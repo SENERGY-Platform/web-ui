@@ -1,4 +1,6 @@
 # SENERGY Web Ui
 
-## Run
-ng serve
+## Run 
+``` 
+npm run start_dev
+```
