@@ -1,0 +1,79 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="main-panel">
+    <div infiniteScroll
+         [infiniteScrollDistance]="1"
+         [infiniteScrollThrottle]="50"
+         [infiniteScrollContainer]="'.main-panel'"
+         [fromRoot]="true"
+         (scrolled)="onScroll()">
+        <div fxLayout="row">
+            <senergy-searchbar fxFlex></senergy-searchbar>
+            <senergy-sort [sortAttributes]="sortAttributes"
+                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        </div>
+
+        <div class="layout-margin" fxLayout="column">
+            <mat-grid-list cols="{{gridCols}}" rowHeight="250px" gutterSize="16px"
+                           *ngIf="networks.length > 0">
+                <mat-grid-tile class="mat-elevation-z1" *ngFor="let network of networks; let i = index">
+                    <mat-card fxFill>
+                        <img mat-card-image src="src/img/network-pic.jpeg">
+                    </mat-card>
+                    <mat-grid-tile-footer>
+                        <div fxLayout="row" fxLayout="row" fxLayoutAlign="start center" fxFill>
+                            <div fxFlex="70" fxLayout="column">
+                                <div class="truncate" matTooltip="{{network.name}}">{{network.name}}</div>
+                                <div>Devices: {{network.devices?.length || 0}}</div>
+                            </div>
+                            <div fxFlex="30" fxLayout="row" fxLayoutAlign="end center">
+                                <senergy-state-icon [state]="network.log_state"></senergy-state-icon>
+                                <button mat-icon-button [matMenuTriggerFor]="menu" color="accent">
+                                    <mat-icon>more_vert</mat-icon>
+                                </button>
+                                <mat-menu #menu="matMenu" [overlapTrigger]="false">
+                                    <button mat-menu-item>
+                                        <mat-icon>info</mat-icon>
+                                        <span>Show devices</span>
+                                    </button>
+                                    <button mat-menu-item (click)="edit(network)">
+                                        <mat-icon>edit</mat-icon>
+                                        <span>Change name</span>
+                                    </button>
+                                    <button mat-menu-item>
+                                        <mat-icon>refresh</mat-icon>
+                                        <span>Clear</span>
+                                    </button>
+                                    <button mat-menu-item (click)="delete(network, i)">
+                                        <mat-icon>delete</mat-icon>
+                                        <span>Delete</span>
+                                    </button>
+                                </mat-menu>
+                            </div>
+                        </div>
+                    </mat-grid-tile-footer>
+                </mat-grid-tile>
+            </mat-grid-list>
+            <div *ngIf="networks.length === 0 && ready">No network found.</div>
+            <senergy-spinner [elementCount]="networks.length" [show]="!ready"></senergy-spinner>
+        </div>
+    </div>
+</div>
+
+
+
+

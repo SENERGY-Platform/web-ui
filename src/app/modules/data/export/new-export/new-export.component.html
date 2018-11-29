@@ -1,0 +1,93 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="main-panel">
+    <div fxLayout="column" class="layout-margin">
+        <mat-radio-group [(ngModel)]="selector" class="radio-group">
+            <mat-radio-button class="radio-button" value="device">Gerät</mat-radio-button>
+            <mat-radio-button class="radio-button" value="pipe">Analyse</mat-radio-button>
+        </mat-radio-group>
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="export.Name" placeholder="Name">
+        </mat-form-field>
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>Description</mat-label>
+            <input matInput [(ngModel)]="export.Description" placeholder="Description">
+        </mat-form-field>
+
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-select *ngIf="selector==='device'" (ngModelChange)="deviceChanged($event)" placeholder="Device" [(ngModel)]="device">
+                <mat-option *ngFor="let device of devices" [value]="device">
+                    {{device.name}}
+                </mat-option>
+            </mat-select>
+            <mat-select *ngIf="selector==='pipe'" placeholder="Pipeline" [(ngModel)]="pipeline">
+                <mat-option *ngFor="let pipe of pipelines" [value]="pipe">
+                    {{pipe.id}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-select *ngIf="selector==='device'" placeholder="Service" [(ngModel)]="service">
+                <mat-option *ngFor="let service of deviceType.services" [value]="device">
+                    {{service.name}}
+                </mat-option>
+            </mat-select>
+            <mat-select *ngIf="selector==='pipe'" placeholder="Operator" [(ngModel)]="operator">
+                <mat-option *ngFor="let operator of pipeline.operators" [value]="operator">
+                    {{operator.Name}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>JSON time path</mat-label>
+            <input matInput [(ngModel)]="export.TimePath" placeholder="JSON time path">
+        </mat-form-field>
+
+        <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
+            <button mat-raised-button color="accent" (click)="addValue()">Add Export Value</button>
+        </div>
+        <div *ngFor="let item of export.Values" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
+            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                <mat-label>Name</mat-label>
+                <input #input matInput [(ngModel)]="item.Name" placeholder="Name">
+            </mat-form-field>
+            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                <mat-label>Path</mat-label>
+                <input #input matInput [(ngModel)]="item.Path" placeholder="Path">
+            </mat-form-field>
+            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                <mat-select placeholder="Type" [(ngModel)]="item.Type" [(value)]="item.Type">
+                    <mat-option *ngFor="let option of dropdown"  [value]="option">
+                        {{option}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <button class="mat-icon-button">
+                <mat-icon (click)="deleteValue(item)" class="mat-warn">
+                    delete
+                </mat-icon>
+            </button>
+        </div>
+
+        <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
+            <button mat-raised-button color="accent" (click)="startExport()">Start</button>
+        </div>
+    </div>
+</div>

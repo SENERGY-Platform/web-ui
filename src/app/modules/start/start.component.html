@@ -1,0 +1,206 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="layout-margin" *ngIf="resizeReady">
+    <div class="mat-subheading-2">
+        PROCESSES
+    </div>
+    <div class="layout-margin">
+        <mat-grid-list cols="{{gridProcessesCols}}" rowHeight="130px" gutterSize="16px">
+            <!-- CHART: Number of process deployments -->
+            <mat-grid-tile class="mat-elevation-z1" [rowspan]="2">
+                <div fxFill fxLayout="column">
+                    <h3 class="layout-margin">Number of process deployments</h3>
+                    <mat-divider class="no-margin"></mat-divider>
+                    <div id="processDeploymentsChartId" fxFlex fxLayout="row" fxLayoutAlign="center center">
+                        <google-chart #processDeploymentsChart [data]="processDeployments"></google-chart>
+                    </div>
+                </div>
+            </mat-grid-tile>
+
+            <!-- CHART: Status of process instances -->
+            <mat-grid-tile class="mat-elevation-z1" [rowspan]="2">
+                <div fxFill fxLayout="column">
+                    <h3 class="layout-margin">Status of process instances</h3>
+                    <mat-divider class="no-margin"></mat-divider>
+                    <div id="processInstancesStatusChartId" fxFlex fxLayout="row" fxLayoutAlign="center center">
+                        <google-chart #processInstancesStatusChart [data]="processInstancesStatus"></google-chart>
+                    </div>
+                </div>
+            </mat-grid-tile>
+
+            <!-- WIDGET: available -->
+            <mat-grid-tile class="mat-elevation-z1" [rowspan]="1" fxLayout="row">
+                <div class="widget-icon-blue" fxFill fxFlex="30" fxLayoutAlign="center center">
+                    <mat-icon class="white mat-48">storage</mat-icon>
+                </div>
+                <div fxFill fxFlex="70" fxLayout="column">
+                    <div class="mat-h3 kpi-header">AVAILABLE</div>
+                    <div class="mat-h2 kpi">{{processAvailable}}</div>
+                </div>
+            </mat-grid-tile>
+
+            <!-- LIST: Latest process models-->
+            <mat-grid-tile class="mat-elevation-z1" [rowspan]="2">
+                <div fxLayout="column" fxFill>
+                    <h3 class="layout-margin">Latest process models</h3>
+                    <mat-divider class="no-margin"></mat-divider>
+                    <div *ngIf="latestProcesses.length == 0" fxFlex fxLayoutAlign="center center">No data</div>
+                    <mat-list *ngIf="latestProcesses.length > 0">
+                        <mat-list-item *ngFor="let process of latestProcesses">
+                            <h4 mat-line>{{process.name}}</h4>
+                            <p mat-line>{{process.date | date:'dd.MM.yyyy, HH:mm'}}</p>
+                            <a>
+                                <mat-icon color="accent">mode_edit</mat-icon>
+                            </a>
+                            <mat-divider [inset]="true" *ngIf="!last"></mat-divider>
+                        </mat-list-item>
+                    </mat-list>
+                </div>
+            </mat-grid-tile>
+
+            <!-- WIDGET: deployable -->
+            <mat-grid-tile class="mat-elevation-z1" [rowspan]="1" fxLayout="row">
+                <div class="widget-icon-orange" fxFill fxFlex="30" fxLayoutAlign="center center">
+                    <mat-icon class="white mat-48">publish</mat-icon>
+                </div>
+                <div fxFill fxFlex="70" fxLayout="column">
+                    <div class="mat-h3 kpi-header">DEPLOYABLE</div>
+                    <div class="mat-h2 kpi">{{processExecutable}}</div>
+                </div>
+            </mat-grid-tile>
+        </mat-grid-list>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="mat-subheading-2">
+        DEVICES
+    </div>
+
+    <div class="layout-margin">
+        <mat-grid-list cols="{{gridDevicesCols}}" rowHeight="81px" gutterSize="16px">
+            <!-- CHART: Devices per gateway -->
+            <mat-grid-tile class="mat-elevation-z1" [colspan]="2" [rowspan]="3">
+                <div fxFill fxLayout="column">
+                    <h3 class="layout-margin">Devices per gateway</h3>
+                    <mat-divider class="no-margin"></mat-divider>
+                    <div id="devicesPerGatewayChartId" fxFlex fxLayout="row" fxLayoutAlign="center center">
+                        <google-chart #devicesPerGatewayChart [data]="devicesPerGateway"></google-chart>
+                    </div>
+                </div>
+            </mat-grid-tile>
+
+            <!-- CHART: Downtime rate per gateway -->
+            <mat-grid-tile class="mat-elevation-z1" [colspan]="2" [rowspan]="3">
+                <div fxFill fxLayout="column">
+                    <h3 class="layout-margin">Downtime rate per gateway (last 7 days)</h3>
+                    <mat-divider class="no-margin"></mat-divider>
+                    <div id="devicesDowntimePerGatewayChartId" fxFlex fxLayout="row" fxLayoutAlign="center center">
+                        <google-chart #devicesDowntimePerGatewayChart [data]="devicesDowntimePerGateway"></google-chart>
+                    </div>
+                </div>
+            </mat-grid-tile>
+
+            <!-- CHART: Total downtime -->
+            <mat-grid-tile class="mat-elevation-z1" [colspan]="2" [rowspan]="3">
+                <div fxFill fxLayout="column">
+                    <h3 class="layout-margin">Total downtime rate ({{date | date: 'dd.MM.yyyy'}})</h3>
+                    <mat-divider class="no-margin"></mat-divider>
+                    <div id="devicesDowntimeTotalChartId" fxFlex fxLayout="row" fxLayoutAlign="center center">
+                        <google-chart #devicesDowntimeTotalChart [data]="devicesDowntimeTotal"></google-chart>
+                    </div>
+                </div>
+            </mat-grid-tile>
+
+            <!-- WIDGET: online -->
+            <mat-grid-tile class="mat-elevation-z1" [colspan]="1" [rowspan]="1" fxLayout="row">
+                <div class="widget-icon-green" fxFill fxFlex="30" fxLayoutAlign="center center">
+                    <mat-icon svgIcon="online" class="mat-40"></mat-icon>
+                </div>
+                <div fxFill fxFlex="70" fxLayout="column">
+                    <div class="mat-h4 kpi-header-1-3">ONLINE</div>
+                    <div fxLayout="row">
+                        <div class="mat-h2 kpi-1-3">{{deviceStatus.connected}}</div>
+                        <div class="mat-body-1 kpi-text-1-3">/ {{deviceStatus.count}}</div>
+                    </div>
+                </div>
+            </mat-grid-tile>
+
+            <!-- LIST: Downtimes -->
+            <mat-grid-tile class="mat-elevation-z1" [colspan]="1" [rowspan]="3">
+                <div fxLayout="column" fxFill>
+                    <h3 class="layout-margin">Downtimes (last 7 days)</h3>
+                    <mat-divider class="no-margin"></mat-divider>
+                    <div *ngIf="deviceDowntimeList.length == 0" fxFlex fxLayoutAlign="center center">No data</div>
+                    <mat-list *ngIf="deviceDowntimeList.length > 0">
+                        <mat-list-item *ngFor="let device of deviceDowntimeList; let i = index">
+                            <h4 mat-line>
+                                <span class="mat-title">{{i + 1}}.</span>
+                                {{device.name}}
+                            </h4>
+                            <p mat-line>{{device.timeDisconnectedInMin}} min / {{device.failureRate}} time(s)</p>
+                            <mat-icon *ngIf="device.timeDisconnectedInMin >= 2880" class="mat-48 red">
+                                sentiment_very_dissatisfied
+                            </mat-icon>
+                            <mat-icon *ngIf="device.timeDisconnectedInMin >= 60 && device.timeDisconnectedInMin < 2880"
+                                      class="mat-48 yellow">sentiment_neutral
+                            </mat-icon>
+                            <mat-icon *ngIf="device.timeDisconnectedInMin < 60" class="mat-48 green">
+                                sentiment_very_satisfied
+                            </mat-icon>
+
+
+                            <mat-divider [inset]="true" *ngIf="!last"></mat-divider>
+                        </mat-list-item>
+                    </mat-list>
+                </div>
+            </mat-grid-tile>
+
+            <!-- WIDGET: offline -->
+            <mat-grid-tile class="mat-elevation-z1" [colspan]="1" [rowspan]="1" fxLayout="row">
+                <div class="widget-icon-red" fxFill fxFlex="30" fxLayoutAlign="center center">
+                    <mat-icon svgIcon="offline" class="mat-40"></mat-icon>
+                </div>
+                <div fxFill fxFlex="70" fxLayout="column">
+                    <div class="mat-h4 kpi-header-1-3">OFFLINE</div>
+                    <div fxLayout="row">
+                        <div class="mat-h2 kpi-1-3">{{deviceStatus.disconnected}}</div>
+                        <div class="mat-body-1 kpi-text-1-3">/ {{deviceStatus.count}}</div>
+                    </div>
+                </div>
+            </mat-grid-tile>
+
+            <!-- WIDGET: unknown -->
+            <mat-grid-tile class="mat-elevation-z1" [colspan]="1" [rowspan]="1" fxLayout="row">
+                <div class="widget-icon-orange" fxFill fxFlex="30" fxLayoutAlign="center center">
+                    <mat-icon class=" white mat-40">help outline</mat-icon>
+                </div>
+                <div fxFill fxFlex="70" fxLayout="column">
+                    <div class="mat-h4 kpi-header-1-3">UNKNOWN</div>
+                    <div fxLayout="row">
+                        <div class="mat-h2 kpi-1-3">{{deviceStatus.unknown}}</div>
+                        <div class="mat-body-1 kpi-text-1-3">/ {{deviceStatus.count}}</div>
+                    </div>
+                </div>
+            </mat-grid-tile>
+        </mat-grid-list>
+    </div>
+</div>
+<div *ngIf="!resizeReady" fxFill fxLayout="row" fxLayoutAlign="center center">
+    <mat-spinner color="accent"></mat-spinner>
+</div>
+

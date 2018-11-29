@@ -1,0 +1,56 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<mat-toolbar class="shadow" color="primary">
+    <button mat-icon-button fxHide.gt-sm (click)="toggle(true)">
+        <mat-icon>menu</mat-icon>
+    </button>
+    <a routerLink="/dashboard" (click)="resetSidenav()" class="image-wrapper" fxHide fxShow.gt-sm>
+        <img class="logo"
+             src="src/img/SENERGY_LOGO-bunt_horizontal_medium_boldBulb130.svg">
+    </a>
+    <div class="mat-h4 color-accent">{{header}}</div>
+    <span class="fill-remaining-space"></span>
+    <button mat-icon-button color="accent">
+        <mat-icon>notifications_none</mat-icon>
+    </button>
+
+    <button mat-icon-button [matMenuTriggerFor]="user" color="accent">
+        <mat-icon>account_circle</mat-icon>
+    </button>
+    <mat-menu #user="matMenu" [overlapTrigger]="false">
+        <button disabled mat-menu-item>
+            <mat-icon>face</mat-icon>
+            {{userName}}
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item>
+            <mat-icon>settings</mat-icon>
+            Settings
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+            <mat-icon>power_settings_new</mat-icon>
+            Logout
+        </button>
+    </mat-menu>
+</mat-toolbar>
+
+
+
+
+
+

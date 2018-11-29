@@ -1,0 +1,78 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="main-panel">
+    <div fxLayout="column" class="layout-margin">
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="operator.name" placeholder="Name">
+        </mat-form-field>
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>Image</mat-label>
+            <input matInput [(ngModel)]="operator.image" placeholder="Image">
+        </mat-form-field>
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>Description</mat-label>
+            <input matInput [(ngModel)]="operator.description" placeholder="Description">
+        </mat-form-field>
+        <mat-checkbox [(ngModel)]="operator.pub">Public</mat-checkbox>
+        <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
+            <button mat-raised-button color="accent" (click)="addInput()">Add Input</button>
+        </div>
+        <div *ngFor="let item of operator.inputs" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
+            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="item.name" placeholder="Name">
+            </mat-form-field>
+            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type">
+                    <mat-option *ngFor="let option of dropdown"  [value]="option">
+                        {{option}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <button class="mat-icon-button">
+                <mat-icon (click)="deleteInput(item)" class="mat-warn">
+                    delete
+                </mat-icon>
+            </button>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="center center">
+            <button mat-raised-button color="accent" (click)="addOutput()">Add Output</button>
+        </div>
+        <div *ngFor="let item of operator.outputs" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
+            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="item.name" placeholder="Name">
+            </mat-form-field>
+            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type">
+                    <mat-option *ngFor="let option of dropdown"  [value]="option">
+                        {{option}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <button class="mat-icon-button">
+                <mat-icon (click)="deleteOutput(item)" class="mat-warn">
+                    delete
+                </mat-icon>
+            </button>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
+            <button mat-raised-button color="accent" (click)="saveOperator()">Save</button>
+        </div>
+    </div>
+</div>

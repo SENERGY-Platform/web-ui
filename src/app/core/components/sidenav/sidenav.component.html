@@ -1,0 +1,58 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<mat-sidenav-container class="sidenav-container" [ngStyle]="{'z-index': zIndex}" (backdropClick)="closeSidenav()">
+    <mat-sidenav disableClose #sidenav role="navigation" class="sidenav" [fixedInViewport]="true"
+                 class="mat-elevation-z1">
+        <ul class="side-menu">
+            <li *ngFor="let section of sections">
+                    <button mat-button  type=button routerLink="{{section.state}}" routerLinkActive="background-color-accent" *ngIf="section.type === 'link'"
+                    (click)="toggleSection(section)"
+                    class="md-button-toggle">
+                    <mat-icon>{{section.icon}}</mat-icon>
+                    {{section.name | uppercase}}
+                    </button>
+                <button mat-button *ngIf="section.type === 'toggle'"
+                        (click)="toggleSection(section)"
+                        [ngClass]="{'background-color-accent': isSectionOpen(section)}"
+                        class="md-button-toggle">
+                    <div fxLayout="row" fxLayoutAlign=" center">
+                        <mat-icon>{{section.icon}}</mat-icon>
+                        <div fxFlexOffset="5px">{{section.name | uppercase}}</div>
+                        <mat-icon class="md-toggle-icon"
+                                  [ngClass]="{'toggled': isSectionOpen(section)}">
+                            keyboard_arrow_down
+                        </mat-icon>
+                    </div>
+                </button>
+                <ul [ngClass]="{'toggled': isSectionOpen(section)}"
+                    class="menu-toggle-list">
+                    <li *ngFor="let page of section.pages">
+                            <button mat-button
+                                    routerLink="{{page.state}}" routerLinkActive="background-color-accent"
+                                    (click)="closeSidenav()" class="md-button-toggle">
+                                <mat-icon>{{page.icon}}</mat-icon>
+                                {{page.name}}
+                            </button>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </mat-sidenav>
+    <mat-sidenav-content [@fadeInAnimation]="o.isActivated ? o.activatedRoute : ''" role="main">
+        <router-outlet #o="outlet"></router-outlet>
+    </mat-sidenav-content>
+</mat-sidenav-container>

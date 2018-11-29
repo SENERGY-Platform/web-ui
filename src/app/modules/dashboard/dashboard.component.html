@@ -1,0 +1,76 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="dashboard-container" fxFill>
+    <mat-tab-group [@.disabled]="disableAnimation" #matTabGroup backgroundColor="accent" color="primary" (animationDone)="animationDone()"
+                   (selectedIndexChange)="setTabIndex($event)"
+                   dynamicHeight="true" headerPosition="above" fxFill>
+        <mat-tab *ngFor="let dashboard of dashboards; let i = index"
+                 label="{{dashboard.name}}">
+            <div class="layout-margin">
+                <div fxLayout="row" fxLayoutAlign="end center">
+                    <button (click)="deleteDashboard()" mat-icon-button color="accent">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                <mat-grid-list cols="{{gridCols}}" rowHeight="280px" gutterSize="16px" *ngIf="i === activeTabIndex">
+                    <mat-grid-tile class="border-radius mat-elevation-z1" *ngFor="let widget of dashboard.widgets">
+
+                            <div [ngSwitch]="widget.type" fxFill>
+                                <div *ngSwitchCase="'switch'" fxFill>
+                                    <senergy-switch [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-switch>
+                                </div>
+                                <div *ngSwitchCase="'devices_state'" fxFill>
+                                    <senergy-devices-state [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-devices-state>
+                                </div>
+                                <div *ngSwitchCase="'event_list'" fxFill>
+                                    <senergy-event-list [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-event-list>
+                                </div>
+                                <div *ngSwitchCase="'ranking_list'" fxFill>
+                                    <senergy-ranking-list [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-ranking-list>
+                                </div>
+                                <div *ngSwitchCase="'charts_export'" fxFill>
+                                    <senergy-charts-export [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-charts-export>
+                                </div>
+                                <div *ngSwitchCase="'charts_process_instances'" fxFill>
+                                    <senergy-charts-process-instances [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-charts-process-instances>
+                                </div>
+                                <div *ngSwitchDefault>
+                                    <div>default</div>
+                                </div>
+                            </div>
+
+
+                    </mat-grid-tile>
+                </mat-grid-list>
+            </div>
+        </mat-tab>
+
+        <mat-tab disabled *ngIf="dashboardsRetrieved">
+            <ng-template mat-tab-label>
+                <button (click)="addDashboard()" mat-icon-button>
+                    <mat-icon>add</mat-icon>
+                </button>
+            </ng-template>
+        </mat-tab>
+
+
+    </mat-tab-group>
+</div>
+
+<button mat-fab class="fab" matTooltip="Add new widget" (click)="addWidget()">
+    <mat-icon>add</mat-icon>
+</button>

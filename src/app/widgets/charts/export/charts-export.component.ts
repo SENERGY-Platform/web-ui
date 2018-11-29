@@ -1,0 +1,89 @@
+/*
+ * Copyright 2018 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {GoogleChartComponent} from 'ng2-google-charts';
+import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {ElementSizeService} from '../../../core/services/element-size.service';
+import {ChartsModel} from '../shared/charts.model';
+import {ChartsExportService} from './shared/charts-export.service';
+import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
+import {Subscription} from 'rxjs';
+
+@Component({
+    selector: 'senergy-charts-export',
+    templateUrl: './charts-export.component.html',
+    styleUrls: ['./charts-export.component.css'],
+})
+export class ChartsExportComponent implements OnInit, OnDestroy {
+
+    chartExportData: ChartsModel = {};
+    ready = false;
+    destroy = new Subscription();
+
+    private resizeTimeout = 0;
+
+    @ViewChild('chartExport') chartExport!: GoogleChartComponent;
+    @Input() dashboardId = '';
+    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+
+    @HostListener('window:resize')
+    onResize() {
+        if (this.resizeTimeout === 0) {
+            this.resizeTimeout = setTimeout(() => {
+                this.resizeProcessInstancesStatusChart();
+                this.resizeTimeout = 0;
+            }, 100);
+        }
+    }
+
+    constructor(private chartsExportService: ChartsExportService,
+                private elementSizeService: ElementSizeService,
+                private dashboardService: DashboardService) {
+    }
+
+    ngOnInit() {
+        this.getData();
+    }
+
+    ngOnDestroy() {
+        this.destroy.unsubscribe();
+    }
+
+    edit() {
+        this.chartsExportService.openEditDialog(this.dashboardId, this.widget.id);
+    }
+
+    private getData() {
+        this.destroy = this.dashboardService.animationDone.subscribe((animationDone: boolean) => {
+            if (animationDone) {
+                this.chartsExportService.getChartData(this.widget).subscribe((chartExportData: ChartsModel) => {
+                    this.chartExportData = chartExportData;
+                    this.ready = true;
+                });
+            }
+        });
+    }
+
+    private resizeProcessInstancesStatusChart() {
+        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id);
+        if (this.chartExportData.options !== undefined) {
+            this.chartExportData.options.height = element.height;
+            this.chartExportData.options.width = element.width;
+            this.chartExport.redraw();
+        }
+    }
+}

@@ -1,0 +1,59 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>Edit Chart Export</h2>
+
+<mat-dialog-content>
+    <div fxLayout="column">
+       <mat-form-field color="accent">
+            <mat-label>Name</mat-label>
+            <input type="text" matInput placeholder="Name" [(ngModel)]="widget.name">
+        </mat-form-field>
+
+            <mat-form-field color="accent">
+                <mat-label>Choose Deployment</mat-label>
+                <input type="text" matInput [formControl]="formControl" [value]="widget.properties.measurementName"
+                       [matAutocomplete]="auto">
+                <mat-error *ngIf="formControl.hasError('valid') === false">
+                    Please enter a valid deployment!
+                </mat-error>
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                    <mat-option *ngFor="let option of filteredExports | async" [value]="option">
+                        {{option.Name}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+
+        <mat-form-field color="accent">
+            <mat-label>Interval</mat-label>
+            <input type="number" matInput placeholder="Interval" [(ngModel)]="widget.properties.interval">
+        </mat-form-field>
+        <mat-form-field color="accent">
+            <mat-label>X-Axis</mat-label>
+            <input type="text" matInput placeholder="X-Axis" [(ngModel)]="widget.properties.hAxisLabel">
+        </mat-form-field>
+        <mat-form-field color="accent">
+            <mat-label>Y-Axis</mat-label>
+            <input type="text" matInput placeholder="Y-Axis" [(ngModel)]="widget.properties.vAxisLabel">
+        </mat-form-field>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
+    <button class="mat-raised-button mat-accent" (click)="save()">Save</button>
+</mat-dialog-actions>
+

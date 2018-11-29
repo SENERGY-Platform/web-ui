@@ -1,0 +1,69 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="main-panel">
+    <div class="layout-margin" fxLayout="column">
+        <div class="layout-margin" fxLayout="column">
+            <mat-grid-list cols="2" rowHeight="340px" gutterSize="16px"
+                           *ngIf="exports.length > 0">
+                <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of exports">
+                    <div fxFill fxLayout="column">
+                        <div fxLayout="row">
+                            <h3 fxFlex class="layout-margin">{{item.Name}}</h3>
+                        </div>
+                        <mat-divider class="no-margin"></mat-divider>
+                        <div fxLayout="column">
+                            <mat-list fxLayoutAlign="center center">
+                                <div fxFill fxLayout="column">
+                                    <mat-list-item>
+                                        <mat-icon mat-list-icon>description</mat-icon>
+                                        <h3 mat-line>{{item.Description}}</h3>
+                                        <p mat-line>Beschreibung</p>
+                                    </mat-list-item>
+                                    <mat-list-item>
+                                        <mat-icon *ngIf="item.FilterType === 'deviceId'" mat-list-icon>router</mat-icon>
+                                        <mat-icon *ngIf="item.FilterType === 'pipeId'" mat-list-icon>timeline</mat-icon>
+                                        <h3 mat-line>{{item.EntityName}}</h3>
+                                        <p mat-line>Source</p>
+                                    </mat-list-item>
+                                    <mat-list-item>
+                                        <mat-icon mat-list-icon>explore</mat-icon>
+                                        <h3 mat-line>{{url}}/measurement/{{item.Measurement}}</h3>
+                                        <p mat-line>Endpoint</p>
+                                    </mat-list-item>
+                                </div>
+                            </mat-list>
+                        </div>
+                    </div>
+                    <mat-grid-tile-footer>
+                        <div fxLayout="row" fxLayoutAlign="end center" fxFill>
+                            <button class="mat-icon-button">
+                                <mat-icon class="mat-warn" (click)="deleteExport(item)">
+                                    delete
+                                </mat-icon>
+                            </button>
+                        </div>
+                    </mat-grid-tile-footer>
+                </mat-grid-tile>
+            </mat-grid-list>
+        </div>
+        <button mat-fab class="fab" routerLink="new" matTooltip="Start new Export">
+            <mat-icon>add</mat-icon>
+        </button>
+        <div *ngIf="exports.length === 0 && ready">No operator instances found.</div>
+        <senergy-spinner [elementCount]="exports.length" [show]="!ready"></senergy-spinner>
+    </div>
+</div>
