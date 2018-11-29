@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 @import '~@angular/material/theming';
+
 @include mat-core();
 
 /* generated: http://mcg.mbitson.com/#!?customcolor=%232e7d32&themename=mcgtheme */
@@ -86,6 +86,39 @@ $md-custom-color-accent: (
 );
 
 $md-custom-color-warn: (
+        50 : #f9ece6,
+        100 : #f0d0c0,
+        200 : #e7b097,
+        300 : #dd906d,
+        400 : #d5794d,
+        500 : #ce612e,
+        600 : #c95929,
+        700 : #c24f23,
+        800 : #bc451d,
+        900 : #b03312,
+        A100 : #ffe6e0,
+        A200 : #ffbcad,
+        A400 : #ff927a,
+        A700 : #ff7d61,
+        contrast: (
+                50 : #000000,
+                100 : #000000,
+                200 : #000000,
+                300 : #000000,
+                400 : #000000,
+                500 : #ffffff,
+                600 : #ffffff,
+                700 : #ffffff,
+                800 : #ffffff,
+                900 : #ffffff,
+                A100 : #000000,
+                A200 : #000000,
+                A400 : #000000,
+                A700 : #000000,
+        )
+);
+
+$md-custom-color-sidenav: (
         50 : #fdf3ea,
         100 : #fbe2ca,
         200 : #f8cfa6,
@@ -118,25 +151,25 @@ $md-custom-color-warn: (
         )
 );
 
-
 $my-app-primary: mat-palette($md-custom-color);
-$my-app-accent:  mat-palette($md-custom-color-accent, 500, 900, A100);
-$my-app-warn:    mat-palette($md-custom-color-warn);
+$my-app-accent: mat-palette($md-custom-color-accent, 500, 900, A100);
+$my-app-warn: mat-palette($md-custom-color-warn);
+$my-app-sidenav: mat-palette($md-custom-color-sidenav);
 
 $my-app-theme: mat-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
 
 @include angular-material-theme($my-app-theme);
 
 .background-color-accent {
-        color: white;
-        background-color: mat-color($my-app-accent);
+  color: white;
+  background-color: mat-color($my-app-accent);
 }
 
-.background-color-warn {
-        color: white;
-        background-color: mat-color($my-app-warn);
+.background-color-sidenav {
+  color: white;
+  background-color: mat-color($my-app-sidenav);
 }
 
 .color-accent {
-        color: mat-color($my-app-accent) !important;
+  color: mat-color($my-app-accent) !important;
 }
