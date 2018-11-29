@@ -28,9 +28,9 @@
             <input type="text" matInput [formControl]="formControl" [value]="widget.properties.measurementName"
                    [matAutocomplete]="auto">
             <mat-error *ngIf="formControl.hasError('valid') === false">
-                Please enter a valid deployment!
+                Please make a selection!
             </mat-error>
-            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="optionSelected($event)" (closed)="autoCompleteClosed()">
                 <mat-option *ngFor="let option of filteredExports | async" [value]="option">
                     {{option.Name}}
                 </mat-option>
@@ -58,11 +58,14 @@
             </tr>
         </table>
         <table cellspacing="0">
-            <tr>
+            <tr >
                 <td>
                     <mat-form-field color="accent">
-                        <mat-label>Y-Axis</mat-label>
-                        <input type="text" matInput placeholder="Y-Axis" value="Zählerstand" disabled>
+                        <mat-select [(value)]="widget.properties.vAxis" [disabled]="vAxisValues.length < 2">
+                            <mat-option *ngFor="let vAxisValue of vAxisValues" [value]="vAxisValue">
+                            {{vAxisValue.Name}}
+                            </mat-option>
+                        </mat-select>
                     </mat-form-field>
                 </td>
                 <td>
@@ -78,6 +81,5 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="save()">Save</button>
+    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="disableSave">Save</button>
 </mat-dialog-actions>
-

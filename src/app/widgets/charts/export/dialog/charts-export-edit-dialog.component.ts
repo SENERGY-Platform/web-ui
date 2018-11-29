@@ -15,7 +15,7 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatAutocompleteSelectedEvent, MatDialogRef} from '@angular/material';
 import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
@@ -24,7 +24,7 @@ import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/internal/operators';
 import {ExportService} from '../../../../modules/data/export/shared/export.service';
-import {ExportModel} from '../../../../modules/data/export/shared/export.model';
+import {ExportModel, ExportValueModel} from '../../../../modules/data/export/shared/export.model';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -35,10 +35,11 @@ export class ChartsExportEditDialogComponent implements OnInit {
     formControl = new FormControl('');
     exports: ExportModel[] = [];
     filteredExports: Observable<ExportModel[]> = new Observable();
-
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    vAxisValues: ExportValueModel[] = [];
+    disableSave = false;
 
     constructor(private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
                 private deploymentsService: DeploymentsService,
@@ -57,7 +58,14 @@ export class ChartsExportEditDialogComponent implements OnInit {
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
+            this.initVAxis();
         });
+    }
+
+    private initVAxis() {
+        if (this.widget.properties.vAxis) {
+            this.vAxisValues.push(this.widget.properties.vAxis);
+        }
     }
 
     initDeployments() {
@@ -103,6 +111,23 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     displayFn(input?: ExportModel): string | undefined {
         return input ? input.Name : undefined;
+    }
+
+    optionSelected(input: MatAutocompleteSelectedEvent ) {
+        this.vAxisValues = input.option.value.Values;
+        this.widget.properties.vAxis = this.vAxisValues[0];
+    }
+
+    autoCompleteClosed() {
+        if (this.exports.indexOf(this.formControl.value) >= 0) {
+            this.disableSave = false;
+            this.formControl.updateValueAndValidity();
+        } else {
+            this.disableSave = true;
+            this.vAxisValues = [];
+            this.formControl.setErrors({'valid': false});
+        }
+
     }
 
 }

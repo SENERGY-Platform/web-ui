@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
+
 export interface ChartsExportPropertiesModel {
         interval?: number;
         hAxisLabel?: string;
+        vAxis?: ExportValueModel;
         vAxisLabel?: string;
         measurementId?: string;
         measurementName?: string;
