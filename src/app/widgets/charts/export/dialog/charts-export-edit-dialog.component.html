@@ -18,37 +18,61 @@
 
 <mat-dialog-content>
     <div fxLayout="column">
-       <mat-form-field color="accent">
+        <mat-form-field color="accent">
             <mat-label>Name</mat-label>
             <input type="text" matInput placeholder="Name" [(ngModel)]="widget.name">
         </mat-form-field>
 
-            <mat-form-field color="accent">
-                <mat-label>Choose Deployment</mat-label>
-                <input type="text" matInput [formControl]="formControl" [value]="widget.properties.measurementName"
-                       [matAutocomplete]="auto">
-                <mat-error *ngIf="formControl.hasError('valid') === false">
-                    Please enter a valid deployment!
-                </mat-error>
-                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                    <mat-option *ngFor="let option of filteredExports | async" [value]="option">
-                        {{option.Name}}
-                    </mat-option>
-                </mat-autocomplete>
-            </mat-form-field>
+        <mat-form-field color="accent">
+            <mat-label>Choose Deployment</mat-label>
+            <input type="text" matInput [formControl]="formControl" [value]="widget.properties.measurementName"
+                   [matAutocomplete]="auto">
+            <mat-error *ngIf="formControl.hasError('valid') === false">
+                Please enter a valid deployment!
+            </mat-error>
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                <mat-option *ngFor="let option of filteredExports | async" [value]="option">
+                    {{option.Name}}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
 
         <mat-form-field color="accent">
             <mat-label>Interval</mat-label>
             <input type="number" matInput placeholder="Interval" [(ngModel)]="widget.properties.interval">
         </mat-form-field>
-        <mat-form-field color="accent">
-            <mat-label>X-Axis</mat-label>
-            <input type="text" matInput placeholder="X-Axis" [(ngModel)]="widget.properties.hAxisLabel">
-        </mat-form-field>
-        <mat-form-field color="accent">
-            <mat-label>Y-Axis</mat-label>
-            <input type="text" matInput placeholder="Y-Axis" [(ngModel)]="widget.properties.vAxisLabel">
-        </mat-form-field>
+        <table cellspacing="0">
+            <tr>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>X-Axis</mat-label>
+                        <input type="text" matInput placeholder="X-Axis" value="time" disabled>
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>X-Axis-Label</mat-label>
+                        <input type="text" matInput placeholder="X-Axis-Label" [(ngModel)]="widget.properties.hAxisLabel">
+                    </mat-form-field>
+                </td>
+            </tr>
+        </table>
+        <table cellspacing="0">
+            <tr>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Y-Axis</mat-label>
+                        <input type="text" matInput placeholder="Y-Axis" value="Zählerstand" disabled>
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Y-Axis-Label</mat-label>
+                        <input type="text" matInput placeholder="Y-Axis-Label" [(ngModel)]="widget.properties.vAxisLabel">
+                    </mat-form-field>
+                </td>
+            </tr>
+        </table>
     </div>
 </mat-dialog-content>
 
