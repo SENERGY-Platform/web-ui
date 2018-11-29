@@ -86,31 +86,31 @@ $md-custom-color-accent: (
 );
 
 $md-custom-color-warn: (
-        50 : #f9ece6,
-        100 : #f0d0c0,
-        200 : #e7b097,
-        300 : #dd906d,
-        400 : #d5794d,
-        500 : #ce612e,
-        600 : #c95929,
-        700 : #c24f23,
-        800 : #bc451d,
-        900 : #b03312,
-        A100 : #ffe6e0,
-        A200 : #ffbcad,
-        A400 : #ff927a,
-        A700 : #ff7d61,
+        50 : #fdf3ea,
+        100 : #fbe2ca,
+        200 : #f8cfa6,
+        300 : #f5bc82,
+        400 : #f3ad68,
+        500 : #f19f4d,
+        600 : #ef9746,
+        700 : #ed8d3d,
+        800 : #eb8334,
+        900 : #e77225,
+        A100 : #ffffff,
+        A200 : #fff4ee,
+        A400 : #ffd4bb,
+        A700 : #ffc4a1,
         contrast: (
                 50 : #000000,
                 100 : #000000,
                 200 : #000000,
                 300 : #000000,
                 400 : #000000,
-                500 : #ffffff,
-                600 : #ffffff,
-                700 : #ffffff,
-                800 : #ffffff,
-                900 : #ffffff,
+                500 : #000000,
+                600 : #000000,
+                700 : #000000,
+                800 : #000000,
+                900 : #000000,
                 A100 : #000000,
                 A200 : #000000,
                 A400 : #000000,
@@ -130,6 +130,11 @@ $my-app-theme: mat-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
 .background-color-accent {
         color: white;
         background-color: mat-color($my-app-accent);
+}
+
+.background-color-warn {
+        color: white;
+        background-color: mat-color($my-app-warn);
 }
 
 .color-accent {

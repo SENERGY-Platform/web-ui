@@ -19,7 +19,7 @@
                  class="mat-elevation-z1">
         <ul class="side-menu">
             <li *ngFor="let section of sections">
-                    <button mat-button  type=button routerLink="{{section.state}}" routerLinkActive="background-color-accent" *ngIf="section.type === 'link'"
+                    <button mat-button  type=button routerLink="{{section.state}}" routerLinkActive="background-color-warn" *ngIf="section.type === 'link'"
                     (click)="toggleSection(section)"
                     class="md-button-toggle">
                     <mat-icon>{{section.icon}}</mat-icon>
@@ -27,7 +27,7 @@
                     </button>
                 <button mat-button *ngIf="section.type === 'toggle'"
                         (click)="toggleSection(section)"
-                        [ngClass]="{'background-color-accent': isSectionOpen(section)}"
+                        [ngClass]="{'background-color-warn': isSectionOpen(section)}"
                         class="md-button-toggle">
                     <div fxLayout="row" fxLayoutAlign=" center">
                         <mat-icon>{{section.icon}}</mat-icon>
@@ -42,7 +42,7 @@
                     class="menu-toggle-list">
                     <li *ngFor="let page of section.pages">
                             <button mat-button
-                                    routerLink="{{page.state}}" routerLinkActive="background-color-accent"
+                                    routerLink="{{page.state}}" routerLinkActive="background-color-warn"
                                     (click)="closeSidenav()" class="md-button-toggle">
                                 <mat-icon>{{page.icon}}</mat-icon>
                                 {{page.name}}
