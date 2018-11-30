@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {
     WidgetModel
 } from '../../modules/dashboard/shared/dashboard-widget.model';
 import {SwitchService} from './shared/switch.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel} from './shared/switch-properties.model';
+import {Subscription} from 'rxjs';
 
 @Component({
     selector: 'senergy-switch',
     templateUrl: './switch.component.html',
     styleUrls: ['./switch.component.css'],
 })
-export class SwitchComponent implements OnInit {
+export class SwitchComponent implements OnInit, OnDestroy {
+
+    ready = false;
+
+    private destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
@@ -37,6 +42,15 @@ export class SwitchComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.destroy = this.dashboardService.animationDone.subscribe((animationDone: boolean) => {
+            if (animationDone) {
+                this.ready = true;
+            }
+        });
+    }
+
+    ngOnDestroy() {
+        this.destroy.unsubscribe();
     }
 
     edit() {
