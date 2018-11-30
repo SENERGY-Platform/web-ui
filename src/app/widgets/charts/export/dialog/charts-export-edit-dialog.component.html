@@ -25,14 +25,14 @@
 
         <mat-form-field color="accent">
             <mat-label>Choose Deployment</mat-label>
-            <input type="text" matInput [formControl]="formControl" [value]="widget.properties.measurementName"
+            <input type="text" matInput [formControl]="formControl"
                    [matAutocomplete]="auto">
             <mat-error *ngIf="formControl.hasError('valid') === false">
                 Please make a selection!
             </mat-error>
             <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="optionSelected($event)" (closed)="autoCompleteClosed()">
                 <mat-option *ngFor="let option of filteredExports | async" [value]="option">
-                    {{option.Name}}
+                    {{option.name}}
                 </mat-option>
             </mat-autocomplete>
         </mat-form-field>

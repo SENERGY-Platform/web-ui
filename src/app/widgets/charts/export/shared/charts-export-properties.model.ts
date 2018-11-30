@@ -27,5 +27,6 @@ export interface ChartsExportPropertiesModel {
 export interface ChartsExportMeasurementModel {
     id: string;
     name: string;
+    values: ExportValueModel [];
 }
 

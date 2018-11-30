@@ -25,6 +25,7 @@ import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/internal/operators';
 import {ExportService} from '../../../../modules/data/export/shared/export.service';
 import {ExportModel, ExportValueModel} from '../../../../modules/data/export/shared/export.model';
+import {ChartsExportMeasurementModel} from '../shared/charts-export-properties.model';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -33,8 +34,8 @@ import {ExportModel, ExportValueModel} from '../../../../modules/data/export/sha
 export class ChartsExportEditDialogComponent implements OnInit {
 
     formControl = new FormControl('');
-    exports: ExportModel[] = [];
-    filteredExports: Observable<ExportModel[]> = new Observable();
+    exports: ChartsExportMeasurementModel[] = [];
+    filteredExports: Observable<ChartsExportMeasurementModel[]> = new Observable();
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
@@ -58,6 +59,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
+            this.formControl.setValue(this.widget.properties.measurement);
             this.initVAxis();
         });
     }
@@ -71,11 +73,15 @@ export class ChartsExportEditDialogComponent implements OnInit {
     initDeployments() {
         this.exportService.getExports().subscribe((exports: (ExportModel[] | null)) => {
             if (exports !== null) {
-                this.exports = exports;
+                exports.forEach((exportModel: ExportModel) => {
+                    if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
+                        this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
+                    }
+                });
                 this.filteredExports = this.formControl.valueChanges
                     .pipe(
-                        startWith<string | ExportModel>(''),
-                        map(value => typeof value === 'string' ? value : value.Name),
+                        startWith<string | ChartsExportMeasurementModel>(''),
+                        map(value => typeof value === 'string' ? value : value.name),
                         map(name => name ? this._filter(name) : this.exports.slice())
                     );
             }
@@ -89,7 +95,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     save(): void {
         if (this.formControl.value) {
-            this.widget.properties.measurement = {id: this.formControl.value.ID, name: this.formControl.value.Name};
+            this.widget.properties.measurement = {id: this.formControl.value.id, name: this.formControl.value.name, values: this.formControl.value.values};
         }
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
@@ -98,33 +104,34 @@ export class ChartsExportEditDialogComponent implements OnInit {
         });
     }
 
-    private _filter(value: string): ExportModel[] {
+    private _filter(value: string): ChartsExportMeasurementModel[] {
         const filterValue = value.toLowerCase();
         return this.exports.filter(option => {
-            if (option.Name) {
-                return option.Name.toLowerCase().indexOf(filterValue) === 0;
+            if (option.name) {
+                return option.name.toLowerCase().indexOf(filterValue) === 0;
             }
             return false;
         });
     }
 
-    displayFn(input?: ExportModel): string | undefined {
-        return input ? input.Name : undefined;
+    displayFn(input?: ChartsExportMeasurementModel): string | undefined {
+        return input ? input.name : undefined;
     }
 
     optionSelected(input: MatAutocompleteSelectedEvent ) {
-        this.vAxisValues = input.option.value.Values;
+        console.log(input);
+        this.vAxisValues = input.option.value.values;
         this.widget.properties.vAxis = this.vAxisValues[0];
     }
 
     autoCompleteClosed() {
-        if (this.exports.indexOf(this.formControl.value) >= 0) {
-            this.disableSave = false;
-            this.formControl.updateValueAndValidity();
-        } else {
+        if (typeof this.formControl.value === 'string') {
             this.disableSave = true;
             this.vAxisValues = [];
             this.formControl.setErrors({'valid': false});
+        } else {
+            this.disableSave = false;
+            this.formControl.updateValueAndValidity();
         }
 
     }
