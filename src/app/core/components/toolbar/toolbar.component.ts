@@ -75,7 +75,7 @@ export class ToolbarComponent implements OnInit {
                 }
                 return route;
             }),
-            mergeMap((route: ActivatedRoute) => route.data)
+            mergeMap((route: any) => route.data)
         ).subscribe((data: any) => {
             this.header = data.header;
         });
