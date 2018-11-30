@@ -89,8 +89,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     save(): void {
         if (this.formControl.value) {
-            this.widget.properties.measurementName = this.formControl.value.Name;
-            this.widget.properties.measurementId = this.formControl.value.ID;
+            this.widget.properties.measurement = {id: this.formControl.value.ID, name: this.formControl.value.Name};
         }
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {

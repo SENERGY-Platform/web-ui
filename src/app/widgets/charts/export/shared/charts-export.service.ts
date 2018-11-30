@@ -66,10 +66,10 @@ export class ChartsExportService {
     }
 
 
-    getChartData(widget: WidgetModel): Observable<ChartsModel> {
+    getChartData(widgetId: string, measurementId: string, interval: number, hAxisLabel: string, vAxisLabel: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-            this.getData(widget.properties.measurementId || '', widget.properties.interval || 1).subscribe((resp: ChartsExportModel) => {
-                observer.next(this.setProcessInstancesStatusValues(widget, this.setData(resp.results[0].series[0].values)));
+            this.getData(measurementId, interval).subscribe((resp: ChartsExportModel) => {
+                observer.next(this.setProcessInstancesStatusValues(widgetId, hAxisLabel, vAxisLabel, this.setData(resp.results[0].series[0].values)));
                 observer.complete();
             });
         });
@@ -98,20 +98,20 @@ export class ChartsExportService {
     }
 
 
-    private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel): ChartsModel {
+    private setProcessInstancesStatusValues(widgetId: string, hAxisLabel: string, vAxisLabel: string, dataTable: ChartDataTableModel): ChartsModel {
 
-       const element = this.elementSizeService.getHeightAndWidthByElementId(widget.id);
+       const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
 
         return new ChartsModel(
             'LineChart',
             dataTable.data,
             {
                 chartArea: {left: 80, top: 20, width: '70%', height: '65%'},
-                hAxis: {format: 'HH:mm:ss', title: widget.properties.hAxisLabel},
+                hAxis: {format: 'HH:mm:ss', title: hAxisLabel},
                 height: element.height,
                 width: element.width,
                 legend: 'none',
-                vAxis: {title: widget.properties.vAxisLabel},
+                vAxis: {title: vAxisLabel},
             });
     }
 }

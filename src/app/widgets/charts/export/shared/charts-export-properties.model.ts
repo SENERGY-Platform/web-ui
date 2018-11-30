@@ -21,7 +21,11 @@ export interface ChartsExportPropertiesModel {
         hAxisLabel?: string;
         vAxis?: ExportValueModel;
         vAxisLabel?: string;
-        measurementId?: string;
-        measurementName?: string;
+        measurement?: ChartsExportMeasurementModel;
+}
+
+export interface ChartsExportMeasurementModel {
+    id: string;
+    name: string;
 }
 

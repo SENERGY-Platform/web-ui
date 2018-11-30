@@ -33,8 +33,11 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     chartExportData: ChartsModel = {};
     ready = false;
     destroy = new Subscription();
+    configureWidget = false;
 
     private resizeTimeout = 0;
+    private measurementId = '';
+    private interval = 0;
 
     @ViewChild('chartExport') chartExport!: GoogleChartComponent;
     @Input() dashboardId = '';
@@ -70,12 +73,35 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     private getData() {
         this.destroy = this.dashboardService.animationDone.subscribe((animationDone: boolean) => {
             if (animationDone) {
-                this.chartsExportService.getChartData(this.widget).subscribe((chartExportData: ChartsModel) => {
-                    this.chartExportData = chartExportData;
+                this.checkConfiguration();
+
+                if (this.configureWidget === false) {
+                    this.chartsExportService.getChartData(this.widget.id, this.measurementId, this.interval,
+                        this.widget.properties.hAxisLabel || '', this.widget.properties.vAxisLabel || '').subscribe((chartExportData: ChartsModel) => {
+                        this.chartExportData = chartExportData;
+                        this.ready = true;
+                    });
+                } else {
                     this.ready = true;
-                });
+                }
+
+
             }
         });
+    }
+
+    private checkConfiguration() {
+        if (this.widget.properties.measurement === undefined) {
+            this.configureWidget = true;
+        } else {
+            this.measurementId = this.widget.properties.measurement.id;
+        }
+
+        if (this.widget.properties.interval === undefined) {
+            this.configureWidget = true;
+        } else {
+            this.interval = this.widget.properties.interval;
+        }
     }
 
     private resizeProcessInstancesStatusChart() {

@@ -20,7 +20,10 @@
     <mat-card-content class="mat-card-image content-size" >
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-            <google-chart *ngIf="ready" #chartExport [data]="chartExportData"></google-chart>
+            <div *ngIf="ready">
+                <div *ngIf="configureWidget === true">Please configure widget!</div>
+                <google-chart *ngIf="configureWidget === false" #chartExport [data]="chartExportData"></google-chart>
+            </div>
         </div>
     </mat-card-content>
 </mat-card>
