@@ -26,7 +26,7 @@
         <mat-form-field color="accent">
             <mat-label>Choose Deployment</mat-label>
             <input type="text" matInput [formControl]="formControl"
-                   [matAutocomplete]="auto">
+                   [matAutocomplete]="auto" required>
             <mat-error *ngIf="formControl.hasError('valid') === false">
                 Please make a selection!
             </mat-error>
@@ -39,7 +39,10 @@
 
         <mat-form-field color="accent">
             <mat-label>Interval</mat-label>
-            <input type="number" matInput placeholder="Interval" [(ngModel)]="widget.properties.interval">
+            <input type="number" matInput placeholder="Interval" [(ngModel)]="widget.properties.interval" required #interval="ngModel">
+            <mat-error *ngIf="interval.errors">
+                Please set a interval!
+            </mat-error>
         </mat-form-field>
         <table cellspacing="0">
             <tr>
@@ -81,5 +84,5 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="disableSave">Save</button>
+    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="disableSave || interval.errors">Save</button>
 </mat-dialog-actions>

@@ -97,7 +97,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             this.measurementId = this.widget.properties.measurement.id;
         }
 
-        if (this.widget.properties.interval === undefined) {
+        if (this.widget.properties.interval === undefined || this.widget.properties.interval === null) {
             this.configureWidget = true;
         } else {
             this.interval = this.widget.properties.interval;
