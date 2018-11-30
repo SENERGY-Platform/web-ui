@@ -36,6 +36,7 @@ import {FlowDesignerComponent} from './flow-designer/flow-designer.component';
 import {FormsModule} from '@angular/forms';
 import {FlowRepoComponent} from './flow-repo/flow-repo.component';
 import {OperatorComponent} from './operator-repo/operator/operator.component';
+import {FlowRepoModule} from './flow-repo/flow-repo.module';
 
 
 const operatorRepo = {path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Analytics' }};
@@ -49,6 +50,7 @@ const flowRepo = {path: 'data/flow-repo', pathMatch: 'full', component: FlowRepo
         RouterModule.forChild([operatorRepo, dataExport, designer, designerEdit, flowRepo]),
         CoreModule,
         OperatorRepoModule,
+        FlowRepoModule,
         ExportModule,
         CommonModule,
         MatGridListModule,

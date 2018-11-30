@@ -41,6 +41,7 @@ export class DiagramEditorComponent implements OnInit {
         {
             inPorts: [],
             outPorts: [],
+            name: '',
             size: {
                 width: 150,
                 height: 100
@@ -331,7 +332,8 @@ export class DiagramEditorComponent implements OnInit {
         }
         const node = new this.NodeElement({
             inPorts: inPorts,
-            outPorts: outPorts
+            outPorts: outPorts,
+            name: name
         });
         node.position(150, 50);
         node.attr({
