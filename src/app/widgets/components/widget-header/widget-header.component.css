@@ -15,11 +15,7 @@
  */
 
 .header-container ::ng-deep .mat-card-header-text {
-    /*margin: 0px;*/
-}
-
-.text-size {
-    font-size: 20px;
+    margin: 0px;
 }
 
 .button-margin {

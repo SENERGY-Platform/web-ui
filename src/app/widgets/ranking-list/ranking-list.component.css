@@ -25,6 +25,6 @@ mat-card {
 }
 
 .content-size {
-    min-height: calc(100% - 12px);
-    height: calc(100% - 12px);
+    min-height: calc(100% - 16px);
+    height: calc(100% - 16px);
 }
