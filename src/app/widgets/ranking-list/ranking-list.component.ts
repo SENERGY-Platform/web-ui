@@ -14,30 +14,44 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {
     WidgetModel
 } from '../../modules/dashboard/shared/dashboard-widget.model';
 import {EventListService} from '../event-list/shared/event-list.service';
 import {RankingListModel} from './shared/ranking-list.model';
+import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
+import {Subscription} from 'rxjs';
 
 @Component({
     selector: 'senergy-ranking-list',
     templateUrl: './ranking-list.component.html',
     styleUrls: ['./ranking-list.component.css'],
 })
-export class RankingListComponent implements OnInit {
+export class RankingListComponent implements OnInit, OnDestroy {
 
     rankings: RankingListModel[] = [];
+    ready = false;
+
+    private destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
 
-    constructor(private eventListService: EventListService) {
+    constructor(private eventListService: EventListService, private dashboardService: DashboardService) {
     }
 
     ngOnInit() {
-        this.initMockup();
+      this.destroy = this.dashboardService.animationDone.subscribe((animationDone: boolean) => {
+            if (animationDone) {
+                this.initMockup();
+                this.ready = true;
+            }
+        });
+    }
+
+    ngOnDestroy() {
+        this.destroy.unsubscribe();
     }
 
     edit() {

@@ -17,6 +17,8 @@
 <mat-card>
     <senergy-widget-header [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-header>
     <mat-divider></mat-divider>
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    <div *ngIf="ready"></div>
     <mat-card-content class="content-size" fxLayout="column">
         <mat-list>
             <mat-list-item *ngFor="let ranking of rankings">
