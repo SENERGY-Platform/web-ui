@@ -59,7 +59,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
-            this.formControl.setValue(this.widget.properties.measurement);
+            this.formControl.setValue(this.widget.properties.measurement || '');
             this.initVAxis();
         });
     }
