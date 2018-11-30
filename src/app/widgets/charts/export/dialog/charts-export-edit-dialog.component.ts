@@ -119,7 +119,6 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     optionSelected(input: MatAutocompleteSelectedEvent ) {
-        console.log(input);
         this.vAxisValues = input.option.value.values;
         this.widget.properties.vAxis = this.vAxisValues[0];
     }
