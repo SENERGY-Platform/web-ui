@@ -138,7 +138,7 @@ export class DashboardService {
     }
 
     manipulateWidget(manipulation: DashboardWidgetManipulationEnum, widget: WidgetModel) {
-        this.widgetSubject.next({manipulation: manipulation, widget: widget});
+        this.widgetSubject.next({manipulation: manipulation, widgetId: widget.id, widget: widget});
     }
 
     animationFinished() {

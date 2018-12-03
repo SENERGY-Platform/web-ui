@@ -18,7 +18,8 @@ import {WidgetModel} from './dashboard-widget.model';
 
 export interface DashboardWidgetManipulationModel {
     manipulation: DashboardWidgetManipulationEnum;
-    widget: WidgetModel;
+    widgetId: string;
+    widget: WidgetModel | null;
 }
 
 export enum DashboardWidgetManipulationEnum {

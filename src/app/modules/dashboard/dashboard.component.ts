@@ -99,11 +99,11 @@ export class DashboardComponent implements OnInit {
             switch (item.manipulation) {
                 case DashboardWidgetManipulationEnum.Create: {
                     if (this.dashboards[this.activeTabIndex].widgets) {
-                        this.dashboards[this.activeTabIndex].widgets.push(item.widget);
+                        this.dashboards[this.activeTabIndex].widgets.push(item.widget || {} as WidgetModel);
                     } else {
-                        this.dashboards[this.activeTabIndex].widgets = [item.widget];
+                        this.dashboards[this.activeTabIndex].widgets = [item.widget || {} as WidgetModel];
                     }
-                    setTimeout(() => this.dashboardService.initWidget(item.widget.id), 0);
+                    setTimeout(() => this.dashboardService.initWidget(item.widgetId), 0);
                 }
             }
 
