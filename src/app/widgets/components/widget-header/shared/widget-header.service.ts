@@ -19,7 +19,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material';
 
 import {WidgetHeaderDeleteDialogComponent} from '../dialogs/widget-header-delete-dialog.component';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
-import {DashboardWidgetManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-widget-manipulation.model';
+import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 
 @Injectable({
     providedIn: 'root'
@@ -38,7 +38,7 @@ export class WidgetHeaderService {
         editDialogRef.afterClosed().subscribe((deleteWidget: boolean) => {
            if (deleteWidget === true) {
                 this.dashboardService.deleteWidget(dashboardId, widgetId).subscribe(() => {
-                    this.dashboardService.manipulateWidget(DashboardWidgetManipulationEnum.Delete, widgetId, null);
+                    this.dashboardService.manipulateWidget(DashboardManipulationEnum.Delete, widgetId, null);
                 });
             }
         });

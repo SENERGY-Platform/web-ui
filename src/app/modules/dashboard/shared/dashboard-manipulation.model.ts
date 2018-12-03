@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {WidgetModel} from './dashboard-widget.model';
 import {DashboardManipulationEnum} from './dashboard-manipulation.enum';
+import {DashboardModel} from './dashboard.model';
 
-export interface DashboardWidgetManipulationModel {
+export interface DashboardManipulationModel {
     manipulation: DashboardManipulationEnum;
-    widgetId: string;
-    widget: WidgetModel | null;
+    dashboardId: string;
+    dashboard: DashboardModel | null;
 }

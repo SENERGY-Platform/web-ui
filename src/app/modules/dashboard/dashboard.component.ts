@@ -19,7 +19,9 @@ import {ResponsiveService} from '../../core/services/responsive.service';
 import {DashboardService} from './shared/dashboard.service';
 import {DashboardModel} from './shared/dashboard.model';
 import {WidgetModel} from './shared/dashboard-widget.model';
-import {DashboardWidgetManipulationEnum, DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
+import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
+import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
+import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -51,6 +53,7 @@ export class DashboardComponent implements OnInit {
     ngOnInit() {
         this.initGridCols();
         this.initDashboard();
+        this.initWidgets();
     }
 
     initDashboard() {
@@ -61,7 +64,18 @@ export class DashboardComponent implements OnInit {
                 this.dashboardsRetrieved = true;
             }
         );
-        this.initWidgets();
+
+        this.dashboardService.dashboardObservable.subscribe((dashboardManipulationModel: DashboardManipulationModel) => {
+            switch (dashboardManipulationModel.manipulation) {
+                case DashboardManipulationEnum.Create: {
+                    this.dashboards.push(dashboardManipulationModel.dashboard || {} as DashboardModel);
+                    break;
+                }
+                case DashboardManipulationEnum.Delete: {
+                    break;
+                }
+            }
+        });
     }
 
     animationDone() {
@@ -97,15 +111,15 @@ export class DashboardComponent implements OnInit {
     private initWidgets() {
         this.dashboardService.dashboardWidgetObservable.subscribe((widgetManipulationModel: DashboardWidgetManipulationModel) => {
             switch (widgetManipulationModel.manipulation) {
-                case DashboardWidgetManipulationEnum.Create: {
+                case DashboardManipulationEnum.Create: {
                     this.addWidget(widgetManipulationModel);
                     break;
                 }
-                case DashboardWidgetManipulationEnum.Delete: {
+                case DashboardManipulationEnum.Delete: {
                     this.deleteWidget(widgetManipulationModel);
                     break;
                 }
-                case DashboardWidgetManipulationEnum.Update: {
+                case DashboardManipulationEnum.Update: {
                     this.updateWidget(widgetManipulationModel);
                 }
             }

@@ -17,9 +17,9 @@
 import {Injectable} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {DashboardWidgetManipulationEnum} from '../../../modules/dashboard/shared/dashboard-widget-manipulation.model';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {RankingListEditDialogComponent} from '../dialogs/ranking-list-edit-dialog.component';
+import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 
 
 @Injectable({
@@ -42,7 +42,7 @@ export class RankingListService {
 
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
             if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardWidgetManipulationEnum.Update, widget.id, widget);
+                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
             }
         });
     }

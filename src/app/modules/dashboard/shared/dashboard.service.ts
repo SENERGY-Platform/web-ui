@@ -27,7 +27,9 @@ import {DashboardDeleteDialogComponent} from '../dialogs/dashboard-delete-dialog
 import {DashboardResponseMessageModel} from './dashboard-response-message.model';
 import {WidgetModel} from './dashboard-widget.model';
 import {DashboardNewWidgetDialogComponent} from '../dialogs/dashboard-new-widget-dialog.component';
-import {DashboardWidgetManipulationEnum, DashboardWidgetManipulationModel} from './dashboard-widget-manipulation.model';
+import {DashboardWidgetManipulationModel} from './dashboard-widget-manipulation.model';
+import {DashboardManipulationModel} from './dashboard-manipulation.model';
+import {DashboardManipulationEnum} from './dashboard-manipulation.enum';
 
 @Injectable({
     providedIn: 'root'
@@ -37,9 +39,11 @@ export class DashboardService {
 
     private animationDoneSubject = new Subject<string>();
     private dashSubject = new Subject<DashboardModel[]>();
+    private dashboardSubject = new Subject<DashboardManipulationModel>();
     private widgetSubject = new Subject<DashboardWidgetManipulationModel>();
 
     currentDashboards = this.dashSubject.asObservable();
+    dashboardObservable = this.dashboardSubject.asObservable();
     dashboardWidgetObservable = this.widgetSubject.asObservable();
     initWidgetObservable = this.animationDoneSubject.asObservable();
 
@@ -64,10 +68,10 @@ export class DashboardService {
             catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [])));
     }
 
-    createDashboard(dashboardName: string): Observable<DashboardResponseMessageModel> {
+    createDashboard(dashboardName: string): Observable<DashboardModel> {
         const dash: DashboardModel = {name: dashboardName, id: '', user_id: '', widgets: []};
-        return this.http.put<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard', dash).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {message: 'error create'})));
+        return this.http.put<DashboardModel>(environment.dashboardServiceUrl + '/dashboard', dash).pipe(
+            catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {} as DashboardModel)));
     }
 
     deleteDashboard(dashboardId: string): Observable<DashboardResponseMessageModel> {
@@ -105,8 +109,8 @@ export class DashboardService {
 
         editDialogRef.afterClosed().subscribe((dashboardName: string) => {
             if (dashboardName !== undefined) {
-                this.createDashboard(dashboardName).subscribe(() => {
-                    this.initDashboard();
+                this.createDashboard(dashboardName).subscribe((dashboard: DashboardModel) => {
+                    this.manipulateDashboard(DashboardManipulationEnum.Create, dashboard.id, dashboard);
                 });
             }
         });
@@ -120,7 +124,7 @@ export class DashboardService {
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
             if (widget !== undefined) {
                 this.createWidget(dashboardId, widget).subscribe((widgetResp) => {
-                    this.manipulateWidget(DashboardWidgetManipulationEnum.Create, widgetResp.id, widgetResp);
+                    this.manipulateWidget(DashboardManipulationEnum.Create, widgetResp.id, widgetResp);
                 });
             }
         });
@@ -142,8 +146,12 @@ export class DashboardService {
 
     /** Observable services */
 
-    manipulateWidget(manipulation: DashboardWidgetManipulationEnum, widgetId: string, widget: WidgetModel | null) {
+    manipulateWidget(manipulation: DashboardManipulationEnum, widgetId: string, widget: WidgetModel | null) {
         this.widgetSubject.next({manipulation: manipulation, widgetId: widgetId, widget: widget});
+    }
+
+    manipulateDashboard(manipulation: DashboardManipulationEnum, dashboardId: string, dashboard: DashboardModel | null) {
+        this.dashboardSubject.next({manipulation: manipulation, dashboardId: dashboardId, dashboard: dashboard});
     }
 
     animationFinished() {

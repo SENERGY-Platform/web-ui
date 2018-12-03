@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {WidgetModel} from './dashboard-widget.model';
-import {DashboardManipulationEnum} from './dashboard-manipulation.enum';
-
-export interface DashboardWidgetManipulationModel {
-    manipulation: DashboardManipulationEnum;
-    widgetId: string;
-    widget: WidgetModel | null;
+export enum DashboardManipulationEnum {
+    Update = 'update',
+    Delete = 'delete',
+    Create = 'create',
 }
