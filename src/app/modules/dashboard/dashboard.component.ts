@@ -95,35 +95,51 @@ export class DashboardComponent implements OnInit {
     }
 
     private initWidgets() {
-        this.dashboardService.dashboardWidgetObservable.subscribe((item: DashboardWidgetManipulationModel) => {
-            switch (item.manipulation) {
+        this.dashboardService.dashboardWidgetObservable.subscribe((widgetManipulationModel: DashboardWidgetManipulationModel) => {
+            switch (widgetManipulationModel.manipulation) {
                 case DashboardWidgetManipulationEnum.Create: {
-                    this.addWidget(item);
+                    this.addWidget(widgetManipulationModel);
                     break;
                 }
                 case DashboardWidgetManipulationEnum.Delete: {
-                    this.deleteWidget(item);
+                    this.deleteWidget(widgetManipulationModel);
                     break;
+                }
+                case DashboardWidgetManipulationEnum.Update: {
+                    this.updateWidget(widgetManipulationModel);
                 }
             }
         });
     }
 
-    private deleteWidget(item: DashboardWidgetManipulationModel) {
+    private updateWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
         this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
-            if (widget.id === item.widgetId) {
+            if (widget.id === widgetManipulationModel.widgetId) {
+                this.dashboards[this.activeTabIndex].widgets[index] = widgetManipulationModel.widget || {} as WidgetModel;
+            }
+        });
+        this.refreshWidget(widgetManipulationModel);
+    }
+
+    private deleteWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
+        this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
+            if (widget.id === widgetManipulationModel.widgetId) {
                 this.dashboards[this.activeTabIndex].widgets.splice(index, 1);
             }
         });
     }
 
-    private addWidget(item: DashboardWidgetManipulationModel) {
+    private addWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
         if (this.dashboards[this.activeTabIndex].widgets) {
-            this.dashboards[this.activeTabIndex].widgets.push(item.widget || {} as WidgetModel);
+            this.dashboards[this.activeTabIndex].widgets.push(widgetManipulationModel.widget || {} as WidgetModel);
         } else {
-            this.dashboards[this.activeTabIndex].widgets = [item.widget || {} as WidgetModel];
+            this.dashboards[this.activeTabIndex].widgets = [widgetManipulationModel.widget || {} as WidgetModel];
         }
-        setTimeout(() => this.dashboardService.initWidget(item.widgetId), 0);
+        this.refreshWidget(widgetManipulationModel);
+    }
+
+    private refreshWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
+        setTimeout(() => this.dashboardService.initWidget(widgetManipulationModel.widgetId), 0);
     }
 }
 

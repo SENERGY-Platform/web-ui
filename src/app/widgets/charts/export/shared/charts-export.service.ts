@@ -29,6 +29,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {ChartsExportEditDialogComponent} from '../dialog/charts-export-edit-dialog.component';
 import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import {DashboardWidgetManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-widget-manipulation.model';
 
 @Injectable({
     providedIn: 'root'
@@ -51,9 +52,9 @@ export class ChartsExportService {
         };
         const editDialogRef = this.dialog.open(ChartsExportEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((saved: boolean) => {
-            if (saved === true) {
-                this.dashboardService.initDashboard();
+        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
+            if (widget !== undefined) {
+                this.dashboardService.manipulateWidget(DashboardWidgetManipulationEnum.Update, widget.id, widget);
             }
         });
     }
