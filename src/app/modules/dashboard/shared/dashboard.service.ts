@@ -55,6 +55,8 @@ export class DashboardService {
         });
     }
 
+    /** REST Services */
+
     getDashboards(): Observable<DashboardModel[]> {
         return this.http.get<DashboardModel[]>
         (environment.dashboardServiceUrl + '/dashboards').pipe(
@@ -94,6 +96,7 @@ export class DashboardService {
             catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidget', {message: 'error update'})));
     }
 
+    /** Dialog Services */
 
     openNewDashboardDialog(): void {
         const dialogConfig = new MatDialogConfig();
@@ -117,7 +120,7 @@ export class DashboardService {
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
             if (widget !== undefined) {
                 this.createWidget(dashboardId, widget).subscribe((widgetResp) => {
-                    this.manipulateWidget(DashboardWidgetManipulationEnum.Create, widgetResp);
+                    this.manipulateWidget(DashboardWidgetManipulationEnum.Create, widgetResp.id, widgetResp);
                 });
             }
         });
@@ -137,8 +140,10 @@ export class DashboardService {
         });
     }
 
-    manipulateWidget(manipulation: DashboardWidgetManipulationEnum, widget: WidgetModel) {
-        this.widgetSubject.next({manipulation: manipulation, widgetId: widget.id, widget: widget});
+    /** Observable services */
+
+    manipulateWidget(manipulation: DashboardWidgetManipulationEnum, widgetId: string, widget: WidgetModel | null) {
+        this.widgetSubject.next({manipulation: manipulation, widgetId: widgetId, widget: widget});
     }
 
     animationFinished() {

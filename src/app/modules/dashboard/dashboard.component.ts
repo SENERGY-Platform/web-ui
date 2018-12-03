@@ -78,7 +78,7 @@ export class DashboardComponent implements OnInit {
         this.dashboardService.openDeleteDashboardDialog(this.dashboards[this.activeTabIndex].id);
     }
 
-    addWidget() {
+    openAddWidgetDialog() {
         this.dashboardService.openNewWidgetDialog(this.dashboards[this.activeTabIndex].id);
     }
 
@@ -98,17 +98,32 @@ export class DashboardComponent implements OnInit {
         this.dashboardService.dashboardWidgetObservable.subscribe((item: DashboardWidgetManipulationModel) => {
             switch (item.manipulation) {
                 case DashboardWidgetManipulationEnum.Create: {
-                    if (this.dashboards[this.activeTabIndex].widgets) {
-                        this.dashboards[this.activeTabIndex].widgets.push(item.widget || {} as WidgetModel);
-                    } else {
-                        this.dashboards[this.activeTabIndex].widgets = [item.widget || {} as WidgetModel];
-                    }
-                    setTimeout(() => this.dashboardService.initWidget(item.widgetId), 0);
+                    this.addWidget(item);
+                    break;
+                }
+                case DashboardWidgetManipulationEnum.Delete: {
+                    this.deleteWidget(item);
+                    break;
                 }
             }
-
         });
     }
 
+    private deleteWidget(item: DashboardWidgetManipulationModel) {
+        this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
+            if (widget.id === item.widgetId) {
+                this.dashboards[this.activeTabIndex].widgets.splice(index, 1);
+            }
+        });
+    }
+
+    private addWidget(item: DashboardWidgetManipulationModel) {
+        if (this.dashboards[this.activeTabIndex].widgets) {
+            this.dashboards[this.activeTabIndex].widgets.push(item.widget || {} as WidgetModel);
+        } else {
+            this.dashboards[this.activeTabIndex].widgets = [item.widget || {} as WidgetModel];
+        }
+        setTimeout(() => this.dashboardService.initWidget(item.widgetId), 0);
+    }
 }
 
