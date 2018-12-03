@@ -19,6 +19,7 @@ import {ResponsiveService} from '../../core/services/responsive.service';
 import {DashboardService} from './shared/dashboard.service';
 import {DashboardModel} from './shared/dashboard.model';
 import {WidgetModel} from './shared/dashboard-widget.model';
+import {DashboardWidgetManipulationEnum, DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -60,7 +61,7 @@ export class DashboardComponent implements OnInit {
                 this.dashboardsRetrieved = true;
             }
         );
-        this.addWidgets();
+        this.initWidgets();
     }
 
     animationDone() {
@@ -93,14 +94,19 @@ export class DashboardComponent implements OnInit {
         });
     }
 
-    private addWidgets() {
-        this.dashboardService.addedWidgetObservable.subscribe((widget: WidgetModel) => {
-            if (this.dashboards[this.activeTabIndex].widgets) {
-                this.dashboards[this.activeTabIndex].widgets.push(widget);
-            } else {
-                this.dashboards[this.activeTabIndex].widgets = [widget];
+    private initWidgets() {
+        this.dashboardService.dashboardWidgetObservable.subscribe((item: DashboardWidgetManipulationModel) => {
+            switch (item.manipulation) {
+                case DashboardWidgetManipulationEnum.Create: {
+                    if (this.dashboards[this.activeTabIndex].widgets) {
+                        this.dashboards[this.activeTabIndex].widgets.push(item.widget);
+                    } else {
+                        this.dashboards[this.activeTabIndex].widgets = [item.widget];
+                    }
+                    setTimeout(() => this.dashboardService.initWidget(item.widget.id), 0);
+                }
             }
-            setTimeout(() => this.dashboardService.initWidget(widget.id), 0);
+
         });
     }
 

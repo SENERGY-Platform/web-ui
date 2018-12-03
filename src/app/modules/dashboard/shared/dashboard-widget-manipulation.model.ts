@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {SwitchPropertiesModel} from '../../../widgets/switch/shared/switch-properties.model';
-import {ChartsExportPropertiesModel} from '../../../widgets/charts/export/shared/charts-export-properties.model';
+import {WidgetModel} from './dashboard-widget.model';
 
-export interface WidgetModel {
-    id: string;
-    name: string;
-    type: string;
-    properties: WidgetPropertiesModels;
+export interface DashboardWidgetManipulationModel {
+    manipulation: DashboardWidgetManipulationEnum;
+    widget: WidgetModel;
 }
 
-interface WidgetPropertiesModels extends SwitchPropertiesModel, ChartsExportPropertiesModel {
+export enum DashboardWidgetManipulationEnum {
+    Update = 'update',
+    Delete = 'delete',
+    Create = 'create',
 }

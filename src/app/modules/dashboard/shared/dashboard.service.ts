@@ -27,6 +27,7 @@ import {DashboardDeleteDialogComponent} from '../dialogs/dashboard-delete-dialog
 import {DashboardResponseMessageModel} from './dashboard-response-message.model';
 import {WidgetModel} from './dashboard-widget.model';
 import {DashboardNewWidgetDialogComponent} from '../dialogs/dashboard-new-widget-dialog.component';
+import {DashboardWidgetManipulationEnum, DashboardWidgetManipulationModel} from './dashboard-widget-manipulation.model';
 
 @Injectable({
     providedIn: 'root'
@@ -36,10 +37,10 @@ export class DashboardService {
 
     private animationDoneSubject = new Subject<string>();
     private dashSubject = new Subject<DashboardModel[]>();
-    private widgetSubject = new Subject<WidgetModel>();
+    private widgetSubject = new Subject<DashboardWidgetManipulationModel>();
 
     currentDashboards = this.dashSubject.asObservable();
-    addedWidgetObservable = this.widgetSubject.asObservable();
+    dashboardWidgetObservable = this.widgetSubject.asObservable();
     initWidgetObservable = this.animationDoneSubject.asObservable();
 
 
@@ -116,14 +117,10 @@ export class DashboardService {
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
             if (widget !== undefined) {
                 this.createWidget(dashboardId, widget).subscribe((widgetResp) => {
-                    this.addWidgetToDashboard(widgetResp);
+                    this.manipulateWidget(DashboardWidgetManipulationEnum.Create, widgetResp);
                 });
             }
         });
-    }
-
-    addWidgetToDashboard(widget: WidgetModel): void {
-        this.widgetSubject.next(widget);
     }
 
     openDeleteDashboardDialog(dashboardId: string): void {
@@ -138,6 +135,10 @@ export class DashboardService {
                 });
             }
         });
+    }
+
+    manipulateWidget(manipulation: DashboardWidgetManipulationEnum, widget: WidgetModel) {
+        this.widgetSubject.next({manipulation: manipulation, widget: widget});
     }
 
     animationFinished() {
