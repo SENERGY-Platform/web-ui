@@ -45,6 +45,7 @@ import localeDe from '@angular/common/locales/de';
 import {RankingListComponent} from './ranking-list/ranking-list.component';
 import {CoreModule} from '../core/core.module';
 import {WidgetSpinnerComponent} from './components/widget-spinner/widget-spinner.component';
+import {RankingListEditDialogComponent} from './ranking-list/dialogs/ranking-list-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -86,6 +87,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ChartsProcessInstancesEditDialogComponent,
         ChartsExportEditDialogComponent,
         RankingListComponent,
+        RankingListEditDialogComponent,
         WidgetSpinnerComponent,
     ],
     exports: [
@@ -105,6 +107,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         EventListEditDialogComponent,
         ChartsProcessInstancesEditDialogComponent,
         ChartsExportEditDialogComponent,
+        RankingListEditDialogComponent,
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 

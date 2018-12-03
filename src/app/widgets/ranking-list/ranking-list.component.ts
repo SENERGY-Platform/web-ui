@@ -18,10 +18,10 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {
     WidgetModel
 } from '../../modules/dashboard/shared/dashboard-widget.model';
-import {EventListService} from '../event-list/shared/event-list.service';
 import {RankingListModel} from './shared/ranking-list.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
+import {RankingListService} from './shared/ranking-list.service';
 
 @Component({
     selector: 'senergy-ranking-list',
@@ -38,7 +38,7 @@ export class RankingListComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
 
-    constructor(private eventListService: EventListService, private dashboardService: DashboardService) {
+    constructor(private rankingListService: RankingListService, private dashboardService: DashboardService) {
     }
 
     ngOnInit() {
@@ -55,7 +55,7 @@ export class RankingListComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-       this.eventListService.openEditDialog(this.dashboardId, this.widget.id);
+       this.rankingListService.openEditDialog(this.dashboardId, this.widget.id);
     }
 
     initMockup() {
