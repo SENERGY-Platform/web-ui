@@ -54,8 +54,8 @@ export class EventListComponent implements OnInit, OnDestroy {
     }
 
     private initMockup() {
-        this.destroy = this.dashboardService.animationDone.subscribe((animationDone: boolean) => {
-            if (animationDone) {
+        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+            if (event === 'reloadAll' || event === this.widget.id) {
                 const date = new Date().getTime();
                 this.events.push({icon: 'meeting_room', time: new Date(), event: 'Küche: Fenster geschlossen'});
                 this.events.push({icon: 'meeting_room', time: new Date(date - 52870000), event: 'Küche: Fenster geöffnet'});
@@ -64,7 +64,7 @@ export class EventListComponent implements OnInit, OnDestroy {
                 this.events.push({icon: 'check_circle_outline', time: new Date(date - 49765342), event: 'Wohnzimmer: Temperatur erreicht'});
                 this.ready = true;
             }
-        })
+        });
     }
 
 

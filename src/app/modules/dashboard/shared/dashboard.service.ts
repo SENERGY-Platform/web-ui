@@ -34,11 +34,13 @@ import {DashboardNewWidgetDialogComponent} from '../dialogs/dashboard-new-widget
 export class DashboardService {
 
 
-    private animationDoneSubject = new Subject<boolean>();
+    private animationDoneSubject = new Subject<string>();
     private dashSubject = new Subject<DashboardModel[]>();
+    private widgetSubject = new Subject<WidgetModel>();
 
     currentDashboards = this.dashSubject.asObservable();
-    animationDone = this.animationDoneSubject.asObservable();
+    addedWidgetObservable = this.widgetSubject.asObservable();
+    initWidgetObservable = this.animationDoneSubject.asObservable();
 
 
     constructor(private dialog: MatDialog,
@@ -76,9 +78,9 @@ export class DashboardService {
             catchError(this.errorHandlerService.handleError(DashboardService.name, 'getWidget', {} as WidgetModel)));
     }
 
-    createWidget(dashboardId: string, widget: WidgetModel): Observable<DashboardResponseMessageModel> {
-        return this.http.put<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget', widget).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'createWidget', {message: 'error create'})));
+    createWidget(dashboardId: string, widget: WidgetModel): Observable<WidgetModel> {
+        return this.http.put<WidgetModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget', widget).pipe(
+            catchError(this.errorHandlerService.handleError(DashboardService.name, 'createWidget', {} as WidgetModel)));
     }
 
     deleteWidget(dashboardId: string, widgetId: string): Observable<DashboardResponseMessageModel> {
@@ -113,11 +115,15 @@ export class DashboardService {
 
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
             if (widget !== undefined) {
-                this.createWidget(dashboardId, widget).subscribe(() => {
-                    this.initDashboard();
+                this.createWidget(dashboardId, widget).subscribe((widgetResp) => {
+                    this.addWidgetToDashboard(widgetResp);
                 });
             }
         });
+    }
+
+    addWidgetToDashboard(widget: WidgetModel): void {
+        this.widgetSubject.next(widget);
     }
 
     openDeleteDashboardDialog(dashboardId: string): void {
@@ -135,7 +141,11 @@ export class DashboardService {
     }
 
     animationFinished() {
-        this.animationDoneSubject.next(true);
+        this.animationDoneSubject.next('reloadAll');
+    }
+
+    initWidget(widgetId: string) {
+        this.animationDoneSubject.next(widgetId);
     }
 
 }

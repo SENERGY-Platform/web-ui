@@ -42,8 +42,8 @@ export class RankingListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-      this.destroy = this.dashboardService.animationDone.subscribe((animationDone: boolean) => {
-            if (animationDone) {
+      this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+          if (event === 'reloadAll' || event === this.widget.id) {
                 this.initMockup();
                 this.ready = true;
             }

@@ -18,6 +18,7 @@ import {Component, OnInit} from '@angular/core';
 import {ResponsiveService} from '../../core/services/responsive.service';
 import {DashboardService} from './shared/dashboard.service';
 import {DashboardModel} from './shared/dashboard.model';
+import {WidgetModel} from './shared/dashboard-widget.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -53,12 +54,13 @@ export class DashboardComponent implements OnInit {
 
     initDashboard() {
         this.dashboardService.initDashboard();
-        this.dashboardService.currentDashboards.subscribe( (dashboards: DashboardModel[]) => {
-            this.disableAnimation = true;
-            this.dashboards = dashboards;
-            this.dashboardsRetrieved = true;
+        this.dashboardService.currentDashboards.subscribe((dashboards: DashboardModel[]) => {
+                this.disableAnimation = true;
+                this.dashboards = dashboards;
+                this.dashboardsRetrieved = true;
             }
         );
+        this.addWidgets();
     }
 
     animationDone() {
@@ -68,7 +70,7 @@ export class DashboardComponent implements OnInit {
     }
 
     addDashboard() {
-      this.dashboardService.openNewDashboardDialog();
+        this.dashboardService.openNewDashboardDialog();
     }
 
     deleteDashboard() {
@@ -88,6 +90,17 @@ export class DashboardComponent implements OnInit {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
             this.gridCols = grids.get(mqAlias) || 0;
+        });
+    }
+
+    private addWidgets() {
+        this.dashboardService.addedWidgetObservable.subscribe((widget: WidgetModel) => {
+            if (this.dashboards[this.activeTabIndex].widgets) {
+                this.dashboards[this.activeTabIndex].widgets.push(widget);
+            } else {
+                this.dashboards[this.activeTabIndex].widgets = [widget];
+            }
+            setTimeout(() => this.dashboardService.initWidget(widget.id), 0);
         });
     }
 
