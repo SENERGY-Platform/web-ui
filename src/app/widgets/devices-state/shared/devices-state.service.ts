@@ -22,6 +22,8 @@ import {DevicesStateModel} from './devices-state.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {DevicesStateEditDialogComponent} from '../dialog/devices-state-edit-dialog.component';
+import {DashboardWidgetManipulationEnum} from '../../../modules/dashboard/shared/dashboard-widget-manipulation.model';
+import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 
 @Injectable({
     providedIn: 'root'
@@ -42,9 +44,9 @@ export class DevicesStateService {
         };
         const editDialogRef = this.dialog.open(DevicesStateEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((saved: boolean) => {
-            if (saved === true) {
-                this.dashboardService.initDashboard();
+        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
+            if (widget !== undefined) {
+                this.dashboardService.manipulateWidget(DashboardWidgetManipulationEnum.Update, widget.id, widget);
             }
         });
     }

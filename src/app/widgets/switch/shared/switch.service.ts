@@ -25,6 +25,8 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 import {catchError} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel} from './switch-properties.model';
+import {DashboardWidgetManipulationEnum} from '../../../modules/dashboard/shared/dashboard-widget-manipulation.model';
+import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 
 @Injectable({
     providedIn: 'root'
@@ -49,9 +51,9 @@ export class SwitchService {
         };
         const editDialogRef = this.dialog.open(SwitchEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((saved: boolean) => {
-            if (saved === true) {
-                this.dashboardService.initDashboard();
+        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
+            if (widget !== undefined) {
+                this.dashboardService.manipulateWidget(DashboardWidgetManipulationEnum.Update, widget.id, widget);
             }
         });
     }

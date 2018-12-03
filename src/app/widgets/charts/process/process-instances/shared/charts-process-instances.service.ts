@@ -25,6 +25,8 @@ import {ElementSizeService} from '../../../../../core/services/element-size.serv
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {ChartsProcessInstancesEditDialogComponent} from '../dialogs/charts-process-instances-edit-dialog.component';
 import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
+import {DashboardWidgetManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-widget-manipulation.model';
+import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 
 @Injectable({
     providedIn: 'root'
@@ -47,9 +49,9 @@ export class ChartsProcessInstancesService {
         };
         const editDialogRef = this.dialog.open(ChartsProcessInstancesEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((saved: boolean) => {
-            if (saved === true) {
-                this.dashboardService.initDashboard();
+        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
+            if (widget !== undefined) {
+                this.dashboardService.manipulateWidget(DashboardWidgetManipulationEnum.Update, widget.id, widget);
             }
         });
     }

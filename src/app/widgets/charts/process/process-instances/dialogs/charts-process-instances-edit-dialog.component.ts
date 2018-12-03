@@ -59,7 +59,7 @@ export class ChartsProcessInstancesEditDialogComponent implements OnInit {
     save(): void {
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
-                this.dialogRef.close(true);
+                this.dialogRef.close(this.widget);
             }
         });
     }
