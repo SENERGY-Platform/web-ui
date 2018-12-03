@@ -82,12 +82,6 @@ export class ChartsExportService {
             const date = new Date(<string>item[0]);
             dataTable.data.push([date, item[1]]);
 
-            // console.log(item[0], item[1]);
-            // array.forEach((item: (string | number)) => {
-            //     console.log(item);
-            // });
-               // const dateNew = new Date(date);
-                // dataTable.data.push([dateNew, count, getTooltipText(dateNew, count)]);
             }
         );
         return dataTable;

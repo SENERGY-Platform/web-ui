@@ -17,12 +17,11 @@
 <mat-card class="switch-container">
     <senergy-widget-header [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-header>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-    <div *ngIf="ready">
-        <img mat-card-image
-             src="{{widget.properties.imgUrl}}" alt="image">
-        <mat-card-actions>
-            <mat-slide-toggle [(ngModel)]="widget.properties.active" (change)="toggle()" class="padding" mat-button color="accent"></mat-slide-toggle>
-        </mat-card-actions>
-    </div>
+    <img mat-card-image
+         src="{{widget.properties.imgUrl}}" alt="image" *ngIf="ready">
+    <mat-card-actions *ngIf="ready">
+        <mat-slide-toggle [(ngModel)]="widget.properties.active" (change)="toggle()" class="padding" mat-button
+                          color="accent"></mat-slide-toggle>
+    </mat-card-actions>
 </mat-card>
 
