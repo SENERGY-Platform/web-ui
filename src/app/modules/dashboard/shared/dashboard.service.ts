@@ -138,7 +138,7 @@ export class DashboardService {
         editDialogRef.afterClosed().subscribe((deleteDashboard: boolean) => {
             if (deleteDashboard === true) {
                 this.deleteDashboard(dashboardId).subscribe(() => {
-                    this.initDashboard();
+                    this.manipulateDashboard(DashboardManipulationEnum.Delete, dashboardId, null);
                 });
             }
         });

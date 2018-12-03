@@ -16,13 +16,13 @@
 
 <div class="dashboard-container" fxFill>
     <mat-tab-group [@.disabled]="disableAnimation" #matTabGroup backgroundColor="accent" color="primary" (animationDone)="animationDone()"
-                   (selectedIndexChange)="setTabIndex($event)"
+                   (selectedIndexChange)="setTabIndex($event)" [(selectedIndex)]="activeTabIndex"
                    dynamicHeight="true" headerPosition="above" fxFill>
         <mat-tab *ngFor="let dashboard of dashboards; let i = index"
                  label="{{dashboard.name}}">
             <div class="layout-margin">
                 <div fxLayout="row" fxLayoutAlign="end center">
-                    <button (click)="deleteDashboard()" mat-icon-button color="accent">
+                    <button (click)="openDeleteDashboardDialog()" mat-icon-button color="accent">
                         <mat-icon>delete</mat-icon>
                     </button>
                 </div>
@@ -61,7 +61,7 @@
 
         <mat-tab disabled *ngIf="dashboardsRetrieved">
             <ng-template mat-tab-label>
-                <button (click)="addDashboard()" mat-icon-button>
+                <button (click)="openAddDashboardDialog()" mat-icon-button>
                     <mat-icon>add</mat-icon>
                 </button>
             </ng-template>

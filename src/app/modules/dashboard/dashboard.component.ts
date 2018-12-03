@@ -56,9 +56,9 @@ export class DashboardComponent implements OnInit {
         this.initWidgets();
     }
 
-    initDashboard() {
-        this.dashboardService.initDashboard();
-        this.dashboardService.currentDashboards.subscribe((dashboards: DashboardModel[]) => {
+    private initDashboard() {
+        
+        this.dashboardService.getDashboards().subscribe((dashboards: DashboardModel[]) => {
                 this.disableAnimation = true;
                 this.dashboards = dashboards;
                 this.dashboardsRetrieved = true;
@@ -68,10 +68,11 @@ export class DashboardComponent implements OnInit {
         this.dashboardService.dashboardObservable.subscribe((dashboardManipulationModel: DashboardManipulationModel) => {
             switch (dashboardManipulationModel.manipulation) {
                 case DashboardManipulationEnum.Create: {
-                    this.dashboards.push(dashboardManipulationModel.dashboard || {} as DashboardModel);
+                    this.addDashboard(dashboardManipulationModel);
                     break;
                 }
                 case DashboardManipulationEnum.Delete: {
+                    this.deleteDashboard(dashboardManipulationModel);
                     break;
                 }
             }
@@ -84,11 +85,11 @@ export class DashboardComponent implements OnInit {
         this.disableAnimation = false;
     }
 
-    addDashboard() {
+    openAddDashboardDialog() {
         this.dashboardService.openNewDashboardDialog();
     }
 
-    deleteDashboard() {
+    openDeleteDashboardDialog() {
         this.dashboardService.openDeleteDashboardDialog(this.dashboards[this.activeTabIndex].id);
     }
 
@@ -99,6 +100,22 @@ export class DashboardComponent implements OnInit {
     setTabIndex(index: number): void {
         this.showWidgets = false;
         this.activeTabIndex = index;
+    }
+
+    private deleteDashboard(dashboardManipulationModel: DashboardManipulationModel) {
+        this.dashboards.forEach((dashboard: DashboardModel, index: number) => {
+            if (dashboard.id === dashboardManipulationModel.dashboardId) {
+                if (this.activeTabIndex > (this.dashboards.length - 2)) {
+                    this.activeTabIndex = this.dashboards.length - 2;
+                }
+                this.dashboards.splice(index, 1);
+            }
+        });
+    }
+
+    private addDashboard(dashboardManipulationModel: DashboardManipulationModel) {
+        this.dashboards.push(dashboardManipulationModel.dashboard || {} as DashboardModel);
+        this.activeTabIndex = this.dashboards.length - 1;
     }
 
     private initGridCols(): void {
