@@ -22,7 +22,7 @@
                  label="{{dashboard.name}}">
             <div class="layout-margin">
                 <div fxLayout="row" fxLayoutAlign="end center">
-                    <button (click)="openDeleteDashboardDialog()" mat-icon-button color="accent">
+                    <button (click)="openDeleteDashboardDialog()" mat-icon-button color="accent" [disabled]="dashboards.length <= 1">
                         <mat-icon>delete</mat-icon>
                     </button>
                 </div>
