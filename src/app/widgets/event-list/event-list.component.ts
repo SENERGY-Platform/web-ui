@@ -56,7 +56,9 @@ export class EventListComponent implements OnInit, OnDestroy {
     private initMockup() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
+                this.ready = false;
                 const date = new Date().getTime();
+                this.events = [];
                 this.events.push({icon: 'meeting_room', time: new Date(), event: 'Küche: Fenster geschlossen'});
                 this.events.push({icon: 'meeting_room', time: new Date(date - 52870000), event: 'Küche: Fenster geöffnet'});
                 this.events.push({icon: 'directions_run', time: new Date(date - 7000000), event: 'Flur: Bewegung während Abwesenheit'});

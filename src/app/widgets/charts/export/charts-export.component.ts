@@ -73,8 +73,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     private getData() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
+                this.ready = false;
                 this.checkConfiguration();
-
                 if (this.configureWidget === false) {
                     this.chartsExportService.getChartData(this.widget.id, this.measurementId, this.interval,
                         this.widget.properties.hAxisLabel || '', this.widget.properties.vAxisLabel || '').subscribe((chartExportData: ChartsModel) => {

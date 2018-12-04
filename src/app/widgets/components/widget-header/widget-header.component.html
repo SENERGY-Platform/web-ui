@@ -20,15 +20,15 @@
     </mat-card-title-group>
     <div fxFlex></div>
     <div class="button-margin">
+        <button mat-icon-button color="accent" (click)="refresh()">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </div>
+    <div class="button-margin">
         <button mat-icon-button [matMenuTriggerFor]="more" color="accent">
             <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #more="matMenu" [overlapTrigger]="false" xPosition="before">
-            <button mat-menu-item>
-                <mat-icon>refresh</mat-icon>
-                Refresh
-            </button>
-            <mat-divider></mat-divider>
             <button mat-menu-item>
                 <mat-icon>zoom_out_map</mat-icon>
                 Zoom

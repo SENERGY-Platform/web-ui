@@ -68,6 +68,7 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     private setDeviceStatus() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
+                this.ready = false;
                 this.devicesStateService.getDevicesStatus().subscribe((devicesStatus: DevicesStateModel) => {
                     this.devicesStatus = devicesStatus;
                     this.ready = true;

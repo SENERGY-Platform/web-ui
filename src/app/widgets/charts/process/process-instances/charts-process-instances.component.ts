@@ -70,6 +70,7 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
     private getProcessInstances() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
+                this.ready = false;
                 this.chartsProcessInstancesService.getProcessInstancesStatus(this.widget.id).subscribe((processInstancesStatus: ChartsModel) => {
                     this.processInstancesStatus = processInstancesStatus;
                     this.ready = true;

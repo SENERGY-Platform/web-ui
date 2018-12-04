@@ -17,6 +17,8 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {WidgetHeaderService} from './shared/widget-header.service';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
+import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 
 @Component({
     selector: 'senergy-widget-header',
@@ -29,7 +31,8 @@ export class WidgetHeaderComponent implements OnInit {
     @Input() widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
     @Output() editEvent = new EventEmitter<boolean>();
 
-    constructor(private widgetHeaderService: WidgetHeaderService) {
+    constructor(private widgetHeaderService: WidgetHeaderService,
+                private dashboardService: DashboardService) {
     }
 
     ngOnInit() {
@@ -41,5 +44,9 @@ export class WidgetHeaderComponent implements OnInit {
 
     close() {
         this.widgetHeaderService.openDeleteWidgetDialog(this.dashboardId, this.widget.id);
+    }
+
+    refresh() {
+        this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, this.widget.id, this.widget);
     }
 }

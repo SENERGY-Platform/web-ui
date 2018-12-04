@@ -57,7 +57,7 @@ export class DashboardComponent implements OnInit {
     }
 
     private initDashboard() {
-        
+
         this.dashboardService.getDashboards().subscribe((dashboards: DashboardModel[]) => {
                 this.disableAnimation = true;
                 this.dashboards = dashboards;
@@ -138,6 +138,7 @@ export class DashboardComponent implements OnInit {
                 }
                 case DashboardManipulationEnum.Update: {
                     this.updateWidget(widgetManipulationModel);
+                    break;
                 }
             }
         });

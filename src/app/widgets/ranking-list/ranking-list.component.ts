@@ -44,6 +44,7 @@ export class RankingListComponent implements OnInit, OnDestroy {
     ngOnInit() {
       this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
           if (event === 'reloadAll' || event === this.widget.id) {
+              this.ready = false;
                 this.initMockup();
                 this.ready = true;
             }
@@ -59,6 +60,7 @@ export class RankingListComponent implements OnInit, OnDestroy {
     }
 
     initMockup() {
+        this.rankings = [];
         this.rankings.push({rank: 1, header: 'Waschmaschine', savings: '55,55€ jährlich', recommendation: 'Kauf Model X'});
         this.rankings.push({rank: 2, header: 'Geschirrspüler', savings: '23,50€ jährlich', recommendation: 'Kauf Model Y'});
         this.rankings.push({rank: 3, header: 'Staubsauger', savings: '20,00€ jährlich', recommendation: 'Kauf Model Z'});
