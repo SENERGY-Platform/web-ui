@@ -37,6 +37,7 @@ import {FormsModule} from '@angular/forms';
 import {FlowRepoComponent} from './flow-repo/flow-repo.component';
 import {OperatorComponent} from './operator-repo/operator/operator.component';
 import {FlowRepoModule} from './flow-repo/flow-repo.module';
+import {PipelineRegistryComponent} from './pipeline-registry/pipeline-registry.component';
 
 
 const operatorRepo = {path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Analytics' }};
@@ -44,10 +45,11 @@ const dataExport = {path: 'data/export', pathMatch: 'full', component: ExportCom
 const designer = {path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Analytics' }};
 const designerEdit = {path: 'data/designer/:id', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Analytics' }};
 const flowRepo = {path: 'data/flow-repo', pathMatch: 'full', component: FlowRepoComponent, data: { header: 'Analytics' }};
+const pipelineRegistry = {path: 'data/pipelines', pathMatch: 'full', component: PipelineRegistryComponent, data: { header: 'Analytics' }};
 
 @NgModule({
     imports: [
-        RouterModule.forChild([operatorRepo, dataExport, designer, designerEdit, flowRepo]),
+        RouterModule.forChild([operatorRepo, dataExport, designer, designerEdit, flowRepo, pipelineRegistry]),
         CoreModule,
         OperatorRepoModule,
         FlowRepoModule,
@@ -67,7 +69,8 @@ const flowRepo = {path: 'data/flow-repo', pathMatch: 'full', component: FlowRepo
         OperatorRepoComponent,
         ExportComponent,
         FlowDesignerComponent,
-        FlowRepoComponent
+        FlowRepoComponent,
+        PipelineRegistryComponent
     ],
 })
 export class DataModule {

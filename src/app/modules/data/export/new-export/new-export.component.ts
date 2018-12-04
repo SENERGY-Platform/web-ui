@@ -15,8 +15,6 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {PipelineRegistryService} from '../../flow-repo/shared/pipeline-registry.service';
-import {PipelineOperatorModel, PipelineModel} from '../../flow-repo/shared/pipeline.model';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {DeviceTypeService} from '../../../devices/device-types/shared/device-type.service';
@@ -24,6 +22,8 @@ import {DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-t
 import {ExportModel, ExportValueModel} from '../shared/export.model';
 import {ExportService} from '../shared/export.service';
 import {MatSnackBar} from '@angular/material';
+import {PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shared/pipeline.model';
+import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
 
 
 @Component({
