@@ -61,7 +61,7 @@ export class DashboardService {
     }
 
     createDashboard(dashboardName: string): Observable<DashboardModel> {
-        const dash: DashboardModel = {name: dashboardName, id: '', user_id: '', widgets: []};
+        const dash: DashboardModel = {name: dashboardName, id: '', user_id: '', widgets: [], refresh_time: 0};
         return this.http.put<DashboardModel>(environment.dashboardServiceUrl + '/dashboard', dash).pipe(
             catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {} as DashboardModel)));
     }
@@ -69,6 +69,11 @@ export class DashboardService {
     deleteDashboard(dashboardId: string): Observable<DashboardResponseMessageModel> {
         return this.http.delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId).pipe(
             catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {message: 'error delete'})));
+    }
+
+    updateDashboard(dashboard: DashboardModel): Observable<DashboardModel> {
+        return this.http.post<DashboardModel>(environment.dashboardServiceUrl + '/dashboard', dashboard).pipe(
+            catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {} as DashboardModel)));
     }
 
     getWidget(dashboardId: string, widgetId: string): Observable<WidgetModel> {
@@ -146,7 +151,7 @@ export class DashboardService {
         this.dashboardSubject.next({manipulation: manipulation, dashboardId: dashboardId, dashboard: dashboard});
     }
 
-    animationFinished() {
+    reloadAllWidgets() {
         this.animationDoneSubject.next('reloadAll');
     }
 

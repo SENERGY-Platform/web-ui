@@ -43,6 +43,7 @@ export class DashboardComponent implements OnInit {
     dashboards: DashboardModel[] = [];
     dashboardsRetrieved = false;
     activeTabIndex = 0;
+    interval = 0;
 
     constructor(private responsiveService: ResponsiveService,
                 private dashboardService: DashboardService) {
@@ -54,8 +55,17 @@ export class DashboardComponent implements OnInit {
         this.initWidgets();
     }
 
-    animationDone() {
-        this.dashboardService.animationFinished();
+    initAllWidgets() {
+        this.dashboardService.reloadAllWidgets();
+        this.refreshAllWidgets();
+    }
+
+    refreshAllWidgets() {
+        clearInterval(this.interval);
+        const refreshTimeInMs = this.dashboards[this.activeTabIndex].refresh_time * 1000;
+        if (refreshTimeInMs > 0) {
+            this.interval = setInterval(() => this.dashboardService.reloadAllWidgets(), refreshTimeInMs);
+        }
     }
 
     openAddDashboardDialog() {
@@ -72,6 +82,13 @@ export class DashboardComponent implements OnInit {
 
     setTabIndex(index: number): void {
         this.activeTabIndex = index;
+    }
+
+    refreshTime(time: number): void {
+        this.dashboards[this.activeTabIndex].refresh_time = time;
+        this.dashboardService.updateDashboard(this.dashboards[this.activeTabIndex]).subscribe(() => {
+            this.refreshAllWidgets();
+        });
     }
 
     private initDashboard() {
