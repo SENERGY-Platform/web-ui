@@ -64,7 +64,7 @@
             <tr >
                 <td>
                     <mat-form-field color="accent">
-                        <mat-select [(value)]="widget.properties.vAxis" [disabled]="vAxisValues.length < 2">
+                        <mat-select [(value)]="widget.properties.vAxis" [disabled]="vAxisValues.length < 2" placeholder="Y-Axis">
                             <mat-option *ngFor="let vAxisValue of vAxisValues" [value]="vAxisValue">
                             {{vAxisValue.Name}}
                             </mat-option>
