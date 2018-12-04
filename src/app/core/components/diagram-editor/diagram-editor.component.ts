@@ -42,6 +42,7 @@ export class DiagramEditorComponent implements OnInit {
             inPorts: [],
             outPorts: [],
             name: '',
+            image: '',
             size: {
                 width: 150,
                 height: 100
@@ -299,8 +300,8 @@ export class DiagramEditorComponent implements OnInit {
     }
 
     public addNode(operator: OperatorModel) {
-        if (operator.name !== undefined && operator.inputs !== undefined && operator.outputs !== undefined) {
-            this.newNode(operator.name, operator.inputs, operator.outputs);
+        if (operator.name !== undefined && operator.inputs !== undefined && operator.outputs !== undefined && operator.image !== undefined) {
+            this.newNode(operator.name, operator.image, operator.inputs, operator.outputs);
         }
     }
 
@@ -317,7 +318,7 @@ export class DiagramEditorComponent implements OnInit {
         this.flowRepoService.saveFlow(this.flow).subscribe();
     }
 
-    private newNode(name: string, inputs: IOModel[], outputs: IOModel []): any {
+    private newNode(name: string, image: string, inputs: IOModel[], outputs: IOModel []): any {
         const inPorts = [];
         for (const input of inputs) {
             if (input.name !== undefined) {
@@ -333,7 +334,8 @@ export class DiagramEditorComponent implements OnInit {
         const node = new this.NodeElement({
             inPorts: inPorts,
             outPorts: outPorts,
-            name: name
+            name: name,
+            image: image
         });
         node.position(150, 50);
         node.attr({

@@ -20,23 +20,21 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
-import {PipelineModel} from './pipeline.model';
+import {ParseModel} from './parse.model';
 
 @Injectable({
     providedIn: 'root'
 })
-
-export class PipelineRegistryService {
+export class FlowEngineService {
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getPipelines(): Observable<PipelineModel[]> {
-        return this.http.get<PipelineModel[]>
-        (environment.pipelineRegistryUrl + '/pipeline').pipe(
+    startPipeline(data: {}): Observable<{}> {
+        return this.http.post<{}>
+        (environment.flowEngineUrl + '/pipeline', data).pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(PipelineRegistryService.name, 'getPipelines: Error', []))
+            catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'startPipeline: Error', []))
         );
-
     }
 }

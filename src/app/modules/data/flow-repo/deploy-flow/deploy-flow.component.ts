@@ -22,6 +22,7 @@ import {DeviceInstancesModel} from '../../../devices/device-instances/shared/dev
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
 import {DeviceTypeModel} from '../../../devices/device-types/shared/device-type.model';
 import {DeviceTypeService} from '../../../devices/device-types/shared/device-type.service';
+import {FlowEngineService} from '../shared/flow-engine.service';
 
 @Component({
     selector: 'senergy-deploy-flow',
@@ -32,6 +33,7 @@ export class DeployFlowComponent implements OnInit {
 
     ready = false;
     inputs: ParseModel[] = [];
+    id = '' as string;
 
     deviceTypes = [] as DeviceTypeModel [];
     devices: DeviceInstancesModel [] = [];
@@ -40,25 +42,29 @@ export class DeployFlowComponent implements OnInit {
                 private route: ActivatedRoute,
                 private deviceInstanceService: DeviceInstancesService,
                 private deviceTypeService: DeviceTypeService,
+                private flowEngineService: FlowEngineService
     ) {
+        const id = this.route.snapshot.paramMap.get('id');
+        if (id !== null) {
+            this.id = id;
+        }
     }
 
     ngOnInit() {
         this.loadDevices();
-        const id = this.route.snapshot.paramMap.get('id');
-        if (id !== null) {
-            this.parserService.getInputs(id).subscribe((resp: ParseModel []) => {
-                this.inputs = resp;
-                this.ready = true;
-                this.inputs.forEach((_, index) => {
-                    this.deviceTypes [index] = {} as DeviceTypeModel;
-                });
+
+        this.parserService.getInputs(this.id).subscribe((resp: ParseModel []) => {
+            this.inputs = resp;
+            this.ready = true;
+            this.inputs.forEach((_, index) => {
+                this.deviceTypes [index] = {} as DeviceTypeModel;
             });
-        }
+        });
     }
 
     startPipeline() {
         console.log(this.inputs);
+        this.flowEngineService.startPipeline({id: this.id, nodes: this.inputs}).subscribe();
     }
 
     loadDevices() {
