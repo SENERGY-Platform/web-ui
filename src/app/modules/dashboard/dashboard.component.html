@@ -15,7 +15,7 @@
   -->
 
 <div class="dashboard-container" fxFill>
-    <mat-tab-group [@.disabled]="disableAnimation" #matTabGroup backgroundColor="accent" color="primary" (animationDone)="animationDone()"
+    <mat-tab-group backgroundColor="accent" color="primary" (animationDone)="animationDone()"
                    (selectedIndexChange)="setTabIndex($event)" [(selectedIndex)]="activeTabIndex"
                    dynamicHeight="true" headerPosition="above" fxFill>
         <mat-tab *ngFor="let dashboard of dashboards; let i = index"

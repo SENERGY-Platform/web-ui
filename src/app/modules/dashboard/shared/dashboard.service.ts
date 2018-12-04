@@ -38,11 +38,9 @@ export class DashboardService {
 
 
     private animationDoneSubject = new Subject<string>();
-    private dashSubject = new Subject<DashboardModel[]>();
     private dashboardSubject = new Subject<DashboardManipulationModel>();
     private widgetSubject = new Subject<DashboardWidgetManipulationModel>();
 
-    currentDashboards = this.dashSubject.asObservable();
     dashboardObservable = this.dashboardSubject.asObservable();
     dashboardWidgetObservable = this.widgetSubject.asObservable();
     initWidgetObservable = this.animationDoneSubject.asObservable();
@@ -51,12 +49,6 @@ export class DashboardService {
     constructor(private dialog: MatDialog,
                 private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService) {
-    }
-
-    initDashboard() {
-        this.getDashboards().subscribe((dash: DashboardModel[]) => {
-            this.dashSubject.next(dash);
-        });
     }
 
     /** REST Services */

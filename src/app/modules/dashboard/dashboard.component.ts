@@ -43,8 +43,6 @@ export class DashboardComponent implements OnInit {
     dashboards: DashboardModel[] = [];
     dashboardsRetrieved = false;
     activeTabIndex = 0;
-    disableAnimation = false;
-    showWidgets = false;
 
     constructor(private responsiveService: ResponsiveService,
                 private dashboardService: DashboardService) {
@@ -56,10 +54,29 @@ export class DashboardComponent implements OnInit {
         this.initWidgets();
     }
 
+    animationDone() {
+        this.dashboardService.animationFinished();
+    }
+
+    openAddDashboardDialog() {
+        this.dashboardService.openNewDashboardDialog();
+    }
+
+    openDeleteDashboardDialog() {
+        this.dashboardService.openDeleteDashboardDialog(this.dashboards[this.activeTabIndex].id);
+    }
+
+    openAddWidgetDialog() {
+        this.dashboardService.openNewWidgetDialog(this.dashboards[this.activeTabIndex].id);
+    }
+
+    setTabIndex(index: number): void {
+        this.activeTabIndex = index;
+    }
+
     private initDashboard() {
 
         this.dashboardService.getDashboards().subscribe((dashboards: DashboardModel[]) => {
-                this.disableAnimation = true;
                 this.dashboards = dashboards;
                 this.dashboardsRetrieved = true;
             }
@@ -77,29 +94,6 @@ export class DashboardComponent implements OnInit {
                 }
             }
         });
-    }
-
-    animationDone() {
-        this.showWidgets = true;
-        this.dashboardService.animationFinished();
-        this.disableAnimation = false;
-    }
-
-    openAddDashboardDialog() {
-        this.dashboardService.openNewDashboardDialog();
-    }
-
-    openDeleteDashboardDialog() {
-        this.dashboardService.openDeleteDashboardDialog(this.dashboards[this.activeTabIndex].id);
-    }
-
-    openAddWidgetDialog() {
-        this.dashboardService.openNewWidgetDialog(this.dashboards[this.activeTabIndex].id);
-    }
-
-    setTabIndex(index: number): void {
-        this.showWidgets = false;
-        this.activeTabIndex = index;
     }
 
     private deleteDashboard(dashboardManipulationModel: DashboardManipulationModel) {
