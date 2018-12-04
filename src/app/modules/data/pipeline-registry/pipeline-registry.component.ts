@@ -16,6 +16,8 @@
 
 import {Component, OnInit} from '@angular/core';
 import {PipelineModel} from './shared/pipeline.model';
+import {PipelineRegistryService} from './shared/pipeline-registry.service';
+import {FlowEngineService} from '../flow-repo/shared/flow-engine.service';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -28,10 +30,16 @@ export class PipelineRegistryComponent implements OnInit {
     pipes: PipelineModel[] = [];
     ready = false;
 
-    constructor() {
+    constructor(private pipelineRegistryService: PipelineRegistryService, private flowEngineService: FlowEngineService) {
     }
 
     ngOnInit() {
+        this.pipelineRegistryService.getPipelines().subscribe((resp: PipelineModel[]) => {
+            this.pipes = resp;
+        });
+    }
 
+    deletePipeline(id: string) {
+        this.flowEngineService.deletePipeline(id).subscribe();
     }
 }

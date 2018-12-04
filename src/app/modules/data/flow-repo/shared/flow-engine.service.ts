@@ -20,7 +20,6 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
-import {ParseModel} from './parse.model';
 
 @Injectable({
     providedIn: 'root'
@@ -35,6 +34,12 @@ export class FlowEngineService {
         (environment.flowEngineUrl + '/pipeline', data).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'startPipeline: Error', []))
+        );
+    }
+
+    deletePipeline (id: string): Observable<{}> {
+        return this.http.delete(environment.flowEngineUrl + '/pipeline/' + id).pipe(
+            catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'deletePipeline: Error', {}))
         );
     }
 }

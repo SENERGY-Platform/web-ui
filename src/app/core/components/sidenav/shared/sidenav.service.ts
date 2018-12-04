@@ -67,7 +67,7 @@ export class SidenavService {
             new SidenavPageModel('Operators', 'link', 'storage', '/data/operator-repo'),
             new SidenavPageModel('Designer', 'link', 'create', '/data/designer'),
             new SidenavPageModel('Flows', 'link', 'timeline', '/data/flow-repo'),
-            new SidenavPageModel('Pipelines', 'link', 'timeline', '/data/pipelines'),
+            new SidenavPageModel('Pipelines', 'link', 'golf_course', '/data/pipelines'),
             new SidenavPageModel('Export', 'link', 'build', '/data/export')
         ]));
 

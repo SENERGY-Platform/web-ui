@@ -21,6 +21,8 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {PipelineModel} from './pipeline.model';
+import {OperatorModel} from '../../operator-repo/shared/operator.model';
+import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
 
 @Injectable({
     providedIn: 'root'

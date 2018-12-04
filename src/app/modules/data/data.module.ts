@@ -24,7 +24,7 @@ import {
     MatDividerModule,
     MatGridListModule,
     MatIconModule,
-    MatListModule, MatSnackBarModule,
+    MatListModule, MatSnackBarModule, MatTableModule,
     MatTooltipModule
 } from '@angular/material';
 import {CoreModule} from '../../core/core.module';
@@ -63,7 +63,8 @@ const pipelineRegistry = {path: 'data/pipelines', pathMatch: 'full', component: 
         FlexLayoutModule,
         MatButtonModule,
         MatSnackBarModule,
-        FormsModule
+        FormsModule,
+        MatTableModule
     ],
     declarations: [
         OperatorRepoComponent,

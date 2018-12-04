@@ -16,6 +16,13 @@
 
 <div class="main-panel">
     <div class="layout-margin" fxLayout="column">
-    Pipes
+        <div *ngFor="let item of pipes">
+            {{ item.id }}
+            <button class="mat-icon-button">
+                <mat-icon class="mat-warn" (click)="deletePipeline(item.id)">
+                    delete
+                </mat-icon>
+            </button>
+        </div>
     </div>
 </div>
