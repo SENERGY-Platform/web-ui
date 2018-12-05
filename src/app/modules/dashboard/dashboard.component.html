@@ -26,12 +26,12 @@
                         <mat-icon>refresh</mat-icon>
                     </button>
                     <mat-menu #refresh="matMenu" [overlapTrigger]="false" xPosition="before">
-                        <button mat-menu-item (click)="refreshTime(5)" [ngClass]="{'color-accent': dashboard.refresh_time === 5}">5 Sekunden</button>
-                        <button mat-menu-item (click)="refreshTime(15)" [ngClass]="{'color-accent': dashboard.refresh_time === 15}">15 Sekunden</button>
-                        <button mat-menu-item (click)="refreshTime(30)" [ngClass]="{'color-accent': dashboard.refresh_time === 30}">30 Sekunden</button>
-                        <button mat-menu-item (click)="refreshTime(60)" [ngClass]="{'color-accent': dashboard.refresh_time === 60}">1 Minute</button>
+                        <button mat-menu-item (click)="refreshTime(5)" [ngClass]="{'color-accent': dashboard.refresh_time === 5}">5 seconds</button>
+                        <button mat-menu-item (click)="refreshTime(15)" [ngClass]="{'color-accent': dashboard.refresh_time === 15}">15 seconds</button>
+                        <button mat-menu-item (click)="refreshTime(30)" [ngClass]="{'color-accent': dashboard.refresh_time === 30}">30 seconds</button>
+                        <button mat-menu-item (click)="refreshTime(60)" [ngClass]="{'color-accent': dashboard.refresh_time === 60}">1 minute</button>
                         <mat-divider></mat-divider>
-                        <button mat-menu-item (click)="refreshTime(0)" [ngClass]="{'color-accent': dashboard.refresh_time === 0}">kein Refresh</button>
+                        <button mat-menu-item (click)="refreshTime(0)" [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh</button>
                     </mat-menu>
                     <button (click)="openDeleteDashboardDialog()" mat-icon-button color="accent" [disabled]="dashboards.length <= 1">
                         <mat-icon>delete</mat-icon>
