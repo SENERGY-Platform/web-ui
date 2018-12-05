@@ -30,6 +30,7 @@ import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.s
 import {ChartsExportEditDialogComponent} from '../dialog/charts-export-edit-dialog.component';
 import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
 
 @Injectable({
     providedIn: 'root'
@@ -59,7 +60,7 @@ export class ChartsExportService {
         });
     }
 
-    getData(id: string, limit: number): Observable<ChartsExportModel> {
+    getData(id: string, limit: number | undefined): Observable<ChartsExportModel> {
         return this.http.get<ChartsExportModel>(environment.influxAPIURL + '/measurement/' + id + '?limit=' + limit).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as ChartsExportModel))
@@ -67,35 +68,34 @@ export class ChartsExportService {
     }
 
 
-    getChartData(widgetId: string, measurementId: string, interval: number, hAxisLabel: string, vAxisLabel: string): Observable<ChartsModel> {
+    getChartData(widget: WidgetModel): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-            this.getData(measurementId, interval).subscribe((resp: ChartsExportModel) => {
-                observer.next(this.setProcessInstancesStatusValues(widgetId, hAxisLabel, vAxisLabel, this.setData(resp.results[0].series[0].values)));
+            this.getData(widget.properties.measurement ? widget.properties.measurement.id : '', widget.properties.interval).
+            subscribe((resp: ChartsExportModel) => {
+                observer.next(this.setProcessInstancesStatusValues(
+                    widget.id,
+                    widget.properties.hAxisLabel || '',
+                    widget.properties.vAxisLabel || '',
+                    this.setData(widget.properties.vAxis, resp.results[0].series[0].values)));
                 observer.complete();
             });
         });
     }
 
-    private setData(exportData: (string | number)[][]): ChartDataTableModel {
-
-        const dataTable = new ChartDataTableModel([['Date', 'Count']]);
+    private setData(vAxis: ExportValueModel | undefined, exportData: (string | number)[][]): ChartDataTableModel {
+        const dataTable = new ChartDataTableModel([['time', vAxis ? vAxis.Name : '']]);
         exportData.forEach((item: (string | number)[]) => {
-            const date = new Date(<string>item[0]);
-            dataTable.data.push([date, item[1]]);
-
+                const date = new Date(<string>item[0]);
+                dataTable.data.push([date, item[1]]);
             }
         );
         return dataTable;
-
-/*        function getTooltipText(date: Date, count: number): string {
-            return date.toLocaleDateString() + '\n' + 'count: ' + count; // todo: translation
-        }*/
     }
 
 
     private setProcessInstancesStatusValues(widgetId: string, hAxisLabel: string, vAxisLabel: string, dataTable: ChartDataTableModel): ChartsModel {
 
-       const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
+        const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
 
         return new ChartsModel(
             'LineChart',

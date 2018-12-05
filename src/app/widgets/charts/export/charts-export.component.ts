@@ -76,8 +76,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                 this.ready = false;
                 this.checkConfiguration();
                 if (this.configureWidget === false) {
-                    this.chartsExportService.getChartData(this.widget.id, this.measurementId, this.interval,
-                        this.widget.properties.hAxisLabel || '', this.widget.properties.vAxisLabel || '').subscribe((chartExportData: ChartsModel) => {
+                    this.chartsExportService.getChartData(this.widget).subscribe((chartExportData: ChartsModel) => {
                         this.chartExportData = chartExportData;
                         this.ready = true;
                     });
