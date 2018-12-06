@@ -15,6 +15,20 @@
   -->
 <div class="main-panel">
     <div class="layout-margin" fxLayout="column">
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="flow.name" placeholder="Name">
+        </mat-form-field>
         <senergy-diagram-editor></senergy-diagram-editor>
+        <mat-list>
+            <mat-list-item *ngFor="let item of operators"> {{ item.name }}
+                <button (click)="addNode(item)" matTooltip="Save">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </mat-list-item>
+        </mat-list>
+        <button mat-fab class="fab" (click)="saveModel()" matTooltip="Save">
+            <mat-icon>save</mat-icon>
+        </button>
     </div>
 </div>

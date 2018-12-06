@@ -13,21 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<mat-form-field fxFill color="accent" appearance="outline">
-    <mat-label>Name</mat-label>
-    <input matInput [(ngModel)]="flow.name" placeholder="Name">
-</mat-form-field>
+
 <div id="paper">
 </div>
-<mat-list>
-    <mat-list-item *ngFor="let item of operators"> {{ item.name }}
-        <button (click)="addNode(item)" matTooltip="Save">
-            <mat-icon>add</mat-icon>
-        </button>
-    </mat-list-item>
-</mat-list>
-<button mat-fab class="fab" (click)="saveModel()" matTooltip="Save">
-    <mat-icon>save</mat-icon>
-</button>
-
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/2.2.0/joint.css"/>

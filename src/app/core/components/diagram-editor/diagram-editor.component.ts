@@ -17,11 +17,8 @@
 import {Component, OnInit} from '@angular/core';
 import {dia, shapes, util} from 'jointjs';
 import * as $ from 'jquery';
-import {IOModel, OperatorModel} from '../../../modules/data/operator-repo/shared/operator.model';
-import {OperatorRepoService} from '../../../modules/data/operator-repo/shared/operator-repo.service';
-import {FlowRepoService} from '../../../modules/data/flow-repo/shared/flow-repo.service';
-import {FlowModel} from '../../../modules/data/flow-repo/shared/flow.model';
-import {ActivatedRoute} from '@angular/router';
+import {DiagramService} from './shared/diagram.service';
+import {DiagramModel} from './shared/diagram.model';
 
 
 @Component({
@@ -33,9 +30,6 @@ import {ActivatedRoute} from '@angular/router';
 export class DiagramEditorComponent implements OnInit {
 
     private graph = new dia.Graph();
-    operators: OperatorModel[] = [];
-    ready = false;
-    flow = {} as FlowModel;
 
     NodeElement: any = dia.Element.define('senergy.NodeElement',
         {
@@ -243,29 +237,26 @@ export class DiagramEditorComponent implements OnInit {
         }
     );
 
-    constructor(private route: ActivatedRoute, private operatorRepoService: OperatorRepoService, private flowRepoService: FlowRepoService) {
+    constructor(private diagram: DiagramService) {
     }
 
     ngOnInit() {
-        const id = this.route.snapshot.paramMap.get('id');
-        if (id !== null) {
-            this.flowRepoService.getFlow(id).subscribe((resp: FlowModel | null) => {
-                if (resp !== null) {
-                    this.flow = resp;
-                    for (const cell of this.flow.model.cells) {
-                        if (cell.type === 'link') {
-                            cell.attrs['.marker-target'] = cell.attrs.markerTarget;
-                            delete cell.attrs.markerTarget;
-                        }
-                    }
-                    this.graph.fromJSON(this.flow.model);
-                }
-            });
-        }
-        this.operatorRepoService.getOperators().subscribe((resp: { operators: OperatorModel[] }) => {
-            this.operators = resp.operators;
-            this.ready = true;
+        this.diagram.currentGraph.subscribe((flow: DiagramModel) => {
+            if (flow.cells !== undefined) {
+                this.graph.fromJSON(flow);
+            }
         });
+
+        this.diagram.getNode.subscribe((data: any) => {
+            if (data.name !== undefined && data.image !== undefined) {
+                this.newNode(data.name, data.image, data.inputs, data.outputs);
+            }
+        });
+        const self = this;
+        this.graph.on('batch:stop', function({}, {}) {
+            self.diagram.setGraphData(self.graph.toJSON());
+        });
+
         const paper = new dia.Paper({
             el: $('#paper'),
             model: this.graph,
@@ -298,25 +289,9 @@ export class DiagramEditorComponent implements OnInit {
         });
     }
 
-    public addNode(operator: OperatorModel) {
-        if (operator.name !== undefined && operator.inputs !== undefined && operator.outputs !== undefined
-            && operator.image !== undefined) {
-            this.newNode(operator.name, operator.image, operator.inputs, operator.outputs);
-        }
-    }
 
-    public saveModel() {
-        this.flow.model = this.graph.toJSON();
-        for (const cell of this.flow.model.cells) {
-            if (cell.type === 'link') {
-                cell.attrs.markerTarget =  cell.attrs['.marker-target'];
-                delete cell.attrs['.marker-target'];
-            }
-        }
-        this.flowRepoService.saveFlow(this.flow).subscribe();
-    }
 
-    private newNode(name: string, image: string, inputs: IOModel[], outputs: IOModel []): any {
+    private newNode(name: string, image: string, inputs: any[], outputs: any[]): any {
         const inPorts = [];
         for (const input of inputs) {
             if (input.name !== undefined) {

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {DiagramModel} from '../../../../core/components/diagram-editor/shared/diagram.model';
 
-export interface FlowModel {
-    _id: string;
-    name: string;
-    model: DiagramModel;
+export interface DiagramModel {
+    cells: CellModel [];
+}
+
+export interface CellModel {
+    type: string;
+    attrs: any;
 }
