@@ -45,7 +45,6 @@ export class OperatorComponent implements OnInit {
             this.operatorService.getOperator(id).subscribe((resp: OperatorModel | null) => {
                 if (resp !== null) {
                     this.operator = resp;
-                    console.log(resp);
                 }
             });
         }

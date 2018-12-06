@@ -42,7 +42,6 @@ export class ExportService {
     }
 
     startPipeline(exp: ExportModel): Observable<{}> {
-        console.log(exp);
         return this.http.put<{}>(environment.exportService + '/instance', exp).pipe(
             catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'startPipeline: Error', {}))
         );
