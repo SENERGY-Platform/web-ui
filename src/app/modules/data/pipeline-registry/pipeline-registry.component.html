@@ -16,13 +16,27 @@
 
 <div class="main-panel">
     <div class="layout-margin" fxLayout="column">
-        <div *ngFor="let item of pipes">
-            {{ item.id }}
-            <button class="mat-icon-button">
-                <mat-icon class="mat-warn" (click)="deletePipeline(item.id)">
-                    delete
-                </mat-icon>
-            </button>
-        </div>
+        <table mat-table [dataSource]="pipes" class="mat-elevation-z8" *ngIf="ready">
+
+            <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef> Id </th>
+                <td mat-cell *matCellDef="let element"> {{element.id}}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let element;">
+                    <div fxLayout="row" fxLayoutAlign="end center" fxFill>
+                        <button class="margin" mat-icon-button color="accent" (click)="deletePipeline(element.id)">
+                            <mat-icon class="mat-warn">delete</mat-icon>
+                        </button>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
     </div>
 </div>

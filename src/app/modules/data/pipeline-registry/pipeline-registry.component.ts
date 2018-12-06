@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {PipelineModel} from './shared/pipeline.model';
 import {PipelineRegistryService} from './shared/pipeline-registry.service';
 import {FlowEngineService} from '../flow-repo/shared/flow-engine.service';
+import {MatTable} from '@angular/material';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -27,8 +28,11 @@ import {FlowEngineService} from '../flow-repo/shared/flow-engine.service';
 
 export class PipelineRegistryComponent implements OnInit {
 
-    pipes: PipelineModel[] = [];
+    pipes: PipelineModel[] = [{id: 'sdfsdfsd', operators: []}];
     ready = false;
+    displayedColumns: string[] = ['id', 'actions'];
+
+    //@ViewChild(MatTable) private _table!: MatTable<PipelineModel>;
 
     constructor(private pipelineRegistryService: PipelineRegistryService, private flowEngineService: FlowEngineService) {
     }
@@ -36,6 +40,9 @@ export class PipelineRegistryComponent implements OnInit {
     ngOnInit() {
         this.pipelineRegistryService.getPipelines().subscribe((resp: PipelineModel[]) => {
             this.pipes = resp;
+            console.log(this.pipes);
+            this.ready = true;
+            //this._table.renderRows();
         });
     }
 
