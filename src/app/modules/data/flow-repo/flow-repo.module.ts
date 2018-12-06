@@ -19,7 +19,7 @@ import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {
-    MatButtonModule, MatCheckboxModule, MatDialogModule,
+    MatButtonModule, MatCardModule, MatCheckboxModule, MatDialogModule,
     MatDividerModule,
     MatFormFieldModule,
     MatGridListModule,
@@ -52,7 +52,8 @@ const deploy = {path: 'data/flow-repo/deploy/:id', pathMatch: 'full', component:
         MatInputModule,
         FormsModule,
         MatCheckboxModule,
-        MatSelectModule
+        MatSelectModule,
+        MatCardModule
 
     ],
     declarations: [

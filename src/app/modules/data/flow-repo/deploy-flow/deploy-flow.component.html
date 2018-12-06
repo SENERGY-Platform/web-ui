@@ -16,39 +16,38 @@
 
 <div class="main-panel">
     <div class="layout-margin" fxLayout="column" *ngIf="inputs.length > 0">
-        <div fxLayout="column" *ngFor="let input of inputs; let key = index">
-            <div fxFill fxLayout="column">
-                <div fxLayout="row">
-                    <h3 fxFlex class="layout-margin">{{input.id}} - {{input.name}}</h3>
-                </div>
-                <mat-divider class="no-margin"></mat-divider>
-                <div fxLayout="column">
-                </div>
-            </div>
-            <div fxLayout="column" *ngFor="let port of input.inPorts">
-                {{ port }}
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-select (ngModelChange)="deviceChanged($event, input.id, port)" placeholder="Device" [(ngModel)]="selectedValues.get(input.id).get(port).device">
-                        <mat-option *ngFor="let device of devices" [value]="device">
-                            {{device.name}}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
+        <mat-card *ngFor="let input of inputs; let key = index" style="margin-bottom:10px;">
+            <mat-card-header>
+                <div mat-card-avatar><mat-icon>poll</mat-icon></div>
+                <mat-card-title>{{input.name}}</mat-card-title>
+                <mat-card-subtitle>{{input.id}}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+                <div fxLayout="column" *ngFor="let port of input.inPorts">
+                    <h4>{{ port }}</h4>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-select (ngModelChange)="deviceChanged($event, input.id, port)" placeholder="Device" [(ngModel)]="selectedValues.get(input.id).get(port).device">
+                            <mat-option *ngFor="let device of devices" [value]="device">
+                                {{device.name}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
 
-                <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-select placeholder="Service" [(ngModel)]="selectedValues.get(input.id).get(port).service">
-                        <mat-option *ngFor="let service of deviceTypes[input.id][port].services" [value]="service">
-                            {{service.name}}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-select placeholder="Service" [(ngModel)]="selectedValues.get(input.id).get(port).service">
+                            <mat-option *ngFor="let service of deviceTypes[input.id][port].services" [value]="service">
+                                {{service.name}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
 
-                <mat-form-field fxFill color="accent" appearance="outline">
-                    <mat-label>path</mat-label>
-                    <input matInput [(ngModel)]="selectedValues.get(input.id).get(port).path" placeholder="path">
-                </mat-form-field>
-            </div>
-        </div>
+                    <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label>path</mat-label>
+                        <input matInput [(ngModel)]="selectedValues.get(input.id).get(port).path" placeholder="path">
+                    </mat-form-field>
+                </div>
+            </mat-card-content>
+        </mat-card>
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
             <button mat-raised-button color="accent" (click)="startPipeline()">Start</button>
         </div>
