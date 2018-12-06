@@ -300,13 +300,13 @@ export class DiagramEditorComponent implements OnInit {
     }
 
     public addNode(operator: OperatorModel) {
-        if (operator.name !== undefined && operator.inputs !== undefined && operator.outputs !== undefined && operator.image !== undefined) {
+        if (operator.name !== undefined && operator.inputs !== undefined && operator.outputs !== undefined
+            && operator.image !== undefined) {
             this.newNode(operator.name, operator.image, operator.inputs, operator.outputs);
         }
     }
 
     public saveModel() {
-        this.flow.name = 'test';
         this.flow.model = this.graph.toJSON();
         for (const cell of this.flow.model.cells) {
             if (cell.type === 'link') {
