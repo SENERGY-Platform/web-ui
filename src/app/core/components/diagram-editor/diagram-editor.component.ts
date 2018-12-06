@@ -259,7 +259,6 @@ export class DiagramEditorComponent implements OnInit {
                         }
                     }
                     this.graph.fromJSON(this.flow.model);
-                    console.log(resp);
                 }
             });
         }
@@ -314,7 +313,6 @@ export class DiagramEditorComponent implements OnInit {
                 delete cell.attrs['.marker-target'];
             }
         }
-        console.log(this.flow.model);
         this.flowRepoService.saveFlow(this.flow).subscribe();
     }
 
