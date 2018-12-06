@@ -19,15 +19,16 @@
         <div fxLayout="column" *ngFor="let input of inputs; let key = index">
             <div fxFill fxLayout="column">
                 <div fxLayout="row">
-                    <h3 fxFlex class="layout-margin">{{input.name}}</h3>
+                    <h3 fxFlex class="layout-margin">{{input.id}} - {{input.name}}</h3>
                 </div>
                 <mat-divider class="no-margin"></mat-divider>
                 <div fxLayout="column">
                 </div>
             </div>
-            <div fxLayout="column">
+            <div fxLayout="column" *ngFor="let port of input.inPorts">
+                {{ port }}
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-select (ngModelChange)="deviceChanged($event, key)" placeholder="Device" [(ngModel)]="input.device">
+                    <mat-select (ngModelChange)="deviceChanged($event, input.id, port)" placeholder="Device" [(ngModel)]="selectedValues.get(input.id).get(port).device">
                         <mat-option *ngFor="let device of devices" [value]="device">
                             {{device.name}}
                         </mat-option>
@@ -35,8 +36,8 @@
                 </mat-form-field>
 
                 <mat-form-field fxFlex color="accent" appearance="outline">
-                    <mat-select placeholder="Service" [(ngModel)]="input.service">
-                        <mat-option *ngFor="let service of deviceTypes[key].services" [value]="service">
+                    <mat-select placeholder="Service" [(ngModel)]="selectedValues.get(input.id).get(port).service">
+                        <mat-option *ngFor="let service of deviceTypes[input.id][port].services" [value]="service">
                             {{service.name}}
                         </mat-option>
                     </mat-select>
@@ -44,7 +45,7 @@
 
                 <mat-form-field fxFill color="accent" appearance="outline">
                     <mat-label>path</mat-label>
-                    <input matInput [(ngModel)]="input.path" placeholder="path">
+                    <input matInput [(ngModel)]="selectedValues.get(input.id).get(port).path" placeholder="path">
                 </mat-form-field>
             </div>
         </div>

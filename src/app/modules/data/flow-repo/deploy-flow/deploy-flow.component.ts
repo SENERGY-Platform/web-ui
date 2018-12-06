@@ -14,29 +14,35 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {ParserService} from '../shared/parser.service';
 import {ActivatedRoute} from '@angular/router';
 import {ParseModel} from '../shared/parse.model';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
-import {DeviceTypeModel} from '../../../devices/device-types/shared/device-type.model';
+import {DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-types/shared/device-type.model';
 import {DeviceTypeService} from '../../../devices/device-types/shared/device-type.service';
 import {FlowEngineService} from '../shared/flow-engine.service';
+import {NodeInput, NodeModel, NodeValue, PipelineRequestModel} from './shared/pipeline-request.model';
 
 @Component({
     selector: 'senergy-deploy-flow',
     templateUrl: './deploy-flow.component.html',
     styleUrls: ['./deploy-flow.component.css']
 })
-export class DeployFlowComponent implements OnInit {
+
+export class DeployFlowComponent {
 
     ready = false;
     inputs: ParseModel[] = [];
     id = '' as string;
 
-    deviceTypes = [] as DeviceTypeModel [];
+    deviceTypes = [] as any;
     devices: DeviceInstancesModel [] = [];
+
+    selectedValues = new Map();
+
+    pipeReq: PipelineRequestModel = {} as PipelineRequestModel;
 
     constructor(private parserService: ParserService,
                 private route: ActivatedRoute,
@@ -48,23 +54,58 @@ export class DeployFlowComponent implements OnInit {
         if (id !== null) {
             this.id = id;
         }
-    }
-
-    ngOnInit() {
         this.loadDevices();
+
+        this.pipeReq = {id: this.id, nodes: []};
 
         this.parserService.getInputs(this.id).subscribe((resp: ParseModel []) => {
             this.inputs = resp;
             this.ready = true;
-            this.inputs.forEach((_, index) => {
-                this.deviceTypes [index] = {} as DeviceTypeModel;
+            this.inputs.map((value: ParseModel, key) => {
+                this.pipeReq.nodes[key] = {nodeId: value.id, inputs: []} as NodeModel;
+                value.inPorts.map((port: string) => {
+                    if (!this.selectedValues.has(value.id)) {
+                        this.selectedValues.set(value.id, new Map());
+                    }
+                    if (this.deviceTypes[value.id] === undefined) {
+                        this.deviceTypes[value.id] = [];
+                    }
+                    this.selectedValues.get(value.id).set(port, {device: {} as DeviceInstancesModel,
+                        service: {} as DeviceTypeServiceModel, path: ''});
+                    this.deviceTypes[value.id][port] = {} as DeviceTypeModel;
+                });
+
             });
         });
     }
 
     startPipeline() {
-        console.log(this.inputs);
-        this.flowEngineService.startPipeline({id: this.id, nodes: this.inputs}).subscribe();
+        this.pipeReq.nodes.forEach((node: NodeModel) => {
+            for (const entry of this.selectedValues.get(node.nodeId).entries()) {
+                if (entry[1].device.id !== undefined && entry[1].service.id !==  undefined) {
+                    const x = {name: entry [0], path: entry[1].path} as NodeValue;
+                    const y = [] as NodeValue [];
+                    y.push(x);
+                    const z = {
+                        deviceId: entry[1].device.id,
+                        topicName: entry[1].service.id.replace(/#/g, '_'),
+                        values: y
+                    } as NodeInput;
+                    if (node.inputs.length > 0) {
+                        node.inputs.forEach((input: NodeInput) => {
+                            if (input.deviceId === entry[1].device.id) {
+                                if (input.values.length > 0) {
+                                    input.values.push(x);
+                                }
+                            }
+                        });
+                    } else {
+                        node.inputs.push(z);
+                    }
+                }
+            }
+        });
+        this.flowEngineService.startPipeline(this.pipeReq).subscribe();
     }
 
     loadDevices() {
@@ -73,11 +114,11 @@ export class DeployFlowComponent implements OnInit {
         });
     }
 
-    deviceChanged(device: DeviceInstancesModel, key: number) {
-        if (this.inputs[key].device !== device.name) {
+    deviceChanged(device: DeviceInstancesModel, inputId: string, port: string) {
+        if (this.selectedValues.get(inputId).get(port).device !== device) {
             this.deviceTypeService.getDeviceType(device.devicetype).subscribe((resp: DeviceTypeModel | null) => {
                 if (resp !== null) {
-                    this.deviceTypes[key] = resp;
+                    this.deviceTypes[inputId][port] = resp;
                 }
             });
         }
