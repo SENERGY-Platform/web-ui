@@ -20,7 +20,6 @@ import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
 import {ActivatedRoute} from '@angular/router';
 import {OperatorRepoService} from '../operator-repo/shared/operator-repo.service';
 import {FlowModel} from '../flow-repo/shared/flow.model';
-import {DiagramModel} from '../../../core/components/diagram-editor/shared/diagram.model';
 import {DiagramEditorComponent} from '../../../core/components/diagram-editor/diagram-editor.component';
 
 @Component({
@@ -30,7 +29,7 @@ import {DiagramEditorComponent} from '../../../core/components/diagram-editor/di
 })
 export class FlowDesignerComponent implements OnInit, AfterViewInit  {
 
-    @ViewChild(DiagramEditorComponent) diagram: any;
+    @ViewChild(DiagramEditorComponent) diagram!: DiagramEditorComponent;
 
     operators: OperatorModel[] = [];
     ready = false;
