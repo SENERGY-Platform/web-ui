@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {AfterContentChecked, Component, OnInit} from '@angular/core';
 import {ResponsiveService} from '../../core/services/responsive.service';
 import {DashboardService} from './shared/dashboard.service';
 import {DashboardModel} from './shared/dashboard.model';
@@ -22,6 +22,11 @@ import {WidgetModel} from './shared/dashboard-widget.model';
 import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
 import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
+import {
+    DisplayGrid,
+    GridsterConfig, GridsterItem, GridsterItemComponentInterface,
+    GridType,
+} from 'angular-gridster2';
 
 const grids = new Map([
     ['xs', 1],
@@ -44,12 +49,14 @@ export class DashboardComponent implements OnInit {
     dashboardsRetrieved = false;
     activeTabIndex = 0;
     interval = 0;
+    options!: GridsterConfig;
 
     constructor(private responsiveService: ResponsiveService,
                 private dashboardService: DashboardService) {
     }
 
     ngOnInit() {
+        this.initDragAndDrop();
         this.initGridCols();
         this.initDashboard();
         this.initWidgets();
@@ -89,6 +96,52 @@ export class DashboardComponent implements OnInit {
         this.dashboardService.updateDashboard(this.dashboards[this.activeTabIndex]).subscribe(() => {
             this.refreshAllWidgets();
         });
+    }
+
+    private initDragAndDrop() {
+        this.initDragAndDropOptions();
+        if (this.options.draggable) {
+            this.options.draggable.stop = () => {
+                setTimeout(() => {
+                    let iterate = true;
+                    this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
+                        if (iterate) {
+                            if (widget.x && widget.y) {
+                                const gridIndex = widget.x + widget.y * 4; /** todo */
+                                if (gridIndex !== index) {
+                                    const swap = this.dashboards[this.activeTabIndex].widgets[index];
+                                    this.dashboards[this.activeTabIndex].widgets[index] = this.dashboards[this.activeTabIndex].widgets[gridIndex];
+                                    this.dashboards[this.activeTabIndex].widgets[gridIndex] = swap;
+                                    this.dashboardService.updateDashboard(this.dashboards[this.activeTabIndex]).subscribe();
+                                    iterate = false;
+                                }
+                            }
+                        }
+                    });
+                }, 0);
+            };
+        }
+    }
+
+    private initDragAndDropOptions() {
+        this.options = {
+            gridType: GridType.VerticalFixed,
+            displayGrid: DisplayGrid.Always,
+            fixedRowHeight: 280,
+            margin: 16,
+            minCols: 4, /** todo */
+            maxCols: 4, /** todo */
+            maxRows: 4, /** todo */
+            setGridSize: true,
+            pushItems: false,
+            swap: true,
+            draggable: {
+                enabled: true
+            },
+            resizable: {
+                enabled: false
+            },
+        };
     }
 
     private initDashboard() {

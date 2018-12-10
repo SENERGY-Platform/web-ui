@@ -30,6 +30,7 @@ import {DashboardDeleteDialogComponent} from './dialogs/dashboard-delete-dialog.
 import {WidgetModule} from '../../widgets/widget.module';
 import {DashboardNewWidgetDialogComponent} from './dialogs/dashboard-new-widget-dialog.component';
 import {FormsModule} from '@angular/forms';
+import {GridsterModule} from 'angular-gridster2';
 
 
 @NgModule({
@@ -49,6 +50,7 @@ import {FormsModule} from '@angular/forms';
         MatSelectModule,
         MatOptionModule,
         FormsModule,
+        GridsterModule,
     ],
     declarations: [
         DashboardComponent,

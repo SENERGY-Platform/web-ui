@@ -14,13 +14,14 @@
   ~ limitations under the License.
   -->
 
+
 <div class="dashboard-container" fxFill>
     <mat-tab-group backgroundColor="accent" color="primary" (animationDone)="initAllWidgets()"
                    (selectedIndexChange)="setTabIndex($event)" [(selectedIndex)]="activeTabIndex"
                    dynamicHeight="true" headerPosition="above" fxFill>
         <mat-tab *ngFor="let dashboard of dashboards; let i = index"
                  label="{{dashboard.name}}">
-            <div class="layout-margin">
+            <div fxFill>
                 <div fxLayout="row" fxLayoutAlign="end center">
                     <button mat-icon-button [matMenuTriggerFor]="refresh" color="accent">
                         <mat-icon>refresh</mat-icon>
@@ -37,35 +38,34 @@
                         <mat-icon>delete</mat-icon>
                     </button>
                 </div>
-                <mat-grid-list cols="{{gridCols}}" rowHeight="280px" gutterSize="16px" *ngIf="i === activeTabIndex">
-                    <mat-grid-tile class="border-radius mat-elevation-z1" *ngFor="let widget of dashboard.widgets">
-
-                            <div [ngSwitch]="widget.type" fxFill>
-                                <div *ngSwitchCase="'switch'" fxFill>
-                                    <senergy-switch [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-switch>
-                                </div>
-                                <div *ngSwitchCase="'devices_state'" fxFill>
-                                    <senergy-devices-state [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-devices-state>
-                                </div>
-                                <div *ngSwitchCase="'event_list'" fxFill>
-                                    <senergy-event-list [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-event-list>
-                                </div>
-                                <div *ngSwitchCase="'ranking_list'" fxFill>
-                                    <senergy-ranking-list [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-ranking-list>
-                                </div>
-                                <div *ngSwitchCase="'charts_export'" fxFill>
-                                    <senergy-charts-export [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-charts-export>
-                                </div>
-                                <div *ngSwitchCase="'charts_process_instances'" fxFill>
-                                    <senergy-charts-process-instances [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-charts-process-instances>
-                                </div>
-                                <div *ngSwitchDefault>
-                                    <div>default</div>
-                                </div>
+                <gridster [options]="options" *ngIf="i === activeTabIndex" fxFill>
+                    <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets" class="mat-elevation-z1">
+                        <div [ngSwitch]="widget.type" fxFill>
+                            <div *ngSwitchCase="'switch'" fxFill>
+                                <senergy-switch [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-switch>
                             </div>
+                            <div *ngSwitchCase="'devices_state'" fxFill>
+                                <senergy-devices-state [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-devices-state>
+                            </div>
+                            <div *ngSwitchCase="'event_list'" fxFill>
+                                <senergy-event-list [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-event-list>
+                            </div>
+                            <div *ngSwitchCase="'ranking_list'" fxFill>
+                                <senergy-ranking-list [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-ranking-list>
+                            </div>
+                            <div *ngSwitchCase="'charts_export'" fxFill>
+                                <senergy-charts-export [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-charts-export>
+                            </div>
+                            <div *ngSwitchCase="'charts_process_instances'" fxFill>
+                                <senergy-charts-process-instances [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-charts-process-instances>
+                            </div>
+                            <div *ngSwitchDefault>
+                                <div>default</div>
+                            </div>
+                        </div>
 
-                    </mat-grid-tile>
-                </mat-grid-list>
+                    </gridster-item>
+                </gridster>
             </div>
         </mat-tab>
 
@@ -84,3 +84,4 @@
 <button mat-fab class="fab" matTooltip="Add new widget" (click)="openAddWidgetDialog()">
     <mat-icon>add</mat-icon>
 </button>
+

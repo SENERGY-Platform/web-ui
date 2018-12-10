@@ -22,6 +22,8 @@ export interface WidgetModel {
     name: string;
     type: string;
     properties: WidgetPropertiesModels;
+    x?: number;
+    y?: number;
 }
 
 interface WidgetPropertiesModels extends SwitchPropertiesModel, ChartsExportPropertiesModel {
