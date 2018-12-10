@@ -18,7 +18,7 @@
     <senergy-widget-header [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-header>
     <mat-divider></mat-divider>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-    <mat-card-content class="mat-card-image content-size" fxLayout="column" *ngIf="ready">
+    <mat-card-content class="mat-card-image content-size drag-handler" fxLayout="column" *ngIf="ready">
         <mat-list >
             <mat-list-item *ngFor="let event of events">
                 <mat-icon mat-list-icon>{{event.icon}}</mat-icon>

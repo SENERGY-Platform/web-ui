@@ -40,8 +40,8 @@
                 </div>
                 <gridster [options]="options" *ngIf="i === activeTabIndex" fxFill>
                     <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets" class="mat-elevation-z1">
-                        <div [ngSwitch]="widget.type" fxFill>
-                            <div *ngSwitchCase="'switch'" fxFill>
+                        <div [ngSwitch]="widget.type" fxFill class="gridster-item-content">
+                            <div *ngSwitchCase="'switch'" fxFill >
                                 <senergy-switch [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-switch>
                             </div>
                             <div *ngSwitchCase="'devices_state'" fxFill>

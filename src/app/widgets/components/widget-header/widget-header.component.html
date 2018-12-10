@@ -15,10 +15,10 @@
   -->
 
 <mat-card-header class="header-container">
-    <mat-card-title-group>
+    <mat-card-title-group class="drag-handler" >
         <mat-card-title>{{widget.name}}</mat-card-title>
     </mat-card-title-group>
-    <div fxFlex></div>
+    <div fxFlex class="drag-handler"></div>
     <div class="button-margin">
         <button mat-icon-button color="accent" (click)="refresh()">
             <mat-icon>refresh</mat-icon>

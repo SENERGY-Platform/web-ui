@@ -19,7 +19,7 @@
     <mat-divider></mat-divider>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <div *ngIf="ready"></div>
-    <mat-card-content class="content-size" fxLayout="column">
+    <mat-card-content class="content-size drag-handler" fxLayout="column">
         <mat-list>
             <mat-list-item *ngFor="let ranking of rankings">
                 <h3 mat-list-icon>{{ranking.rank}}</h3>

@@ -18,7 +18,7 @@
     <senergy-widget-header [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-header>
     <mat-divider></mat-divider>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-    <mat-card-content class="content-size" fxLayout="column" *ngIf="ready">
+    <mat-card-content class="content-size drag-handler" fxLayout="column" *ngIf="ready">
             <div fxFlex >
                 <div class="widget-icon-green" fxFill fxFlex="30" fxLayoutAlign="center center">
                     <mat-icon svgIcon="online" class="mat-32"></mat-icon>

@@ -17,7 +17,7 @@
 <mat-card>
     <senergy-widget-header [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-header>
     <mat-divider></mat-divider>
-    <mat-card-content class="mat-card-image content-size">
+    <mat-card-content class="mat-card-image content-size drag-handler">
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
             <google-chart *ngIf="ready" #processInstancesStatusChart [data]="processInstancesStatus"></google-chart>

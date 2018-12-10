@@ -136,6 +136,9 @@ export class DashboardComponent implements OnInit {
             pushItems: false,
             swap: true,
             draggable: {
+                ignoreContentClass: 'gridster-item-content',
+                ignoreContent: true,
+                dragHandleClass: 'drag-handler',
                 enabled: true
             },
             resizable: {

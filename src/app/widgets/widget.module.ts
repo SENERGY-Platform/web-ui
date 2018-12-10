@@ -46,6 +46,7 @@ import {RankingListComponent} from './ranking-list/ranking-list.component';
 import {CoreModule} from '../core/core.module';
 import {WidgetSpinnerComponent} from './components/widget-spinner/widget-spinner.component';
 import {RankingListEditDialogComponent} from './ranking-list/dialogs/ranking-list-edit-dialog.component';
+import {GridsterModule} from 'angular-gridster2';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -71,7 +72,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         MatListModule,
         Ng2GoogleChartsModule,
         CoreModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        GridsterModule,
     ],
     declarations: [
         SwitchComponent,
