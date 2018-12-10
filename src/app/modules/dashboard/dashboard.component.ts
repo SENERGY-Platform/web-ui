@@ -106,7 +106,7 @@ export class DashboardComponent implements OnInit {
                     let iterate = true;
                     this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
                         if (iterate) {
-                            if (widget.x && widget.y) {
+                            if (widget.x !== undefined && widget.y !== undefined) {
                                 const gridIndex = widget.x + widget.y * 4; /** todo */
                                 if (gridIndex !== index) {
                                     const swap = this.dashboards[this.activeTabIndex].widgets[index];
