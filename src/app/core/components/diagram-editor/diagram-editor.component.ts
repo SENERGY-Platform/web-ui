@@ -17,7 +17,6 @@
 import {Component, OnInit} from '@angular/core';
 import {dia, shapes, util} from 'jointjs';
 import * as $ from 'jquery';
-import {DiagramService} from './shared/diagram.service';
 import {DiagramModel} from './shared/diagram.model';
 
 
@@ -237,25 +236,10 @@ export class DiagramEditorComponent implements OnInit {
         }
     );
 
-    constructor(private diagram: DiagramService) {
+    constructor() {
     }
 
     ngOnInit() {
-        this.diagram.currentGraph.subscribe((flow: DiagramModel) => {
-            if (flow.cells !== undefined) {
-                this.graph.fromJSON(flow);
-            }
-        });
-
-        this.diagram.getNode.subscribe((data: any) => {
-            if (data.name !== undefined && data.image !== undefined) {
-                this.newNode(data.name, data.image, data.inputs, data.outputs);
-            }
-        });
-        const self = this;
-        this.graph.on('batch:stop', function({}, {}) {
-            self.diagram.setGraphData(self.graph.toJSON());
-        });
 
         const paper = new dia.Paper({
             el: $('#paper'),
@@ -289,9 +273,15 @@ export class DiagramEditorComponent implements OnInit {
         });
     }
 
+    public loadGraph(model: DiagramModel) {
+        this.graph.fromJSON(model);
+    }
 
+    public getGraph(): DiagramModel{
+        return this.graph.toJSON();
+    }
 
-    private newNode(name: string, image: string, inputs: any[], outputs: any[]): any {
+    public newNode(name: string, image: string, inputs: any[], outputs: any[]): any {
         const inPorts = [];
         for (const input of inputs) {
             if (input.name !== undefined) {
@@ -334,9 +324,9 @@ export class DiagramEditorComponent implements OnInit {
                 fontWeight: 'bold'
             }
         });
+
         this.graph.addCells([node]);
         this.graph.maxZIndex();
-
 
         return node;
     }

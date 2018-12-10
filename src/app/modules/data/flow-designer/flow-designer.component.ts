@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-import {OnInit, Component} from '@angular/core';
-import {DiagramService} from '../../../core/components/diagram-editor/shared/diagram.service';
+import {OnInit, Component, AfterViewInit, ViewChild} from '@angular/core';
 import {OperatorModel} from '../operator-repo/shared/operator.model';
 import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
 import {ActivatedRoute} from '@angular/router';
 import {OperatorRepoService} from '../operator-repo/shared/operator-repo.service';
 import {FlowModel} from '../flow-repo/shared/flow.model';
+import {DiagramModel} from '../../../core/components/diagram-editor/shared/diagram.model';
+import {DiagramEditorComponent} from '../../../core/components/diagram-editor/diagram-editor.component';
 
 @Component({
     selector: 'senergy-flow-designer',
     templateUrl: './flow-designer.component.html',
     styleUrls: ['./flow-designer.component.css']
 })
-export class FlowDesignerComponent implements OnInit  {
+export class FlowDesignerComponent implements OnInit, AfterViewInit  {
+
+    @ViewChild(DiagramEditorComponent) diagram: any;
 
     operators: OperatorModel[] = [];
     ready = false;
@@ -35,10 +38,17 @@ export class FlowDesignerComponent implements OnInit  {
 
     constructor(private route: ActivatedRoute,
                 private operatorRepoService: OperatorRepoService,
-                private flowRepoService: FlowRepoService,
-                private diagram: DiagramService) { }
+                private flowRepoService: FlowRepoService
+                ) { }
 
     ngOnInit() {
+        this.operatorRepoService.getOperators().subscribe((resp: { operators: OperatorModel[] }) => {
+            this.operators = resp.operators;
+            this.ready = true;
+        });
+    }
+
+    ngAfterViewInit() {
         const id = this.route.snapshot.paramMap.get('id');
         if (id !== null) {
             this.flowRepoService.getFlow(id).subscribe((resp: FlowModel | null) => {
@@ -54,26 +64,23 @@ export class FlowDesignerComponent implements OnInit  {
                 }
             });
         }
-
-        this.operatorRepoService.getOperators().subscribe((resp: { operators: OperatorModel[] }) => {
-            this.operators = resp.operators;
-            this.ready = true;
-        });
     }
 
     public addNode(operator: OperatorModel) {
         if (operator.name !== undefined && operator.inputs !== undefined && operator.outputs !== undefined
             && operator.image !== undefined) {
-            this.diagram.addNode(operator.name, operator.image, operator.inputs, operator.outputs);
+            this.diagram.newNode(operator.name, operator.image, operator.inputs, operator.outputs);
         }
     }
 
     public saveModel() {
-        this.flow.model = this.diagram.getGraphData();
-        for (const cell of this.flow.model.cells) {
-            if (cell.type === 'link') {
-                cell.attrs.markerTarget =  cell.attrs['.marker-target'];
-                delete cell.attrs['.marker-target'];
+        this.flow.model = this.diagram.getGraph();
+        if (this.flow.model.cells !== undefined) {
+            for (const cell of this.flow.model.cells) {
+                if (cell.type === 'link') {
+                    cell.attrs.markerTarget =  cell.attrs['.marker-target'];
+                    delete cell.attrs['.marker-target'];
+                }
             }
         }
         this.flowRepoService.saveFlow(this.flow).subscribe();
