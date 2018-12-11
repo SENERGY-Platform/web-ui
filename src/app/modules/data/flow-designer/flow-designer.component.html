@@ -25,8 +25,11 @@
             </div>
             <div id="diagram-operators" fxFlex="25">
                 <mat-list>
-                    <mat-list-item *ngFor="let item of operators"> {{ item.name }}
-                        <button (click)="addNode(item)" matTooltip="Save">
+                    <h3 mat-subheader>Operators</h3>
+                    <mat-list-item *ngFor="let item of operators">
+                        <mat-icon mat-list-icon> insert_chart_outlined</mat-icon>
+                        <h4 mat-line>{{ item.name }}</h4>
+                        <button (click)="addNode(item)" matTooltip="Add operator" mat-button color="accent">
                             <mat-icon>add</mat-icon>
                         </button>
                     </mat-list-item>
