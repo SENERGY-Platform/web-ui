@@ -21,6 +21,7 @@ import {ActivatedRoute} from '@angular/router';
 import {OperatorRepoService} from '../operator-repo/shared/operator-repo.service';
 import {FlowModel} from '../flow-repo/shared/flow.model';
 import {DiagramEditorComponent} from '../../../core/components/diagram-editor/diagram-editor.component';
+import {MatSnackBar} from '@angular/material';
 
 @Component({
     selector: 'senergy-flow-designer',
@@ -37,8 +38,9 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit  {
 
     constructor(private route: ActivatedRoute,
                 private operatorRepoService: OperatorRepoService,
-                private flowRepoService: FlowRepoService
-                ) { }
+                private flowRepoService: FlowRepoService,
+                public snackBar: MatSnackBar
+    ) { }
 
     ngOnInit() {
         this.operatorRepoService.getOperators().subscribe((resp: { operators: OperatorModel[] }) => {
@@ -83,5 +85,8 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit  {
             }
         }
         this.flowRepoService.saveFlow(this.flow).subscribe();
+        this.snackBar.open('Flow saved', undefined, {
+            duration: 2000,
+        });
     }
 }
