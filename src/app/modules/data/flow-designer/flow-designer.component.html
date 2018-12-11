@@ -19,14 +19,20 @@
             <mat-label>Name</mat-label>
             <input matInput [(ngModel)]="flow.name" placeholder="Name">
         </mat-form-field>
-        <senergy-diagram-editor></senergy-diagram-editor>
-        <mat-list>
-            <mat-list-item *ngFor="let item of operators"> {{ item.name }}
-                <button (click)="addNode(item)" matTooltip="Save">
-                    <mat-icon>add</mat-icon>
-                </button>
-            </mat-list-item>
-        </mat-list>
+        <div fxLayout="row">
+            <div id="senergy-diagram-editor" fxFlex="75">
+                <senergy-diagram-editor></senergy-diagram-editor>
+            </div>
+            <div id="diagram-operators" fxFlex="25">
+                <mat-list>
+                    <mat-list-item *ngFor="let item of operators"> {{ item.name }}
+                        <button (click)="addNode(item)" matTooltip="Save">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                    </mat-list-item>
+                </mat-list>
+            </div>
+        </div>
         <button mat-fab class="fab" (click)="saveModel()" matTooltip="Save">
             <mat-icon>save</mat-icon>
         </button>

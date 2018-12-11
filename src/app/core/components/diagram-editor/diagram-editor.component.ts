@@ -28,7 +28,7 @@ import {DiagramModel} from './shared/diagram.model';
 
 export class DiagramEditorComponent implements OnInit {
 
-    private graph = new dia.Graph();
+    private graph: any;
 
     NodeElement: any = dia.Element.define('senergy.NodeElement',
         {
@@ -150,7 +150,7 @@ export class DiagramEditorComponent implements OnInit {
                 selector: 'portLabel',
             }],
 
-            initialize: function() {
+            initialize: function () {
                 shapes.basic.Generic.prototype.initialize.apply(this, arguments);
 
                 this.on('change:inPorts change:outPorts', this.updatePortItems, this);
@@ -158,7 +158,7 @@ export class DiagramEditorComponent implements OnInit {
             },
 
             // model,changed
-            updatePortItems: function({}, {}, opt: any) {
+            updatePortItems: function ({}, {}, opt: any) {
 
                 // Make sure all ports are unique.
                 const inPorts = util.uniq(this.get('inPorts'));
@@ -167,10 +167,10 @@ export class DiagramEditorComponent implements OnInit {
                 const inPortItems = this.createPortItems('in', inPorts);
                 const outPortItems = this.createPortItems('out', outPorts);
 
-                this.prop('ports/items', inPortItems.concat(outPortItems), util.assign({ rewrite: true }, opt));
+                this.prop('ports/items', inPortItems.concat(outPortItems), util.assign({rewrite: true}, opt));
             },
 
-            createPortItem: function(group: any, port: any) {
+            createPortItem: function (group: any, port: any) {
 
                 return {
                     id: port,
@@ -183,75 +183,101 @@ export class DiagramEditorComponent implements OnInit {
                 };
             },
 
-            createPortItems: function(group: any, ports: any) {
+            createPortItems: function (group: any, ports: any) {
 
                 return util.toArray(ports).map(this.createPortItem.bind(this, group));
             },
 
-            _addGroupPort: function(port: any, group: any, opt: any) {
+            _addGroupPort: function (port: any, group: any, opt: any) {
 
                 const ports = this.get(group);
                 return this.set(group, Array.isArray(ports) ? ports.concat(port) : [port], opt);
             },
 
-            addOutPort: function(port: any, opt: any) {
+            addOutPort: function (port: any, opt: any) {
 
                 return this._addGroupPort(port, 'outPorts', opt);
             },
 
-            addInPort: function(port: any, opt: any) {
+            addInPort: function (port: any, opt: any) {
 
                 return this._addGroupPort(port, 'inPorts', opt);
             },
 
-            _removeGroupPort: function(port: any, group: any, opt: any) {
+            _removeGroupPort: function (port: any, group: any, opt: any) {
 
                 return this.set(group, util.without(this.get(group), port), opt);
             },
 
-            removeOutPort: function(port: any, opt: any) {
+            removeOutPort: function (port: any, opt: any) {
 
                 return this._removeGroupPort(port, 'outPorts', opt);
             },
 
-            removeInPort: function(port: any, opt: any) {
+            removeInPort: function (port: any, opt: any) {
 
                 return this._removeGroupPort(port, 'inPorts', opt);
             },
 
-            _changeGroup: function(group: any, properties: any, opt: any) {
+            _changeGroup: function (group: any, properties: any, opt: any) {
 
                 return this.prop('ports/groups/' + group, util.isObject(properties) ? properties : {}, opt);
             },
 
-            changeInGroup: function(properties: any, opt: any) {
+            changeInGroup: function (properties: any, opt: any) {
 
                 return this._changeGroup('in', properties, opt);
             },
 
-            changeOutGroup: function(properties: any, opt: any) {
+            changeOutGroup: function (properties: any, opt: any) {
 
                 return this._changeGroup('out', properties, opt);
             }
         }
     );
 
+    paperWidth = 500;
+    paper!: any;
+
     constructor() {
     }
 
     ngOnInit() {
+        this.setPaperWidth();
+        this.reinitializePaper();
+        this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
+            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
+            const model = elementView.model;
+            model.remove();
+        });
+    }
 
-        const paper = new dia.Paper({
+    onResize({}) {
+        this.setPaperWidth();
+        this.reinitializePaper();
+    }
+
+    setPaperWidth() {
+        const paperWrap = document.getElementById('paper-wrap');
+        if (paperWrap !== null) {
+            this.paperWidth = paperWrap.offsetWidth;
+        }
+    }
+
+    reinitializePaper() {
+        this.graph = new dia.Graph();
+        this.paper = new dia.Paper({
             el: $('#paper'),
             model: this.graph,
             defaultLink: new dia.Link({
                 attrs: {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}}
             }),
-            width: 800,
-            height: 500,
-            gridSize: 1,
+            width: this.paperWidth,
+            height: 700,
+            gridSize: 20,
             linkPinning: true,
             snapLinks: true,
+            drawGrid: {name: 'mesh'},
             embeddingMode: false,
             validateConnection: function (sourceView, sourceMagnet, targetView, targetMagnet) {
                 // Prevent linking from input ports.
@@ -265,19 +291,13 @@ export class DiagramEditorComponent implements OnInit {
             },
             markAvailable: true
         });
-
-        paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
-            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
-            const model = elementView.model;
-            model.remove();
-        });
     }
 
     public loadGraph(model: DiagramModel) {
         this.graph.fromJSON(model);
     }
 
-    public getGraph(): DiagramModel{
+    public getGraph(): DiagramModel {
         return this.graph.toJSON();
     }
 
