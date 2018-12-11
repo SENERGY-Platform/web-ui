@@ -19,7 +19,6 @@
 }
 
 gridster {
-  margin-bottom: 100px;
   background-color: #fafafa;
 }
 
@@ -43,11 +42,6 @@ gridster {
   min-height: 54px;
 }
 
-.dashboard-container ::ng-deep .mat-tab-body-wrapper {
-  overflow: auto;
-  display: block;
-}
-
 .border-radius {
   border-radius: 4px;
 }
@@ -57,4 +51,12 @@ gridster {
   bottom: 15px;
   right: 15px;
   z-index: 100;
+}
+
+.dashboard-container ::ng-deep .mat-tab-body-content {
+  overflow: hidden;
+}
+
+.dashboard-container ::ng-deep .mat-tab-body-wrapper {
+  height: calc(100vh - 118px);
 }

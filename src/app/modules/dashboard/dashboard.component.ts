@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterContentChecked, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ResponsiveService} from '../../core/services/responsive.service';
 import {DashboardService} from './shared/dashboard.service';
 import {DashboardModel} from './shared/dashboard.model';
@@ -24,7 +24,7 @@ import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
 import {
     DisplayGrid,
-    GridsterConfig, GridsterItem, GridsterItemComponentInterface,
+    GridsterConfig,
     GridType,
 } from 'angular-gridster2';
 
@@ -126,15 +126,18 @@ export class DashboardComponent implements OnInit {
     private initDragAndDropOptions() {
         this.options = {
             gridType: GridType.VerticalFixed,
-            displayGrid: DisplayGrid.Always,
             fixedRowHeight: 280,
-            margin: 16,
-            minCols: 4, /** todo */
-            maxCols: 4, /** todo */
-            maxRows: 4, /** todo */
-            setGridSize: true,
-            pushItems: false,
+            outerMarginBottom: 100,
+            displayGrid: DisplayGrid.None,
+            minCols: 4,
+            maxCols: 4,
+            maxRows: 4,
+            disableWindowResize: false,
+            scrollToNewItems: false,
+            disableWarnings: false,
+            ignoreMarginInRow: false,
             swap: true,
+            pushItems: false,
             draggable: {
                 ignoreContentClass: 'gridster-item-content',
                 ignoreContent: true,
