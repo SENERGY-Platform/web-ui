@@ -19,7 +19,7 @@
     <mat-tab-group backgroundColor="accent" color="primary" (animationDone)="initAllWidgets()"
                    (selectedIndexChange)="setTabIndex($event)" [(selectedIndex)]="activeTabIndex"
                    dynamicHeight="true" headerPosition="above">
-        <mat-tab *ngFor="let dashboard of dashboards; let i = index"
+        <mat-tab *ngFor="let dashboard of dashboards"
                  label="{{dashboard.name}}">
 
             <div fxLayout="row" fxLayoutAlign="end center">
@@ -42,7 +42,7 @@
                 </button>
             </div>
 
-            <gridster [options]="options" *ngIf="i === activeTabIndex">
+            <gridster *ngIf="dashboard === dashboards[activeTabIndex]" [options]="options">
                 <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets" class="mat-elevation-z1">
                     <div [ngSwitch]="widget.type" fxFill class="gridster-item-content">
                         <div *ngSwitchCase="'switch'" fxFill>
@@ -67,9 +67,9 @@
                             <div>default</div>
                         </div>
                     </div>
-
                 </gridster-item>
             </gridster>
+            
         </mat-tab>
 
         <mat-tab disabled *ngIf="dashboardsRetrieved">
@@ -79,7 +79,6 @@
                 </button>
             </ng-template>
         </mat-tab>
-
 
     </mat-tab-group>
 </div>

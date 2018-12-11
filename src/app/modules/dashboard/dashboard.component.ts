@@ -49,14 +49,13 @@ export class DashboardComponent implements OnInit {
     dashboardsRetrieved = false;
     activeTabIndex = 0;
     interval = 0;
-    options!: GridsterConfig;
+    options: GridsterConfig = {};
 
     constructor(private responsiveService: ResponsiveService,
                 private dashboardService: DashboardService) {
     }
 
     ngOnInit() {
-        this.initDragAndDrop();
         this.initGridCols();
         this.initDashboard();
         this.initWidgets();
@@ -89,6 +88,7 @@ export class DashboardComponent implements OnInit {
 
     setTabIndex(index: number): void {
         this.activeTabIndex = index;
+        this.initDragAndDropOptions();
     }
 
     refreshTime(time: number): void {
@@ -99,7 +99,6 @@ export class DashboardComponent implements OnInit {
     }
 
     private initDragAndDrop() {
-        this.initDragAndDropOptions();
         if (this.options.draggable) {
             this.options.draggable.stop = () => {
                 setTimeout(() => {
@@ -107,10 +106,11 @@ export class DashboardComponent implements OnInit {
                     this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
                         if (iterate) {
                             if (widget.x !== undefined && widget.y !== undefined) {
-                                const gridIndex = widget.x + widget.y * 4; /** todo */
+                                const gridIndex = widget.x + widget.y * this.gridCols;
                                 if (gridIndex !== index) {
                                     const swap = this.dashboards[this.activeTabIndex].widgets[index];
-                                    this.dashboards[this.activeTabIndex].widgets[index] = this.dashboards[this.activeTabIndex].widgets[gridIndex];
+                                    this.dashboards[this.activeTabIndex].widgets[index] =
+                                        this.dashboards[this.activeTabIndex].widgets[gridIndex];
                                     this.dashboards[this.activeTabIndex].widgets[gridIndex] = swap;
                                     this.dashboardService.updateDashboard(this.dashboards[this.activeTabIndex]).subscribe();
                                     iterate = false;
@@ -129,12 +129,12 @@ export class DashboardComponent implements OnInit {
             fixedRowHeight: 280,
             outerMarginBottom: 100,
             displayGrid: DisplayGrid.None,
-            minCols: 4,
-            maxCols: 4,
-            maxRows: 4,
+            minCols: this.gridCols,
+            maxCols: this.gridCols,
+            // maxRows: 4,
             disableWindowResize: false,
             scrollToNewItems: false,
-            disableWarnings: false,
+            disableWarnings: true,
             ignoreMarginInRow: false,
             swap: true,
             pushItems: false,
@@ -189,10 +189,29 @@ export class DashboardComponent implements OnInit {
     }
 
     private initGridCols(): void {
+
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
+        this.initDragAndDropOptions();
+        this.initDragAndDrop();
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
             this.gridCols = grids.get(mqAlias) || 0;
+            this.reorderWidgets();
         });
+    }
+
+    private reorderWidgets() {
+        this.options.maxCols = this.gridCols;
+        this.options.minCols = this.gridCols;
+        if (this.dashboards[this.activeTabIndex] && this.dashboards[this.activeTabIndex].widgets !== undefined) {
+            this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
+                widget.x = index % this.gridCols;
+                widget.y = Math.floor(index / this.gridCols);
+            });
+            if (this.options.api && this.options.api.optionsChanged && this.options.api.resize) {
+                this.options.api.optionsChanged();
+                this.options.api.resize();
+            }
+        }
     }
 
     private initWidgets() {
@@ -227,6 +246,7 @@ export class DashboardComponent implements OnInit {
         this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
             if (widget.id === widgetManipulationModel.widgetId) {
                 this.dashboards[this.activeTabIndex].widgets.splice(index, 1);
+                this.reorderWidgets();
             }
         });
     }
