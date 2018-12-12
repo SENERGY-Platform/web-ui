@@ -88,7 +88,10 @@ export class DashboardComponent implements OnInit {
 
     setTabIndex(index: number): void {
         this.activeTabIndex = index;
-        this.initDragAndDropOptions();
+        if (this.options.api === undefined) {
+            this.initDragAndDropOptions();
+            this.initDragAndDrop();
+        }
     }
 
     refreshTime(time: number): void {
