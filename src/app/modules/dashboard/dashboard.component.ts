@@ -105,22 +105,32 @@ export class DashboardComponent implements OnInit {
         if (this.options.draggable) {
             this.options.draggable.stop = () => {
                 setTimeout(() => {
-                    let iterate = true;
+                    let reorder = false;
+                    let swapIndex1 = 0;
+                    let swapIndex2 = 0;
                     this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
-                        if (iterate) {
+                        if (reorder === false) {
                             if (widget.x !== undefined && widget.y !== undefined) {
                                 const gridIndex = widget.x + widget.y * this.gridCols;
+                                if (gridIndex >= this.dashboards[this.activeTabIndex].widgets.length) {
+                                    reorder = true;
+                                }
                                 if (gridIndex !== index) {
-                                    const swap = this.dashboards[this.activeTabIndex].widgets[index];
-                                    this.dashboards[this.activeTabIndex].widgets[index] =
-                                        this.dashboards[this.activeTabIndex].widgets[gridIndex];
-                                    this.dashboards[this.activeTabIndex].widgets[gridIndex] = swap;
-                                    this.dashboardService.updateDashboard(this.dashboards[this.activeTabIndex]).subscribe();
-                                    iterate = false;
+                                    swapIndex1 = gridIndex;
+                                    swapIndex2 = index;
                                 }
                             }
                         }
                     });
+                    if (reorder) {
+                        this.reorderWidgets();
+                    } else {
+                        const swap = this.dashboards[this.activeTabIndex].widgets[swapIndex1];
+                        this.dashboards[this.activeTabIndex].widgets[swapIndex1] =
+                            this.dashboards[this.activeTabIndex].widgets[swapIndex2];
+                        this.dashboards[this.activeTabIndex].widgets[swapIndex2] = swap;
+                        this.dashboardService.updateDashboard(this.dashboards[this.activeTabIndex]).subscribe();
+                    }
                 }, 0);
             };
         }
@@ -134,7 +144,6 @@ export class DashboardComponent implements OnInit {
             displayGrid: DisplayGrid.None,
             minCols: this.gridCols,
             maxCols: this.gridCols,
-            // maxRows: 4,
             disableWindowResize: false,
             scrollToNewItems: false,
             disableWarnings: true,
