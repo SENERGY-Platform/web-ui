@@ -18,7 +18,7 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {PipelineModel} from './shared/pipeline.model';
 import {PipelineRegistryService} from './shared/pipeline-registry.service';
 import {FlowEngineService} from '../flow-repo/shared/flow-engine.service';
-import {MatTable} from '@angular/material';
+import {MatSnackBar, MatTable} from '@angular/material';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -32,21 +32,31 @@ export class PipelineRegistryComponent implements OnInit {
     ready = false;
     displayedColumns: string[] = ['id', 'actions'];
 
-    //@ViewChild(MatTable) private _table!: MatTable<PipelineModel>;
+    @ViewChild(MatTable) table!: MatTable<PipelineModel>;
 
-    constructor(private pipelineRegistryService: PipelineRegistryService, private flowEngineService: FlowEngineService) {
+    constructor(private pipelineRegistryService: PipelineRegistryService,
+                private flowEngineService: FlowEngineService,
+                public snackBar: MatSnackBar) {
     }
 
     ngOnInit() {
         this.pipelineRegistryService.getPipelines().subscribe((resp: PipelineModel[]) => {
             this.pipes = resp;
-            console.log(this.pipes);
             this.ready = true;
-            //this._table.renderRows();
         });
     }
 
-    deletePipeline(id: string) {
-        this.flowEngineService.deletePipeline(id).subscribe();
+    deletePipeline(pipe: PipelineModel) {
+        this.ready = false;
+        this.flowEngineService.deletePipeline(pipe.id).subscribe();
+        const index = this.pipes.indexOf(pipe);
+        if (index > -1) {
+            this.pipes.splice(index, 1);
+        }
+        this.table.renderRows();
+        this.ready = true;
+        this.snackBar.open('Pipeline deleted', undefined, {
+            duration: 2000,
+        });
     }
 }
