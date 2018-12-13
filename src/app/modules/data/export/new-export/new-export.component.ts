@@ -24,6 +24,7 @@ import {ExportService} from '../shared/export.service';
 import {MatSnackBar} from '@angular/material';
 import {PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shared/pipeline.model';
 import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
+import {Router} from '@angular/router';
 
 
 @Component({
@@ -56,6 +57,7 @@ export class NewExportComponent implements OnInit {
                 private deviceInstanceService: DeviceInstancesService,
                 private deviceTypeService: DeviceTypeService,
                 private exportService: ExportService,
+                private router: Router,
                 public snackBar: MatSnackBar) {
     }
 
@@ -65,6 +67,7 @@ export class NewExportComponent implements OnInit {
     }
 
     startExport() {
+        const self =  this;
         if (this.selector === 'device') {
             this.export.EntityName = this.device.name;
             this.export.Filter = this.device.id;
@@ -78,9 +81,11 @@ export class NewExportComponent implements OnInit {
             this.export.ServiceName = this.operator.Name;
             this.export.Topic = 'analytics-' + this.operator.Name;
         }
-        this.exportService.startPipeline(this.export).subscribe();
-        this.snackBar.open('Export created', undefined, {
-            duration: 2000,
+        this.exportService.startPipeline(this.export).subscribe(function () {
+            self.router.navigate(['/data/export']);
+            self.snackBar.open('Export created', undefined, {
+                duration: 2000,
+            });
         });
     }
 
