@@ -15,7 +15,7 @@
   -->
 
 <div class="main-panel">
-    <div class="layout-margin" fxLayout="column" *ngIf="inputs.length > 0">
+    <div class="layout-margin" fxLayout="column" *ngIf="inputs.length > 0 && ready == true">
         <mat-card *ngFor="let input of inputs; let key = index" style="margin-bottom:10px;">
             <mat-card-header>
                 <div mat-card-avatar><mat-icon>poll</mat-icon></div>
@@ -52,4 +52,5 @@
             <button mat-raised-button color="accent" (click)="startPipeline()">Start</button>
         </div>
     </div>
+    <senergy-spinner [elementCount]="inputs.length" [show]="!ready"></senergy-spinner>
 </div>

@@ -16,7 +16,7 @@
 
 import {Component} from '@angular/core';
 import {ParserService} from '../shared/parser.service';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ParseModel} from '../shared/parse.model';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
@@ -24,6 +24,7 @@ import {DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-t
 import {DeviceTypeService} from '../../../devices/device-types/shared/device-type.service';
 import {FlowEngineService} from '../shared/flow-engine.service';
 import {NodeInput, NodeModel, NodeValue, PipelineRequestModel} from './shared/pipeline-request.model';
+import {MatSnackBar} from '@angular/material';
 
 @Component({
     selector: 'senergy-deploy-flow',
@@ -46,6 +47,8 @@ export class DeployFlowComponent {
 
     constructor(private parserService: ParserService,
                 private route: ActivatedRoute,
+                private router: Router,
+                public snackBar: MatSnackBar,
                 private deviceInstanceService: DeviceInstancesService,
                 private deviceTypeService: DeviceTypeService,
                 private flowEngineService: FlowEngineService
@@ -74,12 +77,14 @@ export class DeployFlowComponent {
                         service: {} as DeviceTypeServiceModel, path: ''});
                     this.deviceTypes[value.id][port] = {} as DeviceTypeModel;
                 });
-
+                this.ready = true;
             });
         });
     }
 
     startPipeline() {
+        const self = this;
+        this.ready = false;
         this.pipeReq.nodes.forEach((node: NodeModel) => {
             for (const entry of this.selectedValues.get(node.nodeId).entries()) {
                 if (entry[1].device.id !== undefined && entry[1].service.id !==  undefined) {
@@ -105,7 +110,14 @@ export class DeployFlowComponent {
                 }
             }
         });
-        this.flowEngineService.startPipeline(this.pipeReq).subscribe();
+
+        this.flowEngineService.startPipeline(this.pipeReq).subscribe(function () {
+            self.router.navigate(['/data/pipelines']);
+            self.snackBar.open('Pipeline started', undefined, {
+                duration: 2000,
+            });
+        });
+
     }
 
     loadDevices() {
