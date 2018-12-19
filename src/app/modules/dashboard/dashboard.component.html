@@ -25,7 +25,7 @@
             <div fxFill fxLayout="column" *ngIf="dashboard === dashboards[activeTabIndex]">
 
                 <div *ngIf="zoomedWidgetIndex === null" fxLayout="row" fxLayoutAlign="end center">
-                    <button mat-icon-button [matMenuTriggerFor]="refresh" color="accent">
+                    <button mat-icon-button [matMenuTriggerFor]="refresh" color="accent" matTooltip="set widget refresh time">
                         <mat-icon>refresh</mat-icon>
                     </button>
                     <mat-menu #refresh="matMenu" [overlapTrigger]="false" xPosition="before">
@@ -47,7 +47,8 @@
                         </button>
                     </mat-menu>
                     <button (click)="openDeleteDashboardDialog()" mat-icon-button color="accent"
-                            [disabled]="dashboards.length <= 1">
+                            [disabled]="dashboards.length <= 1"
+                            matTooltip="delete dashboard">
                         <mat-icon>delete</mat-icon>
                     </button>
                 </div>

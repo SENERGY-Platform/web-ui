@@ -21,7 +21,7 @@ import {
     MatDividerModule, MatFormFieldModule,
     MatGridListModule,
     MatIconModule, MatInputModule, MatMenuModule, MatOptionModule, MatSelectModule,
-    MatTabsModule
+    MatTabsModule, MatTooltipModule
 } from '@angular/material';
 import {CommonModule} from '@angular/common';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -51,6 +51,7 @@ import {GridsterModule} from 'angular-gridster2';
         MatOptionModule,
         FormsModule,
         GridsterModule,
+        MatTooltipModule,
     ],
     declarations: [
         DashboardComponent,
