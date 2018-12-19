@@ -26,6 +26,7 @@ export class WidgetComponent implements OnInit {
 
   @Input() dashboardId = '';
   @Input() widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+  @Input() zoom = false;
 
   constructor() { }
 

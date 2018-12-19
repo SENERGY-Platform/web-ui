@@ -29,6 +29,8 @@ export class WidgetHeaderComponent implements OnInit {
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    @Input() optionZoom = false;
+    @Input() zoom = false;
     @Output() editEvent = new EventEmitter<boolean>();
 
     constructor(private widgetHeaderService: WidgetHeaderService,
@@ -42,7 +44,7 @@ export class WidgetHeaderComponent implements OnInit {
         this.editEvent.emit(true);
     }
 
-    close() {
+    delete() {
         this.widgetHeaderService.openDeleteWidgetDialog(this.dashboardId, this.widget.id);
     }
 
@@ -50,7 +52,7 @@ export class WidgetHeaderComponent implements OnInit {
         this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, this.widget.id, this.widget);
     }
 
-    zoom() {
+    zoomWidget() {
         this.dashboardService.zoomWidget(DashboardManipulationEnum.Zoom, this.widget.id, this.widget);
     }
 }

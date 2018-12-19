@@ -15,7 +15,7 @@
   -->
 
 <mat-card>
-    <senergy-widget-header [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-header>
+    <senergy-widget-header [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]=zoom (editEvent)="edit()"></senergy-widget-header>
     <mat-divider></mat-divider>
     <mat-card-content class="mat-card-image content-size drag-handler">
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">

@@ -42,6 +42,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     @ViewChild('chartExport') chartExport!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() zoom = false;
 
     @HostListener('window:resize')
     onResize() {

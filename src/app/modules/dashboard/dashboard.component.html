@@ -55,14 +55,15 @@
                 <div *ngIf="zoomedWidgetIndex !== null" class="zoomed-widget" fxFill>
                     <div fxFlex>
                         <senergy-widget [dashboardId]="dashboard.id"
-                                        [widget]="dashboards[activeTabIndex].widgets[zoomedWidgetIndex]"></senergy-widget>
+                                        [widget]="dashboards[activeTabIndex].widgets[zoomedWidgetIndex]"
+                                        [zoom]="true"></senergy-widget>
                     </div>
                 </div>
 
                 <gridster *ngIf="zoomedWidgetIndex === null" [options]="options">
                     <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets"
                                    class="mat-elevation-z1">
-                        <senergy-widget [dashboardId]="dashboard.id" [widget]="widget"></senergy-widget>
+                        <senergy-widget [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false"></senergy-widget>
                     </gridster-item>
                 </gridster>
             </div>

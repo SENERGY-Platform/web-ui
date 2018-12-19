@@ -39,6 +39,7 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
     @ViewChild('processInstancesStatusChart') processInstancesStatusChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() zoom = false;
 
     @HostListener('window:resize')
     onResize() {

@@ -24,7 +24,7 @@ import {
     MatDividerModule, MatFormFieldModule,
     MatIconModule, MatInputModule, MatListModule,
     MatMenuModule, MatOptionModule, MatProgressSpinnerModule, MatSelectModule,
-    MatSlideToggleModule, MatTableModule
+    MatSlideToggleModule, MatTableModule, MatTooltipModule
 } from '@angular/material';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {WidgetHeaderComponent} from './components/widget-header/widget-header.component';
@@ -75,6 +75,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         CoreModule,
         MatProgressSpinnerModule,
         GridsterModule,
+        MatTooltipModule,
     ],
     declarations: [
         SwitchComponent,

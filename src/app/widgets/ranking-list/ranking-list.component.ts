@@ -37,6 +37,7 @@ export class RankingListComponent implements OnInit, OnDestroy {
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() zoom = false;
 
     constructor(private rankingListService: RankingListService, private dashboardService: DashboardService) {
     }
