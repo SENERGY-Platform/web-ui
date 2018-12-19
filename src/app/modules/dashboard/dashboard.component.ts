@@ -22,11 +22,7 @@ import {WidgetModel} from './shared/dashboard-widget.model';
 import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
 import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
-import {
-    DisplayGrid,
-    GridsterConfig,
-    GridType,
-} from 'angular-gridster2';
+import {DisplayGrid, GridsterConfig, GridType,} from 'angular-gridster2';
 
 const grids = new Map([
     ['xs', 1],
@@ -50,6 +46,7 @@ export class DashboardComponent implements OnInit {
     activeTabIndex = 0;
     interval = 0;
     options: GridsterConfig = {};
+    zoomedWidgetIndex: number | null = null;
 
     constructor(private responsiveService: ResponsiveService,
                 private dashboardService: DashboardService) {
@@ -87,6 +84,7 @@ export class DashboardComponent implements OnInit {
     }
 
     setTabIndex(index: number): void {
+        this.zoomedWidgetIndex = null;
         this.activeTabIndex = index;
         if (this.options.api === undefined) {
             this.initDragAndDropOptions();
@@ -241,6 +239,10 @@ export class DashboardComponent implements OnInit {
                     this.updateWidget(widgetManipulationModel);
                     break;
                 }
+                case DashboardManipulationEnum.Zoom: {
+                    this.zoomWidget(widgetManipulationModel);
+                    break;
+                }
             }
         });
     }
@@ -274,6 +276,16 @@ export class DashboardComponent implements OnInit {
 
     private refreshWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
         setTimeout(() => this.dashboardService.initWidget(widgetManipulationModel.widgetId), 0);
+    }
+
+    private zoomWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
+        if (this.zoomedWidgetIndex === null && widgetManipulationModel.widget) {
+            this.zoomedWidgetIndex = this.dashboards[this.activeTabIndex].widgets.indexOf(widgetManipulationModel.widget);
+            setTimeout(() => this.dashboardService.initWidget(widgetManipulationModel.widgetId), 0);
+        } else {
+            this.zoomedWidgetIndex = null;
+            setTimeout(() => this.dashboardService.reloadAllWidgets(), 0);
+        }
     }
 }
 

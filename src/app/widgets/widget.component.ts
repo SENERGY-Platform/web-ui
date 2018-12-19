@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-export enum DashboardManipulationEnum {
-    Update = 'update',
-    Delete = 'delete',
-    Create = 'create',
-    Zoom = 'zoom',
+import {Component, Input, OnInit} from '@angular/core';
+import {WidgetModel} from '../modules/dashboard/shared/dashboard-widget.model';
+
+@Component({
+  selector: 'senergy-widget',
+  templateUrl: './widget.component.html',
+  styleUrls: ['./widget.component.css']
+})
+export class WidgetComponent implements OnInit {
+
+  @Input() dashboardId = '';
+  @Input() widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
 }

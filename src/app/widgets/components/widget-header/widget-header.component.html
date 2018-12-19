@@ -29,7 +29,7 @@
             <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #more="matMenu" [overlapTrigger]="false" xPosition="before">
-            <button mat-menu-item>
+            <button mat-menu-item (click)="zoom()">
                 <mat-icon>zoom_out_map</mat-icon>
                 Zoom
             </button>

@@ -47,6 +47,7 @@ import {CoreModule} from '../core/core.module';
 import {WidgetSpinnerComponent} from './components/widget-spinner/widget-spinner.component';
 import {RankingListEditDialogComponent} from './ranking-list/dialogs/ranking-list-edit-dialog.component';
 import {GridsterModule} from 'angular-gridster2';
+import {WidgetComponent} from './widget.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -91,6 +92,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         RankingListComponent,
         RankingListEditDialogComponent,
         WidgetSpinnerComponent,
+        WidgetComponent
     ],
     exports: [
         SwitchComponent,
@@ -101,6 +103,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ChartsProcessInstancesComponent,
         RankingListComponent,
         WidgetSpinnerComponent,
+        WidgetComponent,
     ],
     entryComponents: [
         SwitchEditDialogComponent,

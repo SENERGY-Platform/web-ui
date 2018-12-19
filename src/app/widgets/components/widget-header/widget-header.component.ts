@@ -49,4 +49,8 @@ export class WidgetHeaderComponent implements OnInit {
     refresh() {
         this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, this.widget.id, this.widget);
     }
+
+    zoom() {
+        this.dashboardService.zoomWidget(DashboardManipulationEnum.Zoom, this.widget.id, this.widget);
+    }
 }

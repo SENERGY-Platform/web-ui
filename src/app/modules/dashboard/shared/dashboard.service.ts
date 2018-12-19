@@ -151,6 +151,10 @@ export class DashboardService {
         this.dashboardSubject.next({manipulation: manipulation, dashboardId: dashboardId, dashboard: dashboard});
     }
 
+    zoomWidget(manipulation: DashboardManipulationEnum, widgetId: string, widget: WidgetModel | null) {
+        this.widgetSubject.next({manipulation: manipulation, widgetId: widgetId, widget: widget});
+    }
+
     reloadAllWidgets() {
         this.animationDoneSubject.next('reloadAll');
     }

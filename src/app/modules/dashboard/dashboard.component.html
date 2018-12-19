@@ -22,54 +22,51 @@
         <mat-tab *ngFor="let dashboard of dashboards"
                  label="{{dashboard.name}}">
 
-            <div fxLayout="row" fxLayoutAlign="end center">
-                <button mat-icon-button [matMenuTriggerFor]="refresh" color="accent">
-                    <mat-icon>refresh</mat-icon>
-                </button>
-                <mat-menu #refresh="matMenu" [overlapTrigger]="false" xPosition="before">
-                    <button mat-menu-item (click)="refreshTime(5)" [ngClass]="{'color-accent': dashboard.refresh_time === 5}">5 seconds</button>
-                    <button mat-menu-item (click)="refreshTime(15)" [ngClass]="{'color-accent': dashboard.refresh_time === 15}">15 seconds</button>
-                    <button mat-menu-item (click)="refreshTime(30)" [ngClass]="{'color-accent': dashboard.refresh_time === 30}">30 seconds</button>
-                    <button mat-menu-item (click)="refreshTime(60)" [ngClass]="{'color-accent': dashboard.refresh_time === 60}">1 minute</button>
-                    <mat-divider></mat-divider>
-                    <button mat-menu-item (click)="refreshTime(0)"
-                            [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh
+            <div fxFill fxLayout="column" *ngIf="dashboard === dashboards[activeTabIndex]">
+
+                <div *ngIf="zoomedWidgetIndex === null" fxLayout="row" fxLayoutAlign="end center">
+                    <button mat-icon-button [matMenuTriggerFor]="refresh" color="accent">
+                        <mat-icon>refresh</mat-icon>
                     </button>
-                </mat-menu>
-                <button (click)="openDeleteDashboardDialog()" mat-icon-button color="accent"
-                        [disabled]="dashboards.length <= 1">
-                    <mat-icon>delete</mat-icon>
-                </button>
+                    <mat-menu #refresh="matMenu" [overlapTrigger]="false" xPosition="before">
+                        <button mat-menu-item (click)="refreshTime(5)"
+                                [ngClass]="{'color-accent': dashboard.refresh_time === 5}">5 seconds
+                        </button>
+                        <button mat-menu-item (click)="refreshTime(15)"
+                                [ngClass]="{'color-accent': dashboard.refresh_time === 15}">15 seconds
+                        </button>
+                        <button mat-menu-item (click)="refreshTime(30)"
+                                [ngClass]="{'color-accent': dashboard.refresh_time === 30}">30 seconds
+                        </button>
+                        <button mat-menu-item (click)="refreshTime(60)"
+                                [ngClass]="{'color-accent': dashboard.refresh_time === 60}">1 minute
+                        </button>
+                        <mat-divider></mat-divider>
+                        <button mat-menu-item (click)="refreshTime(0)"
+                                [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh
+                        </button>
+                    </mat-menu>
+                    <button (click)="openDeleteDashboardDialog()" mat-icon-button color="accent"
+                            [disabled]="dashboards.length <= 1">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+
+                <div *ngIf="zoomedWidgetIndex !== null" class="zoomed-widget" fxFill>
+                    <div fxFlex>
+                        <senergy-widget [dashboardId]="dashboard.id"
+                                        [widget]="dashboards[activeTabIndex].widgets[zoomedWidgetIndex]"></senergy-widget>
+                    </div>
+                </div>
+
+                <gridster *ngIf="zoomedWidgetIndex === null" [options]="options">
+                    <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets"
+                                   class="mat-elevation-z1">
+                        <senergy-widget [dashboardId]="dashboard.id" [widget]="widget"></senergy-widget>
+                    </gridster-item>
+                </gridster>
             </div>
 
-            <gridster *ngIf="dashboard === dashboards[activeTabIndex]" [options]="options">
-                <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets" class="mat-elevation-z1">
-                    <div [ngSwitch]="widget.type" fxFill class="gridster-item-content">
-                        <div *ngSwitchCase="'switch'" fxFill>
-                            <senergy-switch [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-switch>
-                        </div>
-                        <div *ngSwitchCase="'devices_state'" fxFill>
-                            <senergy-devices-state [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-devices-state>
-                        </div>
-                        <div *ngSwitchCase="'event_list'" fxFill>
-                            <senergy-event-list [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-event-list>
-                        </div>
-                        <div *ngSwitchCase="'ranking_list'" fxFill>
-                            <senergy-ranking-list [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-ranking-list>
-                        </div>
-                        <div *ngSwitchCase="'charts_export'" fxFill>
-                            <senergy-charts-export [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-charts-export>
-                        </div>
-                        <div *ngSwitchCase="'charts_process_instances'" fxFill>
-                            <senergy-charts-process-instances [dashboardId]="dashboard.id" [widget]="widget" fxFill></senergy-charts-process-instances>
-                        </div>
-                        <div *ngSwitchDefault>
-                            <div>default</div>
-                        </div>
-                    </div>
-                </gridster-item>
-            </gridster>
-            
         </mat-tab>
 
         <mat-tab disabled *ngIf="dashboardsRetrieved">
@@ -83,7 +80,8 @@
     </mat-tab-group>
 </div>
 
-<button mat-fab class="fab" matTooltip="Add new widget" (click)="openAddWidgetDialog()">
+<button *ngIf="zoomedWidgetIndex === null" mat-fab class="fab" matTooltip="Add new widget"
+        (click)="openAddWidgetDialog()">
     <mat-icon>add</mat-icon>
 </button>
 
