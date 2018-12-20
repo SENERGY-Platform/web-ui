@@ -20,8 +20,8 @@ export class ChartsModel {
         public dataTable?: (Date | string | number | {role: string}) [][],
         public options?: {
             chartArea?: {
-                left: number,
-                top: number,
+                left?: number,
+                top?: number,
                 width: string,
                 height: string,
             },

@@ -101,7 +101,7 @@ export class ChartsExportService {
             'LineChart',
             dataTable.data,
             {
-                chartArea: {left: 80, top: 20, width: '70%', height: '65%'},
+                chartArea: {width: element.widthPercentage, height: element.heightPercentage},
                 hAxis: {format: 'HH:mm:ss', title: hAxisLabel},
                 height: element.height,
                 width: element.width,

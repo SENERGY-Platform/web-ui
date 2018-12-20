@@ -88,6 +88,10 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
         if (this.processInstancesStatus.options !== undefined) {
             this.processInstancesStatus.options.height = element.height;
             this.processInstancesStatus.options.width = element.width;
+            if (this.processInstancesStatus.options.chartArea) {
+                this.processInstancesStatus.options.chartArea.height = element.heightPercentage;
+                this.processInstancesStatus.options.chartArea.width = element.widthPercentage;
+            }
             this.processInstancesStatusChart.redraw();
         }
     }

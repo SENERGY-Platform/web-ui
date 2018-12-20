@@ -26,21 +26,68 @@ export class ElementSizeService {
     constructor() {
     }
 
-    getHeightAndWidthByElementId(elementId: string): {'height': number, 'width': number} {
+    getHeightAndWidthByElementId(elementId: string): { 'height': number, 'width': number, 'heightPercentage': string, 'widthPercentage': string } {
         let height = 0;
         let width = 0;
+        let heightPercentage = '75%';
+        let widthPercentage = '75%';
+
         const element = document.getElementById(elementId);
 
         if (element !== null) {
-             height = element.offsetHeight - 1;
-             width = element.offsetWidth - 1;
+            height = element.offsetHeight - 1;
+            width = element.offsetWidth - 1;
         } else {
             throw new Error('ElementId is unknown: ' + elementId);
         }
+        heightPercentage = this.calcHeightPercentage(height);
+        widthPercentage = this.calcWidthPercentage(width);
 
-        return {height, width};
+        return {height, width, heightPercentage, widthPercentage};
     }
 
+    private calcHeightPercentage(height: number): string {
+        let percentage = '0%';
+        if (height < 200) {
+            percentage = '70%';
+        } else {
+            if (height < 400) {
+                percentage = '75%';
+            } else {
+                if (height < 500) {
+                    percentage = '80%';
+                } else {
+                    percentage = '90%';
+                }
+            }
+        }
+        return percentage;
+    }
 
+    private calcWidthPercentage(width: number): string {
+        let percentage = '0%';
+        if (width < 350) {
+            percentage = '65%';
+        } else {
+            if (width < 400) {
+                percentage = '70%';
+            } else {
+                if (width < 800) {
+                    percentage = '75%';
+                } else {
+                    if (width < 1100) {
+                        percentage = '82%';
+                    } else {
+                        if (width < 1400) {
+                            percentage = '85%';
+                        } else {
+                            percentage = '85%';
+                        }
+                    }
+                }
+            }
+        }
 
+        return percentage;
+    }
 }

@@ -53,12 +53,13 @@
                     </button>
                 </div>
 
-                <div *ngIf="zoomedWidgetIndex !== null" class="zoomed-widget" fxFill>
-                    <div fxFlex>
+                <div *ngIf="zoomedWidgetIndex !== null">
+                    <div class="zoomed-widget">
                         <senergy-widget [dashboardId]="dashboard.id"
                                         [widget]="dashboards[activeTabIndex].widgets[zoomedWidgetIndex]"
                                         [zoom]="true"></senergy-widget>
                     </div>
+
                 </div>
 
                 <gridster *ngIf="zoomedWidgetIndex === null" [options]="options">
