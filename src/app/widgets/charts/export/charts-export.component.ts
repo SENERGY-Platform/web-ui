@@ -50,7 +50,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
             this.resizeTimeout = setTimeout(() => {
                 this.resizeProcessInstancesStatusChart();
                 this.resizeTimeout = 0;
-            }, 100);
+            }, 500);
         }
     }
 
