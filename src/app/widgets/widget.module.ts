@@ -48,6 +48,8 @@ import {WidgetSpinnerComponent} from './components/widget-spinner/widget-spinner
 import {RankingListEditDialogComponent} from './ranking-list/dialogs/ranking-list-edit-dialog.component';
 import {GridsterModule} from 'angular-gridster2';
 import {WidgetComponent} from './widget.component';
+import {ChartsProcessDeploymentsComponent} from './charts/process/process-deployments/charts-process-deployments.component';
+import {ChartsProcessDeploymentsEditDialogComponent} from './charts/process/process-deployments/dialogs/charts-process-deployments-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -93,7 +95,9 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         RankingListComponent,
         RankingListEditDialogComponent,
         WidgetSpinnerComponent,
-        WidgetComponent
+        WidgetComponent,
+        ChartsProcessDeploymentsComponent,
+        ChartsProcessDeploymentsEditDialogComponent,
     ],
     exports: [
         SwitchComponent,
@@ -114,6 +118,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ChartsProcessInstancesEditDialogComponent,
         ChartsExportEditDialogComponent,
         RankingListEditDialogComponent,
+        ChartsProcessDeploymentsEditDialogComponent,
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 

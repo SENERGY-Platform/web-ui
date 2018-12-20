@@ -73,6 +73,7 @@ export class DashboardNewWidgetDialogComponent {
     chartCategories: ChartCategories[] = [
         {value: 'charts_export', viewValue: 'Export'},
         {value: 'charts_process_instances', viewValue: 'Process instances'},
+        {value: 'charts_process_deployments', viewValue: 'Process deployments'},
     ];
 
     constructor(private dialogRef: MatDialogRef<DashboardNewWidgetDialogComponent>) {
