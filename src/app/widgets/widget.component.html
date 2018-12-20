@@ -36,6 +36,9 @@
   <div *ngSwitchCase="'charts_process_deployments'" fxFill>
     <senergy-charts-process-deployments [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-charts-process-deployments>
   </div>
+  <div *ngSwitchCase="'charts_device_downtime_gateway'" fxFill>
+    <senergy-device-downtime-gateway [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-downtime-gateway>
+  </div>
   <div *ngSwitchDefault>
     <div>default</div>
   </div>

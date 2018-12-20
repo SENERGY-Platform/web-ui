@@ -50,6 +50,8 @@ import {GridsterModule} from 'angular-gridster2';
 import {WidgetComponent} from './widget.component';
 import {ChartsProcessDeploymentsComponent} from './charts/process/process-deployments/charts-process-deployments.component';
 import {ChartsProcessDeploymentsEditDialogComponent} from './charts/process/process-deployments/dialogs/charts-process-deployments-edit-dialog.component';
+import {DeviceDowntimeGatewayComponent} from './charts/device/device-downtime-gateway/device-downtime-gateway.component';
+import {DeviceDowntimeGatewayEditDialogComponent} from './charts/device/device-downtime-gateway/dialogs/device-downtime-gateway-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -98,6 +100,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         WidgetComponent,
         ChartsProcessDeploymentsComponent,
         ChartsProcessDeploymentsEditDialogComponent,
+        DeviceDowntimeGatewayComponent,
+        DeviceDowntimeGatewayEditDialogComponent,
     ],
     exports: [
         SwitchComponent,
@@ -119,6 +123,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ChartsExportEditDialogComponent,
         RankingListEditDialogComponent,
         ChartsProcessDeploymentsEditDialogComponent,
+        DeviceDowntimeGatewayEditDialogComponent,
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 
