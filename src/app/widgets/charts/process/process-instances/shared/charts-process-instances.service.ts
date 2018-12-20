@@ -112,7 +112,7 @@ export class ChartsProcessInstancesService {
             'PieChart',
             dataTable.data,
             {
-                chartArea: {left: 30, top: 20, width: '80%', height: '80%'},
+                chartArea: {width: element.widthPercentage, height: element.heightPercentage},
                 height: element.height,
                 width: element.width,
                 pieSliceText: 'value',
