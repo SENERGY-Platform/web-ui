@@ -26,6 +26,11 @@ gridster {
   background: #f0f0f0;
 }
 
+.dashboard-container ::ng-deep gridster-item.gridster-item-resizing, gridster-item.gridster-item-moving {
+  box-shadow: 0 0 3px 3px rgba(0, 0, 0, .05), 0 3px 5px 0 rgba(0, 0, 0, .03), 0 1px 9px 0 rgba(0, 0, 0, .03);
+}
+
+
 .truncate {
   white-space: nowrap;
   overflow: hidden;
