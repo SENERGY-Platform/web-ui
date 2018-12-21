@@ -16,15 +16,17 @@
 
 <mat-card>
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-    <mat-card-content class="mat-card-image content-size drag-handler" fxLayout="column" *ngIf="ready">
-        <mat-list >
-            <mat-list-item *ngFor="let event of events">
-                <mat-icon mat-list-icon>{{event.icon}}</mat-icon>
-                <h4 mat-line>{{event.event}}</h4>
-                <p mat-line> {{event.time | date}} </p>
-            </mat-list-item>
-        </mat-list>
+    <mat-card-content class="mat-card-image content-size drag-handler">
+        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+        <div *ngIf="ready" fxLayout="column" fxFlex>
+            <mat-list>
+                <mat-list-item *ngFor="let event of events">
+                    <mat-icon mat-list-icon>{{event.icon}}</mat-icon>
+                    <h4 mat-line>{{event.event}}</h4>
+                    <p mat-line> {{event.time | date}} </p>
+                </mat-list-item>
+            </mat-list>
+        </div>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>

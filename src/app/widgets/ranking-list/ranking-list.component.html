@@ -16,16 +16,17 @@
 
 <mat-card>
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-    <div *ngIf="ready"></div>
-    <mat-card-content class="content-size drag-handler" fxLayout="column">
-        <mat-list>
-            <mat-list-item class="item-height" *ngFor="let ranking of rankings">
-                <h3 mat-list-icon>{{ranking.rank}}</h3>
-                <p mat-line>{{ranking.header}}</p>
-                <p mat-line>{{ranking.savings + ' / ' + ranking.recommendation}}</p>
-            </mat-list-item>
-        </mat-list>
+    <mat-card-content class="content-size drag-handler">
+        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+        <div *ngIf="ready" fxLayout="column" fxFlex>
+            <mat-list>
+                <mat-list-item class="item-height" *ngFor="let ranking of rankings">
+                    <h3 mat-list-icon>{{ranking.rank}}</h3>
+                    <p mat-line>{{ranking.header}}</p>
+                    <p mat-line>{{ranking.savings + ' / ' + ranking.recommendation}}</p>
+                </mat-list-item>
+            </mat-list>
+        </div>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>

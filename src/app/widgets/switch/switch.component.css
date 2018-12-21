@@ -38,3 +38,7 @@ img {
 .mat-card-actions {
     margin-bottom: 0px;
 }
+
+.placeholder {
+    height: 177px;
+}
