@@ -15,8 +15,7 @@
   -->
 
 <mat-card>
-    <senergy-widget-header [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-header>
-    <mat-divider></mat-divider>
+    <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <mat-card-content class="content-size drag-handler" fxLayout="column" *ngIf="ready">
             <div fxFlex >
@@ -56,5 +55,6 @@
                 </div>
             </div>
     </mat-card-content>
+    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

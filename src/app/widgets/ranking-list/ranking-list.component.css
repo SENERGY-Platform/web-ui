@@ -20,11 +20,13 @@ mat-card {
     box-sizing: border-box;
 }
 
-.margin {
-    margin-top: 8px;
+.content-size {
+    min-height: calc(100% - 72px);
+    height: calc(100% - 72px);
+    margin: 0 -16px 0px -16px;
+    width: calc(100% + 32px);
 }
 
-.content-size {
-    min-height: calc(100% - 16px);
-    height: calc(100% - 16px);
+.mat-list-base .mat-list-item.mat-2-line, .mat-list-base .mat-list-option.mat-2-line {
+    height: 59px;
 }

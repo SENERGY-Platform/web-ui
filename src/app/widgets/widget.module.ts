@@ -31,7 +31,7 @@ import {WidgetHeaderComponent} from './components/widget-header/widget-header.co
 import {SwitchEditDialogComponent} from './switch/dialogs/switch-edit-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule, registerLocaleData} from '@angular/common';
-import {WidgetHeaderDeleteDialogComponent} from './components/widget-header/dialogs/widget-header-delete-dialog.component';
+import {WidgetFooterDeleteDialogComponent} from './components/widget-footer/dialogs/widget-footer-delete-dialog.component';
 import {DevicesStateComponent} from './devices-state/devices-state.component';
 import {DevicesStateEditDialogComponent} from './devices-state/dialog/devices-state-edit-dialog.component';
 import {EventListComponent} from './event-list/event-list.component';
@@ -52,6 +52,9 @@ import {ChartsProcessDeploymentsComponent} from './charts/process/process-deploy
 import {ChartsProcessDeploymentsEditDialogComponent} from './charts/process/process-deployments/dialogs/charts-process-deployments-edit-dialog.component';
 import {DeviceDowntimeGatewayComponent} from './charts/device/device-downtime-gateway/device-downtime-gateway.component';
 import {DeviceDowntimeGatewayEditDialogComponent} from './charts/device/device-downtime-gateway/dialogs/device-downtime-gateway-edit-dialog.component';
+import {WidgetFooterComponent} from './components/widget-footer/widget-footer.component';
+import {DeviceTotalDowntimeComponent} from './charts/device/device-total-downtime/device-total-downtime.component';
+import {DeviceTotalDowntimeEditDialogComponent} from './charts/device/device-total-downtime/dialogs/device-total-downtime-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -85,7 +88,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         SwitchComponent,
         WidgetHeaderComponent,
         SwitchEditDialogComponent,
-        WidgetHeaderDeleteDialogComponent,
+        WidgetFooterDeleteDialogComponent,
         DevicesStateComponent,
         DevicesStateEditDialogComponent,
         EventListComponent,
@@ -102,6 +105,9 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ChartsProcessDeploymentsEditDialogComponent,
         DeviceDowntimeGatewayComponent,
         DeviceDowntimeGatewayEditDialogComponent,
+        WidgetFooterComponent,
+        DeviceTotalDowntimeComponent,
+        DeviceTotalDowntimeEditDialogComponent,
     ],
     exports: [
         SwitchComponent,
@@ -113,10 +119,11 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         RankingListComponent,
         WidgetSpinnerComponent,
         WidgetComponent,
+        WidgetFooterComponent,
     ],
     entryComponents: [
         SwitchEditDialogComponent,
-        WidgetHeaderDeleteDialogComponent,
+        WidgetFooterDeleteDialogComponent,
         DevicesStateEditDialogComponent,
         EventListEditDialogComponent,
         ChartsProcessInstancesEditDialogComponent,
@@ -124,6 +131,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         RankingListEditDialogComponent,
         ChartsProcessDeploymentsEditDialogComponent,
         DeviceDowntimeGatewayEditDialogComponent,
+        DeviceTotalDowntimeEditDialogComponent,
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 

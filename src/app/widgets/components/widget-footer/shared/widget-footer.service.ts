@@ -17,14 +17,14 @@
 import {Injectable} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 
-import {WidgetHeaderDeleteDialogComponent} from '../dialogs/widget-header-delete-dialog.component';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {WidgetFooterDeleteDialogComponent} from '../dialogs/widget-footer-delete-dialog.component';
 
 @Injectable({
     providedIn: 'root'
 })
-export class WidgetHeaderService {
+export class WidgetFooterService {
 
     constructor(private dialog: MatDialog,
                 private dashboardService: DashboardService) {
@@ -33,7 +33,7 @@ export class WidgetHeaderService {
     openDeleteWidgetDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
-        const editDialogRef = this.dialog.open(WidgetHeaderDeleteDialogComponent, dialogConfig);
+        const editDialogRef = this.dialog.open(WidgetFooterDeleteDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((deleteWidget: boolean) => {
            if (deleteWidget === true) {

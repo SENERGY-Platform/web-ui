@@ -15,8 +15,7 @@
   -->
 
 <mat-card>
-    <senergy-widget-header [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-header>
-    <mat-divider></mat-divider>
+    <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <mat-card-content class="mat-card-image content-size drag-handler" fxLayout="column" *ngIf="ready">
         <mat-list >
@@ -27,5 +26,6 @@
             </mat-list-item>
         </mat-list>
     </mat-card-content>
+    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

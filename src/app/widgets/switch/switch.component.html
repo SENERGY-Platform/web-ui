@@ -15,7 +15,7 @@
   -->
 
 <mat-card class="switch-container">
-    <senergy-widget-header [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-header>
+    <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     <img mat-card-image class="drag-handler"
          src="{{widget.properties.imgUrl}}" alt="image" *ngIf="ready">
@@ -24,5 +24,6 @@
                           color="accent"></mat-slide-toggle>
         <div fxFlex class="drag-handler"></div>
     </mat-card-actions>
+    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

@@ -19,12 +19,12 @@ import {MatDialogRef} from '@angular/material';
 
 
 @Component({
-    templateUrl: './widget-header-delete-dialog.component.html',
-    styleUrls: ['./widget-header-delete-dialog.component.css']
+    templateUrl: './widget-footer-delete-dialog.component.html',
+    styleUrls: ['./widget-footer-delete-dialog.component.css']
 })
-export class WidgetHeaderDeleteDialogComponent {
+export class WidgetFooterDeleteDialogComponent {
 
-    constructor(private dialogRef: MatDialogRef<WidgetHeaderDeleteDialogComponent>) {
+    constructor(private dialogRef: MatDialogRef<WidgetFooterDeleteDialogComponent>) {
 
     }
 

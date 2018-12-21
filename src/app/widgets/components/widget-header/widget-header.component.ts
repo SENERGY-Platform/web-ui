@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {WidgetHeaderService} from './shared/widget-header.service';
+import {Component, Input, OnInit} from '@angular/core';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 
 @Component({
     selector: 'senergy-widget-header',
@@ -27,32 +24,13 @@ import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashb
 })
 export class WidgetHeaderComponent implements OnInit {
 
-    @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
-    @Input() optionZoom = false;
-    @Input() zoom = false;
-    @Output() editEvent = new EventEmitter<boolean>();
 
-    constructor(private widgetHeaderService: WidgetHeaderService,
-                private dashboardService: DashboardService) {
+    constructor() {
     }
 
     ngOnInit() {
     }
 
-    edit() {
-        this.editEvent.emit(true);
-    }
 
-    delete() {
-        this.widgetHeaderService.openDeleteWidgetDialog(this.dashboardId, this.widget.id);
-    }
-
-    refresh() {
-        this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, this.widget.id, this.widget);
-    }
-
-    zoomWidget() {
-        this.dashboardService.zoomWidget(DashboardManipulationEnum.Zoom, this.widget.id, this.widget);
-    }
 }

@@ -14,8 +14,19 @@
   ~ limitations under the License.
   -->
 
-<mat-card-header class="header-container drag-handler">
-    <mat-card-title-group>
-        <mat-card-title>{{widget.name}}</mat-card-title>
-    </mat-card-title-group>
-</mat-card-header>
+<h2 mat-dialog-title>Edit Device Total Downtime</h2>
+
+<mat-dialog-content>
+    <div fxLayout="column">
+       <mat-form-field color="accent">
+            <mat-label>Name</mat-label>
+            <input matInput placeholder="Name" [(ngModel)]="widget.name">
+        </mat-form-field>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
+    <button class="mat-raised-button mat-accent" (click)="save()">Save</button>
+</mat-dialog-actions>
+

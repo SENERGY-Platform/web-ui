@@ -21,3 +21,6 @@
 .button-margin {
     margin-top: -10px
 }
+.header-container {
+    min-height: 32px;
+}
