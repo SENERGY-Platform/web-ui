@@ -51,6 +51,9 @@
   <div *ngSwitchCase="'charts_device_per_gateway'" fxFill>
     <senergy-device-gateway [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-gateway>
   </div>
+  <div *ngSwitchCase="'process_model_list'" fxFill>
+    <senergy-process-model-list [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-process-model-list>
+  </div>
   <div *ngSwitchDefault>
     <div>default</div>
   </div>

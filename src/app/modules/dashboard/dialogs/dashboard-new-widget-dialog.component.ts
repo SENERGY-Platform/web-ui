@@ -53,6 +53,7 @@ export class DashboardNewWidgetDialogComponent {
         {value: DashboardTypesEnum.ProcessState, viewValue: 'Process state'},
         {value: DashboardTypesEnum.EventList, viewValue: 'Event list'},
         {value: DashboardTypesEnum.RankingList, viewValue: 'Ranking list'},
+        {value: DashboardTypesEnum.ProcessModelList, viewValue: 'Process model list'},
     ];
     switchCategories: SwitchCategories[] = [
         {

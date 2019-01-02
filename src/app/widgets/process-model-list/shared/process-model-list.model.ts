@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-export enum DashboardTypesEnum {
-    Switch = 'switch',
-    Chart = 'chart',
-    DevicesState = 'devices_state',
-    ProcessState = 'process_state',
-    EventList = 'event_list',
-    RankingList = 'ranking_list',
-    ProcessModelList = 'process_model_list',
+export class ProcessModelListModel {
+    constructor(
+        public name: string,
+        public id: string,
+        public date: Date,
+    ) {
+    }
 }
