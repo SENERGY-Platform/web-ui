@@ -76,6 +76,7 @@ export class DashboardNewWidgetDialogComponent {
         {value: 'charts_process_deployments', viewValue: 'Process deployments'},
         {value: 'charts_device_total_downtime', viewValue: 'Device total downtime'},
         {value: 'charts_device_downtime_rate_per_gateway', viewValue: 'Downtime rate per gateway'},
+        {value: 'charts_device_per_gateway', viewValue: 'Device per gateway'},
     ];
 
     constructor(private dialogRef: MatDialogRef<DashboardNewWidgetDialogComponent>) {

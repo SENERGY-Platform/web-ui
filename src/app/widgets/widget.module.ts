@@ -55,6 +55,8 @@ import {DeviceDowntimeGatewayEditDialogComponent} from './charts/device/device-d
 import {WidgetFooterComponent} from './components/widget-footer/widget-footer.component';
 import {DeviceTotalDowntimeComponent} from './charts/device/device-total-downtime/device-total-downtime.component';
 import {DeviceTotalDowntimeEditDialogComponent} from './charts/device/device-total-downtime/dialogs/device-total-downtime-edit-dialog.component';
+import {DeviceGatewayComponent} from './charts/device/device-gateway/device-gateway.component';
+import {DeviceGatewayEditDialogComponent} from './charts/device/device-gateway/dialogs/device-gateway-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -109,6 +111,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         WidgetFooterComponent,
         DeviceTotalDowntimeComponent,
         DeviceTotalDowntimeEditDialogComponent,
+        DeviceGatewayComponent,
+        DeviceGatewayEditDialogComponent,
     ],
     exports: [
         SwitchComponent,
@@ -133,6 +137,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ChartsProcessDeploymentsEditDialogComponent,
         DeviceDowntimeGatewayEditDialogComponent,
         DeviceTotalDowntimeEditDialogComponent,
+        DeviceGatewayEditDialogComponent,
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 
