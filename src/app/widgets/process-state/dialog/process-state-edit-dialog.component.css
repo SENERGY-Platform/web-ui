@@ -14,11 +14,35 @@
  * limitations under the License.
  */
 
-export enum DashboardTypesEnum {
-    Switch = 'switch',
-    Chart = 'chart',
-    DevicesState = 'devices_state',
-    ProcessState = 'process_state',
-    EventList = 'event_list',
-    RankingList = 'ranking_list',
+table {
+    width: 100%;
 }
+
+button {
+    margin: 16px 8px;
+}
+
+.margin {
+    margin: 0px;
+}
+
+.trigger-size {
+    min-width: 50px;
+}
+
+.select-size {
+    max-width: 45px;
+}
+
+.user-input {
+    margin-top: 6px;
+    margin-right: 16px;
+}
+
+.example-first-footer-row td{
+    border-bottom: none;
+}
+
+/*::ng-deep .mat-form-field-appearance-legacy .mat-form-field-underline {*/
+    /*display: none;*/
+/*}*/

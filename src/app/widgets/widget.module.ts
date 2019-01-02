@@ -57,6 +57,8 @@ import {DeviceTotalDowntimeComponent} from './charts/device/device-total-downtim
 import {DeviceTotalDowntimeEditDialogComponent} from './charts/device/device-total-downtime/dialogs/device-total-downtime-edit-dialog.component';
 import {DeviceGatewayComponent} from './charts/device/device-gateway/device-gateway.component';
 import {DeviceGatewayEditDialogComponent} from './charts/device/device-gateway/dialogs/device-gateway-edit-dialog.component';
+import {ProcessStateComponent} from './process-state/process-state.component';
+import {ProcessStateEditDialogComponent} from './process-state/dialog/process-state-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -113,6 +115,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         DeviceTotalDowntimeEditDialogComponent,
         DeviceGatewayComponent,
         DeviceGatewayEditDialogComponent,
+        ProcessStateComponent,
+        ProcessStateEditDialogComponent,
     ],
     exports: [
         SwitchComponent,
@@ -138,6 +142,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         DeviceDowntimeGatewayEditDialogComponent,
         DeviceTotalDowntimeEditDialogComponent,
         DeviceGatewayEditDialogComponent,
+        ProcessStateEditDialogComponent,
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 

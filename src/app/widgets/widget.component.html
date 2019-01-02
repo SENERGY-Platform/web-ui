@@ -21,6 +21,9 @@
   <div *ngSwitchCase="'devices_state'" fxFill>
     <senergy-devices-state [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-devices-state>
   </div>
+  <div *ngSwitchCase="'process_state'" fxFill>
+    <senergy-process-state [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-process-state>
+  </div>
   <div *ngSwitchCase="'event_list'" fxFill>
     <senergy-event-list [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-event-list>
   </div>

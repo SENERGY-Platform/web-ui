@@ -50,6 +50,7 @@ export class DashboardNewWidgetDialogComponent {
         {value: DashboardTypesEnum.Switch, viewValue: 'Switch'},
         {value: DashboardTypesEnum.Chart, viewValue: 'Chart'},
         {value: DashboardTypesEnum.DevicesState, viewValue: 'Devices state'},
+        {value: DashboardTypesEnum.ProcessState, viewValue: 'Process state'},
         {value: DashboardTypesEnum.EventList, viewValue: 'Event list'},
         {value: DashboardTypesEnum.RankingList, viewValue: 'Ranking list'},
     ];
