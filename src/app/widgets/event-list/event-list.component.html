@@ -18,7 +18,7 @@
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="mat-card-image content-size drag-handler">
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready" fxLayout="column" fxFlex>
+        <div *ngIf="ready" fxLayout="column" fxFill>
             <mat-list>
                 <mat-list-item *ngFor="let event of events">
                     <mat-icon mat-list-icon>{{event.icon}}</mat-icon>
