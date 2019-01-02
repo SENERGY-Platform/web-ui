@@ -72,7 +72,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
-                this.deviceDowntimeGatewayService.getTotalDowntime(this.widget.id).subscribe(
+                this.deviceDowntimeGatewayService.getDevicesDowntimePerGateway(this.widget.id).subscribe(
                     (processDeploymentsHistory: ChartsModel) => {
                     this.deviceDowntimeGateway = processDeploymentsHistory;
                     this.ready = true;
@@ -83,7 +83,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
 
 
     private resizeProcessInstancesStatusChart() {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id);
+        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 10);
         if (this.deviceDowntimeGateway.options !== undefined) {
             this.deviceDowntimeGateway.options.height = element.height;
             this.deviceDowntimeGateway.options.width = element.width;

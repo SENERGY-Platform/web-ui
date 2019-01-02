@@ -26,7 +26,7 @@ export class ElementSizeService {
     constructor() {
     }
 
-    getHeightAndWidthByElementId(elementId: string): { 'height': number, 'width': number, 'heightPercentage': string, 'widthPercentage': string } {
+    getHeightAndWidthByElementId(elementId: string, heightPercentageAdjustment?: number): { 'height': number, 'width': number, 'heightPercentage': string, 'widthPercentage': string } {
         let height = 0;
         let width = 0;
         let heightPercentage = '75%';
@@ -40,54 +40,54 @@ export class ElementSizeService {
         } else {
             throw new Error('ElementId is unknown: ' + elementId);
         }
-        heightPercentage = this.calcHeightPercentage(height);
+        heightPercentage = this.calcHeightPercentage(height, heightPercentageAdjustment || 0);
         widthPercentage = this.calcWidthPercentage(width);
 
         return {height, width, heightPercentage, widthPercentage};
     }
 
-    private calcHeightPercentage(height: number): string {
-        let percentage = '0%';
+    private calcHeightPercentage(height: number, heightPercentageAdjustment: number): string {
+        let percentage = 0;
         if (height < 200) {
-            percentage = '70%';
+            percentage = 70;
         } else {
             if (height < 400) {
-                percentage = '75%';
+                percentage = 75;
             } else {
                 if (height < 500) {
-                    percentage = '80%';
+                    percentage = 80;
                 } else {
-                    percentage = '90%';
+                    percentage = 90;
                 }
             }
         }
-        return percentage;
+        return percentage - heightPercentageAdjustment + '%';
     }
 
     private calcWidthPercentage(width: number): string {
-        let percentage = '0%';
+        let percentage = 0;
         if (width < 350) {
-            percentage = '65%';
+            percentage = 65;
         } else {
             if (width < 400) {
-                percentage = '70%';
+                percentage = 70;
             } else {
                 if (width < 800) {
-                    percentage = '75%';
+                    percentage = 75;
                 } else {
                     if (width < 1100) {
-                        percentage = '82%';
+                        percentage = 82;
                     } else {
                         if (width < 1400) {
-                            percentage = '85%';
+                            percentage = 85;
                         } else {
-                            percentage = '85%';
+                            percentage = 85;
                         }
                     }
                 }
             }
         }
 
-        return percentage;
+        return percentage + '%';
     }
 }

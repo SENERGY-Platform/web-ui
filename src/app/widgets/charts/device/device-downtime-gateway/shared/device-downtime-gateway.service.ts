@@ -30,15 +30,17 @@ import {StartDeviceModel} from '../../../../../modules/start/shared/start-device
 import {environment} from '../../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ErrorHandlerService} from '../../../../../core/services/error-handler.service';
+import {StartGatewayModel} from '../../../../../modules/start/shared/start-gateway.model';
+import {StartItemStatusModel} from '../../../../../modules/start/shared/start-item-status.model';
 
-const customColor = '#4484ce'; // /* cc */
+const stateConnected = 'connected';
+const stateDisconnected = 'disconnected';
 const stateTrue = true;
 const stateFalse = false;
 const dayInMs = 86400000;
+const failureTimeInMs = dayInMs * 7;
 const today = new Date();
-const intervalDurationInMin = 15;
-const intervalDurationInMs = intervalDurationInMin * 60 * 1000;
-const numberOfIntervals = today.getHours() * (60 / intervalDurationInMin) + Math.ceil(today.getMinutes() / intervalDurationInMin);
+const customColor = '#4484ce'; // /* cc */
 
 @Injectable({
     providedIn: 'root'
@@ -69,138 +71,116 @@ export class DeviceDowntimeGatewayService {
         });
     }
 
-    getTotalDowntime(widgetId: string): Observable<ChartsModel> {
+    getDevicesDowntimePerGateway(widgetId: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-            this.getDeviceHistory('7d').subscribe((devices: StartDeviceModel[]) => {
-                observer.next(this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(devices)));
+            this.getGatewayHistory('7d').subscribe((gateways) => {
+                observer.next(this.setDevicesDowntimePerGatewayChartValues(widgetId, this.getGatewayDowntimeDataTableArray(gateways)));
                 observer.complete();
             });
+
         });
     }
 
-    getDeviceHistory(duration: string): Observable<StartDeviceModel[]> {
-        return this.http.get<StartDeviceModel[]>(environment.apiAggregatorUrl + '/history/devices/' + duration).pipe(
+   private getGatewayHistory(duration: string): Observable<StartGatewayModel[]> {
+        return this.http.get<StartGatewayModel[]>(environment.apiAggregatorUrl + '/history/gateways/' + duration).pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceDowntimeGatewayService.name, 'getDeviceHistory', []))
+            catchError(this.errorHandlerService.handleError(DeviceDowntimeGatewayService.name, 'getGatewayHistory', []))
         );
     }
 
-    private setDevicesTotalDowntimeChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
+    private setDevicesDowntimePerGatewayChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
+
+        const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId, 10);
         return new ChartsModel(
-            'AreaChart',
+            'ColumnChart',
             dataTable.data,
             {
                 chartArea: {width: element.widthPercentage, height: element.heightPercentage},
                 width: element.width,
                 height: element.height,
                 legend: 'none',
-                hAxis: {format: 'HH:mm'},
                 vAxis: {format: '#.## %'},
-                colors: [customColor],
+                tooltip: {trigger: 'none'}
             }
         );
     }
 
-    private processTimelineFailureRatio(devices: StartDeviceModel[]): ChartDataTableModel {
-        const interval: { stateConnected: number, stateDisconnected: number }[] = [];
-        let intervalIndex = 0;
-        let timeLeft = intervalDurationInMs;
-        let intervalFull = false;
-
-        for (let x = 0; x < numberOfIntervals; x++) {
-            interval.push({stateConnected: 0, stateDisconnected: 0});
-        }
-
-        devices.forEach((device: StartDeviceModel) => {
-
-            intervalIndex = 0;
-            timeLeft = intervalDurationInMs;
-            intervalFull = false;
-
-            if (device.log_history.values !== null) {
-
-                const lastIndex = device.log_history.values.length - 1;
-                const diffToday = today.getTime() - new Date(device.log_history.values[lastIndex][0] * 1000).getTime();
-                const statusLastIndex = device.log_history.values[lastIndex][1];
-                spreadIntoTimeZones(statusLastIndex, diffToday);
-
-                for (let z = lastIndex; z >= 1 && intervalFull === false; z--) {
-                    const diffDates = (device.log_history.values[z][0] - device.log_history.values[z - 1][0]) * 1000;
-                    const statusBefore = device.log_history.values[z - 1][1];
-                    spreadIntoTimeZones(statusBefore, diffDates);
-                }
-            }
-
-            if (device.log_edge !== null && intervalFull === false) {
-                const statusEdge: boolean = <boolean>device.log_edge[1];
-                spreadIntoTimeZones((statusEdge), dayInMs);
-            }
+    private getGatewayDowntimeDataTableArray(gateways: StartGatewayModel[]): ChartDataTableModel {
+        const dataTable = new ChartDataTableModel([['Name', 'Percentage', {role: 'annotation'}, {role: 'style'}]]);
+        gateways.forEach((gateway) => {
+            const time = this.calcDisconnectedTime(gateway).failureRatio;
+            const text = Math.round(time * 10000) / 100 + '%';
+            dataTable.data.push([gateway.name, time, text, customColor]);
         });
+        return dataTable;
+    }
 
-        return this.prepareArray(interval);
+    private calcDisconnectedTime(item: StartDeviceModel | StartGatewayModel): StartItemStatusModel {
 
-        function spreadIntoTimeZones(state: boolean, time: number) {
-            while (time >= timeLeft && intervalIndex < (numberOfIntervals - 1)) {
-                time = time - timeLeft;
-                fillIntervalArray(state, timeLeft);
-                intervalIndex++;
-                timeLeft = intervalDurationInMs;
+        const itemStatus = new StartItemStatusModel(0, 0, 0, 0, 0, 0, item.name);
+        if (item.log_history.values === null) {
+            switch (item.log_state) {
+                case stateConnected: {
+                    addTimeConnected(failureTimeInMs);
+                    break;
+                }
+                case stateDisconnected: {
+                    addTimeDisconnected(failureTimeInMs);
+                    break;
+                }
+            }
+        } else {
+            /** calculate delta from last index time till now*/
+            const lastIndex: number = item.log_history.values.length - 1;
+            const diffToday = today.getTime() - new Date(item.log_history.values[lastIndex]['0'] * 1000).getTime();
+            addTimeToConnectionStatus(item.log_history.values[lastIndex]['1'], diffToday);
+
+
+            for (let x = lastIndex; x >= 1; x--) {
+                const diff = (item.log_history.values[x]['0'] - item.log_history.values[x - 1]['0']) * 1000;
+                addTimeToConnectionStatus(item.log_history.values[x - 1]['1'], diff);
             }
 
-            if (intervalIndex === (numberOfIntervals - 1)) {
-                if (time > timeLeft) {
-                    fillIntervalArray(state, timeLeft);
-                    intervalFull = true;
-                } else {
-                    timeLeft = timeLeft - time;
-                    fillIntervalArray(state, time);
-                }
-            } else {
-                timeLeft = timeLeft - time;
-                fillIntervalArray(state, time);
+            /** check if input object existed before first index of log history */
+            if (item.log_edge !== null) {
+                const timeDiff = failureTimeInMs - itemStatus.timeDisconnectedInMs - itemStatus.timeConnectedInMs;
+                addTimeToConnectionStatus((item.log_edge[1] === true), timeDiff);
             }
         }
+        itemStatus.timeConnectedInS = Math.round(itemStatus.timeConnectedInMs / 60000);
+        itemStatus.timeDisconnectedInMin = Math.round(itemStatus.timeDisconnectedInMs / 60000);
+        itemStatus.failureRatio =
+            itemStatus.timeDisconnectedInMs / (itemStatus.timeDisconnectedInMs + itemStatus.timeConnectedInMs);
 
-        function fillIntervalArray(state: boolean, time: number) {
-            switch (state) {
+        return itemStatus;
+
+        function addTimeConnected(time: number) {
+            itemStatus.timeConnectedInMs += time;
+        }
+
+        function addTimeDisconnected(time: number) {
+            itemStatus.timeDisconnectedInMs += time;
+            itemStatus.failureRate++;
+        }
+
+        function addTimeToConnectionStatus(status: boolean, time: number) {
+            switch (status) {
                 case stateTrue: {
-                    interval[intervalIndex].stateConnected += time;
+                    addTimeConnected(time);
                     break;
                 }
                 case stateFalse: {
-                    interval[intervalIndex].stateDisconnected += time;
+                    addTimeDisconnected(time);
                     break;
                 }
-            }
-        }
-    }
-
-    private prepareArray(interval: { stateConnected: number, stateDisconnected: number }[]): ChartDataTableModel {
-        const dataTable = new ChartDataTableModel([['Date', 'Percentage', {role: 'tooltip'}]]);
-
-        if (interval.length !== 0) {
-            for (let m = (interval.length - 1); m >= 0; m--) {
-                const percentage = interval[m].stateDisconnected / (interval[m].stateConnected + interval[m].stateDisconnected);
-                const rightPoint = new Date(today.getTime() - (m * intervalDurationInMs));
-                let leftPoint = new Date(rightPoint.getTime() - intervalDurationInMs);
-                if (m === interval.length - 1) {
-                    leftPoint = new Date(today);
-                    leftPoint.setHours(0, 0);
+                default: {
+                    throw new Error('Unknown state.');
                 }
-
-                dataTable.data.push([leftPoint, percentage, getTooltipText(leftPoint, percentage)]);
-                dataTable.data.push([rightPoint, percentage, getTooltipText(rightPoint, percentage)]);
             }
         }
-        return dataTable;
 
-        function getTooltipText(date: Date, percentage: number): string {
-            const percentageFormatted = Math.round(percentage * 10000) / 100 + '%';
-            const timeFormatted = date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-            return timeFormatted + '\n' + 'failure ratio: ' + percentageFormatted; // todo: translation
-        }
     }
+
 
 }
 
