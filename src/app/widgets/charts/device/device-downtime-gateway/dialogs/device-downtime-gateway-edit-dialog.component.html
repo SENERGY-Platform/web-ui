@@ -18,10 +18,11 @@
 
 <mat-dialog-content>
     <div fxLayout="column">
-       <mat-form-field color="accent">
+        <mat-form-field color="accent">
             <mat-label>Name</mat-label>
             <input matInput placeholder="Name" [(ngModel)]="widget.name">
         </mat-form-field>
+        <mat-checkbox [(ngModel)]="widget.properties.hideZeroPercentage">Hide 0%</mat-checkbox>
     </div>
 </mat-dialog-content>
 

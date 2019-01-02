@@ -19,7 +19,7 @@ import {SwitchComponent} from './switch/switch.component';
 import {
     MatAutocompleteModule,
     MatButtonModule,
-    MatCardModule,
+    MatCardModule, MatCheckboxModule,
     MatDialogModule,
     MatDividerModule, MatFormFieldModule,
     MatIconModule, MatInputModule, MatListModule,
@@ -83,6 +83,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         MatProgressSpinnerModule,
         GridsterModule,
         MatTooltipModule,
+        MatCheckboxModule,
     ],
     declarations: [
         SwitchComponent,

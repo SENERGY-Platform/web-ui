@@ -71,17 +71,18 @@ export class DeviceDowntimeGatewayService {
         });
     }
 
-    getDevicesDowntimePerGateway(widgetId: string): Observable<ChartsModel> {
+    getDevicesDowntimePerGateway(widget: WidgetModel): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
             this.getGatewayHistory('7d').subscribe((gateways) => {
-                observer.next(this.setDevicesDowntimePerGatewayChartValues(widgetId, this.getGatewayDowntimeDataTableArray(gateways)));
+                observer.next(this.setDevicesDowntimePerGatewayChartValues(widget.id,
+                    this.getGatewayDowntimeDataTableArray(widget.properties.hideZeroPercentage || false, gateways)));
                 observer.complete();
             });
 
         });
     }
 
-   private getGatewayHistory(duration: string): Observable<StartGatewayModel[]> {
+    private getGatewayHistory(duration: string): Observable<StartGatewayModel[]> {
         return this.http.get<StartGatewayModel[]>(environment.apiAggregatorUrl + '/history/gateways/' + duration).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceDowntimeGatewayService.name, 'getGatewayHistory', []))
@@ -105,12 +106,18 @@ export class DeviceDowntimeGatewayService {
         );
     }
 
-    private getGatewayDowntimeDataTableArray(gateways: StartGatewayModel[]): ChartDataTableModel {
+    private getGatewayDowntimeDataTableArray(hideZeroPercentage: boolean, gateways: StartGatewayModel[]): ChartDataTableModel {
         const dataTable = new ChartDataTableModel([['Name', 'Percentage', {role: 'annotation'}, {role: 'style'}]]);
         gateways.forEach((gateway) => {
             const time = this.calcDisconnectedTime(gateway).failureRatio;
             const text = Math.round(time * 10000) / 100 + '%';
-            dataTable.data.push([gateway.name, time, text, customColor]);
+            if (hideZeroPercentage) {
+                if (time > 0) {
+                    dataTable.data.push([gateway.name, time, text, customColor]);
+                }
+            } else {
+                dataTable.data.push([gateway.name, time, text, customColor]);
+            }
         });
         return dataTable;
     }

@@ -72,7 +72,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
-                this.deviceDowntimeGatewayService.getDevicesDowntimePerGateway(this.widget.id).subscribe(
+                this.deviceDowntimeGatewayService.getDevicesDowntimePerGateway(this.widget).subscribe(
                     (processDeploymentsHistory: ChartsModel) => {
                     this.deviceDowntimeGateway = processDeploymentsHistory;
                     this.ready = true;

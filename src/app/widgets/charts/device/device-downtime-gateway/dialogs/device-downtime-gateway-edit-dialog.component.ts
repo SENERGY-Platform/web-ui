@@ -32,7 +32,7 @@ export class DeviceDowntimeGatewayEditDialogComponent implements OnInit {
 
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {id: '', name: '', type: '', properties: {hideZeroPercentage: false}};
 
     constructor(private dialogRef: MatDialogRef<DeviceDowntimeGatewayEditDialogComponent>,
                 private deploymentsService: DeploymentsService,
