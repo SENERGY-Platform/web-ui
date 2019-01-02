@@ -30,13 +30,13 @@ import {DeviceTotalDowntimeService} from './shared/device-total-downtime.service
 })
 export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
 
-    deviceDowntimeGateway: ChartsModel = {};
+    deviceTotalDowntime: ChartsModel = {};
     ready = false;
     destroy = new Subscription();
 
     private resizeTimeout = 0;
 
-    @ViewChild('deviceDowntimeGatewayChart') deviceDowntimeGatewayChart!: GoogleChartComponent;
+    @ViewChild('deviceTotalDowntimeChart') deviceTotalDowntimeChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
     @Input() zoom = false;
@@ -74,7 +74,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
                 this.ready = false;
                 this.deviceDowntimeGatewayService.getTotalDowntime(this.widget.id).subscribe(
                     (processDeploymentsHistory: ChartsModel) => {
-                    this.deviceDowntimeGateway = processDeploymentsHistory;
+                    this.deviceTotalDowntime = processDeploymentsHistory;
                     this.ready = true;
                 });
             }
@@ -84,14 +84,14 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
 
     private resizeProcessInstancesStatusChart() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id);
-        if (this.deviceDowntimeGateway.options !== undefined) {
-            this.deviceDowntimeGateway.options.height = element.height;
-            this.deviceDowntimeGateway.options.width = element.width;
-            if (this.deviceDowntimeGateway.options.chartArea) {
-                this.deviceDowntimeGateway.options.chartArea.height = element.heightPercentage;
-                this.deviceDowntimeGateway.options.chartArea.width = element.widthPercentage;
+        if (this.deviceTotalDowntime.options !== undefined) {
+            this.deviceTotalDowntime.options.height = element.height;
+            this.deviceTotalDowntime.options.width = element.width;
+            if (this.deviceTotalDowntime.options.chartArea) {
+                this.deviceTotalDowntime.options.chartArea.height = element.heightPercentage;
+                this.deviceTotalDowntime.options.chartArea.width = element.widthPercentage;
             }
-            this.deviceDowntimeGatewayChart.redraw();
+            this.deviceTotalDowntimeChart.redraw();
         }
     }
 }
