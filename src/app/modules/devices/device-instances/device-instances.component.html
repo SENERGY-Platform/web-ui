@@ -23,6 +23,11 @@
          (scrolled)="onScroll()">
         <div fxLayout="row">
             <senergy-searchbar fxFlex></senergy-searchbar>
+            <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
+                <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent" selected>{{selectedTagTransformed}}
+                    <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+            </mat-chip-list>
             <senergy-sort [sortAttributes]="sortAttributes"
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         </div>
@@ -43,9 +48,9 @@
                                               color="accent" class="shared">people
                                     </mat-icon>
                                     <div class="tag color-accent" *ngFor="let tag of device.tag"
-                                          matTooltip="{{tag | tagValue:''}}">{{tag | tagValue:'#'}} </div>
+                                          matTooltip="{{tag | tagValue:''}}" (click)="getDevicesByTag(tag, 'tag')">{{tag | tagValue:'#'}} </div>
                                     <div class="tag color-accent" *ngFor="let tag of device.usertag"
-                                          matTooltip="{{tag}}">#{{tag}}</div>
+                                          matTooltip="{{tag}}" (click)="getDevicesByTag(tag, 'usertag')">#{{tag}}</div>
                                 </div>
                             </div>
                             <div fxFlex="30" fxLayout="row" fxLayoutAlign="end center">

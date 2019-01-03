@@ -21,9 +21,8 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
 import {DeviceInstancesModel} from './device-instances.model';
 import {Observable} from 'rxjs';
-import {DeviceInstancesHistoryModel} from './device-instances-history.model';
+import {DeviceInstancesHistoryModel} from './device-instances-history.model';​
 
-​
 @Injectable({
     providedIn: 'root'
 })
@@ -31,6 +30,7 @@ export class DeviceInstancesService {
 ​
     private getDeviceHistoryObservable: Observable<DeviceInstancesHistoryModel[]> | null = null;
 ​
+
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
@@ -49,6 +49,16 @@ export class DeviceInstancesService {
             );
         }
     }
+
+    getDeviceInstancesByTag(tagType: string, tag: string, feature: string, order: string): Observable<DeviceInstancesModel[]> {
+        return this.http.get<DeviceInstancesModel[]>
+        (environment.apiAggregatorUrl + '/select/devices/' + tagType + '/' + encodeURIComponent(tag) + '/1000/0/' + feature + '/' + order).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByTag', []))
+        );
+    }
+
+
 
     getDeviceHistory(duration: string): Observable<DeviceInstancesHistoryModel[]> {
         if (this.getDeviceHistoryObservable === null) {

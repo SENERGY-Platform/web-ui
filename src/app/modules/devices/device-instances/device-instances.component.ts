@@ -23,6 +23,7 @@ import {SearchbarService} from '../../../core/components/searchbar/shared/search
 import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {KeycloakService} from 'keycloak-angular';
+import {TagValuePipe} from '../../../core/pipe/tag-value.pipe';
 
 const grids = new Map([
     ['xs', 1],
@@ -44,6 +45,9 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     ready = false;
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
     userID: string;
+    selectedTag = '';
+    selectedTagTransformed = '';
+    selectedTagType = '';
 
     private searchText = '';
     private limit = 54;
@@ -69,29 +73,61 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     }
 
     receiveSortingAttribute(sortAttribute: SortModel) {
-        this.reset();
         this.sortAttribute = sortAttribute;
-        this.getDeviceInstances();
+        this.getDeviceInstances(true);
     }
 
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
             this.ready = false;
             this.offset = this.offset + this.limit;
-            this.getDeviceInstances();
+            this.getDeviceInstances(false);
         }
     }
 
-    private getDeviceInstances() {
-        this.deviceinstancesService.getDeviceInstances(
-            this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-            (deviceInstances: DeviceInstancesModel[]) => {
-                if (deviceInstances.length !== this.limit) {
+    tagRemoved(): void {
+        this.resetTag();
+        this.getDeviceInstances(true);
+    }
+
+    getDevicesByTag(tag: string, tagType: string) {
+
+        if (tagType === 'tag') {
+            this.selectedTagTransformed = new TagValuePipe().transform(tag, '');
+        } else {
+            this.selectedTagTransformed = tag;
+        }
+
+        this.selectedTagType = tagType;
+        this.selectedTag = tag;
+        this.getDeviceInstances(true);
+    }
+
+    private getDeviceInstances(reset: boolean) {
+        if (reset) {
+            this.deviceInstances = [];
+            this.offset = 0;
+            this.allDataLoaded = false;
+            this.ready = false;
+        }
+        if (this.selectedTag === '') {
+            this.deviceinstancesService.getDeviceInstances(
+                this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+                (deviceInstances: DeviceInstancesModel[]) => {
+                    if (deviceInstances.length !== this.limit) {
+                        this.allDataLoaded = true;
+                    }
+                    this.deviceInstances = this.deviceInstances.concat(deviceInstances);
+                    this.ready = true;
+                });
+        } else {
+            this.deviceinstancesService.getDeviceInstancesByTag(this.selectedTagType, this.selectedTag, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+                (deviceInstances: DeviceInstancesModel[]) => {
                     this.allDataLoaded = true;
-                }
-                this.deviceInstances = this.deviceInstances.concat(deviceInstances);
-                this.ready = true;
-            });
+                    this.deviceInstances = this.deviceInstances.concat(deviceInstances);
+                    this.ready = true;
+                });
+        }
     }
 
     private initGridCols(): void {
@@ -103,16 +139,15 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     private initSearchAndGetDevices() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.reset();
+            this.resetTag();
             this.searchText = searchText;
-            this.getDeviceInstances();
+            this.getDeviceInstances(true);
         });
     }
 
-    private reset() {
-        this.deviceInstances = [];
-        this.offset = 0;
-        this.allDataLoaded = false;
-        this.ready = false;
+    private resetTag() {
+        this.selectedTag = '';
+        this.selectedTagTransformed = '';
+        this.selectedTagType = '';
     }
 }
