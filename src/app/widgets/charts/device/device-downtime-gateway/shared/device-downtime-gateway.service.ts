@@ -32,6 +32,7 @@ import {catchError, map} from 'rxjs/operators';
 import {ErrorHandlerService} from '../../../../../core/services/error-handler.service';
 import {StartGatewayModel} from '../../../../../modules/start/shared/start-gateway.model';
 import {StartItemStatusModel} from '../../../../../modules/start/shared/start-item-status.model';
+import {NetworksService} from '../../../../../modules/devices/networks/shared/networks.service';
 
 const stateConnected = 'connected';
 const stateDisconnected = 'disconnected';
@@ -52,7 +53,8 @@ export class DeviceDowntimeGatewayService {
                 private elementSizeService: ElementSizeService,
                 private dialog: MatDialog,
                 private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService) {
+                private errorHandlerService: ErrorHandlerService,
+                private networksService: NetworksService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -73,20 +75,13 @@ export class DeviceDowntimeGatewayService {
 
     getDevicesDowntimePerGateway(widget: WidgetModel): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-            this.getGatewayHistory('7d').subscribe((gateways) => {
+            this.networksService.getGatewayHistory('7d').subscribe((gateways) => {
                 observer.next(this.setDevicesDowntimePerGatewayChartValues(widget.id,
                     this.getGatewayDowntimeDataTableArray(widget.properties.hideZeroPercentage || false, gateways)));
                 observer.complete();
             });
 
         });
-    }
-
-    private getGatewayHistory(duration: string): Observable<StartGatewayModel[]> {
-        return this.http.get<StartGatewayModel[]>(environment.apiAggregatorUrl + '/history/gateways/' + duration).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceDowntimeGatewayService.name, 'getGatewayHistory', []))
-        );
     }
 
     private setDevicesDowntimePerGatewayChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {

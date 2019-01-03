@@ -30,6 +30,7 @@ import {ChartDataTableModel} from '../../../../../core/components/chart/chart-da
 import {environment} from '../../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ChartsModel} from '../../../shared/charts.model';
+import {NetworksService} from '../../../../../modules/devices/networks/shared/networks.service';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -43,7 +44,8 @@ export class DeviceGatewayService {
                 private elementSizeService: ElementSizeService,
                 private dialog: MatDialog,
                 private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService) {
+                private errorHandlerService: ErrorHandlerService,
+                private networksService: NetworksService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -64,18 +66,11 @@ export class DeviceGatewayService {
 
     getDevicesPerGateway(widgetId: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-                this.getGatewayHistory('1h').subscribe((gateways: StartGatewayModel[]) => {
+                this.networksService.getGatewayHistory('1h').subscribe((gateways: StartGatewayModel[]) => {
                     observer.next(this.setDevicesPerGatewayChartValues(widgetId, this.getGatewayDataTableArray(gateways)));
                     observer.complete();
                 });
             }
-        );
-    }
-
-    private getGatewayHistory(duration: string): Observable<StartGatewayModel[]> {
-        return this.http.get<StartGatewayModel[]>(environment.apiAggregatorUrl + '/history/gateways/' + duration).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceGatewayService.name, 'getGatewayHistory', []))
         );
     }
 

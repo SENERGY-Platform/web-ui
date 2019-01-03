@@ -24,6 +24,7 @@ import {NetworksModel} from './networks.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {NetworksEditDialogComponent} from '../dialogs/networks-edit-dialog.component';
 import {NetworksDeleteDialogComponent} from '../dialogs/networks-delete-dialog.component';
+import {StartGatewayModel} from '../../../start/shared/start-gateway.model';
 
 @Injectable({
     providedIn: 'root'
@@ -61,6 +62,13 @@ export class NetworksService {
         );
     }
 
+    getGatewayHistory(duration: string): Observable<StartGatewayModel[]> {
+        return this.http.get<StartGatewayModel[]>(environment.apiAggregatorUrl + '/history/gateways/' + duration).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getGatewayHistory', []))
+        );
+    }
+
     openNetworkEditDialog(network: NetworksModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
@@ -89,9 +97,9 @@ export class NetworksService {
                 this.delete(network.id).subscribe();
                 // todo: refresh network list!
             }
-
         });
     }
+
 
 
 }
