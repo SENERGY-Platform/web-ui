@@ -18,7 +18,7 @@ import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
 import {
     MatButtonModule,
-    MatCardModule,
+    MatCardModule, MatChipsModule,
     MatDialogModule, MatFormFieldModule,
     MatGridListModule,
     MatIconModule, MatInputModule, MatMenuModule,
@@ -62,6 +62,7 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         MatMenuModule,
         MatFormFieldModule,
         MatInputModule,
+        MatChipsModule,
         RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes, maintenance])],
     declarations: [
         NetworksComponent,

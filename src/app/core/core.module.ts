@@ -37,6 +37,7 @@ import {SortComponent} from './components/sort/sort.component';
 import {StateIconComponent} from './components/state-icon/state-icon.component';
 import {DiagramEditorComponent} from './components/diagram-editor/diagram-editor.component';
 import {FormsModule} from '@angular/forms';
+import {TagValuePipe} from './pipe/tag-value.pipe';
 
 @NgModule({
     imports: [
@@ -63,7 +64,8 @@ import {FormsModule} from '@angular/forms';
         SpinnerComponent,
         SortComponent,
         StateIconComponent,
-        DiagramEditorComponent
+        DiagramEditorComponent,
+        TagValuePipe,
     ],
     exports: [
         SidenavComponent,
@@ -72,9 +74,9 @@ import {FormsModule} from '@angular/forms';
         SpinnerComponent,
         SortComponent,
         StateIconComponent,
-        DiagramEditorComponent
-    ],
-
+        DiagramEditorComponent,
+        TagValuePipe,
+    ]
 })
 
 export class CoreModule {

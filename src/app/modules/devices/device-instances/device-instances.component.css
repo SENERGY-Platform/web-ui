@@ -52,3 +52,21 @@ mat-grid-list {
     height: calc(100% - 64px);
     overflow-y: auto;
 }
+
+.shared {
+    margin-right: 4px;
+    max-height: 20px;
+}
+
+.tag {
+    cursor: pointer;
+    text-decoration: underline;
+    max-width: 20ch;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+

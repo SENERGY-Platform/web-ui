@@ -39,8 +39,13 @@
                             <div fxFlex="70" fxLayout="column">
                                 <div class="truncate" matTooltip="{{device.name}}">{{device.name}}</div>
                                 <div fxLayout="row">
-                                    <mat-icon matTooltip="Device is shared" *ngIf="userID !== device.creator" color="accent">people</mat-icon>
-                                    <!--div>tags</div-->
+                                    <mat-icon matTooltip="Device is shared" *ngIf="userID !== device.creator"
+                                              color="accent" class="shared">people
+                                    </mat-icon>
+                                    <div class="tag color-accent" *ngFor="let tag of device.tag"
+                                          matTooltip="{{tag | tagValue:''}}">{{tag | tagValue:'#'}} </div>
+                                    <div class="tag color-accent" *ngFor="let tag of device.usertag"
+                                          matTooltip="{{tag}}">#{{tag}}</div>
                                 </div>
                             </div>
                             <div fxFlex="30" fxLayout="row" fxLayoutAlign="end center">
