@@ -27,6 +27,7 @@ import {catchError, map} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {DeviceDowntimeListModel} from './device-downtime-list.model';
+import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 
 const stateConnected = 'connected';
 const stateDisconnected = 'disconnected';
@@ -44,7 +45,8 @@ export class DeviceDowntimeListService {
     constructor(private dialog: MatDialog,
                 private dashboardService: DashboardService,
                 private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService) {
+                private errorHandlerService: ErrorHandlerService,
+                private deviceInstancesService: DeviceInstancesService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -65,18 +67,11 @@ export class DeviceDowntimeListService {
 
     getDevicesDowntime(): Observable<DeviceDowntimeListModel[]> {
         return new Observable<DeviceDowntimeListModel[]>((observer) => {
-            this.getDeviceHistory('7d').subscribe((devices: StartDeviceModel[]) => {
+            this.deviceInstancesService.getDeviceHistory('7d').subscribe((devices: StartDeviceModel[]) => {
                 observer.next(this.calcDevicesConnectionTime(devices));
                 observer.complete();
             });
         });
-    }
-
-    private getDeviceHistory(duration: string): Observable<StartDeviceModel[]> {
-        return this.http.get<StartDeviceModel[]>(environment.apiAggregatorUrl + '/history/devices/' + duration).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceDowntimeListService.name, 'getDeviceHistory', []))
-        );
     }
 
     private calcDevicesConnectionTime(devices: StartDeviceModel[]): DeviceDowntimeListModel[] {

@@ -30,6 +30,7 @@ import {StartDeviceModel} from '../../../../../modules/start/shared/start-device
 import {environment} from '../../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ErrorHandlerService} from '../../../../../core/services/error-handler.service';
+import {DeviceInstancesService} from '../../../../../modules/devices/device-instances/shared/device-instances.service';
 
 const customColor = '#4484ce'; // /* cc */
 const stateTrue = true;
@@ -50,7 +51,8 @@ export class DeviceTotalDowntimeService {
                 private elementSizeService: ElementSizeService,
                 private dialog: MatDialog,
                 private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService) {
+                private errorHandlerService: ErrorHandlerService,
+                private deviceInstancesService: DeviceInstancesService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -71,18 +73,11 @@ export class DeviceTotalDowntimeService {
 
     getTotalDowntime(widgetId: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-            this.getDeviceHistory('7d').subscribe((devices: StartDeviceModel[]) => {
+            this.deviceInstancesService.getDeviceHistory('7d').subscribe((devices: StartDeviceModel[]) => {
                 observer.next(this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(devices)));
                 observer.complete();
             });
         });
-    }
-
-    getDeviceHistory(duration: string): Observable<StartDeviceModel[]> {
-        return this.http.get<StartDeviceModel[]>(environment.apiAggregatorUrl + '/history/devices/' + duration).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceTotalDowntimeService.name, 'getDeviceHistory', []))
-        );
     }
 
     private setDevicesTotalDowntimeChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
