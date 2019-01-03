@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-export enum DashboardTypesEnum {
-    Switch = 'switch',
-    Chart = 'chart',
-    DevicesState = 'devices_state',
-    ProcessState = 'process_state',
-    EventList = 'event_list',
-    RankingList = 'ranking_list',
-    ProcessModelList = 'process_model_list',
-    DeviceDowntimeList = 'device_downtime_list',
+export class DeviceDowntimeListModel {
+    constructor(
+        public timeConnectedInMs: number,
+        public timeConnectedInS: number,
+        public timeDisconnectedInMs: number,
+        public timeDisconnectedInMin: number,
+        public failureRate: number,
+        public failureRatio: number,
+        public name: string,
+        public color: string,
+        public icon: string,
+    ) {
+    }
 }

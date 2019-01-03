@@ -61,6 +61,8 @@ import {ProcessStateComponent} from './process-state/process-state.component';
 import {ProcessStateEditDialogComponent} from './process-state/dialog/process-state-edit-dialog.component';
 import {ProcessModelListComponent} from './process-model-list/process-model-list.component';
 import {ProcessModelListEditDialogComponent} from './process-model-list/dialogs/process-model-list-edit-dialog.component';
+import {DeviceDowntimeListComponent} from './device-downtime-list/device-downtime-list.component';
+import {DeviceDowntimeListEditDialogComponent} from './device-downtime-list/dialogs/device-downtime-list-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -121,6 +123,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ProcessStateEditDialogComponent,
         ProcessModelListComponent,
         ProcessModelListEditDialogComponent,
+        DeviceDowntimeListComponent,
+        DeviceDowntimeListEditDialogComponent,
     ],
     exports: [
         SwitchComponent,
@@ -148,6 +152,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         DeviceGatewayEditDialogComponent,
         ProcessStateEditDialogComponent,
         ProcessModelListEditDialogComponent,
+        DeviceDowntimeListEditDialogComponent,
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 
