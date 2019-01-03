@@ -25,10 +25,10 @@ import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-wid
 import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ChartDataTableModel} from '../../../../../core/components/chart/chart-data-table.model';
 import {DeviceDowntimeGatewayEditDialogComponent} from '../dialogs/device-downtime-gateway-edit-dialog.component';
-import {StartDeviceModel} from '../../../../../modules/start/shared/start-device.model';
-import {StartGatewayModel} from '../../../../../modules/start/shared/start-gateway.model';
-import {StartItemStatusModel} from '../../../../../modules/start/shared/start-item-status.model';
 import {NetworksService} from '../../../../../modules/devices/networks/shared/networks.service';
+import {DeviceDowntimeGatewayModel} from './device-downtime-gateway.model';
+import {NetworksHistoryModel} from '../../../../../modules/devices/networks/shared/networks-history.model';
+import {DeviceInstancesHistoryModel} from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
 
 const stateConnected = 'connected';
 const stateDisconnected = 'disconnected';
@@ -69,7 +69,7 @@ export class DeviceDowntimeGatewayService {
 
     getDevicesDowntimePerGateway(widget: WidgetModel): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-            this.networksService.getGatewayHistory('7d').subscribe((gateways) => {
+            this.networksService.getNetworksHistory('7d').subscribe((gateways) => {
                 observer.next(this.setDevicesDowntimePerGatewayChartValues(widget.id,
                     this.getGatewayDowntimeDataTableArray(widget.properties.hideZeroPercentage || false, gateways)));
                 observer.complete();
@@ -95,7 +95,7 @@ export class DeviceDowntimeGatewayService {
         );
     }
 
-    private getGatewayDowntimeDataTableArray(hideZeroPercentage: boolean, gateways: StartGatewayModel[]): ChartDataTableModel {
+    private getGatewayDowntimeDataTableArray(hideZeroPercentage: boolean, gateways: NetworksHistoryModel[]): ChartDataTableModel {
         const dataTable = new ChartDataTableModel([['Name', 'Percentage', {role: 'annotation'}, {role: 'style'}]]);
         gateways.forEach((gateway) => {
             const time = this.calcDisconnectedTime(gateway).failureRatio;
@@ -111,9 +111,9 @@ export class DeviceDowntimeGatewayService {
         return dataTable;
     }
 
-    private calcDisconnectedTime(item: StartDeviceModel | StartGatewayModel): StartItemStatusModel {
+    private calcDisconnectedTime(item: NetworksHistoryModel): DeviceDowntimeGatewayModel {
 
-        const itemStatus = new StartItemStatusModel(0, 0, 0, 0, 0, 0, item.name);
+        const itemStatus = new DeviceDowntimeGatewayModel(0, 0, 0, 0, 0, 0, item.name);
         if (item.log_history.values === null) {
             switch (item.log_state) {
                 case stateConnected: {

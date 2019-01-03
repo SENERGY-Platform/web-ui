@@ -21,9 +21,7 @@ import {
 import {DeviceDowntimeListService} from './shared/device-downtime-list.service';
 import {DeviceDowntimeListModel} from './shared/device-downtime-list.model';
 import {Subscription} from 'rxjs';
-import {ChartsModel} from '../charts/shared/charts.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {StartItemStatusModel} from '../../modules/start/shared/start-item-status.model';
 
 @Component({
     selector: 'senergy-device-downtime-list',

@@ -17,15 +17,13 @@
 import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
 
-import {StartComponent} from './modules/start/start.component';
 import {DashboardComponent} from './modules/dashboard/dashboard.component';
 
 const init = {path: '', redirectTo: '/dashboard', pathMatch: 'full'};
-const start = {path: 'start', pathMatch: 'full',  component: StartComponent};
 const dashboard = {path: 'dashboard', pathMatch: 'full',  component: DashboardComponent};
 
 @NgModule({
-    imports: [RouterModule.forRoot([init, start, dashboard])]
+    imports: [RouterModule.forRoot([init, dashboard])]
 })
 export class AppRoutingModule {
 

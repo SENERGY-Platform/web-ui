@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import { TestBed, inject } from '@angular/core/testing';
+export interface NetworksHistoryModel {
+    name: string;
+    devices: string[];
+    log_state: string;
+    log_history: {values: LogHistoryValues[] | null};
+    log_edge: (string|boolean)[] | null;
+}
 
-import { StartService } from './start.service';
+interface LogHistoryValues {
+    0: number;      /** time          */
+    1: boolean;     /** connected     */
+    2: string;      /** connectorName */
+}
 
-describe('StartService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [StartService]
-    });
-  });
-
-  it('should be created', inject([StartService], (service: StartService) => {
-    expect(service).toBeTruthy();
-  }));
-});

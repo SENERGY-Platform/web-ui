@@ -25,8 +25,8 @@ import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-wid
 import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ChartDataTableModel} from '../../../../../core/components/chart/chart-data-table.model';
 import {DeviceTotalDowntimeEditDialogComponent} from '../dialogs/device-total-downtime-edit-dialog.component';
-import {StartDeviceModel} from '../../../../../modules/start/shared/start-device.model';
 import {DeviceInstancesService} from '../../../../../modules/devices/device-instances/shared/device-instances.service';
+import {DeviceInstancesHistoryModel} from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
 
 const customColor = '#4484ce'; // /* cc */
 const stateTrue = true;
@@ -67,7 +67,7 @@ export class DeviceTotalDowntimeService {
 
     getTotalDowntime(widgetId: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-            this.deviceInstancesService.getDeviceHistory('7d').subscribe((devices: StartDeviceModel[]) => {
+            this.deviceInstancesService.getDeviceHistory('7d').subscribe((devices: DeviceInstancesHistoryModel[]) => {
                 observer.next(this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(devices)));
                 observer.complete();
             });
@@ -91,7 +91,7 @@ export class DeviceTotalDowntimeService {
         );
     }
 
-    private processTimelineFailureRatio(devices: StartDeviceModel[]): ChartDataTableModel {
+    private processTimelineFailureRatio(devices: DeviceInstancesHistoryModel[]): ChartDataTableModel {
         const interval: { stateConnected: number, stateDisconnected: number }[] = [];
         let intervalIndex = 0;
         let timeLeft = intervalDurationInMs;
@@ -101,7 +101,7 @@ export class DeviceTotalDowntimeService {
             interval.push({stateConnected: 0, stateDisconnected: 0});
         }
 
-        devices.forEach((device: StartDeviceModel) => {
+        devices.forEach((device: DeviceInstancesHistoryModel) => {
 
             intervalIndex = 0;
             timeLeft = intervalDurationInMs;

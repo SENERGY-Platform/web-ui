@@ -42,7 +42,6 @@ export class SidenavService {
         const sections: SidenavSectionModel[] = [];
 
         sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []));
-        sections.push(new SidenavSectionModel('Home', 'link', 'home', '/start', []));
 
         sections.push(new SidenavSectionModel('Applications', 'toggle', 'apps', '/apps', [
             new SidenavPageModel('Dashboard', 'link', 'dashboard', '/apps/dashboard'),

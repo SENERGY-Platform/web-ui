@@ -25,12 +25,10 @@ import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared
 import {ErrorHandlerService} from '../../../../../core/services/error-handler.service';
 import {DeviceGatewayEditDialogComponent} from '../dialogs/device-gateway-edit-dialog.component';
 import {Observable} from 'rxjs';
-import {StartGatewayModel} from '../../../../../modules/start/shared/start-gateway.model';
 import {ChartDataTableModel} from '../../../../../core/components/chart/chart-data-table.model';
-import {environment} from '../../../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
 import {ChartsModel} from '../../../shared/charts.model';
 import {NetworksService} from '../../../../../modules/devices/networks/shared/networks.service';
+import {NetworksHistoryModel} from '../../../../../modules/devices/networks/shared/networks-history.model';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -66,7 +64,7 @@ export class DeviceGatewayService {
 
     getDevicesPerGateway(widgetId: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-                this.networksService.getGatewayHistory('1h').subscribe((gateways: StartGatewayModel[]) => {
+                this.networksService.getNetworksHistory('1h').subscribe((gateways: NetworksHistoryModel[]) => {
                     observer.next(this.setDevicesPerGatewayChartValues(widgetId, this.getGatewayDataTableArray(gateways)));
                     observer.complete();
                 });
@@ -90,7 +88,7 @@ export class DeviceGatewayService {
         );
     }
 
-    private getGatewayDataTableArray(gateways: StartGatewayModel[]): ChartDataTableModel {
+    private getGatewayDataTableArray(gateways: NetworksHistoryModel[]): ChartDataTableModel {
         const dataTable = new ChartDataTableModel([['Name', 'Count', {role: 'annotation'}, {role: 'style'}]]);
         gateways.forEach((gateway) => {
             const count = gateway.devices === null ? 0 : gateway.devices.length;

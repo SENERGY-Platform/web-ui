@@ -21,13 +21,11 @@ import {DeviceDowntimeListEditDialogComponent} from '../dialogs/device-downtime-
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {Observable} from 'rxjs';
-import {StartDeviceModel} from '../../../modules/start/shared/start-device.model';
-import {environment} from '../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {DeviceDowntimeListModel} from './device-downtime-list.model';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
+import {DeviceInstancesHistoryModel} from '../../../modules/devices/device-instances/shared/device-instances-history.model';
 
 const stateConnected = 'connected';
 const stateDisconnected = 'disconnected';
@@ -67,14 +65,14 @@ export class DeviceDowntimeListService {
 
     getDevicesDowntime(): Observable<DeviceDowntimeListModel[]> {
         return new Observable<DeviceDowntimeListModel[]>((observer) => {
-            this.deviceInstancesService.getDeviceHistory('7d').subscribe((devices: StartDeviceModel[]) => {
+            this.deviceInstancesService.getDeviceHistory('7d').subscribe((devices: DeviceInstancesHistoryModel[]) => {
                 observer.next(this.calcDevicesConnectionTime(devices));
                 observer.complete();
             });
         });
     }
 
-    private calcDevicesConnectionTime(devices: StartDeviceModel[]): DeviceDowntimeListModel[] {
+    private calcDevicesConnectionTime(devices: DeviceInstancesHistoryModel[]): DeviceDowntimeListModel[] {
         const deviceArray: DeviceDowntimeListModel[] = [];
         if (devices !== null) {
             devices.forEach(device => {
@@ -87,7 +85,7 @@ export class DeviceDowntimeListService {
         return deviceArray.slice(0, 50);
     }
 
-    private calcDisconnectedTime(item: StartDeviceModel): DeviceDowntimeListModel {
+    private calcDisconnectedTime(item: DeviceInstancesHistoryModel): DeviceDowntimeListModel {
 
         const itemStatus = new DeviceDowntimeListModel(0, 0, 0, 0, 0, 0, item.name, '', '');
         if (item.log_history.values === null) {

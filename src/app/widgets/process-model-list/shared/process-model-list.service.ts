@@ -21,7 +21,6 @@ import {ProcessModelListEditDialogComponent} from '../dialogs/process-model-list
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {Observable} from 'rxjs';
-import {StartProcessModel} from '../../../modules/start/shared/start-process.model';
 import {PermissionsProcessModel} from '../../../modules/permissions/shared/permissions-process.model';
 import {PermissionsService} from '../../../modules/permissions/shared/permissions.service';
 import {ProcessModelListModel} from './process-model-list.model';
@@ -54,7 +53,7 @@ export class ProcessModelListService {
     }
 
     getProcesses(): Observable<ProcessModelListModel[]> {
-        return new Observable<StartProcessModel[]>((observer) => {
+        return new Observable<ProcessModelListModel[]>((observer) => {
             this.permissionsService.getProcessModels('', 10, 0, 'date', 'desc').subscribe((processes: PermissionsProcessModel[]) => {
                 observer.next(this.prettifyProcessData(processes));
                 observer.complete();

@@ -21,7 +21,6 @@ import {AppComponent} from './app.component';
 import {CoreModule} from './core/core.module';
 import {AppRoutingModule} from './/app-routing.module';
 import {AppsModule} from './modules/apps/apps.module';
-import {StartModule} from './modules/start/start.module';
 import {HttpClientModule} from '@angular/common/http';
 import {KeycloakAngularModule, KeycloakService} from 'keycloak-angular';
 import {keycloakInitializerService} from './core/services/keycloak-initializer.service';
@@ -41,7 +40,6 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
         AppRoutingModule,
         DashboardModule,
         AppsModule,
-        StartModule,
         DevicesModule,
         KeycloakAngularModule,
         DataModule,

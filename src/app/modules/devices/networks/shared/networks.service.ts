@@ -24,7 +24,7 @@ import {NetworksModel} from './networks.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {NetworksEditDialogComponent} from '../dialogs/networks-edit-dialog.component';
 import {NetworksDeleteDialogComponent} from '../dialogs/networks-delete-dialog.component';
-import {StartGatewayModel} from '../../../start/shared/start-gateway.model';
+import {NetworksHistoryModel} from './networks-history.model';
 
 @Injectable({
     providedIn: 'root'
@@ -62,10 +62,10 @@ export class NetworksService {
         );
     }
 
-    getGatewayHistory(duration: string): Observable<StartGatewayModel[]> {
-        return this.http.get<StartGatewayModel[]>(environment.apiAggregatorUrl + '/history/gateways/' + duration).pipe(
+    getNetworksHistory(duration: string): Observable<NetworksHistoryModel[]> {
+        return this.http.get<NetworksHistoryModel[]>(environment.apiAggregatorUrl + '/history/gateways/' + duration).pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getGatewayHistory', []))
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworksHistory', []))
         );
     }
 

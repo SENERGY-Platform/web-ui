@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-export interface StartGatewayModel {
-    name: string;
-    devices: string[];
-    log_state: string;
-    log_history: {values: LogHistoryValues[] | null};
-    log_edge: (string|boolean)[] | null;
+export class DeviceDowntimeGatewayModel {
+    constructor(
+        public timeConnectedInMs: number,
+        public timeConnectedInS: number,
+        public timeDisconnectedInMs: number,
+        public timeDisconnectedInMin: number,
+        public failureRate: number,
+        public failureRatio: number,
+        public name: string,
+    ) {
+    }
 }
-
-interface LogHistoryValues {
-    0: number;      /** time          */
-    1: boolean;     /** connected     */
-    2: string;      /** connectorName */
-}
-
