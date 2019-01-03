@@ -25,7 +25,6 @@ import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashb
 import {PermissionsService} from '../../../modules/permissions/shared/permissions.service';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {catchError} from 'rxjs/operators';
-import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 
 @Injectable({
@@ -37,7 +36,6 @@ export class ProcessStateService {
                 private dashboardService: DashboardService,
                 private permissionsService: PermissionsService,
                 private deploymentService: DeploymentsService,
-                private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService) {
     }
 

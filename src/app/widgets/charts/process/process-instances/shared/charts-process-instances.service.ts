@@ -15,7 +15,6 @@
  */
 
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {ChartsModel} from '../../../shared/charts.model';
 import {MonitorProcessModel} from '../../../../../modules/processes/monitor/shared/monitor-process.model';
@@ -33,8 +32,7 @@ import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared
 })
 export class ChartsProcessInstancesService {
 
-    constructor(private http: HttpClient,
-                private monitorService: MonitorService,
+    constructor(private monitorService: MonitorService,
                 private elementSizeService: ElementSizeService,
                 private dialog: MatDialog,
                 private dashboardService: DashboardService) {

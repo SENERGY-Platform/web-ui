@@ -24,13 +24,11 @@ import {DevicesStateService} from './shared/devices-state.service';
 import {DevicesStateModel} from './shared/devices-state.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
 
 @Component({
     selector: 'senergy-devices-state',
     templateUrl: './devices-state.component.html',
     styleUrls: ['./devices-state.component.css'],
-    providers: [HttpClient],
 })
 export class DevicesStateComponent implements OnInit, OnDestroy {
 

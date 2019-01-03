@@ -15,7 +15,6 @@
  */
 
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {ChartsModel} from '../../../shared/charts.model';
 import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
@@ -27,9 +26,6 @@ import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared
 import {ChartDataTableModel} from '../../../../../core/components/chart/chart-data-table.model';
 import {DeviceDowntimeGatewayEditDialogComponent} from '../dialogs/device-downtime-gateway-edit-dialog.component';
 import {StartDeviceModel} from '../../../../../modules/start/shared/start-device.model';
-import {environment} from '../../../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
-import {ErrorHandlerService} from '../../../../../core/services/error-handler.service';
 import {StartGatewayModel} from '../../../../../modules/start/shared/start-gateway.model';
 import {StartItemStatusModel} from '../../../../../modules/start/shared/start-item-status.model';
 import {NetworksService} from '../../../../../modules/devices/networks/shared/networks.service';
@@ -48,12 +44,10 @@ const customColor = '#4484ce'; // /* cc */
 })
 export class DeviceDowntimeGatewayService {
 
-    constructor(private http: HttpClient,
-                private monitorService: MonitorService,
+    constructor(private monitorService: MonitorService,
                 private elementSizeService: ElementSizeService,
                 private dialog: MatDialog,
                 private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService,
                 private networksService: NetworksService) {
     }
 
