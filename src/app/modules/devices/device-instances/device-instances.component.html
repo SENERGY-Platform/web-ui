@@ -43,7 +43,7 @@
                         <div fxLayout="row" fxLayout="row" fxLayoutAlign="start center" fxFill>
                             <div fxFlex="70" fxLayout="column">
                                 <div class="truncate" matTooltip="{{device.name}}">{{device.name}}</div>
-                                <div fxLayout="row">
+                                <div fxLayout="row" class="truncate">
                                     <mat-icon matTooltip="Device is shared" *ngIf="userID !== device.creator"
                                               color="accent" class="shared">people
                                     </mat-icon>

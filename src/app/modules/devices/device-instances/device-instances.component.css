@@ -62,6 +62,7 @@ mat-grid-list {
     cursor: pointer;
     text-decoration: underline;
     max-width: 20ch;
+    min-width: 3ch;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
