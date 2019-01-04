@@ -21,7 +21,13 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
 import {DeviceInstancesModel} from './device-instances.model';
 import {Observable} from 'rxjs';
-import {DeviceInstancesHistoryModel} from './device-instances-history.model';​
+import {DeviceInstancesHistoryModel} from './device-instances-history.model';
+import {MatDialog, MatDialogConfig} from '@angular/material';
+import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
+import {DeviceTypeModel} from '../../device-types/shared/device-type.model';
+import {DeviceTypeService} from '../../device-types/shared/device-type.service';
+
+​
 
 @Injectable({
     providedIn: 'root'
@@ -31,7 +37,10 @@ export class DeviceInstancesService {
     private getDeviceHistoryObservable: Observable<DeviceInstancesHistoryModel[]> | null = null;
 ​
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
+    constructor(private dialog: MatDialog,
+                private http: HttpClient,
+                private errorHandlerService: ErrorHandlerService,
+                private deviceTypeService: DeviceTypeService) {
     }
 
     getDeviceInstances(searchText: string, limit: number, offset: number, value: string, order: string): Observable<DeviceInstancesModel[]> {
@@ -59,7 +68,6 @@ export class DeviceInstancesService {
     }
 
 
-
     getDeviceHistory(duration: string): Observable<DeviceInstancesHistoryModel[]> {
         if (this.getDeviceHistoryObservable === null) {
             this.getDeviceHistoryObservable = this.http.get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/history/devices/' + duration).pipe(
@@ -69,5 +77,19 @@ export class DeviceInstancesService {
             );
         }
         return this.getDeviceHistoryObservable;
+    }
+
+    openDeviceServiceDialog(deviceTypeId: string): void {
+
+        this.deviceTypeService.getDeviceType(deviceTypeId).subscribe((deviceType: DeviceTypeModel | null) => {
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.disableClose = false;
+            if (deviceType) {
+                dialogConfig.data = {
+                    services: deviceType.services,
+                };
+            }
+            const editDialogRef = this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
+        });
     }
 }

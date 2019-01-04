@@ -58,7 +58,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     constructor(private searchbarService: SearchbarService,
                 private responsiveService: ResponsiveService,
-                private deviceinstancesService: DeviceInstancesService,
+                private deviceInstancesService: DeviceInstancesService,
                 private keycloakService: KeycloakService) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
@@ -103,6 +103,10 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         this.getDeviceInstances(true);
     }
 
+    service(deviceTypeId: string): void {
+        this.deviceInstancesService.openDeviceServiceDialog(deviceTypeId);
+    }
+
     private getDeviceInstances(reset: boolean) {
         if (reset) {
             this.deviceInstances = [];
@@ -111,7 +115,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             this.ready = false;
         }
         if (this.selectedTag === '') {
-            this.deviceinstancesService.getDeviceInstances(
+            this.deviceInstancesService.getDeviceInstances(
                 this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
                 (deviceInstances: DeviceInstancesModel[]) => {
                     if (deviceInstances.length !== this.limit) {
@@ -121,7 +125,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                     this.ready = true;
                 });
         } else {
-            this.deviceinstancesService.getDeviceInstancesByTag(this.selectedTagType, this.selectedTag, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+            this.deviceInstancesService.getDeviceInstancesByTag(this.selectedTagType, this.selectedTag, this.sortAttribute.value, this.sortAttribute.order).subscribe(
                 (deviceInstances: DeviceInstancesModel[]) => {
                     this.allDataLoaded = true;
                     this.deviceInstances = this.deviceInstances.concat(deviceInstances);

@@ -19,9 +19,9 @@ import {RouterModule} from '@angular/router';
 import {
     MatButtonModule,
     MatCardModule, MatChipsModule,
-    MatDialogModule, MatFormFieldModule,
+    MatDialogModule, MatDividerModule, MatFormFieldModule,
     MatGridListModule,
-    MatIconModule, MatInputModule, MatMenuModule,
+    MatIconModule, MatInputModule, MatListModule, MatMenuModule,
     MatTooltipModule
 } from '@angular/material';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -36,6 +36,7 @@ import {MaintenanceComponent} from './maintenance/maintenance.component';
 import {CoreModule} from '../../core/core.module';
 import {NetworksEditDialogComponent} from './networks/dialogs/networks-edit-dialog.component';
 import {NetworksDeleteDialogComponent} from './networks/dialogs/networks-delete-dialog.component';
+import {DeviceInstancesServiceDialogComponent} from './device-instances/dialogs/device-instances-service-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -63,6 +64,8 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         MatFormFieldModule,
         MatInputModule,
         MatChipsModule,
+        MatListModule,
+        MatDividerModule,
         RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes, maintenance])],
     declarations: [
         NetworksComponent,
@@ -72,8 +75,12 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         DeviceTypesComponent,
         ValueTypesComponent,
         MaintenanceComponent,
+        DeviceInstancesServiceDialogComponent,
     ],
-    entryComponents: [NetworksEditDialogComponent, NetworksDeleteDialogComponent]
+    entryComponents: [NetworksEditDialogComponent,
+        NetworksDeleteDialogComponent,
+        DeviceInstancesServiceDialogComponent,
+    ]
 })
 
 export class DevicesModule {
