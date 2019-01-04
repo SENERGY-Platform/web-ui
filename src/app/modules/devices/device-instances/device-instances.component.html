@@ -55,9 +55,27 @@
                             </div>
                             <div fxFlex="30" fxLayout="row" fxLayoutAlign="end center">
                                 <senergy-state-icon [state]="device.log_state"></senergy-state-icon>
-                                <button mat-icon-button color="accent">
+                                <button mat-icon-button [matMenuTriggerFor]="deviceMenu" color="accent">
                                     <mat-icon>more_vert</mat-icon>
                                 </button>
+                                <mat-menu #deviceMenu="matMenu" [overlapTrigger]="false">
+                                    <button mat-menu-item>
+                                        <mat-icon>info</mat-icon>
+                                        Services
+                                    </button>
+                                    <button mat-menu-item>
+                                        <mat-icon>folder_shared</mat-icon>
+                                        Share
+                                    </button>
+                                    <button mat-menu-item>
+                                        <mat-icon>edit</mat-icon>
+                                        Edit
+                                    </button>
+                                    <button mat-menu-item>
+                                        <mat-icon>delete</mat-icon>
+                                        Delete
+                                    </button>
+                                </mat-menu>
                             </div>
                         </div>
                     </mat-grid-tile-footer>
