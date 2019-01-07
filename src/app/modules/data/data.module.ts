@@ -35,7 +35,6 @@ import {ExportModule} from './export/export.module';
 import {FlowDesignerComponent} from './flow-designer/flow-designer.component';
 import {FormsModule} from '@angular/forms';
 import {FlowRepoComponent} from './flow-repo/flow-repo.component';
-import {OperatorComponent} from './operator-repo/operator/operator.component';
 import {FlowRepoModule} from './flow-repo/flow-repo.module';
 import {PipelineRegistryComponent} from './pipeline-registry/pipeline-registry.component';
 
