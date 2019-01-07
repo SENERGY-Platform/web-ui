@@ -28,6 +28,7 @@ import {DevicesModule} from './modules/devices/devices.module';
 import {DashboardModule} from './modules/dashboard/dashboard.module';
 import {DataModule} from './modules/data/data.module';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {ProcessesModule} from "./modules/processes/processes.module";
 
 @NgModule({
     declarations: [
@@ -43,6 +44,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
         DevicesModule,
         KeycloakAngularModule,
         DataModule,
+        ProcessesModule,
         BrowserAnimationsModule
     ],
     providers: [
