@@ -60,11 +60,10 @@ export class PermissionsService {
         );
     }
 
-    setUserRight(user: string, kind: string, resourceId: string, rights: PermissionsRightsModel) {
+    setUserRight(user: string, kind: string, resourceId: string, rights: PermissionsRightsModel): Observable<PermissionsResponseModel> {
         return this.http.put<any>(environment.permissionCommandUrl + '/user/' + encodeURIComponent(user) + '/' +
             encodeURIComponent(kind) + '/' + encodeURIComponent(resourceId) + '/' + rightObjToStr(rights), {}).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(PermissionsService.name, 'setUserRight', []))
+            catchError(this.errorHandlerService.handleError(PermissionsService.name, 'setUserRight', {status: 'Error setUserRight!'}))
         );
 
         function rightObjToStr(right: PermissionsRightsModel): string {

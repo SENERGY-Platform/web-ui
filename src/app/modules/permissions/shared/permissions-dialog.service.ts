@@ -24,9 +24,10 @@ import {PermissionsResourceModel} from './permissions-resource.model';
 import {PermissionsUserModel} from './permissions-user.model';
 import {PermissionsRightsModel} from './permissions-rights.model';
 import {PermissionsEditModel} from './permissions-edit.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {PermissionDialogComponent} from '../dialogs/permission/permission-dialog.component';
 import {PermissionsService} from './permissions.service';
+import {PermissionsResponseModel} from './permissions-response.model';
 
 @Injectable({
     providedIn: 'root'
@@ -36,7 +37,8 @@ export class PermissionsDialogService {
     constructor(private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService,
                 private dialog: MatDialog,
-                private permissionsService: PermissionsService) {
+                private permissionsService: PermissionsService,
+                public snackBar: MatSnackBar) {
     }
 
     openPermissionDialog(kind: string, id: string, name: string): void {
@@ -87,12 +89,20 @@ export class PermissionsDialogService {
     }
 
     private savePermDialogChanges(permissions: PermissionsEditModel[], kind: string, id: string): void {
+        const array: Observable<any>[] = [];
         permissions.forEach((permission: PermissionsEditModel) => {
             if (permission.deleted) {
-                this.permissionsService.removeUserRight(permission.userId, kind, id).subscribe();
+                array.push(this.permissionsService.removeUserRight(permission.userId, kind, id));
             } else {
-                this.permissionsService.setUserRight(permission.userId, kind, id, permission.userRights).subscribe();
+                array.push(this.permissionsService.setUserRight(permission.userId, kind, id, permission.userRights));
             }
+        });
+
+        forkJoin(array).subscribe(() => {
+        }, () => {
+            this.snackBar.open('Error while saving permission!', '', {duration: 2000});
+        }, () => {
+            this.snackBar.open('Permission saved succesfully.', '', {duration: 2000});
         });
     }
 }
