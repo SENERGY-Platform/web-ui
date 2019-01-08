@@ -41,7 +41,7 @@
         <ng-container matColumnDef="read">
             <th mat-header-cell *matHeaderCellDef> Read</th>
             <td mat-cell *matCellDef="let element">
-                <mat-checkbox [(ngModel)]="element.userRights.read" [disabled]="element.userId === userId"></mat-checkbox>
+                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.read" [disabled]="element.userId === userId"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
@@ -50,7 +50,7 @@
         <ng-container matColumnDef="write">
             <th mat-header-cell *matHeaderCellDef> Write</th>
             <td mat-cell *matCellDef="let element">
-                <mat-checkbox [(ngModel)]="element.userRights.write"></mat-checkbox>
+                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.write"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
@@ -59,7 +59,7 @@
         <ng-container matColumnDef="execute">
             <th mat-header-cell *matHeaderCellDef> Execute</th>
             <td mat-cell *matCellDef="let element">
-                <mat-checkbox [(ngModel)]="element.userRights.execute"></mat-checkbox>
+                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.execute"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
@@ -68,7 +68,7 @@
         <ng-container matColumnDef="administrate">
             <th mat-header-cell *matHeaderCellDef> Administrate</th>
             <td mat-cell *matCellDef="let element">
-                <mat-checkbox [(ngModel)]="element.userRights.administrate" [disabled]="element.userId === userId"></mat-checkbox>
+                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.administrate" [disabled]="element.userId === userId"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
