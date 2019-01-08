@@ -17,15 +17,12 @@
 
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {environment} from '../../../../environments/environment';
-import {PermissionsProcessModel} from './permissions-process.model';
 import {forkJoin, Observable} from 'rxjs';
-import {catchError, map} from 'rxjs/internal/operators';
+import {catchError} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {PermissionsResourceModel} from './permissions-resource.model';
 import {PermissionsUserModel} from './permissions-user.model';
 import {PermissionsRightsModel} from './permissions-rights.model';
-import {PermissionsResponseModel} from './permissions-response.model';
 import {PermissionsEditModel} from './permissions-edit.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {PermissionDialogComponent} from '../dialogs/permission/permission-dialog.component';

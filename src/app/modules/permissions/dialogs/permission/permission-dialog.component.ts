@@ -21,9 +21,6 @@ import {PermissionsEditModel} from '../../shared/permissions-edit.model';
 import {FormControl} from '@angular/forms';
 import {AuthorizationService} from '../../../../core/services/authorization.service';
 import {PermissionsUserModel} from '../../shared/permissions-user.model';
-import {Observable} from 'rxjs';
-import {environment} from '../../../../../environments/environment';
-import {catchError} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 import {PermissionsService} from '../../shared/permissions.service';
 
