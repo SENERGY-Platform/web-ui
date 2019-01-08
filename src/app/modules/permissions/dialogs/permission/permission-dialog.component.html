@@ -1,0 +1,102 @@
+<!--
+  ~ Copyright 2019 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>Permissions for {{name}}</h2>
+
+<mat-dialog-content>
+    <table #table mat-table [dataSource]="permissions">
+
+        <ng-container matColumnDef="user">
+            <th mat-header-cell *matHeaderCellDef> User</th>
+            <td mat-cell *matCellDef="let element"> {{element.userName}} </td>
+            <td mat-footer-cell *matFooterCellDef>
+                <form class="user-input">
+                    <mat-form-field color="accent">
+                        <input matInput placeholder="Add user"
+                               [formControl]="formControl">
+                        <mat-error *ngIf="formControl.hasError('invalid') === true">
+                            User unknown!
+                        </mat-error>
+                        <mat-error *ngIf="formControl.hasError('userExists') === true">
+                            User already exists!
+                        </mat-error>
+                    </mat-form-field>
+                </form>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="read">
+            <th mat-header-cell *matHeaderCellDef> Read</th>
+            <td mat-cell *matCellDef="let element">
+                <mat-checkbox [(ngModel)]="element.userRights.read" [disabled]="element.userId === userId"></mat-checkbox>
+            </td>
+            <td mat-footer-cell *matFooterCellDef>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="write">
+            <th mat-header-cell *matHeaderCellDef> Write</th>
+            <td mat-cell *matCellDef="let element">
+                <mat-checkbox [(ngModel)]="element.userRights.write"></mat-checkbox>
+            </td>
+            <td mat-footer-cell *matFooterCellDef>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="execute">
+            <th mat-header-cell *matHeaderCellDef> Execute</th>
+            <td mat-cell *matCellDef="let element">
+                <mat-checkbox [(ngModel)]="element.userRights.execute"></mat-checkbox>
+            </td>
+            <td mat-footer-cell *matFooterCellDef>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="administrate">
+            <th mat-header-cell *matHeaderCellDef> Administrate</th>
+            <td mat-cell *matCellDef="let element">
+                <mat-checkbox [(ngModel)]="element.userRights.administrate" [disabled]="element.userId === userId"></mat-checkbox>
+            </td>
+            <td mat-footer-cell *matFooterCellDef>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef> Action</th>
+            <td mat-cell *matCellDef="let i = index; let element">
+                <button class="margin" mat-icon-button color="accent" (click)="deleteRow(i)" [disabled]="element.userId === userId">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </td>
+            <td mat-footer-cell *matFooterCellDef>
+                <button class="margin" mat-icon-button color="accent" (click)="addColumn()">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-footer-row *matFooterRowDef="displayedColumns" class="example-first-footer-row"></tr>
+    </table>
+
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
+    <button class="mat-raised-button mat-accent" (click)="save()">Save</button>
+</mat-dialog-actions>
+

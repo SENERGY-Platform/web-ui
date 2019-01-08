@@ -26,8 +26,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
 import {DeviceTypeModel} from '../../device-types/shared/device-type.model';
 import {DeviceTypeService} from '../../device-types/shared/device-type.service';
-
-​
+import {PermissionsService} from '../../../permissions/shared/permissions.service';​
 
 @Injectable({
     providedIn: 'root'
@@ -40,7 +39,8 @@ export class DeviceInstancesService {
     constructor(private dialog: MatDialog,
                 private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService,
-                private deviceTypeService: DeviceTypeService) {
+                private deviceTypeService: DeviceTypeService,
+                private permissionsService: PermissionsService,) {
     }
 
     getDeviceInstances(searchText: string, limit: number, offset: number, value: string, order: string): Observable<DeviceInstancesModel[]> {
@@ -89,7 +89,8 @@ export class DeviceInstancesService {
                     services: deviceType.services,
                 };
             }
-            const editDialogRef = this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
+            this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
         });
     }
+
 }

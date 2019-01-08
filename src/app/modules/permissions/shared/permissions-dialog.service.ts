@@ -1,0 +1,101 @@
+/*
+ *
+ *  Copyright 2019 InfAI (CC SES)
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {environment} from '../../../../environments/environment';
+import {PermissionsProcessModel} from './permissions-process.model';
+import {forkJoin, Observable} from 'rxjs';
+import {catchError, map} from 'rxjs/internal/operators';
+import {ErrorHandlerService} from '../../../core/services/error-handler.service';
+import {PermissionsResourceModel} from './permissions-resource.model';
+import {PermissionsUserModel} from './permissions-user.model';
+import {PermissionsRightsModel} from './permissions-rights.model';
+import {PermissionsResponseModel} from './permissions-response.model';
+import {PermissionsEditModel} from './permissions-edit.model';
+import {MatDialog, MatDialogConfig} from '@angular/material';
+import {PermissionDialogComponent} from '../dialogs/permission/permission-dialog.component';
+import {PermissionsService} from './permissions.service';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class PermissionsDialogService {
+
+    constructor(private http: HttpClient,
+                private errorHandlerService: ErrorHandlerService,
+                private dialog: MatDialog,
+                private permissionsService: PermissionsService) {
+    }
+
+    openPermissionDialog(kind: string, id: string, name: string): void {
+
+        const permissionsIn: PermissionsEditModel[] = [];
+
+        this.permissionsService.getResourcePermissions(kind, id).subscribe((permissionsModel: PermissionsResourceModel) => {
+            Object.entries(permissionsModel.user_rights).forEach((resp: (string | PermissionsRightsModel)[]) => {
+                permissionsIn.push({userId: <string>resp[0], userName: '', userRights: <PermissionsRightsModel>resp[1]});
+            });
+
+            this.getUserNames(permissionsIn).subscribe((users: PermissionsUserModel[]) => {
+                users.forEach((user: PermissionsUserModel, index: number) => {
+                    permissionsIn[index].userName = user.username;
+                });
+                this.openPermDialog(name, permissionsIn, kind, id);
+            });
+        });
+    }
+
+    private openPermDialog(name: string, permissionsIn: PermissionsEditModel[], kind: string, id: string) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {
+            name: name,
+            permissions: permissionsIn,
+        };
+        const editDialogRef = this.dialog.open(PermissionDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((permissionsOut: PermissionsEditModel[]) => {
+            if (permissionsOut !== undefined) {
+                this.savePermDialogChanges(permissionsOut, kind, id);
+            }
+        });
+    }
+
+    private getUserNames(permissions: PermissionsEditModel[]): Observable<PermissionsUserModel[]> {
+
+        const array: Observable<PermissionsUserModel>[] = [];
+
+        permissions.forEach((permission: PermissionsEditModel) => {
+            array.push(this.permissionsService.getUserById(permission.userId));
+        });
+
+        return forkJoin(array).pipe(
+            catchError(this.errorHandlerService.handleError(PermissionsDialogService.name, 'getUserNames', []))
+        );
+    }
+
+    private savePermDialogChanges(permissions: PermissionsEditModel[], kind: string, id: string): void {
+        permissions.forEach((permission: PermissionsEditModel) => {
+            if (permission.deleted) {
+                this.permissionsService.removeUserRight(permission.userId, kind, id).subscribe();
+            } else {
+                this.permissionsService.setUserRight(permission.userId, kind, id, permission.userRights).subscribe();
+            }
+        });
+    }
+}

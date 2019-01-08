@@ -24,6 +24,8 @@ import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {KeycloakService} from 'keycloak-angular';
 import {TagValuePipe} from '../../../core/pipe/tag-value.pipe';
+import {PermissionsService} from '../../permissions/shared/permissions.service';
+import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -59,7 +61,8 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     constructor(private searchbarService: SearchbarService,
                 private responsiveService: ResponsiveService,
                 private deviceInstancesService: DeviceInstancesService,
-                private keycloakService: KeycloakService) {
+                private keycloakService: KeycloakService,
+                private permissionsDialogService: PermissionsDialogService) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
 
@@ -105,6 +108,10 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     service(deviceTypeId: string): void {
         this.deviceInstancesService.openDeviceServiceDialog(deviceTypeId);
+    }
+
+    permission(device: DeviceInstancesModel): void {
+        this.permissionsDialogService.openPermissionDialog('deviceinstance', device.id, device.name);
     }
 
     private getDeviceInstances(reset: boolean) {
