@@ -21,9 +21,9 @@ import {ProcessModelListEditDialogComponent} from '../dialogs/process-model-list
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {Observable} from 'rxjs';
-import {PermissionsProcessModel} from '../../../modules/permissions/shared/permissions-process.model';
-import {PermissionsService} from '../../../modules/permissions/shared/permissions.service';
 import {ProcessModelListModel} from './process-model-list.model';
+import {ProcessModel} from '../../../modules/processes/process-repo/shared/process.model';
+import {ProcessRepoService} from "../../../modules/processes/process-repo/shared/process-repo.service";
 
 
 @Injectable({
@@ -33,7 +33,7 @@ export class ProcessModelListService {
 
     constructor(private dialog: MatDialog,
                 private dashboardService: DashboardService,
-                private permissionsService: PermissionsService,) {
+                private processRepoService: ProcessRepoService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -54,14 +54,14 @@ export class ProcessModelListService {
 
     getProcesses(): Observable<ProcessModelListModel[]> {
         return new Observable<ProcessModelListModel[]>((observer) => {
-            this.permissionsService.getProcessModels('', 10, 0, 'date', 'desc').subscribe((processes: PermissionsProcessModel[]) => {
+            this.processRepoService.getProcessModels('', 10, 0, 'date', 'desc').subscribe((processes: ProcessModel[]) => {
                 observer.next(this.prettifyProcessData(processes));
                 observer.complete();
             });
         });
     }
 
-    private prettifyProcessData(processes: PermissionsProcessModel[]): ProcessModelListModel[] {
+    private prettifyProcessData(processes: ProcessModel[]): ProcessModelListModel[] {
         const processesArray: ProcessModelListModel[] = [];
         if (processes !== null) {
             processes.forEach(process => {

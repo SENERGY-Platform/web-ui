@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2019 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import { TestBed, inject } from '@angular/core/testing';
+export interface ProcessModel {
+    id: string;
+    name: string;
+    date: Date;
+    svg: string;
+    publish: boolean;
+    parent_id: string;
+}
 
-import { PermissionsService } from './permissions.service';
 
-describe('PermissionsService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [PermissionsService]
-    });
-  });
 
-  it('should be created', inject([PermissionsService], (service: PermissionsService) => {
-    expect(service).toBeTruthy();
-  }));
-});

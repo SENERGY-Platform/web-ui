@@ -22,10 +22,10 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 import {ProcessStateEditDialogComponent} from '../dialog/process-state-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {PermissionsService} from '../../../modules/permissions/shared/permissions.service';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {catchError} from 'rxjs/operators';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
+import {ProcessRepoService} from "../../../modules/processes/process-repo/shared/process-repo.service";
 
 @Injectable({
     providedIn: 'root'
@@ -34,7 +34,7 @@ export class ProcessStateService {
 
     constructor(private dialog: MatDialog,
                 private dashboardService: DashboardService,
-                private permissionsService: PermissionsService,
+                private processRepoService: ProcessRepoService,
                 private deploymentService: DeploymentsService,
                 private errorHandlerService: ErrorHandlerService) {
     }
@@ -76,7 +76,7 @@ export class ProcessStateService {
 
         const array: Observable<object[]>[] = [];
 
-        array.push(this.permissionsService.list('processmodel', 'r'));
+        array.push(this.processRepoService.list('processmodel', 'r'));
         array.push(this.deploymentService.getAll());
 
         return forkJoin(array).pipe(

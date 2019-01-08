@@ -39,8 +39,7 @@ export class ProcessModelListComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
     @Input() zoom = false;
 
-    constructor(private eventListService: ProcessModelListService,
-                private processModelListService: ProcessModelListService,
+    constructor(private processModelListService: ProcessModelListService,
                 private dashboardService: DashboardService) {
     }
 
