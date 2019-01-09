@@ -98,11 +98,16 @@ export class PermissionsDialogService {
             }
         });
 
-        forkJoin(array).subscribe(() => {
-        }, () => {
-            this.snackBar.open('Error while saving permission!', '', {duration: 2000});
-        }, () => {
-            this.snackBar.open('Permission saved succesfully.', '', {duration: 2000});
+        forkJoin(array).subscribe((responses: PermissionsResponseModel[]) => {
+            const countOk = responses.filter((response: PermissionsResponseModel) => {
+                return response.status === 'ok';
+            }).length;
+
+            if (countOk === responses.length) {
+                this.snackBar.open('Permission saved succesfully.', '', {duration: 2000});
+            } else {
+                this.snackBar.open('Error while saving permission!', '', {duration: 2000});
+            }
         });
     }
 }
