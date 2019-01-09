@@ -19,6 +19,7 @@ import {ExportService} from './shared/export.service';
 import {ExportModel} from './shared/export.model';
 import {environment} from '../../../../environments/environment';
 import {MatSnackBar} from '@angular/material';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 @Component({
     selector: 'senergy-export',
@@ -33,7 +34,8 @@ export class ExportComponent implements OnInit {
     url = environment.influxAPIURL;
 
     constructor(private exportService: ExportService,
-                public snackBar: MatSnackBar) {
+                public snackBar: MatSnackBar,
+                private dialogsService: DialogsService) {
     }
 
     ngOnInit() {
@@ -46,13 +48,18 @@ export class ExportComponent implements OnInit {
     }
 
     deleteExport(exp: ExportModel) {
-        const index = this.exports.indexOf(exp);
-        if (index > -1) {
-            this.exports.splice(index, 1);
-        }
-        this.exportService.stopPipeline(exp).subscribe();
-        this.snackBar.open('Export deleted', undefined, {
-            duration: 2000,
+        this.dialogsService.openDeleteDialog('export').afterClosed().subscribe((deleteExport: boolean) => {
+            if (deleteExport) {
+                const index = this.exports.indexOf(exp);
+                if (index > -1) {
+                    this.exports.splice(index, 1);
+                }
+                this.exportService.stopPipeline(exp).subscribe();
+                this.snackBar.open('Export deleted', undefined, {
+                    duration: 2000,
+                });
+            }
         });
+
     }
 }
