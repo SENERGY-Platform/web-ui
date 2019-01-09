@@ -110,6 +110,10 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         this.deviceInstancesService.openDeviceServiceDialog(deviceTypeId);
     }
 
+    edit(device: DeviceInstancesModel): void {
+        this.deviceInstancesService.openDeviceEditDialog(device);
+    }
+
     permission(device: DeviceInstancesModel): void {
         this.permissionsDialogService.openPermissionDialog('deviceinstance', device.id, device.name);
     }

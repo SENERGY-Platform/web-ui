@@ -37,6 +37,8 @@ import {CoreModule} from '../../core/core.module';
 import {NetworksEditDialogComponent} from './networks/dialogs/networks-edit-dialog.component';
 import {NetworksDeleteDialogComponent} from './networks/dialogs/networks-delete-dialog.component';
 import {DeviceInstancesServiceDialogComponent} from './device-instances/dialogs/device-instances-service-dialog.component';
+import {DeviceInstancesEditDialogComponent} from './device-instances/dialogs/device-instances-edit-dialog.component';
+import {FormsModule} from '@angular/forms';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -66,6 +68,8 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         MatChipsModule,
         MatListModule,
         MatDividerModule,
+        FormsModule,
+        MatChipsModule,
         RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes, maintenance])],
     declarations: [
         NetworksComponent,
@@ -76,10 +80,12 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         ValueTypesComponent,
         MaintenanceComponent,
         DeviceInstancesServiceDialogComponent,
+        DeviceInstancesEditDialogComponent,
     ],
     entryComponents: [NetworksEditDialogComponent,
         NetworksDeleteDialogComponent,
         DeviceInstancesServiceDialogComponent,
+        DeviceInstancesEditDialogComponent,
     ]
 })
 
