@@ -19,6 +19,7 @@ import {PipelineModel} from './shared/pipeline.model';
 import {PipelineRegistryService} from './shared/pipeline-registry.service';
 import {FlowEngineService} from '../flow-repo/shared/flow-engine.service';
 import {MatSnackBar, MatTable} from '@angular/material';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -36,7 +37,8 @@ export class PipelineRegistryComponent implements OnInit {
 
     constructor(private pipelineRegistryService: PipelineRegistryService,
                 private flowEngineService: FlowEngineService,
-                public snackBar: MatSnackBar) {
+                public snackBar: MatSnackBar,
+                private dialogsService: DialogsService) {
     }
 
     ngOnInit() {
@@ -47,16 +49,21 @@ export class PipelineRegistryComponent implements OnInit {
     }
 
     deletePipeline(pipe: PipelineModel) {
-        this.ready = false;
-        this.flowEngineService.deletePipeline(pipe.id).subscribe();
-        const index = this.pipes.indexOf(pipe);
-        if (index > -1) {
-            this.pipes.splice(index, 1);
-        }
-        this.table.renderRows();
-        this.ready = true;
-        this.snackBar.open('Pipeline deleted', undefined, {
-            duration: 2000,
+        this.dialogsService.openDeleteDialog('pipeline').afterClosed().subscribe((deletePipeline: boolean) => {
+            if (deletePipeline) {
+                this.ready = false;
+                this.flowEngineService.deletePipeline(pipe.id).subscribe();
+                const index = this.pipes.indexOf(pipe);
+                if (index > -1) {
+                    this.pipes.splice(index, 1);
+                }
+                this.table.renderRows();
+                this.ready = true;
+                this.snackBar.open('Pipeline deleted', undefined, {
+                    duration: 2000,
+                });
+            }
         });
+
     }
 }
