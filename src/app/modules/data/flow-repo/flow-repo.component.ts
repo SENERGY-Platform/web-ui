@@ -18,6 +18,7 @@ import {Component, OnInit} from '@angular/core';
 import {MatSnackBar} from '@angular/material';
 import {FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 @Component({
     selector: 'senergy-operator-repo',
@@ -29,7 +30,9 @@ export class FlowRepoComponent implements OnInit {
     flows: FlowModel[] = [];
     ready = false;
 
-    constructor(private flowRepoService: FlowRepoService, public snackBar: MatSnackBar) {
+    constructor(private flowRepoService: FlowRepoService,
+                public snackBar: MatSnackBar,
+                private dialogsService: DialogsService) {
     }
 
     ngOnInit() {
@@ -40,13 +43,18 @@ export class FlowRepoComponent implements OnInit {
     }
 
     deleteFlow(flow: FlowModel) {
-        const index = this.flows.indexOf(flow);
-        if (index > -1) {
-            this.flows.splice(index, 1);
-        }
-        this.flowRepoService.deleteFlow(flow).subscribe();
-        this.snackBar.open('Flow deleted', undefined, {
-            duration: 2000,
-        });
+        this.dialogsService.openDeleteDialog('flow').afterClosed().subscribe((deleteFlow: boolean) => {
+            if (deleteFlow) {
+                const index = this.flows.indexOf(flow);
+                if (index > -1) {
+                    this.flows.splice(index, 1);
+                }
+                this.flowRepoService.deleteFlow(flow).subscribe();
+                this.snackBar.open('Flow deleted', undefined, {
+                    duration: 2000,
+                });
+            }
+        })
+
     }
 }
