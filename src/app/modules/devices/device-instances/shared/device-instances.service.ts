@@ -63,10 +63,16 @@ export class DeviceInstancesService {
         }
     }
 
-    updateDeviceInstance(id: string, device: DeviceInstancesUpdateModel): Observable<any> {
-        return this.http.post<DeviceInstancesModel[]>
+    updateDeviceInstance(id: string, device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel> {
+        return this.http.post<DeviceInstancesUpdateModel>
         (environment.iotRepoUrl + '/deviceInstance/' + encodeURIComponent(id), device).pipe(
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', []))
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', {} as DeviceInstancesUpdateModel))
+        );
+    }
+
+    deleteDeviceInstance(id: string): Observable<DeviceInstancesUpdateModel | null> {
+        return this.http.delete<DeviceInstancesUpdateModel>(environment.iotRepoUrl + '/deviceInstance/' + encodeURIComponent(id)).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstance', null))
         );
     }
 
