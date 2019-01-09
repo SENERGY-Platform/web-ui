@@ -15,11 +15,11 @@
  */
 
 import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog} from '@angular/material';
 
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {WidgetFooterDeleteDialogComponent} from '../dialogs/widget-footer-delete-dialog.component';
+import {DialogsService} from '../../../../core/services/dialogs.service';
 
 @Injectable({
     providedIn: 'root'
@@ -27,16 +27,13 @@ import {WidgetFooterDeleteDialogComponent} from '../dialogs/widget-footer-delete
 export class WidgetFooterService {
 
     constructor(private dialog: MatDialog,
-                private dashboardService: DashboardService) {
+                private dashboardService: DashboardService,
+                private dialogsService: DialogsService) {
     }
 
     openDeleteWidgetDialog(dashboardId: string, widgetId: string): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        const editDialogRef = this.dialog.open(WidgetFooterDeleteDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((deleteWidget: boolean) => {
-           if (deleteWidget === true) {
+        this.dialogsService.openDeleteDialog('widget').afterClosed().subscribe((deleteWidget: boolean) => {
+            if (deleteWidget === true) {
                 this.dashboardService.deleteWidget(dashboardId, widgetId).subscribe(() => {
                     this.dashboardService.manipulateWidget(DashboardManipulationEnum.Delete, widgetId, null);
                 });

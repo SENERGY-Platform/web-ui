@@ -35,7 +35,6 @@ import {DeviceTypesComponent} from './device-types/device-types.component';
 import {MaintenanceComponent} from './maintenance/maintenance.component';
 import {CoreModule} from '../../core/core.module';
 import {NetworksEditDialogComponent} from './networks/dialogs/networks-edit-dialog.component';
-import {NetworksDeleteDialogComponent} from './networks/dialogs/networks-delete-dialog.component';
 import {DeviceInstancesServiceDialogComponent} from './device-instances/dialogs/device-instances-service-dialog.component';
 import {DeviceInstancesEditDialogComponent} from './device-instances/dialogs/device-instances-edit-dialog.component';
 import {FormsModule} from '@angular/forms';
@@ -74,7 +73,6 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,
-        NetworksDeleteDialogComponent,
         DeviceInstancesComponent,
         DeviceTypesComponent,
         ValueTypesComponent,
@@ -83,7 +81,6 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         DeviceInstancesEditDialogComponent,
     ],
     entryComponents: [NetworksEditDialogComponent,
-        NetworksDeleteDialogComponent,
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
     ]

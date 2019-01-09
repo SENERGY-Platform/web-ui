@@ -23,7 +23,7 @@ import {
     MatToolbarModule,
     MatMenuModule,
     MatDividerModule,
-    MatFormFieldModule, MatInputModule, MatProgressSpinnerModule, MatTooltipModule, MatListModule
+    MatFormFieldModule, MatInputModule, MatProgressSpinnerModule, MatTooltipModule, MatListModule, MatDialogModule
 } from '@angular/material';
 
 import {throwIfAlreadyLoaded} from './module-import-guard';
@@ -38,6 +38,7 @@ import {StateIconComponent} from './components/state-icon/state-icon.component';
 import {DiagramEditorComponent} from './components/diagram-editor/diagram-editor.component';
 import {FormsModule} from '@angular/forms';
 import {TagValuePipe} from './pipe/tag-value.pipe';
+import {DeleteDialogComponent} from './dialogs/delete-dialog.component';
 
 @NgModule({
     imports: [
@@ -55,7 +56,8 @@ import {TagValuePipe} from './pipe/tag-value.pipe';
         MatProgressSpinnerModule,
         MatTooltipModule,
         FormsModule,
-        MatListModule
+        MatListModule,
+        MatDialogModule,
     ],
     declarations: [
         SidenavComponent,
@@ -66,6 +68,7 @@ import {TagValuePipe} from './pipe/tag-value.pipe';
         StateIconComponent,
         DiagramEditorComponent,
         TagValuePipe,
+        DeleteDialogComponent,
     ],
     exports: [
         SidenavComponent,
@@ -76,6 +79,9 @@ import {TagValuePipe} from './pipe/tag-value.pipe';
         StateIconComponent,
         DiagramEditorComponent,
         TagValuePipe,
+    ],
+    entryComponents: [
+        DeleteDialogComponent,
     ]
 })
 

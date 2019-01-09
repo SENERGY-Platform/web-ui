@@ -31,7 +31,6 @@ import {WidgetHeaderComponent} from './components/widget-header/widget-header.co
 import {SwitchEditDialogComponent} from './switch/dialogs/switch-edit-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule, registerLocaleData} from '@angular/common';
-import {WidgetFooterDeleteDialogComponent} from './components/widget-footer/dialogs/widget-footer-delete-dialog.component';
 import {DevicesStateComponent} from './devices-state/devices-state.component';
 import {DevicesStateEditDialogComponent} from './devices-state/dialog/devices-state-edit-dialog.component';
 import {EventListComponent} from './event-list/event-list.component';
@@ -97,7 +96,6 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         SwitchComponent,
         WidgetHeaderComponent,
         SwitchEditDialogComponent,
-        WidgetFooterDeleteDialogComponent,
         DevicesStateComponent,
         DevicesStateEditDialogComponent,
         EventListComponent,
@@ -140,7 +138,6 @@ registerLocaleData(localeDe, 'de'); // todo: language;
     ],
     entryComponents: [
         SwitchEditDialogComponent,
-        WidgetFooterDeleteDialogComponent,
         DevicesStateEditDialogComponent,
         EventListEditDialogComponent,
         ChartsProcessInstancesEditDialogComponent,

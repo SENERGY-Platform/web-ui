@@ -26,7 +26,6 @@ import {
 import {CommonModule} from '@angular/common';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {DashboardNewDialogComponent} from './dialogs/dashboard-new-dialog.component';
-import {DashboardDeleteDialogComponent} from './dialogs/dashboard-delete-dialog.component';
 import {WidgetModule} from '../../widgets/widget.module';
 import {DashboardNewWidgetDialogComponent} from './dialogs/dashboard-new-widget-dialog.component';
 import {FormsModule} from '@angular/forms';
@@ -56,11 +55,9 @@ import {GridsterModule} from 'angular-gridster2';
     declarations: [
         DashboardComponent,
         DashboardNewDialogComponent,
-        DashboardDeleteDialogComponent,
         DashboardNewWidgetDialogComponent
     ],
     entryComponents: [DashboardNewDialogComponent,
-        DashboardDeleteDialogComponent,
         DashboardNewWidgetDialogComponent]
 })
 export class DashboardModule {
