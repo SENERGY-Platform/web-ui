@@ -22,6 +22,10 @@ gridster {
   background-color: #fafafa;
 }
 
+gridster-item {
+  border-radius: 4px;
+}
+
 .dashboard-container gridster ::ng-deep gridster-preview {
   background: #f0f0f0;
 }
