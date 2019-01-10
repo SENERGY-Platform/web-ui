@@ -23,6 +23,17 @@ import {ProcessRepoComponent} from "../processes/process-repo/process-repo.compo
 import {ProcessDeploymentsComponent} from "../processes/deployments/deployments.component";
 import {ProcessMonitorComponent} from "../processes/monitor/monitor.component";
 import {ProcessDesignerComponent} from "../processes/designer/designer.component";
+import {InfiniteScrollModule} from "ngx-infinite-scroll";
+import {
+    MatButtonModule,
+    MatDialogModule,
+    MatGridListModule,
+    MatIconModule,
+    MatMenuModule,
+    MatTooltipModule
+} from "@angular/material";
+import {CommonModule} from "@angular/common";
+import {FlexLayoutModule} from "@angular/flex-layout";
 
 const processRepo = {path: 'processes/repository', pathMatch: 'full', component: ProcessRepoComponent, data: { header: 'Processes' }};
 const processDeployments = {path: 'processes/deployments', pathMatch: 'full', component: ProcessDeploymentsComponent, data: { header: 'Processes' }};
@@ -33,7 +44,16 @@ const processDesigner = {path: 'processes/designer/:id', pathMatch: 'full', comp
 @NgModule({
     imports: [
         RouterModule.forChild([processRepo, processDeployments, processMonitor, processEdit, processDesigner]),
-        CoreModule
+        FlexLayoutModule,
+        CoreModule,
+        CommonModule,
+        MatGridListModule,
+        MatButtonModule,
+        MatTooltipModule,
+        MatDialogModule,
+        MatMenuModule,
+        MatIconModule,
+        InfiniteScrollModule
     ],
     declarations: [
         ProcessRepoComponent,

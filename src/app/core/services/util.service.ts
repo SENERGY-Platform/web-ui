@@ -14,41 +14,28 @@
  * limitations under the License.
  */
 
-.main-panel {
-    height: calc(100% - 64px);
-    overflow-y: auto;
-}
+import {Injectable} from '@angular/core';
+import * as X2JS from 'x2js';
 
-.layout-margin {
-    margin: 8px;
-}
+@Injectable({
+    providedIn: 'root'
+})
 
-mat-grid-tile {
-    background: whitesmoke !important;
-}
 
-mat-grid-tile-footer {
-    height: 112px !important;
-    background-color: white !important;
-    color: black !important;
-    padding: 8px !important;
-}
+export class UtilService {
 
-.footer-item {
-    margin-top: 12px;
-    margin-left: 8px;
-}
+    x2js: any;
 
-mat-grid-list {
-    margin-bottom: 100px;
-}
+    constructor() {
+        this.x2js = new X2JS();
+    }
 
-.preview {
-    width: 100%;
-    height: 100%;
-    margin-top: 0;
-}
+    convertJSONtoSVG(svg: string):string {
+        return this.x2js.js2xml(svg);
+    }
 
-.image-wrapper {
-    height: 100%;
+    convertSVGtoBase64(svg: string): string {
+        return window.btoa(svg);
+    }
+
 }

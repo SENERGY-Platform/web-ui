@@ -14,4 +14,57 @@
   ~ limitations under the License.
   -->
 
-<div>process repository</div>
+<div class="main-panel">
+    <div infiniteScroll
+         [infiniteScrollDistance]="1"
+         [infiniteScrollThrottle]="50"
+         [infiniteScrollContainer]="'.main-panel'"
+         [fromRoot]="true"
+         (scrolled)="onScroll()">
+        <div fxLayout="row">
+            <senergy-searchbar fxFlex></senergy-searchbar>
+            <senergy-sort [sortAttributes]="sortAttributes"
+                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        </div>
+        <div class="layout-margin" fxLayout="column">
+            <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+                           *ngIf="repoItems.length > 0">
+                <mat-grid-tile class="mat-card" *ngFor="let item of repoItems">
+                    <div class="image-wrapper" fxFill>
+                        <img class="preview" [src]="provideImg(item.svg)">
+                    </div>
+                    <mat-grid-tile-footer>
+                        <div fxLayout="row" fxLayoutAlign="start center" fxFill>
+                            <div fxFlex="70" fxLayout="column" fxFill>
+                                <div class="truncate mat-card-title footer-item" matTooltip="{{item.name}}">
+                                    {{item.name}}
+                                </div>
+                                <div class="truncate mat-card-subtitle footer-item" matTooltip="{{item.date}}">
+                                    {{item.date | date:"medium"}}
+                                </div>
+                                <div fxLayout="row" fxLayoutAlign="start end" fxFlex>
+                                    <button mat-icon-button class="color-accent">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <button mat-icon-button class="color-accent">
+                                        <mat-icon>content_copy</mat-icon>
+                                    </button>
+                                    <button mat-icon-button class="color-accent">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                            <div fxFlex="30" fxLayout="column" fxLayoutAlign="end end" fxFill>
+                                <button mat-icon-button class="color-accent">
+                                    <mat-icon>more_vert</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </mat-grid-tile-footer>
+                </mat-grid-tile>
+            </mat-grid-list>
+            <div *ngIf="repoItems.length === 0 && ready">No process models found.</div>
+            <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
+        </div>
+    </div>
+</div>

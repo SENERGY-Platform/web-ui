@@ -15,7 +15,7 @@
  */
 
 import {BrowserModule} from '@angular/platform-browser';
-import {APP_INITIALIZER, NgModule} from '@angular/core';
+import {APP_INITIALIZER, LOCALE_ID, NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {CoreModule} from './core/core.module';
@@ -29,6 +29,10 @@ import {DashboardModule} from './modules/dashboard/dashboard.module';
 import {DataModule} from './modules/data/data.module';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ProcessesModule} from "./modules/processes/processes.module";
+import localeDe from '@angular/common/locales/de';
+import {registerLocaleData} from "@angular/common";
+
+registerLocaleData(localeDe);
 
 @NgModule({
     declarations: [
@@ -53,6 +57,10 @@ import {ProcessesModule} from "./modules/processes/processes.module";
             useFactory: keycloakInitializerService,
             multi: true,
             deps: [KeycloakService]
+        },
+        {
+            provide: LOCALE_ID,
+            useValue: "de"
         }
     ],
     bootstrap: [AppComponent]
