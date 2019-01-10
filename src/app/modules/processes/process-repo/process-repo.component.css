@@ -28,14 +28,14 @@ mat-grid-tile {
 }
 
 mat-grid-tile-footer {
-    height: 112px !important;
+    height: 100px !important;
     background-color: white !important;
     color: black !important;
     padding: 8px !important;
 }
 
 .footer-item {
-    margin-top: 12px;
+    margin-top: 9px;
     margin-left: 8px;
 }
 

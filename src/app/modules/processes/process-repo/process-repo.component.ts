@@ -44,7 +44,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     repoItems: ProcessModel[] = [];
     gridCols = 0;
-    sortAttributes = [new SortModel('Name', 'name', 'asc'), new SortModel('Date', 'date', 'asc')];
+    sortAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel('Name', 'name', 'asc')];
     userID: string;
     ready = false;
 
