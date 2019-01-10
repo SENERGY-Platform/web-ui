@@ -24,6 +24,11 @@ import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {KeycloakService} from 'keycloak-angular';
 import {TagValuePipe} from '../../../core/pipe/tag-value.pipe';
+import {PermissionsService} from '../../permissions/shared/permissions.service';
+import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {DeviceInstancesUpdateModel} from './shared/device-instances-update.model';
+import {MatSnackBar} from '@angular/material';
 
 const grids = new Map([
     ['xs', 1],
@@ -59,7 +64,10 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     constructor(private searchbarService: SearchbarService,
                 private responsiveService: ResponsiveService,
                 private deviceInstancesService: DeviceInstancesService,
-                private keycloakService: KeycloakService) {
+                private keycloakService: KeycloakService,
+                private permissionsDialogService: PermissionsDialogService,
+                private dialogsService: DialogsService,
+                public snackBar: MatSnackBar) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
 
@@ -105,6 +113,31 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     service(deviceTypeId: string): void {
         this.deviceInstancesService.openDeviceServiceDialog(deviceTypeId);
+    }
+
+    edit(device: DeviceInstancesModel): void {
+        this.deviceInstancesService.openDeviceEditDialog(device);
+    }
+
+    delete(device: DeviceInstancesModel): void {
+        this.dialogsService.openDeleteDialog('device').afterClosed().subscribe((deviceDelete: boolean) => {
+            if (deviceDelete) {
+                this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstancesUpdateModel | null) => {
+                    if (resp !== null) {
+                        const index = this.deviceInstances.indexOf(device);
+                        this.deviceInstances.splice(index, 1);
+                        this.snackBar.open('Device deleted successfully.', '', {duration: 2000});
+
+                    } else {
+                        this.snackBar.open('Error while deleting device!', '', {duration: 2000});
+                    }
+                });
+            }
+        });
+    }
+
+    permission(device: DeviceInstancesModel): void {
+        this.permissionsDialogService.openPermissionDialog('deviceinstance', device.id, device.name);
     }
 
     private getDeviceInstances(reset: boolean) {

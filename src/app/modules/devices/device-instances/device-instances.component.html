@@ -63,15 +63,15 @@
                                         <mat-icon>info</mat-icon>
                                         Services
                                     </button>
-                                    <button mat-menu-item>
+                                    <button mat-menu-item (click)="permission(device)">
                                         <mat-icon>folder_shared</mat-icon>
                                         Share
                                     </button>
-                                    <button mat-menu-item>
+                                    <button mat-menu-item (click)="edit(device)">
                                         <mat-icon>edit</mat-icon>
                                         Edit
                                     </button>
-                                    <button mat-menu-item>
+                                    <button mat-menu-item (click)="delete(device)">
                                         <mat-icon>delete</mat-icon>
                                         Delete
                                     </button>

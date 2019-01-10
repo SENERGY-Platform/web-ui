@@ -14,25 +14,7 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material';
-
-
-@Component({
-    templateUrl: './widget-footer-delete-dialog.component.html',
-    styleUrls: ['./widget-footer-delete-dialog.component.css']
-})
-export class WidgetFooterDeleteDialogComponent {
-
-    constructor(private dialogRef: MatDialogRef<WidgetFooterDeleteDialogComponent>) {
-
-    }
-
-    cancel(): void {
-        this.dialogRef.close();
-    }
-
-    delete(): void {
-        this.dialogRef.close(true);
-    }
+export interface PermissionsUserModel {
+    id: string;
+    username: string;
 }

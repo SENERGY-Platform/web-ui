@@ -23,13 +23,13 @@ import {catchError, map} from 'rxjs/internal/operators';
 import {environment} from '../../../../environments/environment';
 import {DashboardModel} from './dashboard.model';
 import {Observable, Subject} from 'rxjs';
-import {DashboardDeleteDialogComponent} from '../dialogs/dashboard-delete-dialog.component';
 import {DashboardResponseMessageModel} from './dashboard-response-message.model';
 import {WidgetModel} from './dashboard-widget.model';
 import {DashboardNewWidgetDialogComponent} from '../dialogs/dashboard-new-widget-dialog.component';
 import {DashboardWidgetManipulationModel} from './dashboard-widget-manipulation.model';
 import {DashboardManipulationModel} from './dashboard-manipulation.model';
 import {DashboardManipulationEnum} from './dashboard-manipulation.enum';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 @Injectable({
     providedIn: 'root'
@@ -48,7 +48,8 @@ export class DashboardService {
 
     constructor(private dialog: MatDialog,
                 private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService) {
+                private errorHandlerService: ErrorHandlerService,
+                private dialogsService: DialogsService) {
     }
 
     /** REST Services */
@@ -128,16 +129,12 @@ export class DashboardService {
     }
 
     openDeleteDashboardDialog(dashboardId: string): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        const editDialogRef = this.dialog.open(DashboardDeleteDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((deleteDashboard: boolean) => {
-            if (deleteDashboard === true) {
-                this.deleteDashboard(dashboardId).subscribe(() => {
-                    this.manipulateDashboard(DashboardManipulationEnum.Delete, dashboardId, null);
-                });
-            }
+        this.dialogsService.openDeleteDialog('dashboard').afterClosed().subscribe((deleteDashboard: boolean) => {
+               if (deleteDashboard === true) {
+                    this.deleteDashboard(dashboardId).subscribe(() => {
+                        this.manipulateDashboard(DashboardManipulationEnum.Delete, dashboardId, null);
+                    });
+                }
         });
     }
 

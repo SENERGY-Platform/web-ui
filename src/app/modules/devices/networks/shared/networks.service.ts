@@ -23,15 +23,18 @@ import {Observable} from 'rxjs';
 import {NetworksModel} from './networks.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {NetworksEditDialogComponent} from '../dialogs/networks-edit-dialog.component';
-import {NetworksDeleteDialogComponent} from '../dialogs/networks-delete-dialog.component';
 import {NetworksHistoryModel} from './networks-history.model';
+import {DialogsService} from '../../../../core/services/dialogs.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class NetworksService {
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {
+    constructor(private http: HttpClient,
+                private errorHandlerService: ErrorHandlerService,
+                private dialog: MatDialog,
+                private dialogsService: DialogsService) {
     }
 
     getNetworks(searchText: string, limit: number, offset: number, value: string, order: string): Observable<NetworksModel[]> {
@@ -88,11 +91,7 @@ export class NetworksService {
 
     openNetworkDeleteDialog(network: NetworksModel) {
 
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        const editDialogRef = this.dialog.open(NetworksDeleteDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((deleteNetwork: boolean) => {
+        this.dialogsService.openDeleteDialog('networks').afterClosed().subscribe((deleteNetwork: boolean) => {
             if (deleteNetwork) {
                 this.delete(network.id).subscribe();
                 // todo: refresh network list!

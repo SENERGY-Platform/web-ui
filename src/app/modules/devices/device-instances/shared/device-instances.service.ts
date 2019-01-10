@@ -26,6 +26,9 @@ import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
 import {DeviceTypeModel} from '../../device-types/shared/device-type.model';
 import {DeviceTypeService} from '../../device-types/shared/device-type.service';
+import {PermissionsService} from '../../../permissions/shared/permissions.service';
+import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
+import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 
 ​
 
@@ -40,7 +43,8 @@ export class DeviceInstancesService {
     constructor(private dialog: MatDialog,
                 private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService,
-                private deviceTypeService: DeviceTypeService) {
+                private deviceTypeService: DeviceTypeService,
+                private permissionsService: PermissionsService) {
     }
 
     getDeviceInstances(searchText: string, limit: number, offset: number, value: string, order: string): Observable<DeviceInstancesModel[]> {
@@ -57,6 +61,19 @@ export class DeviceInstancesService {
                 catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances: search', []))
             );
         }
+    }
+
+    updateDeviceInstance(id: string, device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel> {
+        return this.http.post<DeviceInstancesUpdateModel>
+        (environment.iotRepoUrl + '/deviceInstance/' + encodeURIComponent(id), device).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', {} as DeviceInstancesUpdateModel))
+        );
+    }
+
+    deleteDeviceInstance(id: string): Observable<DeviceInstancesUpdateModel | null> {
+        return this.http.delete<DeviceInstancesUpdateModel>(environment.iotRepoUrl + '/deviceInstance/' + encodeURIComponent(id)).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstance', null))
+        );
     }
 
     getDeviceInstancesByTag(tagType: string, tag: string, feature: string, order: string): Observable<DeviceInstancesModel[]> {
@@ -89,7 +106,38 @@ export class DeviceInstancesService {
                     services: deviceType.services,
                 };
             }
-            const editDialogRef = this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
+            this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
         });
     }
+
+    openDeviceEditDialog(device: DeviceInstancesModel): void {
+
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {
+            device: JSON.parse(JSON.stringify(device))         // create copy of object
+        };
+
+        const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstancesModel) => {
+            if (deviceOut !== undefined) {
+                const deviceUpdate: DeviceInstancesUpdateModel = {
+                    device_type: deviceOut.devicetype,
+                    id: deviceOut.id,
+                    img: deviceOut.img,
+                    name: deviceOut.name,
+                    tags: deviceOut.tag,
+                    uri: deviceOut.uri,
+                    user_tags: deviceOut.usertag
+                }
+                this.updateDeviceInstance(device.id, deviceUpdate).subscribe(() => {
+                    Object.assign(device, deviceOut);
+                });
+
+            }
+        });
+    };
+
+
 }

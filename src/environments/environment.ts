@@ -34,9 +34,11 @@ export const environment = {
     flowEngineUrl: 'http://localhost',
     flowParserUrl: 'http://localhost',
     permissionSearchUrl: 'http://localhost',
+    permissionCommandUrl: 'http://localhost',
     apiAggregatorUrl: 'http://localhost',
     iotRepoUrl: 'http://localhost',
     dashboardServiceUrl: 'http://localhost',
+    usersServiceUrl: 'http://localhost',
 };
 
 /*

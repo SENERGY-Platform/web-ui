@@ -19,6 +19,7 @@ import {OperatorModel} from './shared/operator.model';
 import {OperatorRepoService} from './shared/operator-repo.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {MatSnackBar} from '@angular/material';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 
 @Component({
@@ -31,7 +32,10 @@ export class OperatorRepoComponent implements OnInit {
     operators: OperatorModel[] = [];
     ready = false;
 
-    constructor(private operatorRepoService: OperatorRepoService, protected auth: AuthorizationService, public snackBar: MatSnackBar) {
+    constructor(private operatorRepoService: OperatorRepoService,
+                protected auth: AuthorizationService,
+                public snackBar: MatSnackBar,
+                private dialogsService: DialogsService) {
     }
 
     ngOnInit() {
@@ -50,13 +54,18 @@ export class OperatorRepoComponent implements OnInit {
     }
 
     deleteOperator(operator: OperatorModel) {
-        const index = this.operators.indexOf(operator);
-        if (index > -1) {
-            this.operators.splice(index, 1);
-        }
-        this.operatorRepoService.deleteOeprator(operator).subscribe();
-        this.snackBar.open('Operator deleted', undefined, {
-            duration: 2000,
+        this.dialogsService.openDeleteDialog('operator').afterClosed().subscribe((operatorDelete: boolean) => {
+           if (operatorDelete) {
+               const index = this.operators.indexOf(operator);
+               if (index > -1) {
+                   this.operators.splice(index, 1);
+               }
+               this.operatorRepoService.deleteOeprator(operator).subscribe();
+               this.snackBar.open('Operator deleted', undefined, {
+                   duration: 2000,
+               });
+           }
         });
+
     }
 }

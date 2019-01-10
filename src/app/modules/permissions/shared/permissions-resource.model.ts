@@ -14,3 +14,12 @@
  * limitations under the License.
  */
 
+import {PermissionsRightsModel} from './permissions-rights.model';
+
+export interface PermissionsResourceModel {
+    creator: string;
+    resource_id: string;
+    user_rights: {
+        [key: string]: PermissionsRightsModel;
+    };
+}

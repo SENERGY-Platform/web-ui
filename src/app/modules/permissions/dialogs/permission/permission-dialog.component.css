@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2019 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material';
+table {
+    width: 100%;
+    min-width: 500px;
+}
 
+.example-first-footer-row td{
+    border-bottom: none;
+}
 
-@Component({
-    templateUrl: './networks-delete-dialog.component.html',
-    styleUrls: ['./networks-delete-dialog.component.css']
-})
-export class NetworksDeleteDialogComponent {
-
-    constructor(private dialogRef: MatDialogRef<NetworksDeleteDialogComponent>) {
-
-    }
-
-    cancel(): void {
-        this.dialogRef.close();
-    }
-
-    delete(): void {
-        this.dialogRef.close(true);
-    }
+.user-input {
+    margin-top: 6px;
 }

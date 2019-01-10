@@ -28,7 +28,8 @@ import {DevicesModule} from './modules/devices/devices.module';
 import {DashboardModule} from './modules/dashboard/dashboard.module';
 import {DataModule} from './modules/data/data.module';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ProcessesModule} from "./modules/processes/processes.module";
+import {ProcessesModule} from './modules/processes/processes.module';
+import {PermissionsModule} from './modules/permissions/permissions.module';
 import localeDe from '@angular/common/locales/de';
 import {registerLocaleData} from "@angular/common";
 
@@ -49,7 +50,8 @@ registerLocaleData(localeDe);
         KeycloakAngularModule,
         DataModule,
         ProcessesModule,
-        BrowserAnimationsModule
+        BrowserAnimationsModule,
+        PermissionsModule,
     ],
     providers: [
         {

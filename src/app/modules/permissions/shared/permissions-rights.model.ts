@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2019 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,9 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material';
-
-
-@Component({
-    templateUrl: './dashboard-delete-dialog.component.html',
-    styleUrls: ['./dashboard-delete-dialog.component.css']
-})
-export class DashboardDeleteDialogComponent {
-
-    constructor(private dialogRef: MatDialogRef<DashboardDeleteDialogComponent>) {
-
-    }
-
-    cancel(): void {
-        this.dialogRef.close();
-    }
-
-    delete(): void {
-        this.dialogRef.close(true);
-    }
+export interface PermissionsRightsModel {
+    administrate: boolean;
+    execute: boolean;
+    read: boolean;
+    write: boolean;
 }
