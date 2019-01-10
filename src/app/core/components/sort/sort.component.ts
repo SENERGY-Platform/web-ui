@@ -22,30 +22,34 @@ import {SortModel} from './shared/sort.model';
     templateUrl: './sort.component.html',
     styleUrls: ['./sort.component.css']
 })
-export class SortComponent  {
+export class SortComponent {
 
     @Input() sortAttributes: SortModel[] = [];
     @Output() messageEvent: EventEmitter<SortModel> = new EventEmitter();
 
     selected = 0;
 
-    constructor() { }
+    constructor() {
+    }
 
     sendMessage(item: SortModel, index: number) {
-        this.selected = index;
-        switch (item.order) {
-            case 'asc': {
-                item.order = 'desc';
-                break;
-            }
-            case 'desc': {
-                item.order = 'asc';
-                break;
-            }
-            default: {
-                throw new Error('Unknown order value:' + item.order);
+        if (this.selected == index) {
+            switch (item.order) {
+                case 'asc': {
+                    item.order = 'desc';
+                    break;
+                }
+                case 'desc': {
+                    item.order = 'asc';
+                    break;
+                }
+                default: {
+                    throw new Error('Unknown order value:' + item.order);
+                }
             }
         }
+
+        this.selected = index;
 
         this.messageEvent.emit(item);
     }

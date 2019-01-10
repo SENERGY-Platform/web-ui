@@ -23,8 +23,8 @@
             <button *ngFor="let item of sortAttributes; let i = index"  mat-menu-item (click)="sendMessage(item, i) ">
                 <div fxLayout="row" fxLayoutAlign="start center">
                     <div [ngClass]="{'color-accent': i === selected}">{{item.label}}</div>
-                    <mat-icon [ngClass]="{'color-accent': i === selected}" *ngIf="item.order === 'asc' && i === selected">arrow_downward</mat-icon>
-                    <mat-icon [ngClass]="{'color-accent': i === selected}" *ngIf="item.order === 'desc' && i === selected">arrow_upward</mat-icon>
+                    <mat-icon [ngClass]="{'color-accent': i === selected}" *ngIf="item.order === 'asc' && i === selected">arrow_upward</mat-icon>
+                    <mat-icon [ngClass]="{'color-accent': i === selected}" *ngIf="item.order === 'desc' && i === selected">arrow_downward</mat-icon>
                 </div>
             </button>
         </mat-menu>
