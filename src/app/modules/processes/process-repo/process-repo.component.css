@@ -28,15 +28,14 @@ mat-grid-tile {
 }
 
 mat-grid-tile-footer {
-    height: 100px !important;
+    height: 110px !important;
     background-color: white !important;
     color: black !important;
     padding: 8px !important;
 }
 
 .footer-item {
-    margin-top: 9px;
-    margin-left: 8px;
+    padding: 5px;
 }
 
 mat-grid-list {
@@ -51,4 +50,17 @@ mat-grid-list {
 
 .image-wrapper {
     height: 100%;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fab {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    z-index: 100;
 }

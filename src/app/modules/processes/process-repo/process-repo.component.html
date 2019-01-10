@@ -35,26 +35,26 @@
                     </div>
                     <mat-grid-tile-footer>
                         <div fxLayout="row" fxLayoutAlign="start center" fxFill>
-                            <div fxFlex="70" fxLayout="column" fxFill>
+                            <div fxFlex="90" fxLayout="column" fxFill>
                                 <div class="truncate mat-card-title footer-item" matTooltip="{{item.name}}">
                                     {{item.name}}
                                 </div>
-                                <div class="truncate mat-card-subtitle footer-item" matTooltip="{{item.date}}">
+                                <div class="truncate mat-card-subtitle footer-item" matTooltip="{{item.date | date:'medium'}}">
                                     {{item.date | date:"medium"}}
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="start end" fxFlex>
-                                    <button mat-icon-button class="color-accent">
+                                    <button mat-icon-button matTooltip="Edit" class="color-accent">
                                         <mat-icon>edit</mat-icon>
                                     </button>
-                                    <button mat-icon-button class="color-accent">
+                                    <button mat-icon-button matTooltip="Copy" class="color-accent">
                                         <mat-icon>content_copy</mat-icon>
                                     </button>
-                                    <button mat-icon-button class="color-accent">
+                                    <button mat-icon-button matTooltip="Delete" class="color-accent">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </div>
                             </div>
-                            <div fxFlex="30" fxLayout="column" fxLayoutAlign="end end" fxFill>
+                            <div fxFlex="10" fxLayout="column" matTooltip="More" fxLayoutAlign="end end" fxFill>
                                 <button mat-icon-button class="color-accent">
                                     <mat-icon>more_vert</mat-icon>
                                 </button>
@@ -67,4 +67,7 @@
             <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
         </div>
     </div>
+    <button mat-fab class="fab" matTooltip="Create new process model">
+        <mat-icon>add</mat-icon>
+    </button>
 </div>
