@@ -43,12 +43,12 @@ export class SidenavService {
 
         sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []));
 
-        sections.push(new SidenavSectionModel('Marketplace', 'toggle', 'shop', '/marketplace', [
+        /* sections.push(new SidenavSectionModel('Marketplace', 'toggle', 'shop', '/marketplace', [
             new SidenavPageModel('Overview', 'link', 'assessment', '/marketplace/overview'),
             new SidenavPageModel('Processes', 'link', 'timeline', '/marketplace/processes'),
             // new SidenavPageModel('Analytics', 'link', 'bar_chart', '/marketplace/data'),
             new SidenavPageModel('Data Export', 'link', 'tune', '/marketplace/dataexport')
-        ]));
+        ])); */
 
         sections.push(new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', [
             new SidenavPageModel('Repository', 'link', 'storage', '/processes/repository'),
