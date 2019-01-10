@@ -33,7 +33,7 @@
         <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="URI" [(ngModel)]="device.uri" [ngModelOptions]="{standalone: true}">
         </mat-form-field>
-        <mat-form-field class="full-width">
+        <mat-form-field class="full-width" color="accent">
             <mat-chip-list #chipList>
                 <mat-chip *ngFor="let usertag of device.usertag; let i = index" color="accent" selected
                           [removable]="true" (removed)="remove(i)">
@@ -44,7 +44,8 @@
                         [matChipInputFor]="chipList"
                         [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
                         [matChipInputAddOnBlur]="true"
-                        (matChipInputTokenEnd)="add($event)">
+                        (matChipInputTokenEnd)="add($event)"
+                placeholder="Tags">
             </mat-chip-list>
         </mat-form-field>
     </form>
