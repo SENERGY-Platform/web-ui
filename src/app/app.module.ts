@@ -20,7 +20,6 @@ import {APP_INITIALIZER, LOCALE_ID, NgModule} from '@angular/core';
 import {AppComponent} from './app.component';
 import {CoreModule} from './core/core.module';
 import {AppRoutingModule} from './/app-routing.module';
-import {AppsModule} from './modules/apps/apps.module';
 import {HttpClientModule} from '@angular/common/http';
 import {KeycloakAngularModule, KeycloakService} from 'keycloak-angular';
 import {keycloakInitializerService} from './core/services/keycloak-initializer.service';
@@ -45,7 +44,6 @@ registerLocaleData(localeDe);
         CoreModule,
         AppRoutingModule,
         DashboardModule,
-        AppsModule,
         DevicesModule,
         KeycloakAngularModule,
         DataModule,

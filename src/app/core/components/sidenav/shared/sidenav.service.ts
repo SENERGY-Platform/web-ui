@@ -43,11 +43,6 @@ export class SidenavService {
 
         sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []));
 
-        sections.push(new SidenavSectionModel('Applications', 'toggle', 'apps', '/apps', [
-            new SidenavPageModel('Dashboard', 'link', 'dashboard', '/apps/dashboard'),
-            new SidenavPageModel('Schedule', 'link', 'schedule', '/apps/schedule')
-        ]));
-
         sections.push(new SidenavSectionModel('Marketplace', 'toggle', 'shop', '/marketplace', [
             new SidenavPageModel('Overview', 'link', 'assessment', '/marketplace/overview'),
             new SidenavPageModel('Processes', 'link', 'timeline', '/marketplace/processes'),
