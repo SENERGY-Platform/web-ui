@@ -25,6 +25,8 @@
 
 mat-grid-tile {
     background: whitesmoke !important;
+    transition: box-shadow 280ms cubic-bezier(.4,0,.2,1);
+    border-radius: 4px;
 }
 
 mat-grid-tile-footer {

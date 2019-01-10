@@ -29,7 +29,7 @@
         <div class="layout-margin" fxLayout="column">
             <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
                            *ngIf="repoItems.length > 0">
-                <mat-grid-tile class="mat-card" *ngFor="let item of repoItems">
+                <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems">
                     <div class="image-wrapper" fxFill>
                         <img class="preview" [src]="provideImg(item.svg)">
                     </div>
@@ -39,7 +39,8 @@
                                 <div class="truncate mat-card-title footer-item" matTooltip="{{item.name}}">
                                     {{item.name}}
                                 </div>
-                                <div class="truncate mat-card-subtitle footer-item" matTooltip="{{item.date | date:'medium'}}">
+                                <div class="truncate mat-card-subtitle footer-item"
+                                     matTooltip="{{item.date | date:'medium'}}">
                                     {{item.date | date:"medium"}}
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="start end" fxFlex>

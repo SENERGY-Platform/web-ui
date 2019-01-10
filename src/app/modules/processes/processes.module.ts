@@ -25,7 +25,7 @@ import {ProcessMonitorComponent} from "../processes/monitor/monitor.component";
 import {ProcessDesignerComponent} from "../processes/designer/designer.component";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
 import {
-    MatButtonModule,
+    MatButtonModule, MatCardModule,
     MatDialogModule,
     MatGridListModule,
     MatIconModule,
@@ -53,6 +53,7 @@ const processDesigner = {path: 'processes/designer/:id', pathMatch: 'full', comp
         MatDialogModule,
         MatMenuModule,
         MatIconModule,
+        MatCardModule,
         InfiniteScrollModule
     ],
     declarations: [
