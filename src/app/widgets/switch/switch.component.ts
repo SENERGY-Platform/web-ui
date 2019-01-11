@@ -95,7 +95,7 @@ export class SwitchComponent implements OnInit, OnDestroy {
         if (this.widget.properties.instances) {
             const instancesArray: SwitchPropertiesInstancesModel[] = [];
             this.widget.properties.instances.forEach((instance: SwitchPropertiesInstancesModel) => {
-                if (instance.ended === false) {
+                if (!instance.ended) {
                     instancesArray.push(instance);
                 }
             });
