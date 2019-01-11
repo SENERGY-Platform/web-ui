@@ -88,6 +88,10 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.router.navigateByUrl('/devices/deviceinstances', {state: network});
     }
 
+    clear(network: NetworksModel) {
+        this.networksService.openNetworkClearDialog(network);
+    }
+
     delete(network: NetworksModel) {
         this.networksService.openNetworkDeleteDialog(network);
     }
