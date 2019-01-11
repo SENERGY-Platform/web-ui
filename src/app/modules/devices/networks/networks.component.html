@@ -46,7 +46,7 @@
                                     <mat-icon>more_vert</mat-icon>
                                 </button>
                                 <mat-menu #menu="matMenu" [overlapTrigger]="false">
-                                    <button mat-menu-item>
+                                    <button mat-menu-item (click)="showDevices(network)">
                                         <mat-icon>info</mat-icon>
                                         <span>Show devices</span>
                                     </button>

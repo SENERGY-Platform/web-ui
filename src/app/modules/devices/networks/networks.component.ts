@@ -22,6 +22,7 @@ import {ResponsiveService} from '../../../core/services/responsive.service';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {Router} from '@angular/router';
 
 const grids = new Map([
     ['xs', 1],
@@ -52,7 +53,8 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     constructor(private searchbarService: SearchbarService,
                 private responsiveService: ResponsiveService,
-                private networksService: NetworksService) {
+                private networksService: NetworksService,
+                private router: Router) {
     }
 
     ngOnInit() {
@@ -80,6 +82,10 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     edit(network: NetworksModel) {
         this.networksService.openNetworkEditDialog(network);
+    }
+
+    showDevices(network: NetworksModel) {
+        this.router.navigateByUrl('/devices/deviceinstances', {state: network});
     }
 
     delete(network: NetworksModel) {
