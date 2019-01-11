@@ -61,9 +61,9 @@ export class NetworksService {
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'changeName', 'error')));
     }
 
-    delete(networkId: string) {
-        return this.http.delete(environment.iotRepoUrl + '/gateway/' + encodeURIComponent(networkId)).pipe(
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'delete'))
+    delete(networkId: string): Observable<string> {
+        return this.http.delete(environment.iotRepoUrl + '/gateway/' + encodeURIComponent(networkId), {responseType: 'text'}).pipe(
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'delete', 'error'))
         );
     }
 
@@ -104,7 +104,7 @@ export class NetworksService {
 
         editDialogRef.afterClosed().subscribe((clearNetwork: boolean) => {
             if (clearNetwork) {
-                this.clear(network.id).subscribe((respMessage) => {
+                this.clear(network.id).subscribe((respMessage: string) => {
                     if (respMessage === 'ok') {
                         this.snackBar.open('Hub cleared succesfully.', undefined, {duration: 2000});
                     } else {
@@ -114,16 +114,4 @@ export class NetworksService {
             }
         });
     }
-
-    openNetworkDeleteDialog(network: NetworksModel) {
-
-        this.dialogsService.openDeleteDialog('networks').afterClosed().subscribe((deleteNetwork: boolean) => {
-            if (deleteNetwork) {
-                this.delete(network.id).subscribe();
-                // todo: refresh network list!
-            }
-        });
-    }
-
-
 }
