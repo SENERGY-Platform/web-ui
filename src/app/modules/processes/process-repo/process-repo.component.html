@@ -31,7 +31,7 @@
                            *ngIf="repoItems.length > 0">
                 <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems">
                     <div class="image-wrapper" fxFill>
-                        <img class="preview" [src]="provideImg(item.svg)">
+                        <img class="preview" [src]="item.image">
                     </div>
                     <mat-grid-tile-footer>
                         <div fxLayout="row" fxLayoutAlign="start center" fxFill>

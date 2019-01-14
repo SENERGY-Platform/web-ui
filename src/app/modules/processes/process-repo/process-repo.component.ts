@@ -25,6 +25,7 @@ import {ProcessModel} from "./shared/process.model";
 import {ProcessRepoService} from "./shared/process-repo.service";
 import {UtilService} from "../../../core/services/util.service";
 import {DomSanitizer, SafeUrl} from "@angular/platform-browser";
+import {forEach} from "@angular/router/src/utils/collection";
 
 const grids = new Map([
     ['xs', 1],
@@ -110,13 +111,16 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                     this.allDataLoaded = true;
                 }
                 this.repoItems = this.repoItems.concat(repoItems);
+                this.repoItems.forEach((repoItem: ProcessModel) => {
+                    repoItem.image = this.provideImg(repoItem.svg)
+                });
                 this.ready = true;
             });
     }
 
     private provideImg(jsonSVG: string): SafeUrl {
-        let svg = this.utilService.convertJSONtoSVG(jsonSVG);
-        let base64 = this.utilService.convertSVGtoBase64(svg);
+        const svg = this.utilService.convertJSONtoSVG(jsonSVG);
+        const base64 = this.utilService.convertSVGtoBase64(svg);
 
         return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);
     }

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {SafeUrl} from "@angular/platform-browser";
+
 export interface ProcessModel {
     id: string;
     name: string;
@@ -21,6 +23,7 @@ export interface ProcessModel {
     svg: string;
     publish: boolean;
     parent_id: string;
+    image: SafeUrl;
 }
 
 
