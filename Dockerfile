@@ -5,6 +5,11 @@ COPY . /workspace
 
 WORKDIR /workspace
 
+# install git
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y git
+
 RUN npm install
 RUN npm rebuild node-sass
 RUN npm run config -- --environment=prod
