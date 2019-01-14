@@ -14,43 +14,35 @@
   ~ limitations under the License.
   -->
 
-<div class="main-panel">
-    <div infiniteScroll
-         [infiniteScrollDistance]="1"
-         [infiniteScrollThrottle]="50"
-         [infiniteScrollContainer]="'.main-panel'"
-         [fromRoot]="true"
-         (scrolled)="onScroll()">
-        <div fxLayout="row">
-            <senergy-searchbar fxFlex></senergy-searchbar>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-
-
-        <div class="layout-margin" fxLayout="column">
-            <div *ngIf="ready">
-                <table mat-table [dataSource]="valuetypes" class="mat-elevation-z1">
-
-                    <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef> Name</th>
-                        <td mat-cell *matCellDef="let element"> {{element.name || 'unknown name'}} </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="description">
-                        <th mat-header-cell *matHeaderCellDef> Description</th>
-                        <td mat-cell *matCellDef="let element"> {{element.desc || 'no description'}} </td>
-                    </ng-container>
-
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                </table>
-            </div>
-            <div *ngIf="valuetypes.length === 0 && ready">No value types found.</div>
-            <senergy-spinner [elementCount]="valuetypes.length" [show]="!ready"></senergy-spinner>
-        </div>
-    </div>
+<div fxLayout="row">
+    <senergy-searchbar fxFlex></senergy-searchbar>
+    <senergy-sort [sortAttributes]="sortAttributes"
+                  (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
 </div>
+
+<div class="layout-margin">
+    <div [hidden]="!ready" class="mat-elevation-z8">
+            <table mat-table [dataSource]="dataSource">
+
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef> Name</th>
+                    <td mat-cell *matCellDef="let element"> {{element.name || 'unknown name'}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef> Description</th>
+                    <td mat-cell *matCellDef="let element"> {{element.desc || 'no description'}} </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+            <mat-paginator [pageSize]="15" [pageSizeOptions]="[5, 10, 15, 20, 50]" showFirstLastButtons></mat-paginator>
+        </div>
+    <div *ngIf="dataSource.data.length === 0 && ready">No value types found.</div>
+    <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
+</div>
+
 
 
 

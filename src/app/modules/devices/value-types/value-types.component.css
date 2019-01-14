@@ -16,21 +16,9 @@
 
 
 .layout-margin {
-    margin: 8px;
-}
-
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.main-panel {
-    height: calc(100% - 64px);
-    overflow-y: auto;
+    margin: 8px 8px 100px;
 }
 
 table {
     width: 100%;
-    margin-bottom: 100px;
 }
