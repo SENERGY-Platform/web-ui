@@ -5,10 +5,8 @@ COPY . /workspace
 
 WORKDIR /workspace
 
-# install git
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y git
+# use git
+RUN apk add --no-cache git
 
 RUN npm install
 RUN npm rebuild node-sass
