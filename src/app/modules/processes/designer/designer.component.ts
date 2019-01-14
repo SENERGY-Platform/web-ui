@@ -16,7 +16,17 @@
 
 import {Component, OnInit} from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-
+import {
+    Modeler,
+    CamundaPropertiesProvider,
+    PropertiesPanelModule,
+    InjectionNames,
+    PaletteProvider,
+    ElementTemplates,
+    camundaBpmnModdle,
+    SenergyPropertiesProvider
+} from "./bpmn-js/bpmn-js";
+import {HttpClient} from "@angular/common/http";
 
 @Component({
     selector: 'senergy-process-designer',
@@ -26,12 +36,75 @@ import {AuthorizationService} from '../../../core/services/authorization.service
 
 export class ProcessDesignerComponent implements OnInit {
 
+    modeler: any;
 
-
-    constructor(protected auth: AuthorizationService) {
+    constructor(private http: HttpClient, protected auth: AuthorizationService) {
     }
 
     ngOnInit() {
         const userId = this.auth.getUserId();
+
+        this.modeler = new Modeler({
+            container: '#js-canvas',
+            width: '100%',
+            height: '100%',
+            additionalModules: [
+                PropertiesPanelModule,
+
+                // Re-use original bpmn-properties-module, see CustomPropsProvider
+                //{[InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
+                {[InjectionNames.propertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
+
+                // TODO: Implement functions and UI components to use DeviceProvider
+                //{[InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]]},
+
+                // Re-use original palette, see CustomPaletteProvider
+                {[InjectionNames.paletteProvider]: ['type', PaletteProvider]},
+
+                {[InjectionNames.elementTemplates]: ['type', ElementTemplates.elementTemplates[1]]}
+
+            ],
+            propertiesPanel: {
+                parent: '#js-properties-panel'
+            },
+            moddleExtension: {
+                camunda: camundaBpmnModdle
+            }
+        });
+
+        this.modeler.designerCallbacks = {
+            durationDialog: null,
+            dateDialog: null,
+            cycleDialog: null,
+            editHistoricDataConfig: null,
+            deregisterOutputs: null,
+            registerOutputs: null,
+            getInfoHtml: null,
+            editInput: null,
+            editOutput: null,
+            editInputScript: null,
+            findIotDevice: null,
+            findIotDeviceType: null
+        };
+
+        this.load();
+    }
+
+    handleError(err: any) {
+        if (err) {
+            console.warn('Ups, error: ', err);
+        }
+    }
+
+    load() {
+        const url = '/assets/bpmn/initial.bpmn';
+        this.http.get(url, {
+            headers: {observe: 'response'}, responseType: 'text'
+        }).subscribe(
+            (x: any) => {
+                this.modeler.importXML(x, this.handleError);
+            },
+            this.handleError
+        );
     }
 }

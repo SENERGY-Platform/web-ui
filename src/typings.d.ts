@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-.canvas {
-    position: relative;
-    height: calc(100vh - 64px);
-}
+/* SystemJS module definition */
+declare var module: NodeModule;
+declare module 'bpmn-js/lib/Modeler.js'
+declare module 'bpmn-js-properties-panel'
+declare module 'bpmn-js-properties-panel/lib/provider/camunda';
+declare module 'bpmn-js-properties-panel/lib/provider/camunda/element-templates';
+declare module 'bpmn-js-properties-panel/lib/factory/EntryFactory';
+declare module 'bpmn-js/lib/features/palette/PaletteProvider';
+declare module 'camunda-bpmn-moddle/resources/camunda.json';
+declare module 'senergy-properties-provider'
 
-#js-properties-panel {
-    position: relative;
-    border-right: 0;
-    border-top: 0;
-    border-bottom: 0;
-    width: 260px;
-    height: calc(100vh - 64px);
-    font-size: 12px;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    z-index: 10;
-    border-left: 1px solid #ccc;
-    overflow: auto;
+interface NodeModule {
+    id: string;
 }

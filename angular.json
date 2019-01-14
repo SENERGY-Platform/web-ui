@@ -26,6 +26,9 @@
             "styles": [
               "src/styles.css",
               "src/theme.scss",
+              "node_modules/bpmn-js/dist/assets/diagram-js.css",
+              "node_modules/bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css",
+              "node_modules/bpmn-js-properties-panel/styles/properties.less",
               "node_modules/jointjs/css/layout.css"
             ],
             "scripts": [
