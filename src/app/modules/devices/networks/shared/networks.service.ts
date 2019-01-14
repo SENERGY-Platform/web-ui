@@ -21,10 +21,11 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {NetworksModel} from './networks.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatDialogRef, MatSnackBar} from '@angular/material';
 import {NetworksEditDialogComponent} from '../dialogs/networks-edit-dialog.component';
 import {NetworksHistoryModel} from './networks-history.model';
 import {DialogsService} from '../../../../core/services/dialogs.service';
+import {NetworksClearDialogComponent} from '../dialogs/networks-clear-dialog.component';
 
 @Injectable({
     providedIn: 'root'
@@ -34,7 +35,8 @@ export class NetworksService {
     constructor(private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService,
                 private dialog: MatDialog,
-                private dialogsService: DialogsService) {
+                private dialogsService: DialogsService,
+                public snackBar: MatSnackBar) {
     }
 
     getNetworks(searchText: string, limit: number, offset: number, value: string, order: string): Observable<NetworksModel[]> {
@@ -59,9 +61,15 @@ export class NetworksService {
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'changeName', 'error')));
     }
 
-    delete(networkId: string) {
-        return this.http.delete(environment.iotRepoUrl + '/gateway/' + encodeURIComponent(networkId)).pipe(
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'delete'))
+    delete(networkId: string): Observable<string> {
+        return this.http.delete(environment.iotRepoUrl + '/gateway/' + encodeURIComponent(networkId), {responseType: 'text'}).pipe(
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'delete', 'error'))
+        );
+    }
+
+    clear(networkId: string): Observable<string> {
+        return this.http.post(environment.iotRepoUrl + '/gateway/' + encodeURIComponent(networkId) + '/clear', null, {responseType: 'text'}).pipe(
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'clear', 'error'))
         );
     }
 
@@ -89,16 +97,21 @@ export class NetworksService {
         });
     }
 
-    openNetworkDeleteDialog(network: NetworksModel) {
+    openNetworkClearDialog(network: NetworksModel): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        const editDialogRef = this.dialog.open(NetworksClearDialogComponent, dialogConfig);
 
-        this.dialogsService.openDeleteDialog('networks').afterClosed().subscribe((deleteNetwork: boolean) => {
-            if (deleteNetwork) {
-                this.delete(network.id).subscribe();
-                // todo: refresh network list!
+        editDialogRef.afterClosed().subscribe((clearNetwork: boolean) => {
+            if (clearNetwork) {
+                this.clear(network.id).subscribe((respMessage: string) => {
+                    if (respMessage === 'ok') {
+                        this.snackBar.open('Hub cleared succesfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while clearing the hub!', undefined, {duration: 2000});
+                    }
+                });
             }
         });
     }
-
-
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2019 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,12 @@
  * limitations under the License.
  */
 
-.layout-margin {
-    margin: 8px;
-}
-
-mat-card {
+.form {
+    min-width: 150px;
+    max-width: 500px;
     width: 100%;
-    height: 100%;
-    box-sizing: border-box;
 }
 
-img {
-    object-fit: cover;
-    height: 156px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
-
-.padding {
-    margin-bottom: -8px;
-    margin-left: 16px;
-}
-
-.mat-card-actions {
-    margin-bottom: 0px;
-}
-
-.placeholder {
-    height: 177px;
+.full-width {
+    width: 100%;
 }

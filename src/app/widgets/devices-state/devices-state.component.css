@@ -20,11 +20,6 @@ mat-card {
     box-sizing: border-box;
 }
 
-.margin-mid-element {
-    margin-top: 8px;
-    margin-bottom: 8px;
-}
-
 .widget-icon-orange {
     background: #f39c12;
 }

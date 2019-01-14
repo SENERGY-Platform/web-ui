@@ -24,11 +24,12 @@ import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {KeycloakService} from 'keycloak-angular';
 import {TagValuePipe} from '../../../core/pipe/tag-value.pipe';
-import {PermissionsService} from '../../permissions/shared/permissions.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeviceInstancesUpdateModel} from './shared/device-instances-update.model';
 import {MatSnackBar} from '@angular/material';
+import {ActivatedRoute, Navigation, Router} from '@angular/router';
+import {NetworksModel} from '../networks/shared/networks.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -53,6 +54,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     selectedTag = '';
     selectedTagTransformed = '';
     selectedTagType = '';
+    routerNetwork: NetworksModel | null = null;
 
     private searchText = '';
     private limit = 54;
@@ -67,11 +69,14 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                 private keycloakService: KeycloakService,
                 private permissionsDialogService: PermissionsDialogService,
                 private dialogsService: DialogsService,
-                public snackBar: MatSnackBar) {
+                public snackBar: MatSnackBar,
+                private router: Router) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
+        this.getRouterParams();
     }
 
     ngOnInit() {
+
         this.initGridCols();
         this.initSearchAndGetDevices();
     }
@@ -94,12 +99,13 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     }
 
     tagRemoved(): void {
+        this.routerNetwork = null;
         this.resetTag();
         this.getDeviceInstances(true);
     }
 
     getDevicesByTag(tag: string, tagType: string) {
-
+        this.routerNetwork = null;
         if (tagType === 'tag') {
             this.selectedTagTransformed = new TagValuePipe().transform(tag, '');
         } else {
@@ -140,6 +146,16 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         this.permissionsDialogService.openPermissionDialog('deviceinstance', device.id, device.name);
     }
 
+    private getRouterParams(): void {
+        const navigation: Navigation | null = this.router.getCurrentNavigation();
+        if (navigation !== null) {
+            if (navigation.extras.state !== undefined) {
+                const network = navigation.extras.state as NetworksModel;
+                this.routerNetwork = network;
+            }
+        }
+    }
+
     private getDeviceInstances(reset: boolean) {
         if (reset) {
             this.deviceInstances = [];
@@ -147,24 +163,37 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             this.allDataLoaded = false;
             this.ready = false;
         }
-        if (this.selectedTag === '') {
-            this.deviceInstancesService.getDeviceInstances(
-                this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-                (deviceInstances: DeviceInstancesModel[]) => {
-                    if (deviceInstances.length !== this.limit) {
-                        this.allDataLoaded = true;
-                    }
-                    this.deviceInstances = this.deviceInstances.concat(deviceInstances);
-                    this.ready = true;
-                });
+
+        if (this.routerNetwork !== null) {
+            this.selectedTag = this.routerNetwork.name;
+            this.selectedTagTransformed = this.routerNetwork.name;
+            this.deviceInstancesService.getDeviceInstancesByIds(this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order,
+                this.routerNetwork.devices || []).subscribe((deviceInstances: DeviceInstancesModel[]) => {
+                this.setDevices(deviceInstances);
+            });
         } else {
-            this.deviceInstancesService.getDeviceInstancesByTag(this.selectedTagType, this.selectedTag, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-                (deviceInstances: DeviceInstancesModel[]) => {
-                    this.allDataLoaded = true;
-                    this.deviceInstances = this.deviceInstances.concat(deviceInstances);
-                    this.ready = true;
-                });
+            if (this.selectedTag === '') {
+                this.deviceInstancesService.getDeviceInstances(
+                    this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+                    (deviceInstances: DeviceInstancesModel[]) => {
+                        this.setDevices(deviceInstances);
+                    });
+            } else {
+                this.deviceInstancesService.getDeviceInstancesByTag(this.selectedTagType, this.selectedTag, this.sortAttribute.value,
+                    this.sortAttribute.order, this.limit, this.offset).subscribe(
+                    (deviceInstances: DeviceInstancesModel[]) => {
+                        this.setDevices(deviceInstances);
+                    });
+            }
         }
+    }
+
+    private setDevices(deviceInstances: DeviceInstancesModel[]) {
+        if (deviceInstances.length !== this.limit) {
+            this.allDataLoaded = true;
+        }
+        this.deviceInstances = this.deviceInstances.concat(deviceInstances);
+        this.ready = true;
     }
 
     private initGridCols(): void {
@@ -176,6 +205,9 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     private initSearchAndGetDevices() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            if (searchText) {
+                this.routerNetwork = null;
+            }
             this.resetTag();
             this.searchText = searchText;
             this.getDeviceInstances(true);

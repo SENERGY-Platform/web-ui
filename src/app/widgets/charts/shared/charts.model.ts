@@ -39,6 +39,9 @@ export class ChartsModel {
             hAxis?: {
                 format?: string;
                 title?: string;
+                gridlines?: {
+                    count?: number
+                }
             }
             colors?: string[];
         }

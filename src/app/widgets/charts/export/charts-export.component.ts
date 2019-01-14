@@ -105,7 +105,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     }
 
     private resizeProcessInstancesStatusChart() {
-        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id);
+        const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id, 5);
         if (this.chartExportData.options !== undefined) {
             this.chartExportData.options.height = element.height;
             this.chartExportData.options.width = element.width;

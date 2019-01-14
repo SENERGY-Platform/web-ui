@@ -22,6 +22,9 @@ import {ResponsiveService} from '../../../core/services/responsive.service';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {Router} from '@angular/router';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {MatSnackBar} from '@angular/material';
 
 const grids = new Map([
     ['xs', 1],
@@ -52,7 +55,10 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     constructor(private searchbarService: SearchbarService,
                 private responsiveService: ResponsiveService,
-                private networksService: NetworksService) {
+                private networksService: NetworksService,
+                private router: Router,
+                private dialogsService: DialogsService,
+                private snackBar: MatSnackBar) {
     }
 
     ngOnInit() {
@@ -82,8 +88,28 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.networksService.openNetworkEditDialog(network);
     }
 
+    showDevices(network: NetworksModel) {
+        this.router.navigateByUrl('/devices/deviceinstances', {state: network});
+    }
+
+    clear(network: NetworksModel) {
+        this.networksService.openNetworkClearDialog(network);
+    }
+
     delete(network: NetworksModel) {
-        this.networksService.openNetworkDeleteDialog(network);
+        this.dialogsService.openDeleteDialog('hub').afterClosed().subscribe((deleteNetwork: boolean) => {
+            if (deleteNetwork) {
+                this.networksService.delete(network.id).subscribe((respMessage: string) => {
+                    if (respMessage === 'ok') {
+                        const index = this.networks.indexOf(network);
+                        this.networks.splice(index, 1);
+                        this.snackBar.open('Hub deleted succesfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting the hub!', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
     }
 
     private initSearchAndGetNetworks() {

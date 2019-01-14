@@ -19,7 +19,7 @@
     <mat-card-content class="content-size drag-handler">
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
         <div *ngIf="ready" fxLayout="column" fxFill>
-            <div fxFlex >
+            <div fxFlex="1 1 calc(33.33% - 5.33px)">
                 <div class="widget-icon-green" fxFill fxFlex="30" fxLayoutAlign="center center">
                     <mat-icon svgIcon="online" class="mat-32"></mat-icon>
                 </div>
@@ -31,7 +31,8 @@
                     </div>
                 </div>
             </div>
-            <div fxFlex class="margin-mid-element">
+            <div fxFlex="8px"></div>
+            <div fxFlex="1 1 calc(33.33% - 5.33px)">
                 <div class="widget-icon-red" fxFill fxFlex="30" fxLayoutAlign="center center">
                     <mat-icon svgIcon="offline" class="mat-32"></mat-icon>
                 </div>
@@ -43,7 +44,8 @@
                     </div>
                 </div>
             </div>
-            <div fxFlex>
+            <div fxFlex="8px"></div>
+            <div fxFlex="1 1 calc(33.33% - 5.33px)">
                 <div class="widget-icon-orange" fxFill fxFlex="30" fxLayoutAlign="center center">
                     <mat-icon class="white mat-32">help outline</mat-icon>
                 </div>

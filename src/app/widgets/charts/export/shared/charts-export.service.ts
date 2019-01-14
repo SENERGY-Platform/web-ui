@@ -95,14 +95,14 @@ export class ChartsExportService {
 
     private setProcessInstancesStatusValues(widgetId: string, hAxisLabel: string, vAxisLabel: string, dataTable: ChartDataTableModel): ChartsModel {
 
-        const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
+        const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId, 5);
 
         return new ChartsModel(
             'LineChart',
             dataTable.data,
             {
                 chartArea: {width: element.widthPercentage, height: element.heightPercentage},
-                hAxis: {format: 'HH:mm:ss', title: hAxisLabel},
+                hAxis: {format: 'HH:mm:ss', title: hAxisLabel, gridlines: {count: 4}},
                 height: element.height,
                 width: element.width,
                 legend: 'none',

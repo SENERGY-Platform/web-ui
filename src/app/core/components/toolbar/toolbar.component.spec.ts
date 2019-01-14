@@ -14,45 +14,25 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ToolbarComponent } from './toolbar.component';
-import {MatIconModule, MatToolbarModule, MatMenuModule, MatButtonModule, MatDividerModule} from '@angular/material';
-import {SidenavService} from '../sidenav/shared/sidenav.service';
-import {UIRouter} from '@uirouter/angular';
+import {ToolbarComponent} from './toolbar.component';
 
 describe('ToolbarComponent', () => {
-  let component: ToolbarComponent;
-  let fixture: ComponentFixture<ToolbarComponent>;
-  let sidenavServiceMock: Partial<SidenavService>;
-  let routerStub;
-
-  beforeEach(async(() => {
-
-           sidenavServiceMock = {
-      };
-
-           routerStub = {
-             navigate: jasmine.createSpy('navigate')
-           }
+    let component: ToolbarComponent;
+    let fixture: ComponentFixture<ToolbarComponent>;
 
 
+    beforeEach(async(() => {
+    }));
 
-    TestBed.configureTestingModule({
-      imports: [MatIconModule, MatToolbarModule, MatMenuModule, MatButtonModule, MatDividerModule],
-      declarations: [ ToolbarComponent ],
-      providers: [{provide: SidenavService, useValue: sidenavServiceMock}, {provide: UIRouter, useValue: routerStub}]
-    })
-    .compileComponents();
-  }));
+    beforeEach(() => {
+        fixture = TestBed.createComponent(ToolbarComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(ToolbarComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });
