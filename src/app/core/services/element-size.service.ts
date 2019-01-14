@@ -37,11 +37,9 @@ export class ElementSizeService {
         if (element !== null) {
             height = element.offsetHeight - 1;
             width = element.offsetWidth - 1;
-        } else {
-            throw new Error('ElementId is unknown: ' + elementId);
+            heightPercentage = this.calcHeightPercentage(height, heightPercentageAdjustment || 0);
+            widthPercentage = this.calcWidthPercentage(width);
         }
-        heightPercentage = this.calcHeightPercentage(height, heightPercentageAdjustment || 0);
-        widthPercentage = this.calcWidthPercentage(width);
 
         return {height, width, heightPercentage, widthPercentage};
     }
