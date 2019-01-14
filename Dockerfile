@@ -10,8 +10,8 @@ RUN apk add --no-cache git
 
 RUN npm install
 RUN npm rebuild node-sass
-RUN npm run config -- --environment=prod
-RUN $(npm bin)/ng build --prod
+RUN npm run config -- --environment=dev
+RUN $(npm bin)/ng build --dev
 
 ## STAGE 2: Run nginx to serve application ##
 FROM nginx
