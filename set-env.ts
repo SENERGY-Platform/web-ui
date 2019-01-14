@@ -49,6 +49,7 @@ export const environment = {
   iotRepoUrl: '${process.env.IOT_REPO_URL}',
   dashboardServiceUrl: '${process.env.DASHBOARD_SERVICE_URL}',
   usersServiceUrl: '${process.env.USERS_SERVICE_URL}',
+  valuetypeSearchUrl: '${process.env.VALUETYPE_SEARCH_URL}',
 };
 `;
 

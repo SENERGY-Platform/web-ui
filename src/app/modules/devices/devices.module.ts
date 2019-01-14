@@ -21,7 +21,7 @@ import {
     MatCardModule, MatChipsModule,
     MatDialogModule, MatDividerModule, MatFormFieldModule,
     MatGridListModule,
-    MatIconModule, MatInputModule, MatListModule, MatMenuModule,
+    MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatTableModule,
     MatTooltipModule
 } from '@angular/material';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -70,6 +70,7 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         MatDividerModule,
         FormsModule,
         MatChipsModule,
+        MatTableModule,
         RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes, maintenance])],
     declarations: [
         NetworksComponent,
