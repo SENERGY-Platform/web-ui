@@ -15,18 +15,47 @@
  *  limitations under the License.
  */
 
-export interface ValueTypesModel {
-    id?: string;
-    name: string;
-    base_type: string;
-    literal: string;
-    fields?: FieldType[] | null;
-    desc?: string;               /** depending on the api desc or description is filled*/
-    description?: string;        /** depending on the api desc or description is filled*/
+.form {
+    min-width: 150px;
+    max-width: 800px;
+    width: 100%;
 }
 
-export interface FieldType {
-    id?: string;
-    name: string;
-    type: ValueTypesModel;
+.full-width {
+    width: 100%;
+}
+
+table {
+    width: 100%;
+}
+
+.margin {
+    margin: 0px;
+}
+
+.trigger-size {
+    min-width: 50px;
+}
+
+.select-size {
+    max-width: 45px;
+}
+
+.user-input {
+    margin-top: 6px;
+    margin-right: 16px;
+    width: 300px;
+}
+
+.user-input-hide-add {
+    margin-right: 16px;
+    width: 300px;
+}
+
+.position {
+    width: 30px;
+}
+
+.example-first-footer-row td{
+    border-bottom: none;
 }

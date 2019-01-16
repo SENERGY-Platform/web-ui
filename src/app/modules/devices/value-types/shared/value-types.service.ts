@@ -22,6 +22,9 @@ import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ValueTypesModel} from './value-types.model';
+import {MatDialog, MatDialogConfig} from '@angular/material';
+import {ValueTypesNewDialogComponent} from '../dialogs/value-types-new-dialog.component';
+import {ValueTypeResponseModel} from './value-type-response.model';
 
 @Injectable({
     providedIn: 'root'
@@ -29,7 +32,8 @@ import {ValueTypesModel} from './value-types.model';
 export class ValueTypesService {
 
     constructor(private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService) {
+                private errorHandlerService: ErrorHandlerService,
+                private dialog: MatDialog) {
     }
 
     getValuetypes(searchText: string, limit: number, offset: number, value: string, order: string): Observable<ValueTypesModel[]> {
@@ -46,5 +50,30 @@ export class ValueTypesService {
                 catchError(this.errorHandlerService.handleError(ValueTypesService.name, 'getValuetypes: search', []))
             );
         }
+    }
+
+    saveValuetype(valuetype: ValueTypesModel): Observable<ValueTypeResponseModel | null> {
+        return this.http.post<ValueTypeResponseModel>(environment.iotRepoUrl + '/other/valueType', valuetype).pipe(
+            catchError(this.errorHandlerService.handleError(ValueTypesService.name, 'saveValuetype', null))
+        );
+    }
+
+    openNewValuetypeDialog(): void {
+        this.getValuetypes('', 9999, 0, 'name', 'asc').subscribe((valuetypes: ValueTypesModel[]) => {
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.autoFocus = true;
+            dialogConfig.data = {
+                valuetypes: valuetypes
+            };
+            const editDialogRef = this.dialog.open(ValueTypesNewDialogComponent, dialogConfig);
+
+            editDialogRef.afterClosed().subscribe((valuetype: ValueTypesModel) => {
+                if (valuetype !== undefined) {
+                    this.saveValuetype(valuetype).subscribe(() => {
+                    });
+                }
+            });
+        });
+
     }
 }

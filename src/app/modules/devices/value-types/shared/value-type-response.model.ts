@@ -15,18 +15,6 @@
  *  limitations under the License.
  */
 
-export interface ValueTypesModel {
-    id?: string;
-    name: string;
-    base_type: string;
-    literal: string;
-    fields?: FieldType[] | null;
-    desc?: string;               /** depending on the api desc or description is filled*/
-    description?: string;        /** depending on the api desc or description is filled*/
-}
-
-export interface FieldType {
-    id?: string;
-    name: string;
-    type: ValueTypesModel;
+export interface ValueTypeResponseModel {
+    created_id: string;
 }

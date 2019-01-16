@@ -57,6 +57,10 @@ export class ValueTypesComponent implements OnInit, OnDestroy {
         this.getValuetypes();
     }
 
+    newValuetype() {
+        this.valueTypesService.openNewValuetypeDialog();
+    }
+
     private initSearchAndGetValuetypes() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;

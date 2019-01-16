@@ -37,12 +37,14 @@
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>
-            <mat-paginator [pageSize]="15" [pageSizeOptions]="[5, 10, 15, 20, 50]" showFirstLastButtons></mat-paginator>
+            <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 15, 20, 50]" showFirstLastButtons></mat-paginator>
         </div>
     <div *ngIf="dataSource.data.length === 0 && ready">No value types found.</div>
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 </div>
-
+<button mat-fab class="fab" matTooltip="Add new value type" (click)="newValuetype()">
+    <mat-icon>add</mat-icon>
+</button>
 
 
 

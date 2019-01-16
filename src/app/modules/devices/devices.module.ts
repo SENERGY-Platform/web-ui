@@ -17,11 +17,12 @@
 import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
 import {
+    MatAutocompleteModule,
     MatButtonModule,
     MatCardModule, MatChipsModule,
     MatDialogModule, MatDividerModule, MatFormFieldModule,
     MatGridListModule,
-    MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatPaginatorModule, MatTableModule,
+    MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatOptionModule, MatPaginatorModule, MatSelectModule, MatTableModule,
     MatTooltipModule
 } from '@angular/material';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -37,8 +38,9 @@ import {CoreModule} from '../../core/core.module';
 import {NetworksEditDialogComponent} from './networks/dialogs/networks-edit-dialog.component';
 import {DeviceInstancesServiceDialogComponent} from './device-instances/dialogs/device-instances-service-dialog.component';
 import {DeviceInstancesEditDialogComponent} from './device-instances/dialogs/device-instances-edit-dialog.component';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NetworksClearDialogComponent} from './networks/dialogs/networks-clear-dialog.component';
+import {ValueTypesNewDialogComponent} from './value-types/dialogs/value-types-new-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -72,6 +74,10 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         MatChipsModule,
         MatTableModule,
         MatPaginatorModule,
+        MatOptionModule,
+        MatSelectModule,
+        ReactiveFormsModule,
+        MatAutocompleteModule,
         RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes, maintenance])],
     declarations: [
         NetworksComponent,
@@ -83,11 +89,13 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
+        ValueTypesNewDialogComponent,
     ],
     entryComponents: [NetworksEditDialogComponent,
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
+        ValueTypesNewDialogComponent,
     ]
 })
 

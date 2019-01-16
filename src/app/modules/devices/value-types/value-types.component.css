@@ -16,9 +16,16 @@
 
 
 .layout-margin {
-    margin: 8px 8px 100px;
+    margin: 8px 8px 150px;
 }
 
 table {
     width: 100%;
+}
+
+.fab {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    z-index: 100;
 }
