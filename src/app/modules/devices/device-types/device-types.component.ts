@@ -14,18 +14,102 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {Subscription} from 'rxjs';
+import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
+import {ResponsiveService} from '../../../core/services/responsive.service';
+import {DeviceTypeService} from './shared/device-type.service';
+import {DeviceTypePermSearchModel} from './shared/device-type-perm-search.model';
+
+const grids = new Map([
+    ['xs', 1],
+    ['sm', 2],
+    ['md', 2],
+    ['lg', 3],
+    ['xl', 6],
+]);
+
 
 @Component({
-  selector: 'senergy-device-types',
-  templateUrl: './device-types.component.html',
-  styleUrls: ['./device-types.component.css']
+    selector: 'senergy-device-types',
+    templateUrl: './device-types.component.html',
+    styleUrls: ['./device-types.component.css']
 })
-export class DeviceTypesComponent implements OnInit {
+export class DeviceTypesComponent implements OnInit, OnDestroy {
 
-  constructor() { }
+    deviceTypes: DeviceTypePermSearchModel[] = [];
+    gridCols = 0;
+    ready = false;
+    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
-  ngOnInit() {
-  }
+    private searchText = '';
+    private limit = 54;
+    private offset = 0;
+    private sortAttribute = this.sortAttributes[0];
+    private searchSub: Subscription = new Subscription();
+    private allDataLoaded = false;
+
+    constructor(private searchbarService: SearchbarService,
+                private responsiveService: ResponsiveService,
+                private deviceTypeService: DeviceTypeService) {
+    }
+
+    ngOnInit() {
+        this.initGridCols();
+        this.initSearchAndGetDeviceTypes();
+    }
+
+    ngOnDestroy() {
+        this.searchSub.unsubscribe();
+    }
+
+    receiveSortingAttribute(sortAttribute: SortModel) {
+        this.reset();
+        this.sortAttribute = sortAttribute;
+        this.getDeviceTypes();
+    }
+
+    onScroll() {
+        if (!this.allDataLoaded && this.ready) {
+            this.ready = false;
+            this.offset = this.offset + this.limit;
+            this.getDeviceTypes();
+        }
+    }
+
+    private initSearchAndGetDeviceTypes() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.reset();
+            this.searchText = searchText;
+            this.getDeviceTypes();
+        });
+    }
+
+    private getDeviceTypes() {
+        this.deviceTypeService.getDeviceTypes(this.searchText, this.limit, this.offset, this.sortAttribute.value,
+            this.sortAttribute.order).subscribe(
+            (deviceTypes: DeviceTypePermSearchModel[]) => {
+                if (deviceTypes.length !== this.limit) {
+                    this.allDataLoaded = true;
+                }
+                this.deviceTypes = this.deviceTypes.concat(deviceTypes);
+                this.ready = true;
+            });
+    }
+
+    private initGridCols(): void {
+        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
+        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+            this.gridCols = grids.get(mqAlias) || 0;
+        });
+    }
+
+    private reset() {
+        this.deviceTypes = [];
+        this.offset = 0;
+        this.allDataLoaded = false;
+        this.ready = false;
+    }
 
 }

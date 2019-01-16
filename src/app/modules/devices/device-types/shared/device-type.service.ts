@@ -21,6 +21,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {DeviceTypeModel} from './device-type.model';
+import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 
 @Injectable({
     providedIn: 'root'
@@ -31,11 +32,26 @@ export class DeviceTypeService {
     }
 
     getDeviceType(type: string): Observable<DeviceTypeModel | null> {
-            return this.http.get<DeviceTypeModel>
-            (environment.iotRepoUrl + '/deviceType/' + encodeURIComponent(type)).pipe(
-                map(resp => resp),
-                catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null))
-            );
+        return this.http.get<DeviceTypeModel>
+        (environment.iotRepoUrl + '/deviceType/' + encodeURIComponent(type)).pipe(
+            map(resp => resp),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null))
+        );
+    }
+
+    getDeviceTypes(searchText: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypePermSearchModel[]> {
+        if (searchText === '') {
+            return this.http.get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/devicetype/r/' +
+                limit + '/' + offset + '/' + feature + '/' + order).pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes: list', [])));
+        } else {
+            return this.http.get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/devicetype/' + searchText +
+                '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes: search', [])));
+        }
+
 
     }
 }

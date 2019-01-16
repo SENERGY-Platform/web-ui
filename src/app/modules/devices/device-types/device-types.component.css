@@ -14,3 +14,41 @@
  * limitations under the License.
  */
 
+.layout-margin {
+    margin: 8px;
+}
+
+mat-grid-tile-footer {
+    background-color: white !important;
+    height: 68px !important;
+    color: black !important;
+}
+
+mat-grid-list {
+    margin-bottom: 100px;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.main-panel {
+    height: calc(100% - 64px);
+    overflow-y: auto;
+}
+
+.background {
+    background-image: url('/src/img/background_deviceTypes.png');
+    background-size: contain;
+}
+
+.device-type-icon {
+    top: 40px;
+    max-height: 100px;
+    max-width: 200px;
+    margin: auto;
+    display: block;
+    position: relative;
+}
