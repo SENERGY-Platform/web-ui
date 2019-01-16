@@ -34,3 +34,8 @@
     border-left: 1px solid #ccc;
     overflow: auto;
 }
+
+#js-properties-panel ::ng-deep .bpmn-iot-button {
+    position: static !important;
+    width: 150px !important;
+}

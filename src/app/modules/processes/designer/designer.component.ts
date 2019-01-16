@@ -25,8 +25,16 @@ import {
     ElementTemplates,
     camundaBpmnModdle,
     SenergyPropertiesProvider
-} from "./bpmn-js/bpmn-js";
-import {HttpClient} from "@angular/common/http";
+} from './bpmn-js/bpmn-js';
+import {HttpClient} from '@angular/common/http';
+import {
+    ConnectorInfo,
+    BpmnElement,
+    Output,
+    HistoricDataConfig,
+    DurationResult,
+    ServiceSelection
+} from './designer.model';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -52,11 +60,11 @@ export class ProcessDesignerComponent implements OnInit {
                 PropertiesPanelModule,
 
                 // Re-use original bpmn-properties-module, see CustomPropsProvider
-                //{[InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
-                {[InjectionNames.propertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
+                {[InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
+                // {[InjectionNames.propertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
 
                 // TODO: Implement functions and UI components to use DeviceProvider
-                //{[InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]]},
+                {[InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]]},
 
                 // Re-use original palette, see CustomPaletteProvider
                 {[InjectionNames.paletteProvider]: ['type', PaletteProvider]},
@@ -73,18 +81,45 @@ export class ProcessDesignerComponent implements OnInit {
         });
 
         this.modeler.designerCallbacks = {
-            durationDialog: null,
-            dateDialog: null,
-            cycleDialog: null,
-            editHistoricDataConfig: null,
-            deregisterOutputs: null,
-            registerOutputs: null,
-            getInfoHtml: null,
-            editInput: null,
-            editOutput: null,
-            editInputScript: null,
-            findIotDevice: null,
-            findIotDeviceType: null
+            durationDialog: function (initial: string): Promise<DurationResult> {
+                // TODO
+                console.log(initial);
+                return new Promise<DurationResult>(function () {});
+            },
+            dateDialog: function (initial: string): Promise<string> {
+                // TODO
+                console.log(initial);
+                return new Promise<string>(function () {});
+            },
+            cycleDialog: function (initial: string): Promise<string> {
+                // TODO
+                console.log(initial);
+                return new Promise<string>(function () {});
+            },
+            editHistoricDataConfig: function(existingConfig: HistoricDataConfig, callback: (result: HistoricDataConfig) => void) {
+                // TODO
+                console.log(existingConfig, callback);
+            },
+            registerOutputs: function (outputs: any) {
+                console.log('WARNING: deprecated call to registerOutputs()', outputs);
+            },
+            getInfoHtml: function (element: BpmnElement): string {
+                // TODO
+                console.log(element);
+                return 'todo';
+            },
+            editInput: function (element: BpmnElement, callback: () => void) {
+                // TODO
+                console.log(element, callback);
+            },
+            editOutput: function(outputs: [Output], callback: () => void) {
+                // TODO
+                console.log(outputs, callback);
+            },
+            findIotDeviceType: function(devicetypeService: ServiceSelection, callback: (connectorInfo: ConnectorInfo) => void) {
+                // TODO
+                console.log(devicetypeService, callback);
+            }
         };
 
         this.load();

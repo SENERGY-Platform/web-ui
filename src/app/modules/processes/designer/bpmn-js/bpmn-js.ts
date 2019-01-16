@@ -19,8 +19,8 @@ import * as _PropertiesPanelModule from 'bpmn-js-properties-panel';
 import * as _CamundaPropertiesProvider from 'bpmn-js-properties-panel/lib/provider/camunda';
 import * as _ElementTemplates from 'bpmn-js-properties-panel/lib/provider/camunda/element-templates';
 import _PaletteProvider from 'bpmn-js/lib/features/palette/PaletteProvider';
-import * as _CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json'
-import * as _SenergyPropertiesProvider from 'senergy-properties-provider'
+import * as _CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
+import * as _SenergyPropertiesProvider from 'senergy-properties-provider';
 
 export const InjectionNames = {
     eventBus: 'eventBus',
