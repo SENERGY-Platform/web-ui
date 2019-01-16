@@ -20,7 +20,9 @@ import {SearchbarService} from '../../../core/components/searchbar/shared/search
 import {Subscription} from 'rxjs';
 import {ValueTypesService} from './shared/value-types.service';
 import {ValueTypesModel} from './shared/value-types.model';
-import {MatPaginator, MatTableDataSource} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatPaginator, MatTable, MatTableDataSource} from '@angular/material';
+import {ValueTypesNewDialogComponent} from './dialogs/value-types-new-dialog.component';
+import {ValueTypeResponseModel} from './shared/value-type-response.model';
 
 @Component({
     selector: 'senergy-value-types',
@@ -40,7 +42,8 @@ export class ValueTypesComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
 
     constructor(private searchbarService: SearchbarService,
-                private valueTypesService: ValueTypesService) {
+                private valueTypesService: ValueTypesService,
+                private dialog: MatDialog) {
     }
 
     ngOnInit() {
@@ -58,7 +61,24 @@ export class ValueTypesComponent implements OnInit, OnDestroy {
     }
 
     newValuetype() {
-        this.valueTypesService.openNewValuetypeDialog();
+        this.valueTypesService.getValuetypes('', 9999, 0, 'name', 'asc').subscribe((valuetypes: ValueTypesModel[]) => {
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.autoFocus = true;
+            dialogConfig.data = {
+                valuetypes: valuetypes
+            };
+            const editDialogRef = this.dialog.open(ValueTypesNewDialogComponent, dialogConfig);
+
+            editDialogRef.afterClosed().subscribe((valuetype: ValueTypesModel) => {
+                if (valuetype !== undefined) {
+                    this.valueTypesService.saveValuetype(valuetype).subscribe((resp: ValueTypeResponseModel | null) => {
+                        if (resp !== null) {
+                            this.dataSource.data = [...this.dataSource.data, valuetype];
+                        }
+                    });
+                }
+            });
+        });
     }
 
     private initSearchAndGetValuetypes() {
@@ -74,7 +94,7 @@ export class ValueTypesComponent implements OnInit, OnDestroy {
 
         this.valueTypesService.getValuetypes(
             this.searchText, 9999, 0, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-                (valuetypes: ValueTypesModel[]) => {
+            (valuetypes: ValueTypesModel[]) => {
                 this.dataSource.data = valuetypes;
                 this.ready = true;
             });
