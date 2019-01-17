@@ -33,6 +33,7 @@ table {
 .user-input {
     margin-top: 6px;
     margin-right: 16px;
+    width: 300px;
 }
 
 .example-first-footer-row td{
