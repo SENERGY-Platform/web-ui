@@ -15,7 +15,7 @@
   -->
 
 
-<h2 mat-dialog-title>Select Device and Service</h2>
+<h2 mat-dialog-title>Select Device Type and Service</h2>
 
 <mat-dialog-content>
     <form class="form">
@@ -29,7 +29,7 @@
             </mat-autocomplete>
         </mat-form-field>
         <mat-form-field color="accent" class="form-field">
-            <mat-select  placeholder="Service" [formControl]="serviceSelectionFormControl" required>
+            <mat-select  placeholder="Service" [compareWith]="idComparision" [formControl]="serviceSelectionFormControl" required>
                 <mat-option *ngFor="let service of serviceOptions | async" [value]="service">
                     {{service.name}}
                 </mat-option>

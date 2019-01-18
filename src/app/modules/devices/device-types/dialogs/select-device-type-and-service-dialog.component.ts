@@ -71,8 +71,13 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
         this.useDialogParams();
     }
 
-    displayFn(input?: DeviceTypePermSearchModel): string | undefined {
+
+    displayFn(input?: {name: string}): string | undefined {
         return input ? input.name : undefined;
+    }
+
+    idComparision(a: any, b: any): boolean {
+        return a.id === b.id;
     }
 
     close(): void {
@@ -84,7 +89,6 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
     }
 
     isValid() {
-        // console.log(this.result && this.result.service && this.result.service.id, this.result);
         return this.result && this.result.service && this.result.service.id;
     }
 
@@ -92,11 +96,8 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
         if (this.dialogParams.selection && this.dialogParams.selection.deviceTypeId && this.dialogParams.selection.serviceId) {
             this.dtService.getDeviceType(this.dialogParams.selection.deviceTypeId).subscribe((dt: DeviceTypeModel | null) => {
                 if (dt) {
-                    const serviceSelection = (<[DeviceTypeServiceModel]>this.serviceSelectionFormControl.value)
-                        .find((service: DeviceTypeServiceModel) => service.id === this.dialogParams.selection.serviceId) || {
-                        id: '',
-                        name: ''
-                    };
+                    const serviceSelection = dt.services.find((service: DeviceTypeServiceModel) => service.id === this.dialogParams.selection.serviceId)
+                        || { id: '', name: '' };
                     // order is important to prevent race between change handler
                     // service change handler terminates immediately because result.deviceType.id === ''
                     this.serviceSelectionFormControl.setValue(serviceSelection);
@@ -149,9 +150,9 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
     private resetServiceSelection(serviceSelectionFormControl: FormControl, serviceOptions: DeviceTypeServiceModel[]) {
         const sSelection = <ServiceInfoModel>serviceSelectionFormControl.value;
         if (sSelection && sSelection.id) {
-            const selectionExists = serviceOptions.some((service: DeviceTypeServiceModel) => service.id === sSelection.id);
-            if (selectionExists) {
-                serviceSelectionFormControl.setValue(sSelection);
+            const selection = serviceOptions.find((service: DeviceTypeServiceModel) => service.id === sSelection.id);
+            if (selection) {
+                serviceSelectionFormControl.setValue(selection);
             } else {
                 serviceSelectionFormControl.reset();
             }
