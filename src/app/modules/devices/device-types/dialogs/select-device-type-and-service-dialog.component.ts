@@ -56,7 +56,6 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
         this.devicetypeOptions = new Observable<DeviceTypePermSearchModel[]>((observer: Subscriber<DeviceTypePermSearchModel[]>) => {
             this.devicetypeSelectionFormControl.valueChanges.subscribe(() => {
                 const dt: any = this.devicetypeSelectionFormControl.value;
-                console.log('on dt selection form change 1', dt);
                 const searchText: string = (dt.name === '' || dt.name) ? dt.name : dt;
                 this.dtService.getDeviceTypes(searchText, 20, 0, 'name', 'asc').subscribe(value => observer.next(value));
             });
@@ -65,7 +64,6 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
         this.serviceOptions = new Observable<DeviceTypeServiceModel[]>((observer: Subscriber<DeviceTypeServiceModel[]>) => {
             this.devicetypeSelectionFormControl.valueChanges.subscribe(() => {
                 const dt: any = that.devicetypeSelectionFormControl.value;
-                console.log('on dt selection form change 2', dt);
                 if (dt.id) {
                     that.dtService.getDeviceType(dt.id).subscribe((value: DeviceTypeModel|null) => {
                         if (value) {
@@ -77,7 +75,6 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
         });
 
         this.devicetypeSelectionFormControl.valueChanges.subscribe(() => {
-            console.log('on dt selection form change 3');
             this.setDeviceType();
         });
         this.serviceOptions.subscribe(() => {
@@ -109,10 +106,8 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
 
     setDeviceType() {
         const dtSelection = <DeviceTypeInfoModel>this.devicetypeSelectionFormControl.value;
-        console.log('setDeviceType()', dtSelection);
         if (dtSelection && dtSelection.id) {
             this.dtService.getDeviceType(dtSelection.id).subscribe((dt: DeviceTypeModel|null) => {
-                console.log('getDeviceType().subscribe()', dtSelection);
                 if (dt) {
                     this.result.deviceType = {name: dt.name || '', id: dt.id };
                 }
@@ -126,7 +121,6 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
 
     onServiceOpitionsChange() {
         const sSelection = <ServiceInfoModel>this.serviceSelectionFormControl.value;
-        console.log('onServiceOpitionsChange()', sSelection);
         if (sSelection && sSelection.id) {
             const selectionExists = (<[DeviceTypeServiceModel]>this.serviceSelectionFormControl.value)
                 .some((service: DeviceTypeServiceModel) => service.id === sSelection.id);
@@ -141,7 +135,6 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
     setService() {
         const dtSelection = <DeviceTypeInfoModel>this.devicetypeSelectionFormControl.value;
         const serviceSelection = <ServiceInfoModel>this.serviceSelectionFormControl.value;
-        console.log('setService()', dtSelection, serviceSelection);
         if (dtSelection && dtSelection.id && serviceSelection && serviceSelection.id) {
             this.result.service = {name: serviceSelection.name || '', id: serviceSelection.id};
             this.dtService.getDeviceTypeSkeleton(dtSelection.id, serviceSelection.id).subscribe((skeleton: BpmnSkeletonModel | null) => {
