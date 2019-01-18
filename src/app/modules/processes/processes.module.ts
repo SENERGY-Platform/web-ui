@@ -34,6 +34,7 @@ import {
 } from "@angular/material";
 import {CommonModule} from "@angular/common";
 import {FlexLayoutModule} from "@angular/flex-layout";
+import {DevicesModule} from '../devices/devices.module';
 
 const processRepo = {path: 'processes/repository', pathMatch: 'full', component: ProcessRepoComponent, data: { header: 'Processes' }};
 const processDeployments = {path: 'processes/deployments', pathMatch: 'full', component: ProcessDeploymentsComponent, data: { header: 'Processes' }};
@@ -54,7 +55,8 @@ const processDesigner = {path: 'processes/designer/:id', pathMatch: 'full', comp
         MatMenuModule,
         MatIconModule,
         MatCardModule,
-        InfiniteScrollModule
+        InfiniteScrollModule,
+        DevicesModule
     ],
     declarations: [
         ProcessRepoComponent,

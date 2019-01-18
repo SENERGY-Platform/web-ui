@@ -22,14 +22,18 @@ import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {DeviceTypeModel} from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
+import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel, BpmnSkeletonModel} from './device-type-select.model';
+import {MatDialog, MatDialogConfig} from '@angular/material';
+import {SelectDeviceTypeAndServiceDialogComponent} from '../dialogs/select-device-type-and-service-dialog.component';
+import {DeviceInstancesModel} from '../../device-instances/shared/device-instances.model';
+import {DeviceInstancesUpdateModel} from '../../device-instances/shared/device-instances-update.model';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DeviceTypeService {
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
-    }
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {}
 
     getDeviceType(type: string): Observable<DeviceTypeModel | null> {
         return this.http.get<DeviceTypeModel>
@@ -51,7 +55,13 @@ export class DeviceTypeService {
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes: search', [])));
         }
+    }
 
-
+    getDeviceTypeSkeleton(typeId: string, serviceId: string): Observable<BpmnSkeletonModel | null> {
+        return this.http.get<BpmnSkeletonModel>
+        (environment.iotRepoUrl + '/devicetype/skeleton/' + encodeURIComponent(typeId) + '/' + encodeURIComponent(serviceId)).pipe(
+            map(resp => resp),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeSkeleton: error', null))
+        );
     }
 }

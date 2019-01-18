@@ -35,6 +35,9 @@ import {
     DurationResult,
     ServiceSelection
 } from './designer.model';
+import {DeviceTypeService} from '../../devices/device-types/shared/device-type.service';
+import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from '../../devices/device-types/shared/device-type-select.model';
+import {DeviceTypeDialogService} from '../../devices/device-types/shared/device-type-dialog.service';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -46,11 +49,12 @@ export class ProcessDesignerComponent implements OnInit {
 
     modeler: any;
 
-    constructor(private http: HttpClient, protected auth: AuthorizationService) {
+    constructor(private http: HttpClient, protected auth: AuthorizationService, protected dtService: DeviceTypeService, protected dtDialogService: DeviceTypeDialogService) {
     }
 
     ngOnInit() {
         const userId = this.auth.getUserId();
+        const that = this;
 
         this.modeler = new Modeler({
             container: '#js-canvas',
@@ -116,9 +120,11 @@ export class ProcessDesignerComponent implements OnInit {
                 // TODO
                 console.log(outputs, callback);
             },
-            findIotDeviceType: function(devicetypeService: ServiceSelection, callback: (connectorInfo: ConnectorInfo) => void) {
-                // TODO
-                console.log(devicetypeService, callback);
+            findIotDeviceType: function(
+                devicetypeService: DeviceTypeSelectionRefModel,
+                callback: (connectorInfo: DeviceTypeSelectionResultModel) => void
+            ) {
+                that.dtDialogService.openSelectDeviceTypeAndServiceDialog(devicetypeService, callback);
             }
         };
 

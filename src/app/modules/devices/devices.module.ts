@@ -41,6 +41,7 @@ import {DeviceInstancesEditDialogComponent} from './device-instances/dialogs/dev
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NetworksClearDialogComponent} from './networks/dialogs/networks-clear-dialog.component';
 import {ValueTypesNewDialogComponent} from './value-types/dialogs/value-types-new-dialog.component';
+import {SelectDeviceTypeAndServiceDialogComponent} from './device-types/dialogs/select-device-type-and-service-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -90,12 +91,15 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
         ValueTypesNewDialogComponent,
+        SelectDeviceTypeAndServiceDialogComponent
     ],
-    entryComponents: [NetworksEditDialogComponent,
+    entryComponents: [
+        NetworksEditDialogComponent,
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
         ValueTypesNewDialogComponent,
+        SelectDeviceTypeAndServiceDialogComponent
     ]
 })
 
