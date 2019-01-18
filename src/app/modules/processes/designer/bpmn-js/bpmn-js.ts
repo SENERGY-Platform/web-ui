@@ -39,7 +39,7 @@ export const PaletteProvider = _PaletteProvider;
 export const CamundaPropertiesProvider = _CamundaPropertiesProvider;
 export const ElementTemplates = _ElementTemplates;
 export const SenergyPropertiesProvider = _SenergyPropertiesProvider;
-export const camundaBpmnModdle = _CamundaBpmnModdle;
+export const camundaBpmnModdle = _CamundaBpmnModdle.default;
 
 export interface IPaletteProvider {
     getPaletteEntries(): any;

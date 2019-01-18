@@ -79,7 +79,7 @@ export class ProcessDesignerComponent implements OnInit {
             propertiesPanel: {
                 parent: '#js-properties-panel'
             },
-            moddleExtension: {
+            moddleExtensions: {
                 camunda: camundaBpmnModdle
             }
         });
