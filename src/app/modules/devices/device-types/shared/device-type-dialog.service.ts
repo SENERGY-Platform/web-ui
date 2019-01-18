@@ -17,7 +17,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel, BpmnSkeletonModel} from './device-type-select.model';
+import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel, BpmnSkeletonModel} from './device-type-selection.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {SelectDeviceTypeAndServiceDialogComponent} from '../dialogs/select-device-type-and-service-dialog.component';
 

@@ -36,7 +36,7 @@ import {
     ServiceSelection
 } from './designer.model';
 import {DeviceTypeService} from '../../devices/device-types/shared/device-type.service';
-import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from '../../devices/device-types/shared/device-type-select.model';
+import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from '../../devices/device-types/shared/device-type-selection.model';
 import {DeviceTypeDialogService} from '../../devices/device-types/shared/device-type-dialog.service';
 
 @Component({

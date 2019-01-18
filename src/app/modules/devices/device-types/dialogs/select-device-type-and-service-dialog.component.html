@@ -19,18 +19,17 @@
 
 <mat-dialog-content>
     <form class="form">
-        <mat-form-field color="accent" class="user-input">
+        <mat-form-field color="accent" class="form-field">
             <mat-label>Insert Device Type</mat-label>
-            <input type="text" matInput [formControl]="devicetypeSelectionFormControl" [matAutocomplete]="auto">
+            <input type="text" placeholder="Search first {{this.limit}} entries"  matInput [formControl]="devicetypeSelectionFormControl" [matAutocomplete]="auto">
             <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
                 <mat-option *ngFor="let option of devicetypeOptions | async" [value]="option">
                     {{option.name || 'unknown'}}
                 </mat-option>
             </mat-autocomplete>
         </mat-form-field>
-
-        <mat-form-field color="accent">
-            <mat-select placeholder="Service" [formControl]="serviceSelectionFormControl" required>
+        <mat-form-field color="accent" class="form-field">
+            <mat-select  placeholder="Service" [formControl]="serviceSelectionFormControl" required>
                 <mat-option *ngFor="let service of serviceOptions | async" [value]="service">
                     {{service.name}}
                 </mat-option>
@@ -44,28 +43,3 @@
     <button class="mat-raised-button mat-accent" [disabled]="!isValid()" (click)="save()">Save</button>
 </mat-dialog-actions>
 
-
-
-<!--
-<mat-form-field color="accent" class="user-input">
-    <mat-label>Insert Device Type</mat-label>
-    <input type="text" matInput [formControl]="devicetypeFormControl" [matAutocomplete]="auto" />
-    <mat-error *ngIf="valuetypeFormControl.hasError('invalid') === true">
-        Please enter a valid device type!
-    </mat-error>
-    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-        <mat-option *ngFor="let option of filteredDevicetypes | async" [value]="option">
-            {{option.name || 'unknown'}}
-        </mat-option>
-    </mat-autocomplete>
-</mat-form-field>
-
-<mat-form-field color="accent">
-    <mat-select placeholder="Service" [formControl]="serviceGroupsControl" required>
-        <mat-option *ngFor="let service of serviceGroup" [label]="result.service.name" [value]="service">
-            {{service}}
-        </mat-option>
-    </mat-select>
-    <mat-error *ngIf="baseTypeGroupsControl.hasError('required')">Please choose a base type</mat-error>
-</mat-form-field>
--->

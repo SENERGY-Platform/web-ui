@@ -13,3 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
+.form {
+    min-width: 150px;
+    max-width: 500px;
+    width: 100%;
+}
+
+.form-field {
+    width: 100%;
+}
