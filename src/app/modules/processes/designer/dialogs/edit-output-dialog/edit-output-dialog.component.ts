@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-.canvas {
-    position: relative;
-    height: calc(100vh - 64px);
-}
+import {Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {BpmnParameter} from '../../designer.model';
 
-#js-properties-panel {
-    position: relative;
-    border-right: 0;
-    border-top: 0;
-    border-bottom: 0;
-    width: 260px;
-    height: calc(100vh - 64px);
-    font-size: 12px;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    z-index: 10;
-    border-left: 1px solid #ccc;
-    overflow: auto;
-}
+@Component({
+  templateUrl: './edit-output-dialog.component.html',
+  styleUrls: ['./edit-output-dialog.component.css']
+})
+export class EditOutputDialogComponent implements OnInit {
 
-#js-properties-panel ::ng-deep .bpmn-iot-button {
-    position: static !important;
-    width: 160px !important;
+  constructor(
+      private dialogRef: MatDialogRef<EditOutputDialogComponent>,
+      @Inject(MAT_DIALOG_DATA) private dialogParams: {outputs: BpmnParameter[]}
+  ) {}
+
+  ngOnInit() {
+  }
+
+  close(): void {
+    this.dialogRef.close();
+  }
+
 }

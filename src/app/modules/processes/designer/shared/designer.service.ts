@@ -15,26 +15,24 @@
  */
 
 import {Injectable} from '@angular/core';
-import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from './device-type-selection.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
-import {SelectDeviceTypeAndServiceDialogComponent} from '../dialogs/select-device-type-and-service-dialog.component';
+import {EditOutputDialogComponent} from '../dialogs/edit-output-dialog/edit-output-dialog.component';
+import {BpmnParameter} from '../designer.model';
 
 @Injectable({
     providedIn: 'root'
 })
-export class DeviceTypeDialogService {
+export class DesignerService {
 
     constructor(private dialog: MatDialog) {}
 
-    openSelectDeviceTypeAndServiceDialog(defaultSelection: DeviceTypeSelectionRefModel, callback: (connectorInfo: DeviceTypeSelectionResultModel) => void) {
+    openEdoitOutputDialog(outputs: BpmnParameter[], callback: () => void) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
-        dialogConfig.data = {selection: defaultSelection};
-        const editDialogRef = this.dialog.open(SelectDeviceTypeAndServiceDialogComponent, dialogConfig);
-        editDialogRef.afterClosed().subscribe((result: DeviceTypeSelectionResultModel) => {
-            if (result) {
-                callback(result);
-            }
+        dialogConfig.data = {outputs: outputs};
+        const editDialogRef = this.dialog.open(EditOutputDialogComponent, dialogConfig);
+        editDialogRef.afterClosed().subscribe(() => {
+            callback();
         });
     }
 }

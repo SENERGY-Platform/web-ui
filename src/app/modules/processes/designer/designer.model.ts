@@ -44,11 +44,6 @@ export interface ConnectorInfo {
     skeleton: SkeletonInfo;
 }
 
-// == BpmnParameter?
-export interface Output {
-    value: string;
-}
-
 interface BpmnElementRef {
     source: BpmnElement;
 }

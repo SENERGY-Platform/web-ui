@@ -14,28 +14,17 @@
  * limitations under the License.
  */
 
-.canvas {
-    position: relative;
-    height: calc(100vh - 64px);
-}
+import { Pipe, PipeTransform } from '@angular/core';
 
-#js-properties-panel {
-    position: relative;
-    border-right: 0;
-    border-top: 0;
-    border-bottom: 0;
-    width: 260px;
-    height: calc(100vh - 64px);
-    font-size: 12px;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    z-index: 10;
-    border-left: 1px solid #ccc;
-    overflow: auto;
-}
-
-#js-properties-panel ::ng-deep .bpmn-iot-button {
-    position: static !important;
-    width: 160px !important;
+@Pipe({name: 'shortInputVariableValue'})
+export class ShortInputVariableValuePipe implements PipeTransform {
+    transform(value: string): string {
+        if (value == null) {
+            return '';
+        }
+        if (!value.startsWith('${')) {
+            return value;
+        }
+        return value.substring('${'.length, value.length - 1);
+    }
 }

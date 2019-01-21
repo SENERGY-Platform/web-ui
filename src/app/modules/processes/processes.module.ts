@@ -25,16 +25,19 @@ import {ProcessMonitorComponent} from "../processes/monitor/monitor.component";
 import {ProcessDesignerComponent} from "../processes/designer/designer.component";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
 import {
-    MatButtonModule, MatCardModule,
-    MatDialogModule,
+    MatAutocompleteModule,
+    MatButtonModule, MatCardModule, MatChipsModule,
+    MatDialogModule, MatDividerModule, MatFormFieldModule,
     MatGridListModule,
-    MatIconModule,
-    MatMenuModule,
+    MatIconModule, MatInputModule, MatListModule,
+    MatMenuModule, MatOptionModule, MatPaginatorModule, MatSelectModule, MatTableModule,
     MatTooltipModule
-} from "@angular/material";
+} from '@angular/material';
 import {CommonModule} from "@angular/common";
 import {FlexLayoutModule} from "@angular/flex-layout";
 import {DevicesModule} from '../devices/devices.module';
+import { EditOutputDialogComponent } from './designer/dialogs/edit-output-dialog/edit-output-dialog.component';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 const processRepo = {path: 'processes/repository', pathMatch: 'full', component: ProcessRepoComponent, data: { header: 'Processes' }};
 const processDeployments = {path: 'processes/deployments', pathMatch: 'full', component: ProcessDeploymentsComponent, data: { header: 'Processes' }};
@@ -56,14 +59,24 @@ const processDesigner = {path: 'processes/designer/:id', pathMatch: 'full', comp
         MatIconModule,
         MatCardModule,
         InfiniteScrollModule,
-        DevicesModule
+        DevicesModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatListModule,
+        ReactiveFormsModule,
+        MatDividerModule,
     ],
     declarations: [
         ProcessRepoComponent,
         ProcessDeploymentsComponent,
         ProcessMonitorComponent,
-        ProcessDesignerComponent
+        ProcessDesignerComponent,
+        EditOutputDialogComponent
     ],
+    entryComponents: [
+        EditOutputDialogComponent
+    ]
 })
 
 export class ProcessesModule {

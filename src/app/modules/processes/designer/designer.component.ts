@@ -28,16 +28,15 @@ import {
 } from './bpmn-js/bpmn-js';
 import {HttpClient} from '@angular/common/http';
 import {
-    ConnectorInfo,
     BpmnElement,
-    Output,
     HistoricDataConfig,
     DurationResult,
-    ServiceSelection
 } from './designer.model';
 import {DeviceTypeService} from '../../devices/device-types/shared/device-type.service';
 import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from '../../devices/device-types/shared/device-type-selection.model';
 import {DeviceTypeDialogService} from '../../devices/device-types/shared/device-type-dialog.service';
+import {DesignerService} from './shared/designer.service';
+import {BpmnParameter} from './shared/designer.model';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -49,8 +48,13 @@ export class ProcessDesignerComponent implements OnInit {
 
     modeler: any;
 
-    constructor(private http: HttpClient, protected auth: AuthorizationService, protected dtService: DeviceTypeService, protected dtDialogService: DeviceTypeDialogService) {
-    }
+    constructor(
+        private http: HttpClient,
+        protected auth: AuthorizationService,
+        protected dtService: DeviceTypeService,
+        protected dtDialogService: DeviceTypeDialogService,
+        protected designerService: DesignerService
+    ) {}
 
     ngOnInit() {
         const userId = this.auth.getUserId();
@@ -116,9 +120,11 @@ export class ProcessDesignerComponent implements OnInit {
                 // TODO
                 console.log(element, callback);
             },
-            editOutput: function(outputs: [Output], callback: () => void) {
-                // TODO
-                console.log(outputs, callback);
+            editOutput: function(outputs: BpmnParameter[], callback: () => void) {
+                // that.designerService.openEdoitOutputDialog(outputs, callback);
+                that.designerService.openEdoitOutputDialog(outputs, () => {
+                    callback();
+                });
             },
             findIotDeviceType: function(
                 devicetypeService: DeviceTypeSelectionRefModel,

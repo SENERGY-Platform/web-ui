@@ -39,6 +39,9 @@ import {DiagramEditorComponent} from './components/diagram-editor/diagram-editor
 import {FormsModule} from '@angular/forms';
 import {TagValuePipe} from './pipe/tag-value.pipe';
 import {DeleteDialogComponent} from './dialogs/delete-dialog.component';
+import {ShortInputVariableNamePipe} from './pipe/short-input-variable-name.pipe';
+import {ShortOutputVariableNamePipe} from './pipe/short-output-variable-name.pipe';
+import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pipe';
 
 @NgModule({
     imports: [
@@ -68,6 +71,9 @@ import {DeleteDialogComponent} from './dialogs/delete-dialog.component';
         StateIconComponent,
         DiagramEditorComponent,
         TagValuePipe,
+        ShortOutputVariableNamePipe,
+        ShortInputVariableNamePipe,
+        ShortInputVariableValuePipe,
         DeleteDialogComponent,
     ],
     exports: [
@@ -79,6 +85,9 @@ import {DeleteDialogComponent} from './dialogs/delete-dialog.component';
         StateIconComponent,
         DiagramEditorComponent,
         TagValuePipe,
+        ShortOutputVariableNamePipe,
+        ShortInputVariableNamePipe,
+        ShortInputVariableValuePipe,
     ],
     entryComponents: [
         DeleteDialogComponent,

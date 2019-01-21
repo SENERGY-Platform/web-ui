@@ -27,7 +27,6 @@ import {DeviceTypeService} from '../shared/device-type.service';
 import {DeviceTypePermSearchModel} from '../shared/device-type-perm-search.model';
 import {DeviceTypeModel, DeviceTypeServiceModel} from '../shared/device-type.model';
 import {Observable, Subscriber} from 'rxjs';
-import {map} from 'rxjs/operators';
 
 @Component({
     templateUrl: './select-device-type-and-service-dialog.component.html',

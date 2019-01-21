@@ -72,7 +72,6 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         MatListModule,
         MatDividerModule,
         FormsModule,
-        MatChipsModule,
         MatTableModule,
         MatPaginatorModule,
         MatOptionModule,
