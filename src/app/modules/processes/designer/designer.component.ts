@@ -35,8 +35,9 @@ import {
 import {DeviceTypeService} from '../../devices/device-types/shared/device-type.service';
 import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from '../../devices/device-types/shared/device-type-selection.model';
 import {DeviceTypeDialogService} from '../../devices/device-types/shared/device-type-dialog.service';
-import {DesignerService} from './shared/designer.service';
+import {DesignerDialogService} from './shared/designer-dialog.service';
 import {BpmnParameter} from './shared/designer.model';
+import {DesignerService} from './shared/designer.service';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -53,7 +54,8 @@ export class ProcessDesignerComponent implements OnInit {
         protected auth: AuthorizationService,
         protected dtService: DeviceTypeService,
         protected dtDialogService: DeviceTypeDialogService,
-        protected designerService: DesignerService
+        protected designerDialogService: DesignerDialogService,
+        protected designerService: DesignerService,
     ) {}
 
     ngOnInit() {
@@ -112,15 +114,13 @@ export class ProcessDesignerComponent implements OnInit {
                 console.log('WARNING: deprecated call to registerOutputs()', outputs);
             },
             getInfoHtml: function (element: BpmnElement): string {
-                // TODO
-                console.log(element);
-                return 'todo';
+                return that.getInfoHtml(element);
             },
             editInput: function (element: BpmnElement, callback: () => void) {
-                that.designerService.openEditInputDialog(element, callback);
+                that.designerDialogService.openEditInputDialog(element, callback);
             },
             editOutput: function(outputs: BpmnParameter[], callback: () => void) {
-                that.designerService.openEditOutputDialog(outputs, callback);
+                that.designerDialogService.openEditOutputDialog(outputs, callback);
             },
             findIotDeviceType: function(
                 devicetypeService: DeviceTypeSelectionRefModel,
@@ -149,5 +149,23 @@ export class ProcessDesignerComponent implements OnInit {
             },
             this.handleError
         );
+    }
+
+    getInfoHtml(element: BpmnElement): string {
+        const outputs = this.designerService.getIncomingOutputs(element);
+        const outputsInfo = this.getInfoHtmlTableRows(outputs);
+        return `<table><tr><th>Variable</th><th>Orig-Ref</th></tr>${outputsInfo}</table>`;
+    }
+
+    private getInfoHtmlTableRows(outputs: BpmnParameter[], index: number = 0): string {
+        if (outputs.length > index) {
+            const element: BpmnParameter = outputs[index];
+            const rest: string = this.getInfoHtmlTableRows(outputs, index + 1);
+            const name: string = element.name;
+            const value: string = element.value;
+            return `<tr><td>${name}</td><td>${value}</td></tr>${rest}`;
+        } else {
+            return '';
+        }
     }
 }

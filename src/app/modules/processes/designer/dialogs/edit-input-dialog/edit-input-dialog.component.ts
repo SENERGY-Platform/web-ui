@@ -17,6 +17,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import {BpmnElement, BpmnParameter} from '../../designer.model';
+import {DesignerService} from '../../shared/designer.service';
 
 @Component({
   templateUrl: './edit-input-dialog.component.html',
@@ -28,9 +29,10 @@ export class EditInputDialogComponent implements OnInit {
 
   constructor(
       private dialogRef: MatDialogRef<EditInputDialogComponent>,
+      private designerService: DesignerService,
       @Inject(MAT_DIALOG_DATA) private dialogParams: {inputElement: BpmnElement}
   ) {
-      this.outputs = this.getIncomingOutputs(dialogParams.inputElement);
+      this.outputs = this.designerService.getIncomingOutputs(dialogParams.inputElement);
       const extensionValues = dialogParams.inputElement.businessObject.extensionElements.values;
       if (extensionValues) {
         this.inputs = extensionValues[0].inputParameters;
@@ -46,25 +48,7 @@ export class EditInputDialogComponent implements OnInit {
       this.dialogRef.close();
   }
 
-  private getIncomingOutputs(element: BpmnElement, done: BpmnElement[] = []): BpmnParameter[] {
-      let result: BpmnParameter[] = [];
-      if (done.indexOf(element) !== -1) {
-        return result;
-      }
-      done.push(element);
-      for (let index = 0; index < element.incoming.length; index++) {
-          const incoming = element.incoming[index].source;
-          if (incoming.businessObject.extensionElements
-              && incoming.businessObject.extensionElements.values
-              && incoming.businessObject.extensionElements.values[0]
-              && incoming.businessObject.extensionElements.values[0].outputParameters
-          ) {
-              result = result.concat(incoming.businessObject.extensionElements.values[0].outputParameters);
-          }
-          result = result.concat(this.getIncomingOutputs(incoming, done));
-      }
-      return result;
-  }
+
 
 
 }

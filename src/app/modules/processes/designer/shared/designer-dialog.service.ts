@@ -23,27 +23,28 @@ import {EditInputDialogComponent} from '../dialogs/edit-input-dialog/edit-input-
 @Injectable({
     providedIn: 'root'
 })
-export class DesignerService {
+export class DesignerDialogService {
 
-    constructor() {}
+    constructor(private dialog: MatDialog) {}
 
-    getIncomingOutputs(element: BpmnElement, done: BpmnElement[] = []): BpmnParameter[] {
-        let result: BpmnParameter[] = [];
-        if (done.indexOf(element) !== -1) {
-            return result;
-        }
-        done.push(element);
-        for (let index = 0; index < element.incoming.length; index++) {
-            const incoming = element.incoming[index].source;
-            if (incoming.businessObject.extensionElements
-                && incoming.businessObject.extensionElements.values
-                && incoming.businessObject.extensionElements.values[0]
-                && incoming.businessObject.extensionElements.values[0].outputParameters
-            ) {
-                result = result.concat(incoming.businessObject.extensionElements.values[0].outputParameters);
-            }
-            result = result.concat(this.getIncomingOutputs(incoming, done));
-        }
-        return result;
+    openEditOutputDialog(outputs: BpmnParameter[], callback: () => void) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {outputs: outputs};
+        const editDialogRef = this.dialog.open(EditOutputDialogComponent, dialogConfig);
+        editDialogRef.afterClosed().subscribe(() => {
+            callback();
+        });
+    }
+
+    openEditInputDialog(inputElement: BpmnElement, callback: () => void) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.autoFocus = false;
+        dialogConfig.data = {inputElement: inputElement};
+        const editDialogRef = this.dialog.open(EditInputDialogComponent, dialogConfig);
+        editDialogRef.afterClosed().subscribe(() => {
+            callback();
+        });
     }
 }
