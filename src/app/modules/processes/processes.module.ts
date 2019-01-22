@@ -38,6 +38,7 @@ import {FlexLayoutModule} from "@angular/flex-layout";
 import {DevicesModule} from '../devices/devices.module';
 import { EditOutputDialogComponent } from './designer/dialogs/edit-output-dialog/edit-output-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {EditInputDialogComponent} from './designer/dialogs/edit-input-dialog/edit-input-dialog.component';
 
 const processRepo = {path: 'processes/repository', pathMatch: 'full', component: ProcessRepoComponent, data: { header: 'Processes' }};
 const processDeployments = {path: 'processes/deployments', pathMatch: 'full', component: ProcessDeploymentsComponent, data: { header: 'Processes' }};
@@ -66,16 +67,21 @@ const processDesigner = {path: 'processes/designer/:id', pathMatch: 'full', comp
         MatListModule,
         ReactiveFormsModule,
         MatDividerModule,
+        MatOptionModule,
+        MatSelectModule,
+        MatAutocompleteModule
     ],
     declarations: [
         ProcessRepoComponent,
         ProcessDeploymentsComponent,
         ProcessMonitorComponent,
         ProcessDesignerComponent,
-        EditOutputDialogComponent
+        EditOutputDialogComponent,
+        EditInputDialogComponent
     ],
     entryComponents: [
-        EditOutputDialogComponent
+        EditOutputDialogComponent,
+        EditInputDialogComponent
     ]
 })
 

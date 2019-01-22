@@ -117,14 +117,10 @@ export class ProcessDesignerComponent implements OnInit {
                 return 'todo';
             },
             editInput: function (element: BpmnElement, callback: () => void) {
-                // TODO
-                console.log(element, callback);
+                that.designerService.openEditInputDialog(element, callback);
             },
             editOutput: function(outputs: BpmnParameter[], callback: () => void) {
-                // that.designerService.openEdoitOutputDialog(outputs, callback);
-                that.designerService.openEdoitOutputDialog(outputs, () => {
-                    callback();
-                });
+                that.designerService.openEditOutputDialog(outputs, callback);
             },
             findIotDeviceType: function(
                 devicetypeService: DeviceTypeSelectionRefModel,

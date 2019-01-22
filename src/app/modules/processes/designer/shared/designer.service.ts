@@ -17,7 +17,8 @@
 import {Injectable} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {EditOutputDialogComponent} from '../dialogs/edit-output-dialog/edit-output-dialog.component';
-import {BpmnParameter} from '../designer.model';
+import {BpmnElement, BpmnParameter} from '../designer.model';
+import {EditInputDialogComponent} from '../dialogs/edit-input-dialog/edit-input-dialog.component';
 
 @Injectable({
     providedIn: 'root'
@@ -26,11 +27,22 @@ export class DesignerService {
 
     constructor(private dialog: MatDialog) {}
 
-    openEdoitOutputDialog(outputs: BpmnParameter[], callback: () => void) {
+    openEditOutputDialog(outputs: BpmnParameter[], callback: () => void) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {outputs: outputs};
         const editDialogRef = this.dialog.open(EditOutputDialogComponent, dialogConfig);
+        editDialogRef.afterClosed().subscribe(() => {
+            callback();
+        });
+    }
+
+    openEditInputDialog(inputElement: BpmnElement, callback: () => void) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.autoFocus = false;
+        dialogConfig.data = {inputElement: inputElement};
+        const editDialogRef = this.dialog.open(EditInputDialogComponent, dialogConfig);
         editDialogRef.afterClosed().subscribe(() => {
             callback();
         });

@@ -15,14 +15,22 @@
   -->
 
 
-<h2 mat-dialog-title>Edit Output Variable Names</h2>
+<h2 mat-dialog-title>Edit Input Variable Values</h2>
 
 <mat-dialog-content>
-  <form class="form">
-    <div *ngFor="let output of dialogParams.outputs; let i = index;">
-      <mat-form-field color="accent">
-        <input matInput type="text" [(ngModel)]="dialogParams.outputs[i].name" name="outputs_{{i}}_name_input">
-        <mat-label>{{output.value | shortOutputVariableName}}</mat-label>
+  <form>
+    <div *ngFor="let input of inputs; let i = index;">
+      <mat-form-field color="accent" *ngIf="i>0" matTooltip="type literal or select reference to output" matTooltipPosition="below">
+        <input matInput type="text" [(ngModel)]="input.value" name="field_{{i}}" [matAutocomplete]="auto">
+        <mat-label>{{input.name | shortInputVariableName}}</mat-label>
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option [value]="input.value">
+            {{input.value}}
+          </mat-option>
+          <mat-option *ngFor="let output of outputs" [value]="'${'+output.name+'}'">
+            {{output.name}}
+          </mat-option>
+        </mat-autocomplete>
       </mat-form-field>
     </div>
   </form>
