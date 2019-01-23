@@ -19,6 +19,8 @@ import {MatDialog, MatDialogConfig} from '@angular/material';
 import {EditOutputDialogComponent} from '../dialogs/edit-output-dialog/edit-output-dialog.component';
 import {BpmnElement, BpmnParameter} from '../designer.model';
 import {EditInputDialogComponent} from '../dialogs/edit-input-dialog/edit-input-dialog.component';
+import {CycleDialogComponent} from '../dialogs/cycle-dialog/cycle-dialog.component';
+import {Observable} from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -46,5 +48,14 @@ export class DesignerDialogService {
         editDialogRef.afterClosed().subscribe(() => {
             callback();
         });
+    }
+
+    openCycleDialog(initialCycle: string): Observable<{cron: string, text: string}> {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.autoFocus = false;
+        dialogConfig.data = {initialCycle: initialCycle};
+        const editDialogRef = this.dialog.open(CycleDialogComponent, dialogConfig);
+        return editDialogRef.afterClosed();
     }
 }

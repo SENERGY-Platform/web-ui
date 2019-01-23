@@ -36,12 +36,13 @@ import {SpinnerComponent} from './components/spinner/spinner.component';
 import {SortComponent} from './components/sort/sort.component';
 import {StateIconComponent} from './components/state-icon/state-icon.component';
 import {DiagramEditorComponent} from './components/diagram-editor/diagram-editor.component';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TagValuePipe} from './pipe/tag-value.pipe';
 import {DeleteDialogComponent} from './dialogs/delete-dialog.component';
 import {ShortInputVariableNamePipe} from './pipe/short-input-variable-name.pipe';
 import {ShortOutputVariableNamePipe} from './pipe/short-output-variable-name.pipe';
 import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pipe';
+import { CronEditorComponent } from './components/cron-editor/cron-editor.component';
 
 @NgModule({
     imports: [
@@ -61,6 +62,7 @@ import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pip
         FormsModule,
         MatListModule,
         MatDialogModule,
+        ReactiveFormsModule
     ],
     declarations: [
         SidenavComponent,
@@ -75,6 +77,7 @@ import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pip
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
         DeleteDialogComponent,
+        CronEditorComponent,
     ],
     exports: [
         SidenavComponent,
@@ -88,6 +91,7 @@ import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pip
         ShortOutputVariableNamePipe,
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
+        CronEditorComponent
     ],
     entryComponents: [
         DeleteDialogComponent,

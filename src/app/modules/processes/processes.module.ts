@@ -24,6 +24,7 @@ import {ProcessDeploymentsComponent} from "../processes/deployments/deployments.
 import {ProcessMonitorComponent} from "../processes/monitor/monitor.component";
 import {ProcessDesignerComponent} from "../processes/designer/designer.component";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
+import {CronEditorModule} from 'cron-editor';
 import {
     MatAutocompleteModule,
     MatButtonModule, MatCardModule, MatChipsModule,
@@ -39,6 +40,7 @@ import {DevicesModule} from '../devices/devices.module';
 import { EditOutputDialogComponent } from './designer/dialogs/edit-output-dialog/edit-output-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {EditInputDialogComponent} from './designer/dialogs/edit-input-dialog/edit-input-dialog.component';
+import {CycleDialogComponent} from './designer/dialogs/cycle-dialog/cycle-dialog.component';
 
 const processRepo = {path: 'processes/repository', pathMatch: 'full', component: ProcessRepoComponent, data: { header: 'Processes' }};
 const processDeployments = {path: 'processes/deployments', pathMatch: 'full', component: ProcessDeploymentsComponent, data: { header: 'Processes' }};
@@ -69,7 +71,7 @@ const processDesigner = {path: 'processes/designer/:id', pathMatch: 'full', comp
         MatDividerModule,
         MatOptionModule,
         MatSelectModule,
-        MatAutocompleteModule
+        MatAutocompleteModule,
     ],
     declarations: [
         ProcessRepoComponent,
@@ -77,11 +79,13 @@ const processDesigner = {path: 'processes/designer/:id', pathMatch: 'full', comp
         ProcessMonitorComponent,
         ProcessDesignerComponent,
         EditOutputDialogComponent,
-        EditInputDialogComponent
+        EditInputDialogComponent,
+        CycleDialogComponent
     ],
     entryComponents: [
         EditOutputDialogComponent,
-        EditInputDialogComponent
+        EditInputDialogComponent,
+        CycleDialogComponent
     ]
 })
 

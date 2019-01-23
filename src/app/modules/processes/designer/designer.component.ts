@@ -101,10 +101,16 @@ export class ProcessDesignerComponent implements OnInit {
                 console.log(initial);
                 return new Promise<string>(function () {});
             },
-            cycleDialog: function (initial: string): Promise<string> {
-                // TODO
-                console.log(initial);
-                return new Promise<string>(function () {});
+            cycleDialog: function (initial: string): Promise<{cron: string, text: string}> {
+                return new Promise((resolve, reject) => {
+                    that.designerDialogService.openCycleDialog(initial).toPromise().then(value => {
+                        if (value) {
+                            resolve(value);
+                        } else {
+                            reject();
+                        }
+                    });
+                });
             },
             editHistoricDataConfig: function(existingConfig: HistoricDataConfig, callback: (result: HistoricDataConfig) => void) {
                 // TODO
