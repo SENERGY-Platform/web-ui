@@ -96,10 +96,16 @@ export class ProcessDesignerComponent implements OnInit {
                 console.log(initial);
                 return new Promise<DurationResult>(function () {});
             },
-            dateDialog: function (initial: string): Promise<string> {
-                // TODO
-                console.log(initial);
-                return new Promise<string>(function () {});
+            dateDialog: function (initial: string): Promise<{iso: string, text: string}> {
+                return new Promise((resolve, reject) => {
+                    that.designerDialogService.openDateTimeDialog(initial).toPromise().then(value => {
+                        if (value) {
+                            resolve(value);
+                        } else {
+                            reject();
+                        }
+                    });
+                });
             },
             cycleDialog: function (initial: string): Promise<{cron: string, text: string}> {
                 return new Promise((resolve, reject) => {

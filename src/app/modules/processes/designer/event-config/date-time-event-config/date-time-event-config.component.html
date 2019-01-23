@@ -1,0 +1,21 @@
+<form class="form">
+  <mat-form-field class="form-field" color="accent">
+    <input matInput [formControl]="date" [matDatepicker]="picker" placeholder="Choose a date">
+    <mat-label>Date</mat-label>
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error *ngIf="date.hasError('required')">
+      Please use datepicker to enter a valid date!
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field class="form-field" color="accent">
+    <input matInput [formControl]="hour" type="number" min="0" max="23" step="1">
+    <mat-label>Hours</mat-label>
+  </mat-form-field>
+
+  <mat-form-field class="form-field" color="accent">
+    <input matInput [formControl]="minute" type="number" min="0" max="59" step="1">
+    <mat-label>Minutes</mat-label>
+  </mat-form-field>
+</form>

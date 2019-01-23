@@ -43,7 +43,7 @@ import {ShortInputVariableNamePipe} from './pipe/short-input-variable-name.pipe'
 import {ShortOutputVariableNamePipe} from './pipe/short-output-variable-name.pipe';
 import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pipe';
 import {PreviewFormatPipe} from './pipe/preview-format.pipe';
-import { CronEditorComponent } from './components/cron-editor/cron-editor.component';
+
 
 @NgModule({
     imports: [
@@ -62,8 +62,7 @@ import { CronEditorComponent } from './components/cron-editor/cron-editor.compon
         MatTooltipModule,
         FormsModule,
         MatListModule,
-        MatDialogModule,
-        ReactiveFormsModule
+        MatDialogModule
     ],
     declarations: [
         SidenavComponent,
@@ -79,7 +78,7 @@ import { CronEditorComponent } from './components/cron-editor/cron-editor.compon
         ShortInputVariableValuePipe,
         DeleteDialogComponent,
         PreviewFormatPipe,
-        CronEditorComponent,
+        DeleteDialogComponent
     ],
     exports: [
         SidenavComponent,
@@ -93,8 +92,7 @@ import { CronEditorComponent } from './components/cron-editor/cron-editor.compon
         ShortOutputVariableNamePipe,
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
-        PreviewFormatPipe,
-        CronEditorComponent
+        PreviewFormatPipe
     ],
     entryComponents: [
         DeleteDialogComponent,

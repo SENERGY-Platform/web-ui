@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-export interface ServiceSelection {
-    serviceId: string;
-    deviceTypeId: string;
-}
-
 interface DeviceTypeInfo {
     id: string;
     name: string;
@@ -33,16 +28,6 @@ interface InputOutput {
     [key: string]: InputOutput | [(InputOutput | string | number | boolean)] | string | number | boolean;
 }
 
-interface SkeletonInfo {
-    inputs ?: InputOutput;
-    outputs ?: InputOutput;
-}
-
-export interface ConnectorInfo {
-    deviceType: DeviceTypeInfo;
-    service: ServiceInfo;
-    skeleton: SkeletonInfo;
-}
 
 interface BpmnElementRef {
     source: BpmnElement;

@@ -2,11 +2,11 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 
 @Component({
-    selector: 'senergy-cron-editor',
-    templateUrl: './cron-editor.component.html',
-    styleUrls: ['./cron-editor.component.css']
+    selector: 'senergy-cycle-event-config',
+    templateUrl: './cycle-event-config.component.html',
+    styleUrls: ['./cycle-event-config.component.css']
 })
-export class CronEditorComponent implements OnInit {
+export class CycleEventConfigComponent implements OnInit {
 
     @Input() initial = '';
     @Output() update =  new EventEmitter<{cron: string, text: string}>();
@@ -28,7 +28,7 @@ export class CronEditorComponent implements OnInit {
     }
 
     private cronToText(cron: string) {
-        console.log('todo: interpret cron as text');
+        console.log('todo: interpret cycle-event-config as text');
         return cron;
     }
 }
