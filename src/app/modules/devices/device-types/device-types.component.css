@@ -52,3 +52,10 @@ mat-grid-list {
     display: block;
     position: relative;
 }
+
+.fab {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    z-index: 100;
+}

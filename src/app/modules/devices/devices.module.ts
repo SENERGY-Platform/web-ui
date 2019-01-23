@@ -19,10 +19,21 @@ import {RouterModule} from '@angular/router';
 import {
     MatAutocompleteModule,
     MatButtonModule,
-    MatCardModule, MatChipsModule,
-    MatDialogModule, MatDividerModule, MatFormFieldModule,
+    MatCardModule, MatCheckboxModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatDividerModule, MatExpansionModule,
+    MatFormFieldModule,
     MatGridListModule,
-    MatIconModule, MatInputModule, MatListModule, MatMenuModule, MatOptionModule, MatPaginatorModule, MatSelectModule, MatTableModule,
+    MatIconModule,
+    MatInputModule,
+    MatListModule,
+    MatMenuModule,
+    MatOptionModule,
+    MatPaginatorModule,
+    MatSelectModule,
+    MatStepperModule,
+    MatTableModule, MatTabsModule,
     MatTooltipModule
 } from '@angular/material';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -42,6 +53,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NetworksClearDialogComponent} from './networks/dialogs/networks-clear-dialog.component';
 import {ValueTypesNewDialogComponent} from './value-types/dialogs/value-types-new-dialog.component';
 import {SelectDeviceTypeAndServiceDialogComponent} from './device-types/dialogs/select-device-type-and-service-dialog.component';
+import {DeviceTypesDialogDialogComponent} from './device-types/dialogs/device-types-dialog-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -78,6 +90,11 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         MatSelectModule,
         ReactiveFormsModule,
         MatAutocompleteModule,
+        MatStepperModule,
+        MatSelectModule,
+        MatExpansionModule,
+        MatTabsModule,
+        MatCheckboxModule,
         RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes, maintenance])],
     declarations: [
         NetworksComponent,
@@ -90,7 +107,8 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
         ValueTypesNewDialogComponent,
-        SelectDeviceTypeAndServiceDialogComponent
+        SelectDeviceTypeAndServiceDialogComponent,
+        DeviceTypesDialogDialogComponent,
     ],
     entryComponents: [
         NetworksEditDialogComponent,
@@ -98,7 +116,8 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
         ValueTypesNewDialogComponent,
-        SelectDeviceTypeAndServiceDialogComponent
+        SelectDeviceTypeAndServiceDialogComponent,
+        DeviceTypesDialogDialogComponent,
     ]
 })
 

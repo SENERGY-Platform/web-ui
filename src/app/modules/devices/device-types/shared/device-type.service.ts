@@ -20,20 +20,24 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
-import {DeviceTypeModel} from './device-type.model';
+import {
+    DeviceTypeAssignmentModel,
+    DeviceTypeClassModel,
+    DeviceTypeModel,
+    DeviceTypeProtocolModel,
+    DeviceTypeVendorModel
+} from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
-import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel, BpmnSkeletonModel} from './device-type-selection.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
-import {SelectDeviceTypeAndServiceDialogComponent} from '../dialogs/select-device-type-and-service-dialog.component';
-import {DeviceInstancesModel} from '../../device-instances/shared/device-instances.model';
-import {DeviceInstancesUpdateModel} from '../../device-instances/shared/device-instances-update.model';
+import {BpmnSkeletonModel} from './device-type-selection.model';
+import {MatDialog} from '@angular/material';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DeviceTypeService {
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {}
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {
+    }
 
     getDeviceType(type: string): Observable<DeviceTypeModel | null> {
         return this.http.get<DeviceTypeModel>
@@ -60,6 +64,36 @@ export class DeviceTypeService {
         return this.http.get<BpmnSkeletonModel>
         (environment.iotRepoUrl + '/devicetype/skeleton/' + encodeURIComponent(typeId) + '/' + encodeURIComponent(serviceId)).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeSkeleton: error', null))
+        );
+    }
+
+    getDeviceTypeClasses(searchText: string, limit: number, offset: number): Observable<DeviceTypeClassModel[]> {
+        return this.http.get<DeviceTypeClassModel[]>
+        (environment.iotRepoUrl + '/ui/search/others/deviceClasses/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeClasses', []))
+        );
+    }
+
+    getDeviceTypeVendors(searchText: string, limit: number, offset: number): Observable<DeviceTypeVendorModel[]> {
+        return this.http.get<DeviceTypeVendorModel[]>
+        (environment.iotRepoUrl + '/ui/search/others/vendors/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeVendors', []))
+        );
+    }
+
+    getDeviceTypeProtocols(searchText: string, limit: number, offset: number): Observable<DeviceTypeProtocolModel[]> {
+        return this.http.get<DeviceTypeProtocolModel[]>
+        (environment.iotRepoUrl + '/ui/search/others/protocols/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeProtocols', []))
+        );
+    }
+
+    getFormatPreview(assignmentModel: DeviceTypeAssignmentModel): Observable<string> {
+        return this.http.post(environment.iotRepoUrl + '/format/example', assignmentModel, {responseType: 'text'}).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeProtocols', 'error'))
         );
     }
 }

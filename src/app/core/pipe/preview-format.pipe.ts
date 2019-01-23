@@ -15,18 +15,18 @@
  *  limitations under the License.
  */
 
-export interface ValueTypesModel {
-    id?: string;
-    name: string;
-    base_type: string;
-    literal: string;
-    fields?: ValueTypesFieldTypeModel[] | null;
-    desc?: string;               /** depending on the api desc or description is filled*/
-    description?: string;        /** depending on the api desc or description is filled*/
-}
+import {Pipe, PipeTransform} from '@angular/core';
+import {DeviceTypeAssignmentModel} from '../../modules/devices/device-types/shared/device-type.model';
+import {DeviceTypeService} from '../../modules/devices/device-types/shared/device-type.service';
+import {Observable} from 'rxjs';
 
-export interface ValueTypesFieldTypeModel {
-    id?: string;
-    name: string;
-    type: ValueTypesModel;
+@Pipe({name: 'previewFormat'})
+
+export class PreviewFormatPipe implements PipeTransform {
+    constructor(private deviceTypeService: DeviceTypeService) {
+    }
+
+    transform(value: DeviceTypeAssignmentModel): Observable<string> {
+        return this.deviceTypeService.getFormatPreview(value);
+    }
 }

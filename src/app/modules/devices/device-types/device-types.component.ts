@@ -21,6 +21,7 @@ import {SearchbarService} from '../../../core/components/searchbar/shared/search
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DeviceTypeService} from './shared/device-type.service';
 import {DeviceTypePermSearchModel} from './shared/device-type-perm-search.model';
+import {DeviceTypeDialogService} from './shared/device-type-dialog.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -52,7 +53,8 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
 
     constructor(private searchbarService: SearchbarService,
                 private responsiveService: ResponsiveService,
-                private deviceTypeService: DeviceTypeService) {
+                private deviceTypeService: DeviceTypeService,
+                private deviceTypeDialogService: DeviceTypeDialogService) {
     }
 
     ngOnInit() {
@@ -76,6 +78,13 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
             this.offset = this.offset + this.limit;
             this.getDeviceTypes();
         }
+    }
+
+    newDeviceType() {
+    }
+
+    edit(id: string) {
+        this.deviceTypeDialogService.openDeviceTypeDialog(id);
     }
 
     private initSearchAndGetDeviceTypes() {

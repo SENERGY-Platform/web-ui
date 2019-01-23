@@ -42,6 +42,7 @@ import {DeleteDialogComponent} from './dialogs/delete-dialog.component';
 import {ShortInputVariableNamePipe} from './pipe/short-input-variable-name.pipe';
 import {ShortOutputVariableNamePipe} from './pipe/short-output-variable-name.pipe';
 import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pipe';
+import {PreviewFormatPipe} from './pipe/preview-format.pipe';
 import { CronEditorComponent } from './components/cron-editor/cron-editor.component';
 
 @NgModule({
@@ -77,6 +78,7 @@ import { CronEditorComponent } from './components/cron-editor/cron-editor.compon
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
         DeleteDialogComponent,
+        PreviewFormatPipe,
         CronEditorComponent,
     ],
     exports: [
@@ -91,6 +93,7 @@ import { CronEditorComponent } from './components/cron-editor/cron-editor.compon
         ShortOutputVariableNamePipe,
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
+        PreviewFormatPipe,
         CronEditorComponent
     ],
     entryComponents: [
