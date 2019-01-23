@@ -18,24 +18,23 @@ import {NgModule} from '@angular/core';
 
 import {RouterModule} from '@angular/router';
 
-import {CoreModule} from "../../core/core.module";
-import {ProcessRepoComponent} from "../processes/process-repo/process-repo.component";
-import {ProcessDeploymentsComponent} from "../processes/deployments/deployments.component";
-import {ProcessMonitorComponent} from "../processes/monitor/monitor.component";
-import {ProcessDesignerComponent} from "../processes/designer/designer.component";
-import {InfiniteScrollModule} from "ngx-infinite-scroll";
-import {CronEditorModule} from 'cron-editor';
+import {CoreModule} from '../../core/core.module';
+import {ProcessRepoComponent} from '../processes/process-repo/process-repo.component';
+import {ProcessDeploymentsComponent} from '../processes/deployments/deployments.component';
+import {ProcessMonitorComponent} from '../processes/monitor/monitor.component';
+import {ProcessDesignerComponent} from '../processes/designer/designer.component';
+import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {
     MatAutocompleteModule,
-    MatButtonModule, MatCardModule, MatChipsModule,
+    MatButtonModule, MatCardModule,
     MatDialogModule, MatDividerModule, MatFormFieldModule,
     MatGridListModule,
     MatIconModule, MatInputModule, MatListModule,
-    MatMenuModule, MatOptionModule, MatPaginatorModule, MatSelectModule, MatTableModule,
+    MatMenuModule, MatOptionModule, MatSelectModule,
     MatTooltipModule
 } from '@angular/material';
-import {CommonModule} from "@angular/common";
-import {FlexLayoutModule} from "@angular/flex-layout";
+import {CommonModule} from '@angular/common';
+import {FlexLayoutModule} from '@angular/flex-layout';
 import {DevicesModule} from '../devices/devices.module';
 import { EditOutputDialogComponent } from './designer/dialogs/edit-output-dialog/edit-output-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
