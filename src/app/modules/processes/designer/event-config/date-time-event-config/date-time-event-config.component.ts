@@ -44,6 +44,8 @@ export class DateTimeEventConfigComponent implements OnInit {
             this.date.setValue(date);
             this.hour.setValue(date.getHours());
             this.minute.setValue(date.getMinutes());
+        } else {
+            this.date.setValue(new Date());
         }
     }
 
