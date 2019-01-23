@@ -24,10 +24,14 @@ import {BpmnParameter} from '../../designer.model';
 })
 export class EditOutputDialogComponent implements OnInit {
 
+  outputs: BpmnParameter[];
+
   constructor(
       private dialogRef: MatDialogRef<EditOutputDialogComponent>,
       @Inject(MAT_DIALOG_DATA) private dialogParams: {outputs: BpmnParameter[]}
-  ) {}
+  ) {
+      this.outputs = dialogParams.outputs;
+  }
 
   ngOnInit() {
   }
