@@ -13,8 +13,8 @@ export class DateTimeEventConfigComponent implements OnInit {
     @Output() update =  new EventEmitter<{iso: string, text: string}>();
 
     date = new FormControl(new Date(), Validators.required);
-    hour = new FormControl(0);
-    minute = new FormControl(0);
+    hour = new FormControl(0, [Validators.max(23), Validators.min(0)]);
+    minute = new FormControl(0, [Validators.max(59), Validators.min(0)]);
 
     constructor(@Inject(LOCALE_ID) private localeId: string) {
 
