@@ -21,8 +21,9 @@ import {BpmnElement, BpmnParameter} from '../designer.model';
 import {EditInputDialogComponent} from '../dialogs/edit-input-dialog/edit-input-dialog.component';
 import {CycleDialogComponent} from '../dialogs/cycle-dialog/cycle-dialog.component';
 import {Observable} from 'rxjs';
-import DateTimeFormat = Intl.DateTimeFormat;
 import {DateTimeDialogComponent} from '../dialogs/date-time-dialog/date-time-dialog.component';
+import {DurationDialogComponent} from '../dialogs/duration-dialog/duration-dialog.component';
+import {DurationResult} from './designer.model';
 
 @Injectable({
     providedIn: 'root'
@@ -67,6 +68,15 @@ export class DesignerDialogService {
         dialogConfig.autoFocus = false;
         dialogConfig.data = {initialDateTime: initialDateTime};
         const editDialogRef = this.dialog.open(DateTimeDialogComponent, dialogConfig);
+        return editDialogRef.afterClosed();
+    }
+
+    openDurationDialog(initialDuration: string): Observable<DurationResult> {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.autoFocus = false;
+        dialogConfig.data = {initialDuration: initialDuration};
+        const editDialogRef = this.dialog.open(DurationDialogComponent, dialogConfig);
         return editDialogRef.afterClosed();
     }
 }

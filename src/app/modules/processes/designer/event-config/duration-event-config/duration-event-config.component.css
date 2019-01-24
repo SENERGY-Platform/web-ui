@@ -1,0 +1,10 @@
+.form {
+    min-width: 150px;
+    max-width: 800px;
+    width: 100%;
+}
+
+.form-field {
+    width: 30%;
+    margin: 1.5%;
+}

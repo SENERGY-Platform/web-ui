@@ -43,6 +43,8 @@ import {CycleDialogComponent} from './designer/dialogs/cycle-dialog/cycle-dialog
 import {DateTimeDialogComponent} from './designer/dialogs/date-time-dialog/date-time-dialog.component';
 import {CycleEventConfigComponent} from './designer/event-config/cycle-event-config/cycle-event-config.component';
 import {DateTimeEventConfigComponent} from './designer/event-config/date-time-event-config/date-time-event-config.component';
+import {DurationDialogComponent} from './designer/dialogs/duration-dialog/duration-dialog.component';
+import {DurationEventConfigComponent} from './designer/event-config/duration-event-config/duration-event-config.component';
 
 const processRepo = {path: 'processes/repository', pathMatch: 'full', component: ProcessRepoComponent, data: { header: 'Processes' }};
 const processDeployments = {path: 'processes/deployments', pathMatch: 'full', component: ProcessDeploymentsComponent, data: { header: 'Processes' }};
@@ -87,13 +89,16 @@ const processDesigner = {path: 'processes/designer/:id', pathMatch: 'full', comp
         CycleDialogComponent,
         CycleEventConfigComponent,
         DateTimeDialogComponent,
-        DateTimeEventConfigComponent
+        DateTimeEventConfigComponent,
+        DurationDialogComponent,
+        DurationEventConfigComponent
     ],
     entryComponents: [
         EditOutputDialogComponent,
         EditInputDialogComponent,
         CycleDialogComponent,
-        DateTimeDialogComponent
+        DateTimeDialogComponent,
+        DurationDialogComponent
     ]
 })
 

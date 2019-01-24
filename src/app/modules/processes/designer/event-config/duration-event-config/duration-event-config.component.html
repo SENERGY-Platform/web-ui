@@ -1,0 +1,50 @@
+<form class="form">
+
+  <mat-form-field class="form-field" color="accent">
+    <input matInput [formControl]="year" type="number" min="0" step="1">
+    <mat-label>Years</mat-label>
+    <mat-error *ngIf="hour.hasError('max') || hour.hasError('min')">
+      Please enter a valid number which is at least 0!
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field class="form-field" color="accent">
+    <input matInput [formControl]="month" type="number" min="0" step="1">
+    <mat-label>Months</mat-label>
+    <mat-error *ngIf="hour.hasError('max') || hour.hasError('min')">
+      Please enter a valid number which is at least 0!
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field class="form-field" color="accent">
+    <input matInput [formControl]="day" type="number" min="0" step="1">
+    <mat-label>Days</mat-label>
+    <mat-error *ngIf="hour.hasError('max') || hour.hasError('min')">
+      Please enter a valid number which is at least 0!
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field class="form-field" color="accent">
+    <input matInput [formControl]="hour" type="number" min="0" step="1">
+    <mat-label>Hours</mat-label>
+    <mat-error *ngIf="hour.hasError('max') || hour.hasError('min')">
+      Please enter a valid number which is at least 0!
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field class="form-field" color="accent">
+    <input matInput [formControl]="minute" type="number" min="0" step="1">
+    <mat-label>Minutes</mat-label>
+    <mat-error *ngIf="minute.hasError('max') || minute.hasError('min')">
+      Please enter a valid number which is at least 0!
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field class="form-field" color="accent">
+    <input matInput [formControl]="second" type="number" min="0" step="1">
+    <mat-label>Seconds</mat-label>
+    <mat-error *ngIf="hour.hasError('max') || hour.hasError('min')">
+      Please enter a valid number which is at least 0!
+    </mat-error>
+  </mat-form-field>
+</form>

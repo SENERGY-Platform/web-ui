@@ -92,9 +92,15 @@ export class ProcessDesignerComponent implements OnInit {
 
         this.modeler.designerCallbacks = {
             durationDialog: function (initial: string): Promise<DurationResult> {
-                // TODO
-                console.log(initial);
-                return new Promise<DurationResult>(function () {});
+                return new Promise((resolve, reject) => {
+                    that.designerDialogService.openDurationDialog(initial).toPromise().then(value => {
+                        if (value) {
+                            resolve(value);
+                        } else {
+                            reject();
+                        }
+                    });
+                });
             },
             dateDialog: function (initial: string): Promise<{iso: string, text: string}> {
                 return new Promise((resolve, reject) => {

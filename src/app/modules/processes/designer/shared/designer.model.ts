@@ -60,8 +60,14 @@ export interface HistoricDataConfig {
     dateInterval ?: HistoricDataConfigDateInterval;
 }
 
-interface DurationIso {
-    string: string;
+export interface DurationIso {
+    string: string; // Y __ M __ d __ h __ m __ s __
+    year:   number; // Y
+    month:  number; // M
+    day:    number; // D
+    hour:   number; // h
+    minute: number; // m
+    second: number; // s
 }
 
 export interface DurationResult {
