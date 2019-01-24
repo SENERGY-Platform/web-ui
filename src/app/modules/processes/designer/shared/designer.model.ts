@@ -55,9 +55,9 @@ interface HistoricDataConfigDateInterval {
 }
 
 export interface HistoricDataConfig {
-    analysisAction ?: string;
-    interval ?: HistoricDataConfigInterval;
-    dateInterval ?: HistoricDataConfigDateInterval;
+    analysisAction: string;
+    interval: HistoricDataConfigInterval;
+    dateInterval: HistoricDataConfigDateInterval;
 }
 
 export interface DurationIso {

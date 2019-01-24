@@ -45,6 +45,7 @@ import {CycleEventConfigComponent} from './designer/event-config/cycle-event-con
 import {DateTimeEventConfigComponent} from './designer/event-config/date-time-event-config/date-time-event-config.component';
 import {DurationDialogComponent} from './designer/dialogs/duration-dialog/duration-dialog.component';
 import {DurationEventConfigComponent} from './designer/event-config/duration-event-config/duration-event-config.component';
+import {HistoricDataConfigDialogComponent} from './designer/dialogs/historic-data-config-dialog/historic-data-config-dialog.component';
 
 const processRepo = {path: 'processes/repository', pathMatch: 'full', component: ProcessRepoComponent, data: { header: 'Processes' }};
 const processDeployments = {path: 'processes/deployments', pathMatch: 'full', component: ProcessDeploymentsComponent, data: { header: 'Processes' }};
@@ -91,14 +92,16 @@ const processDesigner = {path: 'processes/designer/:id', pathMatch: 'full', comp
         DateTimeDialogComponent,
         DateTimeEventConfigComponent,
         DurationDialogComponent,
-        DurationEventConfigComponent
+        DurationEventConfigComponent,
+        HistoricDataConfigDialogComponent
     ],
     entryComponents: [
         EditOutputDialogComponent,
         EditInputDialogComponent,
         CycleDialogComponent,
         DateTimeDialogComponent,
-        DurationDialogComponent
+        DurationDialogComponent,
+        HistoricDataConfigDialogComponent
     ]
 })
 

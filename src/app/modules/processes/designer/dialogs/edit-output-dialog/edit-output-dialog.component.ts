@@ -16,7 +16,7 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {BpmnParameter} from '../../designer.model';
+import {BpmnParameter} from '../../shared/designer.model';
 
 @Component({
   templateUrl: './edit-output-dialog.component.html',

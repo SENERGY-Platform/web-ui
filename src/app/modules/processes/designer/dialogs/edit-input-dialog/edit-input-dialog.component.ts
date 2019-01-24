@@ -16,7 +16,7 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {BpmnElement, BpmnParameter} from '../../designer.model';
+import {BpmnElement, BpmnParameter} from '../../shared/designer.model';
 import {DesignerService} from '../../shared/designer.service';
 
 @Component({

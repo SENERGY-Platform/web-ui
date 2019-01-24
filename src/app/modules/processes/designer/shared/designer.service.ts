@@ -15,10 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
-import {EditOutputDialogComponent} from '../dialogs/edit-output-dialog/edit-output-dialog.component';
-import {BpmnElement, BpmnParameter} from '../designer.model';
-import {EditInputDialogComponent} from '../dialogs/edit-input-dialog/edit-input-dialog.component';
+import {BpmnElement, BpmnParameter} from './designer.model';
 
 @Injectable({
     providedIn: 'root'

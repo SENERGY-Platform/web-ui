@@ -31,12 +31,12 @@ import {
     BpmnElement,
     HistoricDataConfig,
     DurationResult,
-} from './designer.model';
+    BpmnParameter
+} from './shared/designer.model';
 import {DeviceTypeService} from '../../devices/device-types/shared/device-type.service';
 import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from '../../devices/device-types/shared/device-type-selection.model';
 import {DeviceTypeDialogService} from '../../devices/device-types/shared/device-type-dialog.service';
 import {DesignerDialogService} from './shared/designer-dialog.service';
-import {BpmnParameter} from './shared/designer.model';
 import {DesignerService} from './shared/designer.service';
 
 @Component({
@@ -125,8 +125,7 @@ export class ProcessDesignerComponent implements OnInit {
                 });
             },
             editHistoricDataConfig: function(existingConfig: HistoricDataConfig, callback: (result: HistoricDataConfig) => void) {
-                // TODO
-                console.log(existingConfig, callback);
+                that.designerDialogService.openHistoricDataConfigDialog(existingConfig, callback);
             },
             registerOutputs: function (outputs: any) {
                 console.log('WARNING: deprecated call to registerOutputs()', outputs);
