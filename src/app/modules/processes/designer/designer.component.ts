@@ -33,7 +33,6 @@ import {
     DurationResult,
     BpmnParameter
 } from './shared/designer.model';
-import {DeviceTypeService} from '../../devices/device-types/shared/device-type.service';
 import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from '../../devices/device-types/shared/device-type-selection.model';
 import {DeviceTypeDialogService} from '../../devices/device-types/shared/device-type-dialog.service';
 import {DesignerDialogService} from './shared/designer-dialog.service';
@@ -52,7 +51,6 @@ export class ProcessDesignerComponent implements OnInit {
     constructor(
         private http: HttpClient,
         protected auth: AuthorizationService,
-        protected dtService: DeviceTypeService,
         protected dtDialogService: DeviceTypeDialogService,
         protected designerDialogService: DesignerDialogService,
         protected designerService: DesignerService,
