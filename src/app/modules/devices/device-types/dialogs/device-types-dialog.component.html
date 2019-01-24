@@ -53,19 +53,19 @@
                             </td>
                             <td *ngIf="hideAddDeviceClass === true">
                                 <mat-form-field class="full-width" color="accent">
-                                    <input (focus)="focus(true)" (focusout)="focus(false)" type="text" matInput placeholder="Please insert device class" [formControl]="deviceInputFormControl">
+                                    <input (focus)="focusDeviceClass(true)" (focusout)="focusDeviceClass(false)" type="text" matInput placeholder="Please insert device class" [formControl]="deviceClassInputFormControl">
                                 </mat-form-field>
                             </td>
                             <td *ngIf="hideAddDeviceClass === true">
                                 <button *ngIf="!deviceClassInputFocus" mat-icon-button class="mat-accent" (click)="hideDeviceClass(false)">
                                     <mat-icon  matTooltip="return to list">undo</mat-icon>
                                 </button>
-                                <button *ngIf="deviceClassInputFocus" mat-icon-button [disabled]="deviceInputFormControl.value === ''" class="mat-accent" (click)="addDeviceClass()">
+                                <button *ngIf="deviceClassInputFocus" mat-icon-button [disabled]="deviceClassInputFormControl.value === ''" class="mat-accent" (click)="addDeviceClass()">
                                     <mat-icon  matTooltip="add device class">add</mat-icon>
                                 </button>
                             </td>
                             <!--section Vendor-->
-                            <td>
+                            <td *ngIf="hideAddVendor === false">
                                 <mat-form-field class="full-width" color="accent">
                                     <mat-select placeholder="Vendor" [compareWith]="compareId"
                                                 formControlName="vendorCtrl">
@@ -75,6 +75,24 @@
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
+                            </td>
+                            <td *ngIf="hideAddVendor === false">
+                                <button mat-icon-button class="mat-accent" (click)="hideVendor(true)">
+                                    <mat-icon matTooltip="create new vendor">playlist_add</mat-icon>
+                                </button>
+                            </td>
+                            <td *ngIf="hideAddVendor === true">
+                                <mat-form-field class="full-width" color="accent">
+                                    <input (focus)="focusVendor(true)" (focusout)="focusVendor(false)" type="text" matInput placeholder="Please insert vendor" [formControl]="vendorInputFormControl">
+                                </mat-form-field>
+                            </td>
+                            <td *ngIf="hideAddVendor === true">
+                                <button *ngIf="!vendorInputFocus" mat-icon-button class="mat-accent" (click)="hideVendor(false)">
+                                    <mat-icon  matTooltip="return to list">undo</mat-icon>
+                                </button>
+                                <button *ngIf="vendorInputFocus" mat-icon-button [disabled]="vendorInputFormControl.value === ''" class="mat-accent" (click)="addVendor()">
+                                    <mat-icon  matTooltip="add vendor">add</mat-icon>
+                                </button>
                             </td>
                         </tr>
                     </table>

@@ -100,7 +100,13 @@ export class DeviceTypeService {
 
     createDeviceClass(name: string): Observable<DeviceTypeResponseModel | null> {
         return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/other/deviceclass', {name: name}).pipe(
-            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeProtocols', null))
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createDeviceClass', null))
+        );
+    }
+
+    createVendor(name: string): Observable<DeviceTypeResponseModel | null> {
+        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/other/vendor', {name: name}).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createVendor', null))
         );
     }
 

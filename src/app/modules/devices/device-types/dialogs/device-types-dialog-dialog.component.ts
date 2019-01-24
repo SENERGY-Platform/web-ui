@@ -53,6 +53,8 @@ const formatData: FormatStructure[] = [
     {id: 'http://www.sepl.wifa.uni-leipzig.de/ontlogies/device-repo#xml', name: 'XML'},
 ];
 
+const buttonChangeTime = 500;
+
 @Component({
     templateUrl: './device-types-dialog.component.html',
     styleUrls: ['./device-types-dialog.component.css'],
@@ -69,9 +71,12 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
 
     firstFormGroup!: FormGroup;
     secondFormGroup!: FormGroup;
-    deviceInputFormControl = new FormControl('');
+    deviceClassInputFormControl = new FormControl('');
+    vendorInputFormControl = new FormControl('');
     hideAddDeviceClass = false;
+    hideAddVendor = false;
     deviceClassInputFocus = false;
+    vendorInputFocus = false;
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesDialogDialogComponent>,
                 private _formBuilder: FormBuilder,
@@ -127,32 +132,61 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
 
     hideDeviceClass(input: boolean): void {
         if (input) {
-            this.deviceInputFormControl.setValue('');
+            this.deviceClassInputFormControl.setValue('');
         }
         this.hideAddDeviceClass = input;
     }
 
+    hideVendor(input: boolean): void {
+        if (input) {
+            this.vendorInputFormControl.setValue('');
+        }
+        this.hideAddVendor = input;
+    }
+
     addDeviceClass(): void {
-        this.deviceTypeService.createDeviceClass(this.deviceInputFormControl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
+        this.deviceTypeService.createDeviceClass(this.deviceClassInputFormControl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
             if (resp) {
-                const newTypeClass: DeviceTypeClassModel = {id: resp.created_id, name: this.deviceInputFormControl.value};
+                const newTypeClass: DeviceTypeClassModel = {id: resp.created_id, name: this.deviceClassInputFormControl.value};
                 this.firstFormGroup.patchValue({'classCtrl': newTypeClass});
                 this.deviceTypeClasses.push(newTypeClass);
             }
-            this.deviceInputFormControl.setValue('');
+            this.deviceClassInputFormControl.setValue('');
             this.hideDeviceClass(false);
         });
-
     }
 
-    focus(input: boolean): void {
-        if (input === false) {
+    addVendor(): void {
+        this.deviceTypeService.createVendor(this.vendorInputFormControl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
+            if (resp) {
+                const newVendor: DeviceTypeVendorModel = {id: resp.created_id, name: this.vendorInputFormControl.value};
+                this.firstFormGroup.patchValue({'vendorCtrl': newVendor});
+                this.deviceTypeVendors.push(newVendor);
+            }
+            this.vendorInputFormControl.setValue('');
+            this.hideVendor(false);
+        });
+    }
+
+    focusDeviceClass(input: boolean): void {
+        if (!input) {
             /** timeout needed that user can click add button */
             setTimeout(() => {
                 this.deviceClassInputFocus = input;
-            }, 500);
+            }, buttonChangeTime);
         } else {
             this.deviceClassInputFocus = input;
+        }
+    }
+
+    focusVendor(input: boolean): void {
+        if (!input) {
+            /** timeout needed that user can click add button */
+            setTimeout(() => {
+                this.vendorInputFocus = input;
+            }, buttonChangeTime);
+        } else {
+            this.vendorInputFocus = input;
         }
     }
 
