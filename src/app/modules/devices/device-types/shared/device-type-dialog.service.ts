@@ -53,7 +53,12 @@ export class DeviceTypeDialogService {
                     deviceType: deviceType
                 };
                 const editDialogRef = this.dialog.open(DeviceTypesDialogDialogComponent, dialogConfig);
-                editDialogRef.afterClosed().subscribe(() => {
+                editDialogRef.afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
+                    if (deviceTypeResp !== undefined) {
+                        this.deviceTypeService.updateDeviceType(deviceTypeResp).subscribe((resp) => {
+                                // todo: refresh list, snackbar
+                        });
+                    }
                 });
             }
         });

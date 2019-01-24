@@ -93,7 +93,7 @@ export class DeviceTypeService {
     }
 
     getFormatPreview(assignmentModel: DeviceTypeAssignmentModel): Observable<string> {
-        return this.http.post(environment.iotRepoUrl + '/format/example', assignmentModel, {responseType: 'text'}).pipe(
+        return this.http.post(environment.iotRepoUrl + '/format/preview', assignmentModel, {responseType: 'text'}).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeProtocols', 'error'))
         );
     }
@@ -107,6 +107,12 @@ export class DeviceTypeService {
     createVendor(name: string): Observable<DeviceTypeResponseModel | null> {
         return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/other/vendor', {name: name}).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createVendor', null))
+        );
+    }
+
+    updateDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
+        return this.http.post<DeviceTypeModel>(environment.iotRepoUrl + '/deviceType/' + encodeURIComponent(deviceType.id), deviceType).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'updateDeviceType', null))
         );
     }
 

@@ -127,7 +127,7 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-select placeholder="Service type"
-                                                                formControlName="serviceType">
+                                                                formControlName="service_type">
                                                         <mat-option
                                                                 *ngFor="let deviceTypeServiceType of deviceTypeServiceTypes"
                                                                 [value]="deviceTypeServiceType.url">
@@ -176,6 +176,7 @@
                                                     <td>
                                                         <mat-form-field class="full-width" color="accent">
                                                             <mat-select placeholder="Format" formControlName="format">
+                                                                <mat-option>-- None --</mat-option>
                                                                 <mat-option
                                                                         *ngFor="let deviceTypeFormat of deviceTypeFormats"
                                                                         [value]="deviceTypeFormat.id">
@@ -189,6 +190,7 @@
                                                             <mat-select placeholder="Value type"
                                                                         [compareWith]="compareId"
                                                                         formControlName="type">
+                                                                <mat-option>-- None --</mat-option>
                                                                 <mat-option
                                                                         *ngFor="let deviceTypeValueType of deviceTypeValueTypes"
                                                                         [value]="deviceTypeValueType">
@@ -202,12 +204,12 @@
                                         </div>
                                         <mat-divider vertical="true" class="divider-margin"></mat-divider>
                                         <div fxFlex>
-                                            <div *ngIf="control.value.format === null && control.value.type === null">
+                                            <div *ngIf="checkIfAssignmentExists(control.value) === false">
                                                 No preview possible.
                                             </div>
                                             <!-- WARNING!!! DONT REFORMAT LINE BELOW-->
                                             <!-- PreviewFormat will change-->
-                                            <pre *ngIf="control.value.format !== null || control.value.type !== null">{{control.value | previewFormat | async }}</pre>
+                                            <pre class="word-wrap" *ngIf="checkIfAssignmentExists(control.value) === true">{{control.value | previewFormat | async }}</pre>
                                         </div>
                                     </div>
                                 </div>
@@ -233,8 +235,8 @@
             <div>You are now done.</div>
             <div>
                 <div fxFlex></div>
-                <button class="mat-raised-button color-accent button-save-margin">Cancel</button>
-                <button class="mat-raised-button mat-accent button-save-margin">Create</button>
+                <button class="mat-raised-button color-accent button-save-margin" (click)="close()">Cancel</button>
+                <button class="mat-raised-button mat-accent button-save-margin" (click)="save()">Save</button>
             </div>
         </mat-step>
     </mat-horizontal-stepper>
