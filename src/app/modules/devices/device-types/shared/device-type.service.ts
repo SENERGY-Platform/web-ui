@@ -30,6 +30,7 @@ import {
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
 import {MatDialog} from '@angular/material';
+import {DeviceTypeResponseModel} from './device-type-response.model';
 
 @Injectable({
     providedIn: 'root'
@@ -96,4 +97,11 @@ export class DeviceTypeService {
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeProtocols', 'error'))
         );
     }
+
+    createDeviceClass(name: string): Observable<DeviceTypeResponseModel | null> {
+        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/other/deviceclass', {name: name}).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeProtocols', null))
+        );
+    }
+
 }

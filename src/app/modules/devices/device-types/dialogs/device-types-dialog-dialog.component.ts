@@ -17,7 +17,7 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {
     DeviceTypeAssignmentModel,
     DeviceTypeClassModel,
@@ -29,6 +29,7 @@ import {
 import {DeviceTypeService} from '../shared/device-type.service';
 import {ValueTypesService} from '../../value-types/shared/value-types.service';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
+import {DeviceTypeResponseModel} from '../shared/device-type-response.model';
 
 interface ServiceTypeDataStructure {
     url: string;
@@ -68,7 +69,9 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
 
     firstFormGroup!: FormGroup;
     secondFormGroup!: FormGroup;
-    previewText = 'asdsasa';
+    deviceInputFormControl = new FormControl('');
+    hideAddDeviceClass = false;
+    deviceClassInputFocus = false;
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesDialogDialogComponent>,
                 private _formBuilder: FormBuilder,
@@ -120,6 +123,37 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
 
     expand(control: FormGroup): void {
         control.patchValue({'show': !control.value.show});
+    }
+
+    hideDeviceClass(input: boolean): void {
+        if (input) {
+            this.deviceInputFormControl.setValue('');
+        }
+        this.hideAddDeviceClass = input;
+    }
+
+    addDeviceClass(): void {
+        this.deviceTypeService.createDeviceClass(this.deviceInputFormControl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
+            if (resp) {
+                const newTypeClass: DeviceTypeClassModel = {id: resp.created_id, name: this.deviceInputFormControl.value};
+                this.firstFormGroup.patchValue({'classCtrl': newTypeClass});
+                this.deviceTypeClasses.push(newTypeClass);
+            }
+            this.deviceInputFormControl.setValue('');
+            this.hideDeviceClass(false);
+        });
+
+    }
+
+    focus(input: boolean): void {
+        if (input === false) {
+            /** timeout needed that user can click add button */
+            setTimeout(() => {
+                this.deviceClassInputFocus = input;
+            }, 500);
+        } else {
+            this.deviceClassInputFocus = input;
+        }
     }
 
     private initFormControls() {

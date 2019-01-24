@@ -33,8 +33,9 @@
                         <input matInput placeholder="Image" formControlName="imgCtrl">
                     </mat-form-field>
                     <table class="full-width" cellspacing="0">
+                        <!--section Device Class-->
                         <tr>
-                            <td>
+                            <td *ngIf="hideAddDeviceClass === false">
                                 <mat-form-field class="full-width" color="accent">
                                     <mat-select placeholder="Device class" [compareWith]="compareId"
                                                 formControlName="classCtrl">
@@ -45,6 +46,25 @@
                                     </mat-select>
                                 </mat-form-field>
                             </td>
+                            <td *ngIf="hideAddDeviceClass === false">
+                                <button mat-icon-button class="mat-accent" (click)="hideDeviceClass(true)">
+                                    <mat-icon matTooltip="create new device class">playlist_add</mat-icon>
+                                </button>
+                            </td>
+                            <td *ngIf="hideAddDeviceClass === true">
+                                <mat-form-field class="full-width" color="accent">
+                                    <input (focus)="focus(true)" (focusout)="focus(false)" type="text" matInput placeholder="Please insert device class" [formControl]="deviceInputFormControl">
+                                </mat-form-field>
+                            </td>
+                            <td *ngIf="hideAddDeviceClass === true">
+                                <button *ngIf="!deviceClassInputFocus" mat-icon-button class="mat-accent" (click)="hideDeviceClass(false)">
+                                    <mat-icon  matTooltip="return to list">undo</mat-icon>
+                                </button>
+                                <button *ngIf="deviceClassInputFocus" mat-icon-button [disabled]="deviceInputFormControl.value === ''" class="mat-accent" (click)="addDeviceClass()">
+                                    <mat-icon  matTooltip="add device class">add</mat-icon>
+                                </button>
+                            </td>
+                            <!--section Vendor-->
                             <td>
                                 <mat-form-field class="full-width" color="accent">
                                     <mat-select placeholder="Vendor" [compareWith]="compareId"
@@ -115,7 +135,8 @@
                                 </div>
                             </mat-tab>
 
-                            <mat-tab label="{{tab.label}}" disabled="{{control.value.protocol === ''}}" formArrayName="{{tab.formArrayName}}"
+                            <mat-tab label="{{tab.label}}" disabled="{{control.value.protocol === ''}}"
+                                     formArrayName="{{tab.formArrayName}}"
                                      *ngFor="let tab of [{label: 'Input', formArrayName: 'input'},{label: 'Output', formArrayName: 'output'}]">
                                 <div [formGroupName]="i"
                                      *ngFor="let control of control.get(tab.formArrayName).controls;  let i = index">
