@@ -77,6 +77,7 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
     hideAddVendor = false;
     deviceClassInputFocus = false;
     vendorInputFocus = false;
+    disableSave = false;
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesDialogDialogComponent>,
                 private _formBuilder: FormBuilder,
@@ -267,7 +268,24 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
                 formGroup.setControl('output', this.createAssignments(protocol, undefined));
             });
         });
+        this.watchFormGroupStatusChanges();
+    }
 
+    private watchFormGroupStatusChanges() {
+        this.firstFormGroup.statusChanges.subscribe((status: string) => {
+            if (status === 'VALID') {
+                this.disableSave = false;
+            } else {
+                this.disableSave = true;
+            }
+        });
+        this.secondFormGroup.statusChanges.subscribe((status: string) => {
+            if (status === 'VALID') {
+                this.disableSave = false;
+            } else {
+                this.disableSave = true;
+            }
+        });
     }
 
     private createServiceGroup(deviceTypeService: DeviceTypeServiceModel): FormGroup {

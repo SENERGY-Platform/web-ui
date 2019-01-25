@@ -158,7 +158,7 @@
                                      *ngFor="let tab of [{label: 'Input', formArrayName: 'input'},{label: 'Output', formArrayName: 'output'}]">
                                 <div [formGroupName]="i"
                                      *ngFor="let control of control.get(tab.formArrayName).controls;  let i = index">
-                                    <div fxLayout="row" fxLayoutAlign="start center">
+                                    <div fxLayout="row" fxLayoutAlign="start center" >
                                         <button mat-icon-button class="mat-accent"
                                                 (click)="expand(control)">
                                             <mat-icon>{{control.value.show ? 'expand_less' : 'expand_more'}}</mat-icon>
@@ -203,13 +203,13 @@
                                             </table>
                                         </div>
                                         <mat-divider vertical="true" class="divider-margin"></mat-divider>
-                                        <div fxFlex>
-                                            <div *ngIf="checkIfAssignmentExists(control.value) === false">
+                                        <div fxFlex [ngSwitch]="checkIfAssignmentExists(control.value)">
+                                            <div *ngSwitchCase="false">
                                                 No preview possible.
                                             </div>
                                             <!-- WARNING!!! DONT REFORMAT LINE BELOW-->
                                             <!-- PreviewFormat will change-->
-                                            <pre class="word-wrap" *ngIf="checkIfAssignmentExists(control.value) === true">{{control.value | previewFormat | async }}</pre>
+                                            <pre class="word-wrap" *ngSwitchCase="true">{{control.value | previewFormat | async }}</pre>
                                         </div>
                                     </div>
                                 </div>
@@ -232,11 +232,12 @@
         </mat-step>
         <mat-step>
             <ng-template matStepLabel>Save</ng-template>
-            <div>You are now done.</div>
+            <div *ngIf="!disableSave">You are now done.</div>
+            <div *ngIf="disableSave">Can't save, please fix errors.</div>
             <div>
                 <div fxFlex></div>
                 <button class="mat-raised-button color-accent button-save-margin" (click)="close()">Cancel</button>
-                <button class="mat-raised-button mat-accent button-save-margin" (click)="save()">Save</button>
+                <button class="mat-raised-button mat-accent button-save-margin" [disabled]="disableSave" (click)="save()">Save</button>
             </div>
         </mat-step>
     </mat-horizontal-stepper>
