@@ -61,7 +61,7 @@ const buttonChangeTime = 500;
 })
 export class DeviceTypesDialogDialogComponent implements OnInit {
 
-
+    deviceType: DeviceTypeModel;
     deviceTypeClasses: DeviceTypeClassModel[] = [];
     deviceTypeVendors: DeviceTypeVendorModel[] = [];
     deviceTypeProtocols: DeviceTypeProtocolModel[] = [];
@@ -70,7 +70,7 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
     deviceTypeFormats = formatData;
 
     firstFormGroup!: FormGroup;
-    secondFormGroup!: FormGroup;
+    secondFormGroup: FormGroup = new FormGroup({services: this._formBuilder.array([])});
     deviceClassInputFormControl = new FormControl('');
     vendorInputFormControl = new FormControl('');
     hideAddDeviceClass = false;
@@ -78,8 +78,6 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
     deviceClassInputFocus = false;
     vendorInputFocus = false;
     disableSave = false;
-
-    private deviceType: DeviceTypeModel;
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesDialogDialogComponent>,
                 private _formBuilder: FormBuilder,

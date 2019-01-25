@@ -105,9 +105,8 @@
         <mat-step [stepControl]="secondFormGroup">
             <form [formGroup]="secondFormGroup">
                 <ng-template matStepLabel>Service</ng-template>
-                <mat-accordion formArrayName="services">
-                    <mat-expansion-panel [formGroupName]="i"
-                                         *ngFor="let control of secondFormGroup.get('services').controls; let i = index">
+                <mat-accordion formArrayName="services" *ngIf="secondFormGroup.get('services')">
+                    <mat-expansion-panel [formGroupName]="i" *ngFor="let control of secondFormGroup.get('services').controls; let i = index">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
                                 Service {{control.value.name}}
