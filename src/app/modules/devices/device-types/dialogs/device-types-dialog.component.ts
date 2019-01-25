@@ -59,7 +59,7 @@ const buttonChangeTime = 500;
     templateUrl: './device-types-dialog.component.html',
     styleUrls: ['./device-types-dialog.component.css'],
 })
-export class DeviceTypesDialogDialogComponent implements OnInit {
+export class DeviceTypesDialogComponent implements OnInit {
 
     deviceType: DeviceTypeModel;
     deviceTypeClasses: DeviceTypeClassModel[] = [];
@@ -79,7 +79,7 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
     vendorInputFocus = false;
     disableSave = false;
 
-    constructor(private dialogRef: MatDialogRef<DeviceTypesDialogDialogComponent>,
+    constructor(private dialogRef: MatDialogRef<DeviceTypesDialogComponent>,
                 private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
                 private valueTypesService: ValueTypesService,

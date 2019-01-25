@@ -19,7 +19,7 @@ import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from './dev
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {SelectDeviceTypeAndServiceDialogComponent} from '../dialogs/select-device-type-and-service-dialog.component';
 import {DeviceTypeModel} from './device-type.model';
-import {DeviceTypesDialogDialogComponent} from '../dialogs/device-types-dialog-dialog.component';
+import {DeviceTypesDialogComponent} from '../dialogs/device-types-dialog.component';
 import {DeviceTypeService} from './device-type.service';
 
 @Injectable({
@@ -52,7 +52,7 @@ export class DeviceTypeDialogService {
                 dialogConfig.data = {
                     deviceType: deviceType
                 };
-                const editDialogRef = this.dialog.open(DeviceTypesDialogDialogComponent, dialogConfig);
+                const editDialogRef = this.dialog.open(DeviceTypesDialogComponent, dialogConfig);
                 editDialogRef.afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
                     if (deviceTypeResp !== undefined) {
                         this.deviceTypeService.updateDeviceType(deviceTypeResp).subscribe(() => {
