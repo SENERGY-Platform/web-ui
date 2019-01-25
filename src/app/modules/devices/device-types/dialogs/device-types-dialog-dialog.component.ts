@@ -61,7 +61,7 @@ const buttonChangeTime = 500;
 })
 export class DeviceTypesDialogDialogComponent implements OnInit {
 
-    deviceType: DeviceTypeModel;
+
     deviceTypeClasses: DeviceTypeClassModel[] = [];
     deviceTypeVendors: DeviceTypeVendorModel[] = [];
     deviceTypeProtocols: DeviceTypeProtocolModel[] = [];
@@ -78,6 +78,8 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
     deviceClassInputFocus = false;
     vendorInputFocus = false;
     disableSave = false;
+
+    private deviceType: DeviceTypeModel;
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesDialogDialogComponent>,
                 private _formBuilder: FormBuilder,
@@ -254,11 +256,18 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
             imgCtrl: [this.deviceType.img],
             classCtrl: [this.deviceType.device_class, Validators.required],
             vendorCtrl: [this.deviceType.vendor, Validators.required],
-            generatedCtrl: [this.deviceType.generated || false, Validators.required],
+            generatedCtrl: [this.deviceType.generated || false],
         });
+
         this.secondFormGroup = this._formBuilder.group({
             services: this._formBuilder.array(this.deviceType.services.map((elem: DeviceTypeServiceModel) => this.createServiceGroup(elem)))
         });
+
+        if (this.deviceType.generated) {
+            this.firstFormGroup.controls['classCtrl'].disable();
+            this.firstFormGroup.controls['vendorCtrl'].disable();
+            this.secondFormGroup.disable();
+        }
 
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
         formArray.controls.forEach((secondFormGroupService: AbstractControl) => {
@@ -273,19 +282,19 @@ export class DeviceTypesDialogDialogComponent implements OnInit {
 
     private watchFormGroupStatusChanges() {
         this.firstFormGroup.statusChanges.subscribe((status: string) => {
-            if (status === 'VALID') {
-                this.disableSave = false;
-            } else {
-                this.disableSave = true;
-            }
+            this.disableSaveButton(status);
         });
         this.secondFormGroup.statusChanges.subscribe((status: string) => {
-            if (status === 'VALID') {
-                this.disableSave = false;
-            } else {
-                this.disableSave = true;
-            }
+            this.disableSaveButton(status);
         });
+    }
+
+    private disableSaveButton(status: string): void {
+        if (status === 'VALID') {
+            this.disableSave = false;
+        } else {
+            this.disableSave = true;
+        }
     }
 
     private createServiceGroup(deviceTypeService: DeviceTypeServiceModel): FormGroup {
