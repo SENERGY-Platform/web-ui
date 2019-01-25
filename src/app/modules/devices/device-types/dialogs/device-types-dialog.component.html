@@ -24,10 +24,10 @@
                 <ng-template matStepLabel>Information</ng-template>
                 <div class="form">
                     <mat-form-field class="full-width" color="accent">
-                        <input matInput placeholder="Name" formControlName="nameCtrl">
+                        <input matInput placeholder="Name" formControlName="nameCtrl" required>
                     </mat-form-field>
                     <mat-form-field class="full-width" color="accent">
-                        <input matInput placeholder="Description" formControlName="descCtrl">
+                        <input matInput placeholder="Description" formControlName="descCtrl" required>
                     </mat-form-field>
                     <mat-form-field class="full-width" color="accent">
                         <input matInput placeholder="Image" formControlName="imgCtrl">
@@ -38,7 +38,7 @@
                             <td *ngIf="hideAddDeviceClass === false">
                                 <mat-form-field class="full-width" color="accent">
                                     <mat-select placeholder="Device class" [compareWith]="compareId"
-                                                formControlName="classCtrl">
+                                                formControlName="classCtrl" [required]="!deviceType.generated">
                                         <mat-option *ngFor="let deviceTypeClass of deviceTypeClasses"
                                                     [value]="deviceTypeClass">
                                             {{deviceTypeClass.name}}
@@ -68,7 +68,7 @@
                             <td *ngIf="hideAddVendor === false">
                                 <mat-form-field class="full-width" color="accent">
                                     <mat-select placeholder="Vendor" [compareWith]="compareId"
-                                                formControlName="vendorCtrl">
+                                                formControlName="vendorCtrl" [required]="!deviceType.generated">
                                         <mat-option *ngFor="let deviceTypeVendor of deviceTypeVendors"
                                                     [value]="deviceTypeVendor">
                                             {{deviceTypeVendor.name}}
@@ -117,20 +117,21 @@
                             <mat-tab label="Information">
                                 <div class="form">
                                     <mat-form-field class="full-width" color="accent">
-                                        <input matInput placeholder="Name" formControlName="name">
+                                        <input matInput placeholder="Name" formControlName="name" required>
                                     </mat-form-field>
                                     <mat-form-field class="full-width" color="accent">
-                                        <input matInput placeholder="Description" formControlName="description">
+                                        <input matInput placeholder="Description" formControlName="description" required>
                                     </mat-form-field>
                                     <mat-form-field class="full-width" color="accent">
-                                        <input matInput placeholder="URL" formControlName="url">
+                                        <input matInput placeholder="URL" formControlName="url" required>
                                     </mat-form-field>
                                     <table class="full-width" cellspacing="0">
                                         <tr>
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-select placeholder="Service type"
-                                                                formControlName="service_type">
+                                                                formControlName="service_type"
+                                                                required>
                                                         <mat-option
                                                                 *ngFor="let deviceTypeServiceType of deviceTypeServiceTypes"
                                                                 [value]="deviceTypeServiceType.url">
@@ -142,7 +143,8 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-select placeholder="Protocol" [compareWith]="compareId"
-                                                                formControlName="protocol">
+                                                                formControlName="protocol"
+                                                                required>
                                                         <mat-option
                                                                 *ngFor="let deviceTypeProtocol of deviceTypeProtocols"
                                                                 [value]="deviceTypeProtocol">
