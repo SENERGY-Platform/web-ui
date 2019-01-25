@@ -28,6 +28,10 @@ mat-grid-list {
     margin-bottom: 100px;
 }
 
+mat-grid-tile {
+    border-radius: 4px;
+}
+
 .truncate {
     white-space: nowrap;
     overflow: hidden;
