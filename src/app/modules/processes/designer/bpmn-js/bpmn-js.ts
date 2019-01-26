@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import _Modeler from 'bpmn-js/lib/Modeler.js';
+import _Modeler from 'bpmn-js/dist/bpmn-modeler.production.min.js';
 import * as _PropertiesPanelModule from 'bpmn-js-properties-panel';
 import * as _CamundaPropertiesProvider from 'bpmn-js-properties-panel/lib/provider/camunda';
 import * as _ElementTemplates from 'bpmn-js-properties-panel/lib/provider/camunda/element-templates';
