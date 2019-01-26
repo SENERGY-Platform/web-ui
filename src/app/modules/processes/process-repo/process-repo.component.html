@@ -44,7 +44,7 @@
                                     {{item.date | date:"medium"}}
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="start end" fxFlex>
-                                    <button mat-icon-button matTooltip="Edit" class="color-accent">
+                                    <button mat-icon-button matTooltip="Edit" class="color-accent" routerLink="/processes/designer/{{item.id}}">
                                         <mat-icon>edit</mat-icon>
                                     </button>
                                     <button mat-icon-button matTooltip="Copy" class="color-accent">

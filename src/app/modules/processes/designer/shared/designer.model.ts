@@ -74,3 +74,11 @@ export interface DurationResult {
     iso: DurationIso;
     text: string;
 }
+
+export interface DesignerProcessModel {
+    date: Date;
+    owner: string;
+    process: string;
+    svg: string;
+    _id: string;
+}

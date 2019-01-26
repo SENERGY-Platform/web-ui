@@ -21,6 +21,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {ProcessModel} from './process.model';
+import {DesignerProcessModel} from "../../designer/shared/designer.model";
 
 
 @Injectable({
@@ -52,6 +53,13 @@ export class ProcessRepoService {
                 catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(list)', []))
             );
         }
+    }
+
+    getProcessModel(id: string): Observable<DesignerProcessModel[] | null> {
+        return this.http.get<DesignerProcessModel[]>(environment.processRepoUrl + '/' + id).pipe(
+            map(resp => resp),
+            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModel()', []))
+        );
     }
 
     /* getProcesses(): Observable<{flows: FlowModel[]}> {

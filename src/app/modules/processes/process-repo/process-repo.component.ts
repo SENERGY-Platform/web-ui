@@ -119,7 +119,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     }
 
     private provideImg(jsonSVG: string): SafeUrl {
-        const svg = this.utilService.convertJSONtoSVG(jsonSVG);
+        const svg = this.utilService.convertJSONtoXML(jsonSVG);
         const base64 = this.utilService.convertSVGtoBase64(svg);
 
         return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);

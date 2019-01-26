@@ -21,6 +21,7 @@ export interface ProcessModel {
     name: string;
     date: Date;
     svg: string;
+    process: string;
     publish: boolean;
     parent_id: string;
     image: SafeUrl;

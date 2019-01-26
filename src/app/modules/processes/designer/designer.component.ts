@@ -31,12 +31,18 @@ import {
     BpmnElement,
     HistoricDataConfig,
     DurationResult,
-    BpmnParameter
+    BpmnParameter, DesignerProcessModel
 } from './shared/designer.model';
-import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from '../../devices/device-types/shared/device-type-selection.model';
+import {
+    DeviceTypeSelectionRefModel,
+    DeviceTypeSelectionResultModel
+} from '../../devices/device-types/shared/device-type-selection.model';
 import {DeviceTypeDialogService} from '../../devices/device-types/shared/device-type-dialog.service';
 import {DesignerDialogService} from './shared/designer-dialog.service';
 import {DesignerService} from './shared/designer.service';
+import {ProcessRepoService} from "../process-repo/shared/process-repo.service";
+import {ActivatedRoute} from "@angular/router";
+import {UtilService} from "../../../core/services/util.service";
 
 @Component({
     selector: 'senergy-process-designer',
@@ -47,18 +53,24 @@ import {DesignerService} from './shared/designer.service';
 export class ProcessDesignerComponent implements OnInit {
 
     modeler: any;
+    processModel: DesignerProcessModel[] = [];
 
     constructor(
         private http: HttpClient,
+        private route: ActivatedRoute,
+        protected utilService: UtilService,
         protected auth: AuthorizationService,
         protected dtDialogService: DeviceTypeDialogService,
         protected designerDialogService: DesignerDialogService,
         protected designerService: DesignerService,
-    ) {}
+        protected processRepoService: ProcessRepoService
+    ) {
+    }
 
     ngOnInit() {
         const userId = this.auth.getUserId();
         const that = this;
+        const id = this.route.snapshot.paramMap.get('id');
 
         this.modeler = new Modeler({
             container: '#js-canvas',
@@ -100,7 +112,7 @@ export class ProcessDesignerComponent implements OnInit {
                     });
                 });
             },
-            dateDialog: function (initial: string): Promise<{iso: string, text: string}> {
+            dateDialog: function (initial: string): Promise<{ iso: string, text: string }> {
                 return new Promise((resolve, reject) => {
                     that.designerDialogService.openDateTimeDialog(initial).toPromise().then(value => {
                         if (value) {
@@ -111,7 +123,7 @@ export class ProcessDesignerComponent implements OnInit {
                     });
                 });
             },
-            cycleDialog: function (initial: string): Promise<{cron: string, text: string}> {
+            cycleDialog: function (initial: string): Promise<{ cron: string, text: string }> {
                 return new Promise((resolve, reject) => {
                     that.designerDialogService.openCycleDialog(initial).toPromise().then(value => {
                         if (value) {
@@ -122,7 +134,7 @@ export class ProcessDesignerComponent implements OnInit {
                     });
                 });
             },
-            editHistoricDataConfig: function(existingConfig: HistoricDataConfig, callback: (result: HistoricDataConfig) => void) {
+            editHistoricDataConfig: function (existingConfig: HistoricDataConfig, callback: (result: HistoricDataConfig) => void) {
                 that.designerDialogService.openHistoricDataConfigDialog(existingConfig, callback);
             },
             registerOutputs: function (outputs: any) {
@@ -134,10 +146,10 @@ export class ProcessDesignerComponent implements OnInit {
             editInput: function (element: BpmnElement, callback: () => void) {
                 that.designerDialogService.openEditInputDialog(element, callback);
             },
-            editOutput: function(outputs: BpmnParameter[], callback: () => void) {
+            editOutput: function (outputs: BpmnParameter[], callback: () => void) {
                 that.designerDialogService.openEditOutputDialog(outputs, callback);
             },
-            findIotDeviceType: function(
+            findIotDeviceType: function (
                 devicetypeService: DeviceTypeSelectionRefModel,
                 callback: (connectorInfo: DeviceTypeSelectionResultModel) => void
             ) {
@@ -145,7 +157,24 @@ export class ProcessDesignerComponent implements OnInit {
             }
         };
 
-        this.load();
+        if (id !== null) {
+            this.loadProcessDiagram(id);
+        }
+        else {
+            this.newProcessDiagram();
+        }
+
+    }
+
+    loadProcessDiagram(id: string) {
+        this.processRepoService.getProcessModel(id).subscribe((resp: DesignerProcessModel[] | null) => {
+            if (resp !== null) {
+                this.processModel = resp;
+                const xml = this.utilService.convertJSONtoXML(this.processModel[0].process);
+
+                this.modeler.importXML(xml, this.handleError)
+            }
+        });
     }
 
     handleError(err: any) {
@@ -154,7 +183,7 @@ export class ProcessDesignerComponent implements OnInit {
         }
     }
 
-    load() {
+    newProcessDiagram() {
         const url = '/assets/bpmn/initial.bpmn';
         this.http.get(url, {
             headers: {observe: 'response'}, responseType: 'text'

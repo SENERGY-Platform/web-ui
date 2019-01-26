@@ -50,12 +50,12 @@ import {HistoricDataConfigDialogComponent} from './designer/dialogs/historic-dat
 const processRepo = {path: 'processes/repository', pathMatch: 'full', component: ProcessRepoComponent, data: { header: 'Processes' }};
 const processDeployments = {path: 'processes/deployments', pathMatch: 'full', component: ProcessDeploymentsComponent, data: { header: 'Processes' }};
 const processMonitor = {path: 'processes/monitor', pathMatch: 'full', component: ProcessMonitorComponent, data: { header: 'Processes' }};
-const processEdit = {path: 'processes/designer', pathMatch: 'full', component: ProcessDesignerComponent, data: { header: 'Processes' }};
-const processDesigner = {path: 'processes/designer/:id', pathMatch: 'full', component: ProcessDesignerComponent, data: { header: 'Processes' }};
+const processDesignerEdit = {path: 'processes/designer/:id', pathMatch: 'full', component: ProcessDesignerComponent, data: { header: 'Processes' }};
+const processDesigner = {path: 'processes/designer', pathMatch: 'full', component: ProcessDesignerComponent, data: { header: 'Processes' }};
 
 @NgModule({
     imports: [
-        RouterModule.forChild([processRepo, processDeployments, processMonitor, processEdit, processDesigner]),
+        RouterModule.forChild([processRepo, processDeployments, processMonitor, processDesignerEdit, processDesigner]),
         FlexLayoutModule,
         CoreModule,
         CommonModule,

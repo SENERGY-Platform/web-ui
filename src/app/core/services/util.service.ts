@@ -30,7 +30,7 @@ export class UtilService {
         this.x2js = new X2JS();
     }
 
-    convertJSONtoSVG(svg: string):string {
+    convertJSONtoXML(svg: string):string {
         return this.x2js.js2xml(svg);
     }
 
