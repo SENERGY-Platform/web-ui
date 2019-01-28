@@ -41,4 +41,13 @@ export class MonitorService {
     }
     return this.getAllHistoryInstancesObservable;
   }
+
+    getFilteredHistoryInstances(filter: string): Observable<MonitorProcessModel[]> {
+        return this.http.get<MonitorProcessModel[]>
+        (environment.processServiceUrl + '/history/' + filter + '/process-instance').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(MonitorService.name, 'getFilteredHistoryInstances', []))
+        );
+    }
+
 }

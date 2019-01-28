@@ -30,7 +30,7 @@ import {
     MatDialogModule, MatDividerModule, MatFormFieldModule,
     MatGridListModule,
     MatIconModule, MatInputModule, MatListModule,
-    MatMenuModule, MatNativeDateModule, MatOptionModule, MatPaginatorModule, MatSelectModule, MatSortModule, MatTableModule,
+    MatMenuModule, MatNativeDateModule, MatOptionModule, MatPaginatorModule, MatRadioModule, MatSelectModule, MatSortModule, MatTableModule,
     MatTooltipModule
 } from '@angular/material';
 import {CommonModule} from '@angular/common';
@@ -83,6 +83,7 @@ const processDesigner = {path: 'processes/designer', pathMatch: 'full', componen
         MatPaginatorModule,
         MatSortModule,
         MatCheckboxModule,
+        MatRadioModule,
     ],
     declarations: [
         ProcessRepoComponent,

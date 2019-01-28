@@ -22,6 +22,7 @@ import {SearchbarService} from '../../../core/components/searchbar/shared/search
 import {MonitorService} from './shared/monitor.service';
 import {MonitorProcessModel} from './shared/monitor-process.model';
 import {SelectionModel} from '@angular/cdk/collections';
+import {FilterModel} from '../../../core/components/filter/shared/filter.model';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -34,6 +35,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
     dataSource = new MatTableDataSource<MonitorProcessModel>([]);
     ready = false;
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'), new SortModel('Description', 'desc', 'asc'));
+    filterAttributes = new Array(new FilterModel('All', 'all'), new FilterModel('Running', 'unfinished'), new FilterModel('Finished', 'finished'));
     displayedColumns: string[] = ['select', 'process', 'id', 'start_time', 'end_time', 'duration', 'info', 'delete'];
     selection = new SelectionModel<MonitorProcessModel>(true, []);
     disableDeleteAll = true;
@@ -58,7 +60,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
 
     receiveSortingAttribute(sortAttribute: SortModel) {
         this.sortAttribute = sortAttribute;
-        this.getProcesses();
+        this.getProcesses('');
     }
 
     isAllSelected() {
@@ -78,7 +80,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
     private initSearchAndGetProcesses() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.getProcesses();
+            this.getProcesses('');
         });
         this.selection.changed.asObservable().subscribe((selection) => {
             if (selection.source.isEmpty()) {
@@ -89,13 +91,24 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getProcesses() {
+    getProcesses(filter: string) {
         this.dataSource.data = [];
         this.ready = false;
-        this.monitorService.getAllHistoryInstances().subscribe(
-            (monitorProcessModels: MonitorProcessModel[]) => {
-                this.dataSource.data = monitorProcessModels;
-                this.ready = true;
-            });
+        if (filter === '' || filter === 'all') {
+            this.monitorService.getAllHistoryInstances().subscribe(
+                (monitorProcessModels: MonitorProcessModel[]) => {
+                    this.setData(monitorProcessModels);
+                });
+        } else {
+            this.monitorService.getFilteredHistoryInstances(filter).subscribe(
+                (monitorProcessModels: MonitorProcessModel[]) => {
+                    this.setData(monitorProcessModels);
+                });
+        }
+    }
+
+    private setData(monitorProcessModels: MonitorProcessModel[]) {
+        this.dataSource.data = monitorProcessModels;
+        this.ready = true;
     }
 }
