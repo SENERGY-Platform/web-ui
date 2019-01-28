@@ -75,9 +75,10 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
     }
 
     private initSearchAndGetProcesses() {
+        this.getProcesses('');
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.getProcesses('');
+            this.dataSource.filter = this.searchText.trim().toLowerCase();
         });
         this.selection.changed.asObservable().subscribe((selection) => {
             if (selection.source.isEmpty()) {
