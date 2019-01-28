@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {AuthorizationService} from '../../../core/services/authorization.service';
-
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {MatPaginator, MatTableDataSource} from '@angular/material';
+import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {Subscription} from 'rxjs';
+import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
+import {MonitorService} from './shared/monitor.service';
+import {MonitorProcessModel} from './shared/monitor-process.model';
+import {SelectionModel} from '@angular/cdk/collections';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -24,14 +29,73 @@ import {AuthorizationService} from '../../../core/services/authorization.service
     styleUrls: ['./monitor.component.css']
 })
 
-export class ProcessMonitorComponent implements OnInit {
+export class ProcessMonitorComponent implements OnInit, OnDestroy {
 
+    dataSource = new MatTableDataSource<MonitorProcessModel>([]);
+    ready = false;
+    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'), new SortModel('Description', 'desc', 'asc'));
+    displayedColumns: string[] = ['select', 'process', 'id', 'start_time', 'end_time', 'duration', 'info', 'delete'];
+    selection = new SelectionModel<MonitorProcessModel>(true, []);
+    disableDeleteAll = true;
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+    private searchText = '';
+    private sortAttribute = this.sortAttributes[0];
+    private searchSub: Subscription = new Subscription();
 
-    constructor(protected auth: AuthorizationService) {
+    constructor(private searchbarService: SearchbarService,
+                private monitorService: MonitorService) {
     }
 
     ngOnInit() {
-        const userId = this.auth.getUserId();
+        this.initSearchAndGetProcesses();
+        this.dataSource.paginator = this.paginator;
+    }
+
+    ngOnDestroy() {
+        this.searchSub.unsubscribe();
+    }
+
+    receiveSortingAttribute(sortAttribute: SortModel) {
+        this.sortAttribute = sortAttribute;
+        this.getProcesses();
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const numRows = this.dataSource.data.length;
+        return numSelected === numRows;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selection.clear();
+        } else {
+            this.dataSource.data.forEach(row => this.selection.select(row));
+        }
+    }
+
+    private initSearchAndGetProcesses() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.getProcesses();
+        });
+        this.selection.changed.asObservable().subscribe((selection) => {
+            if (selection.source.isEmpty()) {
+                this.disableDeleteAll = true;
+            } else {
+                this.disableDeleteAll = false;
+            }
+        });
+    }
+
+    private getProcesses() {
+        this.dataSource.data = [];
+        this.ready = false;
+        this.monitorService.getAllHistoryInstances().subscribe(
+            (monitorProcessModels: MonitorProcessModel[]) => {
+                this.dataSource.data = monitorProcessModels;
+                this.ready = true;
+            });
     }
 }

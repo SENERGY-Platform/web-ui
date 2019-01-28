@@ -14,3 +14,10 @@
  * limitations under the License.
  */
 
+.layout-margin {
+    margin: 8px 8px 150px;
+}
+
+table {
+    width: 100%;
+}

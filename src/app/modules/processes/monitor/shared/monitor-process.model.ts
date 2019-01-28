@@ -15,6 +15,21 @@
  */
 
 export interface MonitorProcessModel {
-    state: string;
+    businessKey: string;
+    caseInstanceId: string;
+    deleteReason: string;
+    durationInMillis: number;
+    endTime: string;
+    id: string;
+    processDefinitionId: string;
+    processDefinitionKey: string;
+    processDefinitionName: string;
+    processDefinitionVersion: number;
+    startActivityId: string;
     startTime: string;
+    startUserId: string;
+    state: string;
+    superCaseInstanceId: string;
+    superProcessInstanceId: string;
+    tenantId: string;
 }
