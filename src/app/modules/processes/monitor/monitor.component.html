@@ -68,7 +68,7 @@
             <ng-container matColumnDef="info">
                 <th mat-header-cell *matHeaderCellDef>Details</th>
                 <td mat-cell *matCellDef="let element">
-                    <button mat-icon-button matTooltip="Details" class="color-accent">
+                    <button mat-icon-button matTooltip="Details" class="color-accent" (click)="openDetailsDialog(element.id)">
                         <mat-icon>info</mat-icon>
                     </button>
                 </td>

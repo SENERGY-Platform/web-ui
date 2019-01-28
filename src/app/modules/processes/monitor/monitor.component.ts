@@ -74,21 +74,6 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
         }
     }
 
-    private initSearchAndGetProcesses() {
-        this.getProcesses('');
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.searchText = searchText;
-            this.dataSource.filter = this.searchText.trim().toLowerCase();
-        });
-        this.selection.changed.asObservable().subscribe((selection) => {
-            if (selection.source.isEmpty()) {
-                this.disableDeleteAll = true;
-            } else {
-                this.disableDeleteAll = false;
-            }
-        });
-    }
-
     getProcesses(filter: string) {
         this.dataSource.data = [];
         this.ready = false;
@@ -103,6 +88,25 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
                     this.setData(monitorProcessModels);
                 });
         }
+    }
+
+    openDetailsDialog(id: string): void {
+        this.monitorService.openDetailsDialog(id);
+    }
+
+    private initSearchAndGetProcesses() {
+        this.getProcesses('');
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.dataSource.filter = this.searchText.trim().toLowerCase();
+        });
+        this.selection.changed.asObservable().subscribe((selection) => {
+            if (selection.source.isEmpty()) {
+                this.disableDeleteAll = true;
+            } else {
+                this.disableDeleteAll = false;
+            }
+        });
     }
 
     private setData(monitorProcessModels: MonitorProcessModel[]) {

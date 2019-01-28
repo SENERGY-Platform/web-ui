@@ -14,33 +14,40 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
 import {MonitorProcessModel} from './monitor-process.model';
+import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MonitorDetailsDialogComponent} from '../dialogs/monitor-details-dialog.component';
+import {MonitorProcessVariableInstancesModel} from './monitor-process-variable-instances.model';
+import {MonitorProcessIncidentModel} from './monitor-process-incident.model';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class MonitorService {
 
     private getAllHistoryInstancesObservable: Observable<MonitorProcessModel[]> | null = null;
 
-  constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) { }
-
-  getAllHistoryInstances(): Observable<MonitorProcessModel[]> {
-    if (this.getAllHistoryInstancesObservable === null) {
-      this.getAllHistoryInstancesObservable = this.getAllHistoryInstancesObservable = this.http.get<MonitorProcessModel[]>(environment.processServiceUrl + '/history/process-instance').pipe(
-          map(resp => resp || []),
-          catchError(this.errorHandlerService.handleError(MonitorService.name, 'getAllHistoryInstances', [])),
-          share()
-      );
+    constructor(private http: HttpClient,
+                private errorHandlerService: ErrorHandlerService,
+                private dialog: MatDialog) {
     }
-    return this.getAllHistoryInstancesObservable;
-  }
+
+    getAllHistoryInstances(): Observable<MonitorProcessModel[]> {
+        if (this.getAllHistoryInstancesObservable === null) {
+            this.getAllHistoryInstancesObservable = this.getAllHistoryInstancesObservable = this.http.get<MonitorProcessModel[]>(environment.processServiceUrl + '/history/process-instance').pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(MonitorService.name, 'getAllHistoryInstances', [])),
+                share()
+            );
+        }
+        return this.getAllHistoryInstancesObservable;
+    }
 
     getFilteredHistoryInstances(filter: string): Observable<MonitorProcessModel[]> {
         return this.http.get<MonitorProcessModel[]>
@@ -49,5 +56,37 @@ export class MonitorService {
             catchError(this.errorHandlerService.handleError(MonitorService.name, 'getFilteredHistoryInstances', []))
         );
     }
+
+    getVariableInstances(id: string): Observable<MonitorProcessVariableInstancesModel[]> {
+        return this.http.get<MonitorProcessVariableInstancesModel[]>
+        (environment.processServiceUrl + '/history/process-instance/' + id + '/variable-instance').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(MonitorService.name, 'getVariableInstances', []))
+        );
+    }
+
+    getInstancesIncidents(id: string): Observable<MonitorProcessIncidentModel[]> {
+        return this.http.get<MonitorProcessIncidentModel[]>
+        (environment.processServiceUrl + '/process-instance/' + id + '/incident').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(MonitorService.name, 'getInstancesIncidents', []))
+        );
+    }
+
+    openDetailsDialog(id: string): void {
+        this.getInstancesIncidents(id).subscribe((incident: MonitorProcessIncidentModel[]) => {
+            this.getVariableInstances(id).subscribe((variables: MonitorProcessVariableInstancesModel[]) => {
+                const dialogConfig = new MatDialogConfig();
+                dialogConfig.disableClose = false;
+                dialogConfig.data = {
+                    variables: variables,
+                    incident: incident,
+                };
+                this.dialog.open(MonitorDetailsDialogComponent, dialogConfig);
+            });
+        });
+
+    }
+
 
 }
