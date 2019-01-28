@@ -14,6 +14,7 @@
   ~ limitations under the License.
   -->
 
-<div *ngIf="show" class="spinner-height" fxLayout="row" fxLayoutAlign="center center">
-    <mat-spinner [ngClass]="{'position': elementCount === 0}" [diameter]="50" [strokeWidth]="5" color="accent"></mat-spinner>
+<div *ngIf="show" fxLayout="row" fxLayoutAlign="center center">
+    <mat-spinner [fxHide.gt-sm]="true" [ngClass]="{'position-small': elementCount === 0}" [diameter]="50" [strokeWidth]="5" color="accent"></mat-spinner>
+    <mat-spinner [fxHide.lt-md]="true" [ngClass]="{'position-big': elementCount === 0}" [diameter]="50" [strokeWidth]="5" color="accent"></mat-spinner>
 </div>

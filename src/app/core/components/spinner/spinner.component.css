@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-.position {
-    position: absolute;
+.position-small {
+    position: fixed;
     z-index: 999;
     height: 2em;
     width: 2em;
@@ -26,6 +26,14 @@
     right: 0;
 }
 
-.spinner-height {
-    min-height: 300px;
+.position-big {
+    position: fixed;
+    z-index: 999;
+    height: 2em;
+    width: 2em;
+    margin: auto;
+    top: 0;
+    left: 271px;
+    bottom: 0;
+    right: 0;
 }
