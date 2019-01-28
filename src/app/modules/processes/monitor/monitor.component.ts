@@ -15,14 +15,16 @@
  */
 
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {MatPaginator, MatTableDataSource} from '@angular/material';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
 import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {MonitorService} from './shared/monitor.service';
 import {MonitorProcessModel} from './shared/monitor-process.model';
 import {SelectionModel} from '@angular/cdk/collections';
 import {FilterModel} from '../../../core/components/filter/shared/filter.model';
+
+const filterData = new Array(new FilterModel('All', 'all'),
+    new FilterModel('Running', 'unfinished'), new FilterModel('Finished', 'finished'));
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -34,15 +36,14 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
 
     dataSource = new MatTableDataSource<MonitorProcessModel>([]);
     ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'), new SortModel('Description', 'desc', 'asc'));
-    filterAttributes = new Array(new FilterModel('All', 'all'), new FilterModel('Running', 'unfinished'), new FilterModel('Finished', 'finished'));
-    displayedColumns: string[] = ['select', 'process', 'id', 'start_time', 'end_time', 'duration', 'info', 'delete'];
+    filterAttributes = filterData;
+    displayedColumns: string[] = ['select', 'processDefinitionKey', 'id', 'startTime', 'endTime', 'durationInMillis', 'info', 'delete'];
     selection = new SelectionModel<MonitorProcessModel>(true, []);
     disableDeleteAll = true;
     @ViewChild(MatPaginator) paginator!: MatPaginator;
+    @ViewChild(MatSort) sort!: MatSort;
 
     private searchText = '';
-    private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
 
     constructor(private searchbarService: SearchbarService,
@@ -52,15 +53,11 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.initSearchAndGetProcesses();
         this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
-    }
-
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getProcesses('');
     }
 
     isAllSelected() {
