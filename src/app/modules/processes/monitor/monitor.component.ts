@@ -108,10 +108,8 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             if (this.activeIndex === 0) {
                 this.dataSourceFinished.filter = searchText.trim().toLowerCase();
-                console.log(this.dataSourceFinished);
             } else {
                 this.dataSourceRunning.filter = searchText.trim().toLowerCase();
-                console.log(this.dataSourceRunning);
             }
         });
         this.selection.changed.asObservable().subscribe((selection) => {

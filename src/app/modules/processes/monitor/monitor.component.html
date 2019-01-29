@@ -91,7 +91,6 @@
                 <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 15, 20, 50]" showFirstLastButtons></mat-paginator>
             </div>
             <div *ngIf="dataSourceFinished.filteredData.length === 0 && ready">No entries found.</div>
-            <senergy-spinner [elementCount]="dataSourceFinished.filteredData.length" [show]="!ready"></senergy-spinner>
         </div>
     </mat-tab>
     <mat-tab label="Running">
@@ -141,10 +140,11 @@
                 <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 15, 20, 50]" showFirstLastButtons></mat-paginator>
             </div>
             <div *ngIf="dataSourceRunning.filteredData.length === 0 && ready">No entries found.</div>
-            <senergy-spinner [elementCount]="dataSourceRunning.filteredData.length" [show]="!ready"></senergy-spinner>
         </div>
     </mat-tab>
 </mat-tab-group>
+<senergy-spinner *ngIf="activeIndex === 0" [elementCount]="dataSourceFinished.filteredData.length" [show]="!ready"></senergy-spinner>
+<senergy-spinner *ngIf="activeIndex === 1" [elementCount]="dataSourceRunning.filteredData.length" [show]="!ready"></senergy-spinner>
 
 
 
