@@ -26,8 +26,8 @@ import {MonitorProcessIncidentModel} from '../shared/monitor-process-incident.mo
 })
 export class MonitorDetailsDialogComponent implements OnInit {
 
-    private variables: {name: string, value: string}[] = [];
-    private incidents: MonitorProcessIncidentModel[] = []
+    variables: {name: string, value: string}[] = [];
+    incidents: MonitorProcessIncidentModel[] = [];
 
     constructor(private dialogRef: MatDialogRef<MonitorDetailsDialogComponent>,
                 @Inject(MAT_DIALOG_DATA) data: { variables: MonitorProcessVariableInstancesModel[], incident: MonitorProcessIncidentModel[]}
