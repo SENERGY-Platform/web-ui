@@ -40,9 +40,9 @@ import {
 import {DeviceTypeDialogService} from '../../devices/device-types/shared/device-type-dialog.service';
 import {DesignerDialogService} from './shared/designer-dialog.service';
 import {DesignerService} from './shared/designer.service';
-import {ProcessRepoService} from "../process-repo/shared/process-repo.service";
-import {ActivatedRoute} from "@angular/router";
-import {UtilService} from "../../../core/services/util.service";
+import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
+import {ActivatedRoute} from '@angular/router';
+import {UtilService} from '../../../core/services/util.service';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -101,7 +101,7 @@ export class ProcessDesignerComponent implements OnInit {
         });
 
         this.modeler.designerCallbacks = {
-            durationDialog: function (initial: string): Promise<DurationResult> {
+            durationDialog: (initial: string): Promise<DurationResult> => {
                 return new Promise((resolve, reject) => {
                     that.designerDialogService.openDurationDialog(initial).toPromise().then(value => {
                         if (value) {
@@ -112,7 +112,7 @@ export class ProcessDesignerComponent implements OnInit {
                     });
                 });
             },
-            dateDialog: function (initial: string): Promise<{ iso: string, text: string }> {
+            dateDialog: (initial: string): Promise<{iso: string, text: string}> => {
                 return new Promise((resolve, reject) => {
                     that.designerDialogService.openDateTimeDialog(initial).toPromise().then(value => {
                         if (value) {
@@ -123,7 +123,7 @@ export class ProcessDesignerComponent implements OnInit {
                     });
                 });
             },
-            cycleDialog: function (initial: string): Promise<{ cron: string, text: string }> {
+            cycleDialog: (initial: string): Promise<{cron: string, text: string}> => {
                 return new Promise((resolve, reject) => {
                     that.designerDialogService.openCycleDialog(initial).toPromise().then(value => {
                         if (value) {
@@ -140,27 +140,29 @@ export class ProcessDesignerComponent implements OnInit {
             registerOutputs: function (outputs: any) {
                 console.log('WARNING: deprecated call to registerOutputs()', outputs);
             },
-            getInfoHtml: function (element: BpmnElement): string {
+            getInfoHtml: (element: BpmnElement): string => {
                 return that.getInfoHtml(element);
             },
-            editInput: function (element: BpmnElement, callback: () => void) {
+            editInput: (element: BpmnElement, callback: () => void) => {
                 that.designerDialogService.openEditInputDialog(element, callback);
             },
-            editOutput: function (outputs: BpmnParameter[], callback: () => void) {
+            editOutput: (outputs: BpmnParameter[], callback: () => void) => {
                 that.designerDialogService.openEditOutputDialog(outputs, callback);
             },
-            findIotDeviceType: function (
+            findIotDeviceType: (
                 devicetypeService: DeviceTypeSelectionRefModel,
                 callback: (connectorInfo: DeviceTypeSelectionResultModel) => void
-            ) {
+            ) => {
                 that.dtDialogService.openSelectDeviceTypeAndServiceDialog(devicetypeService, callback);
+            },
+            configEmail: (to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void ) => {
+                callback(to + '@test', subj + '_test', content + '_test');
             }
         };
 
         if (id !== null) {
             this.loadProcessDiagram(id);
-        }
-        else {
+        } else {
             this.newProcessDiagram();
         }
 
@@ -172,7 +174,7 @@ export class ProcessDesignerComponent implements OnInit {
                 this.processModel = resp;
                 const xml = this.utilService.convertJSONtoXML(this.processModel[0].process);
 
-                this.modeler.importXML(xml, this.handleError)
+                this.modeler.importXML(xml, this.handleError);
             }
         });
     }
