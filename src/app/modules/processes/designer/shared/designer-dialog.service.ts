@@ -24,6 +24,7 @@ import {DateTimeDialogComponent} from '../dialogs/date-time-dialog/date-time-dia
 import {DurationDialogComponent} from '../dialogs/duration-dialog/duration-dialog.component';
 import {BpmnElement, BpmnParameter, DurationResult, HistoricDataConfig} from './designer.model';
 import {HistoricDataConfigDialogComponent} from '../dialogs/historic-data-config-dialog/historic-data-config-dialog.component';
+import {EmailConfigDialogComponent} from '../dialogs/email-config-dialog/email-config-dialog.component';
 
 @Injectable({
     providedIn: 'root'
@@ -89,6 +90,19 @@ export class DesignerDialogService {
         editDialogRef.afterClosed().subscribe(value => {
             if (value) {
                 callback(value);
+            }
+        });
+    }
+
+    openEmailConfigDialog(to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.autoFocus = false;
+        dialogConfig.data = {to: to, subj: subj, content: content};
+        const editDialogRef = this.dialog.open(EmailConfigDialogComponent, dialogConfig);
+        editDialogRef.afterClosed().subscribe((value: {to: string, subj: string, content: string}) => {
+            if (value) {
+                callback(value.to, value.subj, value.content);
             }
         });
     }

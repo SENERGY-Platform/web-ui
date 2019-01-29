@@ -156,7 +156,7 @@ export class ProcessDesignerComponent implements OnInit {
                 that.dtDialogService.openSelectDeviceTypeAndServiceDialog(devicetypeService, callback);
             },
             configEmail: (to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void ) => {
-                callback(to + '@test', subj + '_test', content + '_test');
+                that.designerDialogService.openEmailConfigDialog(to, subj, content, callback);
             }
         };
 
