@@ -48,7 +48,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     ngOnInit() {
-        this.initSearchAndGetProcesses();
+        this.initSearchAndSelection();
     }
 
     ngAfterViewInit(): void {
@@ -96,7 +96,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     setTabIndex(index: number): void {
         this.activeIndex = index;
-        this.getProcesses();
+        this.ready = false;
     }
 
     openDetailsDialog(id: string): void {
@@ -114,8 +114,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         });
     }
 
-    private initSearchAndGetProcesses() {
-        this.getProcesses();
+    private initSearchAndSelection() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             if (this.activeIndex === 0) {
                 this.dataSourceFinished.filter = searchText.trim().toLowerCase();

@@ -14,13 +14,13 @@
   ~ limitations under the License.
   -->
 
-<mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true" (selectedIndexChange)="setTabIndex($event)">
+<mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true" (selectedIndexChange)="setTabIndex($event)" (animationDone)="getProcesses()">
     <mat-tab label="Finished">
         <div fxLayout="row">
             <senergy-searchbar fxFlex></senergy-searchbar>
         </div>
-        <div class="layout-margin">
-            <div [hidden]="!ready || dataSourceFinished.filteredData.length === 0" class="mat-elevation-z1">
+        <div class="layout-margin" [hidden]="!ready">
+            <div [hidden]="dataSourceFinished.filteredData.length === 0" class="mat-elevation-z1">
                 <table mat-table [dataSource]="dataSourceFinished" matSort matSortActive="startTime" matSortDirection="desc" matSortDisableClear>
 
                     <ng-container matColumnDef="select">
@@ -90,15 +90,15 @@
                 </table>
                 <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 15, 20, 50]" showFirstLastButtons></mat-paginator>
             </div>
-            <div *ngIf="dataSourceFinished.filteredData.length === 0 && ready">No entries found.</div>
+            <div *ngIf="dataSourceFinished.filteredData.length === 0">No entries found.</div>
         </div>
     </mat-tab>
     <mat-tab label="Running">
         <div fxLayout="row">
             <senergy-searchbar fxFlex></senergy-searchbar>
         </div>
-        <div class="layout-margin">
-            <div [hidden]="!ready || dataSourceRunning.filteredData.length === 0" class="mat-elevation-z1">
+        <div class="layout-margin" [hidden]="!ready">
+            <div [hidden]="dataSourceRunning.filteredData.length === 0" class="mat-elevation-z1">
                 <table mat-table [dataSource]="dataSourceRunning" matSort matSortActive="startTime" matSortDirection="desc" matSortDisableClear>
 
                     <ng-container matColumnDef="processDefinitionKey">
@@ -139,12 +139,12 @@
                 </table>
                 <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 15, 20, 50]" showFirstLastButtons></mat-paginator>
             </div>
-            <div *ngIf="dataSourceRunning.filteredData.length === 0 && ready">No entries found.</div>
+            <div *ngIf="dataSourceRunning.filteredData.length === 0">No entries found.</div>
         </div>
     </mat-tab>
 </mat-tab-group>
-<senergy-spinner *ngIf="activeIndex === 0" [elementCount]="dataSourceFinished.filteredData.length" [show]="!ready"></senergy-spinner>
-<senergy-spinner *ngIf="activeIndex === 1" [elementCount]="dataSourceRunning.filteredData.length" [show]="!ready"></senergy-spinner>
+<senergy-spinner [elementCount]="0" [show]="!ready"></senergy-spinner>
+
 
 
 
