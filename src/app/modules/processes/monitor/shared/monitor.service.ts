@@ -73,6 +73,13 @@ export class MonitorService {
         );
     }
 
+    stopInstances(id: string): Observable<string> {
+        return this.http.delete
+        (environment.processServiceUrl + '/process-instance/' + id, {responseType: 'text'}).pipe(
+            catchError(this.errorHandlerService.handleError(MonitorService.name, 'stopInstances', 'error'))
+        );
+    }
+
     openDetailsDialog(id: string): void {
         this.getInstancesIncidents(id).subscribe((incident: MonitorProcessIncidentModel[]) => {
             this.getVariableInstances(id).subscribe((variables: MonitorProcessVariableInstancesModel[]) => {

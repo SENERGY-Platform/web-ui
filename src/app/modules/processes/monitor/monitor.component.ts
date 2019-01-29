@@ -15,7 +15,7 @@
  */
 
 import {AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
-import {MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
+import {MatPaginator, MatSort, MatTable, MatTableDataSource} from '@angular/material';
 import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {MonitorService} from './shared/monitor.service';
@@ -101,6 +101,17 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     openDetailsDialog(id: string): void {
         this.monitorService.openDetailsDialog(id);
+    }
+
+    stop(element: MonitorProcessModel): void {
+
+        this.monitorService.stopInstances(element.id).subscribe((resp: string) => {
+            if (resp === 'ok') {
+                const index = this.dataSourceRunning.data.indexOf(element);
+                this.dataSourceRunning.data.splice(index, 1);
+                this.dataSourceRunning._updateChangeSubscription();
+            }
+        });
     }
 
     private initSearchAndGetProcesses() {
