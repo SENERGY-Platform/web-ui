@@ -26,11 +26,26 @@ import {ProcessDesignerComponent} from '../processes/designer/designer.component
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {
     MatAutocompleteModule,
-    MatButtonModule, MatCardModule, MatCheckboxModule, MatDatepickerModule,
-    MatDialogModule, MatDividerModule, MatFormFieldModule,
+    MatButtonModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatDatepickerModule,
+    MatDialogModule,
+    MatDividerModule,
+    MatFormFieldModule,
     MatGridListModule,
-    MatIconModule, MatInputModule, MatListModule,
-    MatMenuModule, MatNativeDateModule, MatOptionModule, MatPaginatorModule, MatRadioModule, MatSelectModule, MatSortModule, MatTableModule,
+    MatIconModule,
+    MatInputModule,
+    MatListModule,
+    MatMenuModule,
+    MatNativeDateModule,
+    MatOptionModule,
+    MatPaginatorModule,
+    MatRadioModule,
+    MatSelectModule,
+    MatSortModule,
+    MatTableModule,
+    MatTabsModule,
     MatTooltipModule
 } from '@angular/material';
 import {CommonModule} from '@angular/common';
@@ -85,6 +100,7 @@ const processDesigner = {path: 'processes/designer', pathMatch: 'full', componen
         MatSortModule,
         MatCheckboxModule,
         MatRadioModule,
+        MatTabsModule,
     ],
     declarations: [
         ProcessRepoComponent,

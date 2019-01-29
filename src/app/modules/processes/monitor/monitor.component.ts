@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
 import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {MonitorService} from './shared/monitor.service';
 import {MonitorProcessModel} from './shared/monitor-process.model';
 import {SelectionModel} from '@angular/cdk/collections';
-import {FilterModel} from '../../../core/components/filter/shared/filter.model';
-
-const filterData = new Array(new FilterModel('All', 'all'),
-    new FilterModel('Running', 'unfinished'), new FilterModel('Finished', 'finished'));
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -32,18 +28,19 @@ const filterData = new Array(new FilterModel('All', 'all'),
     styleUrls: ['./monitor.component.css']
 })
 
-export class ProcessMonitorComponent implements OnInit, OnDestroy {
+export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    dataSource = new MatTableDataSource<MonitorProcessModel>([]);
+    dataSourceFinished = new MatTableDataSource<MonitorProcessModel>([]);
+    dataSourceRunning = new MatTableDataSource<MonitorProcessModel>([]);
     ready = false;
-    filterAttributes = filterData;
-    displayedColumns: string[] = ['select', 'processDefinitionKey', 'id', 'startTime', 'endTime', 'durationInMillis', 'info', 'delete'];
+    displayedColumnsFinished: string[] = ['select', 'processDefinitionKey', 'id', 'startTime', 'endTime', 'durationInMillis', 'info', 'delete'];
+    displayedColumnsRunning: string[] = ['processDefinitionKey', 'id', 'startTime', 'info', 'action'];
     selection = new SelectionModel<MonitorProcessModel>(true, []);
     disableDeleteAll = true;
-    @ViewChild(MatPaginator) paginator!: MatPaginator;
+    activeIndex = 0;
+    @ViewChildren(MatPaginator) paginator = new QueryList<MatPaginator>();
     @ViewChild(MatSort) sort!: MatSort;
 
-    private searchText = '';
     private searchSub: Subscription = new Subscription();
 
     constructor(private searchbarService: SearchbarService,
@@ -52,8 +49,12 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearchAndGetProcesses();
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+    }
+
+    ngAfterViewInit(): void {
+        this.dataSourceFinished.paginator = this.paginator.toArray()[0];
+        this.dataSourceRunning.paginator = this.paginator.toArray()[1];
+        this.dataSourceFinished.sort = this.sort;
     }
 
     ngOnDestroy() {
@@ -62,7 +63,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
 
     isAllSelected() {
         const numSelected = this.selection.selected.length;
-        const numRows = this.dataSource.data.length;
+        const numRows = this.dataSourceFinished.data.length;
         return numSelected === numRows;
     }
 
@@ -70,24 +71,32 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
         if (this.isAllSelected()) {
             this.selection.clear();
         } else {
-            this.dataSource.data.forEach(row => this.selection.select(row));
+            this.dataSourceFinished.data.forEach(row => this.selection.select(row));
         }
     }
 
-    getProcesses(filter: string) {
-        this.dataSource.data = [];
+    getProcesses() {
         this.ready = false;
-        if (filter === '' || filter === 'all') {
-            this.monitorService.getAllHistoryInstances().subscribe(
+        if (this.activeIndex === 0) {
+            this.dataSourceFinished.data = [];
+            this.monitorService.getFilteredHistoryInstances('finished').subscribe(
                 (monitorProcessModels: MonitorProcessModel[]) => {
-                    this.setData(monitorProcessModels);
+                    this.dataSourceFinished.data = monitorProcessModels;
+                    this.ready = true;
                 });
         } else {
-            this.monitorService.getFilteredHistoryInstances(filter).subscribe(
+            this.dataSourceRunning.data = [];
+            this.monitorService.getFilteredHistoryInstances('unfinished').subscribe(
                 (monitorProcessModels: MonitorProcessModel[]) => {
-                    this.setData(monitorProcessModels);
+                    this.dataSourceRunning.data = monitorProcessModels;
+                    this.ready = true;
                 });
         }
+    }
+
+    setTabIndex(index: number): void {
+        this.activeIndex = index;
+        this.getProcesses();
     }
 
     openDetailsDialog(id: string): void {
@@ -95,10 +104,15 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
     }
 
     private initSearchAndGetProcesses() {
-        this.getProcesses('');
+        this.getProcesses();
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.searchText = searchText;
-            this.dataSource.filter = this.searchText.trim().toLowerCase();
+            if (this.activeIndex === 0) {
+                this.dataSourceFinished.filter = searchText.trim().toLowerCase();
+                console.log(this.dataSourceFinished);
+            } else {
+                this.dataSourceRunning.filter = searchText.trim().toLowerCase();
+                console.log(this.dataSourceRunning);
+            }
         });
         this.selection.changed.asObservable().subscribe((selection) => {
             if (selection.source.isEmpty()) {
@@ -107,10 +121,5 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy {
                 this.disableDeleteAll = false;
             }
         });
-    }
-
-    private setData(monitorProcessModels: MonitorProcessModel[]) {
-        this.dataSource.data = monitorProcessModels;
-        this.ready = true;
     }
 }

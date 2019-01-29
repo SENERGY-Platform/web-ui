@@ -36,14 +36,13 @@ import {SpinnerComponent} from './components/spinner/spinner.component';
 import {SortComponent} from './components/sort/sort.component';
 import {StateIconComponent} from './components/state-icon/state-icon.component';
 import {DiagramEditorComponent} from './components/diagram-editor/diagram-editor.component';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FormsModule} from '@angular/forms';
 import {TagValuePipe} from './pipe/tag-value.pipe';
 import {DeleteDialogComponent} from './dialogs/delete-dialog.component';
 import {ShortInputVariableNamePipe} from './pipe/short-input-variable-name.pipe';
 import {ShortOutputVariableNamePipe} from './pipe/short-output-variable-name.pipe';
 import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pipe';
 import {PreviewFormatPipe} from './pipe/preview-format.pipe';
-import {FilterComponent} from './components/filter/filter.component';
 
 
 @NgModule({
@@ -80,7 +79,6 @@ import {FilterComponent} from './components/filter/filter.component';
         DeleteDialogComponent,
         PreviewFormatPipe,
         DeleteDialogComponent,
-        FilterComponent,
     ],
     exports: [
         SidenavComponent,
@@ -95,7 +93,6 @@ import {FilterComponent} from './components/filter/filter.component';
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
         PreviewFormatPipe,
-        FilterComponent,
     ],
     entryComponents: [
         DeleteDialogComponent,
