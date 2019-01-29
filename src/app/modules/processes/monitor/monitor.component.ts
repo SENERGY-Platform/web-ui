@@ -15,12 +15,13 @@
  */
 
 import {AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
-import {MatPaginator, MatSort, MatTable, MatTableDataSource} from '@angular/material';
+import {MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
 import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {MonitorService} from './shared/monitor.service';
 import {MonitorProcessModel} from './shared/monitor-process.model';
 import {SelectionModel} from '@angular/cdk/collections';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -44,7 +45,8 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     private searchSub: Subscription = new Subscription();
 
     constructor(private searchbarService: SearchbarService,
-                private monitorService: MonitorService) {
+                private monitorService: MonitorService,
+                private dialogsService: DialogsService) {
     }
 
     ngOnInit() {
@@ -101,6 +103,20 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     openDetailsDialog(id: string): void {
         this.monitorService.openDetailsDialog(id);
+    }
+
+    deleteSingleItem(element: MonitorProcessModel): void {
+        this.dialogsService.openDeleteDialog('process (' + element.id + ')').afterClosed().subscribe((processDelete: boolean) => {
+            if (processDelete) {
+                this.monitorService.deleteInstances(element.id).subscribe((resp: string) => {
+                    if (resp === 'ok') {
+                        const index = this.dataSourceFinished.data.indexOf(element);
+                        this.dataSourceFinished.data.splice(index, 1);
+                        this.dataSourceFinished._updateChangeSubscription();
+                    }
+                });
+            }
+        });
     }
 
     stop(element: MonitorProcessModel): void {

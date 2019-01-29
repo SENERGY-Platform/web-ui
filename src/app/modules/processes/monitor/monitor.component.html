@@ -79,7 +79,7 @@
                             </button>
                         </th>
                         <td mat-cell *matCellDef="let element">
-                            <button matTooltip="Delete" mat-icon-button color="accent" [disabled]="!disableDeleteAll">
+                            <button matTooltip="Delete" mat-icon-button color="accent" [disabled]="!disableDeleteAll" (click)="deleteSingleItem(element)">
                                 <mat-icon>delete</mat-icon>
                             </button>
                         </td>
