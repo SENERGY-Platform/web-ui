@@ -17,7 +17,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import {FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
-import {ParentErrorStateMatcher} from '../../../../../core/parent-error-state-matcher';
+import {ParentErrorStateMatcher} from '../../../../../core/classes/parent-error-state-matcher';
 
 
 @Component({
