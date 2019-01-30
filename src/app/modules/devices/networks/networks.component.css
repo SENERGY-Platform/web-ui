@@ -42,3 +42,7 @@ mat-grid-tile {
     height: calc(100% - 64px);
     overflow-y: auto;
 }
+
+.height {
+    height: 198px;
+}

@@ -22,7 +22,7 @@ import {WidgetModel} from './shared/dashboard-widget.model';
 import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
 import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
-import {DisplayGrid, GridsterConfig, GridType,} from 'angular-gridster2';
+import {DisplayGrid, GridsterConfig, GridType} from 'angular-gridster2';
 
 const grids = new Map([
     ['xs', 1],
