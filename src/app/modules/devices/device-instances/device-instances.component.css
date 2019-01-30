@@ -60,7 +60,8 @@ mat-grid-tile {
 }
 
 .shared {
-    margin-right: 4px;
+    padding-left: 5px;
+    padding-right: 5px;
     max-height: 20px;
 }
 
@@ -92,4 +93,8 @@ mat-grid-tile {
     margin-top: -4px;
     padding: 5px;
     margin-bottom: 16px;
+}
+
+.footer-buttons {
+    max-height: 30px;
 }
