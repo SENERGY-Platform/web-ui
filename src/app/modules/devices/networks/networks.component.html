@@ -31,15 +31,15 @@
             <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
                            *ngIf="networks.length > 0">
                 <mat-grid-tile class="mat-elevation-z1" *ngFor="let network of networks; let i = index">
-                    <mat-card fxFill>
-                        <img class="height" mat-card-image src="src/img/network-pic.jpeg">
-                    </mat-card>
+                    <div fxFill>
+                        <img class="widget-image" src="src/img/network-pic.jpeg">
+                    </div>
                     <mat-grid-tile-footer>
                         <div fxLayout="column" fxFill>
-                            <div class="truncate mat-card-title footer-item" matTooltip="{{network.name}}">
+                            <div class="truncate footer-item-header" matTooltip="{{network.name}}">
                                 {{network.name}}
                             </div>
-                            <div class="mat-card-subtitle footer-item">
+                            <div class="truncate footer-item-subtitle">
                                 Devices: {{network.devices?.length || 0}}
                             </div>
                             <form fxLayout="row" class="footer-buttons">

@@ -25,8 +25,19 @@ mat-grid-tile-footer {
     padding: 8px !important;
 }
 
-.footer-item {
+.footer-item-header {
+    min-height: 20px;
     padding: 5px;
+    margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.footer-item-subtitle {
+    min-height: 20px;
+    margin-top: -4px;
+    padding: 5px;
+    margin-bottom: 16px;
 }
 
 .footer-buttons {
@@ -53,6 +64,7 @@ mat-grid-tile {
     overflow-y: auto;
 }
 
-.height {
-    height: 198px;
+.widget-image {
+    height: 156px;
+    width: 100%;
 }
