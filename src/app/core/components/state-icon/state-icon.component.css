@@ -14,3 +14,7 @@
  * limitations under the License.
  */
 
+.padding {
+    padding-left: 5px;
+    padding-right: 5px;
+}

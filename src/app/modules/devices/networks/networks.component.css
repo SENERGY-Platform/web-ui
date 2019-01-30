@@ -19,10 +19,20 @@
 }
 
 mat-grid-tile-footer {
+    height: 110px !important;
     background-color: white !important;
-    height: 68px !important;
     color: black !important;
+    padding: 8px !important;
 }
+
+.footer-item {
+    padding: 5px;
+}
+
+.footer-buttons {
+    max-height: 30px;
+}
+
 
 mat-grid-list {
     margin-bottom: 100px;
