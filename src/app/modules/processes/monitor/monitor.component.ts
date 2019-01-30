@@ -22,6 +22,7 @@ import {MonitorService} from './shared/monitor.service';
 import {MonitorProcessModel} from './shared/monitor-process.model';
 import {SelectionModel} from '@angular/cdk/collections';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {PermissionsResponseModel} from '../../permissions/shared/permissions-response.model';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -37,7 +38,6 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     displayedColumnsFinished: string[] = ['select', 'processDefinitionKey', 'id', 'startTime', 'endTime', 'durationInMillis', 'info', 'delete'];
     displayedColumnsRunning: string[] = ['processDefinitionKey', 'id', 'startTime', 'info', 'action'];
     selection = new SelectionModel<MonitorProcessModel>(true, []);
-    disableDeleteAll = true;
     activeIndex = 0;
     @ViewChildren(MatPaginator) paginator = new QueryList<MatPaginator>();
     @ViewChild(MatSort) sort!: MatSort;
@@ -50,13 +50,16 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     ngOnInit() {
-        this.initSearchAndSelection();
+        this.initSearch();
     }
 
     ngAfterViewInit(): void {
         this.dataSourceFinished.paginator = this.paginator.toArray()[0];
         this.dataSourceRunning.paginator = this.paginator.toArray()[1];
         this.dataSourceFinished.sort = this.sort;
+        this.dataSourceFinished.sort.sortChange.subscribe(() => {
+            this.selectionClear();
+        });
     }
 
     ngOnDestroy() {
@@ -65,19 +68,20 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     isAllSelected() {
         const numSelected = this.selection.selected.length;
-        const numRows = this.dataSourceFinished.data.length;
-        return numSelected === numRows;
+        const currentViewed = this.dataSourceFinished.connect().value.length;
+        return numSelected === currentViewed;
     }
 
     masterToggle() {
         if (this.isAllSelected()) {
-            this.selection.clear();
+            this.selectionClear();
         } else {
-            this.dataSourceFinished.data.forEach(row => this.selection.select(row));
+            this.dataSourceFinished.connect().value.forEach(row => this.selection.select(row));
         }
     }
 
     getProcesses() {
+        this.selectionClear();
         this.ready = false;
         if (this.activeIndex === 0) {
             this.dataSourceFinished.data = [];
@@ -119,8 +123,27 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         });
     }
 
-    stop(element: MonitorProcessModel): void {
+    deleteMultipleItems(): void {
+        this.dialogsService.openDeleteDialog(this.selection.selected.length + ' process(es)').afterClosed().subscribe((processesDelete: boolean) => {
+            if (processesDelete) {
+                this.monitorService.deleteMultipleInstances(this.selection.selected).subscribe((resp: string[]) => {
+                    const countOk = resp.filter((response: string) => {
+                        return response === 'ok';
+                    }).length;
+                    if (countOk === this.selection.selected.length) {
+                        this.selection.selected.forEach((item: MonitorProcessModel) => {
+                            const index = this.dataSourceFinished.data.indexOf(item);
+                            this.dataSourceFinished.data.splice(index, 1);
+                        });
+                        this.dataSourceFinished._updateChangeSubscription();
+                        this.selectionClear();
+                    }
+                });
+            }
+        });
+    }
 
+    stop(element: MonitorProcessModel): void {
         this.monitorService.stopInstances(element.id).subscribe((resp: string) => {
             if (resp === 'ok') {
                 const index = this.dataSourceRunning.data.indexOf(element);
@@ -130,19 +153,17 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         });
     }
 
-    private initSearchAndSelection() {
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    private initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.selection.clear();
             if (this.activeIndex === 0) {
                 this.dataSourceFinished.filter = searchText.trim().toLowerCase();
             } else {
                 this.dataSourceRunning.filter = searchText.trim().toLowerCase();
-            }
-        });
-        this.selection.changed.asObservable().subscribe((selection) => {
-            if (selection.source.isEmpty()) {
-                this.disableDeleteAll = true;
-            } else {
-                this.disableDeleteAll = false;
             }
         });
     }

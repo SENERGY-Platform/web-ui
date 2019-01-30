@@ -17,7 +17,7 @@
 import {Injectable} from '@angular/core';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
 import {MonitorProcessModel} from './monitor-process.model';
@@ -84,6 +84,19 @@ export class MonitorService {
         return this.http.delete
         (environment.processServiceUrl + '/history/process-instance/' + id, {responseType: 'text'}).pipe(
             catchError(this.errorHandlerService.handleError(MonitorService.name, 'deleteInstances', 'error'))
+        );
+    }
+
+    deleteMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]> {
+
+        const array: Observable<string>[] = [];
+
+        processes.forEach((process: MonitorProcessModel) => {
+            array.push(this.deleteInstances(process.id));
+        });
+
+        return forkJoin(array).pipe(
+            catchError(this.errorHandlerService.handleError(MonitorService.name, 'deleteMultipleInstances', []))
         );
     }
 
