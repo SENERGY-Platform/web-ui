@@ -19,9 +19,10 @@
 }
 
 mat-grid-tile-footer {
+    height: 110px !important;
     background-color: white !important;
-    height: 68px !important;
     color: black !important;
+    padding: 8px !important;
 }
 
 mat-grid-list {
@@ -41,12 +42,13 @@ mat-grid-tile {
 .background {
     background-image: url('/src/img/background_deviceTypes.png');
     background-size: contain;
+    max-height: 156px;
 }
 
 .device-icon {
-    top: 40px;
-    max-height: 100px;
-    max-width: 200px;
+    top: 20px;
+    max-height: 70%;
+    max-width: 70%;
     margin: auto;
     display: block;
     position: relative;
@@ -77,4 +79,17 @@ mat-grid-tile {
 .offset {
     margin-top: 20px;
 }
+.footer-item-header {
+    min-height: 20px;
+    padding: 5px;
+    margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 500;
+}
 
+.footer-item-subtitle {
+    min-height: 20px;
+    margin-top: -4px;
+    padding: 5px;
+    margin-bottom: 16px;
+}
