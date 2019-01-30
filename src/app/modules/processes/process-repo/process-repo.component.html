@@ -30,21 +30,22 @@
             <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
                            *ngIf="repoItems.length > 0">
                 <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems">
-                    <div class="image-wrapper" fxFill>
-                        <img class="preview" [src]="item.image">
+                    <div fxFill>
+                        <img class="widget-image" [src]="item.image">
                     </div>
                     <mat-grid-tile-footer>
-                        <div fxLayout="row" fxLayoutAlign="start center" fxFill>
-                            <div fxFlex="90" fxLayout="column" fxFill>
-                                <div class="truncate mat-card-title footer-item" matTooltip="{{item.name}}">
-                                    {{item.name}}
-                                </div>
-                                <div class="truncate mat-card-subtitle footer-item"
-                                     matTooltip="{{item.date | date:'medium'}}">
-                                    {{item.date | date:"medium"}}
-                                </div>
-                                <div fxLayout="row" fxLayoutAlign="start end" fxFlex>
-                                    <button mat-icon-button matTooltip="Edit" class="color-accent" routerLink="/processes/designer/{{item.id}}">
+                        <div fxLayout="column" fxFill>
+                            <div class="truncate footer-item-header" matTooltip="{{item.name}}">
+                                {{item.name}}
+                            </div>
+                            <div class="truncate footer-item-subtitle"
+                                 matTooltip="{{item.date | date:'medium'}}">
+                                {{item.date | date:"medium"}}
+                            </div>
+                            <form fxLayout="row" class="footer-buttons">
+                                <div fxLayout="row" fxLayoutAlign="start center">
+                                    <button mat-icon-button matTooltip="Edit" class="color-accent"
+                                            routerLink="/processes/designer/{{item.id}}">
                                         <mat-icon>edit</mat-icon>
                                     </button>
                                     <button mat-icon-button matTooltip="Copy" class="color-accent">
@@ -54,12 +55,13 @@
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </div>
-                            </div>
-                            <div fxFlex="10" fxLayout="column" matTooltip="More" fxLayoutAlign="end end" fxFill>
-                                <button mat-icon-button class="color-accent">
-                                    <mat-icon>more_vert</mat-icon>
-                                </button>
-                            </div>
+                                <div fxFlex></div>
+                                <div [fxLayoutAlign]="'start center'">
+                                    <button mat-icon-button class="color-accent" matTooltip="More">
+                                        <mat-icon>more_vert</mat-icon>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </mat-grid-tile-footer>
                 </mat-grid-tile>

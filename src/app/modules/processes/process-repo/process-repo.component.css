@@ -36,22 +36,23 @@ mat-grid-tile-footer {
     padding: 8px !important;
 }
 
-.footer-item {
+.footer-item-header {
+    min-height: 20px;
     padding: 5px;
+    margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.footer-item-subtitle {
+    min-height: 20px;
+    margin-top: -4px;
+    padding: 5px;
+    margin-bottom: 16px;
 }
 
 mat-grid-list {
     margin-bottom: 100px;
-}
-
-.preview {
-    width: 100%;
-    height: 100%;
-    margin-top: 0;
-}
-
-.image-wrapper {
-    height: 100%;
 }
 
 .truncate {
@@ -65,4 +66,14 @@ mat-grid-list {
     bottom: 15px;
     right: 15px;
     z-index: 100;
+}
+
+.footer-buttons {
+    max-height: 30px;
+}
+
+.widget-image {
+    height: 156px;
+    width: 100%;
+    background-color: whitesmoke;
 }
