@@ -14,57 +14,51 @@
   ~ limitations under the License.
   -->
 
-<div class="main-panel">
+<div class="main-panel operator-repo-container">
     <div class="layout-margin" fxLayout="column">
-        <mat-grid-list cols="2" rowHeight="300px" gutterSize="16px"
+        <mat-grid-list cols="2" rowHeight="282px" gutterSize="16px"
                        *ngIf="operators.length > 0">
             <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of operators">
-                <div fxFill fxLayout="column">
-                    <div fxLayout="row">
-                        <h3 fxFlex class="layout-margin">{{item.name}}</h3>
-                        <div fxLayoutAlign="end center">
-                            <mat-icon class="mat-accent" *ngIf="item.pub == true && item.editable == false" matTooltip="Öffentlich"
-                                      style="margin-right:10px;">
-                                language
+                <mat-card>
+                    <mat-card-header>
+                        <mat-card-title-group>
+                            <mat-card-title>{{item.name}}</mat-card-title>
+                            <mat-icon color="accent" class="header-icon" *ngIf="item.pub == true && item.editable == false" matTooltip="public">
+                                public
                             </mat-icon>
-                            <mat-icon matTooltip="Veröffentlicht"
-                                      *ngIf="item.pub == true && item.editable == true" style="margin-right:10px;">
+                            <mat-icon color="accent" class="header-icon" *ngIf="item.pub == true && item.editable == true" matTooltip="published">
                                 check_box
                             </mat-icon>
+                        </mat-card-title-group>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div fxLayout="column">
+                            <mat-list fxLayoutAlign="center center">
+                                <div fxFill fxLayout="column">
+                                    <mat-list-item>
+                                        <mat-icon mat-list-icon>cloud_circle</mat-icon>
+                                        <h3 mat-line>{{item.image}}</h3>
+                                        <p mat-line>Image</p>
+                                    </mat-list-item>
+                                    <mat-list-item>
+                                        <mat-icon mat-list-icon>description</mat-icon>
+                                        <h3 mat-line>{{item.description || 'no description'}}</h3>
+                                        <p mat-line>Description</p>
+                                    </mat-list-item>
+                                </div>
+                            </mat-list>
                         </div>
-                    </div>
-                    <mat-divider class="no-margin"></mat-divider>
-                    <div fxLayout="column">
-                        <mat-list fxLayoutAlign="center center">
-                            <div fxFill fxLayout="column">
-                                <mat-list-item>
-                                    <mat-icon mat-list-icon>cloud_circle</mat-icon>
-                                    <h3 mat-line>{{item.image}}</h3>
-                                    <p mat-line>Image</p>
-                                </mat-list-item>
-                                <mat-list-item>
-                                    <mat-icon mat-list-icon>description</mat-icon>
-                                    <h3 mat-line>{{item.description}}</h3>
-                                    <p mat-line>Beschreibung</p>
-                                </mat-list-item>
-                            </div>
-                        </mat-list>
-                    </div>
-                </div>
-                <mat-grid-tile-footer>
-                    <div fxLayout="row" fxLayoutAlign="end center" fxFill>
-                        <button class="mat-icon-button" routerLink="op/{{item._id}}">
-                            <mat-icon class="mat-accent">
-                                edit
-                            </mat-icon>
-                        </button>
-                        <button class="mat-icon-button">
-                            <mat-icon class="mat-warn" (click)="deleteOperator(item)">
-                                delete
-                            </mat-icon>
-                        </button>
-                    </div>
-                </mat-grid-tile-footer>
+                    </mat-card-content>
+                        <mat-card-actions>
+                            <div fxFlex></div>
+                            <button mat-icon-button color="accent" routerLink="op/{{item._id}}">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button mat-icon-button color="accent" (click)="deleteOperator(item)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </mat-card-actions>
+                </mat-card>
             </mat-grid-tile>
         </mat-grid-list>
         <button mat-fab class="fab" routerLink="op" matTooltip="Register new Operator">

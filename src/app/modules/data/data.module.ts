@@ -20,7 +20,7 @@ import {RouterModule} from '@angular/router';
 import {OperatorRepoComponent} from './operator-repo/operator-repo.component';
 import {CommonModule} from '@angular/common';
 import {
-    MatButtonModule,
+    MatButtonModule, MatCardModule,
     MatDividerModule,
     MatGridListModule,
     MatIconModule, MatInputModule,
@@ -64,7 +64,8 @@ const pipelineRegistry = {path: 'data/pipelines', pathMatch: 'full', component: 
         MatSnackBarModule,
         FormsModule,
         MatTableModule,
-        MatInputModule
+        MatInputModule,
+        MatCardModule,
     ],
     declarations: [
         OperatorRepoComponent,
