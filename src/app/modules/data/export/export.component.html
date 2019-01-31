@@ -14,49 +14,53 @@
   ~ limitations under the License.
   -->
 
-<div class="main-panel">
+<div class="main-panel export-container">
     <div class="layout-margin" fxLayout="column">
         <div class="layout-margin" fxLayout="column">
-            <mat-grid-list cols="2" rowHeight="340px" gutterSize="16px"
+            <mat-grid-list cols="2" rowHeight="360px" gutterSize="16px"
                            *ngIf="exports.length > 0">
                 <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of exports">
-                    <div fxFill fxLayout="column">
-                        <div fxLayout="row">
-                            <h3 fxFlex class="layout-margin">{{item.Name}}</h3>
-                        </div>
-                        <mat-divider class="no-margin"></mat-divider>
-                        <div fxLayout="column">
-                            <mat-list fxLayoutAlign="center center">
-                                <div fxFill fxLayout="column">
-                                    <mat-list-item>
-                                        <mat-icon mat-list-icon>description</mat-icon>
-                                        <h3 mat-line>{{item.Description}}</h3>
-                                        <p mat-line>Beschreibung</p>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <mat-icon *ngIf="item.FilterType === 'deviceId'" mat-list-icon>router</mat-icon>
-                                        <mat-icon *ngIf="item.FilterType === 'pipeId'" mat-list-icon>timeline</mat-icon>
-                                        <h3 mat-line>{{item.EntityName}}</h3>
-                                        <p mat-line>Source</p>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <mat-icon mat-list-icon>explore</mat-icon>
-                                        <h3 mat-line>{{url}}/measurement/{{item.Measurement}}</h3>
-                                        <p mat-line>Endpoint</p>
-                                    </mat-list-item>
-                                </div>
-                            </mat-list>
-                        </div>
-                    </div>
-                    <mat-grid-tile-footer>
-                        <div fxLayout="row" fxLayoutAlign="end center" fxFill>
-                            <button class="mat-icon-button">
-                                <mat-icon class="mat-warn" (click)="deleteExport(item)">
-                                    delete
-                                </mat-icon>
+                    <mat-card>
+                        <mat-card-header>
+                            <mat-card-title-group>
+                                <mat-card-title>{{item.Name}}</mat-card-title>
+                            </mat-card-title-group>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div fxLayout="column">
+                                <mat-list fxLayoutAlign="center center">
+                                    <div fxFill fxLayout="column">
+                                        <mat-list fxLayoutAlign="center center">
+                                            <div fxFill fxLayout="column">
+                                                <mat-list-item>
+                                                    <mat-icon mat-list-icon>description</mat-icon>
+                                                    <h3 mat-line>{{item.Description}}</h3>
+                                                    <p mat-line>Description</p>
+                                                </mat-list-item>
+                                                <mat-list-item>
+                                                    <mat-icon *ngIf="item.FilterType === 'deviceId'" mat-list-icon>router</mat-icon>
+                                                    <mat-icon *ngIf="item.FilterType === 'pipeId'" mat-list-icon>timeline</mat-icon>
+                                                    <h3 mat-line>{{item.EntityName}}</h3>
+                                                    <p mat-line>Source</p>
+                                                </mat-list-item>
+                                                <mat-list-item>
+                                                    <mat-icon mat-list-icon>explore</mat-icon>
+                                                    <h3 mat-line>{{url}}/measurement/{{item.Measurement}}</h3>
+                                                    <p mat-line>Endpoint</p>
+                                                </mat-list-item>
+                                            </div>
+                                        </mat-list>
+                                    </div>
+                                </mat-list>
+                            </div>
+                        </mat-card-content>
+                        <mat-card-actions>
+                            <div fxFlex></div>
+                            <button mat-icon-button color="accent" (click)="deleteExport(item)">
+                                <mat-icon>delete</mat-icon>
                             </button>
-                        </div>
-                    </mat-grid-tile-footer>
+                        </mat-card-actions>
+                    </mat-card>
                 </mat-grid-tile>
             </mat-grid-list>
         </div>
