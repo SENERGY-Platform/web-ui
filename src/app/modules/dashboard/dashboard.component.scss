@@ -24,6 +24,7 @@ gridster {
 
 gridster-item {
   border-radius: 4px;
+  min-height: 282px;
 }
 
 .dashboard-container gridster ::ng-deep gridster-preview {
