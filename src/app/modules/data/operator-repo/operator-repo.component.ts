@@ -20,7 +20,15 @@ import {OperatorRepoService} from './shared/operator-repo.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {MatSnackBar} from '@angular/material';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {ResponsiveService} from '../../../core/services/responsive.service';
 
+const grids = new Map([
+    ['xs', 1],
+    ['sm', 2],
+    ['md', 2],
+    ['lg', 4],
+    ['xl', 4],
+]);
 
 @Component({
     selector: 'senergy-operator-repo',
@@ -31,14 +39,17 @@ export class OperatorRepoComponent implements OnInit {
 
     operators: OperatorModel[] = [];
     ready = false;
+    gridCols = 0;
 
     constructor(private operatorRepoService: OperatorRepoService,
                 protected auth: AuthorizationService,
                 public snackBar: MatSnackBar,
-                private dialogsService: DialogsService) {
+                private dialogsService: DialogsService,
+                private responsiveService: ResponsiveService) {
     }
 
     ngOnInit() {
+        this.initGridCols();
         const userId = this.auth.getUserId();
         this.operatorRepoService.getOperators().subscribe((resp: {operators: OperatorModel[]}) => {
             for (const operator of resp.operators) {
@@ -67,5 +78,12 @@ export class OperatorRepoComponent implements OnInit {
            }
         });
 
+    }
+
+    private initGridCols(): void {
+        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
+        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+            this.gridCols = grids.get(mqAlias) || 0;
+        });
     }
 }

@@ -16,7 +16,7 @@
 
 <div class="main-panel operator-repo-container">
     <div class="layout-margin" fxLayout="column">
-        <mat-grid-list cols="2" rowHeight="282px" gutterSize="16px"
+        <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
                        *ngIf="operators.length > 0">
             <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of operators">
                 <mat-card>
@@ -37,12 +37,12 @@
                                 <div fxFill fxLayout="column">
                                     <mat-list-item>
                                         <mat-icon mat-list-icon>cloud_circle</mat-icon>
-                                        <h3 mat-line>{{item.image}}</h3>
+                                        <h3 mat-line matTooltip="{{item.image}}">{{item.image}}</h3>
                                         <p mat-line>Image</p>
                                     </mat-list-item>
                                     <mat-list-item>
                                         <mat-icon mat-list-icon>description</mat-icon>
-                                        <h3 mat-line>{{item.description || 'no description'}}</h3>
+                                        <h3 mat-line matTooltip="{{item.description}}">{{item.description || 'no description'}}</h3>
                                         <p mat-line>Description</p>
                                     </mat-list-item>
                                 </div>
