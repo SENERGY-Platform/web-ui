@@ -27,7 +27,7 @@
                                 <div fxFill fxLayout="column">
                                     <mat-list-item>
                                         <mat-icon mat-list-icon>description</mat-icon>
-                                        <h3 mat-line>{{item.Description}}</h3>
+                                        <h3 mat-line matTooltip="{{item.Description}}">{{item.Description}}</h3>
                                         <p mat-line>Description</p>
                                     </mat-list-item>
                                     <mat-list-item>
@@ -37,12 +37,12 @@
                                         <mat-icon *ngIf="item.FilterType === 'pipeId'" mat-list-icon>
                                             timeline
                                         </mat-icon>
-                                        <h3 mat-line>{{item.EntityName}}</h3>
+                                        <h3 mat-line matTooltip="{{item.EntityName}}">{{item.EntityName}}</h3>
                                         <p mat-line>Source</p>
                                     </mat-list-item>
                                     <mat-list-item>
                                         <mat-icon mat-list-icon>explore</mat-icon>
-                                        <h3 mat-line>{{url}}/measurement/{{item.Measurement}}</h3>
+                                        <h3 mat-line matTooltip="{{url + '/measurement/' + item.Measurement}}">{{url}}/measurement/{{item.Measurement}}</h3>
                                         <p mat-line>Endpoint</p>
                                     </mat-list-item>
                                 </div>
