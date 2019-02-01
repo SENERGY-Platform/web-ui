@@ -61,7 +61,7 @@ export class EventListComponent implements OnInit, OnDestroy {
                 const date = new Date().getTime();
                 this.events = [];
                 this.events.push({icon: 'meeting_room', time: new Date(), event: 'Küche: Fenster geschlossen'});
-                this.events.push({icon: 'meeting_room', time: new Date(date - 52870000), event: 'Küche: Fenster geöffnet'});
+                this.events.push({icon: 'meeting_room', time: new Date(date - 5287000), event: 'Küche: Fenster geöffnet'});
                 this.events.push({icon: 'directions_run', time: new Date(date - 7000000), event: 'Flur: Bewegung während Abwesenheit'});
                 this.events.push({icon: 'thumb_down_alt', time: new Date(date - 7891200), event: 'Keller: Luftfeuchtigkeit zu hoch'});
                 this.events.push({icon: 'check_circle_outline', time: new Date(date - 49765342), event: 'Wohnzimmer: Temperatur erreicht'});
