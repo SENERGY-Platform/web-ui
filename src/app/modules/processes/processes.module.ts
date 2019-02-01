@@ -51,7 +51,7 @@ import {
 import {CommonModule} from '@angular/common';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {DevicesModule} from '../devices/devices.module';
-import { EditOutputDialogComponent } from './designer/dialogs/edit-output-dialog/edit-output-dialog.component';
+import {EditOutputDialogComponent} from './designer/dialogs/edit-output-dialog/edit-output-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {EditInputDialogComponent} from './designer/dialogs/edit-input-dialog/edit-input-dialog.component';
 import {CycleDialogComponent} from './designer/dialogs/cycle-dialog/cycle-dialog.component';
@@ -64,11 +64,35 @@ import {HistoricDataConfigDialogComponent} from './designer/dialogs/historic-dat
 import {MonitorDetailsDialogComponent} from './monitor/dialogs/monitor-details-dialog.component';
 import {EmailConfigDialogComponent} from './designer/dialogs/email-config-dialog/email-config-dialog.component';
 
-const processRepo = {path: 'processes/repository', pathMatch: 'full', component: ProcessRepoComponent, data: { header: 'Processes' }};
-const processDeployments = {path: 'processes/deployments', pathMatch: 'full', component: ProcessDeploymentsComponent, data: { header: 'Processes' }};
-const processMonitor = {path: 'processes/monitor', pathMatch: 'full', component: ProcessMonitorComponent, data: { header: 'Processes' }};
-const processDesignerEdit = {path: 'processes/designer/:id', pathMatch: 'full', component: ProcessDesignerComponent, data: { header: 'Processes' }};
-const processDesigner = {path: 'processes/designer', pathMatch: 'full', component: ProcessDesignerComponent, data: { header: 'Processes' }};
+const processRepo = {
+    path: 'processes/repository',
+    pathMatch: 'full',
+    component: ProcessRepoComponent,
+    data: {header: 'Processes'}
+};
+const processDeployments = {
+    path: 'processes/deployments',
+    pathMatch: 'full',
+    component: ProcessDeploymentsComponent,
+    data: {header: 'Processes'}
+};
+const processMonitor = {
+    path: 'processes/monitor',
+    pathMatch: 'full',
+    component: ProcessMonitorComponent,
+    data: {header: 'Processes'}
+};
+const processDesignerEdit = {
+    path: 'processes/designer/:id',
+    component: ProcessDesignerComponent,
+    data: {header: 'Processes'}
+};
+const processDesigner = {
+    path: 'processes/designer',
+    pathMatch: 'full',
+    component: ProcessDesignerComponent,
+    data: {header: 'Processes'}
+};
 
 @NgModule({
     imports: [

@@ -42,9 +42,9 @@
                                  matTooltip="{{item.date | date:'medium'}}">
                                 {{item.date | date:"medium"}}
                             </div>
-                            <form fxLayout="row" class="footer-buttons">
+                            <div fxLayout="row" class="footer-buttons">
                                 <div fxLayout="row" fxLayoutAlign="start center">
-                                    <button mat-icon-button matTooltip="Edit" class="color-accent"
+                                    <button mat-icon-button class="color-accent" matTooltip="Edit"
                                             routerLink="/processes/designer/{{item.id}}">
                                         <mat-icon>edit</mat-icon>
                                     </button>
@@ -61,7 +61,7 @@
                                         <mat-icon>more_vert</mat-icon>
                                     </button>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                     </mat-grid-tile-footer>
                 </mat-grid-tile>
