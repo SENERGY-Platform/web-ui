@@ -116,4 +116,10 @@ export class DeviceTypeService {
         );
     }
 
+    createDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
+        return this.http.post<DeviceTypeModel>(environment.iotRepoUrl + '/deviceType', deviceType).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'updateDeviceType', null))
+        );
+    }
+
 }

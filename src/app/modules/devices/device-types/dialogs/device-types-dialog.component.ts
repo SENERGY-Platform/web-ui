@@ -256,9 +256,12 @@ export class DeviceTypesDialogComponent implements OnInit {
             vendorCtrl: [this.deviceType.vendor, Validators.required],
             generatedCtrl: [this.deviceType.generated || false],
         });
+        this.disableSaveButton(this.firstFormGroup.status);
 
         this.secondFormGroup = this._formBuilder.group({
-            services: this._formBuilder.array(this.deviceType.services.map((elem: DeviceTypeServiceModel) => this.createServiceGroup(elem)))
+            services: this._formBuilder.array(this.deviceType.services ?
+                this.deviceType.services.map((elem: DeviceTypeServiceModel) => this.createServiceGroup(elem)) :
+                [])
         });
 
         if (this.deviceType.generated) {

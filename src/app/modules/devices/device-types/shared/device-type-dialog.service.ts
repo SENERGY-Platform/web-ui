@@ -16,11 +16,13 @@
 
 import {Injectable} from '@angular/core';
 import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from './device-type-selection.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material';
 import {SelectDeviceTypeAndServiceDialogComponent} from '../dialogs/select-device-type-and-service-dialog.component';
 import {DeviceTypeModel} from './device-type.model';
 import {DeviceTypesDialogComponent} from '../dialogs/device-types-dialog.component';
 import {DeviceTypeService} from './device-type.service';
+import {Observable} from 'rxjs';
+import {DeleteDialogComponent} from '../../../../core/dialogs/delete-dialog.component';
 
 @Injectable({
     providedIn: 'root'
@@ -43,24 +45,21 @@ export class DeviceTypeDialogService {
         });
     }
 
-    openDeviceTypeDialog(id: string): void {
+    editDeviceTypeDialog(id: string): void {
 
         this.deviceTypeService.getDeviceType(id).subscribe((deviceType: (DeviceTypeModel | null)) => {
             if (deviceType !== null) {
-                const dialogConfig = new MatDialogConfig();
-                dialogConfig.disableClose = false;
-                dialogConfig.data = {
-                    deviceType: deviceType
-                };
-                const editDialogRef = this.dialog.open(DeviceTypesDialogComponent, dialogConfig);
-                editDialogRef.afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
-                    if (deviceTypeResp !== undefined) {
-                        this.deviceTypeService.updateDeviceType(deviceTypeResp).subscribe(() => {
-                                // todo: refresh list, snackbar
-                        });
-                    }
-                });
+                this.openDeviceTypeDialog(deviceType);
             }
         });
+    }
+
+    openDeviceTypeDialog(deviceType: DeviceTypeModel): MatDialogRef<DeviceTypesDialogComponent> {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {
+            deviceType: deviceType
+        };
+        return this.dialog.open(DeviceTypesDialogComponent, dialogConfig);
     }
 }

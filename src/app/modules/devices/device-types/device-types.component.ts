@@ -22,6 +22,8 @@ import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DeviceTypeService} from './shared/device-type.service';
 import {DeviceTypePermSearchModel} from './shared/device-type-perm-search.model';
 import {DeviceTypeDialogService} from './shared/device-type-dialog.service';
+import {DeviceTypeModel} from './shared/device-type.model';
+import {MatSnackBar} from '@angular/material';
 
 const grids = new Map([
     ['xs', 1],
@@ -54,7 +56,8 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
     constructor(private searchbarService: SearchbarService,
                 private responsiveService: ResponsiveService,
                 private deviceTypeService: DeviceTypeService,
-                private deviceTypeDialogService: DeviceTypeDialogService) {
+                private deviceTypeDialogService: DeviceTypeDialogService,
+                private snackBar: MatSnackBar) {
     }
 
     ngOnInit() {
@@ -81,10 +84,52 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
     }
 
     newDeviceType() {
+        const newDeviceType: DeviceTypeModel = {} as DeviceTypeModel;
+        this.deviceTypeDialogService.openDeviceTypeDialog(newDeviceType).afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
+            if (deviceTypeResp !== undefined) {
+                this.deviceTypeService.createDeviceType(deviceTypeResp).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
+                    if (deviceTypeSaved) {
+                        this.deviceTypes.push(this.convertDeviceTypes(deviceTypeSaved));
+                        this.snackBar.open('Device type updated successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while updating the device type!', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
     }
 
-    edit(id: string) {
-        this.deviceTypeDialogService.openDeviceTypeDialog(id);
+    edit(deviceTypeInput: DeviceTypePermSearchModel) {
+        this.deviceTypeService.getDeviceType(deviceTypeInput.id).subscribe((deviceType: (DeviceTypeModel | null)) => {
+            if (deviceType !== null) {
+                this.deviceTypeDialogService.openDeviceTypeDialog(deviceType).afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
+                    if (deviceTypeResp !== undefined) {
+                        this.deviceTypeService.updateDeviceType(deviceTypeResp).subscribe((deviceTypeUpdated: DeviceTypeModel | null) => {
+                            if (deviceTypeUpdated) {
+                                const index = this.deviceTypes.indexOf(deviceTypeInput);
+                                this.deviceTypes[index] = this.convertDeviceTypes(deviceTypeUpdated);
+                                this.snackBar.open('Device type updated successfully.', undefined, {duration: 2000});
+                            } else {
+                                this.snackBar.open('Error while updating the device type!', undefined, {duration: 2000});
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    private convertDeviceTypes(deviceTypeIn: DeviceTypeModel): DeviceTypePermSearchModel {
+        return {
+            services: [],
+            vendor: deviceTypeIn.vendor.name,
+            img: deviceTypeIn.img,
+            device_class: deviceTypeIn.device_class.name,
+            description: deviceTypeIn.description,
+            creator: 'unknown',
+            id: deviceTypeIn.id,
+            name: deviceTypeIn.name || '',
+        };
     }
 
     private initSearchAndGetDeviceTypes() {
