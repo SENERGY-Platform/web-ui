@@ -106,7 +106,7 @@ export class NetworksService {
             if (clearNetwork) {
                 this.clear(network.id).subscribe((respMessage: string) => {
                     if (respMessage === 'ok') {
-                        this.snackBar.open('Hub cleared succesfully.', undefined, {duration: 2000});
+                        this.snackBar.open('Hub cleared successfully.', undefined, {duration: 2000});
                     } else {
                         this.snackBar.open('Error while clearing the hub!', undefined, {duration: 2000});
                     }

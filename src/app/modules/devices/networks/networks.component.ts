@@ -103,7 +103,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
                     if (respMessage === 'ok') {
                         const index = this.networks.indexOf(network);
                         this.networks.splice(index, 1);
-                        this.snackBar.open('Hub deleted succesfully.', undefined, {duration: 2000});
+                        this.snackBar.open('Hub deleted successfully.', undefined, {duration: 2000});
                     } else {
                         this.snackBar.open('Error while deleting the hub!', undefined, {duration: 2000});
                     }

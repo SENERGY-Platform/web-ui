@@ -104,7 +104,7 @@ export class PermissionsDialogService {
             }).length;
 
             if (countOk === responses.length) {
-                this.snackBar.open('Permission saved succesfully.', '', {duration: 2000});
+                this.snackBar.open('Permission saved successfully.', '', {duration: 2000});
             } else {
                 this.snackBar.open('Error while saving permission!', '', {duration: 2000});
             }
