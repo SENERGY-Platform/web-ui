@@ -20,6 +20,15 @@ import {ExportModel} from './shared/export.model';
 import {environment} from '../../../../environments/environment';
 import {MatSnackBar} from '@angular/material';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {ResponsiveService} from '../../../core/services/responsive.service';
+
+const grids = new Map([
+    ['xs', 1],
+    ['sm', 2],
+    ['md', 2],
+    ['lg', 4],
+    ['xl', 4],
+]);
 
 @Component({
     selector: 'senergy-export',
@@ -32,13 +41,16 @@ export class ExportComponent implements OnInit {
     exports: ExportModel[] = [];
     ready = false;
     url = environment.influxAPIURL;
+    gridCols = 0;
 
     constructor(private exportService: ExportService,
                 public snackBar: MatSnackBar,
-                private dialogsService: DialogsService) {
+                private dialogsService: DialogsService,
+                private responsiveService: ResponsiveService) {
     }
 
     ngOnInit() {
+        this.initGridCols();
         this.exportService.getExports().subscribe((resp: ExportModel [] | null) => {
             if (resp !== null) {
                 this.exports = resp;
@@ -61,5 +73,12 @@ export class ExportComponent implements OnInit {
             }
         });
 
+    }
+
+    private initGridCols(): void {
+        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
+        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+            this.gridCols = grids.get(mqAlias) || 0;
+        });
     }
 }

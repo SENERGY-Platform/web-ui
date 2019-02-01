@@ -37,6 +37,14 @@ mat-grid-tile {
     overflow-y: auto;
 }
 
+.header-text {
+    min-height: 24px;
+    max-height: 24px;
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
 .fab {
     position: fixed;
     bottom: 15px;
@@ -49,6 +57,7 @@ mat-card {
     height: 100%;
     box-sizing: border-box;
 }
+
 
 .export-container ::ng-deep .mat-card-header-text {
     margin: 0px;
