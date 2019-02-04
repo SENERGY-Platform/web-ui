@@ -24,6 +24,7 @@ import {DeviceTypePermSearchModel} from './shared/device-type-perm-search.model'
 import {DeviceTypeDialogService} from './shared/device-type-dialog.service';
 import {DeviceTypeModel} from './shared/device-type.model';
 import {MatSnackBar} from '@angular/material';
+import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -57,7 +58,8 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
                 private responsiveService: ResponsiveService,
                 private deviceTypeService: DeviceTypeService,
                 private deviceTypeDialogService: DeviceTypeDialogService,
-                private snackBar: MatSnackBar) {
+                private snackBar: MatSnackBar,
+                private deviceInstancesService: DeviceInstancesService) {
     }
 
     ngOnInit() {
@@ -115,6 +117,10 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
                 });
             }
         });
+    }
+
+    newInstance(deviceType: DeviceTypePermSearchModel): void {
+        this.deviceInstancesService.openDeviceCreateDialog(deviceType.id);
     }
 
     private updateDeviceType(deviceTypeResp: DeviceTypeModel, deviceTypeInput: DeviceTypePermSearchModel) {
