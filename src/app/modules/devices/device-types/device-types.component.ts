@@ -22,7 +22,7 @@ import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DeviceTypeService} from './shared/device-type.service';
 import {DeviceTypePermSearchModel} from './shared/device-type-perm-search.model';
 import {DeviceTypeDialogService} from './shared/device-type-dialog.service';
-import {DeviceTypeModel} from './shared/device-type.model';
+import {DeviceTypeAssignmentModel, DeviceTypeModel, DeviceTypeServiceModel} from './shared/device-type.model';
 import {MatSnackBar} from '@angular/material';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 
@@ -109,14 +109,32 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
     copy(deviceTypeInput: DeviceTypePermSearchModel) {
         this.deviceTypeService.getDeviceType(deviceTypeInput.id).subscribe((deviceType: (DeviceTypeModel | null)) => {
             if (deviceType !== null) {
-                deviceType.id = '';
-                this.deviceTypeDialogService.openDeviceTypeDialog(deviceType).afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
-                    if (deviceTypeResp !== undefined) {
-                        this.saveDeviceType(deviceTypeResp);
-                    }
+                this.deviceTypeDialogService.openDeviceTypeDialog(this.resetIds(deviceType)).afterClosed().subscribe(
+                    (deviceTypeResp: DeviceTypeModel) => {
+                        if (deviceTypeResp !== undefined) {
+                            this.saveDeviceType(deviceTypeResp);
+                        }
+                    });
+            }
+        });
+    }
+
+    private resetIds(deviceType: DeviceTypeModel): DeviceTypeModel {
+        deviceType.id = '';
+        deviceType.services.forEach((service: DeviceTypeServiceModel) => {
+            service.id = '';
+            if (service.input) {
+                service.input.forEach((serviceInput: DeviceTypeAssignmentModel) => {
+                    serviceInput.id = '';
+                });
+            }
+            if (service.output) {
+                service.output.forEach((serviceOutput: DeviceTypeAssignmentModel) => {
+                    serviceOutput.id = '';
                 });
             }
         });
+        return deviceType;
     }
 
     newInstance(deviceType: DeviceTypePermSearchModel): void {
