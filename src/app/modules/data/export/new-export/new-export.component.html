@@ -44,7 +44,7 @@
 
         <mat-form-field fxFlex color="accent" appearance="outline">
             <mat-select *ngIf="selector==='device'" placeholder="Service" [(ngModel)]="service">
-                <mat-option *ngFor="let service of deviceType.services" [value]="device">
+                <mat-option *ngFor="let service of deviceType.services" [value]="service">
                     {{service.name}}
                 </mat-option>
             </mat-select>
