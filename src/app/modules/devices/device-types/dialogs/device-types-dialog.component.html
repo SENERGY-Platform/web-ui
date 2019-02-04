@@ -47,7 +47,7 @@
                                 </mat-form-field>
                             </td>
                             <td *ngIf="hideAddDeviceClass === false">
-                                <button mat-icon-button class="mat-accent" (click)="hideDeviceClass(true)" [disabled]="deviceType.generated">
+                                <button mat-icon-button class="mat-accent" (click)="hideDeviceClass(true)" [disabled]="deviceType.generated || !editable">
                                     <mat-icon matTooltip="create new device class">playlist_add</mat-icon>
                                 </button>
                             </td>
@@ -77,7 +77,7 @@
                                 </mat-form-field>
                             </td>
                             <td *ngIf="hideAddVendor === false">
-                                <button mat-icon-button class="mat-accent" (click)="hideVendor(true)" [disabled]="deviceType.generated">
+                                <button mat-icon-button class="mat-accent" (click)="hideVendor(true)" [disabled]="deviceType.generated || !editable">
                                     <mat-icon matTooltip="create new vendor">playlist_add</mat-icon>
                                 </button>
                             </td>
@@ -222,19 +222,19 @@
                         </mat-tab-group>
                         <div fxLayoutAlign="end center">
                             <button (click)="deleteService(control.value)" mat-icon-button class="mat-accent"
-                                    matTooltip="delete service" [disabled]="deviceType.generated">
+                                    matTooltip="delete service" [disabled]="deviceType.generated || !editable">
                                 <mat-icon>delete</mat-icon>
                             </button>
                         </div>
 
                     </mat-expansion-panel>
                 </mat-accordion>
-                <div class="button-margin" fxLayoutAlign="center center" *ngIf="!deviceType.generated">
+                <div class="button-margin" fxLayoutAlign="center center" *ngIf="!deviceType.generated && editable">
                     <button class="mat-raised-button color-accent" (click)="addService()">ADD Service</button>
                 </div>
             </form>
         </mat-step>
-        <mat-step>
+        <mat-step *ngIf="editable">
             <ng-template matStepLabel>Save</ng-template>
             <div *ngIf="!disableSave">You are now done.</div>
             <div *ngIf="disableSave">Can't save, please fix errors.</div>

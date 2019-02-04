@@ -87,7 +87,7 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
 
     newDeviceType() {
         const newDeviceType: DeviceTypeModel = {} as DeviceTypeModel;
-        this.deviceTypeDialogService.openDeviceTypeDialog(newDeviceType).afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
+        this.deviceTypeDialogService.openDeviceTypeDialog(newDeviceType, true).afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
             if (deviceTypeResp !== undefined) {
                 this.saveDeviceType(deviceTypeResp);
             }
@@ -97,7 +97,7 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
     edit(deviceTypeInput: DeviceTypePermSearchModel) {
         this.deviceTypeService.getDeviceType(deviceTypeInput.id).subscribe((deviceType: (DeviceTypeModel | null)) => {
             if (deviceType !== null) {
-                this.deviceTypeDialogService.openDeviceTypeDialog(deviceType).afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
+                this.deviceTypeDialogService.openDeviceTypeDialog(deviceType, true).afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
                     if (deviceTypeResp !== undefined) {
                         this.updateDeviceType(deviceTypeResp, deviceTypeInput);
                     }
@@ -109,12 +109,20 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
     copy(deviceTypeInput: DeviceTypePermSearchModel) {
         this.deviceTypeService.getDeviceType(deviceTypeInput.id).subscribe((deviceType: (DeviceTypeModel | null)) => {
             if (deviceType !== null) {
-                this.deviceTypeDialogService.openDeviceTypeDialog(this.resetIds(deviceType)).afterClosed().subscribe(
+                this.deviceTypeDialogService.openDeviceTypeDialog(this.resetIds(deviceType), true).afterClosed().subscribe(
                     (deviceTypeResp: DeviceTypeModel) => {
                         if (deviceTypeResp !== undefined) {
                             this.saveDeviceType(deviceTypeResp);
                         }
                     });
+            }
+        });
+    }
+
+    details(deviceTypeInput: DeviceTypePermSearchModel) {
+        this.deviceTypeService.getDeviceType(deviceTypeInput.id).subscribe((deviceType: (DeviceTypeModel | null)) => {
+            if (deviceType !== null) {
+                this.deviceTypeDialogService.openDeviceTypeDialog(deviceType, false);
             }
         });
     }
