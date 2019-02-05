@@ -13,84 +13,67 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+<div class="device-instance-container">
 
-<div class="main-panel">
-    <div infiniteScroll
-         [infiniteScrollDistance]="1"
-         [infiniteScrollThrottle]="50"
-         [infiniteScrollContainer]="'.main-panel'"
-         [fromRoot]="true"
-         (scrolled)="onScroll()">
-        <div fxLayout="row">
-            <senergy-searchbar fxFlex></senergy-searchbar>
-            <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
-                <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent" selected>{{selectedTagTransformed}}
-                    <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-            </mat-chip-list>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
+    <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true"
+                   (selectedIndexChange)="setIndex($event)"
+                   (animationDone)="animation()">
+        <mat-tab label="All">
+            <div fxLayout="row">
+                <senergy-searchbar fxFlex></senergy-searchbar>
+                <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
+                    <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
+                              selected>{{selectedTagTransformed}}
+                        <mat-icon matChipRemove>cancel</mat-icon>
+                    </mat-chip>
+                </mat-chip-list>
+                <senergy-sort [sortAttributes]="sortAttributes"
+                              (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+            </div>
+            <div class="main-panel">
 
-        <div class="layout-margin" fxLayout="column">
-            <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                           *ngIf="deviceInstances.length > 0">
-                <mat-grid-tile class="mat-elevation-z1" *ngFor="let device of deviceInstances">
-                    <div class="background" fxFill>
-                        <img class="device-icon" src="{{device.img}}">
+                <div infiniteScroll
+                     [infiniteScrollDistance]="1"
+                     [infiniteScrollThrottle]="50"
+                     [infiniteScrollContainer]="'.main-panel'"
+                     [fromRoot]="true"
+                     (scrolled)="onScroll()">
+                    <div *ngIf="activeIndex === 0 && animationDone">
+                        <senergy-device-instances-grid
+                                [deviceInstances]="deviceInstances"
+                                [ready]="ready"
+                                (tag)="getDevicesByTag($event)"></senergy-device-instances-grid>
                     </div>
-                    <mat-grid-tile-footer>
-                        <div fxLayout="column" fxFill>
-                            <div class="truncate footer-item-header" matTooltip="{{device.name}}">
-                                {{device.name}}
-                            </div>
-                            <div fxLayout="row" class="truncate footer-item-subtitle">
-                                <div class="tag color-accent" *ngFor="let tag of device.tag"
-                                     matTooltip="{{tag | tagValue:''}}"
-                                     (click)="getDevicesByTag(tag, 'tag')">{{tag | tagValue:'#'}} </div>
-                                <div class="tag color-accent" *ngFor="let tag of device.usertag"
-                                     matTooltip="{{tag}}" (click)="getDevicesByTag(tag, 'usertag')">#{{tag}}</div>
-                            </div>
-                            <form fxLayout="row" class="footer-buttons">
-                                <senergy-state-icon [state]="device.log_state"></senergy-state-icon>
-                                <mat-icon matTooltip="Device is shared" *ngIf="userID !== device.creator"
-                                          color="accent" class="shared">people
-                                </mat-icon>
-                                <div fxFlex></div>
-                                <div [fxLayoutAlign]="'start center'">
-                                    <button mat-icon-button [matMenuTriggerFor]="deviceMenu" color="accent">
-                                        <mat-icon>more_vert</mat-icon>
-                                    </button>
-                                    <mat-menu #deviceMenu="matMenu" [overlapTrigger]="false">
-                                        <button mat-menu-item (click)="service(device.devicetype)">
-                                            <mat-icon>info</mat-icon>
-                                            Services
-                                        </button>
-                                        <button mat-menu-item (click)="permission(device)">
-                                            <mat-icon>folder_shared</mat-icon>
-                                            Share
-                                        </button>
-                                        <button mat-menu-item (click)="edit(device)">
-                                            <mat-icon>edit</mat-icon>
-                                            Edit
-                                        </button>
-                                        <button mat-menu-item (click)="delete(device)">
-                                            <mat-icon>delete</mat-icon>
-                                            Delete
-                                        </button>
-                                    </mat-menu>
-                                </div>
-                            </form>
-                        </div>
-                    </mat-grid-tile-footer>
-                </mat-grid-tile>
-            </mat-grid-list>
-            <div *ngIf="deviceInstances.length === 0 && ready">No device instances found.</div>
-            <senergy-spinner [elementCount]="deviceInstances.length" [show]="!ready"></senergy-spinner>
-        </div>
-    </div>
+                </div>
+            </div>
+        </mat-tab>
+        <mat-tab label="{{tab.label}}" *ngFor="let tab of tabs; let i = index">
+            <div fxLayout="row">
+                <senergy-searchbar fxFlex></senergy-searchbar>
+                <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
+                    <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
+                              selected>{{selectedTagTransformed}}
+                        <mat-icon matChipRemove>cancel</mat-icon>
+                    </mat-chip>
+                </mat-chip-list>
+                <senergy-sort [sortAttributes]="sortAttributes"
+                              (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+            </div>
+            <div class="main-panel-alternative">
+                <div *ngIf="activeIndex - 1 === i && animationDone">
+                    <senergy-device-instances-grid
+                            [deviceInstances]="deviceInstances"
+                            [ready]="ready"
+                            (tag)="getDevicesByTag($event)"></senergy-device-instances-grid>
+                </div>
+
+            </div>
+        </mat-tab>
+    </mat-tab-group>
 </div>
 
+
+<senergy-spinner [elementCount]="0" [show]="!animationDone"></senergy-spinner>
 
 
 

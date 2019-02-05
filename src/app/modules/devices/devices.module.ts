@@ -54,6 +54,7 @@ import {NetworksClearDialogComponent} from './networks/dialogs/networks-clear-di
 import {ValueTypesNewDialogComponent} from './value-types/dialogs/value-types-new-dialog.component';
 import {SelectDeviceTypeAndServiceDialogComponent} from './device-types/dialogs/select-device-type-and-service-dialog.component';
 import {DeviceTypesDialogComponent} from './device-types/dialogs/device-types-dialog.component';
+import {DeviceInstancesGridComponent} from './device-instances/device-instances-grid/device-instances-grid.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -109,6 +110,7 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         ValueTypesNewDialogComponent,
         SelectDeviceTypeAndServiceDialogComponent,
         DeviceTypesDialogComponent,
+        DeviceInstancesGridComponent,
     ],
     entryComponents: [
         NetworksEditDialogComponent,
@@ -118,6 +120,7 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         ValueTypesNewDialogComponent,
         SelectDeviceTypeAndServiceDialogComponent,
         DeviceTypesDialogComponent,
+        DeviceInstancesGridComponent,
     ]
 })
 

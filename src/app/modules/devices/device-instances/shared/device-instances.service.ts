@@ -62,6 +62,23 @@ export class DeviceInstancesService {
         }
     }
 
+    getDeviceInstancesByState(state: string): Observable<DeviceInstancesModel[]> {
+        // if (searchText === '') {
+            return this.http.get<DeviceInstancesModel[]>
+            (environment.apiAggregatorUrl + '/filter/devices/state/' + state).pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByState', []))
+            );
+        // }
+        // else {
+            // return this.http.get<DeviceInstancesModel[]>
+            // (environment.apiAggregatorUrl + '/search/devices/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset + '/' + value + '/' + order).pipe(
+            //     map(resp => resp || []),
+            //     catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances: search', []))
+            // );
+        // }
+    }
+
     updateDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {
         return this.http.post<DeviceInstancesUpdateModel>
         (environment.iotRepoUrl + '/deviceInstance/' + encodeURIComponent(device.id), device).pipe(
