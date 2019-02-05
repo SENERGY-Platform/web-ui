@@ -112,6 +112,10 @@ mat-grid-tile {
     margin-bottom: 16px;
 }
 
+.no-tags {
+    min-height: 20px;
+}
+
 .footer-buttons {
     max-height: 30px;
 }

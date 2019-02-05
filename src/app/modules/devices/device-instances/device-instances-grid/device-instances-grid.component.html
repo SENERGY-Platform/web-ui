@@ -34,6 +34,7 @@
                         <div class="tag color-accent" *ngFor="let tag of device.usertag"
                              matTooltip="{{tag}}" (click)="emitTag(tag, 'usertag')">
                             #{{tag}}</div>
+                        <div *ngIf="(device.tag === null || device.tag.length === 0) && (device.usertag === null || device.usertag.length === 0)" class="no-tags"></div>
                     </div>
                     <form fxLayout="row" class="footer-buttons">
                         <senergy-state-icon [state]="device.log_state"></senergy-state-icon>
