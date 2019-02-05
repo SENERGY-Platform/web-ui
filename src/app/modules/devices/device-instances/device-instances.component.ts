@@ -140,7 +140,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             this.allDataLoaded = false;
             this.ready = false;
         }
-        this.animationDone = true;
+
 
         if (this.routerNetwork !== null) {
             this.selectedTag = this.routerNetwork.name;
@@ -174,6 +174,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     }
 
     private setDevices(deviceInstances: DeviceInstancesModel[]) {
+        this.animationDone = true;
         if (deviceInstances.length !== this.limit) {
             this.allDataLoaded = true;
         }
