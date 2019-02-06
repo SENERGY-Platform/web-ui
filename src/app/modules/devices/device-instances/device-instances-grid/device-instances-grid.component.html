@@ -38,8 +38,11 @@
                     </div>
                     <form fxLayout="row" class="footer-buttons">
                         <senergy-state-icon [state]="device.log_state"></senergy-state-icon>
-                        <mat-icon matTooltip="Device is shared" *ngIf="userID !== device.creator"
-                                  color="accent" class="shared">people
+                        <mat-icon matTooltip="Device is shared with you" *ngIf="userID !== device.creator"
+                                  color="accent" class="shared">share
+                        </mat-icon>
+                        <mat-icon matTooltip="You created this device" *ngIf="userID === device.creator"
+                                  color="accent" class="shared">person
                         </mat-icon>
                         <div fxFlex></div>
                         <div [fxLayoutAlign]="'start center'">
