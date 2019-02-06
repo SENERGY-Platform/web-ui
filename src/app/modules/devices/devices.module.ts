@@ -44,7 +44,6 @@ import {DeviceInstancesComponent} from './device-instances/device-instances.comp
 import {NetworksComponent} from './networks/networks.component';
 import {ValueTypesComponent} from './value-types/value-types.component';
 import {DeviceTypesComponent} from './device-types/device-types.component';
-import {MaintenanceComponent} from './maintenance/maintenance.component';
 import {CoreModule} from '../../core/core.module';
 import {NetworksEditDialogComponent} from './networks/dialogs/networks-edit-dialog.component';
 import {DeviceInstancesServiceDialogComponent} from './device-instances/dialogs/device-instances-service-dialog.component';
@@ -65,7 +64,6 @@ const deviceInstances = {
 };
 const deviceTypes = {path: 'devices/devicetypes', pathMatch: 'full', component: DeviceTypesComponent, data: {header: 'Devices'}};
 const valueTypes = {path: 'devices/valuetypes', pathMatch: 'full', component: ValueTypesComponent, data: {header: 'Devices'}};
-const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: MaintenanceComponent, data: {header: 'Devices'}};
 
 @NgModule({
     imports: [MatGridListModule,
@@ -96,14 +94,13 @@ const maintenance = {path: 'devices/maintenance', pathMatch: 'full', component: 
         MatExpansionModule,
         MatTabsModule,
         MatCheckboxModule,
-        RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes, maintenance])],
+        RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes])],
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,
         DeviceInstancesComponent,
         DeviceTypesComponent,
         ValueTypesComponent,
-        MaintenanceComponent,
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,

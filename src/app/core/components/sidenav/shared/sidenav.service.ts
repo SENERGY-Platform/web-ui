@@ -69,8 +69,7 @@ export class SidenavService {
             new SidenavPageModel('Hubs', 'link', 'device_hub', '/devices/networks'),
             new SidenavPageModel('Devices', 'link', 'important_devices', '/devices/deviceinstances'),
             new SidenavPageModel('Device Types', 'link', 'devices_other', '/devices/devicetypes'),
-            new SidenavPageModel('Value Types', 'link', 'import_export', '/devices/valuetypes'),
-            new SidenavPageModel('Maintenance', 'link', 'build', '/devices/maintenance')
+            new SidenavPageModel('Value Types', 'link', 'import_export', '/devices/valuetypes')
         ]));
 
         return sections;
