@@ -113,12 +113,13 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     setIndex(event: number) {
         this.activeIndex = event;
         this.animationDone = false;
+        this.routerNetwork = null;
         this.searchText = '';
+        this.resetTag();
     }
 
     animation(): void {
         if (this.searchInitialized) {
-            this.searchText = '';
             this.getDeviceInstances(true);
         }
     }
