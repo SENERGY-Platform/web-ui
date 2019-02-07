@@ -19,6 +19,7 @@ import {SidenavService} from '../sidenav/shared/sidenav.service';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {filter, map, mergeMap} from 'rxjs/internal/operators';
 import {AuthorizationService} from '../../services/authorization.service';
+import {SettingsDialogService} from '../../../modules/settings/shared/settings-dialog.service';
 
 @Component({
     selector: 'senergy-toolbar',
@@ -33,7 +34,8 @@ export class ToolbarComponent implements OnInit {
     constructor(private sidenavService: SidenavService,
                 private router: Router,
                 private activatedRoute: ActivatedRoute,
-                private authorizationService: AuthorizationService) {
+                private authorizationService: AuthorizationService,
+                private settingsDialogService: SettingsDialogService) {
     }
 
     ngOnInit() {
@@ -51,8 +53,11 @@ export class ToolbarComponent implements OnInit {
     }
 
     logout(): void {
-
         this.authorizationService.logout();
+    }
+
+    settings(): void {
+        this.settingsDialogService.openSettingsDialog();
     }
 
     private initUser() {

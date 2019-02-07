@@ -31,6 +31,7 @@ import {ProcessesModule} from './modules/processes/processes.module';
 import {PermissionsModule} from './modules/permissions/permissions.module';
 import localeDe from '@angular/common/locales/de';
 import {registerLocaleData} from "@angular/common";
+import {SettingsModule} from './modules/settings/settings.module';
 
 registerLocaleData(localeDe);
 
@@ -50,6 +51,7 @@ registerLocaleData(localeDe);
         ProcessesModule,
         BrowserAnimationsModule,
         PermissionsModule,
+        SettingsModule,
     ],
     providers: [
         {

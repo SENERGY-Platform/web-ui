@@ -16,6 +16,14 @@
 
 import {Injectable} from '@angular/core';
 import {KeycloakService} from 'keycloak-angular';
+import {Observable} from 'rxjs';
+import {DashboardModel} from '../../modules/dashboard/shared/dashboard.model';
+import {environment} from '../../../environments/environment';
+import {catchError, map} from 'rxjs/operators';
+import {ErrorHandlerService} from './error-handler.service';
+import {HttpClient} from '@angular/common/http';
+import {AuthorizationProfileModel} from '../components/authorization/authorization-profile.model';
+import {AuthorizationSessionsModel} from '../components/authorization/authorization-sessions.model';
 
 
 @Injectable({
@@ -24,7 +32,9 @@ import {KeycloakService} from 'keycloak-angular';
 
 export class AuthorizationService {
 
-    constructor(private keycloakService: KeycloakService) {
+    constructor(private keycloakService: KeycloakService,
+                private errorHandlerService: ErrorHandlerService,
+                private http: HttpClient) {
     }
 
     getUserId(): string | Error {
@@ -38,6 +48,18 @@ export class AuthorizationService {
 
     getUserName(): string {
         return this.keycloakService.getUsername();
+    }
+
+    getProfile(): AuthorizationProfileModel {
+        const returnProfile: AuthorizationProfileModel = {email: '', firstName: '', lastName: '', username: ''};
+        const profile = this.keycloakService.getKeycloakInstance().profile;
+        if (profile) {
+            returnProfile.email = profile.email || '';
+            returnProfile.firstName = profile.firstName || '';
+            returnProfile.lastName = profile.lastName || '';
+            returnProfile.username = profile.username || '';
+        }
+        return returnProfile;
     }
 
     getToken(): Promise<string> {
