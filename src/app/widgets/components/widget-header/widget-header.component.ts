@@ -16,6 +16,8 @@
 
 import {Component, Input, OnInit} from '@angular/core';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 
 @Component({
     selector: 'senergy-widget-header',
@@ -25,12 +27,20 @@ import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.mo
 export class WidgetHeaderComponent implements OnInit {
 
     @Input() widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    @Input() zoom = false;
 
-    constructor() {
+    constructor(private dashboardService: DashboardService) {
     }
 
     ngOnInit() {
+
     }
 
+    refresh() {
+        this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, this.widget.id, this.widget);
+    }
 
+    zoomWidget() {
+        this.dashboardService.zoomWidget(DashboardManipulationEnum.Zoom, this.widget.id, this.widget);
+    }
 }

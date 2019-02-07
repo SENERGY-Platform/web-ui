@@ -15,13 +15,13 @@
   -->
 
 <mat-card>
-    <senergy-widget-header [widget]="widget"></senergy-widget-header>
+    <senergy-widget-header [widget]="widget" [zoom]="zoom"></senergy-widget-header>
     <mat-card-content class="content-size drag-handler">
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
             <google-chart *ngIf="ready" #deviceTotalDowntimeChart [data]="deviceTotalDowntime"></google-chart>
         </div>
     </mat-card-content>
-    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]=zoom (editEvent)="edit()"></senergy-widget-footer>
+    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
 

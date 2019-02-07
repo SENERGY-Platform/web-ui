@@ -16,6 +16,19 @@
 
 <mat-card-header class="header-container drag-handler">
     <mat-card-title-group>
-        <mat-card-title>{{widget.name}}</mat-card-title>
+        <mat-card-title>
+            {{widget.name}}
+        </mat-card-title>
     </mat-card-title-group>
+    <div fxFlex></div>
+    <div *ngIf="zoom">
+        <button mat-icon-button color="accent" (click)="refresh()" matTooltip="close zoom">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </div>
+    <div *ngIf="zoom">
+        <button mat-icon-button color="accent" (click)="zoomWidget()" matTooltip="close zoom">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
 </mat-card-header>
