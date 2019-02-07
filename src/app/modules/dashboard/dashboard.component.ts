@@ -79,6 +79,10 @@ export class DashboardComponent implements OnInit {
         this.dashboardService.openDeleteDashboardDialog(this.dashboards[this.activeTabIndex].id);
     }
 
+    openEditDashboardDialog() {
+        this.dashboardService.openEditDashboardDialog(this.dashboards[this.activeTabIndex]);
+    }
+
     openAddWidgetDialog() {
         this.dashboardService.openNewWidgetDialog(this.dashboards[this.activeTabIndex].id);
     }
@@ -178,6 +182,10 @@ export class DashboardComponent implements OnInit {
                     this.deleteDashboard(dashboardManipulationModel);
                     break;
                 }
+                case DashboardManipulationEnum.Update: {
+                    this.updateDashboard(dashboardManipulationModel);
+                    break;
+                }
             }
         });
     }
@@ -196,6 +204,18 @@ export class DashboardComponent implements OnInit {
     private addDashboard(dashboardManipulationModel: DashboardManipulationModel) {
         this.dashboards.push(dashboardManipulationModel.dashboard || {} as DashboardModel);
         this.activeTabIndex = this.dashboards.length - 1;
+    }
+
+    private updateDashboard(dashboardManipulationModel: DashboardManipulationModel) {
+        let dashIndex = -1;
+        this.dashboards.forEach((dashboard: DashboardModel, index: number) => {
+            if (dashboard.id === dashboardManipulationModel.dashboardId) {
+                dashIndex = index;
+            }
+        });
+        if (dashIndex > -1) {
+            this.dashboards[dashIndex] = dashboardManipulationModel.dashboard || {} as DashboardModel;
+        }
     }
 
     private initGridCols(): void {

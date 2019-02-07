@@ -17,19 +17,27 @@
 import {NgModule} from '@angular/core';
 import {DashboardComponent} from './dashboard.component';
 import {
-    MatButtonModule, MatDialogModule,
-    MatDividerModule, MatFormFieldModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatDividerModule,
+    MatFormFieldModule,
     MatGridListModule,
-    MatIconModule, MatInputModule, MatMenuModule, MatOptionModule, MatSelectModule,
-    MatTabsModule, MatTooltipModule
+    MatIconModule,
+    MatInputModule,
+    MatMenuModule,
+    MatOptionModule,
+    MatSelectModule,
+    MatTabsModule,
+    MatTooltipModule
 } from '@angular/material';
 import {CommonModule} from '@angular/common';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {DashboardNewDialogComponent} from './dialogs/dashboard-new-dialog.component';
 import {WidgetModule} from '../../widgets/widget.module';
 import {DashboardNewWidgetDialogComponent} from './dialogs/dashboard-new-widget-dialog.component';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {GridsterModule} from 'angular-gridster2';
+import {DashboardEditDialogComponent} from './dialogs/dashboard-edit-dialog.component';
 
 
 @NgModule({
@@ -51,14 +59,17 @@ import {GridsterModule} from 'angular-gridster2';
         FormsModule,
         GridsterModule,
         MatTooltipModule,
+        ReactiveFormsModule,
     ],
     declarations: [
         DashboardComponent,
         DashboardNewDialogComponent,
-        DashboardNewWidgetDialogComponent
+        DashboardNewWidgetDialogComponent,
+        DashboardEditDialogComponent,
     ],
     entryComponents: [DashboardNewDialogComponent,
-        DashboardNewWidgetDialogComponent]
+        DashboardNewWidgetDialogComponent,
+        DashboardEditDialogComponent]
 })
 export class DashboardModule {
 }

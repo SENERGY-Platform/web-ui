@@ -30,6 +30,7 @@ import {DashboardWidgetManipulationModel} from './dashboard-widget-manipulation.
 import {DashboardManipulationModel} from './dashboard-manipulation.model';
 import {DashboardManipulationEnum} from './dashboard-manipulation.enum';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {DashboardEditDialogComponent} from '../dialogs/dashboard-edit-dialog.component';
 
 @Injectable({
     providedIn: 'root'
@@ -135,6 +136,23 @@ export class DashboardService {
                         this.manipulateDashboard(DashboardManipulationEnum.Delete, dashboardId, null);
                     });
                 }
+        });
+    }
+
+    openEditDashboardDialog(dashboard: DashboardModel): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            dashboard: JSON.parse(JSON.stringify(dashboard))         // create copy of object
+        };
+        const editDialogRef = this.dialog.open(DashboardEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((editedDashoard: DashboardModel) => {
+            if (editedDashoard !== undefined) {
+                this.updateDashboard(editedDashoard).subscribe((dashboardResp) => {
+                    this.manipulateDashboard(DashboardManipulationEnum.Update, dashboard.id, dashboardResp);
+                });
+            }
         });
     }
 
