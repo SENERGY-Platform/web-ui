@@ -17,9 +17,9 @@
     <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true"
                    (selectedIndexChange)="setTabIndex($event)"
                    (animationDone)="getProcesses()">
-        <mat-tab label="Finished">
+        <mat-tab label="{{tabs[0].label}}">
             <div fxLayout="row">
-                <senergy-searchbar fxFlex></senergy-searchbar>
+                <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
             </div>
 
             <div class="layout-margin" [hidden]="!ready">
@@ -43,9 +43,9 @@
                                 </td>
                             </ng-container>
 
-                            <ng-container matColumnDef="processDefinitionKey">
+                            <ng-container matColumnDef="processDefinitionName">
                                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Process</th>
-                                <td mat-cell *matCellDef="let element"> {{element.processDefinitionKey}} </td>
+                                <td mat-cell *matCellDef="let element"> {{element.processDefinitionName}} </td>
                             </ng-container>
 
                             <ng-container matColumnDef="id">
@@ -116,9 +116,9 @@
             </div>
 
         </mat-tab>
-        <mat-tab label="Running">
+        <mat-tab label="{{tabs[1].label}}">
             <div fxLayout="row">
-                <senergy-searchbar fxFlex></senergy-searchbar>
+                <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
             </div>
             <div class="layout-margin" [hidden]="!ready">
                 <div [hidden]="dataSourceRunning.filteredData.length === 0" class="mat-elevation-z1">
@@ -126,9 +126,9 @@
                         <table mat-table [dataSource]="dataSourceRunning" matSort matSortActive="startTime"
                                matSortDirection="desc" matSortDisableClear>
 
-                            <ng-container matColumnDef="processDefinitionKey">
+                            <ng-container matColumnDef="processDefinitionName">
                                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Process</th>
-                                <td mat-cell *matCellDef="let element"> {{element.processDefinitionKey}} </td>
+                                <td mat-cell *matCellDef="let element"> {{element.processDefinitionName}} </td>
                             </ng-container>
 
                             <ng-container matColumnDef="id">

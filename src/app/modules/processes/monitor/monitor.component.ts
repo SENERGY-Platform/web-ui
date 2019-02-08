@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const tabs = [{label: 'Finished', filter: 'finished'}, {label: 'Running', filter: 'unfinished'}];
+
 import {AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
 import {Subscription} from 'rxjs';
@@ -35,10 +37,12 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>([]);
     dataSourceRunning = new MatTableDataSource<MonitorProcessModel>([]);
     ready = false;
-    displayedColumnsFinished: string[] = ['select', 'processDefinitionKey', 'id', 'startTime', 'endTime', 'durationInMillis', 'info', 'delete'];
-    displayedColumnsRunning: string[] = ['processDefinitionKey', 'id', 'startTime', 'info', 'action'];
+    displayedColumnsFinished: string[] = ['select', 'processDefinitionName', 'id', 'startTime', 'endTime', 'durationInMillis', 'info', 'delete'];
+    displayedColumnsRunning: string[] = ['processDefinitionName', 'id', 'startTime', 'info', 'action'];
     selection = new SelectionModel<MonitorProcessModel>(true, []);
     activeIndex = 0;
+    searchText = '';
+    tabs: { label: string, filter: string }[] = tabs;
     @ViewChildren(MatPaginator) paginator = new QueryList<MatPaginator>();
     @ViewChild(MatSort) sort!: MatSort;
 
@@ -83,19 +87,16 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     getProcesses() {
         this.selectionClear();
         this.ready = false;
-        if (this.activeIndex === 0) {
-            this.dataSourceFinished.data = [];
-            this.monitorService.getFilteredHistoryInstances('finished').subscribe(
+        this.dataSourceRunning.data = [];
+        if (this.searchText === '') {
+            this.monitorService.getFilteredHistoryInstances(this.tabs[this.activeIndex].filter).subscribe(
                 (monitorProcessModels: MonitorProcessModel[]) => {
-                    this.dataSourceFinished.data = monitorProcessModels;
-                    this.ready = true;
+                    this.setData(monitorProcessModels);
                 });
         } else {
-            this.dataSourceRunning.data = [];
-            this.monitorService.getFilteredHistoryInstances('unfinished').subscribe(
+            this.monitorService.getFilteredHistoryInstancesWithSearch(this.tabs[this.activeIndex].filter, this.searchText).subscribe(
                 (monitorProcessModels: MonitorProcessModel[]) => {
-                    this.dataSourceRunning.data = monitorProcessModels;
-                    this.ready = true;
+                    this.setData(monitorProcessModels);
                 });
         }
     }
@@ -103,6 +104,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     setTabIndex(index: number): void {
         this.activeIndex = index;
         this.ready = false;
+        this.searchText = '';
     }
 
     openDetailsDialog(id: string): void {
@@ -157,14 +159,20 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         this.selection.clear();
     }
 
+    private setData(monitorProcessModels: MonitorProcessModel[]) {
+        if (this.activeIndex === 0) {
+            this.dataSourceFinished.data = monitorProcessModels;
+        } else {
+            this.dataSourceRunning.data = monitorProcessModels;
+        }
+        this.ready = true;
+    }
+
     private initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.selection.clear();
-            if (this.activeIndex === 0) {
-                this.dataSourceFinished.filter = searchText.trim().toLowerCase();
-            } else {
-                this.dataSourceRunning.filter = searchText.trim().toLowerCase();
-            }
+            this.searchText = searchText;
+            this.getProcesses();
         });
     }
 }

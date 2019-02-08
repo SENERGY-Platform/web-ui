@@ -57,6 +57,15 @@ export class MonitorService {
         );
     }
 
+    getFilteredHistoryInstancesWithSearch(filter: string, searchText: string): Observable<MonitorProcessModel[]> {
+        return this.http.get<MonitorProcessModel[]>
+        (environment.processServiceUrl + '/history/filtered/process-instance?processDefinitionNameLike=' + encodeURI('%') + encodeURI(searchText)
+            + encodeURI('%') + '&'  + filter + '=true').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(MonitorService.name, 'getFilteredHistoryInstances', []))
+        );
+    }
+
     getVariableInstances(id: string): Observable<MonitorProcessVariableInstancesModel[]> {
         return this.http.get<MonitorProcessVariableInstancesModel[]>
         (environment.processServiceUrl + '/history/process-instance/' + id + '/variable-instance').pipe(
