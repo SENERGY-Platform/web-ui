@@ -36,7 +36,7 @@ import {SpinnerComponent} from './components/spinner/spinner.component';
 import {SortComponent} from './components/sort/sort.component';
 import {StateIconComponent} from './components/state-icon/state-icon.component';
 import {DiagramEditorComponent} from './components/diagram-editor/diagram-editor.component';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TagValuePipe} from './pipe/tag-value.pipe';
 import {DeleteDialogComponent} from './dialogs/delete-dialog.component';
 import {ShortInputVariableNamePipe} from './pipe/short-input-variable-name.pipe';
@@ -62,7 +62,8 @@ import {PreviewFormatPipe} from './pipe/preview-format.pipe';
         MatTooltipModule,
         FormsModule,
         MatListModule,
-        MatDialogModule
+        MatDialogModule,
+        ReactiveFormsModule,
     ],
     declarations: [
         SidenavComponent,

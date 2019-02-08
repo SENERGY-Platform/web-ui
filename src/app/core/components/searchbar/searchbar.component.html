@@ -17,8 +17,8 @@
 <div class="layout-margin">
   <mat-form-field appearance="outline" color="accent" fxFlex>
     <mat-label>Search</mat-label>
-    <input #searchInput (keyup)="changeSearchtext(searchInput.value)" type="text" matInput placeholder="Please insert search text">
-    <mat-icon matPrefix *ngIf="searchInput.value === ''">search</mat-icon>
-    <mat-icon class="pointer" matPrefix *ngIf="searchInput.value !== ''" (click)="changeSearchtext(searchInput.value = '')">close</mat-icon>
+    <input (keyup)="changeSearchtext()" type="text" matInput placeholder="Please insert search text" [formControl]="formControl">
+    <mat-icon matPrefix *ngIf="formControl.value === ''">search</mat-icon>
+    <mat-icon class="pointer" matPrefix *ngIf="formControl.value !== ''" (click)="resetSearchtext()">close</mat-icon>
   </mat-form-field>
 </div>

@@ -62,21 +62,20 @@ export class DeviceInstancesService {
         }
     }
 
-    getDeviceInstancesByState(state: string): Observable<DeviceInstancesModel[]> {
-        // if (searchText === '') {
+    getDeviceInstancesByState(searchText: string, state: string, value: string, order: string): Observable<DeviceInstancesModel[]> {
+        if (searchText === '') {
             return this.http.get<DeviceInstancesModel[]>
-            (environment.apiAggregatorUrl + '/filter/devices/state/' + state).pipe(
+            (environment.apiAggregatorUrl + '/filter/devices/state/' + state + '/' + value + '/' + order).pipe(
                 map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByState', []))
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByState: no search', []))
             );
-        // }
-        // else {
-            // return this.http.get<DeviceInstancesModel[]>
-            // (environment.apiAggregatorUrl + '/search/devices/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset + '/' + value + '/' + order).pipe(
-            //     map(resp => resp || []),
-            //     catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances: search', []))
-            // );
-        // }
+        } else {
+            return this.http.get<DeviceInstancesModel[]>
+            (environment.apiAggregatorUrl + '/filter/devices/state/' + state + '/search/' + searchText + '/' + value + '/' + order).pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByState: search', []))
+            );
+        }
     }
 
     updateDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {

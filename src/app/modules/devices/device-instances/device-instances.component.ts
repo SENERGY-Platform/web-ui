@@ -51,8 +51,8 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     animationDone = true;
     tabs: {label: string, value: string}[] = tabs;
     searchInitialized = false;
+    searchText = '';
 
-    private searchText = '';
     private limit = 54;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
@@ -159,7 +159,8 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                             this.setDevices(deviceInstances);
                         });
                 } else {
-                    this.deviceInstancesService.getDeviceInstancesByState(tabs[this.activeIndex - 1].value).subscribe(
+                    this.deviceInstancesService.getDeviceInstancesByState(
+                        this.searchText, tabs[this.activeIndex - 1].value, this.sortAttribute.value, this.sortAttribute.order).subscribe(
                         (deviceInstances: DeviceInstancesModel[]) => {
                             this.setDevices(deviceInstances);
                         });
