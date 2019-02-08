@@ -99,6 +99,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     getDevicesByTag(event: { tag: string, tagType: string }) {
         this.routerNetwork = null;
+        this.searchText = '';
         if (event.tagType === 'tag') {
             this.selectedTagTransformed = new TagValuePipe().transform(event.tag, '');
         } else {
