@@ -22,11 +22,10 @@ import {catchError, map, share} from 'rxjs/internal/operators';
 import {DeviceInstancesModel} from './device-instances.model';
 import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
 import {DeviceTypeModel} from '../../device-types/shared/device-type.model';
 import {DeviceTypeService} from '../../device-types/shared/device-type.service';
-import {PermissionsService} from '../../../permissions/shared/permissions.service';
 import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 
@@ -44,7 +43,7 @@ export class DeviceInstancesService {
                 private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService,
                 private deviceTypeService: DeviceTypeService,
-                private permissionsService: PermissionsService) {
+                private snackBar: MatSnackBar) {
     }
 
     getDeviceInstances(searchText: string, limit: number, offset: number, value: string, order: string): Observable<DeviceInstancesModel[]> {
@@ -63,10 +62,34 @@ export class DeviceInstancesService {
         }
     }
 
-    updateDeviceInstance(id: string, device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel> {
+    getDeviceInstancesByState(state: string): Observable<DeviceInstancesModel[]> {
+        // if (searchText === '') {
+            return this.http.get<DeviceInstancesModel[]>
+            (environment.apiAggregatorUrl + '/filter/devices/state/' + state).pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByState', []))
+            );
+        // }
+        // else {
+            // return this.http.get<DeviceInstancesModel[]>
+            // (environment.apiAggregatorUrl + '/search/devices/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset + '/' + value + '/' + order).pipe(
+            //     map(resp => resp || []),
+            //     catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances: search', []))
+            // );
+        // }
+    }
+
+    updateDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {
         return this.http.post<DeviceInstancesUpdateModel>
-        (environment.iotRepoUrl + '/deviceInstance/' + encodeURIComponent(id), device).pipe(
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', {} as DeviceInstancesUpdateModel))
+        (environment.iotRepoUrl + '/deviceInstance/' + encodeURIComponent(device.id), device).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', null))
+        );
+    }
+
+    saveDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {
+        return this.http.post<DeviceInstancesUpdateModel>
+        (environment.iotRepoUrl + '/deviceInstance', device).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'saveDeviceInstance', null))
         );
     }
 
@@ -130,22 +153,52 @@ export class DeviceInstancesService {
 
         editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstancesModel) => {
             if (deviceOut !== undefined) {
-                const deviceUpdate: DeviceInstancesUpdateModel = {
-                    device_type: deviceOut.devicetype,
-                    id: deviceOut.id,
-                    img: deviceOut.img,
-                    name: deviceOut.name,
-                    tags: deviceOut.tag,
-                    uri: deviceOut.uri,
-                    user_tags: deviceOut.usertag
-                }
-                this.updateDeviceInstance(device.id, deviceUpdate).subscribe(() => {
-                    Object.assign(device, deviceOut);
-                });
-
+                this.updateDeviceInstance(this.convertDeviceInstance(deviceOut)).subscribe(
+                    (deviceResp: DeviceInstancesUpdateModel | null) => {
+                        if (deviceResp === null) {
+                            this.snackBar.open('Error while updating the device instance!', undefined, {duration: 2000});
+                        } else {
+                            Object.assign(device, deviceOut);
+                            this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
+                        }
+                    });
             }
         });
-    };
+    }
 
+    openDeviceCreateDialog(deviceTypeId: string): void {
 
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {
+            device: {devicetype: deviceTypeId} as DeviceInstancesModel
+        };
+
+        const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstancesModel) => {
+            if (deviceOut !== undefined) {
+                this.saveDeviceInstance(this.convertDeviceInstance(deviceOut)).subscribe(
+                    (deviceResp: DeviceInstancesUpdateModel | null) => {
+                        if (deviceResp === null) {
+                            this.snackBar.open('Error while saving the device instance!', undefined, {duration: 2000});
+                        } else {
+                            this.snackBar.open('Device instance saved successfully.', undefined, {duration: 2000});
+                        }
+                    });
+            }
+        });
+    }
+
+    private convertDeviceInstance(deviceOut: DeviceInstancesModel): DeviceInstancesUpdateModel {
+        return {
+            device_type: deviceOut.devicetype,
+            id: deviceOut.id,
+            img: deviceOut.img,
+            name: deviceOut.name,
+            tags: deviceOut.tag,
+            uri: deviceOut.uri,
+            user_tags: deviceOut.usertag
+        };
+    }
 }

@@ -18,9 +18,10 @@ import {Component, OnInit} from '@angular/core';
 import {ExportService} from './shared/export.service';
 import {ExportModel} from './shared/export.model';
 import {environment} from '../../../../environments/environment';
-import {MatSnackBar} from '@angular/material';
+import {MatInput, MatSnackBar} from '@angular/material';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ResponsiveService} from '../../../core/services/responsive.service';
+import {ClipboardService} from 'ngx-clipboard';
 
 const grids = new Map([
     ['xs', 1],
@@ -46,7 +47,8 @@ export class ExportComponent implements OnInit {
     constructor(private exportService: ExportService,
                 public snackBar: MatSnackBar,
                 private dialogsService: DialogsService,
-                private responsiveService: ResponsiveService) {
+                private responsiveService: ResponsiveService,
+                private clipboardService: ClipboardService) {
     }
 
     ngOnInit() {
@@ -73,6 +75,13 @@ export class ExportComponent implements OnInit {
             }
         });
 
+    }
+
+    copyEndpoint(endpoint: string) {
+        this.clipboardService.copyFromContent(endpoint);
+        this.snackBar.open('Endpoint copied to clipboard.', undefined, {
+            duration: 2000,
+        });
     }
 
     private initGridCols(): void {

@@ -16,7 +16,7 @@
 
 
 .layout-margin {
-    margin: 8px 8px 150px;
+    margin: 8px 8px 8px;
 }
 
 table {
@@ -29,3 +29,10 @@ table {
     right: 15px;
     z-index: 100;
 }
+
+.table-container {
+    position: relative;
+    max-height: calc(100vh - 308px);
+    overflow: auto;
+}
+

@@ -26,6 +26,8 @@ import {ProcessRepoService} from "./shared/process-repo.service";
 import {UtilService} from "../../../core/services/util.service";
 import {DomSanitizer, SafeUrl} from "@angular/platform-browser";
 import {forEach} from "@angular/router/src/utils/collection";
+import {DeviceInstancesModel} from '../../devices/device-instances/shared/device-instances.model';
+import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -56,7 +58,14 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private sanitizer: DomSanitizer, private utilService: UtilService, private searchbarService: SearchbarService, private processRepoService: ProcessRepoService, private responsiveService: ResponsiveService, protected auth: AuthorizationService, private keycloakService: KeycloakService) {
+    constructor(private sanitizer: DomSanitizer,
+                private utilService: UtilService,
+                private searchbarService: SearchbarService,
+                private processRepoService: ProcessRepoService,
+                private responsiveService: ResponsiveService,
+                protected auth: AuthorizationService,
+                private keycloakService: KeycloakService,
+                private permissionsDialogService: PermissionsDialogService) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
 
@@ -80,6 +89,10 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     receiveSortingAttribute(sortAttribute: SortModel) {
         this.sortAttribute = sortAttribute;
         this.getRepoItems(true);
+    }
+
+    permission(process: ProcessModel): void {
+        this.permissionsDialogService.openPermissionDialog('processmodel', process.id, process.name);
     }
 
     private initGridCols(): void {

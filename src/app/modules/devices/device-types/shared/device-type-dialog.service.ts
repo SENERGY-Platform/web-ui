@@ -45,20 +45,12 @@ export class DeviceTypeDialogService {
         });
     }
 
-    editDeviceTypeDialog(id: string): void {
-
-        this.deviceTypeService.getDeviceType(id).subscribe((deviceType: (DeviceTypeModel | null)) => {
-            if (deviceType !== null) {
-                this.openDeviceTypeDialog(deviceType);
-            }
-        });
-    }
-
-    openDeviceTypeDialog(deviceType: DeviceTypeModel): MatDialogRef<DeviceTypesDialogComponent> {
+    openDeviceTypeDialog(deviceType: DeviceTypeModel, editable: boolean): MatDialogRef<DeviceTypesDialogComponent> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            deviceType: deviceType
+            deviceType: deviceType,
+            editable: editable,
         };
         return this.dialog.open(DeviceTypesDialogComponent, dialogConfig);
     }

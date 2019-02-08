@@ -14,29 +14,24 @@
   ~ limitations under the License.
   -->
 
-<mat-card-actions>
+<mat-card-actions *ngIf="!zoom">
     <div fxFlex class="drag-handler"></div>
     <div>
         <button mat-icon-button color="accent" (click)="refresh()" matTooltip="refresh widget">
             <mat-icon>refresh</mat-icon>
         </button>
     </div>
-    <div *ngIf="zoom">
-        <button mat-icon-button color="accent" (click)="zoomWidget()" matTooltip="close zoom">
-            <mat-icon>close</mat-icon>
-        </button>
-    </div>
-    <div *ngIf="optionZoom && !zoom">
+    <div *ngIf="optionZoom">
         <button mat-icon-button color="accent" (click)="zoomWidget()" matTooltip="zoom widget">
             <mat-icon>zoom_out_map</mat-icon>
         </button>
     </div>
-    <div *ngIf="!zoom">
+    <div>
         <button mat-icon-button color="accent" (click)="edit()" matTooltip="edit widget">
             <mat-icon>edit</mat-icon>
         </button>
     </div>
-    <div *ngIf="!zoom">
+    <div>
         <button mat-icon-button color="accent" (click)="delete()" matTooltip="delete widget">
             <mat-icon>delete</mat-icon>
         </button>

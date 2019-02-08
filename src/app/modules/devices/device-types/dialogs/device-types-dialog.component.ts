@@ -78,13 +78,15 @@ export class DeviceTypesDialogComponent implements OnInit {
     deviceClassInputFocus = false;
     vendorInputFocus = false;
     disableSave = false;
+    editable = false;
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesDialogComponent>,
                 private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
                 private valueTypesService: ValueTypesService,
-                @Inject(MAT_DIALOG_DATA) data: { deviceType: DeviceTypeModel }) {
+                @Inject(MAT_DIALOG_DATA) data: { deviceType: DeviceTypeModel, editable: boolean }) {
         this.deviceType = data.deviceType;
+        this.editable = data.editable;
     }
 
     ngOnInit() {
@@ -263,6 +265,11 @@ export class DeviceTypesDialogComponent implements OnInit {
                 this.deviceType.services.map((elem: DeviceTypeServiceModel) => this.createServiceGroup(elem)) :
                 [])
         });
+
+        if (!this.editable) {
+            this.firstFormGroup.disable();
+            this.secondFormGroup.disable();
+        }
 
         if (this.deviceType.generated) {
             this.firstFormGroup.controls['classCtrl'].disable();

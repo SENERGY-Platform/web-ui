@@ -30,7 +30,9 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ProcessesModule} from './modules/processes/processes.module';
 import {PermissionsModule} from './modules/permissions/permissions.module';
 import localeDe from '@angular/common/locales/de';
-import {registerLocaleData} from "@angular/common";
+import {registerLocaleData} from '@angular/common';
+import {SettingsModule} from './modules/settings/settings.module';
+import {ClipboardModule} from 'ngx-clipboard';
 
 registerLocaleData(localeDe);
 
@@ -50,6 +52,8 @@ registerLocaleData(localeDe);
         ProcessesModule,
         BrowserAnimationsModule,
         PermissionsModule,
+        SettingsModule,
+        ClipboardModule,
     ],
     providers: [
         {
@@ -60,7 +64,7 @@ registerLocaleData(localeDe);
         },
         {
             provide: LOCALE_ID,
-            useValue: "de"
+            useValue: 'de'
         }
     ],
     bootstrap: [AppComponent]

@@ -18,7 +18,6 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
 import {DeviceInstancesModel} from './shared/device-instances.model';
-import {ResponsiveService} from '../../../core/services/responsive.service';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
@@ -26,18 +25,12 @@ import {KeycloakService} from 'keycloak-angular';
 import {TagValuePipe} from '../../../core/pipe/tag-value.pipe';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {DeviceInstancesUpdateModel} from './shared/device-instances-update.model';
 import {MatSnackBar} from '@angular/material';
-import {ActivatedRoute, Navigation, Router} from '@angular/router';
+import {Navigation, Router} from '@angular/router';
 import {NetworksModel} from '../networks/shared/networks.model';
 
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 2],
-    ['md', 2],
-    ['lg', 4],
-    ['xl', 6],
-]);
+
+const tabs = [{label: 'Online', value: 'connected'}, {label: 'Offline', value: 'disconnected'}, {label: 'Unknown', value: 'unknown'}];
 
 @Component({
     selector: 'senergy-device-instances',
@@ -47,7 +40,6 @@ const grids = new Map([
 export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     deviceInstances: DeviceInstancesModel[] = [];
-    gridCols = 0;
     ready = false;
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
     userID: string;
@@ -55,6 +47,10 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     selectedTagTransformed = '';
     selectedTagType = '';
     routerNetwork: NetworksModel | null = null;
+    activeIndex = 0;
+    animationDone = true;
+    tabs: {label: string, value: string}[] = tabs;
+    searchInitialized = false;
 
     private searchText = '';
     private limit = 54;
@@ -64,7 +60,6 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     private allDataLoaded = false;
 
     constructor(private searchbarService: SearchbarService,
-                private responsiveService: ResponsiveService,
                 private deviceInstancesService: DeviceInstancesService,
                 private keycloakService: KeycloakService,
                 private permissionsDialogService: PermissionsDialogService,
@@ -76,8 +71,6 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-
-        this.initGridCols();
         this.initSearchAndGetDevices();
     }
 
@@ -104,46 +97,31 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         this.getDeviceInstances(true);
     }
 
-    getDevicesByTag(tag: string, tagType: string) {
+    getDevicesByTag(event: { tag: string, tagType: string }) {
         this.routerNetwork = null;
-        if (tagType === 'tag') {
-            this.selectedTagTransformed = new TagValuePipe().transform(tag, '');
+        if (event.tagType === 'tag') {
+            this.selectedTagTransformed = new TagValuePipe().transform(event.tag, '');
         } else {
-            this.selectedTagTransformed = tag;
+            this.selectedTagTransformed = event.tag;
         }
 
-        this.selectedTagType = tagType;
-        this.selectedTag = tag;
+        this.selectedTagType = event.tagType;
+        this.selectedTag = event.tag;
         this.getDeviceInstances(true);
     }
 
-    service(deviceTypeId: string): void {
-        this.deviceInstancesService.openDeviceServiceDialog(deviceTypeId);
+    setIndex(event: number) {
+        this.activeIndex = event;
+        this.animationDone = false;
+        this.routerNetwork = null;
+        this.searchText = '';
+        this.resetTag();
     }
 
-    edit(device: DeviceInstancesModel): void {
-        this.deviceInstancesService.openDeviceEditDialog(device);
-    }
-
-    delete(device: DeviceInstancesModel): void {
-        this.dialogsService.openDeleteDialog('device').afterClosed().subscribe((deviceDelete: boolean) => {
-            if (deviceDelete) {
-                this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstancesUpdateModel | null) => {
-                    if (resp !== null) {
-                        const index = this.deviceInstances.indexOf(device);
-                        this.deviceInstances.splice(index, 1);
-                        this.snackBar.open('Device deleted successfully.', '', {duration: 2000});
-
-                    } else {
-                        this.snackBar.open('Error while deleting device!', '', {duration: 2000});
-                    }
-                });
-            }
-        });
-    }
-
-    permission(device: DeviceInstancesModel): void {
-        this.permissionsDialogService.openPermissionDialog('deviceinstance', device.id, device.name);
+    animation(): void {
+        if (this.searchInitialized) {
+            this.getDeviceInstances(true);
+        }
     }
 
     private getRouterParams(): void {
@@ -164,6 +142,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             this.ready = false;
         }
 
+
         if (this.routerNetwork !== null) {
             this.selectedTag = this.routerNetwork.name;
             this.selectedTagTransformed = this.routerNetwork.name;
@@ -173,11 +152,18 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             });
         } else {
             if (this.selectedTag === '') {
-                this.deviceInstancesService.getDeviceInstances(
-                    this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-                    (deviceInstances: DeviceInstancesModel[]) => {
-                        this.setDevices(deviceInstances);
-                    });
+                if (this.activeIndex === 0) {
+                    this.deviceInstancesService.getDeviceInstances(
+                        this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+                        (deviceInstances: DeviceInstancesModel[]) => {
+                            this.setDevices(deviceInstances);
+                        });
+                } else {
+                    this.deviceInstancesService.getDeviceInstancesByState(tabs[this.activeIndex - 1].value).subscribe(
+                        (deviceInstances: DeviceInstancesModel[]) => {
+                            this.setDevices(deviceInstances);
+                        });
+                }
             } else {
                 this.deviceInstancesService.getDeviceInstancesByTag(this.selectedTagType, this.selectedTag, this.sortAttribute.value,
                     this.sortAttribute.order, this.limit, this.offset).subscribe(
@@ -189,6 +175,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     }
 
     private setDevices(deviceInstances: DeviceInstancesModel[]) {
+        this.animationDone = true;
         if (deviceInstances.length !== this.limit) {
             this.allDataLoaded = true;
         }
@@ -196,15 +183,9 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         this.ready = true;
     }
 
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
-    }
-
     private initSearchAndGetDevices() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchInitialized = true;
             if (searchText) {
                 this.routerNetwork = null;
             }

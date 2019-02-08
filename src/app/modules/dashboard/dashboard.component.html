@@ -46,6 +46,10 @@
                                 [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh
                         </button>
                     </mat-menu>
+                    <button (click)="openEditDashboardDialog()" mat-icon-button color="accent"
+                            matTooltip="edit dashboard">
+                        <mat-icon>edit</mat-icon>
+                    </button>
                     <button (click)="openDeleteDashboardDialog()" mat-icon-button color="accent"
                             [disabled]="dashboards.length <= 1"
                             matTooltip="delete dashboard">
