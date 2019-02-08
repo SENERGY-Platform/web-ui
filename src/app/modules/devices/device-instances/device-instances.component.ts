@@ -30,7 +30,7 @@ import {Navigation, Router} from '@angular/router';
 import {NetworksModel} from '../networks/shared/networks.model';
 
 
-const tabs = [{label: 'Online', value: 'connected'}, {label: 'Offline', value: 'disconnected'}, {label: 'Unknown', value: 'unknown'}];
+const tabs = [{label: 'Online', state: 'connected'}, {label: 'Offline', state: 'disconnected'}, {label: 'Unknown', state: 'unknown'}];
 
 @Component({
     selector: 'senergy-device-instances',
@@ -49,7 +49,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     routerNetwork: NetworksModel | null = null;
     activeIndex = 0;
     animationDone = true;
-    tabs: {label: string, value: string}[] = tabs;
+    tabs: { label: string, state: string }[] = tabs;
     searchInitialized = false;
     searchText = '';
 
@@ -160,17 +160,25 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                         });
                 } else {
                     this.deviceInstancesService.getDeviceInstancesByState(
-                        this.searchText, tabs[this.activeIndex - 1].value, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+                        this.searchText, tabs[this.activeIndex - 1].state, this.sortAttribute.value, this.sortAttribute.order).subscribe(
                         (deviceInstances: DeviceInstancesModel[]) => {
                             this.setDevices(deviceInstances);
                         });
                 }
             } else {
-                this.deviceInstancesService.getDeviceInstancesByTag(this.selectedTagType, this.selectedTag, this.sortAttribute.value,
-                    this.sortAttribute.order, this.limit, this.offset).subscribe(
-                    (deviceInstances: DeviceInstancesModel[]) => {
-                        this.setDevices(deviceInstances);
-                    });
+                if (this.activeIndex === 0) {
+                    this.deviceInstancesService.getDeviceInstancesByTag(this.selectedTagType, this.selectedTag, this.sortAttribute.value,
+                        this.sortAttribute.order, this.limit, this.offset).subscribe(
+                        (deviceInstances: DeviceInstancesModel[]) => {
+                            this.setDevices(deviceInstances);
+                        });
+                } else {
+                    this.deviceInstancesService.getDeviceInstancesByTagAndState(this.selectedTagType, this.selectedTag,
+                        this.sortAttribute.value, this.sortAttribute.order, 9999, 0, tabs[this.activeIndex - 1].state).subscribe(
+                        (deviceInstances: DeviceInstancesModel[]) => {
+                            this.setDevices(deviceInstances);
+                        });
+                }
             }
         }
     }
