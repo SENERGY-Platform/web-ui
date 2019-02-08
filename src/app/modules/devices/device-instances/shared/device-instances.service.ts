@@ -106,10 +106,9 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceInstancesByTagAndState(tagType: string, tag: string, feature: string, order: string, limit: number, offset: number, state: string): Observable<DeviceInstancesModel[]> {
+    getDeviceInstancesByTagAndState(tagType: string, tag: string, feature: string, order: string, state: string): Observable<DeviceInstancesModel[]> {
         return this.http.get<DeviceInstancesModel[]>
-        (environment.apiAggregatorUrl + '/select/devices/' + tagType + '/' + encodeURIComponent(tag) + '/' + limit + '/' + offset +
-            '/' + feature + '/' + order + '/' + state).pipe(
+        (environment.apiAggregatorUrl + '/filter/devices/state/' + state + '/' + tagType + '/' + encodeURIComponent(tag) + '/orderby/'  + feature + '/' + order).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByTagAndState', []))
         );

@@ -175,7 +175,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                         });
                 } else {
                     this.deviceInstancesService.getDeviceInstancesByTagAndState(this.selectedTagType, this.selectedTag,
-                        this.sortAttribute.value, this.sortAttribute.order, 9999, 0, tabs[this.activeIndex - 1].state).subscribe(
+                        this.sortAttribute.value, this.sortAttribute.order, tabs[this.activeIndex - 1].state).subscribe(
                         (deviceInstances: DeviceInstancesModel[]) => {
                             this.setDevices(deviceInstances);
                         });
