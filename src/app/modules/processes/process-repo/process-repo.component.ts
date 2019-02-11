@@ -16,18 +16,18 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import {SortModel} from "../../../core/components/sort/shared/sort.model";
-import {Subscription} from "rxjs/index";
-import {SearchbarService} from "../../../core/components/searchbar/shared/searchbar.service";
-import {KeycloakService} from "keycloak-angular";
-import {ResponsiveService} from "../../../core/services/responsive.service";
-import {ProcessModel} from "./shared/process.model";
-import {ProcessRepoService} from "./shared/process-repo.service";
-import {UtilService} from "../../../core/services/util.service";
-import {DomSanitizer, SafeUrl} from "@angular/platform-browser";
-import {forEach} from "@angular/router/src/utils/collection";
-import {DeviceInstancesModel} from '../../devices/device-instances/shared/device-instances.model';
+import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {Subscription} from 'rxjs/index';
+import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
+import {KeycloakService} from 'keycloak-angular';
+import {ResponsiveService} from '../../../core/services/responsive.service';
+import {ProcessModel} from './shared/process.model';
+import {ProcessRepoService} from './shared/process-repo.service';
+import {UtilService} from '../../../core/services/util.service';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
+import {DesignerProcessModel} from '../designer/shared/designer.model';
+import { saveAs } from 'file-saver';
 
 const grids = new Map([
     ['xs', 1],
@@ -93,6 +93,16 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     permission(process: ProcessModel): void {
         this.permissionsDialogService.openPermissionDialog('processmodel', process.id, process.name);
+    }
+
+    downloadDiagram(process: ProcessModel): void {
+        this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel[] | null) => {
+            if (processModel) {
+                const xml = this.utilService.convertJSONtoXML(processModel[0].process);
+                const file = new Blob([xml], {type: 'application/bpmn-xml'});
+                saveAs(file, process.name + '.bpmn');
+            }
+        });
     }
 
     private initGridCols(): void {
