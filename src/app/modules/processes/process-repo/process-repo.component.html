@@ -48,7 +48,7 @@
                                             routerLink="/processes/designer/{{item.id}}">
                                         <mat-icon>edit</mat-icon>
                                     </button>
-                                    <button mat-icon-button matTooltip="Copy" class="color-accent">
+                                    <button mat-icon-button matTooltip="Copy" class="color-accent" (click)="copyProcess(item)">
                                         <mat-icon>content_copy</mat-icon>
                                     </button>
                                     <button mat-icon-button matTooltip="Delete" class="color-accent" (click)="deleteProcess(item)">

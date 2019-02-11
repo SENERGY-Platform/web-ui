@@ -129,6 +129,48 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         });
     }
 
+    copyProcess(process: ProcessModel): void {
+        this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel[] | null) => {
+            if (processModel) {
+                this.processRepoService.saveProcess(this.createNewProcess(processModel)).subscribe((processResp: DesignerProcessModel | null) => {
+                    if (processResp === null) {
+                        this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
+                    } else {
+                        this.addNewProcess(processResp, this.repoItems.indexOf(process));
+                        this.snackBar.open('Process copied successfully.', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
+    }
+
+    private createNewProcess(processModel: DesignerProcessModel[]): DesignerProcessModel {
+        const newProcess = processModel[0].process;
+        newProcess.definitions.process._id = newProcess.definitions.process._id + '_Copy';  // todo: translation
+        const newProcessModel: DesignerProcessModel = {
+            _id: '',
+            owner: '',
+            process: newProcess,
+            date: Date.now(),
+            svg: processModel[0].svg,
+        };
+        return newProcessModel;
+    }
+
+    private addNewProcess(processResp: DesignerProcessModel, index: number): void {
+        const processModel: ProcessModel = {
+            publish: false,
+            parent_id: '',
+            id: processResp._id,
+            process: processResp.process,
+            date: processResp.date,
+            svg: processResp.svg,
+            image: this.provideImg(processResp.svg),
+            name: processResp.process.definitions.process._id,
+        };
+        this.repoItems.splice(index + 1, 0, processModel);
+    }
+
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {

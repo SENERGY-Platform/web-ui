@@ -21,7 +21,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {ProcessModel} from './process.model';
-import {DesignerProcessModel} from "../../designer/shared/designer.model";
+import {DesignerProcessModel} from '../../designer/shared/designer.model';
 
 
 @Injectable({
@@ -65,6 +65,12 @@ export class ProcessRepoService {
     deleteProcess(id: string): Observable<{status: string}> {
         return this.http.delete<{status: string}>(environment.processRepoUrl + '/' + id).pipe(
             catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteProcess', {status: 'error'}))
+        );
+    }
+
+    saveProcess(process: DesignerProcessModel): Observable<DesignerProcessModel | null> {
+        return this.http.post<DesignerProcessModel>(environment.processRepoUrl, process).pipe(
+            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'saveProcess', null))
         );
     }
 

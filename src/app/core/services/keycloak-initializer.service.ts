@@ -28,6 +28,7 @@ export function keycloakInitializerService(keycloak: KeycloakService): () => Pro
             onLoad: 'login-required',
             checkLoginIframe: false,
             // token: token,
-        }
+        },
+        bearerPrefix: 'Bearer',
     });
 }

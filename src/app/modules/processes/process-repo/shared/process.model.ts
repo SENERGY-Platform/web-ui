@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {SafeUrl} from "@angular/platform-browser";
+import {SafeUrl} from '@angular/platform-browser';
 
 export interface ProcessModel {
     id: string;
     name: string;
-    date: Date;
+    date: number;
     svg: string;
     process: string;
     publish: boolean;
