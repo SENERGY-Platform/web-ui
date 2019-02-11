@@ -27,7 +27,7 @@ import {UtilService} from '../../../core/services/util.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {DesignerProcessModel} from '../designer/shared/designer.model';
-import { saveAs } from 'file-saver';
+import {saveAs} from 'file-saver';
 
 const grids = new Map([
     ['xs', 1],
@@ -105,6 +105,11 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         });
     }
 
+    downloadSvg(process: ProcessModel): void {
+        const file = new Blob([this.utilService.convertJSONtoXML(process.svg)], {type: 'image/svg+xml'});
+        saveAs(file, process.name + '.svg');
+    }
+
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
@@ -135,7 +140,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 }
                 this.repoItems = this.repoItems.concat(repoItems);
                 this.repoItems.forEach((repoItem: ProcessModel) => {
-                    repoItem.image = this.provideImg(repoItem.svg)
+                    repoItem.image = this.provideImg(repoItem.svg);
                 });
                 this.ready = true;
             });
