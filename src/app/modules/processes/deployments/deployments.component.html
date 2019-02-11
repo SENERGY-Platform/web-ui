@@ -34,33 +34,45 @@
                         <img class="widget-image" [src]="item.image">
                     </div>
                     <mat-grid-tile-footer>
-                        <div fxLayout="row" fxLayoutAlign="start center" fxFill>
-                            <div fxFlex="90" fxLayout="column" fxFill>
-                                <div class="truncate mat-card-title footer-item" matTooltip="{{item.name}}">
-                                    {{item.name}}
-                                </div>
-                                <div class="truncate mat-card-subtitle footer-item"
-                                     matTooltip="{{item.deploymentTime | date:'medium'}}">
-                                    {{item.deploymentTime | date:"medium"}}
-                                </div>
-                                <div fxLayout="row" fxLayoutAlign="start end" fxFlex>
+                        <div fxLayout="column" fxFill>
+                            <div class="truncate footer-item-header" matTooltip="{{item.name}}">
+                                {{item.name}}
+                            </div>
+                            <div class="truncate footer-item-subtitle"
+                                 matTooltip="{{item.deploymentTime | date:'medium'}}">
+                                {{item.deploymentTime | date:"medium"}}
+                            </div>
+                            <div fxLayout="row" class="footer-buttons">
+                                <div fxLayout="row" fxLayoutAlign="start center">
                                     <button mat-icon-button matTooltip="Run" class="color-accent">
                                         <mat-icon>play_arrow</mat-icon>
                                     </button>
-                                    <button mat-icon-button matTooltip="Copy" class="color-accent">
+                                    <button mat-icon-button matTooltip="Copy Deployment" class="color-accent">
                                         <mat-icon>content_copy</mat-icon>
                                     </button>
                                     <button mat-icon-button matTooltip="Delete" class="color-accent">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </div>
-                            </div>
-                            <div fxFlex="10" fxLayout="column" matTooltip="More" fxLayoutAlign="end end" fxFill>
-                                <button mat-icon-button class="color-accent">
-                                    <mat-icon>more_vert</mat-icon>
-                                </button>
+                                <div fxFlex></div>
+                                <div [fxLayoutAlign]="'start center'">
+                                    <button mat-icon-button [matMenuTriggerFor]="deploymentMenu" class="color-accent" matTooltip="More">
+                                        <mat-icon>more_vert</mat-icon>
+                                    </button>
+                                    <mat-menu #deploymentMenu="matMenu" [overlapTrigger]="false">
+                                        <button mat-menu-item>
+                                            <mat-icon>content_copy</mat-icon>
+                                            <span>Copy URL to Clipboard</span>
+                                        </button>
+                                        <button mat-menu-item>
+                                            <mat-icon>history</mat-icon>
+                                            <span>Show History</span>
+                                        </button>
+                                    </mat-menu>
+                                </div>
                             </div>
                         </div>
+
                     </mat-grid-tile-footer>
                 </mat-grid-tile>
             </mat-grid-list>
