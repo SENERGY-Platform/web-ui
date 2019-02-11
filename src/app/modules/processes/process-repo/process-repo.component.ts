@@ -28,6 +28,8 @@ import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {DesignerProcessModel} from '../designer/shared/designer.model';
 import {saveAs} from 'file-saver';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {MatSnackBar} from '@angular/material';
 
 const grids = new Map([
     ['xs', 1],
@@ -65,7 +67,9 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 private responsiveService: ResponsiveService,
                 protected auth: AuthorizationService,
                 private keycloakService: KeycloakService,
-                private permissionsDialogService: PermissionsDialogService) {
+                private permissionsDialogService: PermissionsDialogService,
+                private dialogsService: DialogsService,
+                private snackBar: MatSnackBar) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
 
@@ -108,6 +112,21 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     downloadSvg(process: ProcessModel): void {
         const file = new Blob([this.utilService.convertJSONtoXML(process.svg)], {type: 'image/svg+xml'});
         saveAs(file, process.name + '.svg');
+    }
+
+    deleteProcess(process: ProcessModel): void {
+        this.dialogsService.openDeleteDialog('process').afterClosed().subscribe((deleteProcess: boolean) => {
+            if (deleteProcess) {
+                this.processRepoService.deleteProcess(process.id).subscribe((resp: { status: string }) => {
+                    if (resp.status === 'OK') {
+                        this.repoItems.splice(this.repoItems.indexOf(process), 1);
+                        this.snackBar.open('Process deleted successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting the process!', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
     }
 
     private initGridCols(): void {

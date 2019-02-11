@@ -62,6 +62,12 @@ export class ProcessRepoService {
         );
     }
 
+    deleteProcess(id: string): Observable<{status: string}> {
+        return this.http.delete<{status: string}>(environment.processRepoUrl + '/' + id).pipe(
+            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteProcess', {status: 'error'}))
+        );
+    }
+
     /* getProcesses(): Observable<{flows: FlowModel[]}> {
         return this.http.get<{flows: FlowModel[]}>
         (environment.flowRepoUrl + '/flow').pipe(
