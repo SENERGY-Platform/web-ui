@@ -42,6 +42,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     selection = new SelectionModel<MonitorProcessModel>(true, []);
     activeIndex = 0;
     searchText = '';
+    searchInitialized = false;
     tabs: { label: string, filter: string }[] = tabs;
     @ViewChildren(MatPaginator) paginator = new QueryList<MatPaginator>();
     @ViewChild(MatSort) sort!: MatSort;
@@ -87,6 +88,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     getProcesses() {
         this.selectionClear();
         this.ready = false;
+        this.dataSourceFinished.data = [];
         this.dataSourceRunning.data = [];
         if (this.searchText === '') {
             this.monitorService.getFilteredHistoryInstances(this.tabs[this.activeIndex].filter).subscribe(
@@ -98,6 +100,12 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                 (monitorProcessModels: MonitorProcessModel[]) => {
                     this.setData(monitorProcessModels);
                 });
+        }
+    }
+
+    animation(): void {
+        if (this.searchInitialized) {
+            this.getProcesses();
         }
     }
 
@@ -170,7 +178,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     private initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.selection.clear();
+            this.searchInitialized = true;
             this.searchText = searchText;
             this.getProcesses();
         });

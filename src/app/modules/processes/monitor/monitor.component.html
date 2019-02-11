@@ -16,7 +16,7 @@
 <div class="monitor-container">
     <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true"
                    (selectedIndexChange)="setTabIndex($event)"
-                   (animationDone)="getProcesses()">
+                   (animationDone)="animation()">
         <mat-tab label="{{tabs[0].label}}">
             <div fxLayout="row">
                 <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
