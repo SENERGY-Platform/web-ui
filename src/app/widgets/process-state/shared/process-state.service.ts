@@ -77,7 +77,7 @@ export class ProcessStateService {
         const array: Observable<object[]>[] = [];
 
         array.push(this.processRepoService.list('processmodel', 'r'));
-        array.push(this.deploymentService.getAll());
+        array.push(this.deploymentService.getAll('', 99999, 0, 'deploymentTime', 'desc'));
 
         return forkJoin(array).pipe(
             catchError(this.errorHandlerService.handleError(ProcessStateService.name, 'getRawData', []))

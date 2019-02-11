@@ -15,8 +15,24 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {AuthorizationService} from '../../../core/services/authorization.service';
+import {ProcessModel} from "../process-repo/shared/process.model";
+import {SortModel} from "../../../core/components/sort/shared/sort.model";
+import {Subscription} from "rxjs/index";
+import {SearchbarService} from "../../../core/components/searchbar/shared/searchbar.service";
+import {ResponsiveService} from "../../../core/services/responsive.service";
+import {DomSanitizer, SafeUrl} from "@angular/platform-browser";
+import {UtilService} from "../../../core/services/util.service";
+import {DeploymentsService} from "./shared/deployments.service";
+import {DeploymentsModel} from "./shared/deployments.model";
+import {DeploymentsDefinitionModel} from "./shared/deployments-definition.model";
 
+const grids = new Map([
+    ['xs', 1],
+    ['sm', 2],
+    ['md', 2],
+    ['lg', 3],
+    ['xl', 6],
+]);
 
 @Component({
     selector: 'senergy-process-deployments',
@@ -26,12 +42,84 @@ import {AuthorizationService} from '../../../core/services/authorization.service
 
 export class ProcessDeploymentsComponent implements OnInit {
 
+    repoItems: DeploymentsModel[] = [];
+    gridCols = 0;
+    sortAttributes = [new SortModel('Date', 'deploymentTime', 'desc'), new SortModel('Name', 'name', 'asc')];
+    ready = false;
 
+    private searchText = '';
+    private limit = 54;
+    private offset = 0;
+    private sortAttribute = this.sortAttributes[0];
+    private searchSub: Subscription = new Subscription();
+    private allDataLoaded = false;
 
-    constructor(protected auth: AuthorizationService) {
+    constructor(private sanitizer: DomSanitizer, private utilService: UtilService, private searchbarService: SearchbarService, private deploymentsService: DeploymentsService, private responsiveService: ResponsiveService) {
     }
 
     ngOnInit() {
-        const userId = this.auth.getUserId();
+        this.initGridCols();
+        this.initSearchAndGetDevices();
+        console
+    }
+
+    ngOnDestroy() {
+        this.searchSub.unsubscribe();
+    }
+
+    onScroll() {
+        if (!this.allDataLoaded && this.ready) {
+            this.ready = false;
+            this.offset = this.offset + this.limit;
+            this.getRepoItems(false);
+        }
+    }
+
+    receiveSortingAttribute(sortAttribute: SortModel) {
+        this.sortAttribute = sortAttribute;
+        this.getRepoItems(true);
+    }
+
+    private initGridCols(): void {
+        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
+        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+            this.gridCols = grids.get(mqAlias) || 0;
+        });
+    }
+
+    private initSearchAndGetDevices() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.getRepoItems(true);
+        });
+    }
+
+    private getRepoItems(reset: boolean) {
+        if (reset) {
+            this.repoItems = [];
+            this.offset = 0;
+            this.allDataLoaded = false;
+            this.ready = false;
+        }
+
+        this.deploymentsService.getAll(
+            this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+            (repoItems: DeploymentsModel[]) => {
+                if (repoItems.length !== this.limit) {
+                    this.allDataLoaded = true;
+                }
+                this.repoItems = this.repoItems.concat(repoItems);
+                this.repoItems.forEach((repoItem: DeploymentsModel) => {
+                    repoItem.image = this.provideImg(repoItem.diagram);
+                });
+
+                this.ready = true;
+            });
+    }
+
+    private provideImg(svg: string): SafeUrl {
+        const base64 = this.utilService.convertSVGtoBase64(svg);
+
+        return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);
     }
 }

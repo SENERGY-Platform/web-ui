@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+import {SafeUrl} from "@angular/platform-browser";
+
 export interface DeploymentsModel {
-    deploymentId: string;
+    id: string;
+    deploymentTime: Date;
     name: string;
+    diagram: string;
+    has_incidents: boolean;
+    image: SafeUrl;
 }
 
 

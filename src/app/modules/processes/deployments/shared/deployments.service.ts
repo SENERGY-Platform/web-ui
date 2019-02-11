@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from '../../../../../environments/environment';
 import {Observable} from 'rxjs';
 import {catchError, map} from 'rxjs/internal/operators';
@@ -24,25 +24,32 @@ import {DeploymentsModel} from './deployments.model';
 import {DeploymentsDefinitionModel} from './deployments-definition.model';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class DeploymentsService {
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getAll(): Observable<DeploymentsModel[]> {
-        return this.http.get<DeploymentsModel[]>(environment.processServiceUrl + '/deployment?sortBy=deploymentTime&sortOrder=desc&maxResults=99999&firstResult=0').pipe(
-           map(resp => resp || []),
-           catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getAll', []))
+    getAll(query: string, limit: number, offset: number, feature: string, order: string): Observable<DeploymentsModel[]> {
+        return this.http.get<DeploymentsModel[]>(environment.processServiceUrl + '/deployment?sortBy=' + feature + '&sortOrder=' + order + '&maxResults=' + limit + '&firstResult=' + offset + (query ? '&nameLike=' + encodeURIComponent('%' + query + '%') : '')).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getAll', []))
         );
     }
 
     getDefinition(deploymentId: string): Observable<DeploymentsDefinitionModel[]> {
-        return this.http.get<DeploymentsDefinitionModel[]>(environment.processServiceUrl + '/deployment/' + deploymentId + '/definition').pipe(
+        return this.http.get<DeploymentsDefinitionModel[]>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/definition').pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDefinition', []))
         );
     }
+    /*
+        getDiagram(definitionId: string): Observable<string> {
+            return this.http.get(environment.processServiceUrl + '/process-definition/' + encodeURIComponent(definitionId) + '/diagram',{responseType: 'text'}).pipe(
+                map(resp => resp || ''),
+                catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeploymentDiagram', ''))
+            );
+        }*/
 
 }

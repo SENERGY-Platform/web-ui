@@ -14,3 +14,55 @@
  * limitations under the License.
  */
 
+.main-panel {
+    height: calc(100% - 64px);
+    overflow-y: auto;
+}
+
+.layout-margin {
+    margin: 8px;
+}
+
+mat-grid-tile {
+    background: whitesmoke !important;
+    transition: box-shadow 280ms cubic-bezier(.4,0,.2,1);
+    border-radius: 4px;
+}
+
+mat-grid-tile-footer {
+    height: 110px !important;
+    background-color: white !important;
+    color: black !important;
+    padding: 8px !important;
+}
+
+.footer-item {
+    padding: 5px;
+}
+
+mat-grid-list {
+    margin-bottom: 100px;
+}
+
+.widget-image {
+    height: 156px;
+    width: 100%;
+    background-color: whitesmoke;
+}
+
+.image-wrapper {
+    height: 100%;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fab {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    z-index: 100;
+}
