@@ -33,8 +33,8 @@ import {MatSnackBar} from '@angular/material';
 
 const grids = new Map([
     ['xs', 1],
-    ['sm', 2],
-    ['md', 2],
+    ['sm', 3],
+    ['md', 3],
     ['lg', 4],
     ['xl', 6],
 ]);

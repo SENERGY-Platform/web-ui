@@ -28,9 +28,9 @@ import {DeploymentsDefinitionModel} from "./shared/deployments-definition.model"
 
 const grids = new Map([
     ['xs', 1],
-    ['sm', 2],
-    ['md', 2],
-    ['lg', 3],
+    ['sm', 3],
+    ['md', 3],
+    ['lg', 4],
     ['xl', 6],
 ]);
 
