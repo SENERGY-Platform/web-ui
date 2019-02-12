@@ -14,68 +14,70 @@
   ~ limitations under the License.
   -->
 
-<div class="main-panel">
-    <div infiniteScroll
-         [infiniteScrollDistance]="1"
-         [infiniteScrollThrottle]="50"
-         [infiniteScrollContainer]="'.main-panel'"
-         [fromRoot]="true"
-         (scrolled)="onScroll()">
-        <div fxLayout="row">
-            <senergy-searchbar fxFlex></senergy-searchbar>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-
-        <div class="layout-margin" fxLayout="column">
-            <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                           *ngIf="networks.length > 0">
-                <mat-grid-tile class="mat-elevation-z1" *ngFor="let network of networks; let i = index">
-                    <div fxFill>
-                        <img class="widget-image" src="src/img/network-pic.jpeg">
-                    </div>
-                    <mat-grid-tile-footer>
-                        <div fxLayout="column" fxFill>
-                            <div class="truncate footer-item-header" matTooltip="{{network.name}}">
-                                {{network.name}}
-                            </div>
-                            <div class="truncate footer-item-subtitle">
-                                Devices: {{network.devices?.length || 0}}
-                            </div>
-                            <form fxLayout="row" class="footer-buttons">
-                                <senergy-state-icon [state]="network.log_state"></senergy-state-icon>
-                                <div fxFlex></div>
-                                <div  [fxLayoutAlign]="'start center'" >
-
-                                    <button mat-icon-button [matMenuTriggerFor]="menu" color="accent" matTooltip="More">
-                                        <mat-icon>more_vert</mat-icon>
-                                    </button>
-                                    <mat-menu #menu="matMenu" [overlapTrigger]="false">
-                                        <button mat-menu-item (click)="showDevices(network)">
-                                            <mat-icon>info</mat-icon>
-                                            <span>Show devices</span>
-                                        </button>
-                                        <button mat-menu-item (click)="edit(network)">
-                                            <mat-icon>edit</mat-icon>
-                                            <span>Change name</span>
-                                        </button>
-                                        <button mat-menu-item (click)="clear(network)">
-                                            <mat-icon>refresh</mat-icon>
-                                            <span>Clear</span>
-                                        </button>
-                                        <button mat-menu-item (click)="delete(network)">
-                                            <mat-icon>delete</mat-icon>
-                                            <span>Delete</span>
-                                        </button>
-                                    </mat-menu>
-                                </div>
-                            </form>
+<div class="hubs-container">
+    <div fxLayout="row">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <senergy-sort [sortAttributes]="sortAttributes"
+                      (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+    </div>
+    <div class="main-panel">
+        <div infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [infiniteScrollContainer]="'.main-panel'"
+             [fromRoot]="true"
+             (scrolled)="onScroll()">
+            <div class="layout-margin" fxLayout="column">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+                               *ngIf="networks.length > 0">
+                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let network of networks; let i = index">
+                        <div fxFill>
+                            <img class="widget-image" src="src/img/network-pic.jpeg">
                         </div>
-                    </mat-grid-tile-footer>
-                </mat-grid-tile>
-            </mat-grid-list>
-            <div *ngIf="networks.length === 0 && ready">No network found.</div>
-            <senergy-spinner [elementCount]="networks.length" [show]="!ready"></senergy-spinner>
+                        <mat-grid-tile-footer>
+                            <div fxLayout="column" fxFill>
+                                <div class="truncate footer-item-header" matTooltip="{{network.name}}">
+                                    {{network.name}}
+                                </div>
+                                <div class="truncate footer-item-subtitle">
+                                    Devices: {{network.devices?.length || 0}}
+                                </div>
+                                <form fxLayout="row" class="footer-buttons">
+                                    <senergy-state-icon [state]="network.log_state"></senergy-state-icon>
+                                    <div fxFlex></div>
+                                    <div [fxLayoutAlign]="'start center'">
+
+                                        <button mat-icon-button [matMenuTriggerFor]="menu" color="accent"
+                                                matTooltip="More">
+                                            <mat-icon>more_vert</mat-icon>
+                                        </button>
+                                        <mat-menu #menu="matMenu" [overlapTrigger]="false">
+                                            <button mat-menu-item (click)="showDevices(network)">
+                                                <mat-icon>info</mat-icon>
+                                                <span>Show devices</span>
+                                            </button>
+                                            <button mat-menu-item (click)="edit(network)">
+                                                <mat-icon>edit</mat-icon>
+                                                <span>Change name</span>
+                                            </button>
+                                            <button mat-menu-item (click)="clear(network)">
+                                                <mat-icon>refresh</mat-icon>
+                                                <span>Clear</span>
+                                            </button>
+                                            <button mat-menu-item (click)="delete(network)">
+                                                <mat-icon>delete</mat-icon>
+                                                <span>Delete</span>
+                                            </button>
+                                        </mat-menu>
+                                    </div>
+                                </form>
+                            </div>
+                        </mat-grid-tile-footer>
+                    </mat-grid-tile>
+                </mat-grid-list>
+                <div *ngIf="networks.length === 0 && ready">No network found.</div>
+                <senergy-spinner [elementCount]="networks.length" [show]="!ready"></senergy-spinner>
+            </div>
         </div>
     </div>
 </div>
