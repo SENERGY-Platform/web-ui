@@ -62,16 +62,16 @@
                                     </button>
                                     <mat-menu #processMenu="matMenu" [overlapTrigger]="false">
                                         <button mat-menu-item (click)="permission(item)">
-                                            <mat-icon>folder_shared</mat-icon>
+                                            <mat-icon>share</mat-icon>
                                             <span>Share</span>
                                         </button>
                                         <button mat-menu-item (click)="downloadDiagram(item)">
-                                            <mat-icon>get_app</mat-icon>
-                                            <span>Download diagram</span>
+                                            <mat-icon>cloud_download</mat-icon>
+                                            <span>Download BPMN</span>
                                         </button>
                                         <button mat-menu-item (click)="downloadSvg(item)">
                                             <mat-icon>insert_photo</mat-icon>
-                                            <span>Download image</span>
+                                            <span>Download SVG</span>
                                         </button>
                                            <button mat-menu-item>
                                             <mat-icon>publish</mat-icon>
