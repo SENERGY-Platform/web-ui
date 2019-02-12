@@ -109,7 +109,7 @@
                             <tr mat-row *matRowDef="let row; columns: displayedColumnsFinished;"></tr>
                         </table>
                     </div>
-                    <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 15, 20, 50]" (page)="selectionClear()"
+                    <mat-paginator [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear()"
                                    showFirstLastButtons></mat-paginator>
                 </div>
                 <div *ngIf="dataSourceFinished.filteredData.length === 0">No entries found.</div>
@@ -164,7 +164,7 @@
                             <tr mat-row *matRowDef="let row; columns: displayedColumnsRunning;"></tr>
                         </table>
                     </div>
-                    <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 15, 20, 50]"
+                    <mat-paginator [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
                                    showFirstLastButtons></mat-paginator>
                 </div>
                 <div *ngIf="dataSourceRunning.filteredData.length === 0">No entries found.</div>

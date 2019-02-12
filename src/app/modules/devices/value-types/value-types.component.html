@@ -40,7 +40,7 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>
         </div>
-        <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 15, 20, 50]" showFirstLastButtons></mat-paginator>
+        <mat-paginator [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
     </div>
     <div *ngIf="dataSource.data.length === 0 && ready">No value types found.</div>
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
