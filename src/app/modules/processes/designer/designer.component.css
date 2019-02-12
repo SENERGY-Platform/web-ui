@@ -39,3 +39,12 @@
     position: static !important;
     width: 160px !important;
 }
+
+.buttons {
+    position: fixed;
+    top: 79px;
+    right: 276px;
+    border: solid 1px #CCCCCC;
+    border-radius: 2px;
+}
+
