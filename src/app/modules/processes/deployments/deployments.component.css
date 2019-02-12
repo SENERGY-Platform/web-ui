@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-.main-panel {
+.deployments-container {
     height: calc(100% - 64px);
+    overflow-y: hidden;
+}
+
+.main-panel {
+    height: calc(100% - 93px);
     overflow-y: auto;
 }
 

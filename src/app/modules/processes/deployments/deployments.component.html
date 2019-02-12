@@ -13,74 +13,76 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<div class="main-panel">
-    <div infiniteScroll
-         [infiniteScrollDistance]="1"
-         [infiniteScrollThrottle]="50"
-         [infiniteScrollContainer]="'.main-panel'"
-         [fromRoot]="true"
-         (scrolled)="onScroll()">
-        <div fxLayout="row">
-            <senergy-searchbar fxFlex></senergy-searchbar>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-        <div class="layout-margin" fxLayout="column">
-            <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                           *ngIf="repoItems.length > 0">
-                <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems">
-                    <div fxFill>
-                        <img class="widget-image" [src]="item.image">
-                    </div>
-                    <mat-grid-tile-footer>
-                        <div fxLayout="column" fxFill>
-                            <div class="truncate footer-item-header" matTooltip="{{item.name}}">
-                                {{item.name}}
-                            </div>
-                            <div class="truncate footer-item-subtitle"
-                                 matTooltip="{{item.deploymentTime | date:'medium'}}">
-                                {{item.deploymentTime | date:"medium"}}
-                            </div>
-                            <div fxLayout="row" class="footer-buttons">
-                                <div fxLayout="row" fxLayoutAlign="start center">
-                                    <button mat-icon-button matTooltip="Run" class="color-accent">
-                                        <mat-icon>play_arrow</mat-icon>
-                                    </button>
-                                    <button mat-icon-button matTooltip="Copy Deployment" class="color-accent">
-                                        <mat-icon>content_copy</mat-icon>
-                                    </button>
-                                    <button mat-icon-button matTooltip="Delete" class="color-accent">
-                                        <mat-icon>delete</mat-icon>
-                                    </button>
-                                </div>
-                                <div fxFlex></div>
-                                <div [fxLayoutAlign]="'start center'">
-                                    <button mat-icon-button [matMenuTriggerFor]="deploymentMenu" class="color-accent" matTooltip="More">
-                                        <mat-icon>more_vert</mat-icon>
-                                    </button>
-                                    <mat-menu #deploymentMenu="matMenu" [overlapTrigger]="false">
-                                        <button mat-menu-item>
-                                            <mat-icon>content_copy</mat-icon>
-                                            <span>Copy URL to Clipboard</span>
-                                        </button>
-                                        <button mat-menu-item>
-                                            <mat-icon>history</mat-icon>
-                                            <span>Show History</span>
-                                        </button>
-                                    </mat-menu>
-                                </div>
-                            </div>
-                        </div>
-
-                    </mat-grid-tile-footer>
-                </mat-grid-tile>
-            </mat-grid-list>
-            <div *ngIf="repoItems.length === 0 && ready">No process models found.</div>
-            <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
-        </div>
+<div class="deployments-container">
+    <div fxLayout="row">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <senergy-sort [sortAttributes]="sortAttributes"
+                      (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
     </div>
-    <button mat-fab class="fab" matTooltip="Create new process model">
-        <mat-icon>add</mat-icon>
-    </button>
+    <div class="main-panel">
+        <div infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [infiniteScrollContainer]="'.main-panel'"
+             [fromRoot]="true"
+             (scrolled)="onScroll()">
+            <div class="layout-margin" fxLayout="column">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+                               *ngIf="repoItems.length > 0">
+                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems">
+                        <div fxFill>
+                            <img class="widget-image" [src]="item.image">
+                        </div>
+                        <mat-grid-tile-footer>
+                            <div fxLayout="column" fxFill>
+                                <div class="truncate footer-item-header" matTooltip="{{item.name}}">
+                                    {{item.name}}
+                                </div>
+                                <div class="truncate footer-item-subtitle"
+                                     matTooltip="{{item.deploymentTime | date:'medium'}}">
+                                    {{item.deploymentTime | date:"medium"}}
+                                </div>
+                                <div fxLayout="row" class="footer-buttons">
+                                    <div fxLayout="row" fxLayoutAlign="start center">
+                                        <button mat-icon-button matTooltip="Run" class="color-accent">
+                                            <mat-icon>play_arrow</mat-icon>
+                                        </button>
+                                        <button mat-icon-button matTooltip="Copy Deployment" class="color-accent">
+                                            <mat-icon>content_copy</mat-icon>
+                                        </button>
+                                        <button mat-icon-button matTooltip="Delete" class="color-accent">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </div>
+                                    <div fxFlex></div>
+                                    <div [fxLayoutAlign]="'start center'">
+                                        <button mat-icon-button [matMenuTriggerFor]="deploymentMenu"
+                                                class="color-accent" matTooltip="More">
+                                            <mat-icon>more_vert</mat-icon>
+                                        </button>
+                                        <mat-menu #deploymentMenu="matMenu" [overlapTrigger]="false">
+                                            <button mat-menu-item>
+                                                <mat-icon>content_copy</mat-icon>
+                                                <span>Copy URL to Clipboard</span>
+                                            </button>
+                                            <button mat-menu-item>
+                                                <mat-icon>history</mat-icon>
+                                                <span>Show History</span>
+                                            </button>
+                                        </mat-menu>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </mat-grid-tile-footer>
+                    </mat-grid-tile>
+                </mat-grid-list>
+                <div *ngIf="repoItems.length === 0 && ready">No process models found.</div>
+                <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
+            </div>
+        </div>
+        <button mat-fab class="fab" matTooltip="Create new process model">
+            <mat-icon>add</mat-icon>
+        </button>
+    </div>
 </div>
