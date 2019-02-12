@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-.main-panel {
+.process-repo-container {
     height: calc(100% - 64px);
+    overflow: hidden;
+}
+
+.main-panel {
+    height: calc(100% - 93px);
     overflow-y: auto;
 }
 
