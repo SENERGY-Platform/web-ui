@@ -82,3 +82,7 @@ export interface DesignerProcessModel {
     svg: any;
     _id: string;
 }
+
+export interface Callback {
+    (error: Error, xml: string): void;
+}

@@ -132,7 +132,9 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     copyProcess(process: ProcessModel): void {
         this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel[] | null) => {
             if (processModel) {
-                this.processRepoService.saveProcess(this.createNewProcess(processModel)).subscribe((processResp: DesignerProcessModel | null) => {
+                const newProcess = processModel[0].process;
+                newProcess.definitions.process._id = newProcess.definitions.process._id + '_Copy';  // todo: translation
+                this.processRepoService.saveProcess('', newProcess, processModel[0].svg).subscribe((processResp: DesignerProcessModel | null) => {
                     if (processResp === null) {
                         this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
                     } else {
@@ -142,19 +144,6 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 });
             }
         });
-    }
-
-    private createNewProcess(processModel: DesignerProcessModel[]): DesignerProcessModel {
-        const newProcess = processModel[0].process;
-        newProcess.definitions.process._id = newProcess.definitions.process._id + '_Copy';  // todo: translation
-        const newProcessModel: DesignerProcessModel = {
-            _id: '',
-            owner: '',
-            process: newProcess,
-            date: Date.now(),
-            svg: processModel[0].svg,
-        };
-        return newProcessModel;
     }
 
     private addNewProcess(processResp: DesignerProcessModel, index: number): void {

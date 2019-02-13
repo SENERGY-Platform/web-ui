@@ -68,10 +68,17 @@ export class ProcessRepoService {
         );
     }
 
-    saveProcess(process: DesignerProcessModel): Observable<DesignerProcessModel | null> {
-        return this.http.post<DesignerProcessModel>(environment.processRepoUrl, process).pipe(
-            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'saveProcess', null))
-        );
+    saveProcess(id: string, process: any, svg: any): Observable<DesignerProcessModel | null> {
+        const processModel: DesignerProcessModel = {owner: '', _id: '', svg: svg, process: process, date: Date.now()};
+        if (id === '') {
+            return this.http.post<DesignerProcessModel>(environment.processRepoUrl, processModel).pipe(
+                catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'saveProcess', null))
+            );
+        } else {
+            return this.http.put<DesignerProcessModel>(environment.processRepoUrl + '/' + id, processModel).pipe(
+                catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'updateProcess', null))
+            );
+        }
     }
 
     /* getProcesses(): Observable<{flows: FlowModel[]}> {

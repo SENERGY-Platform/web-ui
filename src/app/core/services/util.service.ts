@@ -30,8 +30,12 @@ export class UtilService {
         this.x2js = new X2JS();
     }
 
-    convertJSONtoXML(svg: string):string {
+    convertJSONtoXML(svg: string): string {
         return this.x2js.js2xml(svg);
+    }
+
+    convertXMLtoJSON(xml: string): string {
+        return this.x2js.xml2js(xml);
     }
 
     convertSVGtoBase64(svg: string): string {

@@ -22,7 +22,8 @@ import {BpmnElement, BpmnParameter} from './designer.model';
 })
 export class DesignerService {
 
-    constructor() {}
+    constructor() {
+    }
 
     getIncomingOutputs(element: BpmnElement, done: BpmnElement[] = []): BpmnParameter[] {
         let result: BpmnParameter[] = [];
@@ -42,5 +43,45 @@ export class DesignerService {
             result = result.concat(this.getIncomingOutputs(incoming, done));
         }
         return result;
+    }
+
+    checkConstraints(modeler: any): {businessObject: {id: string}}[] {
+        return modeler.injector.get('elementRegistry').filter((element: any) => {
+            return element.type === 'bpmn:Lane' && !checkLaneConstraints(element.businessObject);
+        });
+
+        function checkLaneConstraints(businessObject: any): boolean {
+            let meta = null;
+            for (let i = 0; businessObject.flowNodeRef && i < businessObject.flowNodeRef.length; i++) {
+                const newMeta = getMeta(businessObject.flowNodeRef[i]);
+                if (!meta && newMeta) {
+                    meta = newMeta;
+                }
+                if (!compatibleMeta(meta, newMeta)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function getMeta(flowNodeRef: any): any {
+            if (flowNodeRef.$type === 'bpmn:ServiceTask' && flowNodeRef.type === 'external' && flowNodeRef.topic === 'execute_in_dose') {
+                return getPayload(flowNodeRef);
+            }
+        }
+
+        function getPayload(element: any): any {
+            for (let i = 0; i < element.extensionElements.values.length; i++) {
+                for (let j = 0; j < element.extensionElements.values[i].inputParameters.length; j++) {
+                    if (element.extensionElements.values[i].inputParameters[j].name === 'payload') {
+                        return JSON.parse(element.extensionElements.values[i].inputParameters[j].value);
+                    }
+                }
+            }
+        }
+
+        function compatibleMeta(meta: any, newMeta: any): boolean {
+            return !(meta && newMeta && meta.device_type !== newMeta.device_type);
+        }
     }
 }

@@ -43,6 +43,8 @@ import {DesignerService} from './shared/designer.service';
 import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
 import {ActivatedRoute} from '@angular/router';
 import {UtilService} from '../../../core/services/util.service';
+import {MatSnackBar} from '@angular/material';
+import {last} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -54,6 +56,7 @@ export class ProcessDesignerComponent implements OnInit {
 
     modeler: any;
     processModel: DesignerProcessModel[] = [];
+    id = '';
 
     constructor(
         private http: HttpClient,
@@ -63,14 +66,15 @@ export class ProcessDesignerComponent implements OnInit {
         protected dtDialogService: DeviceTypeDialogService,
         protected designerDialogService: DesignerDialogService,
         protected designerService: DesignerService,
-        protected processRepoService: ProcessRepoService
+        protected processRepoService: ProcessRepoService,
+        private snackBar: MatSnackBar,
     ) {
     }
 
     ngOnInit() {
         const userId = this.auth.getUserId();
         const that = this;
-        const id = this.route.snapshot.paramMap.get('id');
+        this.id = this.route.snapshot.paramMap.get('id') || '';
 
         this.modeler = new Modeler({
             container: '#js-canvas',
@@ -112,7 +116,7 @@ export class ProcessDesignerComponent implements OnInit {
                     });
                 });
             },
-            dateDialog: (initial: string): Promise<{iso: string, text: string}> => {
+            dateDialog: (initial: string): Promise<{ iso: string, text: string }> => {
                 return new Promise((resolve, reject) => {
                     that.designerDialogService.openDateTimeDialog(initial).toPromise().then(value => {
                         if (value) {
@@ -123,7 +127,7 @@ export class ProcessDesignerComponent implements OnInit {
                     });
                 });
             },
-            cycleDialog: (initial: string): Promise<{cron: string, text: string}> => {
+            cycleDialog: (initial: string): Promise<{ cron: string, text: string }> => {
                 return new Promise((resolve, reject) => {
                     that.designerDialogService.openCycleDialog(initial).toPromise().then(value => {
                         if (value) {
@@ -155,15 +159,15 @@ export class ProcessDesignerComponent implements OnInit {
             ) => {
                 that.dtDialogService.openSelectDeviceTypeAndServiceDialog(devicetypeService, callback);
             },
-            configEmail: (to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void ) => {
+            configEmail: (to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void) => {
                 that.designerDialogService.openEmailConfigDialog(to, subj, content, callback);
             }
         };
 
-        if (id !== null) {
-            this.loadProcessDiagram(id);
-        } else {
+        if (this.id === '') {
             this.newProcessDiagram();
+        } else {
+            this.loadProcessDiagram(this.id);
         }
 
     }
@@ -201,6 +205,49 @@ export class ProcessDesignerComponent implements OnInit {
         const outputs = this.designerService.getIncomingOutputs(element);
         const outputsInfo = this.getInfoHtmlTableRows(outputs);
         return `<table><tr><th>Variable</th><th>Orig-Ref</th></tr>${outputsInfo}</table>`;
+    }
+
+    save(): void {
+        const invalidLanes = this.designerService.checkConstraints(this.modeler);
+        if (invalidLanes.length > 0) {
+            this.snackBar.open('Error! Multiple device types in ' + this.errorText(invalidLanes) + '!', undefined, {duration: 3500});
+        } else {
+            this.saveXML((errXML, xml) => {
+                if (errXML) {
+                    this.snackBar.open('Error XML! ' + errXML, undefined, {duration: 3500});
+                } else {
+                    this.saveSVG((errSVG, svg) => {
+                        if (errSVG) {
+                            this.snackBar.open('Error SVG! ' + errSVG, undefined, {duration: 3500});
+                        } else {
+                            this.processRepoService.saveProcess(
+                                this.id, this.utilService.convertXMLtoJSON(xml), this.utilService.convertXMLtoJSON(svg)).subscribe(() => {
+                                this.snackBar.open('Model saved.', undefined, {duration: 2000});
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    private errorText(invalidLanes: { businessObject: { id: string } }[]): string {
+        let text = '';
+        for (let i = 0; i < invalidLanes.length; i++) {
+            text = text + invalidLanes[i].businessObject.id;
+            if (i < invalidLanes.length - 1) {
+                text = text + ', ';
+            }
+        }
+        return text;
+    }
+
+    private saveXML(callback: (error: Error, xml: string) => void) {
+        this.modeler.saveXML(callback);
+    }
+
+    private saveSVG(callback: (error: Error, svg: string) => void) {
+        this.modeler.saveSVG(callback);
     }
 
     private getInfoHtmlTableRows(outputs: BpmnParameter[], index: number = 0): string {
