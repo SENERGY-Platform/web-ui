@@ -16,14 +16,17 @@
 
 <mat-card>
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="mat-card-image content-size drag-handler">
+    <mat-card-content class="mat-card-image content-size">
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
         <div *ngIf="ready" fxLayout="column" fxFill>
             <mat-list>
                 <mat-list-item *ngFor="let process of processes">
-                    <mat-icon mat-list-icon color="accent" matTooltip="edit process model">edit</mat-icon>
-                    <h4 mat-line>{{process.name}}</h4>
-                    <p mat-line> {{process.date | date:'dd.MM.yyyy, HH:mm'}} </p>
+                    <button mat-list-icon mat-icon-button class="color-accent" matTooltip="edit process model"
+                            routerLink="/processes/designer/{{process.id}}">
+                        <mat-icon class="fix-position">edit</mat-icon>
+                    </button>
+                    <h4 mat-line class="drag-handler">{{process.name}}</h4>
+                    <p mat-line class="drag-handler"> {{process.date | date:'dd.MM.yyyy, HH:mm'}} </p>
                 </mat-list-item>
             </mat-list>
         </div>

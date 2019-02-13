@@ -39,3 +39,7 @@ mat-list {
 .mat-list-base .mat-list-item.mat-2-line, .mat-list-base .mat-list-option.mat-2-line {
     height: 59px;
 }
+
+.fix-position {
+    margin-top: -20px;
+}

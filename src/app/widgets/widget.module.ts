@@ -62,6 +62,7 @@ import {ProcessModelListComponent} from './process-model-list/process-model-list
 import {ProcessModelListEditDialogComponent} from './process-model-list/dialogs/process-model-list-edit-dialog.component';
 import {DeviceDowntimeListComponent} from './device-downtime-list/device-downtime-list.component';
 import {DeviceDowntimeListEditDialogComponent} from './device-downtime-list/dialogs/device-downtime-list-edit-dialog.component';
+import {RouterModule} from '@angular/router';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -91,6 +92,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         GridsterModule,
         MatTooltipModule,
         MatCheckboxModule,
+        RouterModule,
     ],
     declarations: [
         SwitchComponent,
