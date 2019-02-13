@@ -20,8 +20,9 @@
     </div>
 </div>
 <div class="buttons">
-    <button mat-icon-button color="accent" matTooltip="Download BPMN">
-        <mat-icon>cloud_download</mat-icon>
+    <input hidden type="file" #uploader (change)="importBPMN($event)" [accept]="'.bpmn'"/>
+    <button mat-icon-button color="accent" matTooltip="Upload BPMN" (click)="uploader.click()">
+        <mat-icon>cloud_upload</mat-icon>
     </button>
     <button mat-icon-button color="accent" matTooltip="Save" (click)="save()">
         <mat-icon>save</mat-icon>

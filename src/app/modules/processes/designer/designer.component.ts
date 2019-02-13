@@ -231,6 +231,20 @@ export class ProcessDesignerComponent implements OnInit {
         }
     }
 
+    importBPMN(event: any): void {
+        const file = event.target.files[0];
+        if (file) {
+            const fileReader = new FileReader();
+            fileReader.onload = () => {
+                this.modeler.importXML(fileReader.result, this.handleError);
+                this.snackBar.open('Import finished.', undefined, {duration: 2000});
+            };
+            fileReader.readAsText(file);
+        } else {
+            this.snackBar.open('Failed to load file!', undefined, {duration: 2000});
+        }
+    }
+
     private errorText(invalidLanes: { businessObject: { id: string } }[]): string {
         let text = '';
         for (let i = 0; i < invalidLanes.length; i++) {
