@@ -15,16 +15,14 @@
  */
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ProcessModel} from "../process-repo/shared/process.model";
-import {SortModel} from "../../../core/components/sort/shared/sort.model";
-import {Subscription} from "rxjs/index";
-import {SearchbarService} from "../../../core/components/searchbar/shared/searchbar.service";
-import {ResponsiveService} from "../../../core/services/responsive.service";
-import {DomSanitizer, SafeUrl} from "@angular/platform-browser";
-import {UtilService} from "../../../core/services/util.service";
-import {DeploymentsService} from "./shared/deployments.service";
-import {DeploymentsModel} from "./shared/deployments.model";
-import {DeploymentsDefinitionModel} from "./shared/deployments-definition.model";
+import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {Subscription} from 'rxjs/index';
+import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
+import {ResponsiveService} from '../../../core/services/responsive.service';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {UtilService} from '../../../core/services/util.service';
+import {DeploymentsService} from './shared/deployments.service';
+import {DeploymentsModel} from './shared/deployments.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -54,7 +52,11 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private sanitizer: DomSanitizer, private utilService: UtilService, private searchbarService: SearchbarService, private deploymentsService: DeploymentsService, private responsiveService: ResponsiveService) {
+    constructor(private sanitizer: DomSanitizer,
+                private utilService: UtilService,
+                private searchbarService: SearchbarService,
+                private deploymentsService: DeploymentsService,
+                private responsiveService: ResponsiveService) {
     }
 
     ngOnInit() {
