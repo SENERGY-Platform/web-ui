@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ProcessModel} from "../process-repo/shared/process.model";
 import {SortModel} from "../../../core/components/sort/shared/sort.model";
 import {Subscription} from "rxjs/index";
@@ -40,7 +40,7 @@ const grids = new Map([
     styleUrls: ['./deployments.component.css']
 })
 
-export class ProcessDeploymentsComponent implements OnInit {
+export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     repoItems: DeploymentsModel[] = [];
     gridCols = 0;
@@ -60,7 +60,6 @@ export class ProcessDeploymentsComponent implements OnInit {
     ngOnInit() {
         this.initGridCols();
         this.initSearchAndGetDevices();
-        console
     }
 
     ngOnDestroy() {
