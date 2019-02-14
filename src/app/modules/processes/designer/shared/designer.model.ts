@@ -79,10 +79,6 @@ export interface DesignerProcessModel {
     date: number;
     owner: string;
     process: any;
-    svg: any;
+    svgXML: string;
     _id: string;
-}
-
-export interface Callback {
-    (error: Error, xml: string): void;
 }

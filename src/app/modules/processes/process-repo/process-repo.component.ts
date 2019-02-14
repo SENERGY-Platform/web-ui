@@ -110,7 +110,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     }
 
     downloadSvg(process: ProcessModel): void {
-        const file = new Blob([this.utilService.convertJSONtoXML(process.svg)], {type: 'image/svg+xml'});
+        const file = new Blob([process.svgXML], {type: 'image/svg+xml'});
         saveAs(file, process.name + '.svg');
     }
 
@@ -134,7 +134,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
             if (processModel) {
                 const newProcess = processModel[0].process;
                 newProcess.definitions.process._id = newProcess.definitions.process._id + '_Copy';  // todo: translation
-                this.processRepoService.saveProcess('', newProcess, processModel[0].svg).subscribe((processResp: DesignerProcessModel | null) => {
+                this.processRepoService.saveProcess('', newProcess, processModel[0].svgXML).subscribe((processResp: DesignerProcessModel | null) => {
                     if (processResp === null) {
                         this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
                     } else {
@@ -153,8 +153,8 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
             id: processResp._id,
             process: processResp.process,
             date: processResp.date,
-            svg: processResp.svg,
-            image: this.provideImg(processResp.svg),
+            svgXML: processResp.svgXML,
+            image: this.provideImg(processResp.svgXML),
             name: processResp.process.definitions.process._id,
         };
         this.repoItems.splice(index + 1, 0, processModel);
@@ -190,15 +190,14 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 }
                 this.repoItems = this.repoItems.concat(repoItems);
                 this.repoItems.forEach((repoItem: ProcessModel) => {
-                    repoItem.image = this.provideImg(repoItem.svg);
+                    repoItem.image = this.provideImg(repoItem.svgXML);
                 });
                 this.ready = true;
             });
     }
 
     private provideImg(jsonSVG: string): SafeUrl {
-        const svg = this.utilService.convertJSONtoXML(jsonSVG);
-        const base64 = this.utilService.convertSVGtoBase64(svg);
+        const base64 = this.utilService.convertSVGtoBase64(jsonSVG);
 
         return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);
     }

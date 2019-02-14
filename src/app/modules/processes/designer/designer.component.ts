@@ -212,16 +212,16 @@ export class ProcessDesignerComponent implements OnInit {
         if (invalidLanes.length > 0) {
             this.snackBar.open('Error! Multiple device types in ' + this.errorText(invalidLanes) + '!', undefined, {duration: 3500});
         } else {
-            this.saveXML((errXML, xml) => {
+            this.saveXML((errXML, processXML) => {
                 if (errXML) {
                     this.snackBar.open('Error XML! ' + errXML, undefined, {duration: 3500});
                 } else {
-                    this.saveSVG((errSVG, svg) => {
+                    this.saveSVG((errSVG, svgXML) => {
                         if (errSVG) {
                             this.snackBar.open('Error SVG! ' + errSVG, undefined, {duration: 3500});
                         } else {
                             this.processRepoService.saveProcess(
-                                this.id, this.utilService.convertXMLtoJSON(xml), this.utilService.convertXMLtoJSON(svg)).subscribe(() => {
+                                this.id, this.utilService.convertXMLtoJSON(processXML), svgXML).subscribe(() => {
                                 this.snackBar.open('Model saved.', undefined, {duration: 2000});
                             });
                         }
@@ -256,11 +256,11 @@ export class ProcessDesignerComponent implements OnInit {
         return text;
     }
 
-    private saveXML(callback: (error: Error, xml: string) => void) {
+    private saveXML(callback: (error: Error, processXML: string) => void) {
         this.modeler.saveXML(callback);
     }
 
-    private saveSVG(callback: (error: Error, svg: string) => void) {
+    private saveSVG(callback: (error: Error, svgXML: string) => void) {
         this.modeler.saveSVG(callback);
     }
 

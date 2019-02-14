@@ -68,8 +68,8 @@ export class ProcessRepoService {
         );
     }
 
-    saveProcess(id: string, process: any, svg: any): Observable<DesignerProcessModel | null> {
-        const processModel: DesignerProcessModel = {owner: '', _id: '', svg: svg, process: process, date: Date.now()};
+    saveProcess(id: string, process: any, svgXML: string): Observable<DesignerProcessModel | null> {
+        const processModel: DesignerProcessModel = {owner: '', _id: '', svgXML: svgXML, process: process, date: Date.now()};
         if (id === '') {
             return this.http.post<DesignerProcessModel>(environment.processRepoUrl, processModel).pipe(
                 catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'saveProcess', null))
