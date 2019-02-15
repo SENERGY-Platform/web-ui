@@ -18,8 +18,8 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
-import {catchError, map} from 'rxjs/internal/operators';
-import {Observable} from 'rxjs';
+import {catchError, delayWhen, finalize, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
+import {Observable, of, timer} from 'rxjs';
 import {ProcessModel} from './process.model';
 import {DesignerProcessModel} from '../../designer/shared/designer.model';
 
@@ -62,8 +62,28 @@ export class ProcessRepoService {
         );
     }
 
-    deleteProcess(id: string): Observable<{status: string}> {
-        return this.http.delete<{status: string}>(environment.processRepoUrl + '/' + id).pipe(
+    checkForProcessModelWithRetries(id: string, maxRetries: number, intervalInMs: number): Observable<boolean> {
+        return this.http.get<DesignerProcessModel[]>(environment.processRepoUrl + '/' + id).pipe(
+            retryWhen(mergeMap((error, i) => {
+                const retryAttempt = i + 1;
+                if (retryAttempt > maxRetries) {
+                    throw(error);
+                }
+                return timer(retryAttempt * intervalInMs);
+            })),
+            map(resp => {
+                if (resp.length > 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }),
+            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'checkForProcessModelWithRetries', false))
+        );
+    }
+
+    deleteProcess(id: string): Observable<{ status: string }> {
+        return this.http.delete<{ status: string }>(environment.processRepoUrl + '/' + id).pipe(
             catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteProcess', {status: 'error'}))
         );
     }
@@ -81,41 +101,4 @@ export class ProcessRepoService {
         }
     }
 
-    /* getProcesses(): Observable<{flows: FlowModel[]}> {
-        return this.http.get<{flows: FlowModel[]}>
-        (environment.flowRepoUrl + '/flow').pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'getFlows: Error', {flows: []}))
-        );
-
-    }
-
-    getProcess(id: string): Observable<FlowModel | null> {
-        return this.http.get<FlowModel>
-        (environment.flowRepoUrl + '/flow/' + id).pipe(
-            map(resp => resp),
-            catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'getFlow: Error', null))
-        );
-
-    }
-
-    saveProcess(flow: FlowModel): Observable<{}> {
-        if (flow._id === undefined) {
-            return this.http.put<{}>(environment.flowRepoUrl + '/flow/', flow).pipe(
-                catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'putFlow: Error', {}))
-            );
-        } else {
-            const id  = flow._id;
-            delete flow._id;
-            return this.http.post<{}>(environment.flowRepoUrl + '/flow/' + id + '/', flow).pipe(
-                catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'postFlow: Error', {}))
-            );
-        }
-    }
-
-    deleteProcess (flow: FlowModel): Observable<{}> {
-        return this.http.delete(environment.flowRepoUrl + '/flow/' + flow._id + '/').pipe(
-            catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'deleteFlow: Error', {}))
-        );
-    } */
 }

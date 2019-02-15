@@ -138,26 +138,18 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                     if (processResp === null) {
                         this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
                     } else {
-                        this.addNewProcess(processResp, this.repoItems.indexOf(process));
-                        this.snackBar.open('Process copied successfully.', undefined, {duration: 2000});
+                        this.processRepoService.checkForProcessModelWithRetries(processResp._id, 10, 100).subscribe((exists) => {
+                            if (exists) {
+                                this.snackBar.open('Process copied successfully.', undefined, {duration: 2000});
+                                this.getRepoItems(true);
+                            } else {
+                                this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
+                            }
+                        });
                     }
                 });
             }
         });
-    }
-
-    private addNewProcess(processResp: DesignerProcessModel, index: number): void {
-        const processModel: ProcessModel = {
-            publish: false,
-            parent_id: '',
-            id: processResp._id,
-            process: processResp.process,
-            date: processResp.date,
-            svgXML: processResp.svgXML,
-            image: this.provideImg(processResp.svgXML),
-            name: processResp.process.definitions.process._id,
-        };
-        this.repoItems.splice(index + 1, 0, processModel);
     }
 
     private initGridCols(): void {
