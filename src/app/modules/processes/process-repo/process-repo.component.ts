@@ -130,24 +130,28 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     }
 
     copyProcess(process: ProcessModel): void {
+        this.reset();
         this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel[] | null) => {
             if (processModel) {
                 const newProcess = processModel[0].process;
                 newProcess.definitions.process._id = newProcess.definitions.process._id + '_Copy';  // todo: translation
-                this.processRepoService.saveProcess('', newProcess, processModel[0].svgXML).subscribe((processResp: DesignerProcessModel | null) => {
-                    if (processResp === null) {
-                        this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
-                    } else {
-                        this.processRepoService.checkForProcessModelWithRetries(processResp._id, 10, 100).subscribe((exists) => {
-                            if (exists) {
-                                this.snackBar.open('Process copied successfully.', undefined, {duration: 2000});
+                this.processRepoService.saveProcess('', newProcess, processModel[0].svgXML).subscribe(
+                    (processResp: DesignerProcessModel | null) => {
+                        if (processResp === null) {
+                            this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
+                            this.getRepoItems(true);
+                        } else {
+                            this.processRepoService.checkForProcessModelWithRetries(processResp._id, 10, 100).subscribe((exists) => {
+                                if (exists) {
+                                    this.snackBar.open('Process copied successfully.', undefined, {duration: 2000});
+                                } else {
+                                    this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
+                                }
                                 this.getRepoItems(true);
-                            } else {
-                                this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
-                            }
-                        });
-                    }
-                });
+                            });
+
+                        }
+                    });
             }
         });
     }
@@ -168,10 +172,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     private getRepoItems(reset: boolean) {
         if (reset) {
-            this.repoItems = [];
-            this.offset = 0;
-            this.allDataLoaded = false;
-            this.ready = false;
+            this.reset();
         }
 
         this.processRepoService.getProcessModels(
@@ -186,6 +187,13 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 });
                 this.ready = true;
             });
+    }
+
+    private reset() {
+        this.repoItems = [];
+        this.offset = 0;
+        this.allDataLoaded = false;
+        this.ready = false;
     }
 
     private provideImg(jsonSVG: string): SafeUrl {
