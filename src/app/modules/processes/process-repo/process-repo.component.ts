@@ -135,6 +135,10 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
             if (processModel) {
                 const newProcess = processModel[0].process;
                 newProcess.definitions.process._id = newProcess.definitions.process._id + '_Copy';  // todo: translation
+                if (newProcess.definitions.collaboration) {
+                    newProcess.definitions.collaboration.participant._processRef =
+                        newProcess.definitions.collaboration.participant._processRef + '_Copy';  // todo: translation
+                }
                 this.processRepoService.saveProcess('', newProcess, processModel[0].svgXML).subscribe(
                     (processResp: DesignerProcessModel | null) => {
                         if (processResp === null) {
