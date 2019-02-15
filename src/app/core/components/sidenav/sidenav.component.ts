@@ -115,7 +115,6 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     private getActiveSection() {
         this.router.events.pipe(
             filter((event) => event instanceof NavigationEnd),
-            take(1),
             map(() => {
                 return this.activatedRoute.firstChild;
             }),
