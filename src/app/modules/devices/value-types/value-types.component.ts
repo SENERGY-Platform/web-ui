@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {Subscription} from 'rxjs';
+import {merge, Subscription} from 'rxjs';
 import {ValueTypesService} from './shared/value-types.service';
 import {ValueTypesModel} from './shared/value-types.model';
-import {MatDialog, MatDialogConfig, MatPaginator, MatTable, MatTableDataSource} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatPaginator, MatSort} from '@angular/material';
 import {ValueTypesNewDialogComponent} from './dialogs/value-types-new-dialog.component';
-import {ValueTypeResponseModel} from './shared/value-type-response.model';
+import {map, startWith, switchMap} from 'rxjs/operators';
+import {ValueTypesTotalModel} from './shared/value-types-total.model';
 
 @Component({
     selector: 'senergy-value-types',
     templateUrl: './value-types.component.html',
     styleUrls: ['./value-types.component.css']
 })
-export class ValueTypesComponent implements OnInit, OnDestroy {
+export class ValueTypesComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    dataSource = new MatTableDataSource<ValueTypesModel>([]);
-    ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'), new SortModel('Description', 'desc', 'asc'));
-    displayedColumns: string[] = ['name', 'description'];
+    isLoadingResults = true;
+    displayedColumns: string[] = ['name', 'desc'];
+    totalCount = 0;
+    data: ValueTypesModel[] = [];
     @ViewChild(MatPaginator) paginator!: MatPaginator;
+    @ViewChild(MatSort) sort!: MatSort;
 
     private searchText = '';
-    private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
+    private addSub = new EventEmitter();
 
     constructor(private searchbarService: SearchbarService,
                 private valueTypesService: ValueTypesService,
@@ -48,16 +49,30 @@ export class ValueTypesComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearchAndGetValuetypes();
-        this.dataSource.paginator = this.paginator;
+    }
+
+    ngAfterViewInit(): void {
+        this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
+
+        merge(this.sort.sortChange, this.paginator.page, this.searchbarService.currentSearchText, this.addSub).pipe(
+            startWith({}),
+            switchMap(() => {
+                this.isLoadingResults = true;
+                return this.valueTypesService.getValuetypesWithTotal(this.searchText, this.paginator.pageSize,
+                    this.paginator.pageSize * this.paginator.pageIndex, this.sort.active, this.sort.direction);
+            }),
+            map((data: ValueTypesTotalModel) => {
+                this.totalCount = data.total;
+                return data.result;
+            })
+        ).subscribe(result => {
+            this.data = result;
+            this.isLoadingResults = false;
+        });
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
-    }
-
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getValuetypes();
     }
 
     newValuetype() {
@@ -71,10 +86,9 @@ export class ValueTypesComponent implements OnInit, OnDestroy {
 
             editDialogRef.afterClosed().subscribe((valuetype: ValueTypesModel) => {
                 if (valuetype !== undefined) {
-                    this.valueTypesService.saveValuetype(valuetype).subscribe((resp: ValueTypeResponseModel | null) => {
-                        if (resp !== null) {
-                            this.dataSource.data = [...this.dataSource.data, valuetype];
-                        }
+                    this.valueTypesService.saveValuetype(valuetype).subscribe(() => {
+                        this.isLoadingResults = true;
+                        setTimeout(() => this.addSub.emit(true), 1000);
                     });
                 }
             });
@@ -83,20 +97,10 @@ export class ValueTypesComponent implements OnInit, OnDestroy {
 
     private initSearchAndGetValuetypes() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.isLoadingResults = true;
             this.searchText = searchText;
-            this.getValuetypes();
+            this.paginator.pageIndex = 0;
         });
     }
 
-    private getValuetypes() {
-        this.dataSource.data = [];
-        this.ready = false;
-
-        this.valueTypesService.getValuetypes(
-            this.searchText, 9999, 0, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-            (valuetypes: ValueTypesModel[]) => {
-                this.dataSource.data = valuetypes;
-                this.ready = true;
-            });
-    }
 }

@@ -23,6 +23,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ValueTypesModel} from './value-types.model';
 import {ValueTypeResponseModel} from './value-type-response.model';
+import {ValueTypesTotalModel} from './value-types-total.model';
 
 @Injectable({
     providedIn: 'root'
@@ -45,6 +46,22 @@ export class ValueTypesService {
                 limit + '/' + offset + '/' + value + '/' + order).pipe(
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(ValueTypesService.name, 'getValuetypes: search', []))
+            );
+        }
+    }
+
+    getValuetypesWithTotal(searchText: string, limit: number, offset: number, value: string, order: string): Observable<ValueTypesTotalModel> {
+        if (searchText === '') {
+            return this.http.get<ValueTypesTotalModel>(environment.valuetypeSearchUrl + '/get/valuetype/endpoint/' + limit + '/' +
+                offset + '/' + value + '/' + order + '/withtotal').pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(ValueTypesService.name, 'getValuetypes: no search', {} as ValueTypesTotalModel))
+            );
+        } else {
+            return this.http.get<ValueTypesTotalModel>(environment.valuetypeSearchUrl + '/search/valuetype/' + searchText + '/endpoint/' +
+                limit + '/' + offset + '/' + value + '/' + order + '/withtotal').pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(ValueTypesService.name, 'getValuetypes: search', {} as ValueTypesTotalModel))
             );
         }
     }

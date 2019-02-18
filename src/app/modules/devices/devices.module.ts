@@ -30,8 +30,8 @@ import {
     MatListModule,
     MatMenuModule,
     MatOptionModule,
-    MatPaginatorModule,
-    MatSelectModule,
+    MatPaginatorModule, MatProgressSpinnerModule,
+    MatSelectModule, MatSortModule,
     MatStepperModule,
     MatTableModule, MatTabsModule,
     MatTooltipModule
@@ -94,6 +94,8 @@ const valueTypes = {path: 'devices/valuetypes', pathMatch: 'full', component: Va
         MatExpansionModule,
         MatTabsModule,
         MatCheckboxModule,
+        MatSortModule,
+        MatProgressSpinnerModule,
         RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes])],
     declarations: [
         NetworksComponent,
