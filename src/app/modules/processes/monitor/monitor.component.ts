@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-const tabs = [{label: 'Finished', filter: 'finished'}, {label: 'Running', filter: 'unfinished'}];
+import {map, startWith, switchMap} from 'rxjs/operators';
 
-import {AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
-import {Subscription} from 'rxjs';
+import {merge, Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {MonitorService} from './shared/monitor.service';
 import {MonitorProcessModel} from './shared/monitor-process.model';
 import {SelectionModel} from '@angular/cdk/collections';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {PermissionsResponseModel} from '../../permissions/shared/permissions-response.model';
+import {MonitorProcessTotalModel} from './shared/monitor-process-total.model';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -34,20 +34,29 @@ import {PermissionsResponseModel} from '../../permissions/shared/permissions-res
 
 export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    dataSourceFinished = new MatTableDataSource<MonitorProcessModel>([]);
-    dataSourceRunning = new MatTableDataSource<MonitorProcessModel>([]);
-    ready = false;
-    displayedColumnsFinished: string[] = ['select', 'processDefinitionName', 'id', 'startTime', 'endTime', 'durationInMillis', 'info', 'delete'];
-    displayedColumnsRunning: string[] = ['processDefinitionName', 'id', 'startTime', 'info', 'action'];
+    dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();
+    dataSourceRunning = new MatTableDataSource<MonitorProcessModel>();
+    displayedColumnsFinished: string[] = ['select', 'definitionName', 'id', 'startTime', 'endTime', 'duration', 'info', 'delete'];
+    displayedColumnsRunning: string[] = ['definitionName', 'id', 'startTime', 'info', 'action'];
     selection = new SelectionModel<MonitorProcessModel>(true, []);
     activeIndex = 0;
+    totalCountFinished = 0;
+    totalCountRunning = 0;
     searchText = '';
+    isLoadingResultsFinished = true;
+    isLoadingResultsRunning = true;
     searchInitialized = false;
-    tabs: { label: string, filter: string }[] = tabs;
-    @ViewChildren(MatPaginator) paginator = new QueryList<MatPaginator>();
-    @ViewChild(MatSort) sort!: MatSort;
+    animation = true;
+    @ViewChild('paginatorFinished') paginatorFinished!: MatPaginator;
+    @ViewChild('paginatorRunning') paginatorRunning!: MatPaginator;
+    @ViewChild('sortFinished') sortFinished!: MatSort;
+    @ViewChild('sortRunning') sortRunning!: MatSort;
 
     private searchSub: Subscription = new Subscription();
+    private finishedSub: Subscription = new Subscription();
+    private runningSub: Subscription = new Subscription();
+    private reloadFinishedSub: EventEmitter<boolean> = new EventEmitter();
+    private reloadRunningSub: EventEmitter<boolean> = new EventEmitter();
 
     constructor(private searchbarService: SearchbarService,
                 private monitorService: MonitorService,
@@ -59,16 +68,14 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     ngAfterViewInit(): void {
-        this.dataSourceFinished.paginator = this.paginator.toArray()[0];
-        this.dataSourceRunning.paginator = this.paginator.toArray()[1];
-        this.dataSourceFinished.sort = this.sort;
-        this.dataSourceFinished.sort.sortChange.subscribe(() => {
-            this.selectionClear();
-        });
+        this.initFinished();
+        this.initRunning();
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+        this.finishedSub.unsubscribe();
+        this.runningSub.unsubscribe();
     }
 
     isAllSelected() {
@@ -85,34 +92,21 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         }
     }
 
-    getProcesses() {
-        this.selectionClear();
-        this.ready = false;
-        this.dataSourceFinished.data = [];
-        this.dataSourceRunning.data = [];
-        if (this.searchText === '') {
-            this.monitorService.getFilteredHistoryInstances(this.tabs[this.activeIndex].filter).subscribe(
-                (monitorProcessModels: MonitorProcessModel[]) => {
-                    this.setData(monitorProcessModels);
-                });
-        } else {
-            this.monitorService.getFilteredHistoryInstancesWithSearch(this.tabs[this.activeIndex].filter, this.searchText).subscribe(
-                (monitorProcessModels: MonitorProcessModel[]) => {
-                    this.setData(monitorProcessModels);
-                });
-        }
-    }
-
-    animation(): void {
-        if (this.searchInitialized) {
-            this.getProcesses();
-        }
+    animationDone(): void {
+        this.animation = false;
     }
 
     setTabIndex(index: number): void {
+        this.animation = true;
         this.activeIndex = index;
-        this.ready = false;
         this.searchText = '';
+        if (this.activeIndex === 0) {
+            this.isLoadingResultsFinished = true;
+            this.reloadFinished();
+        } else {
+            this.isLoadingResultsRunning = true;
+            this.reloadRunning();
+        }
     }
 
     openDetailsDialog(id: string): void {
@@ -122,11 +116,11 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     deleteSingleItem(element: MonitorProcessModel): void {
         this.dialogsService.openDeleteDialog('process (' + element.id + ')').afterClosed().subscribe((processDelete: boolean) => {
             if (processDelete) {
+                this.isLoadingResultsFinished = true;
                 this.monitorService.deleteInstances(element.id).subscribe((resp: string) => {
                     if (resp === 'ok') {
-                        const index = this.dataSourceFinished.data.indexOf(element);
-                        this.dataSourceFinished.data.splice(index, 1);
-                        this.dataSourceFinished._updateChangeSubscription();
+                        this.paginatorFinished.pageIndex = 0;
+                        this.reloadFinished();
                     }
                 });
             }
@@ -134,31 +128,25 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     deleteMultipleItems(): void {
-        this.dialogsService.openDeleteDialog(this.selection.selected.length + ' process(es)').afterClosed().subscribe((processesDelete: boolean) => {
-            if (processesDelete) {
-                this.monitorService.deleteMultipleInstances(this.selection.selected).subscribe((resp: string[]) => {
-                    const countOk = resp.filter((response: string) => {
-                        return response === 'ok';
-                    }).length;
-                    if (countOk === this.selection.selected.length) {
-                        this.selection.selected.forEach((item: MonitorProcessModel) => {
-                            const index = this.dataSourceFinished.data.indexOf(item);
-                            this.dataSourceFinished.data.splice(index, 1);
-                        });
-                        this.dataSourceFinished._updateChangeSubscription();
+        this.dialogsService.openDeleteDialog(this.selection.selected.length + ' process(es)').afterClosed().subscribe(
+            (processesDelete: boolean) => {
+                if (processesDelete) {
+                    this.isLoadingResultsFinished = true;
+                    this.monitorService.deleteMultipleInstances(this.selection.selected).subscribe(() => {
+                        this.paginatorFinished.pageIndex = 0;
+                        this.reloadFinished();
                         this.selectionClear();
-                    }
-                });
-            }
-        });
+                    });
+                }
+            });
     }
 
     stop(element: MonitorProcessModel): void {
         this.monitorService.stopInstances(element.id).subscribe((resp: string) => {
             if (resp === 'ok') {
-                const index = this.dataSourceRunning.data.indexOf(element);
-                this.dataSourceRunning.data.splice(index, 1);
-                this.dataSourceRunning._updateChangeSubscription();
+                this.isLoadingResultsRunning = true;
+                this.paginatorRunning.pageIndex = 0;
+                this.reloadRunning();
             }
         });
     }
@@ -167,20 +155,78 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         this.selection.clear();
     }
 
-    private setData(monitorProcessModels: MonitorProcessModel[]) {
-        if (this.activeIndex === 0) {
-            this.dataSourceFinished.data = monitorProcessModels;
-        } else {
-            this.dataSourceRunning.data = monitorProcessModels;
-        }
-        this.ready = true;
+    private initRunning() {
+        this.dataSourceRunning.sort = this.sortRunning;
+        this.dataSourceRunning.sort.sortChange.subscribe(() => {
+            this.paginatorRunning.pageIndex = 0;
+        });
+        this.runningSub = merge(this.dataSourceRunning.sort.sortChange, this.paginatorRunning.page, this.reloadRunningSub).pipe(
+            startWith({}),
+            switchMap(() => {
+                this.isLoadingResultsRunning = true;
+                return this.monitorService.getFilteredHistoryInstances('unfinished', this.searchText,
+                    this.paginatorRunning.pageSize, this.paginatorRunning.pageSize * this.paginatorRunning.pageIndex,
+                    this.sortRunning.active, this.sortRunning.direction);
+            }),
+            map((resp: MonitorProcessTotalModel) => {
+                this.totalCountRunning = resp.total;
+                return resp.data;
+            })
+        ).subscribe((data: MonitorProcessModel[]) => {
+            this.dataSourceRunning.data = data;
+            this.isLoadingResultsRunning = false;
+
+        });
+    }
+
+    private initFinished() {
+        this.dataSourceFinished.sort = this.sortFinished;
+        this.dataSourceFinished.sort.sortChange.subscribe(() => {
+            this.paginatorFinished.pageIndex = 0;
+            this.selectionClear();
+        });
+
+        this.finishedSub = merge(this.dataSourceFinished.sort.sortChange, this.paginatorFinished.page, this.reloadFinishedSub).pipe(
+            startWith({}),
+            switchMap(() => {
+                this.isLoadingResultsFinished = true;
+                return this.monitorService.getFilteredHistoryInstances('finished', this.searchText,
+                    this.paginatorFinished.pageSize, this.paginatorFinished.pageSize * this.paginatorFinished.pageIndex,
+                    this.sortFinished.active, this.sortFinished.direction);
+            }),
+            map((resp: MonitorProcessTotalModel) => {
+                this.totalCountFinished = resp.total;
+                return resp.data;
+            })
+        ).subscribe((data: MonitorProcessModel[]) => {
+            this.dataSourceFinished.data = data;
+            this.isLoadingResultsFinished = false;
+        });
+
     }
 
     private initSearch() {
+
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.searchInitialized = true;
+            if (searchText !== '') {
+                this.searchInitialized = true;
+            }
             this.searchText = searchText;
-            this.getProcesses();
+            if (this.searchInitialized) {
+                if (this.activeIndex === 0) {
+                    this.reloadFinished();
+                } else {
+                    this.reloadRunning();
+                }
+            }
         });
+    }
+
+    private reloadFinished(): void {
+        this.reloadFinishedSub.emit(true);
+    }
+
+    private reloadRunning(): void {
+        this.reloadRunningSub.emit(true);
     }
 }

@@ -25,6 +25,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material';
 import {MonitorDetailsDialogComponent} from '../dialogs/monitor-details-dialog.component';
 import {MonitorProcessVariableInstancesModel} from './monitor-process-variable-instances.model';
 import {MonitorProcessIncidentModel} from './monitor-process-incident.model';
+import {MonitorProcessTotalModel} from './monitor-process-total.model';
 
 @Injectable({
     providedIn: 'root'
@@ -49,20 +50,11 @@ export class MonitorService {
         return this.getAllHistoryInstancesObservable;
     }
 
-    getFilteredHistoryInstances(filter: string): Observable<MonitorProcessModel[]> {
-        return this.http.get<MonitorProcessModel[]>
-        (environment.processServiceUrl + '/history/' + filter + '/process-instance').pipe(
+    getFilteredHistoryInstances(filter: string, search: string, limit: number, offset: number, value: string, order: string): Observable<MonitorProcessTotalModel> {
+        return this.http.get<MonitorProcessTotalModel>
+        (environment.processServiceUrl + '/history/' + filter + '/process-instance/' + search + '/' + limit + '/' + offset + '/' + value + '/' + order ).pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(MonitorService.name, 'getFilteredHistoryInstances', []))
-        );
-    }
-
-    getFilteredHistoryInstancesWithSearch(filter: string, searchText: string): Observable<MonitorProcessModel[]> {
-        return this.http.get<MonitorProcessModel[]>
-        (environment.processServiceUrl + '/history/filtered/process-instance?processDefinitionNameLike=' + encodeURI('%') + encodeURI(searchText)
-            + encodeURI('%') + '&'  + filter + '=true').pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(MonitorService.name, 'getFilteredHistoryInstances', []))
+            catchError(this.errorHandlerService.handleError(MonitorService.name, 'getFilteredHistoryInstances', {} as MonitorProcessTotalModel))
         );
     }
 
