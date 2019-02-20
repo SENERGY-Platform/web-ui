@@ -71,4 +71,12 @@ export class AuthorizationService {
     logout() {
         this.keycloakService.logout();
     }
+
+    changePasswort(password: string): Observable<null | {error: string}> {
+        return this.http.put<null | {error: string}>(environment.usersServiceUrl + '/password',
+            {'password': password}).pipe(
+            catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changePasswort', {error: 'error'}))
+        );
+
+    }
 }
