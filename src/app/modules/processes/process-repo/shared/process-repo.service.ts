@@ -18,8 +18,8 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
-import {catchError, delayWhen, finalize, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
-import {Observable, of, timer} from 'rxjs';
+import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
+import {Observable, timer} from 'rxjs';
 import {ProcessModel} from './process.model';
 import {DesignerProcessModel} from '../../designer/shared/designer.model';
 
@@ -63,7 +63,13 @@ export class ProcessRepoService {
     }
 
     checkForProcessModelWithRetries(id: string, maxRetries: number, intervalInMs: number): Observable<boolean> {
-        return this.http.get<DesignerProcessModel[]>(environment.processRepoUrl + '/' + id).pipe(
+        return this.http.get<boolean>(environment.permissionSearchUrl + '/jwt/check/processmodel/' + id + '/r/bool').pipe(
+            map(data => {
+                if (data === false) {
+                    throw Error('');
+                }
+                return data;
+            }),
             retryWhen(mergeMap((error, i) => {
                 const retryAttempt = i + 1;
                 if (retryAttempt > maxRetries) {
@@ -71,13 +77,6 @@ export class ProcessRepoService {
                 }
                 return timer(retryAttempt * intervalInMs);
             })),
-            map(resp => {
-                if (resp.length > 0) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }),
             catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'checkForProcessModelWithRetries', false))
         );
     }
