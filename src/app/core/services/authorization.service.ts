@@ -17,13 +17,11 @@
 import {Injectable} from '@angular/core';
 import {KeycloakService} from 'keycloak-angular';
 import {Observable} from 'rxjs';
-import {DashboardModel} from '../../modules/dashboard/shared/dashboard.model';
 import {environment} from '../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ErrorHandlerService} from './error-handler.service';
 import {HttpClient} from '@angular/common/http';
 import {AuthorizationProfileModel} from '../components/authorization/authorization-profile.model';
-import {AuthorizationSessionsModel} from '../components/authorization/authorization-sessions.model';
 
 
 @Injectable({

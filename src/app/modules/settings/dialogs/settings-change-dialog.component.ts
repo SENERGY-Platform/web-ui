@@ -17,10 +17,8 @@
 
 import {Component, OnInit} from '@angular/core';
 import {MatDialogRef, MatSnackBar} from '@angular/material';
-import {KeycloakService} from 'keycloak-angular';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {AuthorizationProfileModel} from '../../../core/components/authorization/authorization-profile.model';
-import {AuthorizationSessionsModel} from '../../../core/components/authorization/authorization-sessions.model';
 import {AbstractControl, FormControl, ValidatorFn, Validators} from '@angular/forms';
 
 @Component({
