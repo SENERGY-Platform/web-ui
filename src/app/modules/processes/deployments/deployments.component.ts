@@ -24,6 +24,8 @@ import {UtilService} from '../../../core/services/util.service';
 import {DeploymentsService} from './shared/deployments.service';
 import {DeploymentsModel} from './shared/deployments.model';
 import {MatSnackBar} from '@angular/material';
+import {ClipboardService} from 'ngx-clipboard';
+import {environment} from '../../../../environments/environment';
 
 const grids = new Map([
     ['xs', 1],
@@ -58,7 +60,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 private searchbarService: SearchbarService,
                 private deploymentsService: DeploymentsService,
                 private responsiveService: ResponsiveService,
-                private snackBar: MatSnackBar) {
+                private snackBar: MatSnackBar,
+                private clipboardService: ClipboardService) {
     }
 
     ngOnInit() {
@@ -91,6 +94,11 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 this.snackBar.open('Deployment started successfully.', undefined, {duration: 2000});
             }
         });
+    }
+
+    copyEndpoint(endpoint: string) {
+        this.clipboardService.copyFromContent(environment.processServiceUrl + '/process-definition/' + endpoint + '/start');
+        this.snackBar.open('URL copied to clipboard.', undefined, {duration: 2000});
     }
 
     private initGridCols(): void {

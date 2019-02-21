@@ -61,9 +61,9 @@
                                             <mat-icon>more_vert</mat-icon>
                                         </button>
                                         <mat-menu #deploymentMenu="matMenu" [overlapTrigger]="false">
-                                            <button mat-menu-item>
+                                            <button mat-menu-item (click)="copyEndpoint(item.definition_id)">
                                                 <mat-icon>content_copy</mat-icon>
-                                                <span>Copy URL to Clipboard</span>
+                                                <span>Copy Endpoint to Clipboard</span>
                                             </button>
                                             <button mat-menu-item>
                                                 <mat-icon>history</mat-icon>
