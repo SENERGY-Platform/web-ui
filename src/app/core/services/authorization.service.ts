@@ -18,10 +18,11 @@ import {Injectable} from '@angular/core';
 import {KeycloakService} from 'keycloak-angular';
 import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
+import {catchError} from 'rxjs/operators';
 import {ErrorHandlerService} from './error-handler.service';
 import {HttpClient} from '@angular/common/http';
 import {AuthorizationProfileModel} from '../components/authorization/authorization-profile.model';
+import {AuthorizationUserProfileModel} from '../components/authorization/authorization-user-profile.model';
 
 
 @Injectable({
@@ -66,15 +67,24 @@ export class AuthorizationService {
         });
     }
 
+    updateToken(): void {
+        this.keycloakService.getKeycloakInstance().loadUserProfile();
+    }
+
     logout() {
         this.keycloakService.logout();
     }
 
-    changePasswort(password: string): Observable<null | {error: string}> {
-        return this.http.put<null | {error: string}>(environment.usersServiceUrl + '/password',
+    changePasswort(password: string): Observable<null | { error: string }> {
+        return this.http.put<null | { error: string }>(environment.usersServiceUrl + '/password',
             {'password': password}).pipe(
             catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changePasswort', {error: 'error'}))
         );
+    }
 
+    changeUserProfile(userProfile: AuthorizationUserProfileModel): Observable<null | { error: string }> {
+        return this.http.put<null>(environment.usersServiceUrl + '/info', userProfile).pipe(
+            catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changeUserProfile', {error: 'error'}))
+        );
     }
 }

@@ -19,7 +19,7 @@ import {Component, OnInit} from '@angular/core';
 import {MatDialogRef, MatSnackBar} from '@angular/material';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {AuthorizationProfileModel} from '../../../core/components/authorization/authorization-profile.model';
-import {AbstractControl, FormControl, ValidatorFn, Validators} from '@angular/forms';
+import {AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
 
 @Component({
     templateUrl: './settings-change-dialog.component.html',
@@ -30,19 +30,26 @@ export class SettingsChangeDialogComponent implements OnInit {
     profile: AuthorizationProfileModel = {email: '', firstName: '', lastName: '', username: ''};
     passwordNew = new FormControl('', [Validators.pattern('.*[?|!|#|%|$].*'), Validators.minLength(8), this.forbiddenNameValidator()]);
     passwordConfirm = new FormControl('', [this.equalValidator()]);
+    firstFormGroup!: FormGroup;
     hidePasswordNew = true;
     hidePasswordConfirm = true;
 
 
     constructor(private authorizationService: AuthorizationService,
                 private dialogRef: MatDialogRef<SettingsChangeDialogComponent>,
-                private snackBar: MatSnackBar) {
+                private snackBar: MatSnackBar,
+                private _formBuilder: FormBuilder) {
     }
 
     ngOnInit(): void {
         this.profile = this.authorizationService.getProfile();
         this.passwordNew.valueChanges.subscribe(() => {
             this.passwordConfirm.updateValueAndValidity();
+        });
+        this.firstFormGroup = this._formBuilder.group({
+            lastName: [this.profile.lastName],
+            firstName: [this.profile.firstName],
+            email: [this.profile.email, [Validators.email]],
         });
     }
 
@@ -51,15 +58,22 @@ export class SettingsChangeDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.authorizationService.changePasswort(this.passwordConfirm.value).subscribe((resp: (null | { error: string })) => {
-            if (resp === null) {
-                this.snackBar.open('Settings saved successfully.', undefined, {duration: 2000});
-                this.passwordNew.setValue('');
-                this.passwordConfirm.setValue('');
-            } else {
-                this.snackBar.open('Error while saving the settings!', undefined, {duration: 2000});
+
+        this.authorizationService.changeUserProfile(
+            {first_name: this.firstFormGroup.value.firstName, last_name:  this.firstFormGroup.value.lastName, email:  this.firstFormGroup.value.email}).subscribe(
+            (resp: null | { error: string }) => {
+                if (resp === null) {
+                    this.authorizationService.updateToken();
+                    if (this.passwordConfirm.value !== '') {
+                        this.updatePassword();
+                    } else {
+                        this.snackBar.open('Settings saved successfully.', undefined, {duration: 2000});
+                    }
+                } else {
+                    this.snackBar.open('Error while saving the settings!', undefined, {duration: 2000});
+                }
             }
-        });
+        );
     }
 
     getErrorMessageNew(): string {
@@ -87,6 +101,18 @@ export class SettingsChangeDialogComponent implements OnInit {
                 return {'notEqual': true};
             }
         };
+    }
+
+    private updatePassword() {
+        this.authorizationService.changePasswort(this.passwordConfirm.value).subscribe((resp: (null | { error: string })) => {
+            if (resp === null) {
+                this.snackBar.open('Settings saved successfully.', undefined, {duration: 2000});
+                this.passwordNew.setValue('');
+                this.passwordConfirm.setValue('');
+            } else {
+                this.snackBar.open('Error while saving the settings!', undefined, {duration: 2000});
+            }
+        });
     }
 }
 
