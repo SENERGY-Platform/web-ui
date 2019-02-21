@@ -65,7 +65,11 @@
                                                 <mat-icon>content_copy</mat-icon>
                                                 <span>Copy Endpoint to Clipboard</span>
                                             </button>
-                                            <button mat-menu-item>
+                                            <button mat-menu-item (click)="navigateToMonitorSection(item, 0)">
+                                                <mat-icon>play_circle_outline</mat-icon>
+                                                <span>Show Running</span>
+                                            </button>
+                                            <button mat-menu-item (click)="navigateToMonitorSection(item, 1)">
                                                 <mat-icon>history</mat-icon>
                                                 <span>Show History</span>
                                             </button>

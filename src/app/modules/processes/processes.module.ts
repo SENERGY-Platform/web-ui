@@ -28,7 +28,7 @@ import {
     MatAutocompleteModule,
     MatButtonModule,
     MatCardModule,
-    MatCheckboxModule,
+    MatCheckboxModule, MatChipsModule,
     MatDatepickerModule,
     MatDialogModule,
     MatDividerModule,
@@ -126,6 +126,7 @@ const processDesigner = {
         MatCheckboxModule,
         MatRadioModule,
         MatTabsModule,
+        MatChipsModule,
     ],
     declarations: [
         ProcessRepoComponent,

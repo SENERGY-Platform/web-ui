@@ -39,3 +39,8 @@ table {
     max-height: calc(100vh - 300px);
     overflow: auto;
 }
+
+.offset {
+    margin-top: 20px;
+    margin-right: 8px;
+}

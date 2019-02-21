@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnChanges, OnDestroy, SimpleChange, SimpleChanges} from '@angular/core';
+import {AfterViewInit, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges} from '@angular/core';
 import {SearchbarService} from './shared/searchbar.service';
 import {FormControl} from '@angular/forms';
 
@@ -23,17 +23,36 @@ import {FormControl} from '@angular/forms';
     templateUrl: './searchbar.component.html',
     styleUrls: ['./searchbar.component.css']
 })
-export class SearchbarComponent implements OnDestroy, OnChanges {
+export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
 
     @Input() searchTextIn = '';
+    @Input() disable = false;
     formControl = new FormControl('');
 
     constructor(private searchbarService: SearchbarService) {
     }
 
+    ngOnInit(): void {
+        if (this.disable) {
+            this.formControl.disable();
+        } else {
+            this.formControl.enable();
+        }
+    }
+
     ngOnChanges(changes: SimpleChanges) {
-        const input: SimpleChange = changes.searchTextIn;
-        this.formControl.setValue(input.currentValue);
+        if (changes.searchTextIn) {
+            const input: SimpleChange = changes.searchTextIn;
+            this.formControl.setValue(input.currentValue);
+        }
+        if (changes.disable) {
+            const input: SimpleChange = changes.disable;
+            if (input.currentValue) {
+                this.formControl.disable();
+            } else {
+                this.formControl.enable();
+            }
+        }
     }
 
     changeSearchtext(): void {

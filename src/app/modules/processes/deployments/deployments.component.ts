@@ -26,6 +26,8 @@ import {DeploymentsModel} from './shared/deployments.model';
 import {MatSnackBar} from '@angular/material';
 import {ClipboardService} from 'ngx-clipboard';
 import {environment} from '../../../../environments/environment';
+import {NetworksModel} from '../../devices/networks/shared/networks.model';
+import {Router} from '@angular/router';
 
 const grids = new Map([
     ['xs', 1],
@@ -61,7 +63,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 private deploymentsService: DeploymentsService,
                 private responsiveService: ResponsiveService,
                 private snackBar: MatSnackBar,
-                private clipboardService: ClipboardService) {
+                private clipboardService: ClipboardService,
+                private router: Router) {
     }
 
     ngOnInit() {
@@ -99,6 +102,10 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     copyEndpoint(endpoint: string) {
         this.clipboardService.copyFromContent(environment.processServiceUrl + '/process-definition/' + endpoint + '/start');
         this.snackBar.open('URL copied to clipboard.', undefined, {duration: 2000});
+    }
+
+    navigateToMonitorSection(deployment: DeploymentsModel, activeTab: number) {
+        this.router.navigateByUrl('/processes/monitor', {state: {deployment: deployment, activeTab: activeTab}});
     }
 
     private initGridCols(): void {

@@ -50,9 +50,10 @@ export class MonitorService {
         return this.getAllHistoryInstancesObservable;
     }
 
-    getFilteredHistoryInstances(filter: string, search: string, limit: number, offset: number, value: string, order: string): Observable<MonitorProcessTotalModel> {
+    getFilteredHistoryInstances(filter: string, searchtype: string, searchvalue: string, limit: number, offset: number, value: string, order: string): Observable<MonitorProcessTotalModel> {
         return this.http.get<MonitorProcessTotalModel>
-        (environment.processServiceUrl + '/history/' + filter + '/process-instance/' + search + '/' + limit + '/' + offset + '/' + value + '/' + order ).pipe(
+        (environment.processServiceUrl + '/history/' + filter + '/process-instance/' + searchtype + '/' + searchvalue + '/' + limit +
+            '/' + offset + '/' + value + '/' + order ).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(MonitorService.name, 'getFilteredHistoryInstances', {} as MonitorProcessTotalModel))
         );

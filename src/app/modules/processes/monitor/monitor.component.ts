@@ -25,6 +25,8 @@ import {MonitorProcessModel} from './shared/monitor-process.model';
 import {SelectionModel} from '@angular/cdk/collections';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {MonitorProcessTotalModel} from './shared/monitor-process-total.model';
+import {Navigation, Router} from '@angular/router';
+import {DeploymentsModel} from '../deployments/shared/deployments.model';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -47,6 +49,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     isLoadingResultsRunning = true;
     searchInitialized = false;
     animation = true;
+    selectedDeployment: DeploymentsModel | null = null;
     @ViewChild('paginatorFinished') paginatorFinished!: MatPaginator;
     @ViewChild('paginatorRunning') paginatorRunning!: MatPaginator;
     @ViewChild('sortFinished') sortFinished!: MatSort;
@@ -60,7 +63,9 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     constructor(private searchbarService: SearchbarService,
                 private monitorService: MonitorService,
-                private dialogsService: DialogsService) {
+                private dialogsService: DialogsService,
+                private router: Router) {
+        this.getRouterParams();
     }
 
     ngOnInit() {
@@ -68,8 +73,8 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     ngAfterViewInit(): void {
-        this.initFinished();
         this.initRunning();
+        this.initFinished();
     }
 
     ngOnDestroy() {
@@ -101,12 +106,11 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         this.activeIndex = index;
         this.searchText = '';
         if (this.activeIndex === 0) {
-            this.isLoadingResultsFinished = true;
-            this.reloadFinished();
-        } else {
             this.isLoadingResultsRunning = true;
-            this.reloadRunning();
+        } else {
+            this.isLoadingResultsFinished = true;
         }
+        this.reload();
     }
 
     openDetailsDialog(id: string): void {
@@ -120,7 +124,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                 this.monitorService.deleteInstances(element.id).subscribe((resp: string) => {
                     if (resp === 'ok') {
                         this.paginatorFinished.pageIndex = 0;
-                        this.reloadFinished();
+                        this.reload();
                     }
                 });
             }
@@ -134,7 +138,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                     this.isLoadingResultsFinished = true;
                     this.monitorService.deleteMultipleInstances(this.selection.selected).subscribe(() => {
                         this.paginatorFinished.pageIndex = 0;
-                        this.reloadFinished();
+                        this.reload();
                         this.selectionClear();
                     });
                 }
@@ -146,13 +150,18 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             if (resp === 'ok') {
                 this.isLoadingResultsRunning = true;
                 this.paginatorRunning.pageIndex = 0;
-                this.reloadRunning();
+                this.reload();
             }
         });
     }
 
     selectionClear(): void {
         this.selection.clear();
+    }
+
+    removeChip(): void {
+        this.selectedDeployment = null;
+        this.reload();
     }
 
     private initRunning() {
@@ -164,7 +173,8 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             startWith({}),
             switchMap(() => {
                 this.isLoadingResultsRunning = true;
-                return this.monitorService.getFilteredHistoryInstances('unfinished', this.searchText,
+                const searchParams = this.setSearchParams();
+                return this.monitorService.getFilteredHistoryInstances('unfinished', searchParams.searchType, searchParams.searchValue,
                     this.paginatorRunning.pageSize, this.paginatorRunning.pageSize * this.paginatorRunning.pageIndex,
                     this.sortRunning.active, this.sortRunning.direction);
             }),
@@ -190,7 +200,8 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             startWith({}),
             switchMap(() => {
                 this.isLoadingResultsFinished = true;
-                return this.monitorService.getFilteredHistoryInstances('finished', this.searchText,
+                const searchParams = this.setSearchParams();
+                return this.monitorService.getFilteredHistoryInstances('finished', searchParams.searchType, searchParams.searchValue,
                     this.paginatorFinished.pageSize, this.paginatorFinished.pageSize * this.paginatorFinished.pageIndex,
                     this.sortFinished.active, this.sortFinished.direction);
             }),
@@ -202,7 +213,20 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             this.dataSourceFinished.data = data;
             this.isLoadingResultsFinished = false;
         });
+    }
 
+    private setSearchParams(): { searchType: string, searchValue: string } {
+        let searchType = '';
+        let searchValue = '';
+
+        if (this.selectedDeployment === null) {
+            searchType = 'processDefinitionNameLike';
+            searchValue = this.searchText;
+        } else {
+            searchType = 'processDefinitionId';
+            searchValue = this.selectedDeployment.definition_id;
+        }
+        return {searchType, searchValue};
     }
 
     private initSearch() {
@@ -213,20 +237,26 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             }
             this.searchText = searchText;
             if (this.searchInitialized) {
-                if (this.activeIndex === 0) {
-                    this.reloadFinished();
-                } else {
-                    this.reloadRunning();
-                }
+                this.reload();
             }
         });
     }
-
-    private reloadFinished(): void {
-        this.reloadFinishedSub.emit(true);
+    private getRouterParams(): void {
+        const navigation: Navigation | null = this.router.getCurrentNavigation();
+        if (navigation !== null) {
+            if (navigation.extras.state !== undefined) {
+                const params = navigation.extras.state as {deployment: DeploymentsModel, activeTab: number};
+                this.selectedDeployment = params.deployment;
+                this.activeIndex = params.activeTab;
+            }
+        }
     }
 
-    private reloadRunning(): void {
-        this.reloadRunningSub.emit(true);
+    private reload() {
+        if (this.activeIndex === 0) {
+            this.reloadRunningSub.emit(true);
+        } else {
+            this.reloadFinishedSub.emit(true);
+        }
     }
 }
