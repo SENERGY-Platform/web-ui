@@ -23,6 +23,7 @@ import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';
 import {DeploymentsService} from './shared/deployments.service';
 import {DeploymentsModel} from './shared/deployments.model';
+import {MatSnackBar} from '@angular/material';
 
 const grids = new Map([
     ['xs', 1],
@@ -56,7 +57,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 private utilService: UtilService,
                 private searchbarService: SearchbarService,
                 private deploymentsService: DeploymentsService,
-                private responsiveService: ResponsiveService) {
+                private responsiveService: ResponsiveService,
+                private snackBar: MatSnackBar) {
     }
 
     ngOnInit() {
@@ -79,6 +81,16 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     receiveSortingAttribute(sortAttribute: SortModel) {
         this.sortAttribute = sortAttribute;
         this.getRepoItems(true);
+    }
+
+    run(definitionId: string): void {
+        this.deploymentsService.startDeployment(definitionId).subscribe((resp) => {
+            if (resp === null) {
+                this.snackBar.open('Error while starting the deployment!', undefined, {duration: 2000});
+            } else {
+                this.snackBar.open('Deployment started successfully.', undefined, {duration: 2000});
+            }
+        });
     }
 
     private initGridCols(): void {

@@ -44,7 +44,7 @@
                                 </div>
                                 <div fxLayout="row" class="footer-buttons">
                                     <div fxLayout="row" fxLayoutAlign="start center">
-                                        <button mat-icon-button matTooltip="Run" class="color-accent">
+                                        <button mat-icon-button matTooltip="Run" class="color-accent" (click)="run(item.definition_id)">
                                             <mat-icon>play_arrow</mat-icon>
                                         </button>
                                         <button mat-icon-button matTooltip="Copy Deployment" class="color-accent">

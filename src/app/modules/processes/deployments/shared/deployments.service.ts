@@ -44,12 +44,11 @@ export class DeploymentsService {
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDefinition', []))
         );
     }
-    /*
-        getDiagram(definitionId: string): Observable<string> {
-            return this.http.get(environment.processServiceUrl + '/process-definition/' + encodeURIComponent(definitionId) + '/diagram',{responseType: 'text'}).pipe(
-                map(resp => resp || ''),
-                catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeploymentDiagram', ''))
-            );
-        }*/
+
+    startDeployment(deploymentId: string): Observable<any[] | null> {
+        return this.http.get<any[]>(environment.processServiceUrl + '/process-definition/' + encodeURIComponent(deploymentId) + '/start').pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null))
+        );
+    }
 
 }

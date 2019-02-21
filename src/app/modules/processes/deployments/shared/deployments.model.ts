@@ -19,6 +19,7 @@ import {SafeUrl} from "@angular/platform-browser";
 export interface DeploymentsModel {
     id: string;
     deploymentTime: Date;
+    definition_id: string;
     name: string;
     diagram: string;
     has_incidents: boolean;
