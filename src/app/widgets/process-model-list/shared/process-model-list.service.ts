@@ -54,7 +54,7 @@ export class ProcessModelListService {
 
     getProcesses(): Observable<ProcessModelListModel[]> {
         return new Observable<ProcessModelListModel[]>((observer) => {
-            this.processRepoService.getProcessModels('', 10, 0, 'date', 'desc').subscribe((processes: ProcessModel[]) => {
+            this.processRepoService.getProcessModels('', 10, 0, 'date', 'desc', null).subscribe((processes: ProcessModel[]) => {
                 observer.next(this.prettifyProcessData(processes));
                 observer.complete();
             });
