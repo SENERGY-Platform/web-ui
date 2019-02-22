@@ -28,6 +28,7 @@ import {ClipboardService} from 'ngx-clipboard';
 import {environment} from '../../../../environments/environment';
 import {NetworksModel} from '../../devices/networks/shared/networks.model';
 import {Router} from '@angular/router';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -64,7 +65,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 private responsiveService: ResponsiveService,
                 private snackBar: MatSnackBar,
                 private clipboardService: ClipboardService,
-                private router: Router) {
+                private router: Router,
+                private dialogsService: DialogsService) {
     }
 
     ngOnInit() {
@@ -106,6 +108,21 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     navigateToMonitorSection(deployment: DeploymentsModel, activeTab: number) {
         this.router.navigateByUrl('/processes/monitor', {state: {deployment: deployment, activeTab: activeTab}});
+    }
+
+    deleteDeployment(deployment: DeploymentsModel): void {
+        this.dialogsService.openDeleteDialog('deployment ' + deployment.name).afterClosed().subscribe((deleteDeployment: boolean) => {
+            if (deleteDeployment) {
+                this.deploymentsService.deleteDeployment(deployment.id).subscribe((resp) => {
+                    if (resp === 'error') {
+                        this.snackBar.open('Error while deleting the deployment!', undefined, {duration: 2000});
+                    } else {
+                        this.getRepoItems(true);
+                        this.snackBar.open('Deployment deleted successfully.', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
     }
 
     private initGridCols(): void {

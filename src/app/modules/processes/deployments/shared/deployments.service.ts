@@ -51,4 +51,10 @@ export class DeploymentsService {
         );
     }
 
+    deleteDeployment(deploymentId: string): Observable<string> {
+        return this.http.delete(environment.processDeploymentUrl + '/deployment/' + encodeURIComponent(deploymentId), {responseType: 'text'}).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'deleteDeployment', 'error'))
+        );
+    }
+
 }
