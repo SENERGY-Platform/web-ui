@@ -15,87 +15,93 @@
   -->
 
 <div class="process-repo-container">
-    <div fxLayout="row">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <senergy-sort [sortAttributes]="sortAttributes"
-                      (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-    </div>
-    <div class="main-panel">
-        <div infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.main-panel'"
-             [fromRoot]="true"
-             (scrolled)="onScroll()">
-            <div class="layout-margin" fxLayout="column">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                               *ngIf="repoItems.length > 0">
-                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems">
-                        <div fxFill>
-                            <img class="widget-image" [src]="item.image">
-                        </div>
-                        <mat-grid-tile-footer>
-                            <div fxLayout="column" fxFill>
-                                <div class="truncate footer-item-header" matTooltip="{{item.name}}">
-                                    {{item.name}}
-                                </div>
-                                <div class="truncate footer-item-subtitle"
-                                     matTooltip="{{item.date | date:'medium'}}">
-                                    {{item.date | date:"medium"}}
-                                </div>
-                                <div fxLayout="row" class="footer-buttons">
-                                    <div fxLayout="row" fxLayoutAlign="start center">
-                                        <button mat-icon-button class="color-accent" matTooltip="Edit"
-                                                routerLink="/processes/designer/{{item.id}}">
-                                            <mat-icon>edit</mat-icon>
-                                        </button>
-                                        <button mat-icon-button matTooltip="Copy" class="color-accent"
-                                                (click)="copyProcess(item)">
-                                            <mat-icon>content_copy</mat-icon>
-                                        </button>
-                                        <button mat-icon-button matTooltip="Delete" class="color-accent"
-                                                (click)="deleteProcess(item)">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
-                                    </div>
-                                    <div fxFlex></div>
-                                    <div [fxLayoutAlign]="'start center'">
-                                        <button mat-icon-button [matMenuTriggerFor]="processMenu" class="color-accent"
-                                                matTooltip="More">
-                                            <mat-icon>more_vert</mat-icon>
-                                        </button>
-                                        <mat-menu #processMenu="matMenu" [overlapTrigger]="false">
-                                            <button mat-menu-item (click)="permission(item)">
-                                                <mat-icon>share</mat-icon>
-                                                <span>Share</span>
-                                            </button>
-                                            <button mat-menu-item (click)="downloadDiagram(item)">
-                                                <mat-icon>cloud_download</mat-icon>
-                                                <span>Download BPMN</span>
-                                            </button>
-                                            <button mat-menu-item (click)="downloadSvg(item)">
-                                                <mat-icon>insert_photo</mat-icon>
-                                                <span>Download SVG</span>
-                                            </button>
-                                            <button mat-menu-item>
-                                                <mat-icon>publish</mat-icon>
-                                                <span>Deploy</span>
-                                            </button>
-                                        </mat-menu>
-                                    </div>
-                                </div>
-                            </div>
-                        </mat-grid-tile-footer>
-                    </mat-grid-tile>
-                </mat-grid-list>
-                <div *ngIf="repoItems.length === 0 && ready">No process models found.</div>
-                <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
-            </div>
-        </div>
-        <button mat-fab class="fab" matTooltip="Create new process model" routerLink="/processes/designer">
-            <mat-icon>add</mat-icon>
-        </button>
-    </div>
-</div>
 
+    <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true"
+                   (selectedIndexChange)="setIndex($event)"
+                   (animationDone)="animation()">
+        <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Published', 'Added']">
+            <div fxLayout="row">
+                <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
+                <senergy-sort [sortAttributes]="sortAttributes"
+                              (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+            </div>
+            <div class="main-panel"
+                 infiniteScroll
+                 [infiniteScrollDistance]="1"
+                 [infiniteScrollThrottle]="50"
+                 [scrollWindow]="false"
+                 (scrolled)="onScroll()">
+                <div class="layout-margin" fxLayout="column" *ngIf="animationDone">
+                    <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+                                   *ngIf="repoItems.length > 0">
+                        <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems">
+                            <div fxFill>
+                                <img class="widget-image" [src]="item.image">
+                            </div>
+                            <mat-grid-tile-footer>
+                                <div fxLayout="column" fxFill>
+                                    <div class="truncate footer-item-header" matTooltip="{{item.name}}">
+                                        {{item.name}}
+                                    </div>
+                                    <div class="truncate footer-item-subtitle"
+                                         matTooltip="{{item.date | date:'medium'}}">
+                                        {{item.date | date:"medium"}}
+                                    </div>
+                                    <div fxLayout="row" class="footer-buttons">
+                                        <div fxLayout="row" fxLayoutAlign="start center">
+                                            <button mat-icon-button class="color-accent" matTooltip="Edit"
+                                                    routerLink="/processes/designer/{{item.id}}">
+                                                <mat-icon>edit</mat-icon>
+                                            </button>
+                                            <button mat-icon-button matTooltip="Copy" class="color-accent"
+                                                    (click)="copyProcess(item)">
+                                                <mat-icon>content_copy</mat-icon>
+                                            </button>
+                                            <button mat-icon-button matTooltip="Delete" class="color-accent"
+                                                    (click)="deleteProcess(item)">
+                                                <mat-icon>delete</mat-icon>
+                                            </button>
+                                        </div>
+                                        <div fxFlex></div>
+                                        <div [fxLayoutAlign]="'start center'">
+                                            <button mat-icon-button [matMenuTriggerFor]="processMenu"
+                                                    class="color-accent"
+                                                    matTooltip="More">
+                                                <mat-icon>more_vert</mat-icon>
+                                            </button>
+                                            <mat-menu #processMenu="matMenu" [overlapTrigger]="false">
+                                                <button mat-menu-item (click)="permission(item)">
+                                                    <mat-icon>share</mat-icon>
+                                                    <span>Share</span>
+                                                </button>
+                                                <button mat-menu-item (click)="downloadDiagram(item)">
+                                                    <mat-icon>cloud_download</mat-icon>
+                                                    <span>Download BPMN</span>
+                                                </button>
+                                                <button mat-menu-item (click)="downloadSvg(item)">
+                                                    <mat-icon>insert_photo</mat-icon>
+                                                    <span>Download SVG</span>
+                                                </button>
+                                                <button mat-menu-item>
+                                                    <mat-icon>publish</mat-icon>
+                                                    <span>Deploy</span>
+                                                </button>
+                                            </mat-menu>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-grid-tile-footer>
+                        </mat-grid-tile>
+                    </mat-grid-list>
+                    <div *ngIf="repoItems.length === 0 && ready">No process models found.</div>
+                    <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
+                </div>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>
+<senergy-spinner [elementCount]="0" [show]="!animationDone"></senergy-spinner>
+<button mat-fab class="fab" matTooltip="Create new process model" routerLink="/processes/designer">
+    <mat-icon>add</mat-icon>
+</button>
 

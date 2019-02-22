@@ -22,6 +22,7 @@ import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
 import {Observable, timer} from 'rxjs';
 import {ProcessModel} from './process.model';
 import {DesignerProcessModel} from '../../designer/shared/designer.model';
+import {ProcessRepoConditionsModel} from './process-repo-conditions.model';
 
 
 @Injectable({
@@ -39,19 +40,35 @@ export class ProcessRepoService {
         );
     }
 
-    getProcessModels(query: string, limit: number, offset: number, feature: string, order: string): Observable<ProcessModel[]> {
-        if (query) {
-            return this.http.get<ProcessModel[]>(environment.permissionSearchUrl + '/jwt/search/processmodel/' +
-                encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(search)', []))
-            );
+    getProcessModels(query: string, limit: number, offset: number, feature: string, order: string, conditions: ProcessRepoConditionsModel | null): Observable<ProcessModel[]> {
+        if (conditions) {
+            if (query) {
+                return this.http.post<ProcessModel[]>(environment.permissionSearchUrl + '/jwt/search/processmodel/' +
+                    encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order, conditions).pipe(
+                    map(resp => resp || []),
+                    catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(search)', []))
+                );
+            } else {
+                return this.http.post<ProcessModel[]>(environment.permissionSearchUrl + '/jwt/list/processmodel/r/' +
+                    limit + '/' + offset + '/' + feature + '/' + order, conditions).pipe(
+                    map(resp => resp || []),
+                    catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(list)', []))
+                );
+            }
         } else {
-            return this.http.get<ProcessModel[]>(environment.permissionSearchUrl + '/jwt/list/processmodel/r/' +
-                limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(list)', []))
-            );
+            if (query) {
+                return this.http.get<ProcessModel[]>(environment.permissionSearchUrl + '/jwt/search/processmodel/' +
+                    encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
+                    map(resp => resp || []),
+                    catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(search)', []))
+                );
+            } else {
+                return this.http.get<ProcessModel[]>(environment.permissionSearchUrl + '/jwt/list/processmodel/r/' +
+                    limit + '/' + offset + '/' + feature + '/' + order).pipe(
+                    map(resp => resp || []),
+                    catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(list)', []))
+                );
+            }
         }
     }
 

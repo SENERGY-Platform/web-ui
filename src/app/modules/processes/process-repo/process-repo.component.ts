@@ -30,6 +30,7 @@ import {DesignerProcessModel} from '../designer/shared/designer.model';
 import {saveAs} from 'file-saver';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {MatSnackBar} from '@angular/material';
+import {ProcessRepoConditionModel, ProcessRepoConditionsModel} from './shared/process-repo-conditions.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -48,10 +49,13 @@ const grids = new Map([
 export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     repoItems: ProcessModel[] = [];
+    activeIndex = 0;
     gridCols = 0;
+    animationDone = true;
     sortAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel('Name', 'name', 'asc')];
     userID: string;
     ready = false;
+    searchInitialized = false;
 
     private searchText = '';
     private limit = 54;
@@ -160,6 +164,18 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         });
     }
 
+    setIndex(event: number) {
+        this.activeIndex = event;
+        this.animationDone = false;
+        this.searchText = '';
+    }
+
+    animation(): void {
+        if (this.searchInitialized) {
+            this.getRepoItems(true);
+        }
+    }
+
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
@@ -169,6 +185,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     private initSearchAndGetDevices() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchInitialized = true;
             this.searchText = searchText;
             this.getRepoItems(true);
         });
@@ -180,8 +197,9 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         }
 
         this.processRepoService.getProcessModels(
-            this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+            this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.getConditions()).subscribe(
             (repoItems: ProcessModel[]) => {
+                this.animationDone = true;
                 if (repoItems.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
@@ -202,7 +220,34 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     private provideImg(jsonSVG: string): SafeUrl {
         const base64 = this.utilService.convertSVGtoBase64(jsonSVG);
-
         return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);
+    }
+
+    private getConditions(): (ProcessRepoConditionsModel | null) {
+        let conditions: ProcessRepoConditionsModel | null = {};
+        switch (this.activeIndex) {
+            case 0: /** all */
+                conditions = null;
+                break;
+            case 1: /** own */
+                conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
+                    {'condition': this.setCondition('features.parent_id', '==', 'null')}];
+                break;
+            case 2: /** published */
+                conditions.condition = this.setCondition('creator', '!=', 'jwt.user');
+                break;
+            case 3: /** added */
+                conditions.condition = this.setCondition('features.parent_id', '!=', 'null');
+                break;
+        }
+        return conditions;
+    }
+
+    private setCondition(feature: string, operation: string, ref: string): ProcessRepoConditionModel {
+        const condition = {} as ProcessRepoConditionModel;
+        condition.feature = feature;
+        condition.operation = operation;
+        condition.ref = ref;
+        return condition;
     }
 }
