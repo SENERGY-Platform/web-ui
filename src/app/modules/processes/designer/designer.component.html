@@ -13,18 +13,19 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <div fxLayout="column" fxFill>
+    <div class="button-header background-color-accent">
+        <input hidden type="file" #uploader (change)="importBPMN($event)" [accept]="'.bpmn'"/>
+        <button mat-icon-button matTooltip="Upload BPMN" (click)="uploader.click()">
+            <mat-icon>cloud_upload</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Save" (click)="save()">
+            <mat-icon>save</mat-icon>
+        </button>
+    </div>
     <div fxLayout="row" fxFlex>
         <div class="canvas" id="js-canvas" fxFlex></div>
         <div id="js-properties-panel"></div>
     </div>
-</div>
-<div class="buttons">
-    <input hidden type="file" #uploader (change)="importBPMN($event)" [accept]="'.bpmn'"/>
-    <button mat-icon-button color="accent" matTooltip="Upload BPMN" (click)="uploader.click()">
-        <mat-icon>cloud_upload</mat-icon>
-    </button>
-    <button mat-icon-button color="accent" matTooltip="Save" (click)="save()">
-        <mat-icon>save</mat-icon>
-    </button>
 </div>
