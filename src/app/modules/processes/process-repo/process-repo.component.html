@@ -19,7 +19,7 @@
     <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true"
                    (selectedIndexChange)="setIndex($event)"
                    (animationDone)="animation()">
-        <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Published', 'Added']">
+        <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Published', 'Shared']">
             <div fxLayout="row">
                 <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
                 <senergy-sort [sortAttributes]="sortAttributes"
