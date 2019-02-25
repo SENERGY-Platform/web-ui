@@ -31,6 +31,7 @@ import {NetworksModel} from '../networks/shared/networks.model';
 
 
 const tabs = [{label: 'Online', state: 'connected'}, {label: 'Offline', state: 'disconnected'}, {label: 'Unknown', state: 'unknown'}];
+const sortingAttributes = [new SortModel('Name', 'name', 'asc')];
 
 @Component({
     selector: 'senergy-device-instances',
@@ -41,7 +42,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     deviceInstances: DeviceInstancesModel[] = [];
     ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
+    sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
     userID: string;
     selectedTag = '';
     selectedTagTransformed = '';
@@ -116,6 +117,8 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         this.animationDone = false;
         this.routerNetwork = null;
         this.searchText = '';
+        this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
+        this.sortAttribute = this.sortAttributes[0];
         this.resetTag();
     }
 
