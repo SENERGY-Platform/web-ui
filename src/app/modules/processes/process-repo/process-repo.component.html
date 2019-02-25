@@ -70,7 +70,7 @@
                                                 <mat-icon>more_vert</mat-icon>
                                             </button>
                                             <mat-menu #processMenu="matMenu" [overlapTrigger]="false">
-                                                <button mat-menu-item (click)="permission(item)">
+                                                <button mat-menu-item (click)="permission(item)" [disabled]="item.permissions.a === false">
                                                     <mat-icon>share</mat-icon>
                                                     <span>Share</span>
                                                 </button>

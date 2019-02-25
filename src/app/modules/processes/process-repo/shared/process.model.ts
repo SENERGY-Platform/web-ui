@@ -25,6 +25,12 @@ export interface ProcessModel {
     publish: boolean;
     parent_id: string;
     image: SafeUrl;
+    permissions: {
+        a: boolean;
+        x: boolean;
+        r: boolean;
+        w: boolean;
+    };
 }
 
 
