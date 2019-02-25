@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChange, SimpleChanges} from '@angular/core';
 import {SortModel} from './shared/sort.model';
 
 @Component({
@@ -22,7 +22,7 @@ import {SortModel} from './shared/sort.model';
     templateUrl: './sort.component.html',
     styleUrls: ['./sort.component.css']
 })
-export class SortComponent {
+export class SortComponent implements OnChanges {
 
     @Input() sortAttributes: SortModel[] = [];
     @Output() messageEvent: EventEmitter<SortModel> = new EventEmitter();
@@ -33,7 +33,7 @@ export class SortComponent {
     }
 
     sendMessage(item: SortModel, index: number) {
-        if (this.selected == index) {
+        if (this.selected === index) {
             switch (item.order) {
                 case 'asc': {
                     item.order = 'desc';
@@ -52,6 +52,14 @@ export class SortComponent {
         this.selected = index;
 
         this.messageEvent.emit(item);
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.sortAttributes) {
+            const input: SimpleChange = changes.sortAttributes;
+            this.selected = 0;
+            this.sortAttributes = input.currentValue;
+        }
     }
 
 }

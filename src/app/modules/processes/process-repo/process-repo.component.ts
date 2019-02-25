@@ -40,6 +40,8 @@ const grids = new Map([
     ['xl', 6],
 ]);
 
+const sortingAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel('Name', 'name', 'asc')];
+
 @Component({
     selector: 'senergy-process-repo',
     templateUrl: './process-repo.component.html',
@@ -52,7 +54,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     activeIndex = 0;
     gridCols = 0;
     animationDone = true;
-    sortAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel('Name', 'name', 'asc')];
+    sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
     userID: string;
     ready = false;
     searchInitialized = false;
@@ -168,6 +170,8 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         this.activeIndex = event;
         this.animationDone = false;
         this.searchText = '';
+        this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
+        this.sortAttribute = this.sortAttributes[0];
     }
 
     animation(): void {
