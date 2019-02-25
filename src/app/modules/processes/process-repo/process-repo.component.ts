@@ -237,11 +237,12 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
                     {'condition': this.setCondition('features.parent_id', '==', 'null')}];
                 break;
-            case 2: /** published */
-                conditions.condition = this.setCondition('creator', '!=', 'jwt.user');
+            case 2: /** marketplace */
+            conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
+                {'condition': this.setCondition('features.parent_id', '!=', 'null')}];
                 break;
-            case 3: /** added */
-                conditions.condition = this.setCondition('features.parent_id', '!=', 'null');
+            case 3: /** shared */
+                conditions.condition = this.setCondition('creator', '!=', 'jwt.user');
                 break;
         }
         return conditions;
