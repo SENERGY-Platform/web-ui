@@ -18,7 +18,6 @@ import {Component, OnInit} from '@angular/core';
 import {IOModel, OperatorModel} from '../shared/operator.model';
 import {ActivatedRoute} from '@angular/router';
 import {OperatorRepoService} from '../shared/operator-repo.service';
-import {IO, Operator} from '../shared/operator.classes';
 import {MatSnackBar} from '@angular/material';
 
 
@@ -29,7 +28,7 @@ import {MatSnackBar} from '@angular/material';
 })
 export class OperatorComponent implements OnInit {
 
-    operator = new Operator ();
+    operator = {} as OperatorModel;
     dropdown = [
         'float',
         'string',
@@ -52,7 +51,7 @@ export class OperatorComponent implements OnInit {
 
     addInput() {
         if (this.operator.inputs !== undefined) {
-            this.operator.inputs.push(new IO());
+            this.operator.inputs.push({} as IOModel);
         }
     }
 
@@ -67,7 +66,7 @@ export class OperatorComponent implements OnInit {
 
     addOutput() {
         if (this.operator.outputs !== undefined) {
-            this.operator.outputs.push(new IO());
+            this.operator.outputs.push({} as IOModel);
         }
     }
 

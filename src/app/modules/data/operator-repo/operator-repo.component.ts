@@ -37,7 +37,7 @@ const grids = new Map([
 })
 export class OperatorRepoComponent implements OnInit {
 
-    operators: OperatorModel[] = [];
+    operators = [] as OperatorModel[];
     ready = false;
     gridCols = 0;
 
