@@ -71,6 +71,27 @@
                 </mat-icon>
             </button>
         </div>
+        <div fxLayout="row" fxLayoutAlign="center center">
+            <button mat-raised-button color="accent" (click)="addConfig()">Add Config Value</button>
+        </div>
+        <div *ngFor="let item of operator.config_values" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
+            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="item.name" placeholder="Name">
+            </mat-form-field>
+            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type">
+                    <mat-option *ngFor="let option of dropdown"  [value]="option">
+                        {{option}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <button class="mat-icon-button">
+                <mat-icon (click)="deleteConfig(item)" class="mat-warn">
+                    delete
+                </mat-icon>
+            </button>
+        </div>
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
             <button mat-raised-button color="accent" (click)="saveOperator()">Save</button>
         </div>

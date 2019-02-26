@@ -23,6 +23,7 @@ export interface OperatorModel {
     userId: string | undefined;
     inputs: IOModel [] | undefined;
     outputs: IOModel [] | undefined;
+    config_values: IOModel [] | undefined;
     editable: boolean | undefined;
 }
 

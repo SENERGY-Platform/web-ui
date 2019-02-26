@@ -50,7 +50,10 @@ export class OperatorComponent implements OnInit {
     }
 
     addInput() {
-        if (this.operator.inputs !== undefined) {
+        if (this.operator.inputs !== null && this.operator.inputs !== undefined) {
+            this.operator.inputs.push({} as IOModel);
+        } else {
+            this.operator.inputs = [] as IOModel [];
             this.operator.inputs.push({} as IOModel);
         }
     }
@@ -65,7 +68,10 @@ export class OperatorComponent implements OnInit {
     }
 
     addOutput() {
-        if (this.operator.outputs !== undefined) {
+        if (this.operator.outputs !== null && this.operator.outputs !== undefined) {
+            this.operator.outputs.push({} as IOModel);
+        } else {
+            this.operator.outputs = [] as IOModel [];
             this.operator.outputs.push({} as IOModel);
         }
     }
@@ -75,6 +81,24 @@ export class OperatorComponent implements OnInit {
             const index = this.operator.outputs.indexOf(output);
             if (index > -1) {
                 this.operator.outputs.splice(index, 1);
+            }
+        }
+    }
+
+    addConfig() {
+        if (this.operator.config_values !== null && this.operator.config_values !== undefined) {
+            this.operator.config_values.push({} as IOModel);
+        } else {
+            this.operator.config_values = [] as IOModel [];
+            this.operator.config_values.push({} as IOModel);
+        }
+    }
+
+    deleteConfig(config: IOModel) {
+        if (this.operator.config_values !== undefined) {
+            const index = this.operator.config_values.indexOf(config);
+            if (index > -1) {
+                this.operator.config_values.splice(index, 1);
             }
         }
     }
