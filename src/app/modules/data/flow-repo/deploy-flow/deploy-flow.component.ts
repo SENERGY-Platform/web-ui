@@ -17,7 +17,7 @@
 import {Component} from '@angular/core';
 import {ParserService} from '../shared/parser.service';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ParseModel} from '../shared/parse.model';
+import {ConfigModel, ParseModel} from '../shared/parse.model';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
 import {DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-types/shared/device-type.model';
@@ -65,18 +65,33 @@ export class DeployFlowComponent {
             this.inputs = resp;
             this.ready = true;
             this.inputs.map((value: ParseModel, key) => {
-                this.pipeReq.nodes[key] = {nodeId: value.id, inputs: []} as NodeModel;
-                value.inPorts.map((port: string) => {
+                this.pipeReq.nodes[key] = {nodeId: value.id, inputs: undefined, config: undefined} as NodeModel;
+                // create map for inports
+                if (value.inPorts !== undefined) {
+                    value.inPorts.map((port: string) => {
+                        if (!this.selectedValues.has(value.id)) {
+                            this.selectedValues.set(value.id, new Map());
+                        }
+                        if (this.deviceTypes[value.id] === undefined) {
+                            this.deviceTypes[value.id] = [];
+                        }
+                        this.selectedValues.get(value.id).set(port, {device: {} as DeviceInstancesModel,
+                            service: {} as DeviceTypeServiceModel, path: ''});
+                        this.deviceTypes[value.id][port] = {} as DeviceTypeModel;
+                    });
+                }
+                // create map for config
+                if (value.config !== undefined) {
                     if (!this.selectedValues.has(value.id)) {
                         this.selectedValues.set(value.id, new Map());
                     }
-                    if (this.deviceTypes[value.id] === undefined) {
-                        this.deviceTypes[value.id] = [];
-                    }
-                    this.selectedValues.get(value.id).set(port, {device: {} as DeviceInstancesModel,
-                        service: {} as DeviceTypeServiceModel, path: ''});
-                    this.deviceTypes[value.id][port] = {} as DeviceTypeModel;
-                });
+                    value.config.map((config: ConfigModel) => {
+                        if (!this.selectedValues.get(value.id).has('_config')) {
+                            this.selectedValues.get(value.id).set('_config', new Map());
+                        }
+                       this.selectedValues.get(value.id).get('_config').set(config.name, '');
+                    });
+                }
                 this.ready = true;
             });
         });
@@ -87,25 +102,37 @@ export class DeployFlowComponent {
         this.ready = false;
         this.pipeReq.nodes.forEach((node: NodeModel) => {
             for (const entry of this.selectedValues.get(node.nodeId).entries()) {
-                if (entry[1].device.id !== undefined && entry[1].service.id !==  undefined) {
-                    const x = {name: entry [0], path: entry[1].path} as NodeValue;
-                    const y = [] as NodeValue [];
-                    y.push(x);
-                    const z = {
-                        deviceId: entry[1].device.id,
-                        topicName: entry[1].service.id.replace(/#/g, '_'),
-                        values: y
-                    } as NodeInput;
-                    if (node.inputs.length > 0) {
-                        node.inputs.forEach((input: NodeInput) => {
-                            if (input.deviceId === entry[1].device.id) {
-                                if (input.values.length > 0) {
-                                    input.values.push(x);
+                if (entry[0] === '_config') {
+                    if (node.config === undefined) {
+                        node.config = [];
+                    }
+                    for (const config of entry[1].entries()) {
+                        node.config.push({name: config[0], value: config [1]});
+                    }
+                } else {
+                    if (entry[1].device.id !== undefined && entry[1].service.id !==  undefined) {
+                        const x = {name: entry [0], path: entry[1].path} as NodeValue;
+                        const y = [] as NodeValue [];
+                        y.push(x);
+                        const z = {
+                            deviceId: entry[1].device.id,
+                            topicName: entry[1].service.id.replace(/#/g, '_'),
+                            values: y
+                        } as NodeInput;
+                        if (node.inputs === undefined) {
+                            node.inputs = [];
+                        }
+                        if (node.inputs.length > 0) {
+                            node.inputs.forEach((input: NodeInput) => {
+                                if (input.deviceId === entry[1].device.id) {
+                                    if (input.values.length > 0) {
+                                        input.values.push(x);
+                                    }
                                 }
-                            }
-                        });
-                    } else {
-                        node.inputs.push(z);
+                            });
+                        } else {
+                            node.inputs.push(z);
+                        }
                     }
                 }
             }
@@ -117,7 +144,6 @@ export class DeployFlowComponent {
                 duration: 2000,
             });
         });
-
     }
 
     loadDevices() {

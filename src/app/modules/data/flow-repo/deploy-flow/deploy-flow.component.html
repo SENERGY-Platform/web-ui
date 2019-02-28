@@ -46,6 +46,14 @@
                         <input matInput [(ngModel)]="selectedValues.get(input.id).get(port).path" placeholder="path">
                     </mat-form-field>
                 </div>
+                <h4>Configuration</h4>
+                <div fxLayout="column" *ngFor="let conf of input.config">
+                    <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label>{{ conf.name }}</mat-label>
+                        <input matInput [ngModel]="selectedValues.get(input.id).get('_config').get(conf.name)"
+                               (ngModelChange)="selectedValues.get(input.id).get('_config').set(conf.name, $event)" placeholder="conf.name">
+                    </mat-form-field>
+                </div>
             </mat-card-content>
         </mat-card>
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">

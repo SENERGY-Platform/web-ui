@@ -21,4 +21,10 @@ export interface ParseModel {
     device: string;
     service: string;
     path: string;
+    config: ConfigModel [];
+}
+
+export interface ConfigModel {
+    name: string;
+    type: string;
 }

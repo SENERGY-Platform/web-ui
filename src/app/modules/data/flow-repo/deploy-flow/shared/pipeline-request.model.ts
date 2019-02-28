@@ -21,7 +21,8 @@ export interface PipelineRequestModel {
 
 export interface NodeModel {
     nodeId: string;
-    inputs: NodeInput [];
+    config: NodeConfig [] | undefined;
+    inputs: NodeInput [] | undefined;
 }
 
 export interface NodeInput {
@@ -33,4 +34,9 @@ export interface NodeInput {
 export interface NodeValue {
     name: string;
     path: string;
+}
+
+export interface NodeConfig {
+    name: string;
+    value: string;
 }
