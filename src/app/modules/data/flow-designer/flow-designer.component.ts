@@ -69,8 +69,8 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit  {
 
     public addNode(operator: OperatorModel) {
         if (operator.name !== undefined && operator.inputs !== undefined && operator.outputs !== undefined
-            && operator.image !== undefined) {
-            this.diagram.newNode(operator.name, operator.image, operator.inputs, operator.outputs);
+            && operator.image !== undefined && operator.config_values !== undefined) {
+            this.diagram.newNode(operator.name, operator.image, operator.inputs, operator.outputs, operator.config_values);
         }
     }
 

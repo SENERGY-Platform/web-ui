@@ -301,7 +301,7 @@ export class DiagramEditorComponent implements OnInit {
         return this.graph.toJSON();
     }
 
-    public newNode(name: string, image: string, inputs: any[], outputs: any[]): any {
+    public newNode(name: string, image: string, inputs: any[], outputs: any[], config: any[]): any {
         const inPorts = [];
         for (const input of inputs) {
             if (input.name !== undefined) {
@@ -318,7 +318,8 @@ export class DiagramEditorComponent implements OnInit {
             inPorts: inPorts,
             outPorts: outPorts,
             name: name,
-            image: image
+            image: image,
+            config: config
         });
         node.position(150, 50);
         node.attr({
