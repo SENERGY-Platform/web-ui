@@ -24,5 +24,6 @@ export interface DeviceInstancesModel {
     img: string;
     devicetype: string;
     uri: string;
+    shared: boolean;
 }
 
