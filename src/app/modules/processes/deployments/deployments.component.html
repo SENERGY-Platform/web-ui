@@ -42,39 +42,37 @@
                                      matTooltip="{{item.deploymentTime | date:'medium'}}">
                                     {{item.deploymentTime | date:"medium"}}
                                 </div>
-                                <div fxLayout="row" class="footer-buttons">
-                                    <div fxLayout="row" fxLayoutAlign="start center">
-                                        <button mat-icon-button matTooltip="Run" class="color-accent" (click)="run(item.definition_id)">
-                                            <mat-icon>play_arrow</mat-icon>
-                                        </button>
-                                        <button mat-icon-button matTooltip="Copy Deployment" class="color-accent">
-                                            <mat-icon>content_copy</mat-icon>
-                                        </button>
-                                        <button mat-icon-button matTooltip="Delete" class="color-accent" (click)="deleteDeployment(item)">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
-                                    </div>
+                                <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
+                                    <button mat-icon-button matTooltip="Run" class="color-accent"
+                                            (click)="run(item.definition_id)">
+                                        <mat-icon>play_arrow</mat-icon>
+                                    </button>
+                                    <button mat-icon-button matTooltip="Copy Deployment" class="color-accent">
+                                        <mat-icon>content_copy</mat-icon>
+                                    </button>
+                                    <button mat-icon-button matTooltip="Delete" class="color-accent"
+                                            (click)="deleteDeployment(item)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
                                     <div fxFlex></div>
-                                    <div [fxLayoutAlign]="'start center'">
-                                        <button mat-icon-button [matMenuTriggerFor]="deploymentMenu"
-                                                class="color-accent" matTooltip="More">
-                                            <mat-icon>more_vert</mat-icon>
+                                    <button mat-icon-button [matMenuTriggerFor]="deploymentMenu"
+                                            class="color-accent" matTooltip="More">
+                                        <mat-icon>more_vert</mat-icon>
+                                    </button>
+                                    <mat-menu #deploymentMenu="matMenu" [overlapTrigger]="false">
+                                        <button mat-menu-item (click)="copyEndpoint(item.definition_id)">
+                                            <mat-icon>content_copy</mat-icon>
+                                            <span>Copy Endpoint to Clipboard</span>
                                         </button>
-                                        <mat-menu #deploymentMenu="matMenu" [overlapTrigger]="false">
-                                            <button mat-menu-item (click)="copyEndpoint(item.definition_id)">
-                                                <mat-icon>content_copy</mat-icon>
-                                                <span>Copy Endpoint to Clipboard</span>
-                                            </button>
-                                            <button mat-menu-item (click)="navigateToMonitorSection(item, 0)">
-                                                <mat-icon>play_circle_outline</mat-icon>
-                                                <span>Show Running</span>
-                                            </button>
-                                            <button mat-menu-item (click)="navigateToMonitorSection(item, 1)">
-                                                <mat-icon>history</mat-icon>
-                                                <span>Show History</span>
-                                            </button>
-                                        </mat-menu>
-                                    </div>
+                                        <button mat-menu-item (click)="navigateToMonitorSection(item, 0)">
+                                            <mat-icon>play_circle_outline</mat-icon>
+                                            <span>Show Running</span>
+                                        </button>
+                                        <button mat-menu-item (click)="navigateToMonitorSection(item, 1)">
+                                            <mat-icon>history</mat-icon>
+                                            <span>Show History</span>
+                                        </button>
+                                    </mat-menu>
                                 </div>
                             </div>
 
