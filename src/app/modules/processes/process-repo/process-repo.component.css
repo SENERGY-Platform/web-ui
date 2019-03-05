@@ -89,3 +89,8 @@ mat-grid-list {
     width: 100%;
     background-color: whitesmoke;
 }
+
+.info-icon {
+    padding-left: 5px;
+    padding-right: 5px;
+}

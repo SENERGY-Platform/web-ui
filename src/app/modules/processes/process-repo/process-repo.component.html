@@ -48,25 +48,29 @@
                                         {{item.date | date:"medium"}}
                                     </div>
                                     <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
+                                        <mat-icon matTooltip="Process is shared" *ngIf="item.shared"
+                                                  class="color-sidenav info-icon">share
+                                        </mat-icon>
+                                        <div fxFlex></div>
                                         <button mat-icon-button class="color-accent" matTooltip="Edit"
                                                 routerLink="/processes/designer/{{item.id}}">
                                             <mat-icon>edit</mat-icon>
-                                        </button>
-                                        <button mat-icon-button matTooltip="Copy" class="color-accent"
-                                                (click)="copyProcess(item)">
-                                            <mat-icon>content_copy</mat-icon>
                                         </button>
                                         <button mat-icon-button matTooltip="Delete" class="color-accent"
                                                 (click)="deleteProcess(item)">
                                             <mat-icon>delete</mat-icon>
                                         </button>
-                                        <div fxFlex></div>
+
                                         <button mat-icon-button [matMenuTriggerFor]="processMenu"
                                                 class="color-accent"
                                                 matTooltip="More">
                                             <mat-icon>more_vert</mat-icon>
                                         </button>
                                         <mat-menu #processMenu="matMenu" [overlapTrigger]="false">
+                                            <button mat-menu-item (click)="copyProcess(item)">
+                                                <mat-icon>content_copy</mat-icon>
+                                                <span>Copy</span>
+                                            </button>
                                             <button mat-menu-item (click)="permission(item)"
                                                     [disabled]="item.permissions.a === false">
                                                 <mat-icon>share</mat-icon>

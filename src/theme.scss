@@ -173,3 +173,7 @@ $my-app-theme: mat-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
 .color-accent {
   color: mat-color($my-app-accent) !important;
 }
+
+.color-sidenav {
+  color: mat-color($my-app-sidenav) !important;
+}

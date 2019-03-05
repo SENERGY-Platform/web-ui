@@ -23,6 +23,7 @@ export interface ProcessModel {
     svgXML: string;
     process: any;
     publish: boolean;
+    shared: boolean;
     parent_id: string;
     image: SafeUrl;
     permissions: {
