@@ -42,7 +42,7 @@
                                 <div class="truncate footer-item-subtitle">
                                     Devices: {{network.devices?.length || 0}}
                                 </div>
-                                <form fxLayout="row" class="footer-buttons">
+                                <form fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                                     <senergy-state-icon [state]="network.log_state"></senergy-state-icon>
                                     <div fxFlex></div>
                                     <div [fxLayoutAlign]="'start center'">
