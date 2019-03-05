@@ -43,6 +43,7 @@
                                     {{item.deploymentTime | date:"medium"}}
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
+                                    <div fxFlex></div>
                                     <button mat-icon-button matTooltip="Run" class="color-accent"
                                             (click)="run(item.definition_id)">
                                         <mat-icon>play_arrow</mat-icon>
@@ -54,7 +55,6 @@
                                             (click)="deleteDeployment(item)">
                                         <mat-icon>delete</mat-icon>
                                     </button>
-                                    <div fxFlex></div>
                                     <button mat-icon-button [matMenuTriggerFor]="deploymentMenu"
                                             class="color-accent" matTooltip="More">
                                         <mat-icon>more_vert</mat-icon>
