@@ -122,7 +122,7 @@ export class NewExportComponent implements OnInit {
     }
 
     loadDevices() {
-        this.deviceInstanceService.getDeviceInstances('', 50, 0, 'name', 'asc').subscribe((resp: DeviceInstancesModel []) => {
+        this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc').subscribe((resp: DeviceInstancesModel []) => {
             this.devices = resp;
         });
     }
