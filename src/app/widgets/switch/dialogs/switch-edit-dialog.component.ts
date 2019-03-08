@@ -120,7 +120,7 @@ export class SwitchEditDialogComponent implements OnInit {
             this.deploymentsService.getDefinition(this.formControl.value.id).subscribe((deploymentDefinition: DeploymentsDefinitionModel[]) => {
                 this.data.push({
                     deploymentId: deploymentDefinition[0].deploymentId,
-                    name: deploymentDefinition[0].key,
+                    name: deploymentDefinition[0].name,
                     id: deploymentDefinition[0].id,
                     trigger: this.newTrigger,
                 });

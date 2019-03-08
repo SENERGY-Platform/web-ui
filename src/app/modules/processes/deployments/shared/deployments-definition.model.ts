@@ -16,9 +16,8 @@
 
 export interface DeploymentsDefinitionModel {
     id: string;
-    key: string;
+    name: string;
     deploymentId: string;
-
 }
 
 
