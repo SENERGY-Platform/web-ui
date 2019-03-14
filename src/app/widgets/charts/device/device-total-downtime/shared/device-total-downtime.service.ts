@@ -85,7 +85,7 @@ export class DeviceTotalDowntimeService {
                 height: element.height,
                 legend: 'none',
                 hAxis: {format: 'HH:mm'},
-                vAxis: {format: '#.## %'},
+                vAxis: {format: '#.## %', viewWindow: {min: 0.00}},
                 colors: [customColor],
             }
         );

@@ -37,7 +37,11 @@ export class ChartsModel {
                 title?: string;
                 gridlines?: {
                     count: number;
-                }
+                };
+                viewWindow?: {
+                    min?: number;
+                    max?: number;
+                };
             }
             hAxis?: {
                 format?: string;
