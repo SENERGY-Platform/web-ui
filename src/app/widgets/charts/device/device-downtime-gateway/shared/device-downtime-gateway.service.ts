@@ -98,14 +98,14 @@ export class DeviceDowntimeGatewayService {
     private getGatewayDowntimeDataTableArray(hideZeroPercentage: boolean, gateways: NetworksHistoryModel[]): ChartDataTableModel {
         const dataTable = new ChartDataTableModel([['Name', 'Percentage', {role: 'annotation'}, {role: 'style'}]]);
         gateways.forEach((gateway) => {
-            const time = this.calcDisconnectedTime(gateway).failureRatio;
-            const text = Math.round(time * 10000) / 100 + '%';
+            const failureRatio = Math.round(this.calcDisconnectedTime(gateway).failureRatio * 10000) / 10000;
+            const text = Math.round(failureRatio * 10000) / 100 + '%';
             if (hideZeroPercentage) {
-                if (time > 0) {
-                    dataTable.data.push([gateway.name, time, text, customColor]);
+                if (failureRatio > 0) {
+                    dataTable.data.push([gateway.name, failureRatio, text, customColor]);
                 }
             } else {
-                dataTable.data.push([gateway.name, time, text, customColor]);
+                dataTable.data.push([gateway.name, failureRatio, text, customColor]);
             }
         });
         return dataTable;
