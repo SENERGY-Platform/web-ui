@@ -35,6 +35,9 @@ export class ChartsModel {
             vAxis?: {
                 format?: string;
                 title?: string;
+                gridlines?: {
+                    count: number;
+                }
             }
             hAxis?: {
                 format?: string;
