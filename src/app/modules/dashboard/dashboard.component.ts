@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ResponsiveService} from '../../core/services/responsive.service';
 import {DashboardService} from './shared/dashboard.service';
 import {DashboardModel} from './shared/dashboard.model';
@@ -23,6 +23,7 @@ import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipu
 import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
 import {DisplayGrid, GridsterConfig, GridType} from 'angular-gridster2';
+import {Subscription} from 'rxjs';
 
 const grids = new Map([
     ['xs', 1],
@@ -38,7 +39,7 @@ const grids = new Map([
     styleUrls: ['./dashboard.component.scss'],
 })
 
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
 
     gridCols = 0;
     dashboards: DashboardModel[] = [];
@@ -47,6 +48,8 @@ export class DashboardComponent implements OnInit {
     interval = 0;
     options: GridsterConfig = {};
     zoomedWidgetIndex: number | null = null;
+    dashWidgetSubscription = new Subscription;
+    dashSubscription = new Subscription;
 
     constructor(private responsiveService: ResponsiveService,
                 private dashboardService: DashboardService) {
@@ -56,6 +59,11 @@ export class DashboardComponent implements OnInit {
         this.initGridCols();
         this.initDashboard();
         this.initWidgets();
+    }
+
+    ngOnDestroy(): void {
+        this.dashWidgetSubscription.unsubscribe();
+        this.dashSubscription.unsubscribe();
     }
 
     initAllWidgets() {
@@ -172,7 +180,7 @@ export class DashboardComponent implements OnInit {
             }
         );
 
-        this.dashboardService.dashboardObservable.subscribe((dashboardManipulationModel: DashboardManipulationModel) => {
+        this.dashSubscription = this.dashboardService.dashboardObservable.subscribe((dashboardManipulationModel: DashboardManipulationModel) => {
             switch (dashboardManipulationModel.manipulation) {
                 case DashboardManipulationEnum.Create: {
                     this.addDashboard(dashboardManipulationModel);
@@ -245,7 +253,7 @@ export class DashboardComponent implements OnInit {
     }
 
     private initWidgets() {
-        this.dashboardService.dashboardWidgetObservable.subscribe((widgetManipulationModel: DashboardWidgetManipulationModel) => {
+        this.dashWidgetSubscription = this.dashboardService.dashboardWidgetObservable.subscribe((widgetManipulationModel: DashboardWidgetManipulationModel) => {
             switch (widgetManipulationModel.manipulation) {
                 case DashboardManipulationEnum.Create: {
                     this.addWidget(widgetManipulationModel);
