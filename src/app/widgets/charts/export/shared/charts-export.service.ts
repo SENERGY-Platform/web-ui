@@ -102,7 +102,7 @@ export class ChartsExportService {
             dataTable.data,
             {
                 chartArea: {width: element.widthPercentage, height: element.heightPercentage},
-                hAxis: {format: 'HH:mm:ss', title: hAxisLabel, gridlines: {count: 4}},
+                hAxis: {title: hAxisLabel, gridlines: {count: -1}},
                 height: element.height,
                 width: element.width,
                 legend: 'none',
