@@ -107,7 +107,7 @@ export class ChartsProcessDeploymentsService {
                 width: element.width,
                 height: element.height,
                 legend: 'none',
-                hAxis: {format: 'd.M.yy'},
+                hAxis: {gridlines: {count: -1}},
                 colors: [customColor],
             }
         );
