@@ -84,7 +84,7 @@ export class DeviceGatewayService {
                 height: element.height,
                 legend: 'none',
                 tooltip: {trigger: 'focus'},
-                vAxis: {format: 'decimal', gridlines: {count: -1}},
+                vAxis: {format: 'decimal', gridlines: {count: -1}, viewWindow: {min: 0}},
             }
         );
     }
