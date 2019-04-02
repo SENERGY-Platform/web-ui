@@ -48,11 +48,11 @@
                                         <mat-icon>warning</mat-icon>
                                     </button>
                                     <mat-menu #deploymentMenuWarning="matMenu" [overlapTrigger]="false">
-                                        <button mat-menu-item [disabled]="!item.has_incidents">
-                                            <span>Show Issues</span>
+                                        <button mat-menu-item [disabled]="!item.has_incidents" (click)="navigateToMonitorSection(item, 0)">
+                                            <span>Show Execution Issues</span>
                                         </button>
                                         <button mat-menu-item [disabled]="item.online" (click)="showMissingDependencies(item.id)">
-                                            <span>Show missing dependencies</span>
+                                            <span>Show Missing Dependencies</span>
                                         </button>
                                     </mat-menu>
                                     <div fxFlex></div>
