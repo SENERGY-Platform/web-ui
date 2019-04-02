@@ -63,6 +63,7 @@ import {DurationEventConfigComponent} from './designer/event-config/duration-eve
 import {HistoricDataConfigDialogComponent} from './designer/dialogs/historic-data-config-dialog/historic-data-config-dialog.component';
 import {MonitorDetailsDialogComponent} from './monitor/dialogs/monitor-details-dialog.component';
 import {EmailConfigDialogComponent} from './designer/dialogs/email-config-dialog/email-config-dialog.component';
+import {DeploymentsMissingDependenciesDialogComponent} from './deployments/dialogs/deployments-missing-dependencies-dialog.component';
 
 const processRepo = {
     path: 'processes/repository',
@@ -144,6 +145,7 @@ const processDesigner = {
         HistoricDataConfigDialogComponent,
         MonitorDetailsDialogComponent,
         EmailConfigDialogComponent,
+        DeploymentsMissingDependenciesDialogComponent,
     ],
     entryComponents: [
         EditOutputDialogComponent,
@@ -154,6 +156,7 @@ const processDesigner = {
         HistoricDataConfigDialogComponent,
         MonitorDetailsDialogComponent,
         EmailConfigDialogComponent,
+        DeploymentsMissingDependenciesDialogComponent,
     ]
 })
 

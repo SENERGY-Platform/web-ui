@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-import {SafeUrl} from "@angular/platform-browser";
+import {SafeUrl} from '@angular/platform-browser';
 
 export interface DeploymentsModel {
-    id: string;
-    deploymentTime: Date;
     definition_id: string;
-    name: string;
+    deploymentTime: Date;
     diagram: string;
     has_incidents: boolean;
+    id: string;
+    name: string;
+    offline_reasons: DeploymentsOfflineReasonsModel[];
+    online: boolean;
     image: SafeUrl;
+}
+
+export interface DeploymentsOfflineReasonsModel {
+    type: string;
+    id: string;
+    additional_info: {
+        name: string;
+    };
+    description: string;
 }
 
 

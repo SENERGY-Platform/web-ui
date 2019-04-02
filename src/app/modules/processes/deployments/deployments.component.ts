@@ -22,13 +22,15 @@ import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';
 import {DeploymentsService} from './shared/deployments.service';
-import {DeploymentsModel} from './shared/deployments.model';
-import {MatSnackBar} from '@angular/material';
+import {DeploymentsModel, DeploymentsOfflineReasonsModel} from './shared/deployments.model';
+import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {ClipboardService} from 'ngx-clipboard';
 import {environment} from '../../../../environments/environment';
 import {NetworksModel} from '../../devices/networks/shared/networks.model';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {DeleteDialogComponent} from '../../../core/dialogs/delete-dialog.component';
+import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deployments-missing-dependencies-dialog.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -66,7 +68,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 private snackBar: MatSnackBar,
                 private clipboardService: ClipboardService,
                 private router: Router,
-                private dialogsService: DialogsService) {
+                private dialogsService: DialogsService,
+                private dialog: MatDialog) {
     }
 
     ngOnInit() {
@@ -123,6 +126,15 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 });
             }
         });
+    }
+
+    showMissingDependencies(id: string): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            id: id
+        };
+        this.dialog.open(DeploymentsMissingDependenciesDialogComponent, dialogConfig);
     }
 
     private initGridCols(): void {

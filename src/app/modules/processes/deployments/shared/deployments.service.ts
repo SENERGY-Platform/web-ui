@@ -22,6 +22,7 @@ import {catchError, map} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {DeploymentsModel} from './deployments.model';
 import {DeploymentsDefinitionModel} from './deployments-definition.model';
+import {DeploymentsMissingDependenciesModel} from './deployments-missing-dependencies.model';
 
 @Injectable({
     providedIn: 'root'
@@ -32,7 +33,7 @@ export class DeploymentsService {
     }
 
     getAll(query: string, limit: number, offset: number, feature: string, order: string): Observable<DeploymentsModel[]> {
-        return this.http.get<DeploymentsModel[]>(environment.processServiceUrl + '/deployment?sortBy=' + feature + '&sortOrder=' + order + '&maxResults=' + limit + '&firstResult=' + offset + (query ? '&nameLike=' + encodeURIComponent('%' + query + '%') : '')).pipe(
+        return this.http.get<DeploymentsModel[]>(environment.apiAggregatorUrl + '/processes?sortBy=' + feature + '&sortOrder=' + order + '&maxResults=' + limit + '&firstResult=' + offset + (query ? '&nameLike=' + encodeURIComponent('%' + query + '%') : '')).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getAll', []))
         );
@@ -42,6 +43,12 @@ export class DeploymentsService {
         return this.http.get<DeploymentsDefinitionModel[]>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/definition').pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDefinition', []))
+        );
+    }
+
+    getMissingDependencies(id: string): Observable<DeploymentsMissingDependenciesModel | null> {
+        return this.http.get<DeploymentsMissingDependenciesModel>(environment.processDeploymentUrl + '/deployment/' + encodeURIComponent(id) + '/dependencies').pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getMissingDependencies', null))
         );
     }
 
