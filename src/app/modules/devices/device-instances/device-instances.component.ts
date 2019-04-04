@@ -150,8 +150,8 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         if (this.routerNetwork !== null) {
             this.selectedTag = this.routerNetwork.name;
             this.selectedTagTransformed = this.routerNetwork.name;
-            this.deviceInstancesService.getDeviceInstancesByIds(this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order,
-                this.routerNetwork.devices || []).subscribe((deviceInstances: DeviceInstancesModel[]) => {
+            this.deviceInstancesService.getDeviceInstancesByHubId(this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order,
+                this.routerNetwork.id).subscribe((deviceInstances: DeviceInstancesModel[]) => {
                 this.setDevices(deviceInstances);
             });
         } else {

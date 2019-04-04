@@ -47,35 +47,21 @@ export class DeviceInstancesService {
     }
 
     getDeviceInstances(searchText: string, limit: number, offset: number, value: string, order: string): Observable<DeviceInstancesModel[]> {
-        if (searchText === '') {
-            return this.http.get<DeviceInstancesModel[]>
-            (environment.apiAggregatorUrl + '/list/devices/' + limit + '/' + offset + '/' + value + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances: no search', []))
-            );
-        } else {
-            return this.http.get<DeviceInstancesModel[]>
-            (environment.apiAggregatorUrl + '/search/devices/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset + '/' + value + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances: search', []))
-            );
-        }
+        return this.http.get<DeviceInstancesModel[]>
+        (environment.apiAggregatorUrl + '/devices?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order +
+            (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText))).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances', []))
+        );
     }
 
     getDeviceInstancesByState(searchText: string, state: string, value: string, order: string): Observable<DeviceInstancesModel[]> {
-        if (searchText === '') {
-            return this.http.get<DeviceInstancesModel[]>
-            (environment.apiAggregatorUrl + '/filter/devices/state/' + state + '/' + value + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByState: no search', []))
-            );
-        } else {
-            return this.http.get<DeviceInstancesModel[]>
-            (environment.apiAggregatorUrl + '/filter/devices/state/' + state + '/search/' + searchText + '/' + value + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByState: search', []))
-            );
-        }
+        return this.http.get<DeviceInstancesModel[]>
+        (environment.apiAggregatorUrl + '/devices?state=' + state + '&sort=' + value + '.' + order +
+            (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText))).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByState: no search', []))
+        );
     }
 
     updateDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {
@@ -100,7 +86,7 @@ export class DeviceInstancesService {
 
     getDeviceInstancesByTag(tagType: string, tag: string, feature: string, order: string, limit: number, offset: number): Observable<DeviceInstancesModel[]> {
         return this.http.get<DeviceInstancesModel[]>
-        (environment.apiAggregatorUrl + '/select/devices/' + tagType + '/' + encodeURIComponent(tag) + '/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
+        (environment.apiAggregatorUrl + '/devices?limit=' + limit + '&offset=' + offset + '&sort=' + feature + '.' + order + '&' + tagType + '=' + tag).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByTag', []))
         );
@@ -108,24 +94,24 @@ export class DeviceInstancesService {
 
     getDeviceInstancesByTagAndState(tagType: string, tag: string, feature: string, order: string, state: string): Observable<DeviceInstancesModel[]> {
         return this.http.get<DeviceInstancesModel[]>
-        (environment.apiAggregatorUrl + '/filter/devices/state/' + state + '/' + tagType + '/' + encodeURIComponent(tag) + '/orderby/'  + feature + '/' + order).pipe(
+        (environment.apiAggregatorUrl + '/devices?sort=' + feature + '.' + order + '&' + tagType + '=' + tag + '&state=' + state).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByTagAndState', []))
         );
     }
 
-    getDeviceInstancesByIds(limit: number, offset: number, value: string, order: string, ids: string[]): Observable<DeviceInstancesModel[]> {
-        return this.http.post<DeviceInstancesModel[]>
-        (environment.apiAggregatorUrl + '/select/devices/ids/' + limit + '/' + offset + '/' + value + '/' + order, ids).pipe(
+    getDeviceInstancesByHubId(limit: number, offset: number, value: string, order: string, id: string): Observable<DeviceInstancesModel[]> {
+        return this.http.get<DeviceInstancesModel[]>
+        (environment.apiAggregatorUrl + '/hubs/' + encodeURIComponent(id) + '/devices?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order).pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByIds', []))
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByHubId', []))
         );
     }
 
 
     getDeviceHistory(duration: string): Observable<DeviceInstancesHistoryModel[]> {
         if (this.getDeviceHistoryObservable === null) {
-            this.getDeviceHistoryObservable = this.http.get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/history/devices/' + duration).pipe(
+            this.getDeviceHistoryObservable = this.http.get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?log=' + duration).pipe(
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory', [])),
                 share()

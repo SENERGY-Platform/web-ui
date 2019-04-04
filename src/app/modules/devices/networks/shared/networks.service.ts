@@ -40,19 +40,12 @@ export class NetworksService {
     }
 
     getNetworks(searchText: string, limit: number, offset: number, value: string, order: string): Observable<NetworksModel[]> {
-        if (searchText === '') {
-            return this.http.get<NetworksModel[]>
-            (environment.apiAggregatorUrl + '/list/gateways/' + limit + '/' + offset + '/' + value + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworks: no search', []))
-            );
-        } else {
-            return this.http.get<NetworksModel[]>
-            (environment.apiAggregatorUrl + '/search/gateways/' + searchText + '/' + limit + '/' + offset + '/' + value + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworks: search', []))
-            );
-        }
+        return this.http.get<NetworksModel[]>
+        (environment.apiAggregatorUrl + '/hubs?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order +
+            (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText))).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworks', []))
+        );
     }
 
     changeName(networkId: string, networkName: string): Observable<string> {
@@ -74,7 +67,7 @@ export class NetworksService {
     }
 
     getNetworksHistory(duration: string): Observable<NetworksHistoryModel[]> {
-        return this.http.get<NetworksHistoryModel[]>(environment.apiAggregatorUrl + '/history/gateways/' + duration).pipe(
+        return this.http.get<NetworksHistoryModel[]>(environment.apiAggregatorUrl + '/gateways?log=' + duration).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworksHistory', []))
         );
