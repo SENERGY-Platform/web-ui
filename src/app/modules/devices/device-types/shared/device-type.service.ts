@@ -122,4 +122,10 @@ export class DeviceTypeService {
         );
     }
 
+    deleteDeviceType(id: string): Observable<string> {
+        return this.http.delete(environment.iotRepoUrl + '/deviceType/' + id, {responseType: 'text'}).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'deleteDeviceType', 'error'))
+        );
+    }
+
 }

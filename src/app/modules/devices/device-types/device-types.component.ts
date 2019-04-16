@@ -25,6 +25,8 @@ import {DeviceTypeDialogService} from './shared/device-type-dialog.service';
 import {DeviceTypeAssignmentModel, DeviceTypeModel, DeviceTypeServiceModel} from './shared/device-type.model';
 import {MatSnackBar} from '@angular/material';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
+import {DeviceInstancesUpdateModel} from '../device-instances/shared/device-instances-update.model';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -59,7 +61,8 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
                 private deviceTypeService: DeviceTypeService,
                 private deviceTypeDialogService: DeviceTypeDialogService,
                 private snackBar: MatSnackBar,
-                private deviceInstancesService: DeviceInstancesService) {
+                private deviceInstancesService: DeviceInstancesService,
+                private dialogsService: DialogsService) {
     }
 
     ngOnInit() {
@@ -127,6 +130,23 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
         });
     }
 
+    delete(deviceTypeInput: DeviceTypePermSearchModel) {
+        this.dialogsService.openDeleteDialog('device type: ' + deviceTypeInput.name).afterClosed().subscribe((deviceTypeDelete: boolean) => {
+            if (deviceTypeDelete) {
+                this.deviceTypeService.deleteDeviceType(encodeURIComponent(deviceTypeInput.id)).subscribe((resp: string) => {
+                    if (resp === 'ok') {
+                        const index = this.deviceTypes.indexOf(deviceTypeInput);
+                        this.deviceTypes.splice(index, 1);
+                        this.snackBar.open('Device type deleted successfully.', '', {duration: 2000});
+
+                    } else {
+                        this.snackBar.open('Error while deleting device type!', '', {duration: 2000});
+                    }
+                });
+            }
+        });
+    }
+
     private resetIds(deviceType: DeviceTypeModel): DeviceTypeModel {
         deviceType.id = '';
         deviceType.services.forEach((service: DeviceTypeServiceModel) => {
@@ -182,6 +202,12 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
             creator: 'unknown',
             id: deviceTypeIn.id,
             name: deviceTypeIn.name || '',
+            permissions: {
+                a: false,
+                x: false,
+                r: false,
+                w: false,
+            }
         };
     }
 

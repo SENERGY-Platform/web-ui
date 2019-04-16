@@ -62,6 +62,10 @@
                                                 <mat-icon>info</mat-icon>
                                                 <span>Details</span>
                                             </button>
+                                            <button mat-menu-item (click)="delete(deviceType)" *ngIf="deviceType.permissions.a">
+                                                <mat-icon>delete</mat-icon>
+                                                <span>Delete</span>
+                                            </button>
                                         </mat-menu>
                                     </div>
                                 </form>

@@ -24,4 +24,10 @@ export interface DeviceTypePermSearchModel {
     name: string;
     services: string[] | string;
     vendor: string;
+    permissions: {
+        a: boolean;
+        x: boolean;
+        r: boolean;
+        w: boolean;
+    };
 }
