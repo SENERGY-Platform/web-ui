@@ -240,7 +240,7 @@ export class DeviceTypesDialogComponent implements OnInit {
                 service.input.splice(service.input.indexOf(item), 1);
             });
             deleteIndexOutput.forEach((item: DeviceTypeAssignmentModel) => {
-                service.output.splice(service.input.indexOf(item), 1);
+                service.output.splice(service.output.indexOf(item), 1);
             });
         });
     }
