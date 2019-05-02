@@ -39,7 +39,7 @@ export class UtilService {
     }
 
     convertSVGtoBase64(svg: string): string {
-        return window.btoa(svg);
+        return window.btoa(unescape(encodeURIComponent(svg)));
     }
 
 }
