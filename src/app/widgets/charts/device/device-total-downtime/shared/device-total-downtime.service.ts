@@ -32,10 +32,7 @@ const customColor = '#4484ce'; // /* cc */
 const stateTrue = true;
 const stateFalse = false;
 const dayInMs = 86400000;
-const today = new Date();
-const intervalDurationInMin = 15;
-const intervalDurationInMs = intervalDurationInMin * 60 * 1000;
-const numberOfIntervals = today.getHours() * (60 / intervalDurationInMin) + Math.ceil(today.getMinutes() / intervalDurationInMin);
+
 
 @Injectable({
     providedIn: 'root'
@@ -67,7 +64,7 @@ export class DeviceTotalDowntimeService {
 
     getTotalDowntime(widgetId: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-            this.deviceInstancesService.getDeviceHistory('7d').subscribe((devices: DeviceInstancesHistoryModel[]) => {
+            this.deviceInstancesService.getDeviceHistory7d().subscribe((devices: DeviceInstancesHistoryModel[]) => {
                 observer.next(this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(devices)));
                 observer.complete();
             });
@@ -92,6 +89,10 @@ export class DeviceTotalDowntimeService {
     }
 
     private processTimelineFailureRatio(devices: DeviceInstancesHistoryModel[]): ChartDataTableModel {
+        const today = new Date();
+        const intervalDurationInMin = 15;
+        const intervalDurationInMs = intervalDurationInMin * 60 * 1000;
+        const numberOfIntervals = today.getHours() * (60 / intervalDurationInMin) + Math.ceil(today.getMinutes() / intervalDurationInMin);
         const interval: { stateConnected: number, stateDisconnected: number }[] = [];
         let intervalIndex = 0;
         let timeLeft = intervalDurationInMs;
@@ -127,7 +128,7 @@ export class DeviceTotalDowntimeService {
             }
         });
 
-        return this.prepareArray(interval);
+        return this.prepareArray(interval, today, intervalDurationInMs);
 
         function spreadIntoTimeZones(state: boolean, time: number) {
             while (time >= timeLeft && intervalIndex < (numberOfIntervals - 1)) {
@@ -165,7 +166,7 @@ export class DeviceTotalDowntimeService {
         }
     }
 
-    private prepareArray(interval: { stateConnected: number, stateDisconnected: number }[]): ChartDataTableModel {
+    private prepareArray(interval: { stateConnected: number, stateDisconnected: number }[], today: Date, intervalDurationInMs: number): ChartDataTableModel {
         const dataTable = new ChartDataTableModel([['Date', 'Percentage', {role: 'tooltip'}]]);
 
         if (interval.length !== 0) {

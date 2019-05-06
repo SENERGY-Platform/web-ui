@@ -53,7 +53,7 @@ export class DevicesStateService {
 
     getDevicesStatus(): Observable<DevicesStateModel> {
         return new Observable<DevicesStateModel>((observer) => {
-            this.deviceInstancesService.getDeviceHistory('1h').subscribe((devices: DeviceInstancesHistoryModel[]) => {
+            this.deviceInstancesService.getDeviceHistory1h().subscribe((devices: DeviceInstancesHistoryModel[]) => {
                 observer.next(this.sumDevicesStatus(devices));
                 observer.complete();
             });

@@ -36,7 +36,8 @@ import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 })
 export class DeviceInstancesService {
 ​
-    private getDeviceHistoryObservable: Observable<DeviceInstancesHistoryModel[]> | null = null;
+    private getDeviceHistoryObservable7d: Observable<DeviceInstancesHistoryModel[]> | null = null;
+    private getDeviceHistoryObservable1h: Observable<DeviceInstancesHistoryModel[]> | null = null;
 ​
 
     constructor(private dialog: MatDialog,
@@ -109,15 +110,26 @@ export class DeviceInstancesService {
     }
 
 
-    getDeviceHistory(duration: string): Observable<DeviceInstancesHistoryModel[]> {
-        if (this.getDeviceHistoryObservable === null) {
-            this.getDeviceHistoryObservable = this.http.get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?log=' + duration).pipe(
+    getDeviceHistory7d(): Observable<DeviceInstancesHistoryModel[]> {
+        if (this.getDeviceHistoryObservable7d === null) {
+            this.getDeviceHistoryObservable7d = this.http.get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?log=7d').pipe(
                 map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory', [])),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory7d', [])),
                 share()
             );
         }
-        return this.getDeviceHistoryObservable;
+        return this.getDeviceHistoryObservable7d;
+    }
+
+    getDeviceHistory1h(): Observable<DeviceInstancesHistoryModel[]> {
+        if (this.getDeviceHistoryObservable1h === null) {
+            this.getDeviceHistoryObservable1h = this.http.get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?log=1h').pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory1h', [])),
+                share()
+            );
+        }
+        return this.getDeviceHistoryObservable1h;
     }
 
     openDeviceServiceDialog(deviceTypeId: string): void {

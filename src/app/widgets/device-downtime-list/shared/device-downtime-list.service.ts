@@ -65,7 +65,7 @@ export class DeviceDowntimeListService {
 
     getDevicesDowntime(): Observable<DeviceDowntimeListModel[]> {
         return new Observable<DeviceDowntimeListModel[]>((observer) => {
-            this.deviceInstancesService.getDeviceHistory('7d').subscribe((devices: DeviceInstancesHistoryModel[]) => {
+            this.deviceInstancesService.getDeviceHistory7d().subscribe((devices: DeviceInstancesHistoryModel[]) => {
                 observer.next(this.calcDevicesConnectionTime(devices));
                 observer.complete();
             });
