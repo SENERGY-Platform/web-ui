@@ -20,7 +20,7 @@ export interface PipelineModel {
 }
 
 export interface PipelineOperatorModel {
-    Id: string;
-    ImageId: string;
-    Name: string;
+    id: string;
+    imageId: string;
+    name: string;
 }

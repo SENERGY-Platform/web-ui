@@ -78,8 +78,8 @@ export class NewExportComponent implements OnInit {
             this.export.EntityName = this.pipeline.id;
             this.export.Filter = this.pipeline.id;
             this.export.FilterType = 'pipeId';
-            this.export.ServiceName = this.operator.Name;
-            this.export.Topic = 'analytics-' + this.operator.Name;
+            this.export.ServiceName = this.operator.name;
+            this.export.Topic = 'analytics-' + this.operator.name;
         }
         this.exportService.startPipeline(this.export).subscribe(function () {
             self.router.navigate(['/data/export']);
@@ -118,6 +118,7 @@ export class NewExportComponent implements OnInit {
     loadPipelines() {
         this.pipelineRegistryService.getPipelines().subscribe((resp: PipelineModel[]) => {
             this.pipelines = resp;
+            console.log(this.pipelines);
         });
     }
 

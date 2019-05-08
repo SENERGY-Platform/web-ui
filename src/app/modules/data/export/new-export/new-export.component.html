@@ -50,7 +50,7 @@
             </mat-select>
             <mat-select *ngIf="selector==='pipe'" placeholder="Operator" [(ngModel)]="operator">
                 <mat-option *ngFor="let operator of pipeline.operators" [value]="operator">
-                    {{operator.Name}}
+                    {{operator.name}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
