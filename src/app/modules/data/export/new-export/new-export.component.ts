@@ -118,7 +118,6 @@ export class NewExportComponent implements OnInit {
     loadPipelines() {
         this.pipelineRegistryService.getPipelines().subscribe((resp: PipelineModel[]) => {
             this.pipelines = resp;
-            console.log(this.pipelines);
         });
     }
 
