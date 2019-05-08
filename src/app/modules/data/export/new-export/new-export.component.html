@@ -16,7 +16,7 @@
 
 <div class="main-panel">
     <div fxLayout="column" class="layout-margin">
-        <mat-radio-group [(ngModel)]="selector" class="radio-group">
+        <mat-radio-group [(ngModel)]="selector" (ngModelChange)="exportChanged($event)" class="radio-group">
             <mat-radio-button class="radio-button" value="device">Gerät</mat-radio-button>
             <mat-radio-button class="radio-button" value="pipe">Analyse</mat-radio-button>
         </mat-radio-group>
@@ -48,7 +48,7 @@
                     {{service.name}}
                 </mat-option>
             </mat-select>
-            <mat-select *ngIf="selector==='pipe'" placeholder="Operator" [(ngModel)]="operator">
+            <mat-select *ngIf="selector==='pipe'"  (ngModelChange)="operatorChanged($event)"  placeholder="Operator" [(ngModel)]="operator">
                 <mat-option *ngFor="let operator of pipeline.operators" [value]="operator">
                     {{operator.name}}
                 </mat-option>
@@ -57,7 +57,10 @@
 
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>JSON time path</mat-label>
-            <input matInput [(ngModel)]="export.TimePath" placeholder="JSON time path">
+            <input matInput [(ngModel)]="export.TimePath" placeholder="JSON time path" [matAutocomplete]="auto">
+            <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let option of timeSuggest" [value]="option">{{option}}</mat-option>
+            </mat-autocomplete>
         </mat-form-field>
 
         <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">

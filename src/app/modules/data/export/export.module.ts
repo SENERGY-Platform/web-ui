@@ -25,7 +25,7 @@ import {
     MatGridListModule,
     MatIconModule, MatInputModule,
     MatListModule, MatRadioModule, MatSelectModule,
-    MatTooltipModule
+    MatTooltipModule, MatAutocompleteModule
 } from '@angular/material';
 import {CoreModule} from '../../../core/core.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -53,7 +53,8 @@ const exp = {path: 'data/export/new', pathMatch: 'full', component: NewExportCom
         FormsModule,
         MatCheckboxModule,
         MatSelectModule,
-        MatRadioModule
+        MatRadioModule,
+        MatAutocompleteModule
 
     ],
     declarations: [

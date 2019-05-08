@@ -25,6 +25,7 @@ import {MatSnackBar} from '@angular/material';
 import {PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shared/pipeline.model';
 import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
 import {Router} from '@angular/router';
+import {OperatorModel} from '../../operator-repo/shared/operator.model';
 
 
 @Component({
@@ -45,6 +46,8 @@ export class NewExportComponent implements OnInit {
     operator = {} as PipelineOperatorModel;
     devices: DeviceInstancesModel [] = [];
     pipelines: PipelineModel [] = [];
+
+    timeSuggest = ['analytics.time', 'value.detection.time', 'value.metrics.update.Time'];
 
     dropdown = [
         'float',
@@ -96,6 +99,18 @@ export class NewExportComponent implements OnInit {
                     this.deviceType = resp;
                 }
             });
+        }
+    }
+
+    operatorChanged(operator: OperatorModel) {
+        console.log(operator);
+    }
+
+    exportChanged(selector: string) {
+        if (selector === 'device') {
+            this.timeSuggest = ['value.detection.time', 'value.metrics.update.Time'];
+        } else {
+            this.timeSuggest = ['analytics.time'];
         }
     }
 
