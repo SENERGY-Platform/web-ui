@@ -47,7 +47,7 @@ export class NewExportComponent implements OnInit {
     devices: DeviceInstancesModel [] = [];
     pipelines: PipelineModel [] = [];
 
-    timeSuggest = ['analytics.time', 'value.detection.time', 'value.metrics.update.Time'];
+    timeSuggest = ['analytics.time', 'value.detection.time', 'value.metrics.updateTime'];
 
     dropdown = [
         'float',
@@ -108,7 +108,7 @@ export class NewExportComponent implements OnInit {
 
     exportChanged(selector: string) {
         if (selector === 'device') {
-            this.timeSuggest = ['value.detection.time', 'value.metrics.update.Time'];
+            this.timeSuggest = ['value.detection.time', 'value.metrics.updateTime'];
         } else {
             this.timeSuggest = ['analytics.time'];
         }
