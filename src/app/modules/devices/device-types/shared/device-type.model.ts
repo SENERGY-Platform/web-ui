@@ -24,7 +24,7 @@ export interface DeviceTypeModel {
     maintenance: string[];
     device_class: DeviceTypeClassModel;
     services: DeviceTypeServiceModel [];
-    vendor: DeviceTypeVendorModel;
+    // vendor: DeviceTypeVendorModel;
     config_parameter: DeviceTypeConfigFieldTypeModel[];
     img: string;
 }

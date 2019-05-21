@@ -63,7 +63,7 @@ export class DeviceTypesDialogComponent implements OnInit {
 
     deviceType: DeviceTypeModel;
     deviceTypeClasses: DeviceTypeClassModel[] = [];
-    deviceTypeVendors: DeviceTypeVendorModel[] = [];
+    // deviceTypeVendors: DeviceTypeVendorModel[] = [];
     deviceTypeProtocols: DeviceTypeProtocolModel[] = [];
     deviceTypeValueTypes: ValueTypesModel[] = [];
     deviceTypeServiceTypes = serviceTypeData;
@@ -72,11 +72,11 @@ export class DeviceTypesDialogComponent implements OnInit {
     firstFormGroup!: FormGroup;
     secondFormGroup: FormGroup = new FormGroup({services: this._formBuilder.array([])});
     deviceClassInputFormControl = new FormControl('');
-    vendorInputFormControl = new FormControl('');
+    // vendorInputFormControl = new FormControl('');
     hideAddDeviceClass = false;
     hideAddVendor = false;
     deviceClassInputFocus = false;
-    vendorInputFocus = false;
+    // vendorInputFocus = false;
     disableSave = false;
     editable = false;
 
@@ -102,7 +102,7 @@ export class DeviceTypesDialogComponent implements OnInit {
         this.cleanUpServices();
 
         const newDeviceType: DeviceTypeModel = {
-            vendor: this.firstFormGroup.value.vendorCtrl,
+            // vendor: this.firstFormGroup.value.vendorCtrl,
             device_class: this.firstFormGroup.value.classCtrl,
             img: this.firstFormGroup.value.imgCtrl,
             description: this.firstFormGroup.value.descCtrl,
@@ -159,12 +159,12 @@ export class DeviceTypesDialogComponent implements OnInit {
         this.hideAddDeviceClass = input;
     }
 
-    hideVendor(input: boolean): void {
-        if (input) {
-            this.vendorInputFormControl.setValue('');
-        }
-        this.hideAddVendor = input;
-    }
+    // hideVendor(input: boolean): void {
+    //     if (input) {
+    //         this.vendorInputFormControl.setValue('');
+    //     }
+    //     this.hideAddVendor = input;
+    // }
 
     addDeviceClass(): void {
         this.deviceTypeService.createDeviceClass(this.deviceClassInputFormControl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
@@ -178,17 +178,17 @@ export class DeviceTypesDialogComponent implements OnInit {
         });
     }
 
-    addVendor(): void {
-        this.deviceTypeService.createVendor(this.vendorInputFormControl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
-            if (resp) {
-                const newVendor: DeviceTypeVendorModel = {id: resp.created_id, name: this.vendorInputFormControl.value};
-                this.firstFormGroup.patchValue({'vendorCtrl': newVendor});
-                this.deviceTypeVendors.push(newVendor);
-            }
-            this.vendorInputFormControl.setValue('');
-            this.hideVendor(false);
-        });
-    }
+    // addVendor(): void {
+    //     this.deviceTypeService.createVendor(this.vendorInputFormControl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
+    //         if (resp) {
+    //             const newVendor: DeviceTypeVendorModel = {id: resp.created_id, name: this.vendorInputFormControl.value};
+    //             this.firstFormGroup.patchValue({'vendorCtrl': newVendor});
+    //             this.deviceTypeVendors.push(newVendor);
+    //         }
+    //         this.vendorInputFormControl.setValue('');
+    //         this.hideVendor(false);
+    //     });
+    // }
 
     focusDeviceClass(input: boolean): void {
         if (!input) {
@@ -201,16 +201,16 @@ export class DeviceTypesDialogComponent implements OnInit {
         }
     }
 
-    focusVendor(input: boolean): void {
-        if (!input) {
-            /** timeout needed that user can click add button */
-            setTimeout(() => {
-                this.vendorInputFocus = input;
-            }, buttonChangeTime);
-        } else {
-            this.vendorInputFocus = input;
-        }
-    }
+    // focusVendor(input: boolean): void {
+    //     if (!input) {
+    //         /** timeout needed that user can click add button */
+    //         setTimeout(() => {
+    //             this.vendorInputFocus = input;
+    //         }, buttonChangeTime);
+    //     } else {
+    //         this.vendorInputFocus = input;
+    //     }
+    // }
 
     checkIfAssignmentExists(input: DeviceTypeAssignmentModel): boolean {
         if ((input.name === null || input.name === '') &&
@@ -255,7 +255,7 @@ export class DeviceTypesDialogComponent implements OnInit {
             descCtrl: [this.deviceType.description, Validators.required],
             imgCtrl: [this.deviceType.img],
             classCtrl: [this.deviceType.device_class, Validators.required],
-            vendorCtrl: [this.deviceType.vendor, Validators.required],
+            // vendorCtrl: [this.deviceType.vendor, Validators.required],
             generatedCtrl: [this.deviceType.generated || false],
         });
         this.disableSaveButton(this.firstFormGroup.status);
@@ -273,7 +273,7 @@ export class DeviceTypesDialogComponent implements OnInit {
 
         if (this.deviceType.generated) {
             this.firstFormGroup.controls['classCtrl'].disable();
-            this.firstFormGroup.controls['vendorCtrl'].disable();
+            // this.firstFormGroup.controls['vendorCtrl'].disable();
             this.secondFormGroup.disable();
         }
 
@@ -371,10 +371,10 @@ export class DeviceTypesDialogComponent implements OnInit {
             (deviceTypeClasses: DeviceTypeClassModel[]) => {
                 this.deviceTypeClasses = deviceTypeClasses;
             });
-        this.deviceTypeService.getDeviceTypeVendors('', 9999, 0).subscribe(
-            (deviceTypeVendors: DeviceTypeVendorModel[]) => {
-                this.deviceTypeVendors = deviceTypeVendors;
-            });
+        // this.deviceTypeService.getDeviceTypeVendors('', 9999, 0).subscribe(
+        //     (deviceTypeVendors: DeviceTypeVendorModel[]) => {
+        //         this.deviceTypeVendors = deviceTypeVendors;
+        //     });
         this.deviceTypeService.getDeviceTypeProtocols('', 9999, 0).subscribe(
             (deviceTypeProtocols: DeviceTypeProtocolModel[]) => {
                 this.deviceTypeProtocols = deviceTypeProtocols;
