@@ -24,8 +24,8 @@ import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
-import {DeviceTypeModel} from '../../device-types/shared/device-type.model';
-import {DeviceTypeService} from '../../device-types/shared/device-type.service';
+import {DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../device-types-overview/shared/device-type.service';
 import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 

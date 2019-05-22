@@ -39,10 +39,10 @@ const grids = new Map([
 
 @Component({
     selector: 'senergy-device-types',
-    templateUrl: './device-types.component.html',
-    styleUrls: ['./device-types.component.css']
+    templateUrl: './device-types-overview.component.html',
+    styleUrls: ['./device-types-overview.component.css']
 })
-export class DeviceTypesComponent implements OnInit, OnDestroy {
+export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
 
     deviceTypes: DeviceTypePermSearchModel[] = [];
     gridCols = 0;

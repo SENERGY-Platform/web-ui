@@ -36,8 +36,8 @@ import {
 import {
     DeviceTypeSelectionRefModel,
     DeviceTypeSelectionResultModel
-} from '../../devices/device-types/shared/device-type-selection.model';
-import {DeviceTypeDialogService} from '../../devices/device-types/shared/device-type-dialog.service';
+} from '../../devices/device-types-overview/shared/device-type-selection.model';
+import {DeviceTypeDialogService} from '../../devices/device-types-overview/shared/device-type-dialog.service';
 import {DesignerDialogService} from './shared/designer-dialog.service';
 import {DesignerService} from './shared/designer.service';
 import {ProcessRepoService} from '../process-repo/shared/process-repo.service';

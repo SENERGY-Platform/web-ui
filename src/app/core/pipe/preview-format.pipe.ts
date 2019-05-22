@@ -16,8 +16,8 @@
  */
 
 import {Pipe, PipeTransform} from '@angular/core';
-import {DeviceTypeAssignmentModel} from '../../modules/devices/device-types/shared/device-type.model';
-import {DeviceTypeService} from '../../modules/devices/device-types/shared/device-type.service';
+import {DeviceTypeAssignmentModel} from '../../modules/devices/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../modules/devices/device-types-overview/shared/device-type.service';
 import {Observable} from 'rxjs';
 
 @Pipe({name: 'previewFormat'})

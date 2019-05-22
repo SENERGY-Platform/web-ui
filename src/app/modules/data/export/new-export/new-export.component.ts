@@ -17,8 +17,8 @@
 import {Component, OnInit} from '@angular/core';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
-import {DeviceTypeService} from '../../../devices/device-types/shared/device-type.service';
-import {DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-types/shared/device-type.model';
+import {DeviceTypeService} from '../../../devices/device-types-overview/shared/device-type.service';
+import {DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
 import {ExportModel, ExportValueModel} from '../shared/export.model';
 import {ExportService} from '../shared/export.service';
 import {MatSnackBar} from '@angular/material';

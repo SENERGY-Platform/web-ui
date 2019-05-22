@@ -43,7 +43,7 @@ import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {DeviceInstancesComponent} from './device-instances/device-instances.component';
 import {NetworksComponent} from './networks/networks.component';
 import {ValueTypesComponent} from './value-types/value-types.component';
-import {DeviceTypesComponent} from './device-types/device-types.component';
+import {DeviceTypesOverviewComponent} from './device-types-overview/device-types-overview.component';
 import {CoreModule} from '../../core/core.module';
 import {NetworksEditDialogComponent} from './networks/dialogs/networks-edit-dialog.component';
 import {DeviceInstancesServiceDialogComponent} from './device-instances/dialogs/device-instances-service-dialog.component';
@@ -51,9 +51,10 @@ import {DeviceInstancesEditDialogComponent} from './device-instances/dialogs/dev
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NetworksClearDialogComponent} from './networks/dialogs/networks-clear-dialog.component';
 import {ValueTypesNewDialogComponent} from './value-types/dialogs/value-types-new-dialog.component';
-import {SelectDeviceTypeAndServiceDialogComponent} from './device-types/dialogs/select-device-type-and-service-dialog.component';
-import {DeviceTypesDialogComponent} from './device-types/dialogs/device-types-dialog.component';
+import {SelectDeviceTypeAndServiceDialogComponent} from './device-types-overview/dialogs/select-device-type-and-service-dialog.component';
+import {DeviceTypesDialogComponent} from './device-types-overview/dialogs/device-types-dialog.component';
 import {DeviceInstancesGridComponent} from './device-instances/device-instances-grid/device-instances-grid.component';
+
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -62,7 +63,7 @@ const deviceInstances = {
     component: DeviceInstancesComponent,
     data: {header: 'Devices'}
 };
-const deviceTypes = {path: 'devices/devicetypes', pathMatch: 'full', component: DeviceTypesComponent, data: {header: 'Devices'}};
+const deviceTypes = {path: 'devices/devicetypesoverview', pathMatch: 'full', component: DeviceTypesOverviewComponent, data: {header: 'Devices'}};
 const valueTypes = {path: 'devices/valuetypes', pathMatch: 'full', component: ValueTypesComponent, data: {header: 'Devices'}};
 
 @NgModule({
@@ -101,7 +102,7 @@ const valueTypes = {path: 'devices/valuetypes', pathMatch: 'full', component: Va
         NetworksComponent,
         NetworksEditDialogComponent,
         DeviceInstancesComponent,
-        DeviceTypesComponent,
+        DeviceTypesOverviewComponent,
         ValueTypesComponent,
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
