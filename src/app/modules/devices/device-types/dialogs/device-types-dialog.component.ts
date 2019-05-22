@@ -148,6 +148,13 @@ export class DeviceTypesDialogComponent implements OnInit {
         return a.id === b.id;
     }
 
+    compareUri(a: any, b: any): boolean {
+        if (b === null) {
+            return false;
+        }
+        return a.uri === b.uri;
+    }
+
     expand(control: FormGroup): void {
         control.patchValue({'show': !control.value.show});
     }
@@ -169,7 +176,7 @@ export class DeviceTypesDialogComponent implements OnInit {
     addDeviceClass(): void {
         this.deviceTypeService.createDeviceClass(this.deviceClassInputFormControl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
             if (resp) {
-                const newTypeClass: DeviceTypeClassModel = {id: resp.created_id, name: this.deviceClassInputFormControl.value};
+                const newTypeClass: DeviceTypeClassModel = {uri: resp.uri, label: this.deviceClassInputFormControl.value};
                 this.firstFormGroup.patchValue({'classCtrl': newTypeClass});
                 this.deviceTypeClasses.push(newTypeClass);
             }
@@ -367,7 +374,7 @@ export class DeviceTypesDialogComponent implements OnInit {
     }
 
     private loadData(): void {
-        this.deviceTypeService.getDeviceTypeClasses('', 9999, 0).subscribe(
+        this.deviceTypeService.getDeviceTypeClasses(9999, 0).subscribe(
             (deviceTypeClasses: DeviceTypeClassModel[]) => {
                 this.deviceTypeClasses = deviceTypeClasses;
             });

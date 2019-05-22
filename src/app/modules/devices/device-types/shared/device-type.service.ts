@@ -68,9 +68,9 @@ export class DeviceTypeService {
         );
     }
 
-    getDeviceTypeClasses(searchText: string, limit: number, offset: number): Observable<DeviceTypeClassModel[]> {
+    getDeviceTypeClasses(limit: number, offset: number): Observable<DeviceTypeClassModel[]> {
         return this.http.get<DeviceTypeClassModel[]>
-        (environment.iotRepoUrl + '/ui/search/others/deviceClasses/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset).pipe(
+        (environment.iotRepoUrl + '/deviceclasses?limit=' + limit + '&offset' + offset).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeClasses', []))
         );

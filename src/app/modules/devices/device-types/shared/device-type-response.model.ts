@@ -16,5 +16,5 @@
  */
 
 export interface DeviceTypeResponseModel {
-    created_id: string;
+    uri: string;
 }

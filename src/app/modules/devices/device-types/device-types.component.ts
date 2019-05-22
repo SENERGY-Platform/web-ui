@@ -197,7 +197,7 @@ export class DeviceTypesComponent implements OnInit, OnDestroy {
             services: [],
             // vendor: deviceTypeIn.vendor.name,
             img: deviceTypeIn.img,
-            device_class: deviceTypeIn.device_class.name,
+            device_class: deviceTypeIn.device_class.label,
             description: deviceTypeIn.description,
             creator: 'unknown',
             id: deviceTypeIn.id,

@@ -30,8 +30,8 @@ export interface DeviceTypeModel {
 }
 
 export interface DeviceTypeClassModel {
-    id: string;
-    name: string;
+    uri: string;
+    label: string;
 }
 
 export interface DeviceTypeServiceModel {

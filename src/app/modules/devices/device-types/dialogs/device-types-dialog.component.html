@@ -37,11 +37,11 @@
                         <tr>
                             <td *ngIf="hideAddDeviceClass === false">
                                 <mat-form-field class="full-width" color="accent">
-                                    <mat-select placeholder="Device class" [compareWith]="compareId"
+                                    <mat-select placeholder="Device class" [compareWith]="compareUri"
                                                 formControlName="classCtrl" [required]="!deviceType.generated">
                                         <mat-option *ngFor="let deviceTypeClass of deviceTypeClasses"
                                                     [value]="deviceTypeClass">
-                                            {{deviceTypeClass.name}}
+                                            {{deviceTypeClass.label}}
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
