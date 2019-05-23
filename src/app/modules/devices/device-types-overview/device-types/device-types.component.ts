@@ -30,6 +30,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {ValueTypesService} from '../../value-types/shared/value-types.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
+import {DeviceTypesNewSensorActuatorDialogComponent} from './dialogs/device-types-new-sensor-actuator-dialog.component';
 
 interface ServiceTypeDataStructure {
     url: string;
@@ -173,8 +174,26 @@ export class DeviceTypesComponent implements OnInit {
                 });
             }
         });
-
     }
+
+    newSensorActuator() {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        const editDialogRef = this.dialog.open(DeviceTypesNewSensorActuatorDialogComponent, dialogConfig);
+
+        // editDialogRef.afterClosed().subscribe((label: string) => {
+        //     if (label !== undefined) {
+        //         this.deviceTypeService.createDeviceClass(label).subscribe((resp: DeviceTypeResponseModel | null) => {
+        //             if (resp) {
+        //                 const newTypeClass: DeviceTypeClassModel = {uri: resp.uri, label: label};
+        //                 this.firstFormGroup.patchValue({'classCtrl': newTypeClass});
+        //                 this.deviceTypeClasses.push(newTypeClass);
+        //             }
+        //         });
+        //     }
+        // });
+    }
+
 
     private cleanUpServices() {
         this.secondFormGroup.value.services.forEach((service: DeviceTypeServiceModel) => {

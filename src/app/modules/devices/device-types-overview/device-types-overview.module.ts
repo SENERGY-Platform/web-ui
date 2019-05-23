@@ -35,7 +35,7 @@ import {
     MatMenuModule,
     MatOptionModule,
     MatPaginatorModule,
-    MatProgressSpinnerModule,
+    MatProgressSpinnerModule, MatRadioModule,
     MatSelectModule,
     MatSortModule,
     MatStepperModule,
@@ -49,6 +49,7 @@ import {CoreModule} from '../../../core/core.module';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {DeviceTypesNewDeviceClassDialogComponent} from './device-types/dialogs/device-types-new-device-class-dialog.component';
+import {DeviceTypesNewSensorActuatorDialogComponent} from './device-types/dialogs/device-types-new-sensor-actuator-dialog.component';
 
 const devicetypes = {path: 'devices/devicetypesoverview/devicetypes', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Devices' }};
 // const operatorEdit = {path: 'data/operator-repo/op/:id', pathMatch: 'full', component: OperatorComponent, data: { header: 'Analytics' }};
@@ -84,14 +85,17 @@ const devicetypes = {path: 'devices/devicetypesoverview/devicetypes', pathMatch:
         MatCheckboxModule,
         MatSortModule,
         MatProgressSpinnerModule,
+        MatRadioModule,
         RouterModule.forChild([devicetypes]),
     ],
     declarations: [
         DeviceTypesComponent,
         DeviceTypesNewDeviceClassDialogComponent,
+        DeviceTypesNewSensorActuatorDialogComponent,
     ],
     entryComponents: [
         DeviceTypesNewDeviceClassDialogComponent,
+        DeviceTypesNewSensorActuatorDialogComponent,
     ]
 })
 export class DeviceTypesOverviewModule {

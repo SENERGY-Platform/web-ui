@@ -15,20 +15,9 @@
  *  limitations under the License.
  */
 
-.device-type-container {
-    height: calc(100% - 64px);
-}
-
-.device-type-container ::ng-deep .mat-step-header .mat-step-icon-selected {
-    background-color: #4484ce; /* cc */
-    color: white;
-}
-
-.device-type-container ::ng-deep .mat-stepper-horizontal, .mat-stepper-vertical {
-    background-color: #fafafa;
-}
-
 .form {
+    min-width: 500px;
+    max-width: 800px;
     width: 100%;
 }
 
@@ -36,25 +25,12 @@
     width: 100%;
 }
 
-.button-save-margin {
-    margin-left: 4px;
-    margin-right: 4px;
-}
-
-.button-margin {
+.mat-radio-button ~ .mat-radio-button {
     margin-top: 16px;
+    margin-bottom: 16px;
+    margin-left: 16px;
 }
 
-.divider-margin {
-    margin-left: 8px;
-    margin-right: 8px;
-}
-
-.word-wrap {
-    white-space: pre-wrap;
-    white-space: -moz-pre-wrap;
-    white-space: -o-pre-wrap;
-}
 .table-button-size {
     width: 40px;
 }

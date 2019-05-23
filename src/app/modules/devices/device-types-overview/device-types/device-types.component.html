@@ -44,7 +44,7 @@
                                     </mat-select>
                                 </mat-form-field>
                             </td>
-                            <td>
+                            <td class="table-button-size">
                                 <button mat-icon-button class="mat-accent" (click)="newDeviceClass()"
                                         [disabled]="deviceType.generated || !editable">
                                     <mat-icon matTooltip="create new device class">playlist_add</mat-icon>
@@ -86,7 +86,7 @@
                                         <tr>
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
-                                                    <mat-select placeholder="Service type"
+                                                    <mat-select placeholder="Sensor/Actuator"
                                                                 formControlName="service_type"
                                                                 required>
                                                         <mat-option
@@ -96,6 +96,11 @@
                                                         </mat-option>
                                                     </mat-select>
                                                 </mat-form-field>
+                                            </td>
+                                            <td class="table-button-size">
+                                                <button mat-icon-button class="mat-accent" (click)="newSensorActuator()">
+                                                    <mat-icon matTooltip="create new sensor/actuator">playlist_add</mat-icon>
+                                                </button>
                                             </td>
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
