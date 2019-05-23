@@ -52,7 +52,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NetworksClearDialogComponent} from './networks/dialogs/networks-clear-dialog.component';
 import {ValueTypesNewDialogComponent} from './value-types/dialogs/value-types-new-dialog.component';
 import {SelectDeviceTypeAndServiceDialogComponent} from './device-types-overview/dialogs/select-device-type-and-service-dialog.component';
-import {DeviceTypesDialogComponent} from './device-types-overview/dialogs/device-types-dialog.component';
 import {DeviceInstancesGridComponent} from './device-instances/device-instances-grid/device-instances-grid.component';
 import {DeviceTypesOverviewModule} from './device-types-overview/device-types-overview.module';
 
@@ -111,7 +110,6 @@ const valueTypes = {path: 'devices/valuetypes', pathMatch: 'full', component: Va
         NetworksClearDialogComponent,
         ValueTypesNewDialogComponent,
         SelectDeviceTypeAndServiceDialogComponent,
-        DeviceTypesDialogComponent,
         DeviceInstancesGridComponent,
     ],
     entryComponents: [
@@ -121,7 +119,6 @@ const valueTypes = {path: 'devices/valuetypes', pathMatch: 'full', component: Va
         NetworksClearDialogComponent,
         ValueTypesNewDialogComponent,
         SelectDeviceTypeAndServiceDialogComponent,
-        DeviceTypesDialogComponent,
         DeviceInstancesGridComponent,
     ]
 })

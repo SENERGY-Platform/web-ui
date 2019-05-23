@@ -88,48 +88,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         }
     }
 
-    newDeviceType() {
-        const newDeviceType: DeviceTypeModel = {} as DeviceTypeModel;
-        this.deviceTypeDialogService.openDeviceTypeDialog(newDeviceType, true).afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
-            if (deviceTypeResp !== undefined) {
-                this.saveDeviceType(deviceTypeResp);
-            }
-        });
-    }
-
-    edit(deviceTypeInput: DeviceTypePermSearchModel) {
-        this.deviceTypeService.getDeviceType(deviceTypeInput.id).subscribe((deviceType: (DeviceTypeModel | null)) => {
-            if (deviceType !== null) {
-                this.deviceTypeDialogService.openDeviceTypeDialog(deviceType, true).afterClosed().subscribe((deviceTypeResp: DeviceTypeModel) => {
-                    if (deviceTypeResp !== undefined) {
-                        this.updateDeviceType(deviceTypeResp, deviceTypeInput);
-                    }
-                });
-            }
-        });
-    }
-
-    copy(deviceTypeInput: DeviceTypePermSearchModel) {
-        this.deviceTypeService.getDeviceType(deviceTypeInput.id).subscribe((deviceType: (DeviceTypeModel | null)) => {
-            if (deviceType !== null) {
-                this.deviceTypeDialogService.openDeviceTypeDialog(this.resetIds(deviceType), true).afterClosed().subscribe(
-                    (deviceTypeResp: DeviceTypeModel) => {
-                        if (deviceTypeResp !== undefined) {
-                            this.saveDeviceType(deviceTypeResp);
-                        }
-                    });
-            }
-        });
-    }
-
-    details(deviceTypeInput: DeviceTypePermSearchModel) {
-        this.deviceTypeService.getDeviceType(deviceTypeInput.id).subscribe((deviceType: (DeviceTypeModel | null)) => {
-            if (deviceType !== null) {
-                this.deviceTypeDialogService.openDeviceTypeDialog(deviceType, false);
-            }
-        });
-    }
-
     delete(deviceTypeInput: DeviceTypePermSearchModel) {
         this.dialogsService.openDeleteDialog('device type: ' + deviceTypeInput.name).afterClosed().subscribe((deviceTypeDelete: boolean) => {
             if (deviceTypeDelete) {

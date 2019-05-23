@@ -16,21 +16,15 @@
 
 import {Injectable} from '@angular/core';
 import {DeviceTypeSelectionRefModel, DeviceTypeSelectionResultModel} from './device-type-selection.model';
-import {MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material';
 import {SelectDeviceTypeAndServiceDialogComponent} from '../dialogs/select-device-type-and-service-dialog.component';
-import {DeviceTypeModel} from './device-type.model';
-import {DeviceTypesDialogComponent} from '../dialogs/device-types-dialog.component';
-import {DeviceTypeService} from './device-type.service';
-import {Observable} from 'rxjs';
-import {DeleteDialogComponent} from '../../../../core/dialogs/delete-dialog.component';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DeviceTypeDialogService {
 
-    constructor(private dialog: MatDialog,
-                private deviceTypeService: DeviceTypeService) {
+    constructor(private dialog: MatDialog) {
     }
 
     openSelectDeviceTypeAndServiceDialog(defaultSelection: DeviceTypeSelectionRefModel, callback: (connectorInfo: DeviceTypeSelectionResultModel) => void) {
@@ -43,15 +37,5 @@ export class DeviceTypeDialogService {
                 callback(result);
             }
         });
-    }
-
-    openDeviceTypeDialog(deviceType: DeviceTypeModel, editable: boolean): MatDialogRef<DeviceTypesDialogComponent> {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
-            deviceType: deviceType,
-            editable: editable,
-        };
-        return this.dialog.open(DeviceTypesDialogComponent, dialogConfig);
     }
 }
