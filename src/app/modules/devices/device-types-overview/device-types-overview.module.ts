@@ -48,6 +48,7 @@ import {CommonModule} from '@angular/common';
 import {CoreModule} from '../../../core/core.module';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {DeviceTypesNewDeviceClassDialogComponent} from './device-types/dialogs/device-types-new-device-class-dialog.component';
 
 const devicetypes = {path: 'devices/devicetypesoverview/devicetypes', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Devices' }};
 // const operatorEdit = {path: 'data/operator-repo/op/:id', pathMatch: 'full', component: OperatorComponent, data: { header: 'Analytics' }};
@@ -87,7 +88,11 @@ const devicetypes = {path: 'devices/devicetypesoverview/devicetypes', pathMatch:
     ],
     declarations: [
         DeviceTypesComponent,
+        DeviceTypesNewDeviceClassDialogComponent,
     ],
+    entryComponents: [
+        DeviceTypesNewDeviceClassDialogComponent,
+    ]
 })
 export class DeviceTypesOverviewModule {
 }

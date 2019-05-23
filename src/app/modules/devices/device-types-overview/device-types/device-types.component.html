@@ -33,7 +33,7 @@
                     <table class="full-width" cellspacing="0">
                         <!--section Device Class-->
                         <tr>
-                            <td *ngIf="hideAddDeviceClass === false">
+                            <td>
                                 <mat-form-field class="full-width" color="accent">
                                     <mat-select placeholder="Device class" [compareWith]="compareUri"
                                                 formControlName="classCtrl" [required]="!deviceType.generated">
@@ -44,22 +44,10 @@
                                     </mat-select>
                                 </mat-form-field>
                             </td>
-                            <td *ngIf="hideAddDeviceClass === false">
-                                <button mat-icon-button class="mat-accent" (click)="hideDeviceClass(true)" [disabled]="deviceType.generated || !editable">
+                            <td>
+                                <button mat-icon-button class="mat-accent" (click)="newDeviceClass()"
+                                        [disabled]="deviceType.generated || !editable">
                                     <mat-icon matTooltip="create new device class">playlist_add</mat-icon>
-                                </button>
-                            </td>
-                            <td *ngIf="hideAddDeviceClass === true">
-                                <mat-form-field class="full-width" color="accent">
-                                    <input (focus)="focusDeviceClass(true)" (focusout)="focusDeviceClass(false)" type="text" matInput placeholder="Please insert device class" [formControl]="deviceClassInputFormControl">
-                                </mat-form-field>
-                            </td>
-                            <td *ngIf="hideAddDeviceClass === true">
-                                <button *ngIf="!deviceClassInputFocus" mat-icon-button class="mat-accent" (click)="hideDeviceClass(false)">
-                                    <mat-icon  matTooltip="return to list">undo</mat-icon>
-                                </button>
-                                <button *ngIf="deviceClassInputFocus" mat-icon-button [disabled]="deviceClassInputFormControl.value === ''" class="mat-accent" (click)="addDeviceClass()">
-                                    <mat-icon  matTooltip="add device class">add</mat-icon>
                                 </button>
                             </td>
                             <!--&lt;!&ndash;section Vendor&ndash;&gt;-->
@@ -95,7 +83,8 @@
                             <!--</tr>-->
                     </table>
                     <mat-form-field class="full-width" color="accent">
-                        <input [disabled]="true" matInput placeholder="Generated" [value]="deviceType.generated ? 'yes' : 'no'">
+                        <input [disabled]="true" matInput placeholder="Generated"
+                               [value]="deviceType.generated ? 'yes' : 'no'">
                     </mat-form-field>
                 </div>
             </form>
@@ -104,7 +93,8 @@
             <form [formGroup]="secondFormGroup">
                 <ng-template matStepLabel>Service</ng-template>
                 <mat-accordion formArrayName="services" *ngIf="secondFormGroup.get('services')">
-                    <mat-expansion-panel [formGroupName]="i" *ngFor="let control of secondFormGroup.get('services').controls; let i = index">
+                    <mat-expansion-panel [formGroupName]="i"
+                                         *ngFor="let control of secondFormGroup.get('services').controls; let i = index">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
                                 Service {{control.value.name}}
@@ -117,7 +107,8 @@
                                         <input matInput placeholder="Name" formControlName="name" required>
                                     </mat-form-field>
                                     <mat-form-field class="full-width" color="accent">
-                                        <input matInput placeholder="Description" formControlName="description" required>
+                                        <input matInput placeholder="Description" formControlName="description"
+                                               required>
                                     </mat-form-field>
                                     <mat-form-field class="full-width" color="accent">
                                         <input matInput placeholder="URL" formControlName="url" required>
@@ -160,7 +151,7 @@
                                      *ngFor="let tab of [{label: 'Input', formArrayName: 'input'},{label: 'Output', formArrayName: 'output'}]">
                                 <div [formGroupName]="i"
                                      *ngFor="let control of control.get(tab.formArrayName).controls;  let i = index">
-                                    <div fxLayout="row" fxLayoutAlign="start center" >
+                                    <div fxLayout="row" fxLayoutAlign="start center">
                                         <button mat-icon-button class="mat-accent"
                                                 (click)="expand(control)">
                                             <mat-icon>{{control.value.show ? 'expand_less' : 'expand_more'}}</mat-icon>
@@ -211,7 +202,8 @@
                                             </div>
                                             <!-- WARNING!!! DONT REFORMAT LINE BELOW-->
                                             <!-- PreviewFormat will change-->
-                                            <pre class="word-wrap" *ngSwitchCase="true">{{control.value | previewFormat | async }}</pre>
+                                            <pre class="word-wrap"
+                                                 *ngSwitchCase="true">{{control.value | previewFormat | async }}</pre>
                                         </div>
                                     </div>
                                 </div>
@@ -239,7 +231,9 @@
             <div>
                 <div fxFlex></div>
                 <button class="mat-raised-button color-accent button-save-margin" (click)="close()">Cancel</button>
-                <button class="mat-raised-button mat-accent button-save-margin" [disabled]="disableSave" (click)="save()">Save</button>
+                <button class="mat-raised-button mat-accent button-save-margin" [disabled]="disableSave"
+                        (click)="save()">Save
+                </button>
             </div>
         </mat-step>
     </mat-horizontal-stepper>

@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {
     DeviceTypeAssignmentModel,
     DeviceTypeClassModel,
@@ -26,9 +26,10 @@ import {
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {DeviceTypeResponseModel} from '../shared/device-type-response.model';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {ValueTypesService} from '../../value-types/shared/value-types.service';
+import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 
 interface ServiceTypeDataStructure {
     url: string;
@@ -73,7 +74,6 @@ export class DeviceTypesComponent implements OnInit {
     secondFormGroup: FormGroup = new FormGroup({services: this._formBuilder.array([])});
     deviceClassInputFormControl = new FormControl('');
     // vendorInputFormControl = new FormControl('');
-    hideAddDeviceClass = false;
     hideAddVendor = false;
     deviceClassInputFocus = false;
     // vendorInputFocus = false;
@@ -82,7 +82,8 @@ export class DeviceTypesComponent implements OnInit {
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
-                private valueTypesService: ValueTypesService) {
+                private valueTypesService: ValueTypesService,
+                private dialog: MatDialog) {
         // this.deviceType = data.deviceType;
         this.deviceType = {} as DeviceTypeModel;
         // this.editable = data.editable;
@@ -155,31 +156,12 @@ export class DeviceTypesComponent implements OnInit {
         control.patchValue({'show': !control.value.show});
     }
 
-    hideDeviceClass(input: boolean): void {
-        if (input) {
-            this.deviceClassInputFormControl.setValue('');
-        }
-        this.hideAddDeviceClass = input;
-    }
-
     // hideVendor(input: boolean): void {
     //     if (input) {
     //         this.vendorInputFormControl.setValue('');
     //     }
     //     this.hideAddVendor = input;
     // }
-
-    addDeviceClass(): void {
-        this.deviceTypeService.createDeviceClass(this.deviceClassInputFormControl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
-            if (resp) {
-                const newTypeClass: DeviceTypeClassModel = {uri: resp.uri, label: this.deviceClassInputFormControl.value};
-                this.firstFormGroup.patchValue({'classCtrl': newTypeClass});
-                this.deviceTypeClasses.push(newTypeClass);
-            }
-            this.deviceClassInputFormControl.setValue('');
-            this.hideDeviceClass(false);
-        });
-    }
 
     // addVendor(): void {
     //     this.deviceTypeService.createVendor(this.vendorInputFormControl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
@@ -192,17 +174,6 @@ export class DeviceTypesComponent implements OnInit {
     //         this.hideVendor(false);
     //     });
     // }
-
-    focusDeviceClass(input: boolean): void {
-        if (!input) {
-            /** timeout needed that user can click add button */
-            setTimeout(() => {
-                this.deviceClassInputFocus = input;
-            }, buttonChangeTime);
-        } else {
-            this.deviceClassInputFocus = input;
-        }
-    }
 
     // focusVendor(input: boolean): void {
     //     if (!input) {
@@ -223,6 +194,25 @@ export class DeviceTypesComponent implements OnInit {
         } else {
             return true;
         }
+    }
+
+    newDeviceClass() {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        const editDialogRef = this.dialog.open(DeviceTypesNewDeviceClassDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((label: string) => {
+            if (label !== undefined) {
+                this.deviceTypeService.createDeviceClass(label).subscribe((resp: DeviceTypeResponseModel | null) => {
+                    if (resp) {
+                        const newTypeClass: DeviceTypeClassModel = {uri: resp.uri, label: label};
+                        this.firstFormGroup.patchValue({'classCtrl': newTypeClass});
+                        this.deviceTypeClasses.push(newTypeClass);
+                    }
+                });
+            }
+        });
+
     }
 
     private cleanUpServices() {
