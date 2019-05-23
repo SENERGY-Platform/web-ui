@@ -76,14 +76,6 @@ export class DeviceTypeService {
         );
     }
 
-    getDeviceTypeVendors(searchText: string, limit: number, offset: number): Observable<DeviceTypeVendorModel[]> {
-        return this.http.get<DeviceTypeVendorModel[]>
-        (environment.iotRepoUrl + '/ui/search/others/vendors/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeVendors', []))
-        );
-    }
-
     getDeviceTypeProtocols(searchText: string, limit: number, offset: number): Observable<DeviceTypeProtocolModel[]> {
         return this.http.get<DeviceTypeProtocolModel[]>
         (environment.iotRepoUrl + '/ui/search/others/protocols/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset).pipe(
@@ -101,12 +93,6 @@ export class DeviceTypeService {
     createDeviceClass(label: string): Observable<DeviceTypeResponseModel | null> {
         return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/deviceclasses', {label: label}).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createDeviceClass', null))
-        );
-    }
-
-    createVendor(name: string): Observable<DeviceTypeResponseModel | null> {
-        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/other/vendor', {name: name}).pipe(
-            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createVendor', null))
         );
     }
 

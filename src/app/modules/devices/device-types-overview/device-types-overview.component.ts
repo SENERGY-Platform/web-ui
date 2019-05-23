@@ -153,7 +153,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     private convertDeviceTypes(deviceTypeIn: DeviceTypeModel): DeviceTypePermSearchModel {
         return {
             services: [],
-            // vendor: deviceTypeIn.vendor.name,
             img: deviceTypeIn.img,
             device_class: deviceTypeIn.device_class.label,
             description: deviceTypeIn.description,
