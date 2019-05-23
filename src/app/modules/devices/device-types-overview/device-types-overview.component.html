@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<div class="device-type-container">
+<div class="device-type-overview-container">
     <div fxLayout="row">
         <senergy-searchbar fxFlex></senergy-searchbar>
         <senergy-sort [sortAttributes]="sortAttributes"
@@ -79,7 +79,7 @@
         </div>
     </div>
 </div>
-<button mat-fab class="fab" matTooltip="Add new device type" (click)="newDeviceType()">
+<button mat-fab class="fab" routerLink="devicetypes" matTooltip="Add new device type">
     <mat-icon>add</mat-icon>
 </button>
 

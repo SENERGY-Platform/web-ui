@@ -54,6 +54,7 @@ import {ValueTypesNewDialogComponent} from './value-types/dialogs/value-types-ne
 import {SelectDeviceTypeAndServiceDialogComponent} from './device-types-overview/dialogs/select-device-type-and-service-dialog.component';
 import {DeviceTypesDialogComponent} from './device-types-overview/dialogs/device-types-dialog.component';
 import {DeviceInstancesGridComponent} from './device-instances/device-instances-grid/device-instances-grid.component';
+import {DeviceTypesOverviewModule} from './device-types-overview/device-types-overview.module';
 
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
@@ -97,6 +98,7 @@ const valueTypes = {path: 'devices/valuetypes', pathMatch: 'full', component: Va
         MatCheckboxModule,
         MatSortModule,
         MatProgressSpinnerModule,
+        DeviceTypesOverviewModule,
         RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes])],
     declarations: [
         NetworksComponent,

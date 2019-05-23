@@ -39,7 +39,7 @@ mat-grid-tile {
     text-overflow: ellipsis;
 }
 
-.device-type-container {
+.device-type-overview-container {
     height: calc(100% - 64px);
     overflow-y: hidden;
 }
