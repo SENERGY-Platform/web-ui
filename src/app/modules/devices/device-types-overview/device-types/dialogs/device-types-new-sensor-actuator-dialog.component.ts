@@ -18,6 +18,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material';
 import {FormControl, FormGroup} from '@angular/forms';
+import {DeviceTypeService} from '../../shared/device-type.service';
 
 const buttonChangeTime = 500;
 
@@ -35,7 +36,8 @@ export class DeviceTypesNewSensorActuatorDialogComponent {
     hideAddProperty = false;
     propertyInputFocus = false;
 
-    constructor(private dialogRef: MatDialogRef<DeviceTypesNewSensorActuatorDialogComponent>){
+    constructor(private dialogRef: MatDialogRef<DeviceTypesNewSensorActuatorDialogComponent>,
+                private deviceTypeService: DeviceTypeService) {
     }
 
     close(): void {
@@ -61,6 +63,11 @@ export class DeviceTypesNewSensorActuatorDialogComponent {
     }
 
     addProperty(input: boolean): void {
+        if (this.optionsCtrl.value === 'sensor') {
+            this.deviceTypeService.createObservableProperty(this.propertyInputCtrl.value).subscribe();
+        } else {
+            this.deviceTypeService.createActuatableProperty(this.propertyInputCtrl.value).subscribe();
+        }
         this.hideProperty(input);
     }
 

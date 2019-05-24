@@ -96,6 +96,18 @@ export class DeviceTypeService {
         );
     }
 
+    createActuatableProperty(label: string): Observable<DeviceTypeResponseModel | null> {
+        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/actuatableproperty', {label: label}).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createActuatableProperty', null))
+        );
+    }
+
+    createObservableProperty(label: string): Observable<DeviceTypeResponseModel | null> {
+        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/observableproperty', {label: label}).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createObservableProperty', null))
+        );
+    }
+
     updateDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
         return this.http.post<DeviceTypeModel>(environment.iotRepoUrl + '/deviceType/' + encodeURIComponent(deviceType.id), deviceType).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'updateDeviceType', null))
