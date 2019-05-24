@@ -23,7 +23,7 @@ import {Observable} from 'rxjs';
 import {
     DeviceTypeAssignmentModel,
     DeviceTypeClassModel,
-    DeviceTypeModel,
+    DeviceTypeModel, DeviceTypePropertiesModel,
     DeviceTypeProtocolModel,
     DeviceTypeVendorModel
 } from './device-type.model';
@@ -68,11 +68,19 @@ export class DeviceTypeService {
         );
     }
 
-    getDeviceTypeClasses(limit: number, offset: number): Observable<DeviceTypeClassModel[]> {
+    getDeviceClasses(limit: number, offset: number): Observable<DeviceTypeClassModel[]> {
         return this.http.get<DeviceTypeClassModel[]>
         (environment.iotRepoUrl + '/deviceclasses?limit=' + limit + '&offset' + offset).pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeClasses', []))
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceClasses', []))
+        );
+    }
+
+    getProperties(propertyType: string, limit: number, offset: number): Observable<DeviceTypeClassModel[]> {
+        return this.http.get<DeviceTypePropertiesModel[]>
+        (environment.iotRepoUrl + '/' + propertyType + '?limit=' + limit + '&offset' + offset).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getProperties', []))
         );
     }
 
@@ -97,13 +105,13 @@ export class DeviceTypeService {
     }
 
     createActuatableProperty(label: string): Observable<DeviceTypeResponseModel | null> {
-        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/actuatableproperty', {label: label}).pipe(
+        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/actuatableproperties', {label: label}).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createActuatableProperty', null))
         );
     }
 
     createObservableProperty(label: string): Observable<DeviceTypeResponseModel | null> {
-        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/observableproperty', {label: label}).pipe(
+        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/observableproperties', {label: label}).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createObservableProperty', null))
         );
     }

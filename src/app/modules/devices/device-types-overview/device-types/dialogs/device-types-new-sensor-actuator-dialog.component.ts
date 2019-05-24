@@ -19,6 +19,8 @@ import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material';
 import {FormControl, FormGroup} from '@angular/forms';
 import {DeviceTypeService} from '../../shared/device-type.service';
+import {DeviceTypeClassModel, DeviceTypePropertiesModel} from '../../shared/device-type.model';
+import {DeviceTypeResponseModel} from '../../shared/device-type-response.model';
 
 const buttonChangeTime = 500;
 
@@ -26,18 +28,24 @@ const buttonChangeTime = 500;
     templateUrl: './device-types-new-sensor-actuator-dialog.component.html',
     styleUrls: ['./device-types-new-sensor-actuator-dialog.component.css']
 })
-export class DeviceTypesNewSensorActuatorDialogComponent {
+export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
 
     optionsCtrl = new FormControl('sensor');
     propertyCtrl = new FormControl('');
     propertyInputCtrl = new FormControl('');
 
+    properties: DeviceTypePropertiesModel[] = [];
+
     selection = '';
     hideAddProperty = false;
-    propertyInputFocus = false;
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesNewSensorActuatorDialogComponent>,
                 private deviceTypeService: DeviceTypeService) {
+    }
+
+    ngOnInit(): void {
+        this.loadData();
+        this.initCtrlChanges();
     }
 
     close(): void {
@@ -55,20 +63,55 @@ export class DeviceTypesNewSensorActuatorDialogComponent {
         return a.uri === b.uri;
     }
 
-    hideProperty(input: boolean): void {
-        if (input) {
+    showPropertyInput(show: boolean): void {
+        if (show) {
             this.propertyInputCtrl.setValue('');
         }
-        this.hideAddProperty = input;
+        this.hideAddProperty = show;
     }
 
-    addProperty(input: boolean): void {
+    addProperty(): void {
         if (this.optionsCtrl.value === 'sensor') {
-            this.deviceTypeService.createObservableProperty(this.propertyInputCtrl.value).subscribe();
+            this.deviceTypeService.createObservableProperty(this.propertyInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
+                this.addPropertyToList(resp);
+            });
         } else {
-            this.deviceTypeService.createActuatableProperty(this.propertyInputCtrl.value).subscribe();
+            this.deviceTypeService.createActuatableProperty(this.propertyInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
+                this.addPropertyToList(resp);
+            });
         }
-        this.hideProperty(input);
+    }
+
+    private initCtrlChanges() {
+        this.optionsCtrl.valueChanges.subscribe(() => {
+            this.propertyCtrl.setValue('');
+            this.loadData();
+        });
+    }
+
+    private addPropertyToList(resp: DeviceTypeResponseModel | null) {
+        if (resp != null) {
+            const newProperty: DeviceTypePropertiesModel = {uri: resp.uri, label: this.propertyInputCtrl.value};
+            this.propertyCtrl.setValue(newProperty);
+            this.properties.push(newProperty);
+        }
+        this.showPropertyInput(false);
+    }
+
+    private loadData() {
+        if (this.optionsCtrl.value === 'sensor') {
+            this.deviceTypeService.getProperties('observableproperties', 9999, 0).subscribe(
+                (properties: DeviceTypePropertiesModel[]) => {
+                    this.properties = properties;
+                }
+            );
+        } else {
+            this.deviceTypeService.getProperties('actuatableproperties', 9999, 0).subscribe(
+                (properties: DeviceTypePropertiesModel[]) => {
+                    this.properties = properties;
+                }
+            );
+        }
     }
 
 }

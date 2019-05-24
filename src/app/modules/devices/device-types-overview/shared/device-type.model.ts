@@ -83,3 +83,8 @@ export interface DeviceTypeConfigFieldTypeModel {
     id: string;
     name: string;
 }
+
+export interface DeviceTypePropertiesModel {
+    uri: string;
+    label: string;
+}
