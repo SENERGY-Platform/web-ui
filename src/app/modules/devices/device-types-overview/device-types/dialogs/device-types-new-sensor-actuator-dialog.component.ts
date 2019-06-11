@@ -19,7 +19,7 @@ import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material';
 import {FormControl, FormGroup} from '@angular/forms';
 import {DeviceTypeService} from '../../shared/device-type.service';
-import {DeviceTypeClassModel, DeviceTypePropertiesModel} from '../../shared/device-type.model';
+import {DeviceTypeClassModel, DeviceTypeFeatureOfInterestModel, DeviceTypePropertiesModel} from '../../shared/device-type.model';
 import {DeviceTypeResponseModel} from '../../shared/device-type-response.model';
 
 const buttonChangeTime = 500;
@@ -33,11 +33,14 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
     optionsCtrl = new FormControl('sensor');
     propertyCtrl = new FormControl('');
     propertyInputCtrl = new FormControl('');
+    featureOfInterestCtrl = new FormControl('');
+    featureOfInterestInputCtrl = new FormControl('');
 
     properties: DeviceTypePropertiesModel[] = [];
+    featureOfInterests: DeviceTypeFeatureOfInterestModel[] = [];
 
-    selection = '';
     hideAddProperty = false;
+    hideAddFeatureOfInterest = false;
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesNewSensorActuatorDialogComponent>,
                 private deviceTypeService: DeviceTypeService) {
@@ -70,6 +73,13 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
         this.hideAddProperty = show;
     }
 
+    showFeatureOfInterestInput(show: boolean): void {
+        if (show) {
+            this.featureOfInterestInputCtrl.setValue('');
+        }
+        this.hideAddFeatureOfInterest = show;
+    }
+
     addProperty(): void {
         if (this.optionsCtrl.value === 'sensor') {
             this.deviceTypeService.createObservableProperty(this.propertyInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
@@ -80,6 +90,12 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
                 this.addPropertyToList(resp);
             });
         }
+    }
+
+    addFeatureOfInterest(): void {
+        this.deviceTypeService.createFeatureOfInterest(this.featureOfInterestInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
+            this.addFeatureOfInterestToList(resp);
+        });
     }
 
     private initCtrlChanges() {
@@ -98,6 +114,16 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
         this.showPropertyInput(false);
     }
 
+    private addFeatureOfInterestToList(resp: DeviceTypeResponseModel | null) {
+        if (resp != null) {
+            const newFoI: DeviceTypeFeatureOfInterestModel = {uri: resp.uri, label: this.featureOfInterestInputCtrl.value};
+            this.featureOfInterestCtrl.setValue(newFoI);
+            this.featureOfInterests.push(newFoI);
+        }
+        this.showFeatureOfInterestInput(false);
+    }
+
+
     private loadData() {
         if (this.optionsCtrl.value === 'sensor') {
             this.deviceTypeService.getProperties('observableproperties', 9999, 0).subscribe(
@@ -112,6 +138,12 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
                 }
             );
         }
+
+        this.deviceTypeService.getFeatureOfInterests(9999, 0).subscribe(
+            (featureOfInterests: DeviceTypeFeatureOfInterestModel[]) => {
+                    this.featureOfInterests = featureOfInterests;
+            }
+        )
     }
 
 }

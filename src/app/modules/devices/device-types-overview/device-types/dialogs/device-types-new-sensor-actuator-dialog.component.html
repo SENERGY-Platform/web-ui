@@ -64,6 +64,42 @@
             </tr>
         </table>
 
+        <table class="full-width" cellspacing="0">
+            <tr>
+                <td *ngIf="hideAddFeatureOfInterest === false">
+                    <mat-form-field class="full-width" color="accent">
+                        <mat-select placeholder="Select Feature of Interest" [compareWith]="compareUri"
+                                    [formControl]="featureOfInterestCtrl" required>
+                            <mat-option *ngFor="let featureOfInterest of featureOfInterests"
+                                        [value]="featureOfInterest">
+                                {{featureOfInterest.label}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </td>
+                <td *ngIf="hideAddFeatureOfInterest === false" class="table-button-size">
+                    <button mat-icon-button class="mat-accent" (click)="showFeatureOfInterestInput(true)">
+                        <mat-icon matTooltip="create new feature of interest">playlist_add</mat-icon>
+                    </button>
+                </td>
+                <td *ngIf="hideAddFeatureOfInterest === true">
+                    <mat-form-field class="full-width" color="accent">
+                        <input type="text" matInput placeholder="Please insert feature of interest" [formControl]="featureOfInterestInputCtrl">
+                    </mat-form-field>
+                </td>
+                <td *ngIf="hideAddFeatureOfInterest === true" class="table-button-size">
+                    <button mat-icon-button [disabled]="featureOfInterestInputCtrl.value === ''" class="mat-accent" (click)="addFeatureOfInterest()">
+                        <mat-icon matTooltip="add feature of interest">add</mat-icon>
+                    </button>
+                </td>
+                <td *ngIf="hideAddFeatureOfInterest === true" class="table-button-size">
+                    <button mat-icon-button class="mat-accent" (click)="showFeatureOfInterestInput(false)">
+                        <mat-icon matTooltip="return to list">undo</mat-icon>
+                    </button>
+                </td>
+            </tr>
+        </table>
+
     </form>
 </mat-dialog-content>
 

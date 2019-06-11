@@ -22,7 +22,7 @@ import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {
     DeviceTypeAssignmentModel,
-    DeviceTypeClassModel,
+    DeviceTypeClassModel, DeviceTypeFeatureOfInterestModel,
     DeviceTypeModel, DeviceTypePropertiesModel,
     DeviceTypeProtocolModel,
     DeviceTypeVendorModel
@@ -76,6 +76,14 @@ export class DeviceTypeService {
         );
     }
 
+    getFeatureOfInterests(limit: number, offset: number): Observable<DeviceTypeFeatureOfInterestModel[]> {
+        return this.http.get<DeviceTypeFeatureOfInterestModel[]>
+        (environment.iotRepoUrl + '/featureofinterests?limit=' + limit + '&offset' + offset).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getFeatureOfInterests', []))
+        );
+    }
+
     getProperties(propertyType: string, limit: number, offset: number): Observable<DeviceTypeClassModel[]> {
         return this.http.get<DeviceTypePropertiesModel[]>
         (environment.iotRepoUrl + '/' + propertyType + '?limit=' + limit + '&offset' + offset).pipe(
@@ -113,6 +121,12 @@ export class DeviceTypeService {
     createObservableProperty(label: string): Observable<DeviceTypeResponseModel | null> {
         return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/observableproperties', {label: label}).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createObservableProperty', null))
+        );
+    }
+
+    createFeatureOfInterest(label: string): Observable<DeviceTypeResponseModel | null> {
+        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/featureofinterests', {label: label}).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createFeatureOfInterest', null))
         );
     }
 

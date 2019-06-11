@@ -88,3 +88,8 @@ export interface DeviceTypePropertiesModel {
     uri: string;
     label: string;
 }
+
+export interface DeviceTypeFeatureOfInterestModel {
+    uri: string;
+    label: string;
+}
