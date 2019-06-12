@@ -107,6 +107,12 @@ export interface DeviceTypeCreateSensorModel {
     feature_of_interest_uri: string;
 }
 
+export interface DeviceTypeCreateSensorActuatorModel {
+    label: string;
+    property_uri: string;
+    feature_of_interest_uri: string;
+}
+
 export interface DeviceTypeSensorModel {
     uri: string;
     label: string;

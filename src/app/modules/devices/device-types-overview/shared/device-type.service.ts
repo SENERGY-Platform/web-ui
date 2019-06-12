@@ -24,7 +24,7 @@ import {
     DeviceTypeAssignmentModel,
     DeviceTypeClassModel, DeviceTypeFeatureOfInterestModel,
     DeviceTypeModel, DeviceTypePropertiesModel,
-    DeviceTypeProtocolModel, DeviceTypeCreateSensorModel, DeviceTypeSensorModel,
+    DeviceTypeProtocolModel, DeviceTypeSensorModel, DeviceTypeCreateSensorActuatorModel,
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
@@ -137,9 +137,15 @@ export class DeviceTypeService {
         );
     }
 
-    createSensor(sensor: DeviceTypeCreateSensorModel): Observable<DeviceTypeResponseModel | null> {
-        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/sensors', sensor).pipe(
+    createSensor(create: DeviceTypeCreateSensorActuatorModel): Observable<DeviceTypeResponseModel | null> {
+        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/sensors', create).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createSensor', null))
+        );
+    }
+
+    createActuator(create: DeviceTypeCreateSensorActuatorModel): Observable<DeviceTypeResponseModel | null> {
+        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/actuators', create).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createActuator', null))
         );
     }
 

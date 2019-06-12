@@ -189,7 +189,7 @@ export class DeviceTypesComponent implements OnInit {
                     this.deviceTypeService.createSensor({
                             label: response.label,
                             feature_of_interest_uri: response.featureOfInterest.uri,
-                            observable_property_uri: response.property.uri
+                            property_uri: response.property.uri
                         }
                     ).subscribe((sensor: DeviceTypeResponseModel | null) => {
                         if (sensor === null) {
@@ -198,6 +198,22 @@ export class DeviceTypesComponent implements OnInit {
                             this.sensorActuatorGroup[0].array.push({uri: sensor.uri, label: response.label});
                             this.setSensorActuatorValue(serviceIndex, sensor.uri);
                             this.snackBar.open('Sensor created successfully.', undefined, {duration: 2000});
+                        }
+                    });
+                }
+                if (response.type === SystemType.Actuator) {
+                    this.deviceTypeService.createActuator({
+                            label: response.label,
+                            feature_of_interest_uri: response.featureOfInterest.uri,
+                            property_uri: response.property.uri
+                        }
+                    ).subscribe((actuator: DeviceTypeResponseModel | null) => {
+                        if (actuator === null) {
+                            this.snackBar.open('Error while creating the Actuator!', undefined, {duration: 2000});
+                        } else {
+                            this.sensorActuatorGroup[1].array.push({uri: actuator.uri, label: response.label});
+                            this.setSensorActuatorValue(serviceIndex, actuator.uri);
+                            this.snackBar.open('Actuator created successfully.', undefined, {duration: 2000});
                         }
                     });
                 }
