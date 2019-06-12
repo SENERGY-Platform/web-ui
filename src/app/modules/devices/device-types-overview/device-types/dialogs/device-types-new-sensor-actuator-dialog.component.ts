@@ -16,7 +16,7 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {MatDialogRef} from '@angular/material';
+import {MatDialogRef, MatSnackBar} from '@angular/material';
 import {FormControl} from '@angular/forms';
 import {DeviceTypeService} from '../../shared/device-type.service';
 import {
@@ -45,7 +45,8 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
     hideAddFeatureOfInterest = false;
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesNewSensorActuatorDialogComponent>,
-                private deviceTypeService: DeviceTypeService) {
+                private deviceTypeService: DeviceTypeService,
+                private snackBar: MatSnackBar) {
     }
 
     ngOnInit(): void {
@@ -90,18 +91,33 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
     addProperty(): void {
         if (this.optionsCtrl.value === SystemType.Sensor) {
             this.deviceTypeService.createObservableProperty(this.propertyInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
-                this.addPropertyToList(resp);
+                if (resp === null) {
+                    this.snackBar.open('Error while creating the Observable Property!', undefined, {duration: 2000});
+                } else {
+                    this.addPropertyToList(resp);
+                    this.snackBar.open('Observable Property created successfully.', undefined, {duration: 2000});
+                }
             });
         } else {
             this.deviceTypeService.createActuatableProperty(this.propertyInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
-                this.addPropertyToList(resp);
+                if (resp === null) {
+                    this.snackBar.open('Error while creating the Actuatable Property!', undefined, {duration: 2000});
+                } else {
+                    this.addPropertyToList(resp);
+                    this.snackBar.open('Actuatable Property created successfully.', undefined, {duration: 2000});
+                }
             });
         }
     }
 
     addFeatureOfInterest(): void {
         this.deviceTypeService.createFeatureOfInterest(this.featureOfInterestInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
-            this.addFeatureOfInterestToList(resp);
+            if (resp === null) {
+                this.snackBar.open('Error while creating the Feature of Interest!', undefined, {duration: 2000});
+            } else {
+                this.addFeatureOfInterestToList(resp);
+                this.snackBar.open('Feature of Interest created successfully.', undefined, {duration: 2000});
+            }
         });
     }
 
