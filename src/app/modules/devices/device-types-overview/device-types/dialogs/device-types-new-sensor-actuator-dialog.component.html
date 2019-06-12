@@ -25,7 +25,7 @@
         </mat-radio-group>
         <mat-form-field class="full-width" color="accent">
             <mat-label>Label</mat-label>
-            <input #input matInput placeholder="Label" required>
+            <input [formControl]="labelCtrl" matInput placeholder="Label" required>
         </mat-form-field>
 
         <table class="full-width" cellspacing="0">
@@ -48,11 +48,13 @@
                 </td>
                 <td *ngIf="hideAddProperty === true">
                     <mat-form-field class="full-width" color="accent">
-                        <input type="text" matInput placeholder="Please insert property" [formControl]="propertyInputCtrl">
+                        <input type="text" matInput placeholder="Please insert property"
+                               [formControl]="propertyInputCtrl">
                     </mat-form-field>
                 </td>
                 <td *ngIf="hideAddProperty === true" class="table-button-size">
-                    <button mat-icon-button [disabled]="propertyInputCtrl.value === ''" class="mat-accent" (click)="addProperty()">
+                    <button mat-icon-button [disabled]="propertyInputCtrl.value === ''" class="mat-accent"
+                            (click)="addProperty()">
                         <mat-icon matTooltip="add property">add</mat-icon>
                     </button>
                 </td>
@@ -84,11 +86,13 @@
                 </td>
                 <td *ngIf="hideAddFeatureOfInterest === true">
                     <mat-form-field class="full-width" color="accent">
-                        <input type="text" matInput placeholder="Please insert feature of interest" [formControl]="featureOfInterestInputCtrl">
+                        <input type="text" matInput placeholder="Please insert feature of interest"
+                               [formControl]="featureOfInterestInputCtrl">
                     </mat-form-field>
                 </td>
                 <td *ngIf="hideAddFeatureOfInterest === true" class="table-button-size">
-                    <button mat-icon-button [disabled]="featureOfInterestInputCtrl.value === ''" class="mat-accent" (click)="addFeatureOfInterest()">
+                    <button mat-icon-button [disabled]="featureOfInterestInputCtrl.value === ''" class="mat-accent"
+                            (click)="addFeatureOfInterest()">
                         <mat-icon matTooltip="add feature of interest">add</mat-icon>
                     </button>
                 </td>
@@ -105,5 +109,8 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="save(input.value)">Save</button>
+    <button class="mat-raised-button mat-accent"
+            [disabled]="labelCtrl.invalid || propertyCtrl.invalid || featureOfInterestCtrl.invalid || hideAddProperty || hideAddFeatureOfInterest"
+            (click)="save()">Save
+    </button>
 </mat-dialog-actions>

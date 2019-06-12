@@ -93,3 +93,21 @@ export interface DeviceTypeFeatureOfInterestModel {
     uri: string;
     label: string;
 }
+
+export interface DeviceTypesSensorActuatorModel {
+    type: SystemType;
+    label: string;
+    property: DeviceTypePropertiesModel;
+    featureOfInterest: DeviceTypeFeatureOfInterestModel;
+}
+
+export interface DeviceTypesCreateSensorModel {
+    label: string;
+    observable_property_uri: string;
+    feature_of_interest_uri: string;
+}
+
+export enum SystemType {
+    Sensor = 'sensor',
+    Actuator = 'actuator',
+}

@@ -24,8 +24,7 @@ import {
     DeviceTypeAssignmentModel,
     DeviceTypeClassModel, DeviceTypeFeatureOfInterestModel,
     DeviceTypeModel, DeviceTypePropertiesModel,
-    DeviceTypeProtocolModel,
-    DeviceTypeVendorModel
+    DeviceTypeProtocolModel, DeviceTypesCreateSensorModel,
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
@@ -129,6 +128,13 @@ export class DeviceTypeService {
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createFeatureOfInterest', null))
         );
     }
+
+    createSensor(sensor: DeviceTypesCreateSensorModel): Observable<DeviceTypeResponseModel | null> {
+        return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/sensors', sensor).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createSensor', null))
+        );
+    }
+
 
     updateDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
         return this.http.post<DeviceTypeModel>(environment.iotRepoUrl + '/deviceType/' + encodeURIComponent(deviceType.id), deviceType).pipe(

@@ -19,12 +19,15 @@ import {Component, OnInit} from '@angular/core';
 import {
     DeviceTypeAssignmentModel,
     DeviceTypeClassModel,
-    DeviceTypeModel, DeviceTypeMsgStructureModel,
+    DeviceTypeModel,
+    DeviceTypeMsgStructureModel,
     DeviceTypeProtocolModel,
-    DeviceTypeServiceModel
+    DeviceTypeServiceModel,
+    DeviceTypesSensorActuatorModel,
+    SystemType
 } from '../shared/device-type.model';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {DeviceTypeResponseModel} from '../shared/device-type-response.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DeviceTypeService} from '../shared/device-type.service';
@@ -181,17 +184,20 @@ export class DeviceTypesComponent implements OnInit {
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(DeviceTypesNewSensorActuatorDialogComponent, dialogConfig);
 
-        // editDialogRef.afterClosed().subscribe((label: string) => {
-        //     if (label !== undefined) {
-        //         this.deviceTypeService.createDeviceClass(label).subscribe((resp: DeviceTypeResponseModel | null) => {
-        //             if (resp) {
-        //                 const newTypeClass: DeviceTypeClassModel = {uri: resp.uri, label: label};
-        //                 this.firstFormGroup.patchValue({'classCtrl': newTypeClass});
-        //                 this.deviceTypeClasses.push(newTypeClass);
-        //             }
-        //         });
-        //     }
-        // });
+        editDialogRef.afterClosed().subscribe((response: DeviceTypesSensorActuatorModel) => {
+            if (response !== undefined) {
+                if (response.type === SystemType.Sensor) {
+                    this.deviceTypeService.createSensor({
+                        label: response.label,
+                        feature_of_interest_uri: response.featureOfInterest.uri,
+                        observable_property_uri: response.property.uri
+                        }
+                    ).subscribe((resp: DeviceTypeResponseModel | null) => {
+                        console.log(resp);
+                    });
+                }
+            }
+        });
     }
 
 

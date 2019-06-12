@@ -17,12 +17,13 @@
 
 import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material';
-import {FormControl, FormGroup} from '@angular/forms';
+import {FormControl} from '@angular/forms';
 import {DeviceTypeService} from '../../shared/device-type.service';
-import {DeviceTypeClassModel, DeviceTypeFeatureOfInterestModel, DeviceTypePropertiesModel} from '../../shared/device-type.model';
+import {
+    DeviceTypeFeatureOfInterestModel,
+    DeviceTypePropertiesModel, DeviceTypesSensorActuatorModel, SystemType
+} from '../../shared/device-type.model';
 import {DeviceTypeResponseModel} from '../../shared/device-type-response.model';
-
-const buttonChangeTime = 500;
 
 @Component({
     templateUrl: './device-types-new-sensor-actuator-dialog.component.html',
@@ -30,6 +31,7 @@ const buttonChangeTime = 500;
 })
 export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
 
+    labelCtrl = new FormControl('');
     optionsCtrl = new FormControl('sensor');
     propertyCtrl = new FormControl('');
     propertyInputCtrl = new FormControl('');
@@ -55,8 +57,13 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    save(label: string): void {
-        this.dialogRef.close(label);
+    save(): void {
+        this.dialogRef.close({
+            type: this.optionsCtrl.value,
+            label: this.labelCtrl.value,
+            property: this.propertyCtrl.value,
+            featureOfInterest: this.featureOfInterestCtrl.value
+        } as DeviceTypesSensorActuatorModel);
     }
 
     compareUri(a: any, b: any): boolean {
@@ -81,7 +88,7 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
     }
 
     addProperty(): void {
-        if (this.optionsCtrl.value === 'sensor') {
+        if (this.optionsCtrl.value === SystemType.Sensor) {
             this.deviceTypeService.createObservableProperty(this.propertyInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
                 this.addPropertyToList(resp);
             });
@@ -125,7 +132,7 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
 
 
     private loadData() {
-        if (this.optionsCtrl.value === 'sensor') {
+        if (this.optionsCtrl.value === SystemType.Sensor) {
             this.deviceTypeService.getProperties('observableproperties', 9999, 0).subscribe(
                 (properties: DeviceTypePropertiesModel[]) => {
                     this.properties = properties;
@@ -141,9 +148,9 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
 
         this.deviceTypeService.getFeatureOfInterests(9999, 0).subscribe(
             (featureOfInterests: DeviceTypeFeatureOfInterestModel[]) => {
-                    this.featureOfInterests = featureOfInterests;
+                this.featureOfInterests = featureOfInterests;
             }
-        )
+        );
     }
 
 }
