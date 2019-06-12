@@ -23,33 +23,22 @@ import {
     DeviceTypeMsgStructureModel,
     DeviceTypeProtocolModel,
     DeviceTypeServiceModel,
-    DeviceTypesSensorActuatorModel,
+    DeviceTypeSensorActuatorModel, DeviceTypeSensorModel,
     SystemType
 } from '../shared/device-type.model';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {DeviceTypeResponseModel} from '../shared/device-type-response.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {ValueTypesService} from '../../value-types/shared/value-types.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewSensorActuatorDialogComponent} from './dialogs/device-types-new-sensor-actuator-dialog.component';
 
-interface ServiceTypeDataStructure {
-    url: string;
-    shortText: string;
-}
-
 interface FormatStructure {
     id: string;
     name: string;
 }
-
-const serviceTypeData: ServiceTypeDataStructure[] = [
-    {url: 'http://www.sepl.wifa.uni-leipzig.de/ontlogies/device-repo#Actuator', shortText: 'Actuator'},
-    {url: 'http://www.sepl.wifa.uni-leipzig.de/ontlogies/device-repo#Sensor', shortText: 'Sensor'},
-    {url: 'http://www.sepl.wifa.uni-leipzig.de/ontlogies/device-repo#Tag', shortText: 'Tag'},
-];
 
 const formatData: FormatStructure[] = [
     {id: 'http://www.sepl.wifa.uni-leipzig.de/ontlogies/device-repo#PlainText', name: 'Plain Text'},
@@ -70,8 +59,16 @@ export class DeviceTypesComponent implements OnInit {
     deviceTypeClasses: DeviceTypeClassModel[] = [];
     deviceTypeProtocols: DeviceTypeProtocolModel[] = [];
     deviceTypeValueTypes: ValueTypesModel[] = [];
-    deviceTypeServiceTypes = serviceTypeData;
     deviceTypeFormats = formatData;
+    sensorActuatorGroup: { name: string, array: DeviceTypeSensorModel[] }[] = [
+        {
+            name: 'Sensor', array: []
+        },
+        {
+            name: 'Actuator', array: []
+        }
+
+    ];
 
     firstFormGroup!: FormGroup;
     secondFormGroup: FormGroup = new FormGroup({services: this._formBuilder.array([])});
@@ -81,7 +78,8 @@ export class DeviceTypesComponent implements OnInit {
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
                 private valueTypesService: ValueTypesService,
-                private dialog: MatDialog) {
+                private dialog: MatDialog,
+                private snackBar: MatSnackBar) {
         this.deviceType = {} as DeviceTypeModel;
         this.editable = true;
     }
@@ -117,6 +115,7 @@ export class DeviceTypesComponent implements OnInit {
             description: [, Validators.required],
             url: [, Validators.required],
             service_type: [, Validators.required],
+            sensor_actuator: [, Validators.required],
             protocol: ['', Validators.required],
             input: [],
             output: [],
@@ -179,27 +178,39 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    newSensorActuator() {
+    newSensorActuator(serviceIndex: number) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(DeviceTypesNewSensorActuatorDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((response: DeviceTypesSensorActuatorModel) => {
+        editDialogRef.afterClosed().subscribe((response: DeviceTypeSensorActuatorModel) => {
             if (response !== undefined) {
                 if (response.type === SystemType.Sensor) {
                     this.deviceTypeService.createSensor({
-                        label: response.label,
-                        feature_of_interest_uri: response.featureOfInterest.uri,
-                        observable_property_uri: response.property.uri
+                            label: response.label,
+                            feature_of_interest_uri: response.featureOfInterest.uri,
+                            observable_property_uri: response.property.uri
                         }
-                    ).subscribe((resp: DeviceTypeResponseModel | null) => {
-                        console.log(resp);
+                    ).subscribe((sensor: DeviceTypeResponseModel | null) => {
+                        if (sensor === null) {
+                            this.snackBar.open('Error while creating the Sensor!', undefined, {duration: 2000});
+                        } else {
+                            this.sensorActuatorGroup[0].array.push({uri: sensor.uri, label: response.label});
+                            this.setSensorActuatorValue(serviceIndex, sensor.uri);
+                            this.snackBar.open('Sensor created successfully.', undefined, {duration: 2000});
+                        }
                     });
                 }
             }
         });
     }
 
+
+    private setSensorActuatorValue(serviceIndex: number, uri: string) {
+        const formArray = <FormArray>this.secondFormGroup.controls['services'];
+        const formGroup = <FormGroup>formArray.controls[serviceIndex];
+        formGroup.controls['sensor_actuator'].setValue(uri);
+    }
 
     private cleanUpServices() {
         this.secondFormGroup.value.services.forEach((service: DeviceTypeServiceModel) => {
@@ -351,6 +362,11 @@ export class DeviceTypesComponent implements OnInit {
         this.deviceTypeService.getDeviceTypeProtocols('', 9999, 0).subscribe(
             (deviceTypeProtocols: DeviceTypeProtocolModel[]) => {
                 this.deviceTypeProtocols = deviceTypeProtocols;
+            }
+        );
+        this.deviceTypeService.getDeviceTypeSensors(9999, 0).subscribe(
+            (sensors: DeviceTypeSensorModel[]) => {
+                this.sensorActuatorGroup[0].array = sensors;
             }
         );
         this.valueTypesService.getValuetypes('', 9999, 0, 'name', 'asc').subscribe(

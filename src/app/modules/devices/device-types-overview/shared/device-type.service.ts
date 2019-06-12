@@ -24,7 +24,7 @@ import {
     DeviceTypeAssignmentModel,
     DeviceTypeClassModel, DeviceTypeFeatureOfInterestModel,
     DeviceTypeModel, DeviceTypePropertiesModel,
-    DeviceTypeProtocolModel, DeviceTypesCreateSensorModel,
+    DeviceTypeProtocolModel, DeviceTypeCreateSensorModel, DeviceTypeSensorModel,
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
@@ -99,6 +99,14 @@ export class DeviceTypeService {
         );
     }
 
+    getDeviceTypeSensors(limit: number, offset: number): Observable<DeviceTypeSensorModel[]> {
+        return this.http.get<DeviceTypeSensorModel[]>
+        (environment.iotRepoUrl + '/sensors' + '?limit=' + limit + '&offset' + offset).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeSensors', []))
+        );
+    }
+
     getFormatPreview(assignmentModel: DeviceTypeAssignmentModel): Observable<string> {
         return this.http.post(environment.iotRepoUrl + '/format/preview', assignmentModel, {responseType: 'text'}).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeProtocols', 'error'))
@@ -129,7 +137,7 @@ export class DeviceTypeService {
         );
     }
 
-    createSensor(sensor: DeviceTypesCreateSensorModel): Observable<DeviceTypeResponseModel | null> {
+    createSensor(sensor: DeviceTypeCreateSensorModel): Observable<DeviceTypeResponseModel | null> {
         return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/sensors', sensor).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createSensor', null))
         );

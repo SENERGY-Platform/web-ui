@@ -21,7 +21,7 @@ import {FormControl} from '@angular/forms';
 import {DeviceTypeService} from '../../shared/device-type.service';
 import {
     DeviceTypeFeatureOfInterestModel,
-    DeviceTypePropertiesModel, DeviceTypesSensorActuatorModel, SystemType
+    DeviceTypePropertiesModel, DeviceTypeSensorActuatorModel, SystemType
 } from '../../shared/device-type.model';
 import {DeviceTypeResponseModel} from '../../shared/device-type-response.model';
 
@@ -64,7 +64,7 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
             label: this.labelCtrl.value,
             property: this.propertyCtrl.value,
             featureOfInterest: this.featureOfInterestCtrl.value
-        } as DeviceTypesSensorActuatorModel);
+        } as DeviceTypeSensorActuatorModel);
     }
 
     compareUri(a: any, b: any): boolean {

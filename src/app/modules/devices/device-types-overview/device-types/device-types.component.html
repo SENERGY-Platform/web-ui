@@ -31,7 +31,6 @@
                         <input matInput placeholder="Image" formControlName="imgCtrl">
                     </mat-form-field>
                     <table class="full-width" cellspacing="0">
-                        <!--section Device Class-->
                         <tr>
                             <td>
                                 <mat-form-field class="full-width" color="accent">
@@ -86,19 +85,18 @@
                                         <tr>
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
-                                                    <mat-select placeholder="Sensor/Actuator"
-                                                                formControlName="service_type"
-                                                                required>
-                                                        <mat-option
-                                                                *ngFor="let deviceTypeServiceType of deviceTypeServiceTypes"
-                                                                [value]="deviceTypeServiceType.url">
-                                                            {{deviceTypeServiceType.shortText}}
-                                                        </mat-option>
+                                                    <mat-label>Sensor/Actuator</mat-label>
+                                                    <mat-select formControlName="sensor_actuator">
+                                                        <mat-optgroup *ngFor="let group of sensorActuatorGroup" [label]="group.name">
+                                                            <mat-option *ngFor="let item of group.array" [value]="item.uri">
+                                                                {{item.label}}
+                                                            </mat-option>
+                                                        </mat-optgroup>
                                                     </mat-select>
                                                 </mat-form-field>
                                             </td>
                                             <td class="table-button-size">
-                                                <button mat-icon-button class="mat-accent" (click)="newSensorActuator()">
+                                                <button mat-icon-button class="mat-accent" (click)="newSensorActuator(i)">
                                                     <mat-icon matTooltip="create new sensor/actuator">playlist_add</mat-icon>
                                                 </button>
                                             </td>
