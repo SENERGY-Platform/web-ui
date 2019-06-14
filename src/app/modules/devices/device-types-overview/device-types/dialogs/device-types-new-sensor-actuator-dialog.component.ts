@@ -49,7 +49,8 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.loadData();
+        this.loadProperties();
+        this.loadFeatureOfInterests();
         this.initCtrlChanges();
     }
 
@@ -95,8 +96,12 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
 
     private initCtrlChanges() {
         this.optionsCtrl.valueChanges.subscribe(() => {
+            this.labelCtrl.setValue('');
             this.propertyCtrl.setValue('');
-            this.loadData();
+            this.featureOfInterestCtrl.setValue('');
+            this.loadProperties();
+            this.showPropertyInput(false);
+            this.showFeatureOfInterestInput(false);
         });
     }
 
@@ -115,14 +120,23 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
     }
 
 
-    private loadData() {
+    private loadFeatureOfInterests() {
+        this.deviceTypeService.getFeatureOfInterests(9999, 0).subscribe(
+            (featureOfInterests: DeviceTypeFeatureOfInterestModel[]) => {
+                this.featureOfInterests = featureOfInterests;
+            }
+        );
+    }
+
+    private loadProperties() {
         if (this.optionsCtrl.value === SystemType.Sensor) {
             this.deviceTypeService.getProperties('observableproperties', 9999, 0).subscribe(
                 (properties: DeviceTypePropertiesModel[]) => {
                     this.properties = properties;
                 }
             );
-        } else {
+        }
+        if (this.optionsCtrl.value === SystemType.Actuator) {
             this.deviceTypeService.getProperties('actuatableproperties', 9999, 0).subscribe(
                 (properties: DeviceTypePropertiesModel[]) => {
                     this.properties = properties;
@@ -130,11 +144,7 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
             );
         }
 
-        this.deviceTypeService.getFeatureOfInterests(9999, 0).subscribe(
-            (featureOfInterests: DeviceTypeFeatureOfInterestModel[]) => {
-                this.featureOfInterests = featureOfInterests;
-            }
-        );
+
     }
 
 }
