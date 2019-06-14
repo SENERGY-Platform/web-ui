@@ -103,6 +103,10 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
             this.showPropertyInput(false);
             this.showFeatureOfInterestInput(false);
         });
+        this.propertyCtrl.valueChanges.subscribe(() => {
+                this.featureOfInterestCtrl.setValue(this.propertyCtrl.value.feature_of_interest);
+            }
+        );
     }
 
     private addPropertyToList() {
