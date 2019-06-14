@@ -32,8 +32,10 @@
             <tr>
                 <td *ngIf="hideAddProperty === false">
                     <mat-form-field class="full-width" color="accent">
-                        <mat-select placeholder="Select Property" [compareWith]="compareUri"
-                                    [formControl]="propertyCtrl" required [disabled]="labelCtrl.invalid">
+                        <mat-select
+                                [placeholder]="optionsCtrl.value === 'sensor' ? 'Select Observable Property' : 'Select Actuatable Property'"
+                                [compareWith]="compareUri"
+                                [formControl]="propertyCtrl" required [disabled]="labelCtrl.invalid">
                             <mat-option *ngFor="let property of properties"
                                         [value]="property">
                                 {{property.label}}
@@ -72,7 +74,8 @@
                 <td *ngIf="hideAddFeatureOfInterest === false">
                     <mat-form-field class="full-width" color="accent">
                         <mat-select placeholder="Select Feature of Interest" [compareWith]="compareUri"
-                                    [formControl]="featureOfInterestCtrl" required [disabled]="labelCtrl.invalid || propertyCtrl.invalid">
+                                    [formControl]="featureOfInterestCtrl" required
+                                    [disabled]="labelCtrl.invalid || propertyCtrl.invalid || propertyCtrl.value.feature_of_interest !== null">
                             <mat-option *ngFor="let featureOfInterest of featureOfInterests"
                                         [value]="featureOfInterest">
                                 {{featureOfInterest.label}}
