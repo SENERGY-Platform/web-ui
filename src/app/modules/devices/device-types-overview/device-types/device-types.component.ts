@@ -377,6 +377,12 @@ export class DeviceTypesComponent implements OnInit {
                 this.sensorActuatorGroup[0].array = sensors;
             }
         );
+        this.deviceTypeService.getDeviceTypeActuators(9999, 0).subscribe(
+            (sensors: DeviceTypeSensorModel[]) => {
+                this.sensorActuatorGroup[1].array = sensors;
+            }
+        );
+
         this.valueTypesService.getValuetypes('', 9999, 0, 'name', 'asc').subscribe(
             (deviceTypeValueTypes: ValueTypesModel[]) => {
                 this.deviceTypeValueTypes = deviceTypeValueTypes;

@@ -116,6 +116,11 @@ export interface DeviceTypeSensorModel {
     label: string;
 }
 
+export interface DeviceTypeActuatorModel {
+    uri: string;
+    label: string;
+}
+
 export enum SystemType {
     Sensor = 'sensor',
     Actuator = 'actuator',

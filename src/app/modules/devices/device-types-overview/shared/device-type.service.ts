@@ -28,7 +28,7 @@ import {
     DeviceTypePropertiesModel,
     DeviceTypeProtocolModel,
     DeviceTypeSensorModel,
-    DeviceTypeCreateSensorModel, DeviceTypeCreateActuatorModel,
+    DeviceTypeCreateSensorModel, DeviceTypeCreateActuatorModel, DeviceTypeActuatorModel,
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
@@ -108,6 +108,14 @@ export class DeviceTypeService {
         (environment.iotRepoUrl + '/sensors' + '?limit=' + limit + '&offset' + offset).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeSensors', []))
+        );
+    }
+
+    getDeviceTypeActuators(limit: number, offset: number): Observable<DeviceTypeActuatorModel[]> {
+        return this.http.get<DeviceTypeActuatorModel[]>
+        (environment.iotRepoUrl + '/actuators' + '?limit=' + limit + '&offset' + offset).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeActuators', []))
         );
     }
 
