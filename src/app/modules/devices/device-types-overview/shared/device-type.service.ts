@@ -22,9 +22,13 @@ import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {
     DeviceTypeAssignmentModel,
-    DeviceTypeClassModel, DeviceTypeFeatureOfInterestModel,
-    DeviceTypeModel, DeviceTypePropertiesModel,
-    DeviceTypeProtocolModel, DeviceTypeSensorModel, DeviceTypeCreateSensorActuatorModel,
+    DeviceTypeClassModel,
+    DeviceTypeFeatureOfInterestModel,
+    DeviceTypeModel,
+    DeviceTypePropertiesModel,
+    DeviceTypeProtocolModel,
+    DeviceTypeSensorModel,
+    DeviceTypeCreateSensorModel, DeviceTypeCreateActuatorModel,
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
@@ -83,7 +87,7 @@ export class DeviceTypeService {
         );
     }
 
-    getProperties(propertyType: string, limit: number, offset: number): Observable<DeviceTypeClassModel[]> {
+    getProperties(propertyType: string, limit: number, offset: number): Observable<DeviceTypePropertiesModel[]> {
         return this.http.get<DeviceTypePropertiesModel[]>
         (environment.iotRepoUrl + '/' + propertyType + '?limit=' + limit + '&offset' + offset).pipe(
             map(resp => resp || []),
@@ -137,13 +141,13 @@ export class DeviceTypeService {
         );
     }
 
-    createSensor(create: DeviceTypeCreateSensorActuatorModel): Observable<DeviceTypeResponseModel | null> {
+    createSensor(create: DeviceTypeCreateSensorModel): Observable<DeviceTypeResponseModel | null> {
         return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/sensors', create).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createSensor', null))
         );
     }
 
-    createActuator(create: DeviceTypeCreateSensorActuatorModel): Observable<DeviceTypeResponseModel | null> {
+    createActuator(create: DeviceTypeCreateActuatorModel): Observable<DeviceTypeResponseModel | null> {
         return this.http.post<DeviceTypeResponseModel>(environment.iotRepoUrl + '/actuators', create).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createActuator', null))
         );

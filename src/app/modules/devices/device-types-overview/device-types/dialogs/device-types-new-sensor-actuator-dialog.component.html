@@ -25,7 +25,7 @@
         </mat-radio-group>
         <mat-form-field class="full-width" color="accent">
             <mat-label>Label</mat-label>
-            <input [formControl]="labelCtrl" matInput placeholder="Label" required>
+            <input [formControl]="labelCtrl" required matInput placeholder="Label">
         </mat-form-field>
 
         <table class="full-width" cellspacing="0">
@@ -33,7 +33,7 @@
                 <td *ngIf="hideAddProperty === false">
                     <mat-form-field class="full-width" color="accent">
                         <mat-select placeholder="Select Property" [compareWith]="compareUri"
-                                    [formControl]="propertyCtrl" required>
+                                    [formControl]="propertyCtrl" required [disabled]="labelCtrl.invalid">
                             <mat-option *ngFor="let property of properties"
                                         [value]="property">
                                 {{property.label}}
@@ -42,7 +42,8 @@
                     </mat-form-field>
                 </td>
                 <td *ngIf="hideAddProperty === false" class="table-button-size">
-                    <button mat-icon-button class="mat-accent" (click)="showPropertyInput(true)">
+                    <button mat-icon-button class="mat-accent" (click)="showPropertyInput(true)"
+                            [disabled]="labelCtrl.invalid">
                         <mat-icon matTooltip="create new property">playlist_add</mat-icon>
                     </button>
                 </td>
@@ -54,7 +55,7 @@
                 </td>
                 <td *ngIf="hideAddProperty === true" class="table-button-size">
                     <button mat-icon-button [disabled]="propertyInputCtrl.value === ''" class="mat-accent"
-                            (click)="addProperty()">
+                            (click)="addPropertyToList()">
                         <mat-icon matTooltip="add property">add</mat-icon>
                     </button>
                 </td>
@@ -71,7 +72,7 @@
                 <td *ngIf="hideAddFeatureOfInterest === false">
                     <mat-form-field class="full-width" color="accent">
                         <mat-select placeholder="Select Feature of Interest" [compareWith]="compareUri"
-                                    [formControl]="featureOfInterestCtrl" required>
+                                    [formControl]="featureOfInterestCtrl" required [disabled]="labelCtrl.invalid || propertyCtrl.invalid">
                             <mat-option *ngFor="let featureOfInterest of featureOfInterests"
                                         [value]="featureOfInterest">
                                 {{featureOfInterest.label}}
@@ -80,7 +81,8 @@
                     </mat-form-field>
                 </td>
                 <td *ngIf="hideAddFeatureOfInterest === false" class="table-button-size">
-                    <button mat-icon-button class="mat-accent" (click)="showFeatureOfInterestInput(true)">
+                    <button mat-icon-button class="mat-accent" (click)="showFeatureOfInterestInput(true)"
+                            [disabled]="labelCtrl.invalid || propertyCtrl.invalid">
                         <mat-icon matTooltip="create new feature of interest">playlist_add</mat-icon>
                     </button>
                 </td>
@@ -92,7 +94,7 @@
                 </td>
                 <td *ngIf="hideAddFeatureOfInterest === true" class="table-button-size">
                     <button mat-icon-button [disabled]="featureOfInterestInputCtrl.value === ''" class="mat-accent"
-                            (click)="addFeatureOfInterest()">
+                            (click)="addFeatureOfInterestToList()">
                         <mat-icon matTooltip="add feature of interest">add</mat-icon>
                     </button>
                 </td>

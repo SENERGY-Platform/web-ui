@@ -23,7 +23,6 @@ import {
     DeviceTypeFeatureOfInterestModel,
     DeviceTypePropertiesModel, DeviceTypeSensorActuatorModel, SystemType
 } from '../../shared/device-type.model';
-import {DeviceTypeResponseModel} from '../../shared/device-type-response.model';
 
 @Component({
     templateUrl: './device-types-new-sensor-actuator-dialog.component.html',
@@ -62,8 +61,14 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
         this.dialogRef.close({
             type: this.optionsCtrl.value,
             label: this.labelCtrl.value,
-            property: this.propertyCtrl.value,
-            featureOfInterest: this.featureOfInterestCtrl.value
+            property: {
+                uri: this.propertyCtrl.value.uri,
+                label: this.propertyCtrl.value.label,
+                feature_of_interest: {
+                    uri: this.featureOfInterestCtrl.value.uri,
+                    label: this.featureOfInterestCtrl.value.label,
+                }
+            }
         } as DeviceTypeSensorActuatorModel);
     }
 
@@ -88,39 +93,6 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
         this.hideAddFeatureOfInterest = show;
     }
 
-    addProperty(): void {
-        if (this.optionsCtrl.value === SystemType.Sensor) {
-            this.deviceTypeService.createObservableProperty(this.propertyInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
-                if (resp === null) {
-                    this.snackBar.open('Error while creating the Observable Property!', undefined, {duration: 2000});
-                } else {
-                    this.addPropertyToList(resp);
-                    this.snackBar.open('Observable Property created successfully.', undefined, {duration: 2000});
-                }
-            });
-        } else {
-            this.deviceTypeService.createActuatableProperty(this.propertyInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
-                if (resp === null) {
-                    this.snackBar.open('Error while creating the Actuatable Property!', undefined, {duration: 2000});
-                } else {
-                    this.addPropertyToList(resp);
-                    this.snackBar.open('Actuatable Property created successfully.', undefined, {duration: 2000});
-                }
-            });
-        }
-    }
-
-    addFeatureOfInterest(): void {
-        this.deviceTypeService.createFeatureOfInterest(this.featureOfInterestInputCtrl.value).subscribe((resp: DeviceTypeResponseModel | null) => {
-            if (resp === null) {
-                this.snackBar.open('Error while creating the Feature of Interest!', undefined, {duration: 2000});
-            } else {
-                this.addFeatureOfInterestToList(resp);
-                this.snackBar.open('Feature of Interest created successfully.', undefined, {duration: 2000});
-            }
-        });
-    }
-
     private initCtrlChanges() {
         this.optionsCtrl.valueChanges.subscribe(() => {
             this.propertyCtrl.setValue('');
@@ -128,21 +100,17 @@ export class DeviceTypesNewSensorActuatorDialogComponent implements OnInit {
         });
     }
 
-    private addPropertyToList(resp: DeviceTypeResponseModel | null) {
-        if (resp != null) {
-            const newProperty: DeviceTypePropertiesModel = {uri: resp.uri, label: this.propertyInputCtrl.value};
-            this.propertyCtrl.setValue(newProperty);
-            this.properties.push(newProperty);
-        }
+    private addPropertyToList() {
+        const newProperty: DeviceTypePropertiesModel = {uri: null, label: this.propertyInputCtrl.value, feature_of_interest: null};
+        this.propertyCtrl.setValue(newProperty);
+        this.properties.push(newProperty);
         this.showPropertyInput(false);
     }
 
-    private addFeatureOfInterestToList(resp: DeviceTypeResponseModel | null) {
-        if (resp != null) {
-            const newFoI: DeviceTypeFeatureOfInterestModel = {uri: resp.uri, label: this.featureOfInterestInputCtrl.value};
-            this.featureOfInterestCtrl.setValue(newFoI);
-            this.featureOfInterests.push(newFoI);
-        }
+    private addFeatureOfInterestToList() {
+        const newFoI: DeviceTypeFeatureOfInterestModel = {uri: null, label: this.featureOfInterestInputCtrl.value};
+        this.featureOfInterestCtrl.setValue(newFoI);
+        this.featureOfInterests.push(newFoI);
         this.showFeatureOfInterestInput(false);
     }
 

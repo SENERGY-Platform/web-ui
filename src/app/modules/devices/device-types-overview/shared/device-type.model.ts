@@ -85,12 +85,13 @@ export interface DeviceTypeConfigFieldTypeModel {
 }
 
 export interface DeviceTypePropertiesModel {
-    uri: string;
+    uri: string | null;
     label: string;
+    feature_of_interest: DeviceTypeFeatureOfInterestModel | null;
 }
 
 export interface DeviceTypeFeatureOfInterestModel {
-    uri: string;
+    uri: string | null;
     label: string;
 }
 
@@ -98,19 +99,16 @@ export interface DeviceTypeSensorActuatorModel {
     type: SystemType;
     label: string;
     property: DeviceTypePropertiesModel;
-    featureOfInterest: DeviceTypeFeatureOfInterestModel;
 }
 
 export interface DeviceTypeCreateSensorModel {
     label: string;
-    observable_property_uri: string;
-    feature_of_interest_uri: string;
+    property: DeviceTypePropertiesModel;
 }
 
-export interface DeviceTypeCreateSensorActuatorModel {
+export interface DeviceTypeCreateActuatorModel {
     label: string;
-    property_uri: string;
-    feature_of_interest_uri: string;
+    property: DeviceTypePropertiesModel;
 }
 
 export interface DeviceTypeSensorModel {

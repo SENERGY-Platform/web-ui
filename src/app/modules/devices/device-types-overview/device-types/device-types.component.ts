@@ -186,11 +186,7 @@ export class DeviceTypesComponent implements OnInit {
         editDialogRef.afterClosed().subscribe((response: DeviceTypeSensorActuatorModel) => {
             if (response !== undefined) {
                 if (response.type === SystemType.Sensor) {
-                    this.deviceTypeService.createSensor({
-                            label: response.label,
-                            feature_of_interest_uri: response.featureOfInterest.uri,
-                            property_uri: response.property.uri
-                        }
+                    this.deviceTypeService.createSensor({label: response.label, property: response.property}
                     ).subscribe((sensor: DeviceTypeResponseModel | null) => {
                         if (sensor === null) {
                             this.snackBar.open('Error while creating the Sensor!', undefined, {duration: 2000});
@@ -202,11 +198,7 @@ export class DeviceTypesComponent implements OnInit {
                     });
                 }
                 if (response.type === SystemType.Actuator) {
-                    this.deviceTypeService.createActuator({
-                            label: response.label,
-                            feature_of_interest_uri: response.featureOfInterest.uri,
-                            property_uri: response.property.uri
-                        }
+                    this.deviceTypeService.createActuator({label: response.label, property: response.property}
                     ).subscribe((actuator: DeviceTypeResponseModel | null) => {
                         if (actuator === null) {
                             this.snackBar.open('Error while creating the Actuator!', undefined, {duration: 2000});
