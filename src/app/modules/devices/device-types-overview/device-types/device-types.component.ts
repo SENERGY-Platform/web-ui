@@ -20,7 +20,7 @@ import {
     DeviceTypeAssignmentModel,
     DeviceTypeClassModel,
     DeviceTypeModel,
-    DeviceTypeMsgStructureModel,
+    DeviceTypeMsgSegmentModel,
     DeviceTypeProtocolModel,
     DeviceTypeServiceModel,
     DeviceTypeSensorActuatorModel, DeviceTypeSensorModel,
@@ -317,20 +317,20 @@ export class DeviceTypesComponent implements OnInit {
     private createAssignments(protocol: DeviceTypeProtocolModel, assignments: (DeviceTypeAssignmentModel[] | undefined)): FormArray {
 
         const array: FormGroup[] = [];
-        protocol.msg_structure.forEach((msg_structure_item: DeviceTypeMsgStructureModel) => {
+        protocol.msg_segment.forEach((mgSegmentElement: DeviceTypeMsgSegmentModel) => {
             if (assignments !== undefined) {
                 let itemMatch = false;
                 assignments.forEach((assignment: DeviceTypeAssignmentModel) => {
-                    if (assignment.msg_segment.id === msg_structure_item.id) {
+                    if (assignment.msg_segment.uri === mgSegmentElement.uri) {
                         array.push(this.createAssignmentGroup(assignment));
                         itemMatch = true;
                     }
                 });
                 if (!itemMatch) {
-                    array.push(this.createInitialAssignmentGroup(msg_structure_item));
+                    array.push(this.createInitialAssignmentGroup(mgSegmentElement));
                 }
             } else {
-                array.push(this.createInitialAssignmentGroup(msg_structure_item));
+                array.push(this.createInitialAssignmentGroup(mgSegmentElement));
             }
         });
 
@@ -349,7 +349,7 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    private createInitialAssignmentGroup(msg_structure: DeviceTypeMsgStructureModel): FormGroup {
+    private createInitialAssignmentGroup(msg_structure: DeviceTypeMsgSegmentModel): FormGroup {
         return this._formBuilder.group({
             id: [],
             name: [],
@@ -367,7 +367,7 @@ export class DeviceTypesComponent implements OnInit {
             (deviceTypeClasses: DeviceTypeClassModel[]) => {
                 this.deviceTypeClasses = deviceTypeClasses;
             });
-        this.deviceTypeService.getDeviceTypeProtocols('', 9999, 0).subscribe(
+        this.deviceTypeService.getDeviceTypeProtocols(9999, 0).subscribe(
             (deviceTypeProtocols: DeviceTypeProtocolModel[]) => {
                 this.deviceTypeProtocols = deviceTypeProtocols;
             }

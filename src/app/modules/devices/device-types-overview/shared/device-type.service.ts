@@ -95,9 +95,9 @@ export class DeviceTypeService {
         );
     }
 
-    getDeviceTypeProtocols(searchText: string, limit: number, offset: number): Observable<DeviceTypeProtocolModel[]> {
+    getDeviceTypeProtocols(limit: number, offset: number): Observable<DeviceTypeProtocolModel[]> {
         return this.http.get<DeviceTypeProtocolModel[]>
-        (environment.iotRepoUrl + '/ui/search/others/protocols/' + encodeURIComponent(searchText) + '/' + limit + '/' + offset).pipe(
+        (environment.iotRepoUrl + '/protocols' + '?limit=' + limit + '&offset' + offset).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeProtocols', []))
         );
@@ -121,7 +121,7 @@ export class DeviceTypeService {
 
     getFormatPreview(assignmentModel: DeviceTypeAssignmentModel): Observable<string> {
         return this.http.post(environment.iotRepoUrl + '/format/preview', assignmentModel, {responseType: 'text'}).pipe(
-            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeProtocols', 'error'))
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getFormatPreview', 'error'))
         );
     }
 

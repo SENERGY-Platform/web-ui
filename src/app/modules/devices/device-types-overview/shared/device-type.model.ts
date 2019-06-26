@@ -45,24 +45,23 @@ export interface DeviceTypeServiceModel {
     // endpoint_format: string // for future use
 }
 
-export interface DeviceTypeMsgStructureModel {
-    id: string;
-    name: string;
-    constraints: string[];
+export interface DeviceTypeMsgSegmentModel {
+    uri: string;
+    label: string;
 }
 
 export interface DeviceTypeProtocolModel {
-    id: string;
-    protocol_handler_url: string;
-    name: string;
-    description: string;
-    msg_structure: DeviceTypeMsgStructureModel[];
+    uri: string;
+    protocol_handler: string;
+    label: string;
+    comment: string;
+    msg_segment: DeviceTypeMsgSegmentModel[];
 }
 
 export interface DeviceTypeAssignmentModel {
     id: string;
     name: string;
-    msg_segment: DeviceTypeMsgStructureModel;
+    msg_segment: DeviceTypeMsgSegmentModel;
     type: ValueTypesModel;
     format: string;
     additional_formatinfo: DeviceTypeAdditionalFormatInfoModel[];

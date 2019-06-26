@@ -102,13 +102,13 @@
                                             </td>
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
-                                                    <mat-select placeholder="Protocol" [compareWith]="compareId"
+                                                    <mat-select placeholder="Protocol" [compareWith]="compareUri"
                                                                 formControlName="protocol"
                                                                 required>
                                                         <mat-option
                                                                 *ngFor="let deviceTypeProtocol of deviceTypeProtocols"
                                                                 [value]="deviceTypeProtocol">
-                                                            {{deviceTypeProtocol.name}}
+                                                            {{deviceTypeProtocol.label}}
                                                         </mat-option>
                                                     </mat-select>
                                                 </mat-form-field>
@@ -128,7 +128,7 @@
                                                 (click)="expand(control)">
                                             <mat-icon>{{control.value.show ? 'expand_less' : 'expand_more'}}</mat-icon>
                                         </button>
-                                        <div>{{control.value.msg_segment.name}}</div>
+                                        <div>{{control.value.msg_segment.label}}</div>
                                     </div>
 
                                     <div fxLayout="row" [fxShow]="control.value.show === true">
