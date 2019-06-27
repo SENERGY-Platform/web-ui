@@ -87,7 +87,7 @@
                                         <tr>
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
-                                                    <mat-label>Select Function Type</mat-label>
+                                                    <mat-label>Function Type</mat-label>
                                                     <mat-select formControlName="functionType">
                                                         <mat-option
                                                                 *ngFor="let item of keys(deviceTypeFunctionType)"
@@ -99,22 +99,27 @@
                                             </td>
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
-                                                    <mat-label>{{control.controls.functionType.invalid ? 'Select Function' : 'Select ' + control.controls.functionType.value + ' Function'}}</mat-label>
-                                                    <mat-select formControlName="function">
-                                                        <mat-optgroup *ngFor="let group of sensorActuatorGroup"
-                                                                      [label]="group.name">
-                                                            <mat-option *ngFor="let item of group.array"
-                                                                        [value]="item.uri">
-                                                                {{item.label}}
-                                                            </mat-option>
-                                                        </mat-optgroup>
+                                                    <mat-label>{{control.controls.functionType.invalid ? 'Function' : control.controls.functionType.value + ' Function'}}</mat-label>
+                                                    <mat-select formControlName="functions" multiple>
+                                                        <mat-select-trigger>
+                                                            {{control.controls.functions.value ? control.controls.functions.value[0] : ''}}
+                                                            <span *ngIf="control.controls.functions.value?.length > 1"
+                                                                  class="example-additional-selection">
+                                                                {{'(+' + (control.controls.functions.value.length - 1) + (control.controls.functions.value?.length === 2 ? ' other)' : ' others)')}}
+                                                                      </span>
+                                                        </mat-select-trigger>
+                                                        <mat-option *ngFor="let topping of functionDummyList"
+                                                                    [value]="topping">{{topping}}</mat-option>
                                                     </mat-select>
                                                 </mat-form-field>
                                             </td>
                                             <td class="table-button-size">
                                                 <button mat-icon-button class="mat-accent"
-                                                        (click)="newSensorActuator(i)" [disabled]="control.controls.functionType.invalid">
-                                                    <mat-icon matTooltip="{{control.controls.functionType.invalid ? 'Create Function' : 'Create ' + control.controls.functionType.value + ' Function'}}">playlist_add
+                                                        (click)="newSensorActuator(i)"
+                                                        [disabled]="control.controls.functionType.invalid">
+                                                    <mat-icon
+                                                            matTooltip="{{control.controls.functionType.invalid ? 'Create Function' : 'Create ' + control.controls.functionType.value + ' Function'}}">
+                                                        playlist_add
                                                     </mat-icon>
                                                 </button>
                                             </td>

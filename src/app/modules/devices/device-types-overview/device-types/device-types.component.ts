@@ -25,7 +25,7 @@ import {
     SystemType, DeviceTypeContentModel, DeviceTypeProtocolSegmentModel, DeviceTypeFunctionTypeEnum
 } from '../shared/device-type.model';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {DeviceTypeResponseModel} from '../shared/device-type-response.model';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {DeviceTypeService} from '../shared/device-type.service';
@@ -43,8 +43,6 @@ const formatData: FormatStructure[] = [
     {id: 'http://www.sepl.wifa.uni-leipzig.de/ontlogies/device-repo#json', name: 'JSON'},
     {id: 'http://www.sepl.wifa.uni-leipzig.de/ontlogies/device-repo#xml', name: 'XML'},
 ];
-
-const buttonChangeTime = 500;
 
 @Component({
     selector: 'senergy-device-types',
@@ -74,6 +72,7 @@ export class DeviceTypesComponent implements OnInit {
     editable = false;
     keys = Object.keys;
     deviceTypeFunctionType = DeviceTypeFunctionTypeEnum;
+    functionDummyList: string[] = ['airQualityMeasuring', 'motionDetection', 'temperatureMeasuring', 'electricConsumptionMeasuring'];
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
@@ -115,7 +114,7 @@ export class DeviceTypesComponent implements OnInit {
             input: [],
             output: [],
             functionType: ['', Validators.required],
-            function: [{value: '', disabled: true}, Validators.required],
+            functions: [{value: [], disabled: true}, Validators.required],
         }));
         const formGroup = <FormGroup>formArray.controls[formArray.length - 1];
         formGroup.controls['protocol'].valueChanges.subscribe((protocol: DeviceTypeProtocolModel) => {
@@ -124,9 +123,9 @@ export class DeviceTypesComponent implements OnInit {
         });
         formGroup.controls['functionType'].valueChanges.subscribe(() => {
             if (formGroup.controls['functionType'].invalid) {
-                formGroup.controls['function'].disable();
+                formGroup.controls['functions'].disable();
             } else {
-                formGroup.controls['function'].enable();
+                formGroup.controls['functions'].enable();
             }
         });
     }
