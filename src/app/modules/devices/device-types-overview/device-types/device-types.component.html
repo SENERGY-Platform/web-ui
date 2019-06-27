@@ -71,6 +71,9 @@
                             <mat-tab label="Information">
                                 <div class="form">
                                     <mat-form-field class="full-width" color="accent">
+                                        <input matInput placeholder="Id" formControlName="id">
+                                    </mat-form-field>
+                                    <mat-form-field class="full-width" color="accent">
                                         <input matInput placeholder="Name" formControlName="name" required>
                                     </mat-form-field>
                                     <mat-form-field class="full-width" color="accent">
@@ -78,42 +81,42 @@
                                                required>
                                     </mat-form-field>
                                     <mat-form-field class="full-width" color="accent">
-                                        <input matInput placeholder="URL" formControlName="url" required>
+                                        <input matInput placeholder="Local Id" formControlName="local_id" required>
                                     </mat-form-field>
-                                    <table class="full-width" cellspacing="0">
-                                        <tr>
-                                            <td>
-                                                <mat-form-field class="full-width" color="accent">
-                                                    <mat-label>Sensor/Actuator</mat-label>
-                                                    <mat-select formControlName="sensor_actuator">
-                                                        <mat-optgroup *ngFor="let group of sensorActuatorGroup" [label]="group.name">
-                                                            <mat-option *ngFor="let item of group.array" [value]="item.uri">
-                                                                {{item.label}}
-                                                            </mat-option>
-                                                        </mat-optgroup>
-                                                    </mat-select>
-                                                </mat-form-field>
-                                            </td>
-                                            <td class="table-button-size">
-                                                <button mat-icon-button class="mat-accent" (click)="newSensorActuator(i)">
-                                                    <mat-icon matTooltip="create new sensor/actuator">playlist_add</mat-icon>
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <mat-form-field class="full-width" color="accent">
-                                                    <mat-select placeholder="Protocol" [compareWith]="compareUri"
-                                                                formControlName="protocol"
-                                                                required>
-                                                        <mat-option
-                                                                *ngFor="let deviceTypeProtocol of deviceTypeProtocols"
-                                                                [value]="deviceTypeProtocol">
-                                                            {{deviceTypeProtocol.label}}
-                                                        </mat-option>
-                                                    </mat-select>
-                                                </mat-form-field>
-                                            </td>
-                                        </tr>
-                                    </table>
+                                    <!--<table class="full-width" cellspacing="0">-->
+                                        <!--<tr>-->
+                                            <!--<td>-->
+                                                <!--<mat-form-field class="full-width" color="accent">-->
+                                                    <!--<mat-label>Sensor/Actuator</mat-label>-->
+                                                    <!--<mat-select formControlName="sensor_actuator">-->
+                                                        <!--<mat-optgroup *ngFor="let group of sensorActuatorGroup" [label]="group.name">-->
+                                                            <!--<mat-option *ngFor="let item of group.array" [value]="item.uri">-->
+                                                                <!--{{item.label}}-->
+                                                            <!--</mat-option>-->
+                                                        <!--</mat-optgroup>-->
+                                                    <!--</mat-select>-->
+                                                <!--</mat-form-field>-->
+                                            <!--</td>-->
+                                            <!--<td class="table-button-size">-->
+                                                <!--<button mat-icon-button class="mat-accent" (click)="newSensorActuator(i)">-->
+                                                    <!--<mat-icon matTooltip="create new sensor/actuator">playlist_add</mat-icon>-->
+                                                <!--</button>-->
+                                            <!--</td>-->
+                                            <!--<td>-->
+                                                <!--<mat-form-field class="full-width" color="accent">-->
+                                                    <!--<mat-select placeholder="Protocol" [compareWith]="compareUri"-->
+                                                                <!--formControlName="protocol"-->
+                                                                <!--required>-->
+                                                        <!--<mat-option-->
+                                                                <!--*ngFor="let deviceTypeProtocol of deviceTypeProtocols"-->
+                                                                <!--[value]="deviceTypeProtocol">-->
+                                                            <!--{{deviceTypeProtocol.label}}-->
+                                                        <!--</mat-option>-->
+                                                    <!--</mat-select>-->
+                                                <!--</mat-form-field>-->
+                                            <!--</td>-->
+                                        <!--</tr>-->
+                                    <!--</table>-->
                                 </div>
                             </mat-tab>
 

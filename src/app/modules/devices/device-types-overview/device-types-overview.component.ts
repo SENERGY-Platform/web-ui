@@ -22,7 +22,7 @@ import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DeviceTypeService} from './shared/device-type.service';
 import {DeviceTypePermSearchModel} from './shared/device-type-perm-search.model';
 import {DeviceTypeDialogService} from './shared/device-type-dialog.service';
-import {DeviceTypeAssignmentModel, DeviceTypeModel, DeviceTypeServiceModel} from './shared/device-type.model';
+import {DeviceTypeAssignmentModel, DeviceTypeContentModel, DeviceTypeModel, DeviceTypeServiceModel} from './shared/device-type.model';
 import {MatSnackBar} from '@angular/material';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
@@ -108,13 +108,13 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         deviceType.id = '';
         deviceType.services.forEach((service: DeviceTypeServiceModel) => {
             service.id = '';
-            if (service.input) {
-                service.input.forEach((serviceInput: DeviceTypeAssignmentModel) => {
+            if (service.inputs) {
+                service.inputs.forEach((serviceInput: DeviceTypeContentModel) => {
                     serviceInput.id = '';
                 });
             }
-            if (service.output) {
-                service.output.forEach((serviceOutput: DeviceTypeAssignmentModel) => {
+            if (service.outputs) {
+                service.outputs.forEach((serviceOutput: DeviceTypeContentModel) => {
                     serviceOutput.id = '';
                 });
             }

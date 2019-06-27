@@ -32,27 +32,64 @@ export interface DeviceTypeClassModel {
 
 export interface DeviceTypeServiceModel {
     id: string;
-    service_type: string;
+    local_id: string;
     name: string;
     description: string;
+    aspects: DeviceTypeAspectModel[];
     protocol: DeviceTypeProtocolModel;
-    input: DeviceTypeAssignmentModel[];
-    output: DeviceTypeAssignmentModel[];
-    url: string;
-    // endpoint_format: string // for future use
+    inputs: DeviceTypeContentModel[];
+    outputs: DeviceTypeContentModel[];
+    functions: DeviceTypeFunctionModel[];
+}
+
+export interface DeviceTypeAspectModel {
+    id: string;
+    name: string;
+}
+
+export interface DeviceTypeContentModel {
+    id: string;
+    variable: string;
+    serialization_options: DeviceTypeSerializationOptionModel[];
+    serialization: DeviceTypeSerializationModel;
+    protocol_segment: DeviceTypeProtocolSegmentModel;
+}
+
+export interface DeviceTypeSerializationOptionModel {
+    id: string;
+    option: string;
+}
+
+export interface DeviceTypeSerializationModel {
+    id: string;
+    name: string;
+}
+
+export interface DeviceTypeFunctionModel {
+    id: string;
+    name: string;
+    type: DeviceTypeFunctionEnum;
 }
 
 export interface DeviceTypeMsgSegmentModel {
     uri: string;
-    label: string;
+}
+
+enum DeviceTypeFunctionEnum {
+    Controlling = 'controlling',
+    Measuring = 'measuring',
 }
 
 export interface DeviceTypeProtocolModel {
-    uri: string;
-    protocol_handler: string;
-    label: string;
-    comment: string;
-    msg_segment: DeviceTypeMsgSegmentModel[];
+    id: string;
+    name: string;
+    handler: string;
+    protocol_segment: DeviceTypeProtocolSegmentModel[];
+}
+
+export interface DeviceTypeProtocolSegmentModel {
+    id: string;
+    name: string;
 }
 
 export interface DeviceTypeAssignmentModel {
@@ -68,16 +105,6 @@ export interface DeviceTypeAdditionalFormatInfoModel {
     id: string;
     field: ValueTypesFieldTypeModel;
     format_flag: string;
-}
-
-export interface DeviceTypeVendorModel {
-    id: string;
-    name: string;
-}
-
-export interface DeviceTypeConfigFieldTypeModel {
-    id: string;
-    name: string;
 }
 
 export interface DeviceTypePropertiesModel {

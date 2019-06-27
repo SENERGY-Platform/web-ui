@@ -24,7 +24,7 @@ import {
     DeviceTypeProtocolModel,
     DeviceTypeServiceModel,
     DeviceTypeSensorActuatorModel, DeviceTypeSensorModel,
-    SystemType
+    SystemType, DeviceTypeContentModel, DeviceTypeProtocolSegmentModel
 } from '../shared/device-type.model';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
@@ -107,12 +107,10 @@ export class DeviceTypesComponent implements OnInit {
     addService() {
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
         formArray.push(this._formBuilder.group({
-            id: [],
+            id: [{value: '', disabled: true}],
+            local_id: [, Validators.required],
             name: [, Validators.required],
             description: [, Validators.required],
-            url: [, Validators.required],
-            service_type: [, Validators.required],
-            sensor_actuator: [, Validators.required],
             protocol: ['', Validators.required],
             input: [],
             output: [],
@@ -147,10 +145,12 @@ export class DeviceTypesComponent implements OnInit {
         control.patchValue({'show': !control.value.show});
     }
 
-    checkIfAssignmentExists(input: DeviceTypeAssignmentModel): boolean {
-        if ((input.name === null || input.name === '') &&
-            (input.format === null || input.format === undefined) &&
-            (input.type === null || input.type === undefined)) {
+    checkIfAssignmentExists(input: DeviceTypeContentModel): boolean {
+        // if ((input.name === null || input.name === '') &&
+        //     (input.format === null || input.format === undefined) &&
+        //     (input.type === null || input.type === undefined))
+        if (input.id === null)
+        {
             return false;
         } else {
             return true;
@@ -219,23 +219,23 @@ export class DeviceTypesComponent implements OnInit {
 
     private cleanUpServices() {
         this.secondFormGroup.value.services.forEach((service: DeviceTypeServiceModel) => {
-            const deleteIndexInput: DeviceTypeAssignmentModel[] = [];
-            const deleteIndexOutput: DeviceTypeAssignmentModel[] = [];
-            service.input.forEach((item: DeviceTypeAssignmentModel) => {
+            const deleteIndexInput: DeviceTypeContentModel[] = [];
+            const deleteIndexOutput: DeviceTypeContentModel[] = [];
+            service.inputs.forEach((item: DeviceTypeContentModel) => {
                 if (!this.checkIfAssignmentExists(item)) {
                     deleteIndexInput.push(item);
                 }
             });
-            service.output.forEach((item: DeviceTypeAssignmentModel) => {
+            service.outputs.forEach((item: DeviceTypeContentModel) => {
                 if (!this.checkIfAssignmentExists(item)) {
                     deleteIndexOutput.push(item);
                 }
             });
-            deleteIndexInput.forEach((item: DeviceTypeAssignmentModel) => {
-                service.input.splice(service.input.indexOf(item), 1);
+            deleteIndexInput.forEach((item: DeviceTypeContentModel) => {
+                service.inputs.splice(service.inputs.indexOf(item), 1);
             });
-            deleteIndexOutput.forEach((item: DeviceTypeAssignmentModel) => {
-                service.output.splice(service.output.indexOf(item), 1);
+            deleteIndexOutput.forEach((item: DeviceTypeContentModel) => {
+                service.outputs.splice(service.outputs.indexOf(item), 1);
             });
         });
     }
@@ -293,24 +293,24 @@ export class DeviceTypesComponent implements OnInit {
     private createServiceGroup(deviceTypeService: DeviceTypeServiceModel): FormGroup {
         return this._formBuilder.group({
             id: [deviceTypeService.id],
+            local_id: [deviceTypeService.local_id],
             name: [deviceTypeService.name, Validators.required],
             description: [deviceTypeService.description, Validators.required],
-            url: [deviceTypeService.url, Validators.required],
-            service_type: [deviceTypeService.service_type, Validators.required],
+            aspects: [deviceTypeService.aspects],
             protocol: [deviceTypeService.protocol, Validators.required],
-            input: this.createAssignments(deviceTypeService.protocol, deviceTypeService.input),
-            output: this.createAssignments(deviceTypeService.protocol, deviceTypeService.output),
+            inputs: this.createAssignments(deviceTypeService.protocol, deviceTypeService.inputs),
+            outputs: this.createAssignments(deviceTypeService.protocol, deviceTypeService.outputs),
         });
     }
 
-    private createAssignments(protocol: DeviceTypeProtocolModel, assignments: (DeviceTypeAssignmentModel[] | undefined)): FormArray {
+    private createAssignments(protocol: DeviceTypeProtocolModel, assignments: (DeviceTypeContentModel[] | undefined)): FormArray {
 
         const array: FormGroup[] = [];
-        protocol.msg_segment.forEach((mgSegmentElement: DeviceTypeMsgSegmentModel) => {
+        protocol.protocol_segment.forEach((mgSegmentElement: DeviceTypeProtocolSegmentModel) => {
             if (assignments !== undefined) {
                 let itemMatch = false;
-                assignments.forEach((assignment: DeviceTypeAssignmentModel) => {
-                    if (assignment.msg_segment.uri === mgSegmentElement.uri) {
+                assignments.forEach((assignment: DeviceTypeContentModel) => {
+                    if (assignment.protocol_segment.id === mgSegmentElement.id) {
                         array.push(this.createAssignmentGroup(assignment));
                         itemMatch = true;
                     }
@@ -326,19 +326,18 @@ export class DeviceTypesComponent implements OnInit {
         return this._formBuilder.array(array);
     }
 
-    private createAssignmentGroup(assignmentModel: DeviceTypeAssignmentModel): FormGroup {
+    private createAssignmentGroup(assignmentModel: DeviceTypeContentModel): FormGroup {
         return this._formBuilder.group({
             id: [assignmentModel.id],
-            name: [assignmentModel.name],
-            msg_segment: [assignmentModel.msg_segment],
-            type: [assignmentModel.type],
-            format: [assignmentModel.format],
-            additional_formatinfo: [assignmentModel.additional_formatinfo],
+            // msg_segment: [assignmentModel.msg_segment],
+            // type: [assignmentModel.type],
+            // format: [assignmentModel.format],
+            // additional_formatinfo: [assignmentModel.additional_formatinfo],
             show: [true],
         });
     }
 
-    private createInitialAssignmentGroup(msg_structure: DeviceTypeMsgSegmentModel): FormGroup {
+    private createInitialAssignmentGroup(msg_structure: DeviceTypeProtocolSegmentModel): FormGroup {
         return this._formBuilder.group({
             id: [],
             name: [],
