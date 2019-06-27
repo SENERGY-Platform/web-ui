@@ -93,15 +93,12 @@ export class DeviceTypesComponent implements OnInit {
         this.cleanUpServices();
 
         const newDeviceType: DeviceTypeModel = {
-            device_class: this.firstFormGroup.value.classCtrl,
-            img: this.firstFormGroup.value.imgCtrl,
-            description: this.firstFormGroup.value.descCtrl,
-            name: this.firstFormGroup.value.nameCtrl,
-            config_parameter: this.firstFormGroup.value.configParameterCtrl,
-            generated: this.firstFormGroup.value.generatedCtrl,
             id: this.firstFormGroup.value.idCtrl,
-            maintenance: this.firstFormGroup.value.maintenanceCtrl,
+            name: this.firstFormGroup.value.nameCtrl,
+            description: this.firstFormGroup.value.descCtrl,
+            image: this.firstFormGroup.value.imageCtrl,
             services: this.secondFormGroup.value.services,
+            device_class: this.firstFormGroup.value.classCtrl,
         };
         // this.dialogRef.close(newDeviceType);
     }
@@ -246,14 +243,11 @@ export class DeviceTypesComponent implements OnInit {
 
     private initFormControls() {
         this.firstFormGroup = this._formBuilder.group({
-            idCtrl: [this.deviceType.id],
-            configParameterCtrl: [this.deviceType.config_parameter || []],
-            maintenanceCtrl: [this.deviceType.maintenance || []],
+            idCtrl: [{value: this.deviceType.id, disabled: true}],
             nameCtrl: [this.deviceType.name, Validators.required],
             descCtrl: [this.deviceType.description, Validators.required],
-            imgCtrl: [this.deviceType.img],
+            imageCtrl: [this.deviceType.image],
             classCtrl: [this.deviceType.device_class, Validators.required],
-            generatedCtrl: [this.deviceType.generated || false],
         });
         this.disableSaveButton(this.firstFormGroup.status);
 
@@ -265,11 +259,6 @@ export class DeviceTypesComponent implements OnInit {
 
         if (!this.editable) {
             this.firstFormGroup.disable();
-            this.secondFormGroup.disable();
-        }
-
-        if (this.deviceType.generated) {
-            this.firstFormGroup.controls['classCtrl'].disable();
             this.secondFormGroup.disable();
         }
 

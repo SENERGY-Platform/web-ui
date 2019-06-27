@@ -22,20 +22,23 @@
                 <ng-template matStepLabel>Information</ng-template>
                 <div class="form">
                     <mat-form-field class="full-width" color="accent">
+                        <input matInput placeholder="Id" formControlName="idCtrl">
+                    </mat-form-field>
+                    <mat-form-field class="full-width" color="accent">
                         <input matInput placeholder="Name" formControlName="nameCtrl" required>
                     </mat-form-field>
                     <mat-form-field class="full-width" color="accent">
                         <input matInput placeholder="Description" formControlName="descCtrl" required>
                     </mat-form-field>
                     <mat-form-field class="full-width" color="accent">
-                        <input matInput placeholder="Image" formControlName="imgCtrl">
+                        <input matInput placeholder="Image" formControlName="imageCtrl">
                     </mat-form-field>
                     <table class="full-width" cellspacing="0">
                         <tr>
                             <td>
                                 <mat-form-field class="full-width" color="accent">
                                     <mat-select placeholder="Device class" [compareWith]="compareUri"
-                                                formControlName="classCtrl" [required]="!deviceType.generated">
+                                                formControlName="classCtrl" required>
                                         <mat-option *ngFor="let deviceTypeClass of deviceTypeClasses"
                                                     [value]="deviceTypeClass">
                                             {{deviceTypeClass.label}}
@@ -45,15 +48,11 @@
                             </td>
                             <td class="table-button-size">
                                 <button mat-icon-button class="mat-accent" (click)="newDeviceClass()"
-                                        [disabled]="deviceType.generated || !editable">
+                                        [disabled]="!editable">
                                     <mat-icon matTooltip="create new device class">playlist_add</mat-icon>
                                 </button>
                             </td>
                     </table>
-                    <mat-form-field class="full-width" color="accent">
-                        <input [disabled]="true" matInput placeholder="Generated"
-                               [value]="deviceType.generated ? 'yes' : 'no'">
-                    </mat-form-field>
                 </div>
             </form>
         </mat-step>

@@ -25,7 +25,6 @@ import {DeviceTypeDialogService} from './shared/device-type-dialog.service';
 import {DeviceTypeAssignmentModel, DeviceTypeModel, DeviceTypeServiceModel} from './shared/device-type.model';
 import {MatSnackBar} from '@angular/material';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
-import {DeviceInstancesUpdateModel} from '../device-instances/shared/device-instances-update.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
 
 const grids = new Map([
@@ -152,13 +151,13 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
 
     private convertDeviceTypes(deviceTypeIn: DeviceTypeModel): DeviceTypePermSearchModel {
         return {
+            id: deviceTypeIn.id,
+            name: deviceTypeIn.name || '',
             services: [],
-            img: deviceTypeIn.img,
+            img: deviceTypeIn.image,
             device_class: deviceTypeIn.device_class.label,
             description: deviceTypeIn.description,
             creator: 'unknown',
-            id: deviceTypeIn.id,
-            name: deviceTypeIn.name || '',
             permissions: {
                 a: false,
                 x: false,

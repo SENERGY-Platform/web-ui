@@ -20,12 +20,9 @@ export interface DeviceTypeModel {
     id: string;
     name: string | null;
     description: string;
-    generated: boolean;
-    maintenance: string[];
-    device_class: DeviceTypeClassModel;
+    image: string;
     services: DeviceTypeServiceModel [];
-    config_parameter: DeviceTypeConfigFieldTypeModel[];
-    img: string;
+    device_class: DeviceTypeClassModel;
 }
 
 export interface DeviceTypeClassModel {
