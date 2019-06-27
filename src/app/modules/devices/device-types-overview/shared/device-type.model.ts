@@ -68,16 +68,16 @@ export interface DeviceTypeSerializationModel {
 export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
-    type: DeviceTypeFunctionEnum;
+    type: DeviceTypeFunctionTypeEnum;
 }
 
 export interface DeviceTypeMsgSegmentModel {
     uri: string;
 }
 
-enum DeviceTypeFunctionEnum {
-    Controlling = 'controlling',
-    Measuring = 'measuring',
+export enum DeviceTypeFunctionTypeEnum {
+    Controlling = 'Controlling',
+    Measuring = 'Measuring',
 }
 
 export interface DeviceTypeProtocolModel {

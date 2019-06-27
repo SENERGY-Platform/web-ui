@@ -49,7 +49,7 @@
                             <td class="table-button-size">
                                 <button mat-icon-button class="mat-accent" (click)="newDeviceClass()"
                                         [disabled]="!editable">
-                                    <mat-icon matTooltip="create new device class">playlist_add</mat-icon>
+                                    <mat-icon matTooltip="Create Device Class">playlist_add</mat-icon>
                                 </button>
                             </td>
                     </table>
@@ -83,40 +83,56 @@
                                     <mat-form-field class="full-width" color="accent">
                                         <input matInput placeholder="Local Id" formControlName="local_id" required>
                                     </mat-form-field>
-                                    <!--<table class="full-width" cellspacing="0">-->
-                                        <!--<tr>-->
+                                    <table class="full-width" cellspacing="0">
+                                        <tr>
+                                            <td>
+                                                <mat-form-field class="full-width" color="accent">
+                                                    <mat-label>Select Function Type</mat-label>
+                                                    <mat-select formControlName="functionType">
+                                                        <mat-option
+                                                                *ngFor="let item of keys(deviceTypeFunctionType)"
+                                                                [value]="deviceTypeFunctionType[item]">
+                                                            {{item}}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                            <td>
+                                                <mat-form-field class="full-width" color="accent">
+                                                    <mat-label>{{control.controls.functionType.invalid ? 'Select Function' : 'Select ' + control.controls.functionType.value + ' Function'}}</mat-label>
+                                                    <mat-select formControlName="function">
+                                                        <mat-optgroup *ngFor="let group of sensorActuatorGroup"
+                                                                      [label]="group.name">
+                                                            <mat-option *ngFor="let item of group.array"
+                                                                        [value]="item.uri">
+                                                                {{item.label}}
+                                                            </mat-option>
+                                                        </mat-optgroup>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="table-button-size">
+                                                <button mat-icon-button class="mat-accent"
+                                                        (click)="newSensorActuator(i)" [disabled]="control.controls.functionType.invalid">
+                                                    <mat-icon matTooltip="{{control.controls.functionType.invalid ? 'Create Function' : 'Create ' + control.controls.functionType.value + ' Function'}}">playlist_add
+                                                    </mat-icon>
+                                                </button>
+                                            </td>
                                             <!--<td>-->
-                                                <!--<mat-form-field class="full-width" color="accent">-->
-                                                    <!--<mat-label>Sensor/Actuator</mat-label>-->
-                                                    <!--<mat-select formControlName="sensor_actuator">-->
-                                                        <!--<mat-optgroup *ngFor="let group of sensorActuatorGroup" [label]="group.name">-->
-                                                            <!--<mat-option *ngFor="let item of group.array" [value]="item.uri">-->
-                                                                <!--{{item.label}}-->
-                                                            <!--</mat-option>-->
-                                                        <!--</mat-optgroup>-->
-                                                    <!--</mat-select>-->
-                                                <!--</mat-form-field>-->
+                                            <!--<mat-form-field class="full-width" color="accent">-->
+                                            <!--<mat-select placeholder="Protocol" [compareWith]="compareUri"-->
+                                            <!--formControlName="protocol"-->
+                                            <!--required>-->
+                                            <!--<mat-option-->
+                                            <!--*ngFor="let deviceTypeProtocol of deviceTypeProtocols"-->
+                                            <!--[value]="deviceTypeProtocol">-->
+                                            <!--{{deviceTypeProtocol.label}}-->
+                                            <!--</mat-option>-->
+                                            <!--</mat-select>-->
+                                            <!--</mat-form-field>-->
                                             <!--</td>-->
-                                            <!--<td class="table-button-size">-->
-                                                <!--<button mat-icon-button class="mat-accent" (click)="newSensorActuator(i)">-->
-                                                    <!--<mat-icon matTooltip="create new sensor/actuator">playlist_add</mat-icon>-->
-                                                <!--</button>-->
-                                            <!--</td>-->
-                                            <!--<td>-->
-                                                <!--<mat-form-field class="full-width" color="accent">-->
-                                                    <!--<mat-select placeholder="Protocol" [compareWith]="compareUri"-->
-                                                                <!--formControlName="protocol"-->
-                                                                <!--required>-->
-                                                        <!--<mat-option-->
-                                                                <!--*ngFor="let deviceTypeProtocol of deviceTypeProtocols"-->
-                                                                <!--[value]="deviceTypeProtocol">-->
-                                                            <!--{{deviceTypeProtocol.label}}-->
-                                                        <!--</mat-option>-->
-                                                    <!--</mat-select>-->
-                                                <!--</mat-form-field>-->
-                                            <!--</td>-->
-                                        <!--</tr>-->
-                                    <!--</table>-->
+                                        </tr>
+                                    </table>
                                 </div>
                             </mat-tab>
 
