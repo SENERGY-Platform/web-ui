@@ -182,21 +182,21 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     newDeviceClass() {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        const editDialogRef = this.dialog.open(DeviceTypesNewDeviceClassDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((label: string) => {
-            if (label !== undefined) {
-                this.deviceTypeService.createDeviceClass(label).subscribe((resp: DeviceTypeResponseModel | null) => {
-                    if (resp) {
-                        const newTypeClass: DeviceTypeClassModel = {uri: resp.uri, label: label};
-                        this.firstFormGroup.patchValue({'classCtrl': newTypeClass});
-                        this.deviceTypeClasses.push(newTypeClass);
-                    }
-                });
-            }
-        });
+        // const dialogConfig = new MatDialogConfig();
+        // dialogConfig.autoFocus = true;
+        // const editDialogRef = this.dialog.open(DeviceTypesNewDeviceClassDialogComponent, dialogConfig);
+        //
+        // editDialogRef.afterClosed().subscribe((label: string) => {
+        //     if (label !== undefined) {
+        //         this.deviceTypeService.createDeviceClass(label).subscribe((resp: DeviceTypeResponseModel | null) => {
+        //             if (resp) {
+        //                 const newTypeClass: DeviceTypeClassModel = {id: resp.uri, label: label};
+        //                 this.firstFormGroup.patchValue({'classCtrl': newTypeClass});
+        //                 this.deviceTypeClasses.push(newTypeClass);
+        //             }
+        //         });
+        //     }
+        // });
     }
 
     newSensorActuator(serviceIndex: number) {
@@ -341,9 +341,9 @@ export class DeviceTypesComponent implements OnInit {
             name: [deviceTypeService.name, Validators.required],
             description: [deviceTypeService.description, Validators.required],
             aspects: [deviceTypeService.aspects],
-            protocol: [deviceTypeService.protocol, Validators.required],
-            inputs: this.createAssignments(deviceTypeService.protocol, deviceTypeService.inputs),
-            outputs: this.createAssignments(deviceTypeService.protocol, deviceTypeService.outputs),
+            protocol_id: [deviceTypeService.protocol_id, Validators.required],
+            // inputs: this.createAssignments(deviceTypeService.protocol_id, deviceTypeService.inputs),
+            // outputs: this.createAssignments(deviceTypeService.protocol, deviceTypeService.outputs),
         });
     }
 
@@ -354,7 +354,7 @@ export class DeviceTypesComponent implements OnInit {
             if (assignments !== undefined) {
                 let itemMatch = false;
                 assignments.forEach((assignment: DeviceTypeContentModel) => {
-                    if (assignment.protocol_segment.id === mgSegmentElement.id) {
+                    if (assignment.protocol_segment_id === mgSegmentElement.id) {
                         array.push(this.createAssignmentGroup(assignment));
                         itemMatch = true;
                     }

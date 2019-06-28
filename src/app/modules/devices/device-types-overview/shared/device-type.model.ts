@@ -18,16 +18,16 @@ import {ValueTypesFieldTypeModel, ValueTypesModel} from '../../value-types/share
 
 export interface DeviceTypeModel {
     id: string;
-    name: string | null;
+    name: string;
     description: string;
     image: string;
-    services: DeviceTypeServiceModel [];
+    services: DeviceTypeServiceModel[];
     device_class: DeviceTypeClassModel;
 }
 
 export interface DeviceTypeClassModel {
-    uri: string;
-    label: string;
+    id: string;
+    name: string;
 }
 
 export interface DeviceTypeServiceModel {
@@ -36,7 +36,7 @@ export interface DeviceTypeServiceModel {
     name: string;
     description: string;
     aspects: DeviceTypeAspectModel[];
-    protocol: DeviceTypeProtocolModel;
+    protocol_id: string;
     inputs: DeviceTypeContentModel[];
     outputs: DeviceTypeContentModel[];
     functions: DeviceTypeFunctionModel[];
@@ -49,15 +49,22 @@ export interface DeviceTypeAspectModel {
 
 export interface DeviceTypeContentModel {
     id: string;
-    variable: string;
+    variable: DeviceTypeVariableModel;
     serialization_options: DeviceTypeSerializationOptionModel[];
-    serialization: DeviceTypeSerializationModel;
-    protocol_segment: DeviceTypeProtocolSegmentModel;
+    serialization_id: string;
+    protocol_segment_id: string;
 }
 
 export interface DeviceTypeSerializationOptionModel {
     id: string;
     option: string;
+}
+
+export interface DeviceTypeVariableModel {
+    id: string;
+    name: string;
+    type: string;
+    sub_variables: DeviceTypeVariableModel[];
 }
 
 export interface DeviceTypeSerializationModel {

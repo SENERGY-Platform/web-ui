@@ -155,7 +155,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
             name: deviceTypeIn.name || '',
             services: [],
             img: deviceTypeIn.image,
-            device_class: deviceTypeIn.device_class.label,
+            device_class: deviceTypeIn.device_class.name,
             description: deviceTypeIn.description,
             creator: 'unknown',
             permissions: {
