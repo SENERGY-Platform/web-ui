@@ -22,10 +22,10 @@ export interface DeviceTypeModel {
     description: string;
     image: string;
     services: DeviceTypeServiceModel[];
-    device_class: DeviceTypeClassModel;
+    device_class: DeviceTypeDeviceClassModel;
 }
 
-export interface DeviceTypeClassModel {
+export interface DeviceTypeDeviceClassModel {
     id: string;
     name: string;
 }

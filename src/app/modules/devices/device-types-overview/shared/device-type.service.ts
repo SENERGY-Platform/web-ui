@@ -22,7 +22,7 @@ import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {
     DeviceTypeAssignmentModel,
-    DeviceTypeClassModel,
+    DeviceTypeDeviceClassModel,
     DeviceTypeFeatureOfInterestModel,
     DeviceTypeModel,
     DeviceTypePropertiesModel,
@@ -71,8 +71,8 @@ export class DeviceTypeService {
         );
     }
 
-    getDeviceClasses(limit: number, offset: number): Observable<DeviceTypeClassModel[]> {
-        return this.http.get<DeviceTypeClassModel[]>
+    getDeviceClasses(limit: number, offset: number): Observable<DeviceTypeDeviceClassModel[]> {
+        return this.http.get<DeviceTypeDeviceClassModel[]>
         (environment.iotRepoUrl + '/deviceclasses?limit=' + limit + '&offset' + offset).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceClasses', []))

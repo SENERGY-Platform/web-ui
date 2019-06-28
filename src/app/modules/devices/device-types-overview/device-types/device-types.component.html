@@ -22,26 +22,26 @@
                 <ng-template matStepLabel>Information</ng-template>
                 <div class="form">
                     <mat-form-field class="full-width" color="accent">
-                        <input matInput placeholder="Id" formControlName="idCtrl">
+                        <input matInput placeholder="Id" formControlName="id">
                     </mat-form-field>
                     <mat-form-field class="full-width" color="accent">
-                        <input matInput placeholder="Name" formControlName="nameCtrl" required>
+                        <input matInput placeholder="Name" formControlName="name" required>
                     </mat-form-field>
                     <mat-form-field class="full-width" color="accent">
-                        <input matInput placeholder="Description" formControlName="descCtrl" required>
+                        <input matInput placeholder="Description" formControlName="description" required>
                     </mat-form-field>
                     <mat-form-field class="full-width" color="accent">
-                        <input matInput placeholder="Image" formControlName="imageCtrl">
+                        <input matInput placeholder="Image" formControlName="image">
                     </mat-form-field>
                     <table class="full-width" cellspacing="0">
                         <tr>
                             <td>
                                 <mat-form-field class="full-width" color="accent">
-                                    <mat-select placeholder="Device class" [compareWith]="compareUri"
-                                                formControlName="classCtrl" required>
-                                        <mat-option *ngFor="let deviceTypeClass of deviceTypeClasses"
+                                    <mat-select placeholder="Device class" [compareWith]="compareId"
+                                                formControlName="device_class" required>
+                                        <mat-option *ngFor="let deviceTypeClass of deviceTypeDeviceClasses"
                                                     [value]="deviceTypeClass">
-                                            {{deviceTypeClass.label}}
+                                            {{deviceTypeClass.name}}
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>

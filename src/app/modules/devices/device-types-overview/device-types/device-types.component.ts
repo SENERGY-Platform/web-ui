@@ -17,7 +17,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {
-    DeviceTypeClassModel,
+    DeviceTypeDeviceClassModel,
     DeviceTypeModel,
     DeviceTypeProtocolModel,
     DeviceTypeServiceModel,
@@ -53,7 +53,7 @@ const formatData: FormatStructure[] = [
 export class DeviceTypesComponent implements OnInit {
 
     deviceType: DeviceTypeModel;
-    deviceTypeClasses: DeviceTypeClassModel[] = [];
+    deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];
     deviceTypeProtocols: DeviceTypeProtocolModel[] = [];
     deviceTypeValueTypes: ValueTypesModel[] = [];
     deviceTypeFormats = formatData;
@@ -156,7 +156,7 @@ export class DeviceTypesComponent implements OnInit {
         if (b === null) {
             return false;
         }
-        return a.id === b.id;
+        return a.id === b.id && a.name === b.name;
     }
 
     compareUri(a: any, b: any): boolean {
@@ -182,21 +182,23 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     newDeviceClass() {
-        // const dialogConfig = new MatDialogConfig();
-        // dialogConfig.autoFocus = true;
-        // const editDialogRef = this.dialog.open(DeviceTypesNewDeviceClassDialogComponent, dialogConfig);
-        //
-        // editDialogRef.afterClosed().subscribe((label: string) => {
-        //     if (label !== undefined) {
-        //         this.deviceTypeService.createDeviceClass(label).subscribe((resp: DeviceTypeResponseModel | null) => {
-        //             if (resp) {
-        //                 const newTypeClass: DeviceTypeClassModel = {id: resp.uri, label: label};
-        //                 this.firstFormGroup.patchValue({'classCtrl': newTypeClass});
-        //                 this.deviceTypeClasses.push(newTypeClass);
-        //             }
-        //         });
-        //     }
-        // });
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        const editDialogRef = this.dialog.open(DeviceTypesNewDeviceClassDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((name: string) => {
+            if (name !== undefined) {
+                const index = this.checkIfDeviceClassNameExists(name);
+                if (index === -1) {
+                    const newDeviceClass: DeviceTypeDeviceClassModel = {id: '', name: name};
+                    this.firstFormGroup.patchValue({'device_class': newDeviceClass});
+                    this.deviceTypeDeviceClasses.push(newDeviceClass);
+                } else {
+                    this.snackBar.open('Device Class Name already exists!', undefined, {duration: 2000});
+                    this.firstFormGroup.patchValue({'device_class': this.deviceTypeDeviceClasses[index]});
+                }
+            }
+        });
     }
 
     newSensorActuator(serviceIndex: number) {
@@ -287,11 +289,11 @@ export class DeviceTypesComponent implements OnInit {
 
     private initFormControls() {
         this.firstFormGroup = this._formBuilder.group({
-            idCtrl: [{value: this.deviceType.id, disabled: true}],
-            nameCtrl: [this.deviceType.name, Validators.required],
-            descCtrl: [this.deviceType.description, Validators.required],
-            imageCtrl: [this.deviceType.image],
-            classCtrl: [this.deviceType.device_class, Validators.required],
+            id: [{value: this.deviceType.id, disabled: true}],
+            name: [this.deviceType.name, Validators.required],
+            description: [this.deviceType.description, Validators.required],
+            image: [this.deviceType.image],
+            device_class: [this.deviceType.device_class, Validators.required],
         });
         this.disableSaveButton(this.firstFormGroup.status);
 
@@ -394,10 +396,20 @@ export class DeviceTypesComponent implements OnInit {
         // }
     }
 
+    private checkIfDeviceClassNameExists(name: string): number {
+        let index = -1;
+        this.deviceTypeDeviceClasses.forEach((deviceClass: DeviceTypeDeviceClassModel, i: number) => {
+            if (deviceClass.name === name) {
+                index = i;
+            }
+        });
+        return index;
+    }
+
     private loadData(): void {
         this.deviceTypeService.getDeviceClasses(9999, 0).subscribe(
-            (deviceTypeClasses: DeviceTypeClassModel[]) => {
-                this.deviceTypeClasses = deviceTypeClasses;
+            (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
+                this.deviceTypeDeviceClasses = deviceTypeDeviceClasses;
             });
         this.deviceTypeService.getDeviceTypeProtocols(9999, 0).subscribe(
             (deviceTypeProtocols: DeviceTypeProtocolModel[]) => {
