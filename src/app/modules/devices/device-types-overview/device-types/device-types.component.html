@@ -108,14 +108,14 @@
                                                                 {{'(+' + (control.controls.functions.value.length - 1) + (control.controls.functions.value?.length === 2 ? ' other)' : ' others)')}}
                                                                       </span>
                                                         </mat-select-trigger>
-                                                        <mat-option *ngFor="let topping of functionDummyList"
+                                                        <mat-option *ngFor="let topping of functions"
                                                                     [value]="topping">{{topping}}</mat-option>
                                                     </mat-select>
                                                 </mat-form-field>
                                             </td>
                                             <td class="table-button-size">
                                                 <button mat-icon-button class="mat-accent"
-                                                        (click)="newSensorActuator(i)"
+                                                        (click)="openCreateFunctionDialog(i)"
                                                         [disabled]="control.controls.functionType.invalid">
                                                     <mat-icon
                                                             matTooltip="{{control.controls.functionType.invalid ? 'Create Function' : 'Create ' + control.controls.functionType.value + ' Function'}}">

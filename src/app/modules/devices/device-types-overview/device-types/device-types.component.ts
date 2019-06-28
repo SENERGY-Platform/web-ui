@@ -32,6 +32,7 @@ import {DeviceTypeService} from '../shared/device-type.service';
 import {ValueTypesService} from '../../value-types/shared/value-types.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewSensorActuatorDialogComponent} from './dialogs/device-types-new-sensor-actuator-dialog.component';
+import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
 
 interface FormatStructure {
     id: string;
@@ -72,7 +73,9 @@ export class DeviceTypesComponent implements OnInit {
     editable = false;
     keys = Object.keys;
     deviceTypeFunctionType = DeviceTypeFunctionTypeEnum;
-    functionDummyList: string[] = ['airQualityMeasuring', 'motionDetection', 'temperatureMeasuring', 'electricConsumptionMeasuring'];
+    functions: string[] = [];
+    measuringFunctions: string[] = [];
+    controllingFunctions: string[] = [];
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
@@ -88,7 +91,12 @@ export class DeviceTypesComponent implements OnInit {
         this.loadData();
     }
 
+    close(): void {
+        console.log(this.secondFormGroup);
+    }
+
     save(): void {
+
         this.cleanUpServices();
 
         const newDeviceType: DeviceTypeModel = {
@@ -122,10 +130,19 @@ export class DeviceTypesComponent implements OnInit {
             formGroup.setControl('output', this.createAssignments(protocol, undefined));
         });
         formGroup.controls['functionType'].valueChanges.subscribe(() => {
+            console.log('valueChange');
             if (formGroup.controls['functionType'].invalid) {
                 formGroup.controls['functions'].disable();
             } else {
                 formGroup.controls['functions'].enable();
+            }
+
+            formGroup.controls['functions'].setValue([]);
+            if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Measuring) {
+                this.functions = this.measuringFunctions;
+            }
+            if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Controlling) {
+                this.functions = this.controllingFunctions;
             }
         });
     }
@@ -157,8 +174,7 @@ export class DeviceTypesComponent implements OnInit {
         // if ((input.name === null || input.name === '') &&
         //     (input.format === null || input.format === undefined) &&
         //     (input.type === null || input.type === undefined))
-        if (input.id === null)
-        {
+        if (input.id === null) {
             return false;
         } else {
             return true;
@@ -216,6 +232,26 @@ export class DeviceTypesComponent implements OnInit {
                 }
             }
         });
+    }
+
+    openCreateFunctionDialog(serviceIndex: number) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        const editDialogRef = this.dialog.open(DeviceTypesNewFunctionDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((functionName: string) => {
+            if (functionName !== undefined) {
+                const formArray = <FormArray>this.secondFormGroup.controls['services'];
+                const formGroup = <FormGroup>formArray.controls[serviceIndex];
+                if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Measuring) {
+                    this.measuringFunctions.push(functionName);
+                }
+                if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Controlling) {
+                    this.controllingFunctions.push(functionName);
+                }
+            }
+        });
+        console.log(serviceIndex);
     }
 
 
@@ -383,6 +419,20 @@ export class DeviceTypesComponent implements OnInit {
             (deviceTypeValueTypes: ValueTypesModel[]) => {
                 this.deviceTypeValueTypes = deviceTypeValueTypes;
             });
+
+        this.controllingFunctions = [
+            'brightnessAdjustment',
+            'colorFunction',
+            'onFunction',
+            'offFunction',
+        ];
+
+        this.measuringFunctions = [
+            'batteryLevelMeasuring',
+            'connectionStatusMeasuring',
+            'humidityMeasuring',
+            'temperatureMeasuring',
+        ];
     }
 
 }
