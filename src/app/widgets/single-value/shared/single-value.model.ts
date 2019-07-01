@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-export enum DashboardTypesEnum {
-    Switch = 'switch',
-    Chart = 'chart',
-    DevicesState = 'devices_state',
-    ProcessState = 'process_state',
-    EventList = 'event_list',
-    RankingList = 'ranking_list',
-    ProcessModelList = 'process_model_list',
-    DeviceDowntimeList = 'device_downtime_list',
-    SingleValue = 'single_value',
+export interface SingleValueModel {
+    value: (number | string);
 }
+

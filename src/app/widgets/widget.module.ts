@@ -19,12 +19,21 @@ import {SwitchComponent} from './switch/switch.component';
 import {
     MatAutocompleteModule,
     MatButtonModule,
-    MatCardModule, MatCheckboxModule,
+    MatCardModule,
+    MatCheckboxModule,
     MatDialogModule,
-    MatDividerModule, MatFormFieldModule,
-    MatIconModule, MatInputModule, MatListModule,
-    MatMenuModule, MatOptionModule, MatProgressSpinnerModule, MatSelectModule,
-    MatSlideToggleModule, MatTableModule, MatTooltipModule
+    MatDividerModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatListModule,
+    MatMenuModule,
+    MatOptionModule,
+    MatProgressSpinnerModule,
+    MatSelectModule,
+    MatSlideToggleModule,
+    MatTableModule,
+    MatTooltipModule
 } from '@angular/material';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {WidgetHeaderComponent} from './components/widget-header/widget-header.component';
@@ -63,6 +72,8 @@ import {ProcessModelListEditDialogComponent} from './process-model-list/dialogs/
 import {DeviceDowntimeListComponent} from './device-downtime-list/device-downtime-list.component';
 import {DeviceDowntimeListEditDialogComponent} from './device-downtime-list/dialogs/device-downtime-list-edit-dialog.component';
 import {RouterModule} from '@angular/router';
+import {SingleValueComponent} from './single-value/single-value.component';
+import {SingleValueEditDialogComponent} from './single-value/dialog/single-value-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -125,6 +136,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ProcessModelListEditDialogComponent,
         DeviceDowntimeListComponent,
         DeviceDowntimeListEditDialogComponent,
+        SingleValueComponent,
+        SingleValueEditDialogComponent
     ],
     exports: [
         SwitchComponent,
@@ -152,6 +165,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ProcessStateEditDialogComponent,
         ProcessModelListEditDialogComponent,
         DeviceDowntimeListEditDialogComponent,
+        SingleValueEditDialogComponent
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 

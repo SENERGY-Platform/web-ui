@@ -55,6 +55,7 @@ export class DashboardNewWidgetDialogComponent {
         {value: DashboardTypesEnum.RankingList, viewValue: 'Ranking list'},
         {value: DashboardTypesEnum.ProcessModelList, viewValue: 'Process model list'},
         {value: DashboardTypesEnum.DeviceDowntimeList, viewValue: 'Device downtime list'},
+        {value: DashboardTypesEnum.SingleValue, viewValue: 'Single Value'},
     ];
     switchCategories: SwitchCategories[] = [
         {
