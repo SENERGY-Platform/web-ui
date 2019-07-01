@@ -100,16 +100,16 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-label>{{control.controls.functionType.invalid ? 'Function' : control.controls.functionType.value + ' Function'}}</mat-label>
-                                                    <mat-select formControlName="functions" multiple>
+                                                    <mat-select formControlName="functions" multiple [compareWith]="compare">
                                                         <mat-select-trigger>
-                                                            {{control.controls.functions.value ? control.controls.functions.value[0] : ''}}
+                                                            {{control.controls.functions.value[0] ? control.controls.functions.value[0].name : ''}}
                                                             <span *ngIf="control.controls.functions.value?.length > 1"
                                                                   class="example-additional-selection">
                                                                 {{'(+' + (control.controls.functions.value.length - 1) + (control.controls.functions.value?.length === 2 ? ' other)' : ' others)')}}
                                                                       </span>
                                                         </mat-select-trigger>
-                                                        <mat-option *ngFor="let topping of functions"
-                                                                    [value]="topping">{{topping}}</mat-option>
+                                                        <mat-option *ngFor="let func of functions"
+                                                                    [value]="func">{{func.name}}</mat-option>
                                                     </mat-select>
                                                 </mat-form-field>
                                             </td>

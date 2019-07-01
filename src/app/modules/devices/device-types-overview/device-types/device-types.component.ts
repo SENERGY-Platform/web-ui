@@ -17,12 +17,17 @@
 
 import {Component, OnInit} from '@angular/core';
 import {
+    DeviceTypeContentModel,
     DeviceTypeDeviceClassModel,
+    DeviceTypeFunctionModel,
+    DeviceTypeFunctionTypeEnum,
     DeviceTypeModel,
     DeviceTypeProtocolModel,
+    DeviceTypeProtocolSegmentModel,
+    DeviceTypeSensorActuatorModel,
+    DeviceTypeSensorModel,
     DeviceTypeServiceModel,
-    DeviceTypeSensorActuatorModel, DeviceTypeSensorModel,
-    SystemType, DeviceTypeContentModel, DeviceTypeProtocolSegmentModel, DeviceTypeFunctionTypeEnum
+    SystemType
 } from '../shared/device-type.model';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
@@ -73,9 +78,9 @@ export class DeviceTypesComponent implements OnInit {
     editable = false;
     keys = Object.keys;
     deviceTypeFunctionType = DeviceTypeFunctionTypeEnum;
-    functions: string[] = [];
-    measuringFunctions: string[] = [];
-    controllingFunctions: string[] = [];
+    functions: DeviceTypeFunctionModel[] = [];
+    measuringFunctions: DeviceTypeFunctionModel[] = [];
+    controllingFunctions: DeviceTypeFunctionModel[] = [];
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
@@ -92,7 +97,6 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     close(): void {
-        console.log(this.secondFormGroup);
     }
 
     save(): void {
@@ -130,7 +134,6 @@ export class DeviceTypesComponent implements OnInit {
             formGroup.setControl('output', this.createAssignments(protocol, undefined));
         });
         formGroup.controls['functionType'].valueChanges.subscribe(() => {
-            console.log('valueChange');
             if (formGroup.controls['functionType'].invalid) {
                 formGroup.controls['functions'].disable();
             } else {
@@ -157,6 +160,10 @@ export class DeviceTypesComponent implements OnInit {
             return false;
         }
         return a.id === b.id && a.name === b.name;
+    }
+
+    compare(a: any, b: any): boolean {
+        return a && b && a.name === b.name;
     }
 
     compareUri(a: any, b: any): boolean {
@@ -194,7 +201,7 @@ export class DeviceTypesComponent implements OnInit {
                     this.firstFormGroup.patchValue({'device_class': newDeviceClass});
                     this.deviceTypeDeviceClasses.push(newDeviceClass);
                 } else {
-                    this.snackBar.open('Device Class Name already exists!', undefined, {duration: 2000});
+                    this.snackBar.open('Device Class already exists! Name auto selected!', undefined, {duration: 4000});
                     this.firstFormGroup.patchValue({'device_class': this.deviceTypeDeviceClasses[index]});
                 }
             }
@@ -246,14 +253,43 @@ export class DeviceTypesComponent implements OnInit {
                 const formArray = <FormArray>this.secondFormGroup.controls['services'];
                 const formGroup = <FormGroup>formArray.controls[serviceIndex];
                 if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Measuring) {
-                    this.measuringFunctions.push(functionName);
+                    const measureFuncIndex = this.checkIfMeasuringFunctionNameExists(functionName);
+                    if (measureFuncIndex === -1) {
+                        const newFunction: DeviceTypeFunctionModel = {id: '', name: functionName, type: DeviceTypeFunctionTypeEnum.Measuring};
+                        formGroup.controls['functions'].value.push(newFunction);
+                        this.measuringFunctions.push(newFunction);
+                    } else {
+                        const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
+                        const measureFuncFormGroupIndex = functionsFormGroup.value.indexOf(this.measuringFunctions[measureFuncIndex]);
+                        if (measureFuncFormGroupIndex === -1) {
+                            this.snackBar.open('Measuring Function already exists! Function auto selected!', undefined, {duration: 4000});
+                            const array = formGroup.controls['functions'].value;
+                            formGroup.controls['functions'].setValue([...array, this.measuringFunctions[measureFuncIndex]]);
+                        } else {
+                            this.snackBar.open('Measuring Function already selected!', undefined, {duration: 4000});
+                        }
+                    }
                 }
                 if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Controlling) {
-                    this.controllingFunctions.push(functionName);
+                    const controllFuncIndex = this.checkIfControllingFunctionNameExists(functionName);
+                    if (controllFuncIndex === -1) {
+                        const newFunction: DeviceTypeFunctionModel = {id: '', name: functionName, type: DeviceTypeFunctionTypeEnum.Controlling};
+                        formGroup.controls['functions'].value.push(newFunction);
+                        this.controllingFunctions.push(newFunction);
+                    } else {
+                        const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
+                        const controllFuncFormGroupIndex = functionsFormGroup.value.indexOf(this.controllingFunctions[controllFuncIndex]);
+                        if (controllFuncFormGroupIndex === -1) {
+                            this.snackBar.open('Controlling Function already exists! Function auto selected!', undefined, {duration: 4000});
+                            const array = formGroup.controls['functions'].value;
+                            formGroup.controls['functions'].setValue([...array, this.controllingFunctions[controllFuncIndex]]);
+                        } else {
+                            this.snackBar.open('Controlling Function already selected!', undefined, {duration: 4000});
+                        }
+                    }
                 }
             }
         });
-        console.log(serviceIndex);
     }
 
 
@@ -406,6 +442,26 @@ export class DeviceTypesComponent implements OnInit {
         return index;
     }
 
+    private checkIfMeasuringFunctionNameExists(name: string): number {
+        let index = -1;
+        this.measuringFunctions.forEach((func: DeviceTypeFunctionModel, i: number) => {
+            if (func.name === name) {
+                index = i;
+            }
+        });
+        return index;
+    }
+
+    private checkIfControllingFunctionNameExists(name: string): number {
+        let index = -1;
+        this.controllingFunctions.forEach((func: DeviceTypeFunctionModel, i: number) => {
+            if (func.name === name) {
+                index = i;
+            }
+        });
+        return index;
+    }
+
     private loadData(): void {
         this.deviceTypeService.getDeviceClasses(9999, 0).subscribe(
             (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
@@ -433,17 +489,17 @@ export class DeviceTypesComponent implements OnInit {
             });
 
         this.controllingFunctions = [
-            'brightnessAdjustment',
-            'colorFunction',
-            'onFunction',
-            'offFunction',
+            {id: '1', name: 'brightnessAdjustment', type: DeviceTypeFunctionTypeEnum.Controlling},
+            {id: '2', name: 'colorFunction', type: DeviceTypeFunctionTypeEnum.Controlling},
+            {id: '3', name: 'onFunction', type: DeviceTypeFunctionTypeEnum.Controlling},
+            {id: '4', name: 'offFunction', type: DeviceTypeFunctionTypeEnum.Controlling},
         ];
 
         this.measuringFunctions = [
-            'batteryLevelMeasuring',
-            'connectionStatusMeasuring',
-            'humidityMeasuring',
-            'temperatureMeasuring',
+            {id: '1a', name: 'batteryLevelMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring},
+            {id: '2a', name: 'connectionStatusMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring},
+            {id: '3a', name: 'humidityMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring},
+            {id: '4a', name: 'temperatureMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring},
         ];
     }
 
