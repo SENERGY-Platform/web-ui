@@ -53,21 +53,14 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     ngOnInit() {
         this.getWidgetData();
-        this.initDeployments();
     }
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
             this.formControl.setValue(this.widget.properties.measurement || '');
-            this.initVAxis();
+            this.initDeployments();
         });
-    }
-
-    private initVAxis() {
-        if (this.widget.properties.vAxis) {
-            this.vAxisValues.push(this.widget.properties.vAxis);
-        }
     }
 
     initDeployments() {
@@ -76,6 +69,11 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 exports.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
                         this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
+                        if (this.widget.properties.vAxis) {
+                            if (this.widget.properties.vAxis.InstanceID === exportModel.ID) {
+                                this.vAxisValues = exportModel.Values;
+                            }
+                        }
                     }
                 });
                 this.filteredExports = this.formControl.valueChanges
@@ -88,6 +86,9 @@ export class ChartsExportEditDialogComponent implements OnInit {
         });
     }
 
+    compare(a: any, b: any) {
+        return a.InstanceID === b.InstanceID && a.Name === b.Name && a.Path === b.Path;
+    }
 
     close(): void {
         this.dialogRef.close();
