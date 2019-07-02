@@ -74,6 +74,8 @@ import {DeviceDowntimeListEditDialogComponent} from './device-downtime-list/dial
 import {RouterModule} from '@angular/router';
 import {SingleValueComponent} from './single-value/single-value.component';
 import {SingleValueEditDialogComponent} from './single-value/dialog/single-value-edit-dialog.component';
+import {EnergyPredictionComponent} from './energy-prediction/energy-prediction.component';
+import {EnergyPredictionEditDialogComponent} from './energy-prediction/dialog/energy-prediction-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -137,7 +139,9 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         DeviceDowntimeListComponent,
         DeviceDowntimeListEditDialogComponent,
         SingleValueComponent,
-        SingleValueEditDialogComponent
+        SingleValueEditDialogComponent,
+        EnergyPredictionComponent,
+        EnergyPredictionEditDialogComponent
     ],
     exports: [
         SwitchComponent,
@@ -165,7 +169,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ProcessStateEditDialogComponent,
         ProcessModelListEditDialogComponent,
         DeviceDowntimeListEditDialogComponent,
-        SingleValueEditDialogComponent
+        SingleValueEditDialogComponent,
+        EnergyPredictionEditDialogComponent
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 

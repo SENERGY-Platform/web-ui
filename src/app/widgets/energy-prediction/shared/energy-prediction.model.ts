@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-export enum DashboardTypesEnum {
-    Switch = 'switch',
-    Chart = 'chart',
-    DevicesState = 'devices_state',
-    ProcessState = 'process_state',
-    EventList = 'event_list',
-    RankingList = 'ranking_list',
-    ProcessModelList = 'process_model_list',
-    DeviceDowntimeList = 'device_downtime_list',
-    SingleValue = 'single_value',
-    EnergyPrediction = 'energy_prediction',
+export interface EnergyPredictionModel {
+    prediction: (number);
+    timestamp: (string);
 }
+
+export interface EnergyPredictionPropertiesModel {
+    columns?: (EnergyPredictionColumnModel);
+    selectedOption?: (string);
+    threshold?: (number);
+    thresholdOption?: (string);
+    price?: (number);
+}
+
+interface EnergyPredictionColumnModel {
+    prediction: (string);
+    timestamp: (string);
+}
+
