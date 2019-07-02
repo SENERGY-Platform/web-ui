@@ -17,6 +17,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {
+    DeviceTypeAspectModel,
     DeviceTypeContentModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
@@ -81,6 +82,7 @@ export class DeviceTypesComponent implements OnInit {
     functions: DeviceTypeFunctionModel[] = [];
     measuringFunctions: DeviceTypeFunctionModel[] = [];
     controllingFunctions: DeviceTypeFunctionModel[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
@@ -127,6 +129,7 @@ export class DeviceTypesComponent implements OnInit {
             output: [],
             functionType: ['', Validators.required],
             functions: [{value: [], disabled: true}, Validators.required],
+            aspects: [{value: []}],
         }));
         const formGroup = <FormGroup>formArray.controls[formArray.length - 1];
         formGroup.controls['protocol'].valueChanges.subscribe((protocol: DeviceTypeProtocolModel) => {
@@ -501,6 +504,13 @@ export class DeviceTypesComponent implements OnInit {
             {id: '3a', name: 'humidityMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring},
             {id: '4a', name: 'temperatureMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring},
         ];
+
+        this.aspects = [
+            {id: '1aa', name: 'Air'},
+            {id: '2aa', name: 'Lightning'},
+            {id: '3aa', name: 'Battery'},
+            {id: '4aa', name: 'Noise'},
+        ]
     }
 
 }

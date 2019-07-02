@@ -123,19 +123,35 @@
                                                     </mat-icon>
                                                 </button>
                                             </td>
-                                            <!--<td>-->
-                                            <!--<mat-form-field class="full-width" color="accent">-->
-                                            <!--<mat-select placeholder="Protocol" [compareWith]="compareUri"-->
-                                            <!--formControlName="protocol"-->
-                                            <!--required>-->
-                                            <!--<mat-option-->
-                                            <!--*ngFor="let deviceTypeProtocol of deviceTypeProtocols"-->
-                                            <!--[value]="deviceTypeProtocol">-->
-                                            <!--{{deviceTypeProtocol.label}}-->
-                                            <!--</mat-option>-->
-                                            <!--</mat-select>-->
-                                            <!--</mat-form-field>-->
-                                            <!--</td>-->
+                                        </tr>
+                                    </table>
+                                    <table class="full-width" cellspacing="0">
+                                        <tr>
+                                            <td>
+                                                <mat-form-field class="full-width" color="accent">
+                                                    <mat-label>Aspects</mat-label>
+                                                    <mat-select formControlName="aspects" multiple [compareWith]="compare">
+                                                        <mat-select-trigger>
+                                                            {{control.controls.aspects.value[0] ? control.controls.aspects.value[0].name : ''}}
+                                                            <span *ngIf="control.controls.aspects.value?.length > 1"
+                                                                  class="example-additional-selection">
+                                                                {{'(+' + (control.controls.aspects.value.length - 1) + (control.controls.aspects.value?.length === 2 ? ' other)' : ' others)')}}
+                                                                      </span>
+                                                        </mat-select-trigger>
+                                                        <mat-option *ngFor="let aspect of aspects"
+                                                                    [value]="aspect">{{aspect.name}}</mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="table-button-size">
+                                                <button mat-icon-button class="mat-accent"
+                                                        (click)="openCreateFunctionDialog(i)">
+                                                    <mat-icon
+                                                            matTooltip="Create Aspect">
+                                                        playlist_add
+                                                    </mat-icon>
+                                                </button>
+                                            </td>
                                         </tr>
                                     </table>
                                 </div>
