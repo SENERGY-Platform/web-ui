@@ -54,21 +54,14 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     ngOnInit() {
         this.getWidgetData();
-        this.initDeployments();
     }
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
             this.formControl.setValue(this.widget.properties.measurement || '');
-            this.initVAxis();
+            this.initDeployments();
         });
-    }
-
-    private initVAxis() {
-        if (this.widget.properties.vAxis) {
-            this.vAxisValues.push(this.widget.properties.vAxis);
-        }
     }
 
     initDeployments() {
@@ -77,6 +70,11 @@ export class SingleValueEditDialogComponent implements OnInit {
                 exports.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
                         this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
+                        if (this.widget.properties.vAxis) {
+                            if (this.widget.properties.vAxis.InstanceID === exportModel.ID) {
+                                this.vAxisValues = exportModel.Values;
+                            }
+                        }
                     }
                 });
                 this.filteredExports = this.formControl.valueChanges
@@ -122,6 +120,11 @@ export class SingleValueEditDialogComponent implements OnInit {
     displayFn(input?: ChartsExportMeasurementModel): string | undefined {
         return input ? input.name : undefined;
     }
+
+    compare(a: any, b: any) {
+        return a.InstanceID === b.InstanceID && a.Name === b.Name && a.Path === b.Path;
+    }
+
 
     optionSelected(input: MatAutocompleteSelectedEvent ) {
         this.vAxisValues = input.option.value.values;
