@@ -258,7 +258,13 @@ export class DeviceTypesComponent implements OnInit {
                 if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Measuring) {
                     const measureFuncIndex = this.checkIfMeasuringFunctionNameExists(functionName);
                     if (measureFuncIndex === -1) {
-                        const newFunction: DeviceTypeFunctionModel = {id: '', name: functionName, type: DeviceTypeFunctionTypeEnum.Measuring};
+                        const newFunction: DeviceTypeFunctionModel = {
+                            id: '',
+                            name: functionName,
+                            type: DeviceTypeFunctionTypeEnum.Measuring,
+                            inputs: [],
+                            outputs: [],
+                        };
                         formGroup.controls['functions'].value.push(newFunction);
                         this.measuringFunctions.push(newFunction);
                     } else {
@@ -276,7 +282,13 @@ export class DeviceTypesComponent implements OnInit {
                 if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Controlling) {
                     const controllFuncIndex = this.checkIfControllingFunctionNameExists(functionName);
                     if (controllFuncIndex === -1) {
-                        const newFunction: DeviceTypeFunctionModel = {id: '', name: functionName, type: DeviceTypeFunctionTypeEnum.Controlling};
+                        const newFunction: DeviceTypeFunctionModel = {
+                            id: '',
+                            name: functionName,
+                            type: DeviceTypeFunctionTypeEnum.Controlling,
+                            inputs: [],
+                            outputs: [],
+                        };
                         formGroup.controls['functions'].value.push(newFunction);
                         this.controllingFunctions.push(newFunction);
                     } else {
@@ -492,17 +504,17 @@ export class DeviceTypesComponent implements OnInit {
             });
 
         this.controllingFunctions = [
-            {id: '1', name: 'brightnessAdjustment', type: DeviceTypeFunctionTypeEnum.Controlling},
-            {id: '2', name: 'colorFunction', type: DeviceTypeFunctionTypeEnum.Controlling},
-            {id: '3', name: 'onFunction', type: DeviceTypeFunctionTypeEnum.Controlling},
-            {id: '4', name: 'offFunction', type: DeviceTypeFunctionTypeEnum.Controlling},
+            {id: '1', name: 'brightnessAdjustment', type: DeviceTypeFunctionTypeEnum.Controlling, inputs: [], outputs: []},
+            {id: '2', name: 'colorFunction', type: DeviceTypeFunctionTypeEnum.Controlling, inputs: [], outputs: []},
+            {id: '3', name: 'onFunction', type: DeviceTypeFunctionTypeEnum.Controlling, inputs: [], outputs: []},
+            {id: '4', name: 'offFunction', type: DeviceTypeFunctionTypeEnum.Controlling, inputs: [], outputs: []},
         ];
 
         this.measuringFunctions = [
-            {id: '1a', name: 'batteryLevelMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring},
-            {id: '2a', name: 'connectionStatusMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring},
-            {id: '3a', name: 'humidityMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring},
-            {id: '4a', name: 'temperatureMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring},
+            {id: '1a', name: 'batteryLevelMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring, inputs: [], outputs: []},
+            {id: '2a', name: 'connectionStatusMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring, inputs: [], outputs: []},
+            {id: '3a', name: 'humidityMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring, inputs: [], outputs: []},
+            {id: '4a', name: 'temperatureMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring, inputs: [], outputs: []},
         ];
 
         this.aspects = [
@@ -510,7 +522,7 @@ export class DeviceTypesComponent implements OnInit {
             {id: '2aa', name: 'Lightning'},
             {id: '3aa', name: 'Battery'},
             {id: '4aa', name: 'Noise'},
-        ]
+        ];
     }
 
 }

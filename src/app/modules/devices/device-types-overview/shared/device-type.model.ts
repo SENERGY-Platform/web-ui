@@ -64,6 +64,7 @@ export interface DeviceTypeVariableModel {
     id: string;
     name: string;
     type: string;
+    unit: string;
     sub_variables: DeviceTypeVariableModel[];
 }
 
@@ -76,6 +77,8 @@ export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
     type: DeviceTypeFunctionTypeEnum;
+    inputs: DeviceTypeVariableModel[];
+    outputs: DeviceTypeVariableModel[];
 }
 
 export interface DeviceTypeMsgSegmentModel {
