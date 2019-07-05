@@ -166,7 +166,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     compare(a: any, b: any): boolean {
-        return a && b && a.name === b.name;
+        return a && b && a.id === b.id && a.name === b.name ;
     }
 
     compareUri(a: any, b: any): boolean {
@@ -394,6 +394,7 @@ export class DeviceTypesComponent implements OnInit {
             name: [deviceTypeService.name, Validators.required],
             description: [deviceTypeService.description, Validators.required],
             aspects: [deviceTypeService.aspects],
+            functions: [deviceTypeService.functions],
             protocol_id: [deviceTypeService.protocol_id, Validators.required],
             // inputs: this.createAssignments(deviceTypeService.protocol_id, deviceTypeService.inputs),
             // outputs: this.createAssignments(deviceTypeService.protocol, deviceTypeService.outputs),

@@ -64,8 +64,16 @@ export interface DeviceTypeVariableModel {
     id: string;
     name: string;
     type: string;
-    unit: string;
-    sub_variables: DeviceTypeVariableModel[];
+    property?: DeviceTypePropertyModel;
+    sub_variables?: DeviceTypeVariableModel[];
+}
+
+export interface DeviceTypePropertyModel {
+    id: string;
+    unit?: string;
+    value?: string | boolean | number;
+    max_value?: number;
+    min_value?: number;
 }
 
 export interface DeviceTypeSerializationModel {
