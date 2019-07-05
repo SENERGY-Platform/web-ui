@@ -129,7 +129,7 @@ export class DeviceTypesComponent implements OnInit {
             output: [],
             functionType: ['', Validators.required],
             functions: [{value: [], disabled: true}, Validators.required],
-            aspects: [{value: []}],
+            aspects: [[], Validators.required],
         }));
         const formGroup = <FormGroup>formArray.controls[formArray.length - 1];
         formGroup.controls['protocol'].valueChanges.subscribe((protocol: DeviceTypeProtocolModel) => {
