@@ -15,8 +15,10 @@
  *  limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material';
+import {Component, OnInit} from '@angular/core';
+import {MatDialogRef, MatSnackBar} from '@angular/material';
+import {FormControl, Validators} from '@angular/forms';
+import {jsonValidator} from '../../../../../core/validators/json.validator';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',
@@ -24,7 +26,11 @@ import {MatDialogRef} from '@angular/material';
 })
 export class DeviceTypesNewFunctionDialogComponent {
 
-    constructor(private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>) {
+    nameControl = new FormControl('', [Validators.required]);
+    variableRawControl = new FormControl('', [Validators.required, jsonValidator()]);
+
+    constructor(private snackBar: MatSnackBar,
+                private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>) {
     }
 
     close(): void {

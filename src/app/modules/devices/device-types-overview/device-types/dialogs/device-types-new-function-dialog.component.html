@@ -21,12 +21,18 @@
     <form class="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Name</mat-label>
-            <input #input matInput placeholder="Name">
+            <input [formControl]="nameControl" matInput placeholder="Name">
+        </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <textarea [formControl]="variableRawControl" matInput placeholder="Insert data structure in json format"></textarea>
+            <mat-error *ngIf="variableRawControl.invalid">
+                Enter valid json!
+            </mat-error>
         </mat-form-field>
     </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="save(input.value)">Save</button>
+    <button class="mat-raised-button mat-accent" [disabled]="nameControl.invalid || variableRawControl.invalid" (click)="save()">Save</button>
 </mat-dialog-actions>
