@@ -51,7 +51,10 @@
     "tslib": "^1.9.0",
     "x2js": "^3.2.3",
     "yargs": "^12.0.5",
-    "zone.js": "~0.8.26"
+    "zone.js": "~0.8.26",
+    "@agm/core": "^1.0.0-beta.7",
+    "@angular-material-extensions/google-maps-autocomplete": "^2.0.0",
+    "@types/googlemaps": "^3.37.5"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.12.1",

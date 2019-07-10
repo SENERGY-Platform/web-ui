@@ -26,3 +26,11 @@ body {
 }
 
 svg > g > g:last-child { pointer-events: none } /* google chart anti flickering fix */
+
+.right-aligned-header > .mat-content { /* to align description in expansion panel  headers to the right, has to be here */
+    justify-content: space-between;
+}
+
+.mat-content > mat-panel-title, .mat-content > mat-panel-description {
+    flex: 0 0 auto;
+}
