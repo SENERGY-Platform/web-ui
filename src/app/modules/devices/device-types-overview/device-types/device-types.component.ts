@@ -27,7 +27,7 @@ import {
     DeviceTypeProtocolSegmentModel,
     DeviceTypeSensorActuatorModel,
     DeviceTypeSensorModel,
-    DeviceTypeServiceModel,
+    DeviceTypeServiceModel, DeviceTypeVariableModel,
     SystemType
 } from '../shared/device-type.model';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
@@ -166,7 +166,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     compare(a: any, b: any): boolean {
-        return a && b && a.id === b.id && a.name === b.name ;
+        return a && b && a.id === b.id && a.name === b.name;
     }
 
     compareUri(a: any, b: any): boolean {
@@ -262,8 +262,8 @@ export class DeviceTypesComponent implements OnInit {
                             id: '',
                             name: functionName,
                             type: DeviceTypeFunctionTypeEnum.Measuring,
-                            inputs: [],
-                            outputs: [],
+                            input: {} as DeviceTypeVariableModel,
+                            output: {} as DeviceTypeVariableModel,
                         };
                         formGroup.controls['functions'].value.push(newFunction);
                         this.measuringFunctions.push(newFunction);
@@ -286,8 +286,8 @@ export class DeviceTypesComponent implements OnInit {
                             id: '',
                             name: functionName,
                             type: DeviceTypeFunctionTypeEnum.Controlling,
-                            inputs: [],
-                            outputs: [],
+                            input: {} as DeviceTypeVariableModel,
+                            output: {} as DeviceTypeVariableModel,
                         };
                         formGroup.controls['functions'].value.push(newFunction);
                         this.controllingFunctions.push(newFunction);
@@ -505,17 +505,65 @@ export class DeviceTypesComponent implements OnInit {
             });
 
         this.controllingFunctions = [
-            {id: '1', name: 'brightnessAdjustment', type: DeviceTypeFunctionTypeEnum.Controlling, inputs: [], outputs: []},
-            {id: '2', name: 'colorFunction', type: DeviceTypeFunctionTypeEnum.Controlling, inputs: [], outputs: []},
-            {id: '3', name: 'onFunction', type: DeviceTypeFunctionTypeEnum.Controlling, inputs: [], outputs: []},
-            {id: '4', name: 'offFunction', type: DeviceTypeFunctionTypeEnum.Controlling, inputs: [], outputs: []},
+            {
+                id: '1',
+                name: 'brightnessAdjustment',
+                type: DeviceTypeFunctionTypeEnum.Controlling,
+                input: {} as DeviceTypeVariableModel,
+                output: {} as DeviceTypeVariableModel
+            },
+            {
+                id: '2',
+                name: 'colorFunction',
+                type: DeviceTypeFunctionTypeEnum.Controlling,
+                input: {} as DeviceTypeVariableModel,
+                output: {} as DeviceTypeVariableModel
+            },
+            {
+                id: '3',
+                name: 'onFunction',
+                type: DeviceTypeFunctionTypeEnum.Controlling,
+                input: {} as DeviceTypeVariableModel,
+                output: {} as DeviceTypeVariableModel
+            },
+            {
+                id: '4',
+                name: 'offFunction',
+                type: DeviceTypeFunctionTypeEnum.Controlling,
+                input: {} as DeviceTypeVariableModel,
+                output: {} as DeviceTypeVariableModel
+            },
         ];
 
         this.measuringFunctions = [
-            {id: '1a', name: 'batteryLevelMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring, inputs: [], outputs: []},
-            {id: '2a', name: 'connectionStatusMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring, inputs: [], outputs: []},
-            {id: '3a', name: 'humidityMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring, inputs: [], outputs: []},
-            {id: '4a', name: 'temperatureMeasuring', type: DeviceTypeFunctionTypeEnum.Measuring, inputs: [], outputs: []},
+            {
+                id: '1a',
+                name: 'batteryLevelMeasuring',
+                type: DeviceTypeFunctionTypeEnum.Measuring,
+                input: {} as DeviceTypeVariableModel,
+                output: {} as DeviceTypeVariableModel
+            },
+            {
+                id: '2a',
+                name: 'connectionStatusMeasuring',
+                type: DeviceTypeFunctionTypeEnum.Measuring,
+                input: {} as DeviceTypeVariableModel,
+                output: {} as DeviceTypeVariableModel
+            },
+            {
+                id: '3a',
+                name: 'humidityMeasuring',
+                type: DeviceTypeFunctionTypeEnum.Measuring,
+                input: {} as DeviceTypeVariableModel,
+                output: {} as DeviceTypeVariableModel
+            },
+            {
+                id: '4a',
+                name: 'temperatureMeasuring',
+                type: DeviceTypeFunctionTypeEnum.Measuring,
+                input: {} as DeviceTypeVariableModel,
+                output: {} as DeviceTypeVariableModel
+            },
         ];
 
         this.aspects = [
@@ -525,5 +573,4 @@ export class DeviceTypesComponent implements OnInit {
             {id: '4aa', name: 'Noise'},
         ];
     }
-
 }

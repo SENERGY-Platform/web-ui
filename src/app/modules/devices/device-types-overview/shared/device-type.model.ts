@@ -61,15 +61,16 @@ export interface DeviceTypeSerializationOptionModel {
 }
 
 export interface DeviceTypeVariableModel {
-    id: string;
-    name: string;
+    id?: string;
+    name: string | number;
     type: string;
+    mapping?: DeviceTypeMappingModel[];
     property?: DeviceTypePropertyModel;
     sub_variables?: DeviceTypeVariableModel[];
 }
 
 export interface DeviceTypePropertyModel {
-    id: string;
+    id?: string;
     unit?: string;
     value?: string | boolean | number;
     max_value?: number;
@@ -81,12 +82,18 @@ export interface DeviceTypeSerializationModel {
     name: string;
 }
 
+export interface DeviceTypeMappingModel {
+    conversion?: string | null;
+    input: string[];
+    output: string[];
+}
+
 export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
     type: DeviceTypeFunctionTypeEnum;
-    inputs: DeviceTypeVariableModel[];
-    outputs: DeviceTypeVariableModel[];
+    input: DeviceTypeVariableModel;
+    output: DeviceTypeVariableModel;
 }
 
 export interface DeviceTypeMsgSegmentModel {
