@@ -62,8 +62,10 @@ export interface DeviceTypeSerializationOptionModel {
 
 export interface DeviceTypeVariableModel {
     id?: string;
-    name: string | number;
-    type: string;
+    name?: string | number;
+    type?: string;
+    skala?: string[];
+    semantic_label?: string;
     mapping?: DeviceTypeMappingModel[];
     property?: DeviceTypePropertyModel;
     sub_variables?: DeviceTypeVariableModel[];
