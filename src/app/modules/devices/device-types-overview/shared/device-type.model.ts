@@ -71,6 +71,22 @@ export interface DeviceTypeVariableModel {
     sub_variables?: DeviceTypeVariableModel[];
 }
 
+export interface DeviceTypeCategoryModel {
+    id: string;
+    name: string;
+    category_variable: DeviceTypeCategoryVariableModel;
+}
+
+export interface DeviceTypeCategoryVariableModel {
+    id: string;
+    name: string;
+    type: string;
+    min_value?: number;
+    max_value?: number;
+    value?: string | number | boolean;
+    sub_category_variable?: DeviceTypeCategoryVariableModel[];
+}
+
 export interface DeviceTypePropertyModel {
     id?: string;
     unit?: string;
