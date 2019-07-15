@@ -24,7 +24,7 @@ import {DeviceTypeCategoryModel} from '../../shared/device-type.model';
     templateUrl: './device-types-new-function-dialog.component.html',
     styleUrls: ['./device-types-new-function-dialog.component.css']
 })
-export class DeviceTypesNewFunctionDialogComponent implements OnInit{
+export class DeviceTypesNewFunctionDialogComponent implements OnInit {
 
     nameControl = new FormControl('', [Validators.required]);
     categoriesControl = new FormControl('', [Validators.required]);
@@ -51,29 +51,30 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit{
             {
                 id: 'urn:infai:ses:category:1',
                 name: 'color',
-                category_variable: {
-                    id: 'urn:infai:ses:categoryvariable:1',
-                    name: 'rgb',
-                    type: 'http://schema.org/structure',
-                    sub_category_variable: [
-                        {
-                            id: 'urn:infai:ses:categoryvariable:2',
-                            name: 'r',
-                            type: 'xsd:integer',
-                            min_value: 0,
-                            max_value: 0,
-                        }
-                    ]
-                }
+                category_variables: [
+                    {
+                        id: 'urn:infai:ses:categoryvariable:1',
+                        name: 'rgb',
+                        type: 'http://schema.org/structure',
+                        sub_category_variable: [
+                            {
+                                id: 'urn:infai:ses:categoryvariable:2',
+                                name: 'r',
+                                type: 'xsd:integer',
+                                min_value: 0,
+                                max_value: 0,
+                            }
+                        ]
+                    }]
             },
             {
                 id: 'urn:infai:ses:category:2',
                 name: 'temperature',
-                category_variable: {
+                category_variables: [{
                     id: 'urn:infai:ses:categoryvariable:1',
                     name: 'DegreeCelsius',
                     type: 'xsd:float',
-                }
+                }]
             },
         ];
     }

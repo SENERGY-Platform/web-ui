@@ -74,7 +74,7 @@ export interface DeviceTypeVariableModel {
 export interface DeviceTypeCategoryModel {
     id: string;
     name: string;
-    category_variable: DeviceTypeCategoryVariableModel;
+    category_variables: DeviceTypeCategoryVariableModel[];
 }
 
 export interface DeviceTypeCategoryVariableModel {
