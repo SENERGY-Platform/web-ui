@@ -17,8 +17,11 @@
 
 import {AbstractControl, ValidatorFn} from '@angular/forms';
 
-export function jsonValidator(): ValidatorFn {
+export function jsonValidator(blankIsValid = false): ValidatorFn {
     return (control: AbstractControl): {[key: string]: any} | null => {
+        if (blankIsValid && control.value === '') {
+            return null;
+        }
         try {
             JSON.parse(control.value);
         } catch (e) {

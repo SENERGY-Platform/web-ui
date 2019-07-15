@@ -100,7 +100,8 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-label>{{control.controls.functionType.invalid ? 'Function' : control.controls.functionType.value + ' Function'}}</mat-label>
-                                                    <mat-select formControlName="functions" multiple [compareWith]="compare">
+                                                    <mat-select formControlName="functions" multiple
+                                                                [compareWith]="compare">
                                                         <mat-select-trigger>
                                                             {{control.controls.functions.value[0] ? control.controls.functions.value[0].name : ''}}
                                                             <span *ngIf="control.controls.functions.value?.length > 1"
@@ -130,7 +131,8 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-label>Aspects</mat-label>
-                                                    <mat-select formControlName="aspects" multiple [compareWith]="compare">
+                                                    <mat-select formControlName="aspects" multiple
+                                                                [compareWith]="compare">
                                                         <mat-select-trigger>
                                                             {{control.controls.aspects.value[0] ? control.controls.aspects.value[0].name : ''}}
                                                             <span *ngIf="control.controls.aspects.value?.length > 1"
@@ -154,6 +156,17 @@
                                             </td>
                                         </tr>
                                     </table>
+                                    <mat-form-field class="full-width" color="accent">
+                                        <mat-select placeholder="Protocol" [compareWith]="compare"
+                                                    formControlName="protocol"
+                                                    required>
+                                            <mat-option
+                                                    *ngFor="let item of protocols"
+                                                    [value]="item.id">
+                                                {{item.name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
                                 </div>
                             </mat-tab>
 
@@ -167,54 +180,27 @@
                                                 (click)="expand(control)">
                                             <mat-icon>{{control.value.show ? 'expand_less' : 'expand_more'}}</mat-icon>
                                         </button>
-                                        <div>{{control.value.msg_segment.label}}</div>
+                                        <div>{{control.value.name}}</div>
                                     </div>
 
                                     <div fxLayout="row" [fxShow]="control.value.show === true">
                                         <div fxFlex>
                                             <mat-form-field class="full-width" color="accent">
-                                                <input matInput placeholder="Name" formControlName="name">
+                                                <mat-select placeholder="Serialization"
+                                                            formControlName="serialization">
+                                                    <mat-option *ngFor="let serialization of serializations"
+                                                                [value]="serialization">
+                                                        {{serialization}}
+                                                    </mat-option>
+                                                </mat-select>
                                             </mat-form-field>
-                                            <table class="full-width" cellspacing="0">
-                                                <tr>
-                                                    <td>
-                                                        <mat-form-field class="full-width" color="accent">
-                                                            <mat-select placeholder="Format" formControlName="format">
-                                                                <mat-option>-- None --</mat-option>
-                                                                <mat-option
-                                                                        *ngFor="let deviceTypeFormat of deviceTypeFormats"
-                                                                        [value]="deviceTypeFormat.id">
-                                                                    {{deviceTypeFormat.name}}
-                                                                </mat-option>
-                                                            </mat-select>
-                                                        </mat-form-field>
-                                                    </td>
-                                                    <td>
-                                                        <mat-form-field class="full-width" color="accent">
-                                                            <mat-select placeholder="Value type"
-                                                                        [compareWith]="compareId"
-                                                                        formControlName="type">
-                                                                <mat-option>-- None --</mat-option>
-                                                                <mat-option
-                                                                        *ngFor="let deviceTypeValueType of deviceTypeValueTypes"
-                                                                        [value]="deviceTypeValueType">
-                                                                    {{deviceTypeValueType.name}}
-                                                                </mat-option>
-                                                            </mat-select>
-                                                        </mat-form-field>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </div>
-                                        <mat-divider vertical="true" class="divider-margin"></mat-divider>
-                                        <div fxFlex [ngSwitch]="checkIfAssignmentExists(control.value)">
-                                            <div *ngSwitchCase="false">
-                                                No preview possible.
-                                            </div>
-                                            <!-- WARNING!!! DONT REFORMAT LINE BELOW-->
-                                            <!-- PreviewFormat will change-->
-                                            <pre class="word-wrap"
-                                                 *ngSwitchCase="true">{{control.value | previewFormat | async }}</pre>
+                                            <mat-form-field class="full-width" color="accent">
+                                            <textarea formControlName="content_variable_raw" matInput
+                                                      placeholder="Insert data structure in json format"></textarea>
+                                                <mat-error *ngIf="control.controls.content_variable_raw.invalid">
+                                                Enter valid json!
+                                                </mat-error>
+                                            </mat-form-field>
                                         </div>
                                     </div>
                                 </div>

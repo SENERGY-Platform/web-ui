@@ -39,6 +39,7 @@ import {ValueTypesService} from '../../value-types/shared/value-types.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewSensorActuatorDialogComponent} from './dialogs/device-types-new-sensor-actuator-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
+import {jsonValidator} from '../../../../core/validators/json.validator';
 
 interface FormatStructure {
     id: string;
@@ -60,7 +61,7 @@ export class DeviceTypesComponent implements OnInit {
 
     deviceType: DeviceTypeModel;
     deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];
-    deviceTypeProtocols: DeviceTypeProtocolModel[] = [];
+    protocols: DeviceTypeProtocolModel[] = [];
     deviceTypeValueTypes: ValueTypesModel[] = [];
     deviceTypeFormats = formatData;
     sensorActuatorGroup: { name: string, array: DeviceTypeSensorModel[] }[] = [
@@ -83,6 +84,7 @@ export class DeviceTypesComponent implements OnInit {
     measuringFunctions: DeviceTypeFunctionModel[] = [];
     controllingFunctions: DeviceTypeFunctionModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
+    serializations: string[] = ['json', 'xml'];
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
@@ -132,9 +134,9 @@ export class DeviceTypesComponent implements OnInit {
             aspects: [[], Validators.required],
         }));
         const formGroup = <FormGroup>formArray.controls[formArray.length - 1];
-        formGroup.controls['protocol'].valueChanges.subscribe((protocol: DeviceTypeProtocolModel) => {
-            formGroup.setControl('input', this.createAssignments(protocol, undefined));
-            formGroup.setControl('output', this.createAssignments(protocol, undefined));
+        formGroup.controls['protocol'].valueChanges.subscribe((protocolId: string) => {
+            formGroup.setControl('input', this.createAssignments(protocolId, undefined));
+            formGroup.setControl('output', this.createAssignments(protocolId, undefined));
         });
         formGroup.controls['functionType'].valueChanges.subscribe(() => {
             if (formGroup.controls['functionType'].invalid) {
@@ -362,7 +364,7 @@ export class DeviceTypesComponent implements OnInit {
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
         formArray.controls.forEach((secondFormGroupService: AbstractControl) => {
             const formGroup = <FormGroup>secondFormGroupService;
-            formGroup.controls['protocol'].valueChanges.subscribe((protocol: DeviceTypeProtocolModel) => {
+            formGroup.controls['protocol'].valueChanges.subscribe((protocol: string) => {
                 formGroup.setControl('input', this.createAssignments(protocol, undefined));
                 formGroup.setControl('output', this.createAssignments(protocol, undefined));
             });
@@ -401,23 +403,29 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    private createAssignments(protocol: DeviceTypeProtocolModel, assignments: (DeviceTypeContentModel[] | undefined)): FormArray {
+    private createAssignments(protocolId: string, assignments: (DeviceTypeContentModel[] | undefined)): FormArray {
 
         const array: FormGroup[] = [];
-        protocol.protocol_segment.forEach((mgSegmentElement: DeviceTypeProtocolSegmentModel) => {
+        let protocolIndex = -1;
+        this.protocols.forEach((protocol: DeviceTypeProtocolModel, index: number) => {
+            if (protocol.id === protocolId) {
+                protocolIndex = index;
+            }
+        });
+        this.protocols[protocolIndex].protocol_segment.forEach((protocolSegment: DeviceTypeProtocolSegmentModel) => {
             if (assignments !== undefined) {
                 let itemMatch = false;
                 assignments.forEach((assignment: DeviceTypeContentModel) => {
-                    if (assignment.protocol_segment_id === mgSegmentElement.id) {
+                    if (assignment.protocol_segment_id === protocolSegment.id) {
                         array.push(this.createAssignmentGroup(assignment));
                         itemMatch = true;
                     }
                 });
                 if (!itemMatch) {
-                    array.push(this.createInitialAssignmentGroup(mgSegmentElement));
+                    array.push(this.createInitialAssignmentGroup(protocolSegment));
                 }
             } else {
-                array.push(this.createInitialAssignmentGroup(mgSegmentElement));
+                array.push(this.createInitialAssignmentGroup(protocolSegment));
             }
         });
 
@@ -427,6 +435,7 @@ export class DeviceTypesComponent implements OnInit {
     private createAssignmentGroup(assignmentModel: DeviceTypeContentModel): FormGroup {
         return this._formBuilder.group({
             id: [assignmentModel.id],
+
             // msg_segment: [assignmentModel.msg_segment],
             // type: [assignmentModel.type],
             // format: [assignmentModel.format],
@@ -435,14 +444,12 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    private createInitialAssignmentGroup(msg_structure: DeviceTypeProtocolSegmentModel): FormGroup {
+    private createInitialAssignmentGroup(protocolSegment: DeviceTypeProtocolSegmentModel): FormGroup {
         return this._formBuilder.group({
             id: [],
-            name: [],
-            msg_segment: [msg_structure],
-            type: [],
-            format: [],
-            additional_formatinfo: [],
+            name: [protocolSegment.name],
+            serialization: [''],
+            content_variable_raw: ['', jsonValidator(true)],
             show: [false],
         });
         // }
@@ -483,11 +490,11 @@ export class DeviceTypesComponent implements OnInit {
             (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceTypeDeviceClasses = deviceTypeDeviceClasses;
             });
-        this.deviceTypeService.getDeviceTypeProtocols(9999, 0).subscribe(
-            (deviceTypeProtocols: DeviceTypeProtocolModel[]) => {
-                this.deviceTypeProtocols = deviceTypeProtocols;
-            }
-        );
+        // this.deviceTypeService.getDeviceTypeProtocols(9999, 0).subscribe(
+        //     (deviceTypeProtocols: DeviceTypeProtocolModel[]) => {
+        //         this.deviceTypeProtocols = deviceTypeProtocols;
+        //     }
+        // );
         this.deviceTypeService.getDeviceTypeSensors(9999, 0).subscribe(
             (sensors: DeviceTypeSensorModel[]) => {
                 this.sensorActuatorGroup[0].array = sensors;
@@ -571,6 +578,61 @@ export class DeviceTypesComponent implements OnInit {
             {id: '2aa', name: 'Lightning'},
             {id: '3aa', name: 'Battery'},
             {id: '4aa', name: 'Noise'},
+        ];
+
+        this.protocols = [
+            {
+                id: 'urn:infai:ses:protocol:1',
+                name: 'mqtt-connector',
+                handler: 'mqtt',
+                protocol_segment: [
+                    {
+                        id: 'urn:infai:ses:protocolsegment:1',
+                        name: 'payload'
+                    },
+                    {
+                        id: 'urn:infai:ses:protocolsegment:2',
+                        name: 'topic'
+                    }
+                ]
+            },
+            {
+                id: 'urn:infai:ses:protocol:2',
+                name: 'moses',
+                handler: 'moses',
+                protocol_segment: [
+                    {
+                        id: 'urn:infai:ses:protocolsegment:3',
+                        name: 'payload'
+                    },
+                ]
+            },
+            {
+                id: 'urn:infai:ses:protocol:3',
+                name: 'standard-connector',
+                handler: 'connector',
+                protocol_segment: [
+                    {
+                        id: 'urn:infai:ses:protocolsegment:4',
+                        name: 'metadata'
+                    },
+                    {
+                        id: 'urn:infai:ses:protocolsegment:5',
+                        name: 'data'
+                    },
+                ]
+            },
+            {
+                id: 'urn:infai:ses:protocol:4',
+                name: 'zway-connector',
+                handler: 'connector',
+                protocol_segment: [
+                    {
+                        id: 'urn:infai:ses:protocolsegment:6',
+                        name: 'metrics'
+                    }
+                ]
+            }
         ];
     }
 }
