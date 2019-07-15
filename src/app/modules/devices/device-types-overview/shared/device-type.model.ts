@@ -49,7 +49,7 @@ export interface DeviceTypeAspectModel {
 
 export interface DeviceTypeContentModel {
     id: string;
-    variable: DeviceTypeVariableModel;
+    content_variable: DeviceTypeContentVariableModel;
     serialization_options: DeviceTypeSerializationOptionModel[];
     serialization_id: string;
     protocol_segment_id: string;
@@ -60,7 +60,7 @@ export interface DeviceTypeSerializationOptionModel {
     option: string;
 }
 
-export interface DeviceTypeVariableModel {
+export interface DeviceTypeContentVariableModel {
     id?: string;
     name?: string | number;
     type?: string;
@@ -68,7 +68,7 @@ export interface DeviceTypeVariableModel {
     semantic_label?: string;
     mapping?: DeviceTypeMappingModel[];
     property?: DeviceTypePropertyModel;
-    sub_variables?: DeviceTypeVariableModel[];
+    sub_content_variables?: DeviceTypeContentVariableModel[];
 }
 
 export interface DeviceTypeCategoryModel {
@@ -110,8 +110,8 @@ export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
     type: DeviceTypeFunctionTypeEnum;
-    input: DeviceTypeVariableModel;
-    output: DeviceTypeVariableModel;
+    input: DeviceTypeContentVariableModel;
+    output: DeviceTypeContentVariableModel;
 }
 
 export interface DeviceTypeMsgSegmentModel {

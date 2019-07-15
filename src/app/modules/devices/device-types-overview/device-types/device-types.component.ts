@@ -27,7 +27,7 @@ import {
     DeviceTypeProtocolSegmentModel,
     DeviceTypeSensorActuatorModel,
     DeviceTypeSensorModel,
-    DeviceTypeServiceModel, DeviceTypeVariableModel,
+    DeviceTypeServiceModel, DeviceTypeContentVariableModel,
     SystemType
 } from '../shared/device-type.model';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
@@ -123,9 +123,9 @@ export class DeviceTypesComponent implements OnInit {
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
         formArray.push(this._formBuilder.group({
             id: [{value: '', disabled: true}],
-            local_id: [, Validators.required],
-            name: [, Validators.required],
-            description: [, Validators.required],
+            local_id: ['', Validators.required],
+            name: ['', Validators.required],
+            description: [''],
             protocol: ['', Validators.required],
             input: [],
             output: [],
@@ -135,8 +135,8 @@ export class DeviceTypesComponent implements OnInit {
         }));
         const formGroup = <FormGroup>formArray.controls[formArray.length - 1];
         formGroup.controls['protocol'].valueChanges.subscribe((protocolId: string) => {
-            formGroup.setControl('input', this.createAssignments(protocolId, undefined));
-            formGroup.setControl('output', this.createAssignments(protocolId, undefined));
+            formGroup.setControl('input', this.createContent(protocolId, undefined));
+            formGroup.setControl('output', this.createContent(protocolId, undefined));
         });
         formGroup.controls['functionType'].valueChanges.subscribe(() => {
             if (formGroup.controls['functionType'].invalid) {
@@ -264,8 +264,8 @@ export class DeviceTypesComponent implements OnInit {
                             id: '',
                             name: functionName,
                             type: DeviceTypeFunctionTypeEnum.Measuring,
-                            input: {} as DeviceTypeVariableModel,
-                            output: {} as DeviceTypeVariableModel,
+                            input: {} as DeviceTypeContentVariableModel,
+                            output: {} as DeviceTypeContentVariableModel,
                         };
                         formGroup.controls['functions'].value.push(newFunction);
                         this.measuringFunctions.push(newFunction);
@@ -288,8 +288,8 @@ export class DeviceTypesComponent implements OnInit {
                             id: '',
                             name: functionName,
                             type: DeviceTypeFunctionTypeEnum.Controlling,
-                            input: {} as DeviceTypeVariableModel,
-                            output: {} as DeviceTypeVariableModel,
+                            input: {} as DeviceTypeContentVariableModel,
+                            output: {} as DeviceTypeContentVariableModel,
                         };
                         formGroup.controls['functions'].value.push(newFunction);
                         this.controllingFunctions.push(newFunction);
@@ -344,7 +344,7 @@ export class DeviceTypesComponent implements OnInit {
         this.firstFormGroup = this._formBuilder.group({
             id: [{value: this.deviceType.id, disabled: true}],
             name: [this.deviceType.name, Validators.required],
-            description: [this.deviceType.description, Validators.required],
+            description: [this.deviceType.description],
             image: [this.deviceType.image],
             device_class: [this.deviceType.device_class, Validators.required],
         });
@@ -365,8 +365,8 @@ export class DeviceTypesComponent implements OnInit {
         formArray.controls.forEach((secondFormGroupService: AbstractControl) => {
             const formGroup = <FormGroup>secondFormGroupService;
             formGroup.controls['protocol'].valueChanges.subscribe((protocol: string) => {
-                formGroup.setControl('input', this.createAssignments(protocol, undefined));
-                formGroup.setControl('output', this.createAssignments(protocol, undefined));
+                formGroup.setControl('input', this.createContent(protocol, undefined));
+                formGroup.setControl('output', this.createContent(protocol, undefined));
             });
         });
         this.watchFormGroupStatusChanges();
@@ -394,16 +394,16 @@ export class DeviceTypesComponent implements OnInit {
             id: [deviceTypeService.id],
             local_id: [deviceTypeService.local_id],
             name: [deviceTypeService.name, Validators.required],
-            description: [deviceTypeService.description, Validators.required],
-            aspects: [deviceTypeService.aspects],
-            functions: [deviceTypeService.functions],
+            description: [deviceTypeService.description],
+            aspects: [deviceTypeService.aspects, Validators.required],
+            functions: [deviceTypeService.functions, Validators.required],
             protocol_id: [deviceTypeService.protocol_id, Validators.required],
-            // inputs: this.createAssignments(deviceTypeService.protocol_id, deviceTypeService.inputs),
-            // outputs: this.createAssignments(deviceTypeService.protocol, deviceTypeService.outputs),
+            inputs: this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs),
+            outputs: this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs),
         });
     }
 
-    private createAssignments(protocolId: string, assignments: (DeviceTypeContentModel[] | undefined)): FormArray {
+    private createContent(protocolId: string, content: (DeviceTypeContentModel[] | undefined)): FormArray {
 
         const array: FormGroup[] = [];
         let protocolIndex = -1;
@@ -413,11 +413,11 @@ export class DeviceTypesComponent implements OnInit {
             }
         });
         this.protocols[protocolIndex].protocol_segment.forEach((protocolSegment: DeviceTypeProtocolSegmentModel) => {
-            if (assignments !== undefined) {
+            if (content !== undefined) {
                 let itemMatch = false;
-                assignments.forEach((assignment: DeviceTypeContentModel) => {
-                    if (assignment.protocol_segment_id === protocolSegment.id) {
-                        array.push(this.createAssignmentGroup(assignment));
+                content.forEach((cont: DeviceTypeContentModel) => {
+                    if (cont.protocol_segment_id === protocolSegment.id) {
+                        array.push(this.createContentGroup(cont, protocolSegment));
                         itemMatch = true;
                     }
                 });
@@ -432,14 +432,12 @@ export class DeviceTypesComponent implements OnInit {
         return this._formBuilder.array(array);
     }
 
-    private createAssignmentGroup(assignmentModel: DeviceTypeContentModel): FormGroup {
+    private createContentGroup(content: DeviceTypeContentModel, protocolSegment: DeviceTypeProtocolSegmentModel): FormGroup {
         return this._formBuilder.group({
-            id: [assignmentModel.id],
-
-            // msg_segment: [assignmentModel.msg_segment],
-            // type: [assignmentModel.type],
-            // format: [assignmentModel.format],
-            // additional_formatinfo: [assignmentModel.additional_formatinfo],
+            id: [content.id],
+            name: [protocolSegment.name],
+            serialization: [content.serialization_id],
+            content_variable_raw: [content.content_variable, jsonValidator(true)],
             show: [true],
         });
     }
@@ -516,29 +514,29 @@ export class DeviceTypesComponent implements OnInit {
                 id: '1',
                 name: 'brightnessAdjustment',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                input: {} as DeviceTypeVariableModel,
-                output: {} as DeviceTypeVariableModel
+                input: {} as DeviceTypeContentVariableModel,
+                output: {} as DeviceTypeContentVariableModel
             },
             {
                 id: '2',
                 name: 'colorFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                input: {} as DeviceTypeVariableModel,
-                output: {} as DeviceTypeVariableModel
+                input: {} as DeviceTypeContentVariableModel,
+                output: {} as DeviceTypeContentVariableModel
             },
             {
                 id: '3',
                 name: 'onFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                input: {} as DeviceTypeVariableModel,
-                output: {} as DeviceTypeVariableModel
+                input: {} as DeviceTypeContentVariableModel,
+                output: {} as DeviceTypeContentVariableModel
             },
             {
                 id: '4',
                 name: 'offFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                input: {} as DeviceTypeVariableModel,
-                output: {} as DeviceTypeVariableModel
+                input: {} as DeviceTypeContentVariableModel,
+                output: {} as DeviceTypeContentVariableModel
             },
         ];
 
@@ -547,29 +545,29 @@ export class DeviceTypesComponent implements OnInit {
                 id: '1a',
                 name: 'batteryLevelMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                input: {} as DeviceTypeVariableModel,
-                output: {} as DeviceTypeVariableModel
+                input: {} as DeviceTypeContentVariableModel,
+                output: {} as DeviceTypeContentVariableModel
             },
             {
                 id: '2a',
                 name: 'connectionStatusMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                input: {} as DeviceTypeVariableModel,
-                output: {} as DeviceTypeVariableModel
+                input: {} as DeviceTypeContentVariableModel,
+                output: {} as DeviceTypeContentVariableModel
             },
             {
                 id: '3a',
                 name: 'humidityMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                input: {} as DeviceTypeVariableModel,
-                output: {} as DeviceTypeVariableModel
+                input: {} as DeviceTypeContentVariableModel,
+                output: {} as DeviceTypeContentVariableModel
             },
             {
                 id: '4a',
                 name: 'temperatureMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                input: {} as DeviceTypeVariableModel,
-                output: {} as DeviceTypeVariableModel
+                input: {} as DeviceTypeContentVariableModel,
+                output: {} as DeviceTypeContentVariableModel
             },
         ];
 
