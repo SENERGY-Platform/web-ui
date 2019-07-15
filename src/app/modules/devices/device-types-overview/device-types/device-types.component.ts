@@ -25,19 +25,14 @@ import {
     DeviceTypeModel,
     DeviceTypeProtocolModel,
     DeviceTypeProtocolSegmentModel,
-    DeviceTypeSensorActuatorModel,
-    DeviceTypeSensorModel,
     DeviceTypeServiceModel, DeviceTypeContentVariableModel,
-    SystemType
 } from '../shared/device-type.model';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {DeviceTypeResponseModel} from '../shared/device-type-response.model';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {ValueTypesService} from '../../value-types/shared/value-types.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
-import {DeviceTypesNewSensorActuatorDialogComponent} from './dialogs/device-types-new-sensor-actuator-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
 import {jsonValidator} from '../../../../core/validators/json.validator';
 
@@ -64,15 +59,6 @@ export class DeviceTypesComponent implements OnInit {
     protocols: DeviceTypeProtocolModel[] = [];
     deviceTypeValueTypes: ValueTypesModel[] = [];
     deviceTypeFormats = formatData;
-    sensorActuatorGroup: { name: string, array: DeviceTypeSensorModel[] }[] = [
-        {
-            name: 'Sensor', array: []
-        },
-        {
-            name: 'Actuator', array: []
-        }
-
-    ];
 
     firstFormGroup!: FormGroup;
     secondFormGroup: FormGroup = new FormGroup({services: this._formBuilder.array([])});
@@ -213,41 +199,6 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    newSensorActuator(serviceIndex: number) {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        const editDialogRef = this.dialog.open(DeviceTypesNewSensorActuatorDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((response: DeviceTypeSensorActuatorModel) => {
-            if (response !== undefined) {
-                if (response.type === SystemType.Sensor) {
-                    this.deviceTypeService.createSensor({label: response.label, property: response.property}
-                    ).subscribe((sensor: DeviceTypeResponseModel | null) => {
-                        if (sensor === null) {
-                            this.snackBar.open('Error while creating the Sensor!', undefined, {duration: 2000});
-                        } else {
-                            this.sensorActuatorGroup[0].array.push({uri: sensor.uri, label: response.label});
-                            this.setSensorActuatorValue(serviceIndex, sensor.uri);
-                            this.snackBar.open('Sensor created successfully.', undefined, {duration: 2000});
-                        }
-                    });
-                }
-                if (response.type === SystemType.Actuator) {
-                    this.deviceTypeService.createActuator({label: response.label, property: response.property}
-                    ).subscribe((actuator: DeviceTypeResponseModel | null) => {
-                        if (actuator === null) {
-                            this.snackBar.open('Error while creating the Actuator!', undefined, {duration: 2000});
-                        } else {
-                            this.sensorActuatorGroup[1].array.push({uri: actuator.uri, label: response.label});
-                            this.setSensorActuatorValue(serviceIndex, actuator.uri);
-                            this.snackBar.open('Actuator created successfully.', undefined, {duration: 2000});
-                        }
-                    });
-                }
-            }
-        });
-    }
-
     openCreateFunctionDialog(serviceIndex: number) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
@@ -264,8 +215,7 @@ export class DeviceTypesComponent implements OnInit {
                             id: '',
                             name: functionName,
                             type: DeviceTypeFunctionTypeEnum.Measuring,
-                            input: {} as DeviceTypeContentVariableModel,
-                            output: {} as DeviceTypeContentVariableModel,
+                            category_ids: [],
                         };
                         formGroup.controls['functions'].value.push(newFunction);
                         this.measuringFunctions.push(newFunction);
@@ -288,8 +238,7 @@ export class DeviceTypesComponent implements OnInit {
                             id: '',
                             name: functionName,
                             type: DeviceTypeFunctionTypeEnum.Controlling,
-                            input: {} as DeviceTypeContentVariableModel,
-                            output: {} as DeviceTypeContentVariableModel,
+                            category_ids: [],
                         };
                         formGroup.controls['functions'].value.push(newFunction);
                         this.controllingFunctions.push(newFunction);
@@ -436,7 +385,7 @@ export class DeviceTypesComponent implements OnInit {
         return this._formBuilder.group({
             id: [content.id],
             name: [protocolSegment.name],
-            serialization: [content.serialization_id],
+            serialization: [content.serialization],
             content_variable_raw: [content.content_variable, jsonValidator(true)],
             show: [true],
         });
@@ -488,21 +437,6 @@ export class DeviceTypesComponent implements OnInit {
             (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceTypeDeviceClasses = deviceTypeDeviceClasses;
             });
-        // this.deviceTypeService.getDeviceTypeProtocols(9999, 0).subscribe(
-        //     (deviceTypeProtocols: DeviceTypeProtocolModel[]) => {
-        //         this.deviceTypeProtocols = deviceTypeProtocols;
-        //     }
-        // );
-        this.deviceTypeService.getDeviceTypeSensors(9999, 0).subscribe(
-            (sensors: DeviceTypeSensorModel[]) => {
-                this.sensorActuatorGroup[0].array = sensors;
-            }
-        );
-        this.deviceTypeService.getDeviceTypeActuators(9999, 0).subscribe(
-            (sensors: DeviceTypeSensorModel[]) => {
-                this.sensorActuatorGroup[1].array = sensors;
-            }
-        );
 
         this.valueTypesService.getValuetypes('', 9999, 0, 'name', 'asc').subscribe(
             (deviceTypeValueTypes: ValueTypesModel[]) => {
@@ -514,29 +448,25 @@ export class DeviceTypesComponent implements OnInit {
                 id: '1',
                 name: 'brightnessAdjustment',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                input: {} as DeviceTypeContentVariableModel,
-                output: {} as DeviceTypeContentVariableModel
+                category_ids: [],
             },
             {
                 id: '2',
                 name: 'colorFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                input: {} as DeviceTypeContentVariableModel,
-                output: {} as DeviceTypeContentVariableModel
+                category_ids: [],
             },
             {
                 id: '3',
                 name: 'onFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                input: {} as DeviceTypeContentVariableModel,
-                output: {} as DeviceTypeContentVariableModel
+                category_ids: [],
             },
             {
                 id: '4',
                 name: 'offFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                input: {} as DeviceTypeContentVariableModel,
-                output: {} as DeviceTypeContentVariableModel
+                category_ids: [],
             },
         ];
 
@@ -545,29 +475,25 @@ export class DeviceTypesComponent implements OnInit {
                 id: '1a',
                 name: 'batteryLevelMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                input: {} as DeviceTypeContentVariableModel,
-                output: {} as DeviceTypeContentVariableModel
+                category_ids: [],
             },
             {
                 id: '2a',
                 name: 'connectionStatusMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                input: {} as DeviceTypeContentVariableModel,
-                output: {} as DeviceTypeContentVariableModel
+                category_ids: [],
             },
             {
                 id: '3a',
                 name: 'humidityMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                input: {} as DeviceTypeContentVariableModel,
-                output: {} as DeviceTypeContentVariableModel
+                category_ids: [],
             },
             {
                 id: '4a',
                 name: 'temperatureMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                input: {} as DeviceTypeContentVariableModel,
-                output: {} as DeviceTypeContentVariableModel
+                category_ids: [],
             },
         ];
 

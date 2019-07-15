@@ -42,8 +42,6 @@ import {DeleteDialogComponent} from './dialogs/delete-dialog.component';
 import {ShortInputVariableNamePipe} from './pipe/short-input-variable-name.pipe';
 import {ShortOutputVariableNamePipe} from './pipe/short-output-variable-name.pipe';
 import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pipe';
-import {PreviewFormatPipe} from './pipe/preview-format.pipe';
-
 
 @NgModule({
     imports: [
@@ -78,7 +76,6 @@ import {PreviewFormatPipe} from './pipe/preview-format.pipe';
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
         DeleteDialogComponent,
-        PreviewFormatPipe,
         DeleteDialogComponent,
     ],
     exports: [
@@ -93,7 +90,6 @@ import {PreviewFormatPipe} from './pipe/preview-format.pipe';
         ShortOutputVariableNamePipe,
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
-        PreviewFormatPipe,
     ],
     entryComponents: [
         DeleteDialogComponent,

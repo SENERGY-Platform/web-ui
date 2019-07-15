@@ -56,7 +56,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
                         id: 'urn:infai:ses:categoryvariable:1',
                         name: 'rgb',
                         type: 'http://schema.org/structure',
-                        sub_category_variable: [
+                        sub_category_variables: [
                             {
                                 id: 'urn:infai:ses:categoryvariable:2',
                                 name: 'r',

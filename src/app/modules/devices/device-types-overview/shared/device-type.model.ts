@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {ValueTypesFieldTypeModel, ValueTypesModel} from '../../value-types/shared/value-types.model';
-
 export interface DeviceTypeModel {
     id: string;
     name: string;
@@ -51,23 +49,22 @@ export interface DeviceTypeContentModel {
     id: string;
     content_variable: DeviceTypeContentVariableModel;
     serialization_options: DeviceTypeSerializationOptionModel[];
-    serialization_id: string;
+    serialization: string;
     protocol_segment_id: string;
 }
 
 export interface DeviceTypeSerializationOptionModel {
     id: string;
     option: string;
+    content_variable_id: string;
 }
 
 export interface DeviceTypeContentVariableModel {
     id?: string;
-    name?: string | number;
+    name?: string;
     type?: string;
-    skala?: string[];
-    semantic_label?: string;
-    mapping?: DeviceTypeMappingModel[];
-    property?: DeviceTypePropertyModel;
+    exactMatch?: string;
+    value?: string | boolean | number;
     sub_content_variables?: DeviceTypeContentVariableModel[];
 }
 
@@ -83,40 +80,17 @@ export interface DeviceTypeCategoryVariableModel {
     type: string;
     min_value?: number;
     max_value?: number;
-    value?: string | number | boolean;
-    sub_category_variable?: DeviceTypeCategoryVariableModel[];
-}
-
-export interface DeviceTypePropertyModel {
-    id?: string;
-    unit?: string;
     value?: string | boolean | number;
-    max_value?: number;
-    min_value?: number;
-}
-
-export interface DeviceTypeSerializationModel {
-    id: string;
-    name: string;
-}
-
-export interface DeviceTypeMappingModel {
-    conversion?: string | null;
-    input: string[];
-    output: string[];
+    sub_category_variables?: DeviceTypeCategoryVariableModel[];
 }
 
 export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
     type: DeviceTypeFunctionTypeEnum;
-    input: DeviceTypeContentVariableModel;
-    output: DeviceTypeContentVariableModel;
+    category_ids: string[];
 }
 
-export interface DeviceTypeMsgSegmentModel {
-    uri: string;
-}
 
 export enum DeviceTypeFunctionTypeEnum {
     Controlling = 'Controlling',
@@ -135,59 +109,3 @@ export interface DeviceTypeProtocolSegmentModel {
     name: string;
 }
 
-export interface DeviceTypeAssignmentModel {
-    id: string;
-    name: string;
-    msg_segment: DeviceTypeMsgSegmentModel;
-    type: ValueTypesModel;
-    format: string;
-    additional_formatinfo: DeviceTypeAdditionalFormatInfoModel[];
-}
-
-export interface DeviceTypeAdditionalFormatInfoModel {
-    id: string;
-    field: ValueTypesFieldTypeModel;
-    format_flag: string;
-}
-
-export interface DeviceTypePropertiesModel {
-    uri: string | null;
-    label: string;
-    feature_of_interest: DeviceTypeFeatureOfInterestModel | null;
-}
-
-export interface DeviceTypeFeatureOfInterestModel {
-    uri: string | null;
-    label: string;
-}
-
-export interface DeviceTypeSensorActuatorModel {
-    type: SystemType;
-    label: string;
-    property: DeviceTypePropertiesModel;
-}
-
-export interface DeviceTypeCreateSensorModel {
-    label: string;
-    property: DeviceTypePropertiesModel;
-}
-
-export interface DeviceTypeCreateActuatorModel {
-    label: string;
-    property: DeviceTypePropertiesModel;
-}
-
-export interface DeviceTypeSensorModel {
-    uri: string;
-    label: string;
-}
-
-export interface DeviceTypeActuatorModel {
-    uri: string;
-    label: string;
-}
-
-export enum SystemType {
-    Sensor = 'sensor',
-    Actuator = 'actuator',
-}
