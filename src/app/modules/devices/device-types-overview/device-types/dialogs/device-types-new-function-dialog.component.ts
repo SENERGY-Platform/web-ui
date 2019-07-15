@@ -18,16 +18,17 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialogRef, MatSnackBar} from '@angular/material';
 import {FormControl, Validators} from '@angular/forms';
-import {jsonValidator} from '../../../../../core/validators/json.validator';
+import {DeviceTypeCategoryModel} from '../../shared/device-type.model';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',
     styleUrls: ['./device-types-new-function-dialog.component.css']
 })
-export class DeviceTypesNewFunctionDialogComponent {
+export class DeviceTypesNewFunctionDialogComponent implements OnInit{
 
     nameControl = new FormControl('', [Validators.required]);
-    variableRawControl = new FormControl('', [Validators.required, jsonValidator()]);
+    categoriesControl = new FormControl('', [Validators.required]);
+    categories: DeviceTypeCategoryModel[] = [];
 
     constructor(private snackBar: MatSnackBar,
                 private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>) {
@@ -37,8 +38,43 @@ export class DeviceTypesNewFunctionDialogComponent {
         this.dialogRef.close();
     }
 
-    save(label: string): void {
-        this.dialogRef.close(label);
+    save(): void {
+        this.dialogRef.close();
     }
 
+    compare(a: any, b: any): boolean {
+        return a && b && a.id === b.id && a.name === b.name;
+    }
+
+    ngOnInit(): void {
+        this.categories = [
+            {
+                id: 'urn:infai:ses:category:1',
+                name: 'color',
+                category_variable: {
+                    id: 'urn:infai:ses:categoryvariable:1',
+                    name: 'rgb',
+                    type: 'http://schema.org/structure',
+                    sub_category_variable: [
+                        {
+                            id: 'urn:infai:ses:categoryvariable:2',
+                            name: 'r',
+                            type: 'xsd:integer',
+                            min_value: 0,
+                            max_value: 0,
+                        }
+                    ]
+                }
+            },
+            {
+                id: 'urn:infai:ses:category:2',
+                name: 'temperature',
+                category_variable: {
+                    id: 'urn:infai:ses:categoryvariable:1',
+                    name: 'DegreeCelsius',
+                    type: 'xsd:float',
+                }
+            },
+        ];
+    }
 }

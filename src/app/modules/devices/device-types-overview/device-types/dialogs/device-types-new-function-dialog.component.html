@@ -24,15 +24,25 @@
             <input [formControl]="nameControl" matInput placeholder="Name">
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <textarea [formControl]="variableRawControl" matInput placeholder="Insert data structure in json format"></textarea>
-            <mat-error *ngIf="variableRawControl.invalid">
-                Enter valid json!
-            </mat-error>
+            <mat-label>Category</mat-label>
+            <mat-select [formControl]="categoriesControl" multiple [compareWith]="compare">
+                <mat-select-trigger>
+                    {{categoriesControl.value[0] ? categoriesControl.value[0].name : ''}}
+                    <span *ngIf="categoriesControl.value?.length > 1"
+                          class="example-additional-selection">
+                        {{'(+' + (categoriesControl.value.length - 1) + (categoriesControl.value?.length === 2 ? ' other)' : ' others)')}}
+                    </span>
+                </mat-select-trigger>
+                <mat-option *ngFor="let category of categories"
+                            [value]="category">{{category.name}}</mat-option>
+            </mat-select>
         </mat-form-field>
     </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" [disabled]="nameControl.invalid || variableRawControl.invalid" (click)="save()">Save</button>
+    <button class="mat-raised-button mat-accent" [disabled]="nameControl.invalid || categoriesControl.invalid"
+            (click)="save()">Save
+    </button>
 </mat-dialog-actions>

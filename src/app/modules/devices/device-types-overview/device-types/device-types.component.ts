@@ -17,7 +17,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {
-    DeviceTypeAspectModel, DeviceTypeCategoryModel,
+    DeviceTypeAspectModel,
     DeviceTypeContentModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
@@ -83,7 +83,6 @@ export class DeviceTypesComponent implements OnInit {
     measuringFunctions: DeviceTypeFunctionModel[] = [];
     controllingFunctions: DeviceTypeFunctionModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
-    categories: DeviceTypeCategoryModel[] = [];
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
@@ -572,36 +571,6 @@ export class DeviceTypesComponent implements OnInit {
             {id: '2aa', name: 'Lightning'},
             {id: '3aa', name: 'Battery'},
             {id: '4aa', name: 'Noise'},
-        ];
-
-        this.categories = [
-            {
-                id: 'urn:infai:ses:category:1',
-                name: 'color',
-                category_variable: {
-                    id: 'urn:infai:ses:categoryvariable:1',
-                    name: 'rgb',
-                    type: 'http://schema.org/structure',
-                    sub_category_variable: [
-                        {
-                            id: 'urn:infai:ses:categoryvariable:2',
-                            name: 'r',
-                            type: 'xsd:integer',
-                            min_value: 0,
-                            max_value: 0,
-                        }
-                    ]
-                }
-            },
-            {
-                id: 'urn:infai:ses:category:2',
-                name: 'temperature',
-                category_variable: {
-                    id: 'urn:infai:ses:categoryvariable:1',
-                    name: 'DegreeCelsius',
-                    type: 'xsd:float',
-                }
-            },
         ];
     }
 }
