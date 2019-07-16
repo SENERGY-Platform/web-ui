@@ -25,7 +25,7 @@ import {
     DeviceTypeModel,
     DeviceTypeProtocolModel,
     DeviceTypeProtocolSegmentModel,
-    DeviceTypeServiceModel, DeviceTypeContentVariableModel, DeviceTypeConceptModel,
+    DeviceTypeServiceModel,
 } from '../shared/device-type.model';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
@@ -35,17 +35,6 @@ import {ValueTypesService} from '../../value-types/shared/value-types.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
 import {jsonValidator} from '../../../../core/validators/json.validator';
-
-interface FormatStructure {
-    id: string;
-    name: string;
-}
-
-const formatData: FormatStructure[] = [
-    {id: 'http://www.sepl.wifa.uni-leipzig.de/ontlogies/device-repo#PlainText', name: 'Plain Text'},
-    {id: 'http://www.sepl.wifa.uni-leipzig.de/ontlogies/device-repo#json', name: 'JSON'},
-    {id: 'http://www.sepl.wifa.uni-leipzig.de/ontlogies/device-repo#xml', name: 'XML'},
-];
 
 @Component({
     selector: 'senergy-device-types',
@@ -58,7 +47,6 @@ export class DeviceTypesComponent implements OnInit {
     deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];
     protocols: DeviceTypeProtocolModel[] = [];
     deviceTypeValueTypes: ValueTypesModel[] = [];
-    deviceTypeFormats = formatData;
 
     firstFormGroup!: FormGroup;
     secondFormGroup: FormGroup = new FormGroup({services: this._formBuilder.array([])});
@@ -94,14 +82,14 @@ export class DeviceTypesComponent implements OnInit {
         this.cleanUpServices();
 
         const newDeviceType: DeviceTypeModel = {
-            id: this.firstFormGroup.value.idCtrl,
-            name: this.firstFormGroup.value.nameCtrl,
-            description: this.firstFormGroup.value.descCtrl,
-            image: this.firstFormGroup.value.imageCtrl,
+            id: this.firstFormGroup.value.id,
+            name: this.firstFormGroup.value.name,
+            description: this.firstFormGroup.value.description,
+            image: this.firstFormGroup.value.image,
             services: this.secondFormGroup.value.services,
-            device_class: this.firstFormGroup.value.classCtrl,
+            device_class: this.firstFormGroup.value.device_class,
         };
-        // this.dialogRef.close(newDeviceType);
+
     }
 
 
@@ -113,16 +101,16 @@ export class DeviceTypesComponent implements OnInit {
             name: ['', Validators.required],
             description: [''],
             protocol: ['', Validators.required],
-            input: [],
-            output: [],
+            inputs: [[]],
+            outputs: [[]],
             functionType: ['', Validators.required],
             functions: [{value: [], disabled: true}, Validators.required],
             aspects: [[], Validators.required],
         }));
         const formGroup = <FormGroup>formArray.controls[formArray.length - 1];
         formGroup.controls['protocol'].valueChanges.subscribe((protocolId: string) => {
-            formGroup.setControl('input', this.createContent(protocolId, undefined));
-            formGroup.setControl('output', this.createContent(protocolId, undefined));
+            formGroup.setControl('inputs', this.createContent(protocolId, undefined));
+            formGroup.setControl('outputs', this.createContent(protocolId, undefined));
         });
         formGroup.controls['functionType'].valueChanges.subscribe(() => {
             if (formGroup.controls['functionType'].invalid) {
@@ -168,11 +156,9 @@ export class DeviceTypesComponent implements OnInit {
         control.patchValue({'show': !control.value.show});
     }
 
-    checkIfAssignmentExists(input: DeviceTypeContentModel): boolean {
-        // if ((input.name === null || input.name === '') &&
-        //     (input.format === null || input.format === undefined) &&
-        //     (input.type === null || input.type === undefined))
-        if (input.id === null) {
+    checkIfContentExists(input: DeviceTypeContentModel): boolean {
+        if ((input.content_variable === null || input.content_variable === '' || input.content_variable === undefined) &&
+            (input.serialization === null || input.serialization === '')) {
             return false;
         } else {
             return true;
@@ -203,7 +189,6 @@ export class DeviceTypesComponent implements OnInit {
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
         const formGroup = <FormGroup>formArray.controls[serviceIndex];
         const dialogConfig = new MatDialogConfig();
-        console.log(formGroup.controls['functionType'].value);
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             functionType: formGroup.controls['functionType'].value,
@@ -255,12 +240,12 @@ export class DeviceTypesComponent implements OnInit {
             const deleteIndexInput: DeviceTypeContentModel[] = [];
             const deleteIndexOutput: DeviceTypeContentModel[] = [];
             service.inputs.forEach((item: DeviceTypeContentModel) => {
-                if (!this.checkIfAssignmentExists(item)) {
+                if (!this.checkIfContentExists(item)) {
                     deleteIndexInput.push(item);
                 }
             });
             service.outputs.forEach((item: DeviceTypeContentModel) => {
-                if (!this.checkIfAssignmentExists(item)) {
+                if (!this.checkIfContentExists(item)) {
                     deleteIndexOutput.push(item);
                 }
             });
@@ -299,8 +284,8 @@ export class DeviceTypesComponent implements OnInit {
         formArray.controls.forEach((secondFormGroupService: AbstractControl) => {
             const formGroup = <FormGroup>secondFormGroupService;
             formGroup.controls['protocol'].valueChanges.subscribe((protocol: string) => {
-                formGroup.setControl('input', this.createContent(protocol, undefined));
-                formGroup.setControl('output', this.createContent(protocol, undefined));
+                formGroup.setControl('inputs', this.createContent(protocol, undefined));
+                formGroup.setControl('outputs', this.createContent(protocol, undefined));
             });
         });
         this.watchFormGroupStatusChanges();
