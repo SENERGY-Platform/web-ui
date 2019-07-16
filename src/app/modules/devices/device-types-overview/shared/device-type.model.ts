@@ -68,27 +68,27 @@ export interface DeviceTypeContentVariableModel {
     sub_content_variables?: DeviceTypeContentVariableModel[];
 }
 
-export interface DeviceTypeCategoryModel {
+export interface DeviceTypeConceptModel {
     id: string;
     name: string;
-    category_variables: DeviceTypeCategoryVariableModel[];
+    characteristics: DeviceTypeCharacteristicsModel[];
 }
 
-export interface DeviceTypeCategoryVariableModel {
+export interface DeviceTypeCharacteristicsModel {
     id: string;
     name: string;
     type: string;
     min_value?: number;
     max_value?: number;
     value?: string | boolean | number;
-    sub_category_variables?: DeviceTypeCategoryVariableModel[];
+    sub_characteristics?: DeviceTypeCharacteristicsModel[];
 }
 
 export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
     type: DeviceTypeFunctionTypeEnum;
-    category_ids: string[];
+    concept_ids: string[];
 }
 
 

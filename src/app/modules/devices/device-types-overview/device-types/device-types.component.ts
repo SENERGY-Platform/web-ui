@@ -215,7 +215,7 @@ export class DeviceTypesComponent implements OnInit {
                             id: '',
                             name: functionName,
                             type: DeviceTypeFunctionTypeEnum.Measuring,
-                            category_ids: [],
+                            concept_ids: [],
                         };
                         formGroup.controls['functions'].value.push(newFunction);
                         this.measuringFunctions.push(newFunction);
@@ -238,7 +238,7 @@ export class DeviceTypesComponent implements OnInit {
                             id: '',
                             name: functionName,
                             type: DeviceTypeFunctionTypeEnum.Controlling,
-                            category_ids: [],
+                            concept_ids: [],
                         };
                         formGroup.controls['functions'].value.push(newFunction);
                         this.controllingFunctions.push(newFunction);
@@ -448,25 +448,25 @@ export class DeviceTypesComponent implements OnInit {
                 id: '1',
                 name: 'brightnessAdjustment',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                category_ids: [],
+                concept_ids: [],
             },
             {
                 id: '2',
                 name: 'colorFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                category_ids: [],
+                concept_ids: [],
             },
             {
                 id: '3',
                 name: 'onFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                category_ids: [],
+                concept_ids: [],
             },
             {
                 id: '4',
                 name: 'offFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                category_ids: [],
+                concept_ids: [],
             },
         ];
 
@@ -475,25 +475,25 @@ export class DeviceTypesComponent implements OnInit {
                 id: '1a',
                 name: 'batteryLevelMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                category_ids: [],
+                concept_ids: [],
             },
             {
                 id: '2a',
                 name: 'connectionStatusMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                category_ids: [],
+                concept_ids: [],
             },
             {
                 id: '3a',
                 name: 'humidityMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                category_ids: [],
+                concept_ids: [],
             },
             {
                 id: '4a',
                 name: 'temperatureMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                category_ids: [],
+                concept_ids: [],
             },
         ];
 

@@ -18,7 +18,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialogRef, MatSnackBar} from '@angular/material';
 import {FormControl, Validators} from '@angular/forms';
-import {DeviceTypeCategoryModel} from '../../shared/device-type.model';
+import {DeviceTypeConceptModel} from '../../shared/device-type.model';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',
@@ -28,7 +28,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
 
     nameControl = new FormControl('', [Validators.required]);
     categoriesControl = new FormControl('', [Validators.required]);
-    categories: DeviceTypeCategoryModel[] = [];
+    categories: DeviceTypeConceptModel[] = [];
 
     constructor(private snackBar: MatSnackBar,
                 private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>) {
@@ -51,12 +51,12 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
             {
                 id: 'urn:infai:ses:category:1',
                 name: 'color',
-                category_variables: [
+                characteristics: [
                     {
                         id: 'urn:infai:ses:categoryvariable:1',
                         name: 'rgb',
                         type: 'http://schema.org/structure',
-                        sub_category_variables: [
+                        sub_characteristics: [
                             {
                                 id: 'urn:infai:ses:categoryvariable:2',
                                 name: 'r',
@@ -70,7 +70,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
             {
                 id: 'urn:infai:ses:category:2',
                 name: 'temperature',
-                category_variables: [{
+                characteristics: [{
                     id: 'urn:infai:ses:categoryvariable:1',
                     name: 'DegreeCelsius',
                     type: 'xsd:float',
