@@ -95,17 +95,6 @@ export class DeviceTypesComponent implements OnInit {
 
     }
 
-    private saveDeviceType(deviceTypeResp: DeviceTypeModel) {
-        this.deviceTypeService.createDeviceType(deviceTypeResp).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
-            if (deviceTypeSaved) {
-                this.snackBar.open('Device type saved successfully.', undefined, {duration: 2000});
-            } else {
-                this.snackBar.open('Error while saving the device type!', undefined, {duration: 2000});
-            }
-        });
-    }
-
-
     addService() {
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
         formArray.push(this._formBuilder.group({
@@ -156,13 +145,6 @@ export class DeviceTypesComponent implements OnInit {
 
     compare(a: any, b: any): boolean {
         return a && b && a.id === b.id && a.name === b.name;
-    }
-
-    compareUri(a: any, b: any): boolean {
-        if (b === null) {
-            return false;
-        }
-        return a.uri === b.uri;
     }
 
     expand(control: FormGroup): void {
@@ -413,6 +395,16 @@ export class DeviceTypesComponent implements OnInit {
             }
         });
         return index;
+    }
+
+    private saveDeviceType(deviceTypeResp: DeviceTypeModel) {
+        this.deviceTypeService.createDeviceType(deviceTypeResp).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
+            if (deviceTypeSaved) {
+                this.snackBar.open('Device type saved successfully.', undefined, {duration: 2000});
+            } else {
+                this.snackBar.open('Error while saving the device type!', undefined, {duration: 2000});
+            }
+        });
     }
 
     private loadData(): void {
