@@ -138,17 +138,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         });
     }
 
-    private saveDeviceType(deviceTypeResp: DeviceTypeModel) {
-        this.deviceTypeService.createDeviceType(deviceTypeResp).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
-            if (deviceTypeSaved) {
-                this.deviceTypes.push(this.convertDeviceTypes(deviceTypeSaved));
-                this.snackBar.open('Device type saved successfully.', undefined, {duration: 2000});
-            } else {
-                this.snackBar.open('Error while saving the device type!', undefined, {duration: 2000});
-            }
-        });
-    }
-
     private convertDeviceTypes(deviceTypeIn: DeviceTypeModel): DeviceTypePermSearchModel {
         return {
             id: deviceTypeIn.id,

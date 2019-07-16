@@ -101,7 +101,7 @@ export interface DeviceTypeProtocolModel {
     id: string;
     name: string;
     handler: string;
-    protocol_segment: DeviceTypeProtocolSegmentModel[];
+    protocol_segments: DeviceTypeProtocolSegmentModel[];
 }
 
 export interface DeviceTypeProtocolSegmentModel {

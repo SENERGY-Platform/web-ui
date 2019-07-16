@@ -90,6 +90,19 @@ export class DeviceTypesComponent implements OnInit {
             device_class: this.firstFormGroup.value.device_class,
         };
 
+        console.log(newDeviceType);
+        this.saveDeviceType(newDeviceType);
+
+    }
+
+    private saveDeviceType(deviceTypeResp: DeviceTypeModel) {
+        this.deviceTypeService.createDeviceType(deviceTypeResp).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
+            if (deviceTypeSaved) {
+                this.snackBar.open('Device type saved successfully.', undefined, {duration: 2000});
+            } else {
+                this.snackBar.open('Error while saving the device type!', undefined, {duration: 2000});
+            }
+        });
     }
 
 
@@ -100,7 +113,7 @@ export class DeviceTypesComponent implements OnInit {
             local_id: ['', Validators.required],
             name: ['', Validators.required],
             description: [''],
-            protocol: ['', Validators.required],
+            protocol_id: ['', Validators.required],
             inputs: [[]],
             outputs: [[]],
             functionType: ['', Validators.required],
@@ -108,7 +121,7 @@ export class DeviceTypesComponent implements OnInit {
             aspects: [[], Validators.required],
         }));
         const formGroup = <FormGroup>formArray.controls[formArray.length - 1];
-        formGroup.controls['protocol'].valueChanges.subscribe((protocolId: string) => {
+        formGroup.controls['protocol_id'].valueChanges.subscribe((protocolId: string) => {
             formGroup.setControl('inputs', this.createContent(protocolId, undefined));
             formGroup.setControl('outputs', this.createContent(protocolId, undefined));
         });
@@ -283,7 +296,7 @@ export class DeviceTypesComponent implements OnInit {
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
         formArray.controls.forEach((secondFormGroupService: AbstractControl) => {
             const formGroup = <FormGroup>secondFormGroupService;
-            formGroup.controls['protocol'].valueChanges.subscribe((protocol: string) => {
+            formGroup.controls['protocol_id'].valueChanges.subscribe((protocol: string) => {
                 formGroup.setControl('inputs', this.createContent(protocol, undefined));
                 formGroup.setControl('outputs', this.createContent(protocol, undefined));
             });
@@ -331,7 +344,7 @@ export class DeviceTypesComponent implements OnInit {
                 protocolIndex = index;
             }
         });
-        this.protocols[protocolIndex].protocol_segment.forEach((protocolSegment: DeviceTypeProtocolSegmentModel) => {
+        this.protocols[protocolIndex].protocol_segments.forEach((protocolSegment: DeviceTypeProtocolSegmentModel) => {
             if (content !== undefined) {
                 let itemMatch = false;
                 content.forEach((cont: DeviceTypeContentModel) => {
@@ -413,30 +426,35 @@ export class DeviceTypesComponent implements OnInit {
                 this.deviceTypeValueTypes = deviceTypeValueTypes;
             });
 
+        this.deviceTypeService.getProtocols(9999, 0, 'name', 'asc').subscribe(
+            (protocols: DeviceTypeProtocolModel[]) => {
+                this.protocols = protocols;
+            });
+
         this.controllingFunctions = [
             {
                 id: '1',
                 name: 'brightnessAdjustment',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                concept_ids: [],
+                concept_ids: ['urn:infai:ses:concept:1'],
             },
             {
                 id: '2',
                 name: 'colorFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                concept_ids: [],
+                concept_ids: ['urn:infai:ses:concept:1'],
             },
             {
                 id: '3',
                 name: 'onFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                concept_ids: [],
+                concept_ids: ['urn:infai:ses:concept:1'],
             },
             {
                 id: '4',
                 name: 'offFunction',
                 type: DeviceTypeFunctionTypeEnum.Controlling,
-                concept_ids: [],
+                concept_ids: ['urn:infai:ses:concept:1'],
             },
         ];
 
@@ -445,25 +463,25 @@ export class DeviceTypesComponent implements OnInit {
                 id: '1a',
                 name: 'batteryLevelMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                concept_ids: [],
+                concept_ids: ['urn:infai:ses:concept:1'],
             },
             {
                 id: '2a',
                 name: 'connectionStatusMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                concept_ids: [],
+                concept_ids: ['urn:infai:ses:concept:1'],
             },
             {
                 id: '3a',
                 name: 'humidityMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                concept_ids: [],
+                concept_ids: ['urn:infai:ses:concept:1'],
             },
             {
                 id: '4a',
                 name: 'temperatureMeasuring',
                 type: DeviceTypeFunctionTypeEnum.Measuring,
-                concept_ids: [],
+                concept_ids: ['urn:infai:ses:concept:1'],
             },
         ];
 
@@ -474,59 +492,5 @@ export class DeviceTypesComponent implements OnInit {
             {id: '4aa', name: 'Noise'},
         ];
 
-        this.protocols = [
-            {
-                id: 'urn:infai:ses:protocol:1',
-                name: 'mqtt-connector',
-                handler: 'mqtt',
-                protocol_segment: [
-                    {
-                        id: 'urn:infai:ses:protocolsegment:1',
-                        name: 'payload'
-                    },
-                    {
-                        id: 'urn:infai:ses:protocolsegment:2',
-                        name: 'topic'
-                    }
-                ]
-            },
-            {
-                id: 'urn:infai:ses:protocol:2',
-                name: 'moses',
-                handler: 'moses',
-                protocol_segment: [
-                    {
-                        id: 'urn:infai:ses:protocolsegment:3',
-                        name: 'payload'
-                    },
-                ]
-            },
-            {
-                id: 'urn:infai:ses:protocol:3',
-                name: 'standard-connector',
-                handler: 'connector',
-                protocol_segment: [
-                    {
-                        id: 'urn:infai:ses:protocolsegment:4',
-                        name: 'metadata'
-                    },
-                    {
-                        id: 'urn:infai:ses:protocolsegment:5',
-                        name: 'data'
-                    },
-                ]
-            },
-            {
-                id: 'urn:infai:ses:protocol:4',
-                name: 'zway-connector',
-                handler: 'connector',
-                protocol_segment: [
-                    {
-                        id: 'urn:infai:ses:protocolsegment:6',
-                        name: 'metrics'
-                    }
-                ]
-            }
-        ];
     }
 }

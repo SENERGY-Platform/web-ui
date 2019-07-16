@@ -22,7 +22,7 @@ import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {
     DeviceTypeDeviceClassModel,
-    DeviceTypeModel,
+    DeviceTypeModel, DeviceTypeProtocolModel,
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
@@ -79,7 +79,7 @@ export class DeviceTypeService {
     }
 
     createDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
-        return this.http.post<DeviceTypeModel>(environment.iotRepoUrl + '/deviceType', deviceType).pipe(
+        return this.http.post<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types', deviceType).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'updateDeviceType', null))
         );
     }
@@ -87,6 +87,13 @@ export class DeviceTypeService {
     deleteDeviceType(id: string): Observable<string> {
         return this.http.delete(environment.iotRepoUrl + '/deviceType/' + id, {responseType: 'text'}).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'deleteDeviceType', 'error'))
+        );
+    }
+
+    getProtocols(limit: number, offset: number, sort: string, order: string): Observable<DeviceTypeProtocolModel[]> {
+        return this.http.get<DeviceTypeProtocolModel[]>(environment.deviceRepoUrl + '/protocols?limit=' + limit + '&offset=' + offset + '&sort=' + sort + '.' + order).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getProtocols', []))
         );
     }
 
