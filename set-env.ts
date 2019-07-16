@@ -51,6 +51,8 @@ export const environment = {
   dashboardServiceUrl: '${process.env.DASHBOARD_SERVICE_URL}',
   usersServiceUrl: '${process.env.USERS_SERVICE_URL}',
   valuetypeSearchUrl: '${process.env.VALUETYPE_SEARCH_URL}',
+  deviceRepoUrl: '${process.env.DEVICE_REPO_URL}',
+  deviceManagerUrl: '${process.env.DEVICE_MANAGER_URL}',
 };
 `;
 
