@@ -25,15 +25,15 @@
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Category</mat-label>
-            <mat-select [formControl]="categoriesControl" multiple [compareWith]="compare">
+            <mat-select [formControl]="conceptControl" multiple [compareWith]="compare">
                 <mat-select-trigger>
-                    {{categoriesControl.value[0] ? categoriesControl.value[0].name : ''}}
-                    <span *ngIf="categoriesControl.value?.length > 1"
+                    {{conceptControl.value[0] ? conceptControl.value[0].name : ''}}
+                    <span *ngIf="conceptControl.value?.length > 1"
                           class="example-additional-selection">
-                        {{'(+' + (categoriesControl.value.length - 1) + (categoriesControl.value?.length === 2 ? ' other)' : ' others)')}}
+                        {{'(+' + (conceptControl.value.length - 1) + (conceptControl.value?.length === 2 ? ' other)' : ' others)')}}
                     </span>
                 </mat-select-trigger>
-                <mat-option *ngFor="let category of categories"
+                <mat-option *ngFor="let category of concepts"
                             [value]="category">{{category.name}}</mat-option>
             </mat-select>
         </mat-form-field>
@@ -42,7 +42,7 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" [disabled]="nameControl.invalid || categoriesControl.invalid"
+    <button class="mat-raised-button mat-accent" [disabled]="nameControl.invalid || conceptControl.invalid"
             (click)="save()">Save
     </button>
 </mat-dialog-actions>

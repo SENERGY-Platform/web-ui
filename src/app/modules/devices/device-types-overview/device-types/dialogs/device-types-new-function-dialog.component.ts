@@ -15,10 +15,10 @@
  *  limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {MatDialogRef, MatSnackBar} from '@angular/material';
+import {Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import {FormControl, Validators} from '@angular/forms';
-import {DeviceTypeConceptModel} from '../../shared/device-type.model';
+import {DeviceTypeConceptModel, DeviceTypeFunctionModel, DeviceTypeFunctionTypeEnum} from '../../shared/device-type.model';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',
@@ -27,11 +27,14 @@ import {DeviceTypeConceptModel} from '../../shared/device-type.model';
 export class DeviceTypesNewFunctionDialogComponent implements OnInit {
 
     nameControl = new FormControl('', [Validators.required]);
-    categoriesControl = new FormControl('', [Validators.required]);
-    categories: DeviceTypeConceptModel[] = [];
+    conceptControl = new FormControl('', [Validators.required]);
+    concepts: DeviceTypeConceptModel[] = [];
+    functionType = '';
 
     constructor(private snackBar: MatSnackBar,
-                private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>) {
+                private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>,
+                @Inject(MAT_DIALOG_DATA) data: {functionType: string}) {
+        this.functionType = data.functionType;
     }
 
     close(): void {
@@ -39,7 +42,14 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.dialogRef.close();
+        const func: DeviceTypeFunctionModel = {
+            id: '',
+            name: this.nameControl.value,
+            type: this.functionType,
+            concept_ids: this.conceptControl.value,
+        };
+
+        this.dialogRef.close(func);
     }
 
     compare(a: any, b: any): boolean {
@@ -47,7 +57,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.categories = [
+        this.concepts = [
             {
                 id: 'urn:infai:ses:category:1',
                 name: 'color',

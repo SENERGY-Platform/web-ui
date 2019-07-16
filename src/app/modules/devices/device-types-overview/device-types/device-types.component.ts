@@ -25,7 +25,7 @@ import {
     DeviceTypeModel,
     DeviceTypeProtocolModel,
     DeviceTypeProtocolSegmentModel,
-    DeviceTypeServiceModel, DeviceTypeContentVariableModel,
+    DeviceTypeServiceModel, DeviceTypeContentVariableModel, DeviceTypeConceptModel,
 } from '../shared/device-type.model';
 import {ValueTypesModel} from '../../value-types/shared/value-types.model';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
@@ -200,25 +200,23 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     openCreateFunctionDialog(serviceIndex: number) {
+        const formArray = <FormArray>this.secondFormGroup.controls['services'];
+        const formGroup = <FormGroup>formArray.controls[serviceIndex];
         const dialogConfig = new MatDialogConfig();
+        console.log(formGroup.controls['functionType'].value);
         dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            functionType: formGroup.controls['functionType'].value,
+        };
         const editDialogRef = this.dialog.open(DeviceTypesNewFunctionDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((functionName: string) => {
-            if (functionName !== undefined) {
-                const formArray = <FormArray>this.secondFormGroup.controls['services'];
-                const formGroup = <FormGroup>formArray.controls[serviceIndex];
+        editDialogRef.afterClosed().subscribe((func: DeviceTypeFunctionModel) => {
+            if (func !== undefined) {
                 if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Measuring) {
-                    const measureFuncIndex = this.checkIfMeasuringFunctionNameExists(functionName);
+                    const measureFuncIndex = this.checkIfMeasuringFunctionNameExists(func.name);
                     if (measureFuncIndex === -1) {
-                        const newFunction: DeviceTypeFunctionModel = {
-                            id: '',
-                            name: functionName,
-                            type: DeviceTypeFunctionTypeEnum.Measuring,
-                            concept_ids: [],
-                        };
-                        formGroup.controls['functions'].value.push(newFunction);
-                        this.measuringFunctions.push(newFunction);
+                        formGroup.controls['functions'].value.push(func);
+                        this.measuringFunctions.push(func);
                     } else {
                         const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
                         const measureFuncFormGroupIndex = functionsFormGroup.value.indexOf(this.measuringFunctions[measureFuncIndex]);
@@ -232,16 +230,10 @@ export class DeviceTypesComponent implements OnInit {
                     }
                 }
                 if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Controlling) {
-                    const controllFuncIndex = this.checkIfControllingFunctionNameExists(functionName);
+                    const controllFuncIndex = this.checkIfControllingFunctionNameExists(func.name);
                     if (controllFuncIndex === -1) {
-                        const newFunction: DeviceTypeFunctionModel = {
-                            id: '',
-                            name: functionName,
-                            type: DeviceTypeFunctionTypeEnum.Controlling,
-                            concept_ids: [],
-                        };
-                        formGroup.controls['functions'].value.push(newFunction);
-                        this.controllingFunctions.push(newFunction);
+                        formGroup.controls['functions'].value.push(func);
+                        this.controllingFunctions.push(func);
                     } else {
                         const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
                         const controllFuncFormGroupIndex = functionsFormGroup.value.indexOf(this.controllingFunctions[controllFuncIndex]);
@@ -256,13 +248,6 @@ export class DeviceTypesComponent implements OnInit {
                 }
             }
         });
-    }
-
-
-    private setSensorActuatorValue(serviceIndex: number, uri: string) {
-        const formArray = <FormArray>this.secondFormGroup.controls['services'];
-        const formGroup = <FormGroup>formArray.controls[serviceIndex];
-        formGroup.controls['sensor_actuator'].setValue(uri);
     }
 
     private cleanUpServices() {

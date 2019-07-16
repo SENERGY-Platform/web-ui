@@ -87,7 +87,7 @@ export interface DeviceTypeCharacteristicsModel {
 export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
-    type: DeviceTypeFunctionTypeEnum;
+    type: string;
     concept_ids: string[];
 }
 
