@@ -187,6 +187,7 @@
                                             <mat-form-field class="full-width" color="accent">
                                                 <mat-select placeholder="Serialization"
                                                             formControlName="serialization">
+                                                    <mat-option>-- None --</mat-option>
                                                     <mat-option *ngFor="let serialization of serializations"
                                                                 [value]="serialization">
                                                         {{serialization}}
