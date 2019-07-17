@@ -90,7 +90,6 @@ export class DeviceTypesComponent implements OnInit {
             device_class: this.firstFormGroup.value.device_class,
         };
 
-        console.log(newDeviceType);
         this.saveDeviceType(newDeviceType);
 
     }
@@ -237,11 +236,15 @@ export class DeviceTypesComponent implements OnInit {
             service.inputs.forEach((item: DeviceTypeContentModel) => {
                 if (!this.checkIfContentExists(item)) {
                     deleteIndexInput.push(item);
+                } else {
+                    item.content_variable = JSON.parse(item.content_variable_raw);
                 }
             });
             service.outputs.forEach((item: DeviceTypeContentModel) => {
                 if (!this.checkIfContentExists(item)) {
                     deleteIndexOutput.push(item);
+                } else {
+                    item.content_variable = JSON.parse(item.content_variable_raw);
                 }
             });
             deleteIndexInput.forEach((item: DeviceTypeContentModel) => {
@@ -352,6 +355,7 @@ export class DeviceTypesComponent implements OnInit {
             name: [protocolSegment.name],
             serialization: [content.serialization],
             content_variable_raw: [content.content_variable, jsonValidator(true)],
+            protocol_segment_id: [content.protocol_segment_id],
             show: [true],
         });
     }
@@ -360,8 +364,9 @@ export class DeviceTypesComponent implements OnInit {
         return this._formBuilder.group({
             id: [],
             name: [protocolSegment.name],
-            serialization: [''],
+            serialization: [],
             content_variable_raw: ['', jsonValidator(true)],
+            protocol_segment_id: [protocolSegment.id],
             show: [false],
         });
         // }
