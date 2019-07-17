@@ -45,12 +45,12 @@ export class DeviceTypeService {
 
     getDeviceTypes(searchText: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypePermSearchModel[]> {
         if (searchText === '') {
-            return this.http.get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/devicetype/r/' +
+            return this.http.get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/device-types/r/' +
                 limit + '/' + offset + '/' + feature + '/' + order).pipe(
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes: list', [])));
         } else {
-            return this.http.get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/devicetype/' + searchText +
+            return this.http.get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/device-types/' + searchText +
                 '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes: search', [])));
@@ -84,9 +84,9 @@ export class DeviceTypeService {
         );
     }
 
-    deleteDeviceType(id: string): Observable<string> {
-        return this.http.delete(environment.iotRepoUrl + '/deviceType/' + id, {responseType: 'text'}).pipe(
-            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'deleteDeviceType', 'error'))
+    deleteDeviceType(id: string): Observable<boolean> {
+        return this.http.delete<boolean>(environment.deviceManagerUrl + '/device-types/' + id).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'deleteDeviceType', false))
         );
     }
 

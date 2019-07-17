@@ -90,8 +90,8 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     delete(deviceTypeInput: DeviceTypePermSearchModel) {
         this.dialogsService.openDeleteDialog('device type: ' + deviceTypeInput.name).afterClosed().subscribe((deviceTypeDelete: boolean) => {
             if (deviceTypeDelete) {
-                this.deviceTypeService.deleteDeviceType(encodeURIComponent(deviceTypeInput.id)).subscribe((resp: string) => {
-                    if (resp === 'ok') {
+                this.deviceTypeService.deleteDeviceType(encodeURIComponent(deviceTypeInput.id)).subscribe((deleted: boolean) => {
+                    if (deleted) {
                         const index = this.deviceTypes.indexOf(deviceTypeInput);
                         this.deviceTypes.splice(index, 1);
                         this.snackBar.open('Device type deleted successfully.', '', {duration: 2000});
