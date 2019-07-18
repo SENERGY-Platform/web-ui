@@ -123,11 +123,21 @@ export class DeployFlowComponent {
                             node.inputs = [];
                         }
                         if (node.inputs.length > 0) {
+                            let inserted = false;
+                            let counter = 0;
+                            const length = node.inputs.length;
+                            // Try to add current entry to existing input
                             node.inputs.forEach((input: NodeInput) => {
+                                counter++;
                                 if (input.deviceId === entry[1].device.id) {
                                     if (input.values.length > 0) {
                                         input.values.push(x);
+                                        inserted = true;
                                     }
+                                }
+                                if (counter === length && inserted === false && node.inputs) {
+                                    // No existing input found for device ID, create new input
+                                    node.inputs.push(z);
                                 }
                             });
                         } else {
