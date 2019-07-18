@@ -209,14 +209,14 @@
                         </mat-tab-group>
                         <div fxLayoutAlign="end center">
                             <button (click)="deleteService(control.value)" mat-icon-button class="mat-accent"
-                                    matTooltip="delete service" [disabled]="deviceType.generated || !editable">
+                                    matTooltip="delete service" [disabled]="!editable">
                                 <mat-icon>delete</mat-icon>
                             </button>
                         </div>
 
                     </mat-expansion-panel>
                 </mat-accordion>
-                <div class="button-margin" fxLayoutAlign="center center" *ngIf="!deviceType.generated && editable">
+                <div class="button-margin" fxLayoutAlign="center center" *ngIf="editable">
                     <button class="mat-raised-button color-accent" (click)="addService()">ADD Service</button>
                 </div>
             </form>

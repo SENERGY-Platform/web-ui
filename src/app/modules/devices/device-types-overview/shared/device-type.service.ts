@@ -36,9 +36,9 @@ export class DeviceTypeService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {
     }
 
-    getDeviceType(type: string): Observable<DeviceTypeModel | null> {
+    getDeviceType(id: string): Observable<DeviceTypeModel | null> {
         return this.http.get<DeviceTypeModel>
-        (environment.iotRepoUrl + '/deviceType/' + encodeURIComponent(type)).pipe(
+        (environment.deviceManagerUrl + '/device-types/' + encodeURIComponent(id)).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null))
         );
     }

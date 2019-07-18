@@ -52,6 +52,7 @@ import {DeviceTypesNewDeviceClassDialogComponent} from './device-types/dialogs/d
 import {DeviceTypesNewFunctionDialogComponent} from './device-types/dialogs/device-types-new-function-dialog.component';
 
 const devicetypes = {path: 'devices/devicetypesoverview/devicetypes', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Devices' }};
+const devicetypesEdit = {path: 'devices/devicetypesoverview/devicetypes/:id', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Devices' }};
 
 @NgModule({
     imports: [
@@ -85,7 +86,7 @@ const devicetypes = {path: 'devices/devicetypesoverview/devicetypes', pathMatch:
         MatSortModule,
         MatProgressSpinnerModule,
         MatRadioModule,
-        RouterModule.forChild([devicetypes]),
+        RouterModule.forChild([devicetypes, devicetypesEdit]),
     ],
     declarations: [
         DeviceTypesComponent,

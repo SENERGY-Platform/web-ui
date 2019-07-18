@@ -35,6 +35,7 @@ import {ValueTypesService} from '../../value-types/shared/value-types.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
 import {jsonValidator} from '../../../../core/validators/json.validator';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
     selector: 'senergy-device-types',
@@ -43,7 +44,6 @@ import {jsonValidator} from '../../../../core/validators/json.validator';
 })
 export class DeviceTypesComponent implements OnInit {
 
-    deviceType: DeviceTypeModel;
     deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];
     protocols: DeviceTypeProtocolModel[] = [];
     deviceTypeValueTypes: ValueTypesModel[] = [];
@@ -59,13 +59,14 @@ export class DeviceTypesComponent implements OnInit {
     controllingFunctions: DeviceTypeFunctionModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     serializations: string[] = ['json', 'xml'];
+    id = '';
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
                 private valueTypesService: ValueTypesService,
                 private dialog: MatDialog,
-                private snackBar: MatSnackBar) {
-        this.deviceType = {} as DeviceTypeModel;
+                private snackBar: MatSnackBar,
+                private route: ActivatedRoute) {
         this.editable = true;
     }
 
@@ -96,18 +97,7 @@ export class DeviceTypesComponent implements OnInit {
 
     addService() {
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
-        formArray.push(this._formBuilder.group({
-            id: [{value: '', disabled: true}],
-            local_id: ['', Validators.required],
-            name: ['', Validators.required],
-            description: [''],
-            protocol_id: ['', Validators.required],
-            inputs: [[]],
-            outputs: [[]],
-            functionType: ['', Validators.required],
-            functions: [{value: [], disabled: true}, Validators.required],
-            aspects: [[], Validators.required],
-        }));
+        formArray.push(this.createServiceGroup({} as DeviceTypeServiceModel));
         const formGroup = <FormGroup>formArray.controls[formArray.length - 1];
         formGroup.controls['protocol_id'].valueChanges.subscribe((protocolId: string) => {
             formGroup.setControl('inputs', this.createContent(protocolId, undefined));
@@ -258,35 +248,59 @@ export class DeviceTypesComponent implements OnInit {
 
 
     private initFormControls() {
-        this.firstFormGroup = this._formBuilder.group({
-            id: [{value: this.deviceType.id, disabled: true}],
-            name: [this.deviceType.name, Validators.required],
-            description: [this.deviceType.description],
-            image: [this.deviceType.image],
-            device_class: [this.deviceType.device_class, Validators.required],
-        });
+        this.initFirstFormGroup({} as DeviceTypeModel);
+        this.initSecondFormGroup({} as DeviceTypeModel);
         this.disableSaveButton(this.firstFormGroup.status);
-
         this.secondFormGroup = this._formBuilder.group({
-            services: this._formBuilder.array(this.deviceType.services ?
-                this.deviceType.services.map((elem: DeviceTypeServiceModel) => this.createServiceGroup(elem)) :
+            services: this._formBuilder.array([])
+        });
+
+        this.watchFormGroupStatusChanges();
+    }
+
+    private loadDataIfIdExists() {
+        this.id = this.route.snapshot.paramMap.get('id') || '';
+        if (this.id !== '') {
+            this.deviceTypeService.getDeviceType(this.id).subscribe((deviceType: DeviceTypeModel | null) => {
+                if (deviceType !== null) {
+                    this.initFirstFormGroup(deviceType);
+                    this.disableSaveButton(this.firstFormGroup.status);
+                    this.initSecondFormGroup(deviceType);
+
+                    if (!this.editable) {
+                        this.firstFormGroup.disable();
+                        this.secondFormGroup.disable();
+                    }
+
+                    const formArray = <FormArray>this.secondFormGroup.controls['services'];
+                    formArray.controls.forEach((secondFormGroupService: AbstractControl) => {
+                        const formGroup = <FormGroup>secondFormGroupService;
+                        formGroup.controls['protocol_id'].valueChanges.subscribe((protocol: string) => {
+                            formGroup.setControl('inputs', this.createContent(protocol, undefined));
+                            formGroup.setControl('outputs', this.createContent(protocol, undefined));
+                        });
+                    });
+                }
+            });
+        }
+    }
+
+    private initSecondFormGroup(deviceType: DeviceTypeModel) {
+        this.secondFormGroup = this._formBuilder.group({
+            services: this._formBuilder.array(deviceType.services ?
+                deviceType.services.map((elem: DeviceTypeServiceModel) => this.createServiceGroup(elem)) :
                 [])
         });
+    }
 
-        if (!this.editable) {
-            this.firstFormGroup.disable();
-            this.secondFormGroup.disable();
-        }
-
-        const formArray = <FormArray>this.secondFormGroup.controls['services'];
-        formArray.controls.forEach((secondFormGroupService: AbstractControl) => {
-            const formGroup = <FormGroup>secondFormGroupService;
-            formGroup.controls['protocol_id'].valueChanges.subscribe((protocol: string) => {
-                formGroup.setControl('inputs', this.createContent(protocol, undefined));
-                formGroup.setControl('outputs', this.createContent(protocol, undefined));
-            });
+    private initFirstFormGroup(deviceType: DeviceTypeModel) {
+        this.firstFormGroup = this._formBuilder.group({
+            id: [{value: deviceType.id, disabled: true}],
+            name: [deviceType.name, Validators.required],
+            description: [deviceType.description],
+            image: [deviceType.image],
+            device_class: [deviceType.device_class, Validators.required],
         });
-        this.watchFormGroupStatusChanges();
     }
 
     private watchFormGroupStatusChanges() {
@@ -308,15 +322,19 @@ export class DeviceTypesComponent implements OnInit {
 
     private createServiceGroup(deviceTypeService: DeviceTypeServiceModel): FormGroup {
         return this._formBuilder.group({
-            id: [deviceTypeService.id],
+            id: [{value: deviceTypeService.id, disabled: true}],
             local_id: [deviceTypeService.local_id],
             name: [deviceTypeService.name, Validators.required],
             description: [deviceTypeService.description],
-            aspects: [deviceTypeService.aspects, Validators.required],
-            functions: [deviceTypeService.functions, Validators.required],
             protocol_id: [deviceTypeService.protocol_id, Validators.required],
-            inputs: this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs),
-            outputs: this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs),
+            inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : [],
+            outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : [],
+            functionType: [deviceTypeService.functions ? deviceTypeService.functions[0].type : '', Validators.required],
+            functions: [{
+                value: deviceTypeService.functions ? deviceTypeService.functions : [],
+                disabled: deviceTypeService.functions ? false : true
+            }, Validators.required],
+            aspects: [deviceTypeService.aspects ? deviceTypeService.aspects : [], Validators.required],
         });
     }
 
@@ -426,6 +444,7 @@ export class DeviceTypesComponent implements OnInit {
         this.deviceTypeService.getProtocols(9999, 0, 'name', 'asc').subscribe(
             (protocols: DeviceTypeProtocolModel[]) => {
                 this.protocols = protocols;
+                this.loadDataIfIdExists();
             });
 
         this.controllingFunctions = [
