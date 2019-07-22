@@ -11,7 +11,7 @@ RUN apk add --no-cache git
 RUN npm install
 RUN npm rebuild node-sass
 RUN npm run config -- --environment=prod
-RUN $(npm bin)/ng build --prod
+RUN node --max_old_space_size=8192 $(npm bin)/ng build --prod
 
 ## STAGE 2: Run nginx to serve application ##
 FROM nginx
