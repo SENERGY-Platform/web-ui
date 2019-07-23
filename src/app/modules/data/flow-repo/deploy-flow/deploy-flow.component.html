@@ -46,7 +46,7 @@
                         <input matInput [(ngModel)]="selectedValues.get(input.id).get(port).path" placeholder="path">
                     </mat-form-field>
                 </div>
-                <h4>Configuration</h4>
+                <h4 *ngIf="input.config != undefined" >Configuration</h4>
                 <div fxLayout="column" *ngFor="let conf of input.config">
                     <mat-form-field fxFill color="accent" appearance="outline">
                         <mat-label>{{ conf.name }}</mat-label>
