@@ -16,6 +16,7 @@
 
 export interface PipelineRequestModel {
     id: string;
+    windowTime: number;
     nodes: NodeModel [];
 }
 

@@ -56,6 +56,21 @@
                 </div>
             </mat-card-content>
         </mat-card>
+        <mat-card style="margin-bottom:10px;">
+            <mat-card-header>
+                <div mat-card-avatar><mat-icon>settings</mat-icon></div>
+                <mat-card-title>Global Settings</mat-card-title>
+                <mat-card-subtitle>Only change, if you know what you are doing</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+                <div fxLayout="column">
+                    <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label>Window Time</mat-label>
+                        <input matInput [(ngModel)]="windowTime" placeholder="Window Time">
+                    </mat-form-field>
+                </div>
+            </mat-card-content>
+        </mat-card>
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
             <button mat-raised-button color="accent" (click)="startPipeline()">Start</button>
         </div>

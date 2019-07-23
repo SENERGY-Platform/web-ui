@@ -25,6 +25,7 @@ import {DeviceTypeService} from '../../../devices/device-types/shared/device-typ
 import {FlowEngineService} from '../shared/flow-engine.service';
 import {NodeInput, NodeModel, NodeValue, PipelineRequestModel} from './shared/pipeline-request.model';
 import {MatSnackBar} from '@angular/material';
+import {windowTime} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-deploy-flow',
@@ -43,6 +44,8 @@ export class DeployFlowComponent {
 
     selectedValues = new Map();
 
+    windowTime = 30;
+
     pipeReq: PipelineRequestModel = {} as PipelineRequestModel;
 
     constructor(private parserService: ParserService,
@@ -59,7 +62,7 @@ export class DeployFlowComponent {
         }
         this.loadDevices();
 
-        this.pipeReq = {id: this.id, nodes: []};
+        this.pipeReq = {id: this.id, nodes: [], windowTime: this.windowTime};
 
         this.parserService.getInputs(this.id).subscribe((resp: ParseModel []) => {
             this.inputs = resp;
@@ -148,6 +151,7 @@ export class DeployFlowComponent {
             }
         });
 
+        this.pipeReq.windowTime = this.windowTime;
         this.flowEngineService.startPipeline(this.pipeReq).subscribe(function () {
             self.router.navigate(['/data/pipelines']);
             self.snackBar.open('Pipeline started', undefined, {
