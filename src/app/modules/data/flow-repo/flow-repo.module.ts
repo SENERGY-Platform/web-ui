@@ -20,7 +20,7 @@ import {RouterModule} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {
     MatButtonModule, MatCardModule, MatCheckboxModule, MatDialogModule,
-    MatDividerModule,
+    MatDividerModule, MatExpansionModule,
     MatFormFieldModule,
     MatGridListModule,
     MatIconModule, MatInputModule,
@@ -41,6 +41,7 @@ const deploy = {path: 'data/flow-repo/deploy/:id', pathMatch: 'full', component:
         CoreModule,
         CommonModule,
         MatGridListModule,
+        MatExpansionModule,
         MatIconModule,
         MatTooltipModule,
         MatDividerModule,
