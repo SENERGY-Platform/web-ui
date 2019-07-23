@@ -47,7 +47,7 @@ export class NewExportComponent implements OnInit {
     devices: DeviceInstancesModel [] = [];
     pipelines: PipelineModel [] = [];
 
-    timeSuggest = ['analytics.time', 'value.detection.time', 'value.metrics.updateTime'];
+    timeSuggest = ['time', 'value.detection.time', 'value.metrics.updateTime'];
 
     dropdown = [
         'float',
