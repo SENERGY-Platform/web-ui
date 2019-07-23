@@ -41,4 +41,13 @@ export class PipelineRegistryService {
         );
 
     }
+
+    getPipeline(id: string): Observable<PipelineModel | null> {
+        return this.http.get<PipelineModel>
+        (environment.pipelineRegistryUrl + '/pipeline/' + id).pipe(
+            map(resp => resp || null),
+            catchError(this.errorHandlerService.handleError(PipelineRegistryService.name, 'getPipeline: Error', null))
+        );
+
+    }
 }

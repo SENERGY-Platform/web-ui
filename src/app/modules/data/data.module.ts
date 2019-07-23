@@ -37,6 +37,7 @@ import {FormsModule} from '@angular/forms';
 import {FlowRepoComponent} from './flow-repo/flow-repo.component';
 import {FlowRepoModule} from './flow-repo/flow-repo.module';
 import {PipelineRegistryComponent} from './pipeline-registry/pipeline-registry.component';
+import {PipelineRegistryModule} from './pipeline-registry/pipeline-registry.module';
 
 
 const operatorRepo = {path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Analytics' }};
@@ -53,6 +54,7 @@ const pipelineRegistry = {path: 'data/pipelines', pathMatch: 'full', component: 
         OperatorRepoModule,
         FlowRepoModule,
         ExportModule,
+        PipelineRegistryModule,
         CommonModule,
         MatGridListModule,
         MatIconModule,
