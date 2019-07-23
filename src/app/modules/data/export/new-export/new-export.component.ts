@@ -110,7 +110,7 @@ export class NewExportComponent implements OnInit {
         if (selector === 'device') {
             this.timeSuggest = ['value.detection.time', 'value.metrics.updateTime'];
         } else {
-            this.timeSuggest = ['analytics.time'];
+            this.timeSuggest = ['time'];
         }
     }
 
