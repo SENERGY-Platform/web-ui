@@ -20,12 +20,12 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ConfigModel, ParseModel} from '../shared/parse.model';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
-import {DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-types/shared/device-type.model';
+import {DeviceTypeAssignmentModel, DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-types/shared/device-type.model';
 import {DeviceTypeService} from '../../../devices/device-types/shared/device-type.service';
 import {FlowEngineService} from '../shared/flow-engine.service';
 import {NodeInput, NodeModel, NodeValue, PipelineRequestModel} from './shared/pipeline-request.model';
 import {MatSnackBar} from '@angular/material';
-import {windowTime} from 'rxjs/operators';
+import {ValueTypesFieldTypeModel} from '../../../devices/value-types/shared/value-types.model';
 
 @Component({
     selector: 'senergy-deploy-flow',
@@ -40,6 +40,7 @@ export class DeployFlowComponent {
     id = '' as string;
 
     deviceTypes = [] as any;
+    paths = [] as any;
     devices: DeviceInstancesModel [] = [];
 
     selectedValues = new Map();
@@ -69,7 +70,7 @@ export class DeployFlowComponent {
             this.ready = true;
             this.inputs.map((value: ParseModel, key) => {
                 this.pipeReq.nodes[key] = {nodeId: value.id, inputs: undefined, config: undefined} as NodeModel;
-                // create map for inports
+                // create map for inputs
                 if (value.inPorts !== undefined) {
                     value.inPorts.map((port: string) => {
                         if (!this.selectedValues.has(value.id)) {
@@ -77,6 +78,9 @@ export class DeployFlowComponent {
                         }
                         if (this.deviceTypes[value.id] === undefined) {
                             this.deviceTypes[value.id] = [];
+                        }
+                        if (this.paths[value.id] === undefined) {
+                            this.paths[value.id] = [];
                         }
                         this.selectedValues.get(value.id).set(port, {device: {} as DeviceInstancesModel,
                             service: {} as DeviceTypeServiceModel, path: ''});
@@ -171,8 +175,19 @@ export class DeployFlowComponent {
             this.deviceTypeService.getDeviceType(device.devicetype).subscribe((resp: DeviceTypeModel | null) => {
                 if (resp !== null) {
                     this.deviceTypes[inputId][port] = resp;
+                    this.paths[inputId][port] = [];
                 }
             });
         }
+    }
+
+    serviceChanged(service: DeviceTypeServiceModel, inputId: string, port: string) {
+        service.output.forEach((out: DeviceTypeAssignmentModel) => {
+            if (out.type.fields != null) {
+                out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
+                    this.paths[inputId][port].push('value.' + out.name +  '.' +  field.name);
+                });
+            }
+        });
     }
 }

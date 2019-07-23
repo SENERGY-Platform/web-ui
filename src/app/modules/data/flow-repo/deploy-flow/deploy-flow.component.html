@@ -34,7 +34,7 @@
                     </mat-form-field>
 
                     <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-select placeholder="Service" [(ngModel)]="selectedValues.get(input.id).get(port).service">
+                        <mat-select (ngModelChange)="serviceChanged($event, input.id, port)" placeholder="Service" [(ngModel)]="selectedValues.get(input.id).get(port).service">
                             <mat-option *ngFor="let service of deviceTypes[input.id][port].services" [value]="service">
                                 {{service.name}}
                             </mat-option>
@@ -43,7 +43,11 @@
 
                     <mat-form-field fxFill color="accent" appearance="outline">
                         <mat-label>path</mat-label>
-                        <input matInput [(ngModel)]="selectedValues.get(input.id).get(port).path" placeholder="path">
+                        <mat-select [(ngModel)]="selectedValues.get(input.id).get(port).path" placeholder="path">
+                            <mat-option *ngFor="let path of paths[input.id][port]" [value]="path">
+                                {{path}}
+                            </mat-option>
+                        </mat-select>
                     </mat-form-field>
                 </div>
                 <h4 *ngIf="input.config != undefined" >Configuration</h4>
