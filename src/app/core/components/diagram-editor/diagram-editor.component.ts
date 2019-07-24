@@ -36,6 +36,7 @@ export class DiagramEditorComponent implements OnInit {
             outPorts: [],
             name: '',
             image: '',
+            operatorId: '',
             size: {
                 width: 150,
                 height: 100
@@ -301,7 +302,7 @@ export class DiagramEditorComponent implements OnInit {
         return this.graph.toJSON();
     }
 
-    public newNode(name: string, image: string, inputs: any[], outputs: any[], config: any[]): any {
+    public newNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
         const inPorts = [];
         for (const input of inputs) {
             if (input.name !== undefined) {
@@ -319,7 +320,8 @@ export class DiagramEditorComponent implements OnInit {
             outPorts: outPorts,
             name: name,
             image: image,
-            config: config
+            config: config,
+            operatorId: operatorId
         });
         node.position(150, 50);
         node.attr({
@@ -339,7 +341,7 @@ export class DiagramEditorComponent implements OnInit {
                 strokeWidth: 2
             },
             buttonLabel: {
-                text: 'ï¼¿', // fullwidth underscore
+                text: 'X', // fullwidth underscore
                 fill: 'black',
                 fontSize: 8,
                 fontWeight: 'bold'
