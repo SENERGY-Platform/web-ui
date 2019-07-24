@@ -16,7 +16,7 @@
 
 <div class="main-panel">
     <div fxLayout="column" class="layout-margin">
-        <mat-radio-group [(ngModel)]="selector" (ngModelChange)="exportTypeChanged($event)" class="radio-group">
+        <mat-radio-group [(ngModel)]="selector" class="radio-group">
             <mat-radio-button class="radio-button" value="device">Gerät</mat-radio-button>
             <mat-radio-button class="radio-button" value="pipe">Analyse</mat-radio-button>
         </mat-radio-group>
@@ -35,7 +35,7 @@
                     {{device.name}}
                 </mat-option>
             </mat-select>
-            <mat-select *ngIf="selector==='pipe'" placeholder="Pipeline" [(ngModel)]="pipeline">
+            <mat-select *ngIf="selector==='pipe'" (ngModelChange)="pipelineChanged()" placeholder="Pipeline" [(ngModel)]="pipeline">
                 <mat-option *ngFor="let pipe of pipelines" [value]="pipe">
                     {{pipe.id}}
                 </mat-option>
@@ -62,10 +62,11 @@
                     {{path}}
                 </mat-option>
             </mat-select>
-            <input matInput *ngIf="selector==='pipe'" [(ngModel)]="export.TimePath" placeholder="JSON time path" [matAutocomplete]="auto">
-            <mat-autocomplete #auto="matAutocomplete">
-                <mat-option *ngFor="let option of timeSuggest" [value]="option">{{option}}</mat-option>
-            </mat-autocomplete>
+            <mat-select #input *ngIf="selector==='pipe'"  [(ngModel)]="export.TimePath" placeholder="JSON time path">
+                <mat-option *ngFor="let path of timeSuggest" [value]="path">
+                    {{path}}
+                </mat-option>
+            </mat-select>
         </mat-form-field>
 
         <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
@@ -78,12 +79,11 @@
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Path</mat-label>
-                <mat-select #input *ngIf="selector==='device'"  [(ngModel)]="item.Path" placeholder="Path">
+                <mat-select #input [(ngModel)]="item.Path" placeholder="Path">
                     <mat-option *ngFor="let path of paths" [value]="path">
                         {{path}}
                     </mat-option>
                 </mat-select>
-                <input #input *ngIf="selector==='pipe'"  matInput [(ngModel)]="item.Path" placeholder="Path">
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-select placeholder="Type" [(ngModel)]="item.Type" [(value)]="item.Type">

@@ -22,5 +22,6 @@ export interface PipelineModel {
 export interface PipelineOperatorModel {
     id: string;
     imageId: string;
+    operatorId: string;
     name: string;
 }

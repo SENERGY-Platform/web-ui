@@ -25,8 +25,9 @@ import {MatSnackBar} from '@angular/material';
 import {PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shared/pipeline.model';
 import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
 import {Router} from '@angular/router';
-import {OperatorModel} from '../../operator-repo/shared/operator.model';
+import {IOModel, OperatorModel} from '../../operator-repo/shared/operator.model';
 import {ValueTypesFieldTypeModel} from '../../../devices/value-types/shared/value-types.model';
+import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
 
 
 @Component({
@@ -49,7 +50,7 @@ export class NewExportComponent implements OnInit {
     pipelines: PipelineModel [] = [];
     paths: string [] = [];
 
-    timeSuggest = ['time', 'value.detection.time', 'value.metrics.updateTime'];
+    timeSuggest = ['time'];
 
     dropdown = [
         'float',
@@ -62,6 +63,7 @@ export class NewExportComponent implements OnInit {
                 private deviceInstanceService: DeviceInstancesService,
                 private deviceTypeService: DeviceTypeService,
                 private exportService: ExportService,
+                private operatorRepoService: OperatorRepoService,
                 private router: Router,
                 public snackBar: MatSnackBar) {
 
@@ -95,15 +97,6 @@ export class NewExportComponent implements OnInit {
         });
     }
 
-
-    exportTypeChanged(selector: string) {
-        if (selector === 'device') {
-            this.timeSuggest = ['value.detection.time', 'value.metrics.updateTime'];
-        } else {
-            this.timeSuggest = ['time'];
-        }
-    }
-
     deviceChanged(device: DeviceInstancesModel) {
         if (this.device !== device) {
             this.deviceTypeService.getDeviceType(device.devicetype).subscribe((resp: DeviceTypeModel | null) => {
@@ -125,11 +118,20 @@ export class NewExportComponent implements OnInit {
         });
     }
 
-    operatorChanged(operator: OperatorModel) {
-        console.log(operator);
+    pipelineChanged() {
+        this.resetVars();
     }
 
-
+    operatorChanged(operator: PipelineOperatorModel) {
+        this.resetVars();
+        this.operatorRepoService.getOperator(operator.operatorId).subscribe((resp: OperatorModel | null) => {
+            if (resp !== null && resp.outputs !== undefined) {
+                resp.outputs.forEach((out: IOModel) => {
+                    this.paths.push('analytics.' + out.name);
+                });
+            }
+        });
+    }
 
     addValue() {
         if (this.export.Values === undefined) {
