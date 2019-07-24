@@ -21,7 +21,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {
-    DeviceTypeDeviceClassModel,
+    DeviceTypeDeviceClassModel, DeviceTypeFunctionModel,
     DeviceTypeModel, DeviceTypeProtocolModel,
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
@@ -94,6 +94,20 @@ export class DeviceTypeService {
         return this.http.get<DeviceTypeProtocolModel[]>(environment.deviceRepoUrl + '/protocols?limit=' + limit + '&offset=' + offset + '&sort=' + sort + '.' + order).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getProtocols', []))
+        );
+    }
+
+    getControllingFunctions(): Observable<DeviceTypeFunctionModel[]> {
+        return this.http.get<DeviceTypeFunctionModel[]>(environment.semanticRepoUrl + '/controlling-functions').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getControllingFunctions', []))
+        );
+    }
+
+    getMeasuringFunctions(): Observable<DeviceTypeFunctionModel[]> {
+        return this.http.get<DeviceTypeFunctionModel[]>(environment.semanticRepoUrl + '/measuring-functions').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getMeasuringFunctions', []))
         );
     }
 

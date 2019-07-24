@@ -53,6 +53,7 @@ export const environment = {
   valuetypeSearchUrl: '${process.env.VALUETYPE_SEARCH_URL}',
   deviceRepoUrl: '${process.env.DEVICE_REPO_URL}',
   deviceManagerUrl: '${process.env.DEVICE_MANAGER_URL}',
+  semanticRepoUrl: '${process.env.SEMANTIC_REPO_URL}',
 };
 `;
 

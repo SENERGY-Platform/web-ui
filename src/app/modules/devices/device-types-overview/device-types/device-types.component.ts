@@ -447,59 +447,15 @@ export class DeviceTypesComponent implements OnInit {
                 this.loadDataIfIdExists();
             });
 
-        this.controllingFunctions = [
-            {
-                id: '1',
-                name: 'brightnessAdjustment',
-                type: DeviceTypeFunctionTypeEnum.Controlling,
-                concept_ids: ['urn:infai:ses:concept:1'],
-            },
-            {
-                id: '2',
-                name: 'colorFunction',
-                type: DeviceTypeFunctionTypeEnum.Controlling,
-                concept_ids: ['urn:infai:ses:concept:1'],
-            },
-            {
-                id: '3',
-                name: 'onFunction',
-                type: DeviceTypeFunctionTypeEnum.Controlling,
-                concept_ids: ['urn:infai:ses:concept:1'],
-            },
-            {
-                id: '4',
-                name: 'offFunction',
-                type: DeviceTypeFunctionTypeEnum.Controlling,
-                concept_ids: ['urn:infai:ses:concept:1'],
-            },
-        ];
+        this.deviceTypeService.getControllingFunctions().subscribe(
+            (functions: DeviceTypeFunctionModel[]) => {
+                this.controllingFunctions = functions;
+            });
 
-        this.measuringFunctions = [
-            {
-                id: '1a',
-                name: 'batteryLevelMeasuring',
-                type: DeviceTypeFunctionTypeEnum.Measuring,
-                concept_ids: ['urn:infai:ses:concept:1'],
-            },
-            {
-                id: '2a',
-                name: 'connectionStatusMeasuring',
-                type: DeviceTypeFunctionTypeEnum.Measuring,
-                concept_ids: ['urn:infai:ses:concept:1'],
-            },
-            {
-                id: '3a',
-                name: 'humidityMeasuring',
-                type: DeviceTypeFunctionTypeEnum.Measuring,
-                concept_ids: ['urn:infai:ses:concept:1'],
-            },
-            {
-                id: '4a',
-                name: 'temperatureMeasuring',
-                type: DeviceTypeFunctionTypeEnum.Measuring,
-                concept_ids: ['urn:infai:ses:concept:1'],
-            },
-        ];
+        this.deviceTypeService.getMeasuringFunctions().subscribe(
+            (functions: DeviceTypeFunctionModel[]) => {
+                this.measuringFunctions = functions;
+            });
 
         this.aspects = [
             {id: '1aa', name: 'Air'},

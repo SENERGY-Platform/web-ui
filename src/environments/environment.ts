@@ -43,6 +43,7 @@ export const environment = {
     valuetypeSearchUrl: 'http://localhost',
     deviceRepoUrl: 'http://localhost',
     deviceManagerUrl: 'https://localhost',
+    semanticRepoUrl: 'https://localhost',
 };
 
 /*
