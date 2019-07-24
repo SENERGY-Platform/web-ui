@@ -28,7 +28,7 @@ export interface OperatorModel {
 }
 
 export interface IOModel {
-    name: string | undefined;
-    type: string | undefined;
+    name: string;
+    type: string;
 }
 

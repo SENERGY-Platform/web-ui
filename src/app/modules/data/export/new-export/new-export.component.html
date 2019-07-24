@@ -16,7 +16,7 @@
 
 <div class="main-panel">
     <div fxLayout="column" class="layout-margin">
-        <mat-radio-group [(ngModel)]="selector" class="radio-group">
+        <mat-radio-group [(ngModel)]="selector" (ngModelChange)="exportTypeChanged()" class="radio-group">
             <mat-radio-button class="radio-button" value="device">Gerät</mat-radio-button>
             <mat-radio-button class="radio-button" value="pipe">Analyse</mat-radio-button>
         </mat-radio-group>
@@ -58,8 +58,8 @@
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>JSON time path</mat-label>
             <mat-select #input *ngIf="selector==='device'"  [(ngModel)]="export.TimePath" placeholder="JSON time path">
-                <mat-option *ngFor="let path of paths" [value]="path">
-                    {{path}}
+                <mat-option *ngFor="let path of paths | keyvalue" [value]="path.key">
+                    {{path.key}}
                 </mat-option>
             </mat-select>
             <mat-select #input *ngIf="selector==='pipe'"  [(ngModel)]="export.TimePath" placeholder="JSON time path">
@@ -72,23 +72,23 @@
         <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
             <button mat-raised-button color="accent" (click)="addValue()">Add Export Value</button>
         </div>
-        <div *ngFor="let item of export.Values" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
+        <div *ngFor="let item of export.Values; let key = index" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
                 <input #input matInput [(ngModel)]="item.Name" placeholder="Name">
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Path</mat-label>
-                <mat-select #input [(ngModel)]="item.Path" placeholder="Path">
-                    <mat-option *ngFor="let path of paths" [value]="path">
-                        {{path}}
+                <mat-select #input [(ngModel)]="item.Path" (ngModelChange)="pathChanged(key)"  placeholder="Path">
+                    <mat-option *ngFor="let path of paths | keyvalue" [value]="path.key">
+                        {{path.key}}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-select placeholder="Type" [(ngModel)]="item.Type" [(value)]="item.Type">
-                    <mat-option *ngFor="let option of dropdown"  [value]="option">
-                        {{option}}
+                    <mat-option *ngFor="let option of dropdown | keyvalue"  [value]="option.value">
+                        {{option.value}}
                     </mat-option>
                 </mat-select>
             </mat-form-field>

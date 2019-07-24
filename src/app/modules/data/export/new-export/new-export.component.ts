@@ -48,7 +48,7 @@ export class NewExportComponent implements OnInit {
     operator = {} as PipelineOperatorModel;
     devices: DeviceInstancesModel [] = [];
     pipelines: PipelineModel [] = [];
-    paths: string [] = [];
+    paths = new Map<string, string | undefined>();
 
     timeSuggest = ['time'];
 
@@ -97,6 +97,16 @@ export class NewExportComponent implements OnInit {
         });
     }
 
+    exportTypeChanged() {
+        this.resetVars();
+        this.export = {} as ExportModel;
+        this.device = {} as DeviceInstancesModel;
+        this.service = {} as DeviceTypeServiceModel;
+        this.deviceType = {} as DeviceTypeModel;
+        this.pipeline = {} as PipelineModel;
+        this.operator = {} as PipelineOperatorModel;
+    }
+
     deviceChanged(device: DeviceInstancesModel) {
         if (this.device !== device) {
             this.deviceTypeService.getDeviceType(device.devicetype).subscribe((resp: DeviceTypeModel | null) => {
@@ -112,7 +122,7 @@ export class NewExportComponent implements OnInit {
         service.output.forEach((out: DeviceTypeAssignmentModel) => {
             if (out.type.fields != null) {
                 out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
-                    this.paths.push('value.' + out.name +  '.' +  field.name);
+                    this.paths.set('value.' + out.name +  '.' +  field.name, field.type.base_type.split('#')[1]);
                 });
             }
         });
@@ -127,7 +137,7 @@ export class NewExportComponent implements OnInit {
         this.operatorRepoService.getOperator(operator.operatorId).subscribe((resp: OperatorModel | null) => {
             if (resp !== null && resp.outputs !== undefined) {
                 resp.outputs.forEach((out: IOModel) => {
-                    this.paths.push('analytics.' + out.name);
+                    this.paths.set('analytics.' + out.name,  out.type);
                 });
             }
         });
@@ -149,6 +159,18 @@ export class NewExportComponent implements OnInit {
         }
     }
 
+    pathChanged(id: number) {
+        if (id !== undefined) {
+            let type = this.paths.get(this.export.Values[id].Path);
+            if (this.paths.get(this.export.Values[id].Path) === 'decimal') {
+                type =  'float';
+            }
+            // @ts-ignore
+            this.export.Values[id].Type = type;
+        }
+        console.log(this.paths);
+    }
+
     loadPipelines() {
         this.pipelineRegistryService.getPipelines().subscribe((resp: PipelineModel[]) => {
             this.pipelines = resp;
@@ -162,6 +184,6 @@ export class NewExportComponent implements OnInit {
     }
 
     resetVars() {
-        this.paths = [];
+        this.paths.clear();
     }
 }
