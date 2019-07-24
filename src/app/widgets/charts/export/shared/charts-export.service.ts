@@ -72,26 +72,29 @@ export class ChartsExportService {
         return new Observable<ChartsModel>((observer) => {
             this.getData(widget.properties.measurement ? widget.properties.measurement.id : '', widget.properties.interval).
             subscribe((resp: ChartsExportModel) => {
+                let vAxisIndex = 1;
+                if (widget.properties.vAxis) {
+                    vAxisIndex = resp.results[0].series[0].columns.indexOf(widget.properties.vAxis.Name);
+                }
                 observer.next(this.setProcessInstancesStatusValues(
                     widget.id,
                     widget.properties.hAxisLabel || '',
                     widget.properties.vAxisLabel || '',
-                    this.setData(widget.properties.vAxis, resp.results[0].series[0].values)));
+                    this.setData(widget.properties.vAxis, resp.results[0].series[0].values, vAxisIndex)));
                 observer.complete();
             });
         });
     }
 
-    private setData(vAxis: ExportValueModel | undefined, exportData: (string | number)[][]): ChartDataTableModel {
+    private setData(vAxis: ExportValueModel | undefined, exportData: (string | number)[][], vAxisIndex: number): ChartDataTableModel {
         const dataTable = new ChartDataTableModel([['time', vAxis ? vAxis.Name : '']]);
         exportData.forEach((item: (string | number)[]) => {
                 const date = new Date(<string>item[0]);
-                dataTable.data.push([date, item[1]]);
+                dataTable.data.push([date, item[vAxisIndex]]);
             }
         );
         return dataTable;
     }
-
 
     private setProcessInstancesStatusValues(widgetId: string, hAxisLabel: string, vAxisLabel: string, dataTable: ChartDataTableModel): ChartsModel {
 
