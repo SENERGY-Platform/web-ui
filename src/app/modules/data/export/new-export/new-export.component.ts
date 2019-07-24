@@ -18,7 +18,7 @@ import {Component, OnInit} from '@angular/core';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {DeviceTypeService} from '../../../devices/device-types/shared/device-type.service';
-import {DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-types/shared/device-type.model';
+import {DeviceTypeAssignmentModel, DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-types/shared/device-type.model';
 import {ExportModel, ExportValueModel} from '../shared/export.model';
 import {ExportService} from '../shared/export.service';
 import {MatSnackBar} from '@angular/material';
@@ -26,6 +26,7 @@ import {PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shar
 import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
 import {Router} from '@angular/router';
 import {OperatorModel} from '../../operator-repo/shared/operator.model';
+import {ValueTypesFieldTypeModel} from '../../../devices/value-types/shared/value-types.model';
 
 
 @Component({
@@ -46,6 +47,7 @@ export class NewExportComponent implements OnInit {
     operator = {} as PipelineOperatorModel;
     devices: DeviceInstancesModel [] = [];
     pipelines: PipelineModel [] = [];
+    paths: string [] = [];
 
     timeSuggest = ['time', 'value.detection.time', 'value.metrics.updateTime'];
 
@@ -62,6 +64,7 @@ export class NewExportComponent implements OnInit {
                 private exportService: ExportService,
                 private router: Router,
                 public snackBar: MatSnackBar) {
+
     }
 
     ngOnInit() {
@@ -92,6 +95,15 @@ export class NewExportComponent implements OnInit {
         });
     }
 
+
+    exportTypeChanged(selector: string) {
+        if (selector === 'device') {
+            this.timeSuggest = ['value.detection.time', 'value.metrics.updateTime'];
+        } else {
+            this.timeSuggest = ['time'];
+        }
+    }
+
     deviceChanged(device: DeviceInstancesModel) {
         if (this.device !== device) {
             this.deviceTypeService.getDeviceType(device.devicetype).subscribe((resp: DeviceTypeModel | null) => {
@@ -99,20 +111,25 @@ export class NewExportComponent implements OnInit {
                     this.deviceType = resp;
                 }
             });
+            this.resetVars();
         }
+    }
+
+    serviceChanged(service: DeviceTypeServiceModel) {
+        service.output.forEach((out: DeviceTypeAssignmentModel) => {
+            if (out.type.fields != null) {
+                out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
+                    this.paths.push('value.' + out.name +  '.' +  field.name);
+                });
+            }
+        });
     }
 
     operatorChanged(operator: OperatorModel) {
         console.log(operator);
     }
 
-    exportChanged(selector: string) {
-        if (selector === 'device') {
-            this.timeSuggest = ['value.detection.time', 'value.metrics.updateTime'];
-        } else {
-            this.timeSuggest = ['time'];
-        }
-    }
+
 
     addValue() {
         if (this.export.Values === undefined) {
@@ -140,5 +157,9 @@ export class NewExportComponent implements OnInit {
         this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc').subscribe((resp: DeviceInstancesModel []) => {
             this.devices = resp;
         });
+    }
+
+    resetVars() {
+        this.paths = [];
     }
 }
