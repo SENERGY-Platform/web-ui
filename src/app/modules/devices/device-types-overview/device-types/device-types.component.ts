@@ -457,12 +457,9 @@ export class DeviceTypesComponent implements OnInit {
                 this.measuringFunctions = functions;
             });
 
-        this.aspects = [
-            {id: '1aa', name: 'Air'},
-            {id: '2aa', name: 'Lightning'},
-            {id: '3aa', name: 'Battery'},
-            {id: '4aa', name: 'Noise'},
-        ];
-
+        this.deviceTypeService.getAspects().subscribe(
+            (aspects: DeviceTypeAspectModel[]) => {
+                this.aspects = aspects;
+            });
     }
 }

@@ -21,6 +21,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {
+    DeviceTypeAspectModel,
     DeviceTypeDeviceClassModel, DeviceTypeFunctionModel,
     DeviceTypeModel, DeviceTypeProtocolModel,
 } from './device-type.model';
@@ -108,6 +109,13 @@ export class DeviceTypeService {
         return this.http.get<DeviceTypeFunctionModel[]>(environment.semanticRepoUrl + '/measuring-functions').pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getMeasuringFunctions', []))
+        );
+    }
+
+    getAspects(): Observable<DeviceTypeAspectModel[]> {
+        return this.http.get<DeviceTypeAspectModel[]>(environment.semanticRepoUrl + '/aspects').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspects', []))
         );
     }
 
