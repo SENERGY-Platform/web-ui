@@ -47,6 +47,8 @@ export class DeployFlowComponent {
 
     windowTime = 30;
 
+    vals = [] as string [];
+
     pipeReq: PipelineRequestModel = {} as PipelineRequestModel;
 
     constructor(private parserService: ParserService,
@@ -82,8 +84,10 @@ export class DeployFlowComponent {
                         if (this.paths[value.id] === undefined) {
                             this.paths[value.id] = [];
                         }
-                        this.selectedValues.get(value.id).set(port, {device: {} as DeviceInstancesModel,
-                            service: {} as DeviceTypeServiceModel, path: ''});
+                        this.selectedValues.get(value.id).set(port, {
+                            device: {} as DeviceInstancesModel,
+                            service: {} as DeviceTypeServiceModel, path: ''
+                        });
                         this.deviceTypes[value.id][port] = {} as DeviceTypeModel;
                     });
                 }
@@ -96,7 +100,7 @@ export class DeployFlowComponent {
                         if (!this.selectedValues.get(value.id).has('_config')) {
                             this.selectedValues.get(value.id).set('_config', new Map());
                         }
-                       this.selectedValues.get(value.id).get('_config').set(config.name, '');
+                        this.selectedValues.get(value.id).get('_config').set(config.name, '');
                     });
                 }
                 this.ready = true;
@@ -117,7 +121,7 @@ export class DeployFlowComponent {
                         node.config.push({name: config[0], value: config [1]});
                     }
                 } else {
-                    if (entry[1].device.id !== undefined && entry[1].service.id !==  undefined) {
+                    if (entry[1].device.id !== undefined && entry[1].service.id !== undefined) {
                         const x = {name: entry [0], path: entry[1].path} as NodeValue;
                         const y = [] as NodeValue [];
                         y.push(x);
@@ -182,12 +186,27 @@ export class DeployFlowComponent {
     }
 
     serviceChanged(service: DeviceTypeServiceModel, inputId: string, port: string) {
+        this.vals = [];
+        let pathString = 'value';
         service.output.forEach((out: DeviceTypeAssignmentModel) => {
             if (out.type.fields != null) {
+                pathString += '.' + service.output[0].name;
                 out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
-                    this.paths[inputId][port].push('value.' + out.name +  '.' +  field.name);
+                    this.traverseDataStructure(pathString, field);
                 });
             }
         });
+        this.paths[inputId][port] = this.vals;
+    }
+
+    traverseDataStructure(pathString: string, field: ValueTypesFieldTypeModel) {
+        if (field.type.base_type.split('#')[1] === 'structure' && field.type.fields !== undefined && field.type.fields !== null) {
+            pathString += '.' + field.name;
+            field.type.fields.forEach((innerField: ValueTypesFieldTypeModel) => {
+                this.traverseDataStructure(pathString, innerField);
+            });
+        } else {
+            this.vals.push(pathString + '.' + field.name);
+        }
     }
 }
