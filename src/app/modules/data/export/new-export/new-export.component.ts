@@ -119,13 +119,26 @@ export class NewExportComponent implements OnInit {
     }
 
     serviceChanged(service: DeviceTypeServiceModel) {
+        let pathString = 'value';
         service.output.forEach((out: DeviceTypeAssignmentModel) => {
             if (out.type.fields != null) {
+                pathString += '.' + service.output[0].name;
                 out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
-                    this.paths.set('value.' + out.name +  '.' +  field.name, field.type.base_type.split('#')[1]);
+                    this.traverseDataStructure(pathString, field);
                 });
             }
         });
+    }
+
+    traverseDataStructure(pathString: string, field: ValueTypesFieldTypeModel) {
+        if (field.type.base_type.split('#')[1] === 'structure' && field.type.fields !== undefined && field.type.fields !== null) {
+            pathString += '.' + field.name;
+            field.type.fields.forEach((innerField: ValueTypesFieldTypeModel) => {
+                this.traverseDataStructure(pathString, innerField);
+            });
+        } else {
+            this.paths.set(pathString + '.' + field.name, field.type.base_type.split('#')[1]);
+        }
     }
 
     pipelineChanged() {
@@ -168,7 +181,6 @@ export class NewExportComponent implements OnInit {
             // @ts-ignore
             this.export.Values[id].Type = type;
         }
-        console.log(this.paths);
     }
 
     loadPipelines() {
