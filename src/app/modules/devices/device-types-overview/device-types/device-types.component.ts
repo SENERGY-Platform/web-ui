@@ -431,7 +431,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private loadData(): void {
-        this.deviceTypeService.getDeviceClasses(9999, 0).subscribe(
+        this.deviceTypeService.getDeviceClasses().subscribe(
             (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceTypeDeviceClasses = deviceTypeDeviceClasses;
             });
