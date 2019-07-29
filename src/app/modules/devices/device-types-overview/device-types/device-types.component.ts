@@ -36,6 +36,7 @@ import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-n
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
 import {jsonValidator} from '../../../../core/validators/json.validator';
 import {ActivatedRoute} from '@angular/router';
+import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
 
 @Component({
     selector: 'senergy-device-types',
@@ -164,6 +165,35 @@ export class DeviceTypesComponent implements OnInit {
                 } else {
                     this.snackBar.open('Device Class already exists! Name auto selected!', undefined, {duration: 4000});
                     this.firstFormGroup.patchValue({'device_class': this.deviceTypeDeviceClasses[index]});
+                }
+            }
+        });
+    }
+
+    newAspect(serviceIndex: number) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        const editDialogRef = this.dialog.open(DeviceTypesNewAspectDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((name: string) => {
+            if (name !== undefined) {
+                const aspectIndex = this.checkIfAspectNameExists(name);
+                const formArray = <FormArray>this.secondFormGroup.controls['services'];
+                const formGroup = <FormGroup>formArray.controls[serviceIndex];
+                const aspects = formGroup.controls['aspects'];
+                if (aspectIndex === -1) {
+                    const newAspect: DeviceTypeAspectModel = {id: '', name: name};
+                    aspects.value.push(newAspect);
+                    this.aspects.push(newAspect);
+                } else {
+                    const index = aspects.value.indexOf(this.aspects[aspectIndex]);
+                    if (index === -1) {
+                        this.snackBar.open('Aspect already exists! Aspect auto selected!', undefined, {duration: 4000});
+                        const array = formGroup.controls['aspects'].value;
+                        formGroup.controls['aspects'].setValue([...array, this.aspects[aspectIndex]]);
+                    } else {
+                        this.snackBar.open('Aspect already selected!', undefined, {duration: 4000});
+                    }
                 }
             }
         });
@@ -394,6 +424,16 @@ export class DeviceTypesComponent implements OnInit {
         let index = -1;
         this.deviceTypeDeviceClasses.forEach((deviceClass: DeviceTypeDeviceClassModel, i: number) => {
             if (deviceClass.name === name) {
+                index = i;
+            }
+        });
+        return index;
+    }
+
+    private checkIfAspectNameExists(name: string): number {
+        let index = -1;
+        this.aspects.forEach((aspect: DeviceTypeAspectModel, i: number) => {
+            if (aspect.name === name) {
                 index = i;
             }
         });
