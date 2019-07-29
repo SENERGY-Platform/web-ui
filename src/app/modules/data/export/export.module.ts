@@ -25,19 +25,21 @@ import {
     MatGridListModule,
     MatIconModule, MatInputModule,
     MatListModule, MatRadioModule, MatSelectModule,
-    MatTooltipModule, MatAutocompleteModule
+    MatTooltipModule, MatAutocompleteModule, MatCardModule
 } from '@angular/material';
 import {CoreModule} from '../../../core/core.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule} from '@angular/forms';
 import {NewExportComponent} from './new-export/new-export.component';
+import {ExportDetailsComponent} from './export-details/export-details.component';
 
 
 const exp = {path: 'data/export/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'Analytics' }};
+const details = {path: 'data/export/details/:id', pathMatch: 'full', component: ExportDetailsComponent, data: { header: 'Analytics' }};
 
 @NgModule({
     imports: [
-        RouterModule.forChild([exp]),
+        RouterModule.forChild([exp, details]),
         CoreModule,
         CommonModule,
         MatGridListModule,
@@ -54,11 +56,12 @@ const exp = {path: 'data/export/new', pathMatch: 'full', component: NewExportCom
         MatCheckboxModule,
         MatSelectModule,
         MatRadioModule,
-        MatAutocompleteModule
-
+        MatAutocompleteModule,
+        MatCardModule
     ],
     declarations: [
-        NewExportComponent
+        NewExportComponent,
+        ExportDetailsComponent
     ],
 })
 export class ExportModule {

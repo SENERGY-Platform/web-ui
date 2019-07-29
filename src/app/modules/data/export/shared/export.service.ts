@@ -21,7 +21,6 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {ExportModel} from './export.model';
-import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
 
 @Injectable({
     providedIn: 'root'
@@ -40,16 +39,25 @@ export class ExportService {
         );
 
     }
+    
+    getExport(id: string): Observable<ExportModel | null> {
+        return this.http.get<ExportModel>
+        (environment.exportService + '/instance/' + id).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'getExport: Error', null))
+        );
+
+    }
 
     startPipeline(exp: ExportModel): Observable<{}> {
         return this.http.put<{}>(environment.exportService + '/instance', exp).pipe(
-            catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'startPipeline: Error', {}))
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'startPipeline: Error', {}))
         );
     }
 
     stopPipeline(exp: ExportModel): Observable<{}> {
         return this.http.delete<{}>(environment.exportService + '/instance/' + exp.ID).pipe(
-            catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'stopPipeline: Error', {}))
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipeline: Error', {}))
         );
     }
 }

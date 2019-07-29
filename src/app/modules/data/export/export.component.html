@@ -50,6 +50,9 @@
                         </mat-card-content>
                         <mat-card-actions>
                             <div fxFlex></div>
+                            <button mat-icon-button color="accent" routerLink="/data/export/details/{{item.ID}}" matTooltip="access the details of the export">
+                                <mat-icon>info</mat-icon>
+                            </button>
                             <button mat-icon-button color="accent" (click)="copyEndpoint(url + '/measurement/' + item.Measurement)" matTooltip="copy endpoint to clipboard">
                                 <mat-icon>content_copy</mat-icon>
                             </button>
