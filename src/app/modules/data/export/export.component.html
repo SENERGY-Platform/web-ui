@@ -64,7 +64,7 @@
         <button mat-fab class="fab" routerLink="new" matTooltip="Start new Export">
             <mat-icon>add</mat-icon>
         </button>
-        <div *ngIf="exports.length === 0 && ready">No operator instances found.</div>
+        <div *ngIf="exports.length === 0 && ready">No export instances found.</div>
         <senergy-spinner [elementCount]="exports.length" [show]="!ready"></senergy-spinner>
     </div>
 </div>
