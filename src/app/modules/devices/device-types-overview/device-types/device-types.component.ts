@@ -141,7 +141,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     checkIfContentExists(input: DeviceTypeContentModel): boolean {
-        if ((input.content_variable === null || input.content_variable === '' || input.content_variable === undefined) &&
+        if ((input.content_variable_raw === null || input.content_variable_raw === '' || input.content_variable_raw === undefined) &&
             (input.serialization === null || input.serialization === '')) {
             return false;
         } else {

@@ -49,15 +49,8 @@ export interface DeviceTypeContentModel {
     id: string;
     content_variable: DeviceTypeContentVariableModel;
     content_variable_raw: string;
-    serialization_options: DeviceTypeSerializationOptionModel[];
     serialization: string;
     protocol_segment_id: string;
-}
-
-export interface DeviceTypeSerializationOptionModel {
-    id: string;
-    option: string;
-    content_variable_id: string;
 }
 
 export interface DeviceTypeContentVariableModel {
@@ -67,6 +60,7 @@ export interface DeviceTypeContentVariableModel {
     exact_match?: string;
     value?: string | boolean | number;
     sub_content_variables?: DeviceTypeContentVariableModel[];
+    serialization_options: string[];
 }
 
 export interface DeviceTypeConceptModel {
