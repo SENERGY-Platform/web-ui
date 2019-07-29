@@ -87,9 +87,9 @@ export interface DeviceTypeFunctionModel {
 }
 
 
-export enum DeviceTypeFunctionTypeEnum {
-    Controlling = 'Controlling',
-    Measuring = 'Measuring',
+export interface DeviceTypeFunctionType {
+   text: string;
+   type: string;
 }
 
 export interface DeviceTypeProtocolModel {

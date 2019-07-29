@@ -89,16 +89,16 @@
                                                     <mat-label>Function Type</mat-label>
                                                     <mat-select formControlName="functionType">
                                                         <mat-option
-                                                                *ngFor="let item of keys(deviceTypeFunctionType)"
-                                                                [value]="deviceTypeFunctionType[item]">
-                                                            {{item}}
+                                                                *ngFor="let item of deviceTypeFunctionType"
+                                                                [value]="item">
+                                                            {{item.text}}
                                                         </mat-option>
                                                     </mat-select>
                                                 </mat-form-field>
                                             </td>
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
-                                                    <mat-label>{{control.controls.functionType.invalid ? 'Function' : control.controls.functionType.value + ' Function'}}</mat-label>
+                                                    <mat-label>{{control.controls.functionType.invalid ? 'Function' : control.controls.functionType.value.text + ' Function'}}</mat-label>
                                                     <mat-select formControlName="functions" multiple
                                                                 [compareWith]="compare">
                                                         <mat-select-trigger>
@@ -118,7 +118,7 @@
                                                         (click)="openCreateFunctionDialog(i)"
                                                         [disabled]="control.controls.functionType.invalid">
                                                     <mat-icon
-                                                            matTooltip="{{control.controls.functionType.invalid ? 'Create Function' : 'Create ' + control.controls.functionType.value + ' Function'}}">
+                                                            matTooltip="{{control.controls.functionType.invalid ? 'Create Function' : 'Create ' + control.controls.functionType.value.text + ' Function'}}">
                                                         playlist_add
                                                     </mat-icon>
                                                 </button>

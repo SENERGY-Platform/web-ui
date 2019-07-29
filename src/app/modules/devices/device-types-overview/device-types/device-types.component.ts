@@ -20,8 +20,7 @@ import {
     DeviceTypeAspectModel,
     DeviceTypeContentModel,
     DeviceTypeDeviceClassModel,
-    DeviceTypeFunctionModel,
-    DeviceTypeFunctionTypeEnum,
+    DeviceTypeFunctionModel, DeviceTypeFunctionType,
     DeviceTypeModel,
     DeviceTypeProtocolModel,
     DeviceTypeProtocolSegmentModel,
@@ -38,6 +37,14 @@ import {jsonValidator} from '../../../../core/validators/json.validator';
 import {ActivatedRoute} from '@angular/router';
 import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
 
+
+const functionTypes: DeviceTypeFunctionType[] = [
+    {text: 'Controlling', type: 'https://senergy.infai.org/ontology/ControllingFunction'},
+    {text: 'Measuring', type: 'https://senergy.infai.org/ontology/MeasuringFunction'},
+];
+
+const controllingIndex = 0;
+const measuringIndex = 1;
 @Component({
     selector: 'senergy-device-types',
     templateUrl: './device-types.component.html',
@@ -54,7 +61,7 @@ export class DeviceTypesComponent implements OnInit {
     disableSave = false;
     editable = false;
     keys = Object.keys;
-    deviceTypeFunctionType = DeviceTypeFunctionTypeEnum;
+    deviceTypeFunctionType = functionTypes;
     functions: DeviceTypeFunctionModel[] = [];
     measuringFunctions: DeviceTypeFunctionModel[] = [];
     controllingFunctions: DeviceTypeFunctionModel[] = [];
@@ -112,10 +119,10 @@ export class DeviceTypesComponent implements OnInit {
             }
 
             formGroup.controls['functions'].setValue([]);
-            if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Measuring) {
+            if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[measuringIndex]) {
                 this.functions = this.measuringFunctions;
             }
-            if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Controlling) {
+            if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[controllingIndex]) {
                 this.functions = this.controllingFunctions;
             }
         });
@@ -195,6 +202,7 @@ export class DeviceTypesComponent implements OnInit {
                         this.snackBar.open('Aspect already selected!', undefined, {duration: 4000});
                     }
                 }
+                aspects.updateValueAndValidity();
             }
         });
     }
@@ -211,7 +219,7 @@ export class DeviceTypesComponent implements OnInit {
 
         editDialogRef.afterClosed().subscribe((func: DeviceTypeFunctionModel) => {
             if (func !== undefined) {
-                if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Measuring) {
+                if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[measuringIndex]) {
                     const measureFuncIndex = this.checkIfMeasuringFunctionNameExists(func.name);
                     if (measureFuncIndex === -1) {
                         formGroup.controls['functions'].value.push(func);
@@ -228,7 +236,7 @@ export class DeviceTypesComponent implements OnInit {
                         }
                     }
                 }
-                if (formGroup.controls['functionType'].value === DeviceTypeFunctionTypeEnum.Controlling) {
+                if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[controllingIndex]) {
                     const controllFuncIndex = this.checkIfControllingFunctionNameExists(func.name);
                     if (controllFuncIndex === -1) {
                         formGroup.controls['functions'].value.push(func);
@@ -245,6 +253,9 @@ export class DeviceTypesComponent implements OnInit {
                         }
                     }
                 }
+                formGroup.controls['functions'].updateValueAndValidity();
+                console.log(formGroup.controls);
+                console.log(this.functions);
             }
         });
     }
@@ -488,13 +499,13 @@ export class DeviceTypesComponent implements OnInit {
             });
 
         this.deviceTypeService.getControllingFunctions().subscribe(
-            (functions: DeviceTypeFunctionModel[]) => {
-                this.controllingFunctions = functions;
+            (resp: DeviceTypeFunctionModel[]) => {
+                this.controllingFunctions = resp;
             });
 
         this.deviceTypeService.getMeasuringFunctions().subscribe(
-            (functions: DeviceTypeFunctionModel[]) => {
-                this.measuringFunctions = functions;
+            (resp: DeviceTypeFunctionModel[]) => {
+                this.measuringFunctions = resp;
             });
 
         this.deviceTypeService.getAspects().subscribe(

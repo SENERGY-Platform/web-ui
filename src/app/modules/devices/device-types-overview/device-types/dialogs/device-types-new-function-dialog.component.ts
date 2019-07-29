@@ -18,7 +18,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import {FormControl, Validators} from '@angular/forms';
-import {DeviceTypeConceptModel, DeviceTypeFunctionModel, DeviceTypeFunctionTypeEnum} from '../../shared/device-type.model';
+import {DeviceTypeConceptModel, DeviceTypeFunctionModel, DeviceTypeFunctionType} from '../../shared/device-type.model';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',
@@ -29,11 +29,11 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     nameControl = new FormControl('', [Validators.required]);
     conceptControl = new FormControl('', [Validators.required]);
     concepts: DeviceTypeConceptModel[] = [];
-    functionType = '';
+    functionType = {} as DeviceTypeFunctionType;
 
     constructor(private snackBar: MatSnackBar,
                 private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: {functionType: string}) {
+                @Inject(MAT_DIALOG_DATA) data: {functionType: DeviceTypeFunctionType}) {
         this.functionType = data.functionType;
     }
 
@@ -45,7 +45,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
         const func: DeviceTypeFunctionModel = {
             id: '',
             name: this.nameControl.value,
-            type: this.functionType,
+            type: this.functionType.type,
             concept_ids: this.conceptControl.value,
         };
 
