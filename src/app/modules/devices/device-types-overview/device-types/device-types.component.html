@@ -169,7 +169,7 @@
                                 </div>
                             </mat-tab>
 
-                            <mat-tab label="{{tab.label}}" disabled="{{control.value.protocol_id === ''}}"
+                            <mat-tab label="{{tab.label}}" disabled="{{control.value.protocol_id === null}}"
                                      formArrayName="{{tab.formArrayName}}"
                                      *ngFor="let tab of [{label: 'Input', formArrayName: 'inputs'},{label: 'Output', formArrayName: 'outputs'}]">
                                 <div [formGroupName]="i"
