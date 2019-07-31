@@ -156,7 +156,7 @@ export class DeviceTypesComponent implements OnInit {
                     this.firstFormGroup.patchValue({'device_class': newDeviceClass});
                     this.deviceTypeDeviceClasses.push(newDeviceClass);
                 } else {
-                    this.snackBar.open('Device Class already exists! Name auto selected!', undefined, {duration: 4000});
+                    this.snackbarAlreadyExists('Device Class');
                     this.firstFormGroup.patchValue({'device_class': this.deviceTypeDeviceClasses[index]});
                 }
             }
@@ -181,11 +181,11 @@ export class DeviceTypesComponent implements OnInit {
                 } else {
                     const index = aspects.value.indexOf(this.aspects[aspectIndex]);
                     if (index === -1) {
-                        this.snackBar.open('Aspect already exists! Aspect auto selected!', undefined, {duration: 4000});
+                        this.snackbarAlreadyExists('Aspect');
                         const array = formGroup.controls['aspects'].value;
                         formGroup.controls['aspects'].setValue([...array, this.aspects[aspectIndex]]);
                     } else {
-                        this.snackBar.open('Aspect already selected!', undefined, {duration: 4000});
+                        this.snackbarAlreadySelected('Aspect');
                     }
                 }
                 aspects.updateValueAndValidity();
@@ -214,11 +214,11 @@ export class DeviceTypesComponent implements OnInit {
                         const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
                         const measureFuncFormGroupIndex = functionsFormGroup.value.indexOf(this.measuringFunctions[measureFuncIndex]);
                         if (measureFuncFormGroupIndex === -1) {
-                            this.snackBar.open('Measuring Function already exists! Function auto selected!', undefined, {duration: 4000});
+                            this.snackbarAlreadyExists('Measuring Function');
                             const array = formGroup.controls['functions'].value;
                             formGroup.controls['functions'].setValue([...array, this.measuringFunctions[measureFuncIndex]]);
                         } else {
-                            this.snackBar.open('Measuring Function already selected!', undefined, {duration: 4000});
+                            this.snackbarAlreadySelected('Measuring Function');
                         }
                     }
                 }
@@ -231,11 +231,11 @@ export class DeviceTypesComponent implements OnInit {
                         const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
                         const controllFuncFormGroupIndex = functionsFormGroup.value.indexOf(this.controllingFunctions[controllFuncIndex]);
                         if (controllFuncFormGroupIndex === -1) {
-                            this.snackBar.open('Controlling Function already exists! Function auto selected!', undefined, {duration: 4000});
+                            this.snackbarAlreadyExists('Controlling Function');
                             const array = formGroup.controls['functions'].value;
                             formGroup.controls['functions'].setValue([...array, this.controllingFunctions[controllFuncIndex]]);
                         } else {
-                            this.snackBar.open('Controlling Function already selected!', undefined, {duration: 4000});
+                            this.snackbarAlreadySelected('Controlling Function');
                         }
                     }
                 }
@@ -491,6 +491,15 @@ export class DeviceTypesComponent implements OnInit {
                 this.snackBar.open('Error while saving the device type!', undefined, {duration: 2000});
             }
         });
+    }
+
+    private snackbarAlreadyExists(type: string) {
+        this.snackBar.open(type + ' already exists! ' +  type + ' auto selected!', undefined, {duration: 4000});
+    }
+
+
+    private snackbarAlreadySelected(type: string) {
+        this.snackBar.open(type + ' already selected!', undefined, {duration: 4000});
     }
 
     private loadData(): void {
