@@ -18,7 +18,12 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import {FormControl, Validators} from '@angular/forms';
-import {DeviceTypeConceptModel, DeviceTypeFunctionModel, DeviceTypeFunctionType} from '../../shared/device-type.model';
+import {
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeConceptModel,
+    DeviceTypeFunctionModel,
+    DeviceTypeFunctionType
+} from '../../shared/device-type.model';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',
@@ -42,11 +47,12 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     }
 
     save(): void {
+
         const func: DeviceTypeFunctionModel = {
             id: '',
             name: this.nameControl.value,
             type: this.functionType.type,
-            concept_ids: this.conceptControl.value,
+            concept_ids: this.getConceptIds(this.conceptControl.value),
         };
 
         this.dialogRef.close(func);
@@ -59,33 +65,41 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     ngOnInit(): void {
         this.concepts = [
             {
-                id: 'urn:infai:ses:category:1',
+                id: 'urn:infai:ses:concept:1',
                 name: 'color',
                 characteristics: [
                     {
-                        id: 'urn:infai:ses:categoryvariable:1',
+                        id: 'urn:infai:ses:characteristic:1',
                         name: 'rgb',
                         type: 'http://schema.org/structure',
                         sub_characteristics: [
                             {
-                                id: 'urn:infai:ses:categoryvariable:2',
+                                id: 'urn:infai:ses:characteristic:2',
                                 name: 'r',
                                 type: 'xsd:integer',
                                 min_value: 0,
-                                max_value: 0,
+                                max_value: 255,
                             }
                         ]
                     }]
             },
             {
-                id: 'urn:infai:ses:category:2',
+                id: 'urn:infai:ses:concept:2',
                 name: 'temperature',
                 characteristics: [{
-                    id: 'urn:infai:ses:categoryvariable:1',
+                    id: 'urn:infai:ses:characteristic:3',
                     name: 'DegreeCelsius',
                     type: 'xsd:float',
                 }]
             },
         ];
     }
+
+    private getConceptIds(concepts: DeviceTypeConceptModel[]): string[] {
+        const resp: string[] = [];
+        concepts.forEach((concept: DeviceTypeConceptModel) => {
+            resp.push(concept.id);
+        });
+        return resp;
+}
 }
