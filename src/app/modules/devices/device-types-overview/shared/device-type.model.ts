@@ -57,7 +57,8 @@ export interface DeviceTypeContentVariableModel {
     id?: string;
     name?: string;
     type?: string;
-    exact_match?: string;
+    rdf_type: string;
+    characteristics_id?: string;
     value?: string | boolean | number;
     sub_content_variables?: DeviceTypeContentVariableModel[];
     serialization_options: string[];
@@ -73,6 +74,7 @@ export interface DeviceTypeCharacteristicsModel {
     id: string;
     name: string;
     type: string;
+    rdf_type?: string;
     min_value?: number;
     max_value?: number;
     value?: string | boolean | number;
@@ -82,14 +84,14 @@ export interface DeviceTypeCharacteristicsModel {
 export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
-    type: string;
+    rdf_type: string;
     concept_ids: string[];
 }
 
 
 export interface DeviceTypeFunctionType {
    text: string;
-   type: string;
+   rdf_type: string;
 }
 
 export interface DeviceTypeProtocolModel {

@@ -39,8 +39,8 @@ import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-as
 
 
 const functionTypes: DeviceTypeFunctionType[] = [
-    {text: 'Controlling', type: 'https://senergy.infai.org/ontology/ControllingFunction'},
-    {text: 'Measuring', type: 'https://senergy.infai.org/ontology/MeasuringFunction'},
+    {text: 'Controlling', rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction'},
+    {text: 'Measuring', rdf_type: 'https://senergy.infai.org/ontology/MeasuringFunction'},
 ];
 
 const controllingIndex = 0;
@@ -371,7 +371,7 @@ export class DeviceTypesComponent implements OnInit {
             protocol_id: [deviceTypeService.protocol_id, Validators.required],
             inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : [],
             outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : [],
-            functionType: [deviceTypeService.functions ? this.getFunctionType(deviceTypeService.functions[0].type) : '', Validators.required],
+            functionType: [deviceTypeService.functions ? this.getFunctionType(deviceTypeService.functions[0].rdf_type) : '', Validators.required],
             functions: [{
                 value: deviceTypeService.functions ? deviceTypeService.functions : [],
                 disabled: deviceTypeService.functions ? false : true
@@ -380,10 +380,10 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    private getFunctionType(type: string): DeviceTypeFunctionType {
+    private getFunctionType(rdfType: string): DeviceTypeFunctionType {
         let index = -1;
         this.deviceTypeFunctionType.forEach((deviceType: DeviceTypeFunctionType, i: number) => {
-            if (deviceType.type === type) {
+            if (deviceType.rdf_type === rdfType) {
                 index = i;
             }
         });
@@ -474,7 +474,7 @@ export class DeviceTypesComponent implements OnInit {
         let index = -1;
         functions.forEach((func: DeviceTypeFunctionModel, i: number) => {
             if (func.id === this.controllingFunctions[inputIndex].id &&
-                func.type === this.controllingFunctions[inputIndex].type &&
+                func.rdf_type === this.controllingFunctions[inputIndex].rdf_type &&
                 func.name === this.controllingFunctions[inputIndex].name) {
                 index = i;
             }
@@ -486,7 +486,7 @@ export class DeviceTypesComponent implements OnInit {
         let index = -1;
         functions.forEach((func: DeviceTypeFunctionModel, i: number) => {
             if (func.id === this.measuringFunctions[inputIndex].id &&
-                func.type === this.measuringFunctions[inputIndex].type &&
+                func.rdf_type === this.measuringFunctions[inputIndex].rdf_type &&
                 func.name === this.measuringFunctions[inputIndex].name) {
                 index = i;
             }

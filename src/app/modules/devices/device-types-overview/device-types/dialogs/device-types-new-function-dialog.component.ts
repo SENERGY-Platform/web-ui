@@ -51,7 +51,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
         const func: DeviceTypeFunctionModel = {
             id: '',
             name: this.nameControl.value,
-            type: this.functionType.type,
+            rdf_type: this.functionType.rdf_type,
             concept_ids: this.getConceptIds(this.conceptControl.value),
         };
 
