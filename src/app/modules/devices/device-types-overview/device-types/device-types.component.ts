@@ -126,13 +126,6 @@ export class DeviceTypesComponent implements OnInit {
         control.removeAt(this.secondFormGroup.value.services.indexOf(deviceTypeService));
     }
 
-    compareId(a: any, b: any): boolean {
-        if (b === null) {
-            return false;
-        }
-        return a.id === b.id && a.name === b.name;
-    }
-
     compare(a: any, b: any): boolean {
         return a && b && a.id === b.id && a.name === b.name;
     }

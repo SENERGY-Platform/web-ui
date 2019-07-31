@@ -37,7 +37,7 @@
                         <tr>
                             <td>
                                 <mat-form-field class="full-width" color="accent">
-                                    <mat-select placeholder="Device class" [compareWith]="compareId"
+                                    <mat-select placeholder="Device class" [compareWith]="compare"
                                                 formControlName="device_class" required>
                                         <mat-option *ngFor="let deviceTypeClass of deviceTypeDeviceClasses"
                                                     [value]="deviceTypeClass">
