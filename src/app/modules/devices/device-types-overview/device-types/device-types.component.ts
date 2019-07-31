@@ -224,16 +224,12 @@ export class DeviceTypesComponent implements OnInit {
                 }
                 if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[controllingIndex]) {
                     const controllFuncIndex = this.checkIfControllingFunctionNameExists(func.name);
-                    console.log(controllFuncIndex);
                     if (controllFuncIndex === -1) {
                         formGroup.controls['functions'].value.push(func);
                         this.controllingFunctions.push(func);
                     } else {
                         const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
-                        console.log(functionsFormGroup.value);
-                        console.log(this.controllingFunctions[controllFuncIndex]);
                         const controllFuncFormGroupIndex = this.checkIfControllingFunctionIsSelected(functionsFormGroup.value, controllFuncIndex);
-                        console.log(controllFuncFormGroupIndex);
                         if (controllFuncFormGroupIndex === -1) {
                             this.snackbarAlreadyExists('Controlling Function');
                             const array = formGroup.controls['functions'].value;
@@ -413,10 +409,10 @@ export class DeviceTypesComponent implements OnInit {
                     }
                 });
                 if (!itemMatch) {
-                    array.push(this.createInitialAssignmentGroup(protocolSegment));
+                    array.push(this.createContentGroup({} as DeviceTypeContentModel, protocolSegment));
                 }
             } else {
-                array.push(this.createInitialAssignmentGroup(protocolSegment));
+                array.push(this.createContentGroup({} as DeviceTypeContentModel, protocolSegment));
             }
         });
 
@@ -430,20 +426,8 @@ export class DeviceTypesComponent implements OnInit {
             serialization: [content.serialization],
             content_variable_raw: [content.content_variable, jsonValidator(true)],
             protocol_segment_id: [content.protocol_segment_id],
-            show: [true],
+            show: [content.protocol_segment_id ? true : false],
         });
-    }
-
-    private createInitialAssignmentGroup(protocolSegment: DeviceTypeProtocolSegmentModel): FormGroup {
-        return this._formBuilder.group({
-            id: [],
-            name: [protocolSegment.name],
-            serialization: [],
-            content_variable_raw: ['', jsonValidator(true)],
-            protocol_segment_id: [protocolSegment.id],
-            show: [false],
-        });
-        // }
     }
 
     private checkIfDeviceClassNameExists(name: string): number {
