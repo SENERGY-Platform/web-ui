@@ -108,10 +108,7 @@ export class DeviceTypesComponent implements OnInit {
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
         formArray.push(this.createServiceGroup({} as DeviceTypeServiceModel));
         const formGroup = <FormGroup>formArray.controls[formArray.length - 1];
-        formGroup.controls['protocol_id'].valueChanges.subscribe((protocolId: string) => {
-            formGroup.setControl('inputs', this.createContent(protocolId, undefined));
-            formGroup.setControl('outputs', this.createContent(protocolId, undefined));
-        });
+        this.initProtocolIdChangeListener(formGroup);
         formGroup.controls['functionType'].valueChanges.subscribe(() => {
             if (formGroup.controls['functionType'].invalid) {
                 formGroup.controls['functions'].disable();
@@ -301,23 +298,22 @@ export class DeviceTypesComponent implements OnInit {
                     this.initFirstFormGroup(deviceType);
                     this.disableSaveButton(this.firstFormGroup.status);
                     this.initSecondFormGroup(deviceType);
+                    console.log(this.secondFormGroup);
 
                     if (!this.editable) {
                         this.firstFormGroup.disable();
                         this.secondFormGroup.disable();
                     }
-
-                    const formArray = <FormArray>this.secondFormGroup.controls['services'];
-                    formArray.controls.forEach((secondFormGroupService: AbstractControl) => {
-                        const formGroup = <FormGroup>secondFormGroupService;
-                        formGroup.controls['protocol_id'].valueChanges.subscribe((protocol: string) => {
-                            formGroup.setControl('inputs', this.createContent(protocol, undefined));
-                            formGroup.setControl('outputs', this.createContent(protocol, undefined));
-                        });
-                    });
                 }
             });
         }
+    }
+
+    private initProtocolIdChangeListener(formGroup: FormGroup) {
+        formGroup.controls['protocol_id'].valueChanges.subscribe((protocolId: string) => {
+            formGroup.setControl('inputs', this.createContent(protocolId, undefined));
+            formGroup.setControl('outputs', this.createContent(protocolId, undefined));
+        });
     }
 
     private initSecondFormGroup(deviceType: DeviceTypeModel) {
@@ -327,9 +323,10 @@ export class DeviceTypesComponent implements OnInit {
                 [])
         });
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
-        formArray.controls.forEach((control) => {
+        formArray.controls.forEach((control: AbstractControl) => {
             const formGroup = <FormGroup>control;
             this.initFunctions(formGroup);
+            this.initProtocolIdChangeListener(formGroup);
             formGroup.controls['functionType'].valueChanges.subscribe(() => {
                 formGroup.controls['functions'].setValue([]);
                 this.initFunctions(formGroup);
