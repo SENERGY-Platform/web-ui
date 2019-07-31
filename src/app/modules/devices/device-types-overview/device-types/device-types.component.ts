@@ -212,7 +212,7 @@ export class DeviceTypesComponent implements OnInit {
                         this.measuringFunctions.push(func);
                     } else {
                         const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
-                        const measureFuncFormGroupIndex = functionsFormGroup.value.indexOf(this.measuringFunctions[measureFuncIndex]);
+                        const measureFuncFormGroupIndex = this.checkIfMeasuringFunctionIsSelected(functionsFormGroup.value, measureFuncIndex);
                         if (measureFuncFormGroupIndex === -1) {
                             this.snackbarAlreadyExists('Measuring Function');
                             const array = formGroup.controls['functions'].value;
@@ -224,12 +224,16 @@ export class DeviceTypesComponent implements OnInit {
                 }
                 if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[controllingIndex]) {
                     const controllFuncIndex = this.checkIfControllingFunctionNameExists(func.name);
+                    console.log(controllFuncIndex);
                     if (controllFuncIndex === -1) {
                         formGroup.controls['functions'].value.push(func);
                         this.controllingFunctions.push(func);
                     } else {
                         const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
-                        const controllFuncFormGroupIndex = functionsFormGroup.value.indexOf(this.controllingFunctions[controllFuncIndex]);
+                        console.log(functionsFormGroup.value);
+                        console.log(this.controllingFunctions[controllFuncIndex]);
+                        const controllFuncFormGroupIndex = this.checkIfControllingFunctionIsSelected(functionsFormGroup.value, controllFuncIndex);
+                        console.log(controllFuncFormGroupIndex);
                         if (controllFuncFormGroupIndex === -1) {
                             this.snackbarAlreadyExists('Controlling Function');
                             const array = formGroup.controls['functions'].value;
@@ -291,7 +295,6 @@ export class DeviceTypesComponent implements OnInit {
                     this.initFirstFormGroup(deviceType);
                     this.disableSaveButton(this.firstFormGroup.status);
                     this.initSecondFormGroup(deviceType);
-                    console.log(this.secondFormGroup);
 
                     if (!this.editable) {
                         this.firstFormGroup.disable();
@@ -477,6 +480,30 @@ export class DeviceTypesComponent implements OnInit {
         let index = -1;
         this.controllingFunctions.forEach((func: DeviceTypeFunctionModel, i: number) => {
             if (func.name === name) {
+                index = i;
+            }
+        });
+        return index;
+    }
+
+    private checkIfControllingFunctionIsSelected(functions: DeviceTypeFunctionModel[], inputIndex: number): number {
+        let index = -1;
+        functions.forEach((func: DeviceTypeFunctionModel, i: number) => {
+            if (func.id === this.controllingFunctions[inputIndex].id &&
+                func.type === this.controllingFunctions[inputIndex].type &&
+                func.name === this.controllingFunctions[inputIndex].name) {
+                index = i;
+            }
+        });
+        return index;
+    }
+
+    private checkIfMeasuringFunctionIsSelected(functions: DeviceTypeFunctionModel[], inputIndex: number): number {
+        let index = -1;
+        functions.forEach((func: DeviceTypeFunctionModel, i: number) => {
+            if (func.id === this.measuringFunctions[inputIndex].id &&
+                func.type === this.measuringFunctions[inputIndex].type &&
+                func.name === this.measuringFunctions[inputIndex].name) {
                 index = i;
             }
         });
