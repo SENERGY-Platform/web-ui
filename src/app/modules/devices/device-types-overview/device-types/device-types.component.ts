@@ -45,6 +45,7 @@ const functionTypes: DeviceTypeFunctionType[] = [
 
 const controllingIndex = 0;
 const measuringIndex = 1;
+
 @Component({
     selector: 'senergy-device-types',
     templateUrl: './device-types.component.html',
@@ -119,12 +120,7 @@ export class DeviceTypesComponent implements OnInit {
             }
 
             formGroup.controls['functions'].setValue([]);
-            if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[measuringIndex]) {
-                this.functions = this.measuringFunctions;
-            }
-            if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[controllingIndex]) {
-                this.functions = this.controllingFunctions;
-            }
+            this.initFunctions(formGroup);
         });
     }
 
@@ -254,8 +250,6 @@ export class DeviceTypesComponent implements OnInit {
                     }
                 }
                 formGroup.controls['functions'].updateValueAndValidity();
-                console.log(formGroup.controls);
-                console.log(this.functions);
             }
         });
     }
@@ -332,6 +326,24 @@ export class DeviceTypesComponent implements OnInit {
                 deviceType.services.map((elem: DeviceTypeServiceModel) => this.createServiceGroup(elem)) :
                 [])
         });
+        const formArray = <FormArray>this.secondFormGroup.controls['services'];
+        formArray.controls.forEach((control) => {
+            const formGroup = <FormGroup>control;
+            this.initFunctions(formGroup);
+            formGroup.controls['functionType'].valueChanges.subscribe(() => {
+                formGroup.controls['functions'].setValue([]);
+                this.initFunctions(formGroup);
+            });
+        });
+    }
+
+    private initFunctions(formGroup: FormGroup) {
+        if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[measuringIndex]) {
+            this.functions = this.measuringFunctions;
+        }
+        if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[controllingIndex]) {
+            this.functions = this.controllingFunctions;
+        }
     }
 
     private initFirstFormGroup(deviceType: DeviceTypeModel) {
@@ -370,13 +382,23 @@ export class DeviceTypesComponent implements OnInit {
             protocol_id: [deviceTypeService.protocol_id, Validators.required],
             inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : [],
             outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : [],
-            functionType: [deviceTypeService.functions ? deviceTypeService.functions[0].type : '', Validators.required],
+            functionType: [deviceTypeService.functions ? this.getFunctionType(deviceTypeService.functions[0].type) : '', Validators.required],
             functions: [{
                 value: deviceTypeService.functions ? deviceTypeService.functions : [],
                 disabled: deviceTypeService.functions ? false : true
             }, Validators.required],
             aspects: [deviceTypeService.aspects ? deviceTypeService.aspects : [], Validators.required],
         });
+    }
+
+    private getFunctionType(type: string): DeviceTypeFunctionType {
+        let index = -1;
+        this.deviceTypeFunctionType.forEach((deviceType: DeviceTypeFunctionType, i: number) => {
+            if (deviceType.type === type) {
+                index = i;
+            }
+        });
+        return this.deviceTypeFunctionType[index];
     }
 
     private createContent(protocolId: string, content: (DeviceTypeContentModel[] | undefined)): FormArray {
