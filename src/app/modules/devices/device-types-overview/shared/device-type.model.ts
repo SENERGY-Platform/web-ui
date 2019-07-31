@@ -58,7 +58,7 @@ export interface DeviceTypeContentVariableModel {
     name?: string;
     type?: string;
     rdf_type: string;
-    characteristics_id?: string;
+    characteristic_id?: string;
     value?: string | boolean | number;
     sub_content_variables?: DeviceTypeContentVariableModel[];
     serialization_options: string[];
