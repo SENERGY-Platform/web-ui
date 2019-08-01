@@ -91,7 +91,7 @@ export class DeviceTypesComponent implements OnInit {
         this.cleanUpServices();
 
         const newDeviceType: DeviceTypeModel = {
-            id: this.firstFormGroup.value.id,
+            id: this.firstFormGroup.getRawValue().id, // use getRawValue because control is disabled
             name: this.firstFormGroup.value.name,
             description: this.firstFormGroup.value.description,
             image: this.firstFormGroup.value.image,
