@@ -55,7 +55,6 @@ export class DeviceTypesComponent implements OnInit {
 
     deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];
     protocols: DeviceTypeProtocolModel[] = [];
-    deviceTypeValueTypes: ValueTypesModel[] = [];
 
     firstFormGroup!: FormGroup;
     secondFormGroup: FormGroup = new FormGroup({services: this._formBuilder.array([])});
@@ -517,11 +516,6 @@ export class DeviceTypesComponent implements OnInit {
         this.deviceTypeService.getDeviceClasses().subscribe(
             (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceTypeDeviceClasses = deviceTypeDeviceClasses;
-            });
-
-        this.valueTypesService.getValuetypes('', 9999, 0, 'name', 'asc').subscribe(
-            (deviceTypeValueTypes: ValueTypesModel[]) => {
-                this.deviceTypeValueTypes = deviceTypeValueTypes;
             });
 
         this.deviceTypeService.getProtocols(9999, 0, 'name', 'asc').subscribe(
