@@ -73,14 +73,15 @@ export class DeviceTypeService {
         );
     }
 
-    updateDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
-        return this.http.post<DeviceTypeModel>(environment.iotRepoUrl + '/deviceType/' + encodeURIComponent(deviceType.id), deviceType).pipe(
-            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'updateDeviceType', null))
+    createDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
+        return this.http.post<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types', deviceType).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createDeviceType', null))
         );
     }
 
-    createDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
-        return this.http.post<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types', deviceType).pipe(
+    updateDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
+        console.log(deviceType);
+        return this.http.put<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types/' + encodeURIComponent(deviceType.id), deviceType).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'updateDeviceType', null))
         );
     }

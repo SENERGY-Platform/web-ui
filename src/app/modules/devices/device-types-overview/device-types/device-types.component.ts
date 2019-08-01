@@ -26,7 +26,6 @@ import {
     DeviceTypeProtocolSegmentModel,
     DeviceTypeServiceModel,
 } from '../shared/device-type.model';
-import {ValueTypesModel} from '../../value-types/shared/value-types.model';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {DeviceTypeService} from '../shared/device-type.service';
@@ -493,14 +492,24 @@ export class DeviceTypesComponent implements OnInit {
         return index;
     }
 
-    private saveDeviceType(deviceTypeResp: DeviceTypeModel) {
-        this.deviceTypeService.createDeviceType(deviceTypeResp).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
-            if (deviceTypeSaved) {
-                this.snackBar.open('Device type saved successfully.', undefined, {duration: 2000});
-            } else {
-                this.snackBar.open('Error while saving the device type!', undefined, {duration: 2000});
-            }
-        });
+    private saveDeviceType(deviceType: DeviceTypeModel) {
+        if (deviceType.id === '') {
+            this.deviceTypeService.createDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
+                this.showMessage(deviceTypeSaved);
+            });
+        } else {
+            this.deviceTypeService.updateDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
+                this.showMessage(deviceTypeSaved);
+            });
+        }
+    }
+
+    private showMessage(deviceTypeSaved: DeviceTypeModel | null) {
+        if (deviceTypeSaved) {
+            this.snackBar.open('Device type saved successfully.', undefined, {duration: 2000});
+        } else {
+            this.snackBar.open('Error while saving the device type!', undefined, {duration: 2000});
+        }
     }
 
     private snackbarAlreadyExists(type: string) {
