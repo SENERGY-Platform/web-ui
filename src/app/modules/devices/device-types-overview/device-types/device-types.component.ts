@@ -424,7 +424,7 @@ export class DeviceTypesComponent implements OnInit {
             name: [protocolSegment.name],
             serialization: [content.serialization],
             content_variable_raw: [JSON.stringify(content.content_variable), jsonValidator(true)],
-            protocol_segment_id: [content.protocol_segment_id],
+            protocol_segment_id: [protocolSegment.id],
             show: [content.protocol_segment_id ? true : false],
         });
     }
