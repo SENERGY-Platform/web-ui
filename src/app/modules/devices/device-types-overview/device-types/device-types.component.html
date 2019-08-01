@@ -87,7 +87,7 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-label>Function Type</mat-label>
-                                                    <mat-select formControlName="functionType">
+                                                    <mat-select formControlName="functionType" required>
                                                         <mat-option
                                                                 *ngFor="let item of deviceTypeFunctionType"
                                                                 [value]="item">
@@ -99,7 +99,7 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-label>{{control.controls.functionType.invalid ? 'Function' : control.controls.functionType.value.text + ' Function'}}</mat-label>
-                                                    <mat-select formControlName="functions" multiple
+                                                    <mat-select formControlName="functions" multiple required
                                                                 [compareWith]="compare">
                                                         <mat-select-trigger>
                                                             {{control.controls.functions.value[0] ? control.controls.functions.value[0].name : ''}}
@@ -130,7 +130,7 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-label>Aspects</mat-label>
-                                                    <mat-select formControlName="aspects" multiple
+                                                    <mat-select formControlName="aspects" multiple required
                                                                 [compareWith]="compare">
                                                         <mat-select-trigger>
                                                             {{control.controls.aspects.value[0] ? control.controls.aspects.value[0].name : ''}}
