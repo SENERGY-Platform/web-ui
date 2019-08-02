@@ -183,7 +183,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                 return resp.data;
             })
         ).subscribe((data: MonitorProcessModel[]) => {
-            this.dataSourceRunning.data = data;
+            this.dataSourceRunning.data = data || [];
             this.isLoadingResultsRunning = false;
 
         });
@@ -210,7 +210,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                 return resp.data;
             })
         ).subscribe((data: MonitorProcessModel[]) => {
-            this.dataSourceFinished.data = data;
+            this.dataSourceFinished.data = data || [];
             this.isLoadingResultsFinished = false;
         });
     }
