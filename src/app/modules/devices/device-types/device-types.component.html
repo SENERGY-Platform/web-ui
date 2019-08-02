@@ -46,7 +46,7 @@
                                             <mat-icon>more_vert</mat-icon>
                                         </button>
                                         <mat-menu #menu="matMenu" [overlapTrigger]="false">
-                                            <button mat-menu-item (click)="edit(deviceType)">
+                                            <button mat-menu-item (click)="edit(deviceType)" [disabled]="!deviceType.permissions.w">
                                                 <mat-icon>edit</mat-icon>
                                                 <span>Edit</span>
                                             </button>
