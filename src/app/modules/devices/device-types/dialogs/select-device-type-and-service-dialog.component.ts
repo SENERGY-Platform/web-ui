@@ -153,7 +153,7 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
         }
     }
 
-    private changeCompletionStrategy(event: MatRadioChange) {
+    changeCompletionStrategy(event: MatRadioChange) {
         this.setCompletionStrategy(event.value);
     }
 
@@ -161,7 +161,7 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
         this.completionStrategy = strategy;
     }
 
-    private isChecked(completionSrategy: string) {
+    isChecked(completionSrategy: string) {
         return this.completionStrategy == completionSrategy
     }
 
