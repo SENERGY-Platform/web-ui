@@ -15,7 +15,7 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef, MatRadioChange} from '@angular/material';
 import {
     BpmnSkeletonModel,
     DeviceTypeInfoModel,
@@ -37,6 +37,7 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
     serviceSelectionFormControl = new FormControl('');
     serviceOptions: Observable<DeviceTypeServiceModel[]>;
     devicetypeOptions: Observable<DeviceTypePermSearchModel[]>;
+    completionStrategy = "";
     limit = 20;
 
     result: DeviceTypeSelectionResultModel;
@@ -44,12 +45,13 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
     constructor(
         private dialogRef: MatDialogRef<SelectDeviceTypeAndServiceDialogComponent>,
         private dtService: DeviceTypeService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: {selection: DeviceTypeSelectionRefModel}
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { selection: DeviceTypeSelectionRefModel }
     ) {
         this.result = {
             deviceType: {name: '', id: ''},
             service: {name: '', id: ''},
-            skeleton: {}
+            skeleton: {},
+            completionStrategy: ""
         };
 
         this.devicetypeOptions = this.getDeviceTypeOptionsObservable(this.devicetypeSelectionFormControl);
@@ -71,7 +73,7 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
     }
 
 
-    displayFn(input?: {name: string}): string | undefined {
+    displayFn(input?: { name: string }): string | undefined {
         return input ? input.name : undefined;
     }
 
@@ -85,6 +87,7 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
 
     save(): void {
         this.dialogRef.close(this.result);
+        this.result.completionStrategy = this.completionStrategy;
     }
 
     isValid() {
@@ -92,24 +95,29 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
     }
 
     private useDialogParams() {
-        if (this.dialogParams.selection && this.dialogParams.selection.deviceTypeId && this.dialogParams.selection.serviceId) {
+        if (this.dialogParams.selection && this.dialogParams.selection.deviceTypeId && this.dialogParams.selection.serviceId && this.dialogParams.selection.completionStrategy) {
             this.dtService.getDeviceType(this.dialogParams.selection.deviceTypeId).subscribe((dt: DeviceTypeModel | null) => {
                 if (dt) {
                     const serviceSelection = dt.services.find((service: DeviceTypeServiceModel) => service.id === this.dialogParams.selection.serviceId)
-                        || { id: '', name: '' };
+                        || {id: '', name: ''};
                     // order is important to prevent race between change handler
                     // service change handler terminates immediately because result.deviceType.id === ''
                     this.serviceSelectionFormControl.setValue(serviceSelection);
                     this.devicetypeSelectionFormControl.setValue(dt);
+                    this.setCompletionStrategy(this.dialogParams.selection.completionStrategy);
                 }
             });
+        } else {
+            if (this.completionStrategy == "") {
+                this.setCompletionStrategy('optimistic');
+            }
         }
     }
 
     // expects FormControl with DeviceTypeModel
     private createServiceOptionsObservable(devicetypeSelectionFormControl: FormControl) {
         return new Observable<DeviceTypeServiceModel[]>((observer: Subscriber<DeviceTypeServiceModel[]>) => {
-            devicetypeSelectionFormControl.valueChanges.subscribe(() =>  {
+            devicetypeSelectionFormControl.valueChanges.subscribe(() => {
                 const dt: any = devicetypeSelectionFormControl.value;
                 if (dt.id) {
                     this.dtService.getDeviceType(dt.id).subscribe((value: DeviceTypeModel | null) => {
@@ -135,14 +143,26 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
 
     private setDeviceTypeResult(dtSelection: DeviceTypeInfoModel) {
         if (dtSelection && dtSelection.id) {
-            this.dtService.getDeviceType(dtSelection.id).subscribe((dt: DeviceTypeModel|null) => {
+            this.dtService.getDeviceType(dtSelection.id).subscribe((dt: DeviceTypeModel | null) => {
                 if (dt) {
-                    this.result.deviceType = {name: dt.name || '', id: dt.id };
+                    this.result.deviceType = {name: dt.name || '', id: dt.id};
                 }
             });
         } else {
-            this.result.deviceType =  {name: '', id: ''};
+            this.result.deviceType = {name: '', id: ''};
         }
+    }
+
+    private changeCompletionStrategy(event: MatRadioChange) {
+        this.setCompletionStrategy(event.value);
+    }
+
+    private setCompletionStrategy(strategy: string) {
+        this.completionStrategy = strategy;
+    }
+
+    private isChecked(completionSrategy: string) {
+        return this.completionStrategy == completionSrategy
     }
 
     // expect serviceSelectionFormControl as FormControl with ServiceInfoModel

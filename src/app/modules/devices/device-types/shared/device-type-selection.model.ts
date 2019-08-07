@@ -19,12 +19,14 @@
 export interface DeviceTypeSelectionRefModel {
     serviceId: string;
     deviceTypeId: string;
+    completionStrategy: string;
 }
 
 export interface DeviceTypeSelectionResultModel {
     deviceType: DeviceTypeInfoModel;
     service: ServiceInfoModel;
     skeleton: BpmnSkeletonModel;
+    completionStrategy: string;
 }
 
 export interface DeviceTypeInfoModel {
