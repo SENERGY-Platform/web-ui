@@ -96,12 +96,6 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         }
     }
 
-    private setRepoItemsParams(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.repoItems.length;
-    }
-
     receiveSortingAttribute(sortAttribute: SortModel) {
         this.sortAttribute = sortAttribute;
         this.getRepoItems(true);
@@ -266,5 +260,11 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         condition.operation = operation;
         condition.ref = ref;
         return condition;
+    }
+
+    private setRepoItemsParams(limit: number) {
+        this.ready = false;
+        this.limit = limit;
+        this.offset = this.repoItems.length;
     }
 }
