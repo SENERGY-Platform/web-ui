@@ -26,6 +26,7 @@ import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-wid
 import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ChartsProcessDeploymentsEditDialogComponent} from '../dialogs/charts-process-deployments-edit-dialog.component';
 import {ChartDataTableModel} from '../../../../../core/components/chart/chart-data-table.model';
+import {ChartsDataTableModel} from '../../../shared/charts-data-table.model';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -59,7 +60,11 @@ export class ChartsProcessDeploymentsService {
     getProcessDeploymentHistory(widgetId: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
             this.monitorService.getAllHistoryInstances().subscribe((processes: MonitorProcessModel[]) => {
-                observer.next(this.setProcessDeploymentValues(widgetId, this.sumUpProcessDeployments(processes)));
+                if (processes.length === 0) {
+                    observer.next(this.setProcessDeploymentValues(widgetId, new ChartsDataTableModel([[]])));
+                } else {
+                    observer.next(this.setProcessDeploymentValues(widgetId, this.sumUpProcessDeployments(processes)));
+                }
                 observer.complete();
             });
         });
