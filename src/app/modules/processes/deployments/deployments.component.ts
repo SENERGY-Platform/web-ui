@@ -54,7 +54,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     ready = false;
 
     private searchText = '';
-    private limit = 54;
+    private limitInit = 54;
+    private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
@@ -83,8 +84,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.offset = this.offset + this.limit;
+            this.setRepoItemsParams(this.limitInit);
             this.getRepoItems(false);
         }
     }
@@ -120,8 +120,12 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                     if (resp === 'error') {
                         this.snackBar.open('Error while deleting the deployment!', undefined, {duration: 2000});
                     } else {
-                        this.getRepoItems(true);
+                        this.repoItems.splice(this.repoItems.indexOf(deployment), 1);
                         this.snackBar.open('Deployment deleted successfully.', undefined, {duration: 2000});
+                        this.setRepoItemsParams(1);
+                        setTimeout(() => {
+                            this.getRepoItems(false);
+                        }, 1000);
                     }
                 });
             }
@@ -153,10 +157,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     private getRepoItems(reset: boolean) {
         if (reset) {
-            this.repoItems = [];
-            this.offset = 0;
-            this.allDataLoaded = false;
-            this.ready = false;
+            this.setRepoItemsParams(this.limitInit);
+            this.reset();
         }
 
         this.deploymentsService.getAll(
@@ -169,14 +171,25 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 this.repoItems.forEach((repoItem: DeploymentsModel) => {
                     repoItem.image = this.provideImg(repoItem.diagram);
                 });
-
                 this.ready = true;
             });
     }
 
     private provideImg(svg: string): SafeUrl {
         const base64 = this.utilService.convertSVGtoBase64(svg);
-
         return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);
+    }
+
+    private reset() {
+        this.repoItems = [];
+        this.offset = 0;
+        this.allDataLoaded = false;
+        this.ready = false;
+    }
+
+    private setRepoItemsParams(limit: number) {
+        this.ready = false;
+        this.limit = limit;
+        this.offset = this.repoItems.length;
     }
 }
