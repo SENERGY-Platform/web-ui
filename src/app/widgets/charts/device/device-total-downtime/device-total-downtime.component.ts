@@ -30,7 +30,7 @@ import {DeviceTotalDowntimeService} from './shared/device-total-downtime.service
 })
 export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
 
-    deviceTotalDowntime: ChartsModel = {};
+    deviceTotalDowntime = {} as ChartsModel;
     ready = false;
     destroy = new Subscription();
 

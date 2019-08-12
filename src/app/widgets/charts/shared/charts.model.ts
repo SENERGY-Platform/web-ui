@@ -16,8 +16,8 @@
 
 export class ChartsModel {
     constructor(
-        public chartType?: string,
-        public dataTable?: (Date | string | number | {role: string}) [][],
+        public chartType: string,
+        public dataTable: (Date | string | number | {role: string}) [][],
         public options?: {
             chartArea?: {
                 left?: number,
