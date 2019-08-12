@@ -19,7 +19,8 @@
     <mat-card-content class="content-size drag-handler">
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-            <google-chart *ngIf="ready" #deviceGatewayChart [data]="deviceGateway"></google-chart>
+            <google-chart *ngIf="ready && deviceGateway.dataTable[0].length != 0" #deviceGatewayChart [data]="deviceGateway"></google-chart>
+            <senergy-no-data [showIf]="ready && deviceGateway.dataTable[0].length === 0"></senergy-no-data>
         </div>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()"></senergy-widget-footer>
