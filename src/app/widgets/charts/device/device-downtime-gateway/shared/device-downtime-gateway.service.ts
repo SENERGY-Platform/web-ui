@@ -70,8 +70,12 @@ export class DeviceDowntimeGatewayService {
     getDevicesDowntimePerGateway(widget: WidgetModel): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
             this.networksService.getNetworksHistory('7d').subscribe((gateways) => {
-                observer.next(this.setDevicesDowntimePerGatewayChartValues(widget.id,
-                    this.getGatewayDowntimeDataTableArray(widget.properties.hideZeroPercentage || false, gateways)));
+                if (gateways.length === 0) {
+                    observer.next(this.setDevicesDowntimePerGatewayChartValues(widget.id, new ChartDataTableModel([[]])));
+                } else {
+                    observer.next(this.setDevicesDowntimePerGatewayChartValues(widget.id,
+                        this.getGatewayDowntimeDataTableArray(widget.properties.hideZeroPercentage || false, gateways)));
+                }
                 observer.complete();
             });
 
