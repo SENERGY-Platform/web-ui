@@ -19,7 +19,8 @@
     <mat-card-content class="mat-card-image content-size drag-handler">
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-            <google-chart *ngIf="ready" #processInstancesStatusChart [data]="processInstancesStatus"></google-chart>
+            <google-chart *ngIf="ready && processInstancesStatus.dataTable[0].length != 0" #processInstancesStatusChart [data]="processInstancesStatus"></google-chart>
+            <div *ngIf="ready && processInstancesStatus.dataTable[0].length === 0" fxFlex fxLayoutAlign="center center">No data</div>
         </div>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()"></senergy-widget-footer>

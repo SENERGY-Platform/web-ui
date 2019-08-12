@@ -57,7 +57,11 @@ export class ChartsProcessInstancesService {
     getProcessInstancesStatus(widgetId: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
             this.monitorService.getAllHistoryInstances().subscribe((processes: MonitorProcessModel[]) => {
+                if (processes.length === 0) {
+                    observer.next(this.setProcessInstancesStatusValues(widgetId, new ChartsDataTableModel([[]])));
+                } else {
                     observer.next(this.setProcessInstancesStatusValues(widgetId, this.sumUpProcessStatuses(processes)));
+                }
                     observer.complete();
                 }
             );
