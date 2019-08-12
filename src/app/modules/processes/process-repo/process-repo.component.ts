@@ -60,7 +60,8 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     searchInitialized = false;
 
     private searchText = '';
-    private limit = 54;
+    private limitInit = 54;
+    private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
@@ -90,10 +91,15 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.offset = this.offset + this.limit;
+            this.setRepoItemsParams(this.limitInit);
             this.getRepoItems(false);
         }
+    }
+
+    private setRepoItemsParams(limit: number) {
+        this.ready = false;
+        this.limit = limit;
+        this.offset = this.repoItems.length;
     }
 
     receiveSortingAttribute(sortAttribute: SortModel) {
@@ -127,6 +133,11 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                     if (resp.status === 'OK') {
                         this.repoItems.splice(this.repoItems.indexOf(process), 1);
                         this.snackBar.open('Process deleted successfully.', undefined, {duration: 2000});
+                        this.setRepoItemsParams(1);
+                        setTimeout(() => {
+                            this.getRepoItems(false);
+                        }, 1000);
+
                     } else {
                         this.snackBar.open('Error while deleting the process!', undefined, {duration: 2000});
                     }
@@ -197,6 +208,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     private getRepoItems(reset: boolean) {
         if (reset) {
+            this.setRepoItemsParams(this.limitInit);
             this.reset();
         }
 
