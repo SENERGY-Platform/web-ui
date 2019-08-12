@@ -30,7 +30,7 @@ import {Subscription} from 'rxjs';
 })
 export class ChartsExportComponent implements OnInit, OnDestroy {
 
-    chartExportData: ChartsModel = {};
+    chartExportData = {} as ChartsModel;
     ready = false;
     destroy = new Subscription();
     configureWidget = false;

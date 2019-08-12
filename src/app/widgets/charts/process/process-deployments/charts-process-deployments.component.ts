@@ -30,7 +30,7 @@ import {ChartsProcessDeploymentsService} from './shared/charts-process-deploymen
 })
 export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
 
-    processDeploymentsHistory: ChartsModel = {};
+    processDeploymentsHistory = {} as ChartsModel;
     ready = false;
     destroy = new Subscription();
 

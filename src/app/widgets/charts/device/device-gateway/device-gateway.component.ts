@@ -30,7 +30,7 @@ import {DeviceGatewayService} from './shared/device-gateway.service';
 })
 export class DeviceGatewayComponent implements OnInit, OnDestroy {
 
-    deviceGateway: ChartsModel = {};
+    deviceGateway = {} as ChartsModel;
     ready = false;
     destroy = new Subscription();
 

@@ -30,7 +30,7 @@ import {DeviceDowntimeGatewayService} from './shared/device-downtime-gateway.ser
 })
 export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
 
-    deviceDowntimeGateway: ChartsModel = {};
+    deviceDowntimeGateway = {} as ChartsModel;
     ready = false;
     destroy = new Subscription();
 

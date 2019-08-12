@@ -18,7 +18,7 @@
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="mat-card-image content-size">
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready" fxLayout="column" fxFill>
+        <div *ngIf="ready && processes.length != 0" fxLayout="column" fxFill>
             <mat-list>
                 <mat-list-item *ngFor="let process of processes">
                     <button mat-list-icon mat-icon-button class="color-accent" matTooltip="edit process model"
@@ -30,6 +30,7 @@
                 </mat-list-item>
             </mat-list>
         </div>
+        <senergy-no-data [showIf]="ready && processes.length === 0"></senergy-no-data>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>

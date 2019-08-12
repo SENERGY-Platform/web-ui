@@ -29,6 +29,7 @@ import {ChartDataTableModel} from '../../../../../core/components/chart/chart-da
 import {ChartsModel} from '../../../shared/charts.model';
 import {NetworksService} from '../../../../../modules/devices/networks/shared/networks.service';
 import {NetworksHistoryModel} from '../../../../../modules/devices/networks/shared/networks-history.model';
+import {ChartsDataTableModel} from '../../../shared/charts-data-table.model';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -65,7 +66,11 @@ export class DeviceGatewayService {
     getDevicesPerGateway(widgetId: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
                 this.networksService.getNetworksHistory('1h').subscribe((gateways: NetworksHistoryModel[]) => {
-                    observer.next(this.setDevicesPerGatewayChartValues(widgetId, this.getGatewayDataTableArray(gateways)));
+                    if (gateways.length === 0) {
+                        observer.next(this.setDevicesPerGatewayChartValues(widgetId, new ChartsDataTableModel([[]])));
+                    } else {
+                        observer.next(this.setDevicesPerGatewayChartValues(widgetId, this.getGatewayDataTableArray(gateways)));
+                    }
                     observer.complete();
                 });
             }

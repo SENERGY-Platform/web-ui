@@ -30,7 +30,7 @@ import {Subscription} from 'rxjs';
 })
 export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
 
-    processInstancesStatus: ChartsModel = {};
+    processInstancesStatus = {} as ChartsModel;
     ready = false;
     destroy = new Subscription();
 
