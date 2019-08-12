@@ -43,6 +43,7 @@ import {ShortInputVariableNamePipe} from './pipe/short-input-variable-name.pipe'
 import {ShortOutputVariableNamePipe} from './pipe/short-output-variable-name.pipe';
 import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pipe';
 import {PreviewFormatPipe} from './pipe/preview-format.pipe';
+import {WidgetNoDataComponent} from './components/widget-no-data/widget-no-data.component';
 
 
 @NgModule({
@@ -80,6 +81,7 @@ import {PreviewFormatPipe} from './pipe/preview-format.pipe';
         DeleteDialogComponent,
         PreviewFormatPipe,
         DeleteDialogComponent,
+        WidgetNoDataComponent,
     ],
     exports: [
         SidenavComponent,
@@ -94,6 +96,7 @@ import {PreviewFormatPipe} from './pipe/preview-format.pipe';
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
         PreviewFormatPipe,
+        WidgetNoDataComponent,
     ],
     entryComponents: [
         DeleteDialogComponent,
