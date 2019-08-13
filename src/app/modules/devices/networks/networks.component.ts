@@ -47,7 +47,8 @@ export class NetworksComponent implements OnInit, OnDestroy {
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
     private searchText = '';
-    private limit = 54;
+    private limitInit = 54;
+    private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
@@ -71,16 +72,14 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     receiveSortingAttribute(sortAttribute: SortModel) {
-        this.reset();
         this.sortAttribute = sortAttribute;
-        this.getNetworks();
+        this.getNetworks(true);
     }
 
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.offset = this.offset + this.limit;
-            this.getNetworks();
+            this.setRepoItemsParams(this.limitInit);
+            this.getNetworks(false);
         }
     }
 
@@ -101,9 +100,12 @@ export class NetworksComponent implements OnInit, OnDestroy {
             if (deleteNetwork) {
                 this.networksService.delete(network.id).subscribe((respMessage: string) => {
                     if (respMessage === 'ok') {
-                        const index = this.networks.indexOf(network);
-                        this.networks.splice(index, 1);
+                        this.networks.splice(this.networks.indexOf(network), 1);
                         this.snackBar.open('Hub deleted successfully.', undefined, {duration: 2000});
+                        this.setRepoItemsParams(1);
+                        setTimeout(() => {
+                            this.getNetworks(false);
+                        }, 1000);
                     } else {
                         this.snackBar.open('Error while deleting the hub!', undefined, {duration: 2000});
                     }
@@ -114,13 +116,17 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     private initSearchAndGetNetworks() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.reset();
             this.searchText = searchText;
-            this.getNetworks();
+            this.getNetworks(true);
         });
     }
 
-    private getNetworks() {
+    private getNetworks(reset: boolean) {
+        if (reset) {
+            this.setRepoItemsParams(this.limitInit);
+            this.reset();
+        }
+
         this.networksService.getNetworks(
             this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
             (networks: NetworksModel[]) => {
@@ -144,6 +150,12 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+    }
+
+    private setRepoItemsParams(limit: number) {
+        this.ready = false;
+        this.limit = limit;
+        this.offset = this.networks.length;
     }
 
 }
