@@ -42,7 +42,8 @@
                         <senergy-device-instances-grid
                                 [deviceInstances]="deviceInstances"
                                 [ready]="ready"
-                                (tag)="getDevicesByTag($event)"></senergy-device-instances-grid>
+                                (tag)="getDevicesByTag($event)"
+                                (itemDeleted)="reloadElement($event)"></senergy-device-instances-grid>
                     </div>
                 </div>
             </div>
@@ -64,7 +65,8 @@
                     <senergy-device-instances-grid
                             [deviceInstances]="deviceInstances"
                             [ready]="ready"
-                            (tag)="getDevicesByTag($event)"></senergy-device-instances-grid>
+                            (tag)="getDevicesByTag($event)"
+                            (itemDeleted)="reloadElement($event)"></senergy-device-instances-grid>
                 </div>
 
             </div>

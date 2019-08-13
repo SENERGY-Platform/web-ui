@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {DeviceInstancesModel} from '../shared/device-instances.model';
 import {ResponsiveService} from '../../../../core/services/responsive.service';
 import {DeviceInstancesService} from '../shared/device-instances.service';
@@ -23,7 +23,6 @@ import {PermissionsDialogService} from '../../../permissions/shared/permissions-
 import {DialogsService} from '../../../../core/services/dialogs.service';
 import {MatSnackBar} from '@angular/material';
 import {DeviceInstancesUpdateModel} from '../shared/device-instances-update.model';
-import {TagValuePipe} from '../../../../core/pipe/tag-value.pipe';
 import {KeycloakService} from 'keycloak-angular';
 
 const grids = new Map([
@@ -46,6 +45,7 @@ export class DeviceInstancesGridComponent implements OnInit {
     @Input() deviceInstances: DeviceInstancesModel[] = [];
     @Input() ready = false;
     @Output() tag =  new EventEmitter<{tag: string, tagType: string}>();
+    @Output() itemDeleted =  new EventEmitter<boolean>();
     gridCols = 0;
     userID: string;
 
@@ -75,10 +75,9 @@ export class DeviceInstancesGridComponent implements OnInit {
             if (deviceDelete) {
                 this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstancesUpdateModel | null) => {
                     if (resp !== null) {
-                        const index = this.deviceInstances.indexOf(device);
-                        this.deviceInstances.splice(index, 1);
+                        this.deviceInstances.splice(this.deviceInstances.indexOf(device), 1);
                         this.snackBar.open('Device deleted successfully.', '', {duration: 2000});
-
+                        this.emitItemDeleted();
                     } else {
                         this.snackBar.open('Error while deleting device!', '', {duration: 2000});
                     }
@@ -93,6 +92,10 @@ export class DeviceInstancesGridComponent implements OnInit {
 
     emitTag(tag: string, tagType: string) {
         this.tag.emit({tag: tag, tagType: tagType});
+    }
+
+    emitItemDeleted() {
+        this.itemDeleted.emit(true);
     }
 
     private initGridCols(): void {
