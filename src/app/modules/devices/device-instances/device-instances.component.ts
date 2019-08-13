@@ -54,7 +54,8 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     searchInitialized = false;
     searchText = '';
 
-    private limit = 54;
+    private limitInit = 54;
+    private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
@@ -86,8 +87,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.offset = this.offset + this.limit;
+            this.setRepoItemsParams(this.limitInit);
             this.getDeviceInstances(false);
         }
     }
@@ -110,6 +110,15 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         this.selectedTagType = event.tagType;
         this.selectedTag = event.tag;
         this.getDeviceInstances(true);
+    }
+
+    reloadElement(event: boolean) {
+        if (!this.allDataLoaded && this.ready && event) {
+            this.setRepoItemsParams(1);
+            setTimeout(() => {
+                this.getDeviceInstances(false);
+            }, 1000);
+        }
     }
 
     setIndex(event: number) {
@@ -140,12 +149,9 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     private getDeviceInstances(reset: boolean) {
         if (reset) {
-            this.deviceInstances = [];
-            this.offset = 0;
-            this.allDataLoaded = false;
-            this.ready = false;
+            this.setRepoItemsParams(this.limitInit);
+            this.reset();
         }
-
 
         if (this.routerNetwork !== null) {
             this.selectedTag = this.routerNetwork.name;
@@ -212,5 +218,18 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         this.selectedTag = '';
         this.selectedTagTransformed = '';
         this.selectedTagType = '';
+    }
+
+    private reset() {
+        this.deviceInstances = [];
+        this.offset = 0;
+        this.allDataLoaded = false;
+        this.ready = false;
+    }
+
+    private setRepoItemsParams(limit: number) {
+        this.ready = false;
+        this.limit = limit;
+        this.offset = this.deviceInstances.length;
     }
 }
