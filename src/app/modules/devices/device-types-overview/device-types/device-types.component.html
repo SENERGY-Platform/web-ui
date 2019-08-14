@@ -223,12 +223,14 @@
         </mat-step>
         <mat-step *ngIf="editable">
             <ng-template matStepLabel>Save</ng-template>
-            <div *ngIf="!disableSave">You are now done.</div>
-            <div *ngIf="disableSave">Can't save, please fix errors.</div>
+            <div *ngIf="firstFormGroup.valid && secondFormGroup.valid">You are now done.</div>
+            <div *ngIf="firstFormGroup.invalid || secondFormGroup.invalid">Can't save, please fix errors.</div>
+            <div *ngIf="firstFormGroup.invalid">Error in section "1 Information".</div>
+            <div *ngIf="secondFormGroup.invalid">Error in section "2 Service". You need at least one service.</div>
             <div>
                 <div fxFlex></div>
                 <button class="mat-raised-button color-accent button-save-margin" (click)="close()">Cancel</button>
-                <button class="mat-raised-button mat-accent button-save-margin" [disabled]="disableSave"
+                <button class="mat-raised-button mat-accent button-save-margin" [disabled]="firstFormGroup.invalid || secondFormGroup.invalid"
                         (click)="save()">Save
                 </button>
             </div>

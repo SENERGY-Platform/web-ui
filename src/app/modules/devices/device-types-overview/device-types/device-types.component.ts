@@ -56,8 +56,7 @@ export class DeviceTypesComponent implements OnInit {
     protocols: DeviceTypeProtocolModel[] = [];
 
     firstFormGroup!: FormGroup;
-    secondFormGroup: FormGroup = new FormGroup({services: this._formBuilder.array([])});
-    disableSave = false;
+    secondFormGroup!: FormGroup;
     editable = false;
     keys = Object.keys;
     deviceTypeFunctionType = functionTypes;
@@ -273,12 +272,6 @@ export class DeviceTypesComponent implements OnInit {
     private initFormControls() {
         this.initFirstFormGroup({} as DeviceTypeModel);
         this.initSecondFormGroup({} as DeviceTypeModel);
-        this.disableSaveButton(this.firstFormGroup.status);
-        this.secondFormGroup = this._formBuilder.group({
-            services: this._formBuilder.array([])
-        });
-
-        this.watchFormGroupStatusChanges();
     }
 
     private loadDataIfIdExists() {
@@ -287,7 +280,6 @@ export class DeviceTypesComponent implements OnInit {
             this.deviceTypeService.getDeviceType(this.id).subscribe((deviceType: DeviceTypeModel | null) => {
                 if (deviceType !== null) {
                     this.initFirstFormGroup(deviceType);
-                    this.disableSaveButton(this.firstFormGroup.status);
                     this.initSecondFormGroup(deviceType);
 
                     if (!this.editable) {
@@ -310,7 +302,7 @@ export class DeviceTypesComponent implements OnInit {
         this.secondFormGroup = this._formBuilder.group({
             services: this._formBuilder.array(deviceType.services ?
                 deviceType.services.map((elem: DeviceTypeServiceModel) => this.createServiceGroup(elem)) :
-                [])
+                [], Validators.required)
         });
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
         formArray.controls.forEach((control: AbstractControl) => {
@@ -341,23 +333,6 @@ export class DeviceTypesComponent implements OnInit {
             image: [deviceType.image],
             device_class: [deviceType.device_class, Validators.required],
         });
-    }
-
-    private watchFormGroupStatusChanges() {
-        this.firstFormGroup.statusChanges.subscribe((status: string) => {
-            this.disableSaveButton(status);
-        });
-        this.secondFormGroup.statusChanges.subscribe((status: string) => {
-            this.disableSaveButton(status);
-        });
-    }
-
-    private disableSaveButton(status: string): void {
-        if (status === 'VALID') {
-            this.disableSave = false;
-        } else {
-            this.disableSave = true;
-        }
     }
 
     private createServiceGroup(deviceTypeService: DeviceTypeServiceModel): FormGroup {
@@ -493,7 +468,8 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private saveDeviceType(deviceType: DeviceTypeModel) {
-        if (deviceType.id === '') {
+        console.log(deviceType);
+        if (deviceType.id === '' || deviceType.id === undefined) {
             this.deviceTypeService.createDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
                 this.showMessage(deviceTypeSaved);
             });
