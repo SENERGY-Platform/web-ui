@@ -19,11 +19,12 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import {FormControl, Validators} from '@angular/forms';
 import {
-    DeviceTypeCharacteristicsModel,
     DeviceTypeConceptModel,
     DeviceTypeFunctionModel,
     DeviceTypeFunctionType
 } from '../../shared/device-type.model';
+import {util} from 'jointjs';
+import uuid = util.uuid;
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',
@@ -49,7 +50,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     save(): void {
 
         const func: DeviceTypeFunctionModel = {
-            id: '',
+            id: this.setId(),
             name: this.nameControl.value,
             rdf_type: this.functionType.rdf_type,
             concept_ids: this.getConceptIds(this.conceptControl.value),
@@ -93,6 +94,10 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
                 }]
             },
         ];
+    }
+
+    private setId(): string {
+        return 'urn:infai:ses:' + this.functionType.urn_part + ':' + uuid();
     }
 
     private getConceptIds(concepts: DeviceTypeConceptModel[]): string[] {

@@ -35,11 +35,13 @@ import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-
 import {jsonValidator} from '../../../../core/validators/json.validator';
 import {ActivatedRoute} from '@angular/router';
 import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
+import {util} from 'jointjs';
+import uuid = util.uuid;
 
 
 const functionTypes: DeviceTypeFunctionType[] = [
-    {text: 'Controlling', rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction'},
-    {text: 'Measuring', rdf_type: 'https://senergy.infai.org/ontology/MeasuringFunction'},
+    {text: 'Controlling', rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction', urn_part: 'controlling-function'},
+    {text: 'Measuring', rdf_type: 'https://senergy.infai.org/ontology/MeasuringFunction', urn_part: 'measuring-function'},
 ];
 
 const controllingIndex = 0;
@@ -172,7 +174,7 @@ export class DeviceTypesComponent implements OnInit {
                 const formGroup = <FormGroup>formArray.controls[serviceIndex];
                 const aspects = formGroup.controls['aspects'];
                 if (aspectIndex === -1) {
-                    const newAspect: DeviceTypeAspectModel = {id: '', name: name};
+                    const newAspect: DeviceTypeAspectModel = {id: this.generateUUID('aspect'), name: name};
                     aspects.value.push(newAspect);
                     this.aspects.push(newAspect);
                 } else {
@@ -522,5 +524,9 @@ export class DeviceTypesComponent implements OnInit {
             (aspects: DeviceTypeAspectModel[]) => {
                 this.aspects = aspects;
             });
+    }
+
+    private generateUUID(type: string): string {
+        return 'urn:infai:ses:' + type + ':' + uuid();
     }
 }

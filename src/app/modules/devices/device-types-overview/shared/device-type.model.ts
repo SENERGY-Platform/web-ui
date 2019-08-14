@@ -92,6 +92,7 @@ export interface DeviceTypeFunctionModel {
 export interface DeviceTypeFunctionType {
    text: string;
    rdf_type: string;
+   urn_part: string;
 }
 
 export interface DeviceTypeProtocolModel {
