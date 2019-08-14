@@ -468,7 +468,6 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private saveDeviceType(deviceType: DeviceTypeModel) {
-        console.log(deviceType);
         if (deviceType.id === '' || deviceType.id === undefined) {
             this.deviceTypeService.createDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
                 this.showMessage(deviceTypeSaved);
