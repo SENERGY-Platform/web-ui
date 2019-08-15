@@ -29,7 +29,6 @@ import {
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {DeviceTypeService} from '../shared/device-type.service';
-import {ValueTypesService} from '../../value-types/shared/value-types.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
 import {jsonValidator} from '../../../../core/validators/json.validator';
@@ -71,7 +70,6 @@ export class DeviceTypesComponent implements OnInit {
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
-                private valueTypesService: ValueTypesService,
                 private dialog: MatDialog,
                 private snackBar: MatSnackBar,
                 private route: ActivatedRoute) {

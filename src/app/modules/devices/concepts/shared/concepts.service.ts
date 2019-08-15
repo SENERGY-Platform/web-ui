@@ -15,47 +15,17 @@
  *  limitations under the License.
  */
 
-.form {
-    min-width: 150px;
-    max-width: 800px;
-    width: 100%;
-}
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 
-.full-width {
-    width: 100%;
-}
+@Injectable({
+    providedIn: 'root'
+})
+export class ConceptsService {
 
-table {
-    width: 100%;
-}
+    constructor(private http: HttpClient,
+                private errorHandlerService: ErrorHandlerService) {
+    }
 
-.margin {
-    margin: 0px;
-}
-
-.trigger-size {
-    min-width: 50px;
-}
-
-.select-size {
-    max-width: 45px;
-}
-
-.user-input {
-    margin-top: 6px;
-    margin-right: 16px;
-    width: 300px;
-}
-
-.user-input-hide-add {
-    margin-right: 16px;
-    width: 300px;
-}
-
-.position {
-    width: 30px;
-}
-
-.example-first-footer-row td{
-    border-bottom: none;
 }

@@ -40,7 +40,6 @@ export const environment = {
     iotRepoUrl: 'http://localhost',
     dashboardServiceUrl: 'http://localhost',
     usersServiceUrl: 'http://localhost',
-    valuetypeSearchUrl: 'http://localhost',
     deviceRepoUrl: 'http://localhost',
     deviceManagerUrl: 'https://localhost',
     semanticRepoUrl: 'https://localhost',
