@@ -53,6 +53,7 @@ import {SelectDeviceTypeAndServiceDialogComponent} from './device-types-overview
 import {DeviceInstancesGridComponent} from './device-instances/device-instances-grid/device-instances-grid.component';
 import {DeviceTypesOverviewModule} from './device-types-overview/device-types-overview.module';
 import {ConceptsComponent} from './concepts/concepts.component';
+import {ConceptsNewDialogComponent} from './concepts/dialogs/concepts-new-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -108,6 +109,7 @@ const concepts = {path: 'devices/concepts', pathMatch: 'full', component: Concep
         NetworksClearDialogComponent,
         SelectDeviceTypeAndServiceDialogComponent,
         DeviceInstancesGridComponent,
+        ConceptsNewDialogComponent,
     ],
     entryComponents: [
         NetworksEditDialogComponent,
@@ -116,6 +118,7 @@ const concepts = {path: 'devices/concepts', pathMatch: 'full', component: Concep
         NetworksClearDialogComponent,
         SelectDeviceTypeAndServiceDialogComponent,
         DeviceInstancesGridComponent,
+        ConceptsNewDialogComponent,
     ]
 })
 

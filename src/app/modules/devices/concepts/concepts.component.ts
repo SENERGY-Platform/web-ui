@@ -15,6 +15,12 @@
  */
 
 import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
+import {MatDialog, MatDialogConfig} from '@angular/material';
+import {WidgetModel} from '../../dashboard/shared/dashboard-widget.model';
+import {DashboardManipulationEnum} from '../../dashboard/shared/dashboard-manipulation.enum';
+import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
+import {NetworksModel} from '../networks/shared/networks.model';
+import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 
 @Component({
     selector: 'senergy-concepts',
@@ -23,7 +29,8 @@ import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
 })
 export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    constructor() {
+
+    constructor(private dialog: MatDialog) {
     }
 
     ngOnInit() {
@@ -39,6 +46,15 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     newConcept() {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        const editDialogRef = this.dialog.open(ConceptsNewDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((conceptName: string) => {
+            if (conceptName !== '') {
+                console.log(conceptName);
+            }
+        });
 
     }
 
