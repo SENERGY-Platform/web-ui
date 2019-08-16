@@ -53,6 +53,7 @@ import {SelectDeviceTypeAndServiceDialogComponent} from './device-types-overview
 import {DeviceInstancesGridComponent} from './device-instances/device-instances-grid/device-instances-grid.component';
 import {DeviceTypesOverviewModule} from './device-types-overview/device-types-overview.module';
 import {ConceptsComponent} from './concepts/concepts.component';
+import {ConceptsModule} from './concepts/concepts.module';
 import {ConceptsNewDialogComponent} from './concepts/dialogs/concepts-new-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
@@ -97,18 +98,19 @@ const concepts = {path: 'devices/concepts', pathMatch: 'full', component: Concep
         MatSortModule,
         MatProgressSpinnerModule,
         DeviceTypesOverviewModule,
+        ConceptsModule,
         RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts])],
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,
         DeviceInstancesComponent,
         DeviceTypesOverviewComponent,
-        ConceptsComponent,
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
         SelectDeviceTypeAndServiceDialogComponent,
         DeviceInstancesGridComponent,
+        ConceptsComponent,
         ConceptsNewDialogComponent,
     ],
     entryComponents: [

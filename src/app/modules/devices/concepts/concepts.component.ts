@@ -16,11 +16,17 @@
 
 import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
-import {WidgetModel} from '../../dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../dashboard/shared/dashboard-manipulation.enum';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
-import {NetworksModel} from '../networks/shared/networks.model';
 import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
+import {ResponsiveService} from '../../../core/services/responsive.service';
+
+const grids = new Map([
+    ['xs', 1],
+    ['sm', 3],
+    ['md', 3],
+    ['lg', 4],
+    ['xl', 6],
+]);
 
 @Component({
     selector: 'senergy-concepts',
@@ -29,11 +35,17 @@ import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-typ
 })
 export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
 
+    concepts: DeviceTypeConceptModel[] = [];
+    gridCols = 0;
+    ready = true;
 
-    constructor(private dialog: MatDialog) {
+    constructor(private dialog: MatDialog,
+                private responsiveService: ResponsiveService,) {
     }
 
     ngOnInit() {
+        this.initGridCols();
+        this.getConcepts();
         this.initSearchAndGetValuetypes();
     }
 
@@ -58,12 +70,32 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     }
 
+    private getConcepts() {
+        this.concepts.push({
+            id: '1',
+            name: 'temperature',
+            characteristics: []
+        });
+        this.concepts.push({
+            id: '2',
+            name: 'color',
+            characteristics: []
+        });
+    }
+
     private initSearchAndGetValuetypes() {
         // this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
         //     this.isLoadingResults = true;
         //     this.searchText = searchText;
         //     this.paginator.pageIndex = 0;
         // });
+    }
+
+    private initGridCols(): void {
+        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
+        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+            this.gridCols = grids.get(mqAlias) || 0;
+        });
     }
 
 }
