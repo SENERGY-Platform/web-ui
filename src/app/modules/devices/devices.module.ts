@@ -53,8 +53,9 @@ import {SelectDeviceTypeAndServiceDialogComponent} from './device-types-overview
 import {DeviceInstancesGridComponent} from './device-instances/device-instances-grid/device-instances-grid.component';
 import {DeviceTypesOverviewModule} from './device-types-overview/device-types-overview.module';
 import {ConceptsComponent} from './concepts/concepts.component';
-import {ConceptsModule} from './concepts/concepts.module';
 import {ConceptsNewDialogComponent} from './concepts/dialogs/concepts-new-dialog.component';
+import {CharacteristicsComponent} from './characteristics/characteristics.component';
+import {CharacteristicsNewDialogComponent} from './characteristics/dialogs/characteristics-new-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -65,6 +66,7 @@ const deviceInstances = {
 };
 const deviceTypes = {path: 'devices/devicetypesoverview', pathMatch: 'full', component: DeviceTypesOverviewComponent, data: {header: 'Devices'}};
 const concepts = {path: 'devices/concepts', pathMatch: 'full', component: ConceptsComponent, data: {header: 'Devices'}};
+const characteristics = {path: 'devices/characteristics', pathMatch: 'full', component: CharacteristicsComponent, data: {header: 'Devices'}};
 
 @NgModule({
     imports: [MatGridListModule,
@@ -98,8 +100,7 @@ const concepts = {path: 'devices/concepts', pathMatch: 'full', component: Concep
         MatSortModule,
         MatProgressSpinnerModule,
         DeviceTypesOverviewModule,
-        ConceptsModule,
-        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts])],
+        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics])],
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,
@@ -112,6 +113,8 @@ const concepts = {path: 'devices/concepts', pathMatch: 'full', component: Concep
         DeviceInstancesGridComponent,
         ConceptsComponent,
         ConceptsNewDialogComponent,
+        CharacteristicsComponent,
+        CharacteristicsNewDialogComponent,
     ],
     entryComponents: [
         NetworksEditDialogComponent,
@@ -121,6 +124,7 @@ const concepts = {path: 'devices/concepts', pathMatch: 'full', component: Concep
         SelectDeviceTypeAndServiceDialogComponent,
         DeviceInstancesGridComponent,
         ConceptsNewDialogComponent,
+        CharacteristicsNewDialogComponent,
     ]
 })
 

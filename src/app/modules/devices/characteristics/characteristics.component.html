@@ -29,13 +29,11 @@
              [fromRoot]="true"
              (scrolled)="onScroll()">
             <div class="layout-margin" fxLayout="column">
-                <h2>BIN BEI CONCEPT: XYZ</h2>
                 <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
                                *ngIf="characteristics.length > 0">
                     <mat-grid-tile class="mat-elevation-z1"
                                    *ngFor="let characteristic of characteristics; let i = index">
                         <div class="background" fxFill>
-                            <img class="device-icon" src="{{characteristic.img}}">
                         </div>
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>
@@ -45,14 +43,12 @@
                                 <form fxLayout="row" class="footer-buttons">
                                     <div fxFlex></div>
                                     <div [fxLayoutAlign]="'start center'">
-
                                         <button mat-icon-button class="color-accent" matTooltip="Edit">
                                             <mat-icon>edit</mat-icon>
                                         </button>
                                         <button mat-icon-button class="color-accent" matTooltip="Delete">
                                             <mat-icon>delete</mat-icon>
                                         </button>
-
                                     </div>
                                 </form>
                             </div>

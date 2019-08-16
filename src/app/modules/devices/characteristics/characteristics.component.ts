@@ -17,9 +17,8 @@
 
 import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
-import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
-import {ResponsiveService} from '../../../../core/services/responsive.service';
-import {ConceptsNewDialogComponent} from '../dialogs/concepts-new-dialog.component';
+import {DeviceTypeCharacteristicsModel} from '../device-types-overview/shared/device-type.model';
+import {ResponsiveService} from '../../../core/services/responsive.service';
 import {CharacteristicsNewDialogComponent} from './dialogs/characteristics-new-dialog.component';
 
 const grids = new Map([
