@@ -32,6 +32,8 @@ import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
 
+const customColor = '#4484ce'; // /* cc */
+
 @Injectable({
     providedIn: 'root'
 })
@@ -105,6 +107,7 @@ export class ChartsExportService {
             dataTable.data,
             {
                 chartArea: {width: element.widthPercentage, height: element.heightPercentage},
+                colors: [customColor],
                 hAxis: {title: hAxisLabel, gridlines: {count: -1}},
                 height: element.height,
                 width: element.width,
