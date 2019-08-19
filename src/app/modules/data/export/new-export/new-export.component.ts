@@ -122,7 +122,7 @@ export class NewExportComponent implements OnInit {
         let pathString = 'value';
         service.output.forEach((out: DeviceTypeAssignmentModel) => {
             if (out.type.fields != null) {
-                pathString += '.' + service.output[0].name;
+                pathString += '.' + out.name;
                 out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
                     this.traverseDataStructure(pathString, field);
                 });
