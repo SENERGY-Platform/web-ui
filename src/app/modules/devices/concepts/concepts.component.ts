@@ -19,6 +19,8 @@ import {MatDialog, MatDialogConfig} from '@angular/material';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
+import {NetworksModel} from '../networks/shared/networks.model';
+import {Router} from '@angular/router';
 
 const grids = new Map([
     ['xs', 1],
@@ -40,7 +42,8 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     ready = true;
 
     constructor(private dialog: MatDialog,
-                private responsiveService: ResponsiveService,) {
+                private responsiveService: ResponsiveService,
+                private router: Router) {
     }
 
     ngOnInit() {
@@ -68,6 +71,10 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         });
 
+    }
+
+    showCharacteristics(concept: DeviceTypeConceptModel) {
+        this.router.navigateByUrl('/devices/characteristics', {state: concept});
     }
 
     private getConcepts() {

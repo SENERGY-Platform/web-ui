@@ -17,9 +17,10 @@
 
 import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
-import {DeviceTypeCharacteristicsModel} from '../device-types-overview/shared/device-type.model';
+import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {CharacteristicsNewDialogComponent} from './dialogs/characteristics-new-dialog.component';
+import {Navigation, Router} from '@angular/router';
 
 const grids = new Map([
     ['xs', 1],
@@ -39,9 +40,13 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
     characteristics: DeviceTypeCharacteristicsModel[] = [];
     gridCols = 0;
     ready = true;
+    routerConcept: DeviceTypeConceptModel | null = null;
+    selectedTag = '';
 
     constructor(private dialog: MatDialog,
-                private responsiveService: ResponsiveService) {
+                private responsiveService: ResponsiveService,
+                private router: Router) {
+        this.getRouterParams();
     }
 
     ngOnInit() {
@@ -69,6 +74,12 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
         //     }
         // });
 
+    }
+
+    tagRemoved(): void {
+        this.routerConcept = null;
+        this.selectedTag = '';
+        this.getConcepts();
     }
 
     private getConcepts() {
@@ -105,6 +116,18 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
             this.gridCols = grids.get(mqAlias) || 0;
         });
+    }
+
+    private getRouterParams(): void {
+        const navigation: Navigation | null = this.router.getCurrentNavigation();
+        if (navigation !== null) {
+            if (navigation.extras.state !== undefined) {
+                const concept = navigation.extras.state as DeviceTypeConceptModel;
+                this.routerConcept = concept;
+                this.selectedTag = this.routerConcept.name;
+                console.log(this.routerConcept);
+            }
+        }
     }
 
 }

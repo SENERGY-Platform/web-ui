@@ -32,7 +32,6 @@
                                *ngIf="concepts.length > 0">
                     <mat-grid-tile class="mat-elevation-z1" *ngFor="let concept of concepts; let i = index">
                         <div class="background" fxFill>
-                            <img class="device-icon" src="{{concept.img}}">
                         </div>
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>
@@ -54,7 +53,7 @@
                                                 <mat-icon>edit</mat-icon>
                                                 <span>Change name</span>
                                             </button>
-                                            <button mat-menu-item routerLink="/devices/concepts/{{concept.id}}">
+                                            <button mat-menu-item (click)="showCharacteristics(concept)">
                                                 <mat-icon>palette</mat-icon>
                                                 <span>characteristics</span>
                                             </button>

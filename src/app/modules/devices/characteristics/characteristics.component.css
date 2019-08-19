@@ -85,3 +85,7 @@ mat-grid-tile {
     max-height: 30px;
 }
 
+.offset {
+    margin-top: 20px;
+}
+
