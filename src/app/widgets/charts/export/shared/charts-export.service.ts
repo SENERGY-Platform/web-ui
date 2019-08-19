@@ -72,17 +72,25 @@ export class ChartsExportService {
 
     getChartData(widget: WidgetModel): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
-            this.getData(widget.properties.measurement ? widget.properties.measurement.id : '', widget.properties.interval).
-            subscribe((resp: ChartsExportModel) => {
-                let vAxisIndex = 1;
-                if (widget.properties.vAxis) {
-                    vAxisIndex = resp.results[0].series[0].columns.indexOf(widget.properties.vAxis.Name);
+            this.getData(widget.properties.measurement ? widget.properties.measurement.id : '', widget.properties.interval).subscribe((resp: ChartsExportModel) => {
+                if (resp.results[0].series === undefined) {
+                    // no data
+                    observer.next(this.setProcessInstancesStatusValues(
+                        widget.id,
+                        widget.properties.hAxisLabel || '',
+                        widget.properties.vAxisLabel || '',
+                        new ChartDataTableModel([[]])));
+                } else {
+                    let vAxisIndex = 1;
+                    if (widget.properties.vAxis) {
+                        vAxisIndex = resp.results[0].series[0].columns.indexOf(widget.properties.vAxis.Name);
+                    }
+                    observer.next(this.setProcessInstancesStatusValues(
+                        widget.id,
+                        widget.properties.hAxisLabel || '',
+                        widget.properties.vAxisLabel || '',
+                        this.setData(widget.properties.vAxis, resp.results[0].series[0].values, vAxisIndex)));
                 }
-                observer.next(this.setProcessInstancesStatusValues(
-                    widget.id,
-                    widget.properties.hAxisLabel || '',
-                    widget.properties.vAxisLabel || '',
-                    this.setData(widget.properties.vAxis, resp.results[0].series[0].values, vAxisIndex)));
                 observer.complete();
             });
         });
