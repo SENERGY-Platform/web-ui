@@ -17,6 +17,7 @@
 
 import {Component} from '@angular/core';
 import {MatDialogRef} from '@angular/material';
+import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './concepts-new-dialog.component.html',
@@ -32,7 +33,12 @@ export class ConceptsNewDialogComponent {
     }
 
     create(name: string): void {
-        this.dialogRef.close(name);
+        const concept: DeviceTypeConceptModel = {
+            id: '',
+            name: name,
+            characteristics: []
+        }
+        this.dialogRef.close(concept);
     }
 
 }

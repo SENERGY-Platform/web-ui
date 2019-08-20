@@ -18,6 +18,10 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
+import {DeviceTypeConceptModel, DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
+import {Observable} from 'rxjs';
+import {environment} from '../../../../../environments/environment';
+import {catchError} from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root'
@@ -26,6 +30,12 @@ export class ConceptsService {
 
     constructor(private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService) {
+    }
+
+    createConcept(concept: DeviceTypeConceptModel): Observable<DeviceTypeConceptModel | null> {
+        return this.http.post<DeviceTypeConceptModel>(environment.deviceManagerUrl + '/concept', concept).pipe(
+            catchError(this.errorHandlerService.handleError(ConceptsService.name, 'createConcept', null))
+        );
     }
 
 }

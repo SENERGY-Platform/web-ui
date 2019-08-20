@@ -19,7 +19,6 @@ import {MatDialog, MatDialogConfig} from '@angular/material';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
-import {NetworksModel} from '../networks/shared/networks.model';
 import {Router} from '@angular/router';
 
 const grids = new Map([
@@ -65,9 +64,10 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(ConceptsNewDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((conceptName: string) => {
-            if (conceptName !== '') {
-                console.log(conceptName);
+        editDialogRef.afterClosed().subscribe((concept: DeviceTypeConceptModel) => {
+            if (concept !== undefined) {
+
+                console.log(concept);
             }
         });
 
