@@ -17,7 +17,21 @@
 <div class="main-panel">
     <div class="main-panel">
         <div fxLayout="column" class="layout-margin">
-            <h1>Pipe - {{pipe.id}}</h1>
+            <div fxLayout="row" fxLayoutAlign="start center" style="margin-bottom:8px;">
+                <button mat-raised-button color="accent" routerLink="/data/pipelines">back</button>
+            </div>
+            <mat-card style="margin-bottom:10px;">
+                <mat-card-header>
+                    <div mat-card-avatar><mat-icon>timeline</mat-icon></div>
+                    <mat-card-title>{{pipe.name}}</mat-card-title>
+                    <mat-card-subtitle>{{pipe.id}}</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                    <div fxLayout="column">
+                        {{pipe.description}}
+                    </div>
+                </mat-card-content>
+            </mat-card>
             <mat-expansion-panel  *ngFor="let operator of pipe.operators">
                 <mat-expansion-panel-header>
                     <mat-panel-title style="width:40%">

@@ -29,9 +29,9 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 
 export class PipelineRegistryComponent implements OnInit {
 
-    pipes: PipelineModel[] = [{id: '', operators: []}];
+    pipes = [] as PipelineModel [];
     ready = false;
-    displayedColumns: string[] = ['id', 'info', 'delete'];
+    displayedColumns: string[] = ['id', 'name', 'info', 'delete'];
 
     @ViewChild(MatTable) table!: MatTable<PipelineModel>;
 
