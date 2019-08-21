@@ -30,6 +30,12 @@
                 </td>
             </ng-container>
 
+            <ng-container matColumnDef="created at">
+                <th mat-header-cell *matHeaderCellDef> Created at</th>
+                <td mat-cell *matCellDef="let element"> {{ element.createdAt}}
+                </td>
+            </ng-container>
+
             <ng-container matColumnDef="info">
                 <th mat-header-cell *matHeaderCellDef>Info</th>
                 <td mat-cell *matCellDef="let element;">

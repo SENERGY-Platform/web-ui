@@ -31,7 +31,7 @@ export class PipelineRegistryComponent implements OnInit {
 
     pipes = [] as PipelineModel [];
     ready = false;
-    displayedColumns: string[] = ['id', 'name', 'info', 'delete'];
+    displayedColumns: string[] = ['id', 'name', 'created at', 'info', 'delete'];
 
     @ViewChild(MatTable) table!: MatTable<PipelineModel>;
 
