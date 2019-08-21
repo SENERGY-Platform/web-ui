@@ -85,7 +85,7 @@ export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
     rdf_type: string;
-    concept_ids: string[];
+    concept_id: string;
 }
 
 

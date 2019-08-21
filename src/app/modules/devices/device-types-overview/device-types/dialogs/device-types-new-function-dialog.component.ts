@@ -53,7 +53,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
             id: this.setId(),
             name: this.nameControl.value,
             rdf_type: this.functionType.rdf_type,
-            concept_ids: this.getConceptIds(this.conceptControl.value),
+            concept_id: this.conceptControl.value.id,
         };
 
         this.dialogRef.close(func);
@@ -99,12 +99,4 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     private setId(): string {
         return 'urn:infai:ses:' + this.functionType.urn_part + ':' + uuid();
     }
-
-    private getConceptIds(concepts: DeviceTypeConceptModel[]): string[] {
-        const resp: string[] = [];
-        concepts.forEach((concept: DeviceTypeConceptModel) => {
-            resp.push(concept.id);
-        });
-        return resp;
-}
 }

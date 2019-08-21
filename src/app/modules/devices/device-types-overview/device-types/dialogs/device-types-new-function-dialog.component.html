@@ -23,18 +23,13 @@
             <mat-label>Name</mat-label>
             <input [formControl]="nameControl" matInput placeholder="Name">
         </mat-form-field>
-        <mat-form-field class="full-width" appearance="outline" color="accent">
-            <mat-label>Category</mat-label>
-            <mat-select [formControl]="conceptControl" multiple [compareWith]="compare">
-                <mat-select-trigger>
-                    {{conceptControl.value[0] ? conceptControl.value[0].name : ''}}
-                    <span *ngIf="conceptControl.value?.length > 1"
-                          class="example-additional-selection">
-                        {{'(+' + (conceptControl.value.length - 1) + (conceptControl.value?.length === 2 ? ' other)' : ' others)')}}
-                    </span>
-                </mat-select-trigger>
+        <mat-form-field class="full-width" appearance="outline"  color="accent">
+            <mat-select placeholder="Concept" [compareWith]="compare"
+                        [formControl]="conceptControl" required>
                 <mat-option *ngFor="let category of concepts"
-                            [value]="category">{{category.name}}</mat-option>
+                            [value]="category">
+                    {{category.name}}
+                </mat-option>
             </mat-select>
         </mat-form-field>
     </form>
