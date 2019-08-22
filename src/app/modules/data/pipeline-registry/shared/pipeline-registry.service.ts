@@ -33,9 +33,9 @@ export class PipelineRegistryService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getPipelines(): Observable<PipelineModel[]> {
+    getPipelines(order: string = 'id:asc'): Observable<PipelineModel[]> {
         return this.http.get<PipelineModel[]>
-        (environment.pipelineRegistryUrl + '/pipeline').pipe(
+        (environment.pipelineRegistryUrl + '/pipeline?order=' + order).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(PipelineRegistryService.name, 'getPipelines: Error', []))
         );

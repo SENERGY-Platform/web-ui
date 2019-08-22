@@ -15,12 +15,24 @@
   -->
 
 <div class="main-panel">
-    <div class="layout-margin" fxLayout="column">
-        <table mat-table [dataSource]="pipes" class="mat-elevation-z1" *ngIf="ready">
+    <div class="layout-margin" fxLayout="column" >
+        <table mat-table [dataSource]="pipes" class="mat-elevation-z1" [hidden]="!ready" matSortActive="createdat" matSort matSortDisableClear matSortDirection="desc">
 
             <ng-container matColumnDef="id">
-                <th mat-header-cell *matHeaderCellDef> Id</th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear style="max-width: 20%"> Id</th>
                 <td mat-cell *matCellDef="let element"> {{element.id}}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Name</th>
+                <td mat-cell *matCellDef="let element"> {{element.name}}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="createdat">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Created at</th>
+                <td mat-cell *matCellDef="let element"> {{ element.createdAt |  date:'dd.MM.yyyy - HH:mm'}}
                 </td>
             </ng-container>
 

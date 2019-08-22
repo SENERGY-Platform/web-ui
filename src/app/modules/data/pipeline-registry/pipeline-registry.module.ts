@@ -20,7 +20,7 @@ import {RouterModule} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {CoreModule} from '../../../core/core.module';
 import {PipelineDetailsComponent} from './pipeline-details/pipeline-details.component';
-import {MatExpansionModule} from '@angular/material';
+import {MatButtonModule, MatCardModule, MatExpansionModule, MatIconModule} from '@angular/material';
 
 
 const details = {path: 'data/pipelines/details/:id', pathMatch: 'full', component: PipelineDetailsComponent, data: { header: 'Analytics' }};
@@ -30,7 +30,10 @@ const details = {path: 'data/pipelines/details/:id', pathMatch: 'full', componen
         RouterModule.forChild([details]),
         CoreModule,
         CommonModule,
-        MatExpansionModule
+        MatExpansionModule,
+        MatCardModule,
+        MatIconModule,
+        MatButtonModule
     ],
     declarations: [
         PipelineDetailsComponent

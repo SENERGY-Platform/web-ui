@@ -38,6 +38,8 @@ export class DeployFlowComponent {
     ready = false;
     inputs: ParseModel[] = [];
     id = '' as string;
+    name = '';
+    description = '';
 
     deviceTypes = [] as any;
     paths = [] as any;
@@ -65,7 +67,7 @@ export class DeployFlowComponent {
         }
         this.loadDevices();
 
-        this.pipeReq = {id: this.id, nodes: [], windowTime: this.windowTime};
+        this.pipeReq = {id: this.id, name: '', description: '', nodes: [], windowTime: this.windowTime};
 
         this.parserService.getInputs(this.id).subscribe((resp: ParseModel []) => {
             this.inputs = resp;
@@ -160,6 +162,8 @@ export class DeployFlowComponent {
         });
 
         this.pipeReq.windowTime = this.windowTime;
+        this.pipeReq.name = this.name;
+        this.pipeReq.description = this.description;
         this.flowEngineService.startPipeline(this.pipeReq).subscribe(function () {
             self.router.navigate(['/data/pipelines']);
             self.snackBar.open('Pipeline started', undefined, {

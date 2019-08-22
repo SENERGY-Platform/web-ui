@@ -16,6 +16,10 @@
 
 export interface PipelineModel {
     id: string;
+    name: string;
+    description: string;
+    createdAt: Date;
+    updatedAt: Date;
     operators: PipelineOperatorModel [];
 }
 

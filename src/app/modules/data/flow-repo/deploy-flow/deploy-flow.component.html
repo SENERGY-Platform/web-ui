@@ -16,6 +16,23 @@
 
 <div class="main-panel">
     <div class="layout-margin" fxLayout="column" *ngIf="inputs.length > 0 && ready == true">
+        <mat-card style="margin-bottom:10px;">
+            <mat-card-header>
+                <div mat-card-avatar><mat-icon>folder</mat-icon></div>
+                <mat-card-title>General</mat-card-title>
+                <mat-card-subtitle></mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+                <div fxLayout="column">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <input matInput [(ngModel)]="name" placeholder="Name">
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <input matInput [(ngModel)]="description" placeholder="Description">
+                    </mat-form-field>
+                </div>
+            </mat-card-content>
+        </mat-card>
         <mat-card *ngFor="let input of inputs; let key = index" style="margin-bottom:10px;">
             <mat-card-header>
                 <div mat-card-avatar><mat-icon>poll</mat-icon></div>

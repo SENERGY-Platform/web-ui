@@ -51,6 +51,12 @@
                         <mat-divider></mat-divider>
                     </mat-list-item>
                     <mat-list-item>
+                        <mat-icon mat-list-icon>date_range</mat-icon>
+                        <h4 mat-line>CreatedAt</h4>
+                        <p mat-line>{{export.CreatedAt | date:'dd.MM.yyyy - HH:mm' }}</p>
+                        <mat-divider></mat-divider>
+                    </mat-list-item>
+                    <mat-list-item>
                         <mat-icon mat-list-icon>code</mat-icon>
                         <h4 mat-line>Values</h4>
                         <p mat-line *ngFor="let val of export.Values">

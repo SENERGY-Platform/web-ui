@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import {PipelineModel} from './shared/pipeline.model';
 import {PipelineRegistryService} from './shared/pipeline-registry.service';
 import {FlowEngineService} from '../flow-repo/shared/flow-engine.service';
-import {MatSnackBar, MatTable} from '@angular/material';
+import {MatSnackBar, MatSort, MatTable} from '@angular/material';
 import {DialogsService} from '../../../core/services/dialogs.service';
 
 @Component({
@@ -27,13 +27,14 @@ import {DialogsService} from '../../../core/services/dialogs.service';
     styleUrls: ['./pipeline-registry.component.css']
 })
 
-export class PipelineRegistryComponent implements OnInit {
+export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
-    pipes: PipelineModel[] = [{id: '', operators: []}];
+    pipes = [] as PipelineModel [];
     ready = false;
-    displayedColumns: string[] = ['id', 'info', 'delete'];
+    displayedColumns: string[] = ['id', 'name', 'createdat', 'info', 'delete'];
 
     @ViewChild(MatTable) table!: MatTable<PipelineModel>;
+    @ViewChild(MatSort) sort!: MatSort;
 
     constructor(private pipelineRegistryService: PipelineRegistryService,
                 private flowEngineService: FlowEngineService,
@@ -42,9 +43,19 @@ export class PipelineRegistryComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.pipelineRegistryService.getPipelines().subscribe((resp: PipelineModel[]) => {
+        this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
             this.pipes = resp;
             this.ready = true;
+        });
+    }
+
+    ngAfterViewInit() {
+        this.sort.sortChange.subscribe(() => {
+            this.ready = false;
+            this.pipelineRegistryService.getPipelines(this.sort.active + ':' + this.sort.direction).subscribe((resp: PipelineModel[]) => {
+                this.pipes = resp;
+                this.ready = true;
+            });
         });
     }
 
