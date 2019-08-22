@@ -41,9 +41,9 @@
                                         <p mat-line>Source</p>
                                     </mat-list-item>
                                     <mat-list-item>
-                                        <mat-icon mat-list-icon>explore</mat-icon>
-                                        <h3 mat-line matTooltip="{{url + '/measurement/' + item.Measurement}}">{{url}}/measurement/{{item.Measurement}}</h3>
-                                        <p mat-line>Endpoint</p>
+                                        <mat-icon mat-list-icon>date_range</mat-icon>
+                                        <h3 mat-line matTooltip="{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}">{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}</h3>
+                                        <p mat-line>createdAt</p>
                                     </mat-list-item>
                                 </div>
                             </mat-list>
