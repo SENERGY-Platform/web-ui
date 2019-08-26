@@ -266,7 +266,13 @@ export class DiagramEditorComponent implements OnInit {
     }
 
     reinitializePaper() {
-        this.graph = new dia.Graph();
+        const { standard, devs } = shapes;
+        this.graph = new dia.Graph({}, {
+            cellNamespace: {
+                standard,
+                devs,
+                senergy: { NodeElement: this.NodeElement }
+            } });
         this.paper = new dia.Paper({
             el: $('#paper'),
             model: this.graph,
@@ -316,6 +322,7 @@ export class DiagramEditorComponent implements OnInit {
             }
         }
         const node = new this.NodeElement({
+            type: 'senergy.NodeElement',
             inPorts: inPorts,
             outPorts: outPorts,
             name: name,
