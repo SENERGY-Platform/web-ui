@@ -104,7 +104,8 @@ export class OperatorComponent implements OnInit {
     }
 
     saveOperator() {
-        this.operatorService.saveOperator(this.operator).subscribe();
+        const op = Object.assign({}, this.operator);
+        this.operatorService.saveOperator(op).subscribe();
         this.snackBar.open('Operator saved', undefined, {
             duration: 2000,
         });
