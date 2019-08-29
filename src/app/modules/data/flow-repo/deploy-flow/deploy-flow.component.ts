@@ -190,16 +190,29 @@ export class DeployFlowComponent {
     }
 
     serviceChanged(service: DeviceTypeServiceModel, inputId: string, port: string) {
+        const input = this.inputs.find(x => x.id === inputId);
         this.vals = [];
         let pathString = 'value';
-        service.output.forEach((out: DeviceTypeAssignmentModel) => {
-            if (out.type.fields != null) {
-                pathString += '.' + out.name;
-                out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
-                    this.traverseDataStructure(pathString, field);
-                });
-            }
-        });
+        if (input !== undefined && input.deploymentType === 'local') {
+            pathString = '';
+            service.output.forEach((out: DeviceTypeAssignmentModel) => {
+                if (out.type.fields != null) {
+                    pathString += out.msg_segment.name;
+                    out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
+                        this.traverseDataStructure(pathString, field);
+                    });
+                }
+            });
+        } else {
+            service.output.forEach((out: DeviceTypeAssignmentModel) => {
+                if (out.type.fields != null) {
+                    pathString += '.' + out.name;
+                    out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
+                        this.traverseDataStructure(pathString, field);
+                    });
+                }
+            });
+        }
         this.paths[inputId][port] = this.vals;
     }
 
