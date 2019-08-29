@@ -24,6 +24,7 @@ export interface PipelineRequestModel {
 
 export interface NodeModel {
     nodeId: string;
+    deploymentType: string;
     config: NodeConfig [] | undefined;
     inputs: NodeInput [] | undefined;
 }
