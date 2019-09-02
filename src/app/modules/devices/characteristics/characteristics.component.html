@@ -15,7 +15,7 @@
   ~  limitations under the License.
   -->
 
-<div class="concepts-container">
+<div class="characteristics-container">
     <div fxLayout="row">
         <senergy-searchbar fxFlex></senergy-searchbar>
         <mat-chip-list class="offset" *ngIf="selectedTag !== ''">
@@ -39,7 +39,8 @@
                                *ngIf="characteristics.length > 0">
                     <mat-grid-tile class="mat-elevation-z1"
                                    *ngFor="let characteristic of characteristics; let i = index">
-                        <div class="background" fxFill>
+                        <div fxFill>
+                            <img class="background" src="src/img/characteristic.jpg">
                         </div>
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>
