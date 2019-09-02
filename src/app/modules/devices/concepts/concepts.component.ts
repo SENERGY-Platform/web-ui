@@ -44,7 +44,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     concepts: DeviceTypeConceptModel[] = [];
     gridCols = 0;
-    ready = true;
+    ready = false;
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
     private searchText = '';
