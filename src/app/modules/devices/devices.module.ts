@@ -56,6 +56,7 @@ import {ConceptsComponent} from './concepts/concepts.component';
 import {ConceptsNewDialogComponent} from './concepts/dialogs/concepts-new-dialog.component';
 import {CharacteristicsComponent} from './characteristics/characteristics.component';
 import {CharacteristicsNewDialogComponent} from './characteristics/dialogs/characteristics-new-dialog.component';
+import {ConceptsEditDialogComponent} from './concepts/dialogs/concepts-edit-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -115,6 +116,7 @@ const characteristics = {path: 'devices/characteristics', pathMatch: 'full', com
         ConceptsNewDialogComponent,
         CharacteristicsComponent,
         CharacteristicsNewDialogComponent,
+        ConceptsEditDialogComponent,
     ],
     entryComponents: [
         NetworksEditDialogComponent,
@@ -125,6 +127,7 @@ const characteristics = {path: 'devices/characteristics', pathMatch: 'full', com
         DeviceInstancesGridComponent,
         ConceptsNewDialogComponent,
         CharacteristicsNewDialogComponent,
+        ConceptsEditDialogComponent,
     ]
 })
 

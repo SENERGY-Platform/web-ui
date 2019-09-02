@@ -40,6 +40,12 @@ export class ConceptsService {
         );
     }
 
+    updateConcept(concept: DeviceTypeConceptModel): Observable<DeviceTypeConceptModel | null> {
+        return this.http.put<DeviceTypeConceptModel>(environment.deviceManagerUrl + '/concepts/' + concept.id, concept).pipe(
+            catchError(this.errorHandlerService.handleError(ConceptsService.name, 'createConcept', null))
+        );
+    }
+
     deleteConcept(conceptId: string): Observable<boolean> {
         return this.http.delete<boolean>(environment.deviceManagerUrl + '/concepts/' + conceptId).pipe(
             catchError(this.errorHandlerService.handleError(ConceptsService.name, 'deleteConcept', false))

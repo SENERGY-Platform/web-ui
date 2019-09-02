@@ -25,6 +25,7 @@ import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -98,9 +99,31 @@ export class ConceptsComponent implements OnInit, OnDestroy {
                         this.getConcepts(true);
                     } else {
                         this.snackBar.open('Concept created successfully.', undefined, {duration: 2000});
-                        setTimeout(() => {
-                            this.getConcepts(true);
-                        }, 1000);
+                        this.reloadConcepts(true);
+                    }
+                });
+            }
+        });
+    }
+
+    editConcept(conceptInput: DeviceTypeConceptModel) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            concept: conceptInput
+        };
+        const editDialogRef = this.dialog.open(ConceptsEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((newConcept: DeviceTypeConceptModel) => {
+            if (newConcept !== undefined) {
+                this.reset();
+                this.conceptsService.updateConcept(newConcept).subscribe((concept: (DeviceTypeConceptModel | null)) => {
+                    if (concept === null) {
+                        this.snackBar.open('Error while updating the concept!', undefined, {duration: 2000});
+                        this.getConcepts(true);
+                    } else {
+                        this.snackBar.open('Concept updated successfully.', undefined, {duration: 2000});
+                        this.reloadConcepts(true);
                     }
                 });
             }
@@ -116,9 +139,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
                         this.concepts.splice(this.concepts.indexOf(concept), 1);
                         this.snackBar.open('Concept deleted successfully.', undefined, {duration: 2000});
                         this.setRepoItemsParams(1);
-                        setTimeout(() => {
-                            this.getConcepts(false);
-                        }, 1500);
+                        this.reloadConcepts(false);
                     } else {
                         this.snackBar.open('Error while deleting the concept!', undefined, {duration: 2000});
                     }
@@ -171,6 +192,12 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.limit = limit;
         this.offset = this.concepts.length;
+    }
+
+    private reloadConcepts(reset: boolean) {
+        setTimeout(() => {
+            this.getConcepts(reset);
+        }, 1500);
     }
 
 }
