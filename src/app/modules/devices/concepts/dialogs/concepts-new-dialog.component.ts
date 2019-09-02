@@ -18,12 +18,15 @@
 import {Component} from '@angular/core';
 import {MatDialogRef} from '@angular/material';
 import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
+import {FormControl, Validators} from '@angular/forms';
 
 @Component({
     templateUrl: './concepts-new-dialog.component.html',
     styleUrls: ['./concepts-new-dialog.component.css']
 })
 export class ConceptsNewDialogComponent {
+
+    nameControl = new FormControl('', [Validators.required]);
 
     constructor(private dialogRef: MatDialogRef<ConceptsNewDialogComponent>) {
     }
@@ -32,12 +35,12 @@ export class ConceptsNewDialogComponent {
         this.dialogRef.close();
     }
 
-    create(name: string): void {
+    create(): void {
         const concept: DeviceTypeConceptModel = {
             id: '',
-            name: name,
+            name: this.nameControl.value,
             characteristic_ids: []
-        }
+        };
         this.dialogRef.close(concept);
     }
 

@@ -19,7 +19,7 @@
 
 <mat-dialog-content>
     <form class="form">
-        <mat-form-field class="full-width" color="accent">
+        <mat-form-field class="full-width" appearance="outline" color="accent">
             <input matInput placeholder="Name" [formControl]="formControl">
         </mat-form-field>
     </form>
@@ -27,5 +27,5 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="formControl.status === 'INVALID'">Save</button>
+    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="formControl.invalid">Save</button>
 </mat-dialog-actions>

@@ -19,13 +19,13 @@
 
 <mat-dialog-content>
     <form class="form">
-        <mat-form-field class="full-width" color="accent">
-            <input #input matInput placeholder="Name">
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <input [formControl]="nameControl" matInput placeholder="Name">
         </mat-form-field>
     </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="create(input.value)">Create</button>
+    <button class="mat-raised-button mat-accent" [disabled]="nameControl.invalid" (click)="create()">Create</button>
 </mat-dialog-actions>
