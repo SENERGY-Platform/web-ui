@@ -15,7 +15,7 @@
  */
 
 import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
@@ -56,7 +56,8 @@ export class ConceptsComponent implements OnInit, OnDestroy {
                 private responsiveService: ResponsiveService,
                 private router: Router,
                 private conceptsService: ConceptsService,
-                private searchbarService: SearchbarService) {
+                private searchbarService: SearchbarService,
+                private snackBar: MatSnackBar) {
     }
 
     ngOnInit() {
@@ -69,17 +70,15 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     }
 
     receiveSortingAttribute(sortAttribute: SortModel) {
-        this.reset();
         this.sortAttribute = sortAttribute;
-        this.getConcepts();
+        this.getConcepts(true);
     }
 
     onScroll() {
-        console.log('onScroll');
         if (!this.allDataLoaded && this.ready) {
             this.ready = false;
             this.offset = this.offset + this.limit;
-            this.getConcepts();
+            this.getConcepts(false);
         }
     }
 
@@ -88,22 +87,32 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(ConceptsNewDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((concept: DeviceTypeConceptModel) => {
-            if (concept !== undefined) {
-                this.conceptsService.createConcept(concept).subscribe((resp) => {
-                    console.log(resp);
+        editDialogRef.afterClosed().subscribe((newConcept: DeviceTypeConceptModel) => {
+            if (newConcept !== undefined) {
+                this.reset();
+                this.conceptsService.createConcept(newConcept).subscribe((concept: (DeviceTypeConceptModel | null)) => {
+                    if (concept === null) {
+                        this.snackBar.open('Error while creating the concept!', undefined, {duration: 2000});
+                        this.getConcepts(true);
+                    } else {
+                        this.snackBar.open('Concept created successfully.', undefined, {duration: 2000});
+                        setTimeout(() => {
+                            this.getConcepts(true);
+                        }, 1000);
+                    }
                 });
-                console.log(concept);
             }
         });
-
     }
 
     showCharacteristics(concept: DeviceTypeConceptModel) {
         this.router.navigateByUrl('/devices/characteristics', {state: concept});
     }
 
-    private getConcepts() {
+    private getConcepts(reset: boolean) {
+        if (reset) {
+            this.reset();
+        }
         this.conceptsService.getConcepts(this.searchText, this.limit, this.offset, this.sortAttribute.value,
             this.sortAttribute.order).subscribe(
             (concepts: DeviceTypeConceptModel[]) => {
@@ -117,9 +126,8 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     private initSearchAndGetValuetypes() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.reset();
             this.searchText = searchText;
-            this.getConcepts();
+            this.getConcepts(true);
         });
     }
 
