@@ -40,6 +40,12 @@ export class ConceptsService {
         );
     }
 
+    deleteConcept(conceptId: string): Observable<boolean> {
+        return this.http.delete<boolean>(environment.deviceManagerUrl + '/concepts/' + conceptId).pipe(
+            catchError(this.errorHandlerService.handleError(ConceptsService.name, 'deleteConcept', false))
+        );
+    }
+
     getConcepts(query: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypeConceptModel[]> {
         if (query) {
             return this.http.get<DeviceTypeConceptModel[]>(environment.permissionSearchUrl + '/jwt/search/concepts/' +

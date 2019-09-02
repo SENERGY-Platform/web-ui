@@ -24,6 +24,7 @@ import {ConceptsService} from './shared/concepts.service';
 import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -57,7 +58,8 @@ export class ConceptsComponent implements OnInit, OnDestroy {
                 private router: Router,
                 private conceptsService: ConceptsService,
                 private searchbarService: SearchbarService,
-                private snackBar: MatSnackBar) {
+                private snackBar: MatSnackBar,
+                private dialogsService: DialogsService) {
     }
 
     ngOnInit() {
@@ -105,6 +107,26 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         });
     }
 
+    deleteConcept(concept: DeviceTypeConceptModel): void {
+        this.dialogsService.openDeleteDialog('concept ' + concept.name).afterClosed().subscribe((deleteConcept: boolean) => {
+            if (deleteConcept) {
+                this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
+                    console.log(resp);
+                    if (resp === true) {
+                        this.concepts.splice(this.concepts.indexOf(concept), 1);
+                        this.snackBar.open('Concept deleted successfully.', undefined, {duration: 2000});
+                        this.setRepoItemsParams(1);
+                        setTimeout(() => {
+                            this.getConcepts(false);
+                        }, 1500);
+                    } else {
+                        this.snackBar.open('Error while deleting the concept!', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
+    }
+
     showCharacteristics(concept: DeviceTypeConceptModel) {
         this.router.navigateByUrl('/devices/characteristics', {state: concept});
     }
@@ -143,6 +165,12 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+    }
+
+    private setRepoItemsParams(limit: number) {
+        this.ready = false;
+        this.limit = limit;
+        this.offset = this.concepts.length;
     }
 
 }
