@@ -25,6 +25,7 @@ import {
 } from '../../shared/device-type.model';
 import {util} from 'jointjs';
 import uuid = util.uuid;
+import {ConceptsService} from '../../../concepts/shared/concepts.service';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',
@@ -38,6 +39,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     functionType = {} as DeviceTypeFunctionType;
 
     constructor(private snackBar: MatSnackBar,
+                private conceptsService: ConceptsService,
                 private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>,
                 @Inject(MAT_DIALOG_DATA) data: {functionType: DeviceTypeFunctionType}) {
         this.functionType = data.functionType;
@@ -64,18 +66,9 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.concepts = [
-            {
-                id: 'urn:infai:ses:concept:1',
-                name: 'color',
-                characteristic_ids: ['urn:infai:ses:characteristic:1']
-            },
-            {
-                id: 'urn:infai:ses:concept:2',
-                name: 'temperature',
-                characteristic_ids: ['urn:infai:ses:characteristic:2']
-            },
-        ];
+        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: DeviceTypeConceptModel[]) => {
+            this.concepts = concepts;
+        });
     }
 
     private setId(): string {
