@@ -67,7 +67,7 @@ export interface DeviceTypeContentVariableModel {
 export interface DeviceTypeConceptModel {
     id: string;
     name: string;
-    characteristics: DeviceTypeCharacteristicsModel[];
+    characteristic_ids: string[];
 }
 
 export interface DeviceTypeCharacteristicsModel {

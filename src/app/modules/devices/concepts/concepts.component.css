@@ -40,7 +40,7 @@ mat-grid-tile {
     text-overflow: ellipsis;
 }
 
-.device-type-overview-container {
+.concepts-container {
     height: calc(100% - 64px);
     overflow-y: hidden;
 }
@@ -51,18 +51,10 @@ mat-grid-tile {
 }
 
 .background {
-    background-image: url('/src/img/concept.jpg');
-    background-size: contain;
-    max-height: 198px;
-}
-
-.device-icon {
-    top: 40px;
-    max-height: 70%;
-    max-width: 70%;
-    margin: auto;
-    display: block;
-    position: relative;
+    /*background-image: url('/src/img/concept.jpg');*/
+    width: 100%;
+    /*background-size: contain;*/
+    height: 198px;
 }
 
 .fab {

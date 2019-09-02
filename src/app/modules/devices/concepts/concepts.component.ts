@@ -20,6 +20,10 @@ import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.componen
 import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {Router} from '@angular/router';
+import {ConceptsService} from './shared/concepts.service';
+import {Subscription} from 'rxjs';
+import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -34,29 +38,49 @@ const grids = new Map([
     templateUrl: './concepts.component.html',
     styleUrls: ['./concepts.component.css']
 })
-export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ConceptsComponent implements OnInit, OnDestroy {
 
     concepts: DeviceTypeConceptModel[] = [];
     gridCols = 0;
     ready = true;
+    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
+
+    private searchText = '';
+    private limit = 54;
+    private offset = 0;
+    private sortAttribute = this.sortAttributes[0];
+    private searchSub: Subscription = new Subscription();
+    private allDataLoaded = false;
 
     constructor(private dialog: MatDialog,
                 private responsiveService: ResponsiveService,
-                private router: Router) {
+                private router: Router,
+                private conceptsService: ConceptsService,
+                private searchbarService: SearchbarService) {
     }
 
     ngOnInit() {
         this.initGridCols();
-        this.getConcepts();
         this.initSearchAndGetValuetypes();
     }
 
-    ngAfterViewInit(): void {
-
+    ngOnDestroy() {
+        this.searchSub.unsubscribe();
     }
 
-    ngOnDestroy() {
-        // this.searchSub.unsubscribe();
+    receiveSortingAttribute(sortAttribute: SortModel) {
+        this.reset();
+        this.sortAttribute = sortAttribute;
+        this.getConcepts();
+    }
+
+    onScroll() {
+        console.log('onScroll');
+        if (!this.allDataLoaded && this.ready) {
+            this.ready = false;
+            this.offset = this.offset + this.limit;
+            this.getConcepts();
+        }
     }
 
     newConcept() {
@@ -66,7 +90,9 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
 
         editDialogRef.afterClosed().subscribe((concept: DeviceTypeConceptModel) => {
             if (concept !== undefined) {
-
+                this.conceptsService.createConcept(concept).subscribe((resp) => {
+                    console.log(resp);
+                });
                 console.log(concept);
             }
         });
@@ -78,24 +104,23 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private getConcepts() {
-        this.concepts.push({
-            id: '1',
-            name: 'temperature',
-            characteristics: []
-        });
-        this.concepts.push({
-            id: '2',
-            name: 'color',
-            characteristics: []
-        });
+        this.conceptsService.getConcepts(this.searchText, this.limit, this.offset, this.sortAttribute.value,
+            this.sortAttribute.order).subscribe(
+            (concepts: DeviceTypeConceptModel[]) => {
+                if (concepts.length !== this.limit) {
+                    this.allDataLoaded = true;
+                }
+                this.concepts = this.concepts.concat(concepts);
+                this.ready = true;
+            });
     }
 
     private initSearchAndGetValuetypes() {
-        // this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-        //     this.isLoadingResults = true;
-        //     this.searchText = searchText;
-        //     this.paginator.pageIndex = 0;
-        // });
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.reset();
+            this.searchText = searchText;
+            this.getConcepts();
+        });
     }
 
     private initGridCols(): void {
@@ -103,6 +128,13 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
             this.gridCols = grids.get(mqAlias) || 0;
         });
+    }
+
+    private reset() {
+        this.concepts = [];
+        this.offset = 0;
+        this.allDataLoaded = false;
+        this.ready = false;
     }
 
 }

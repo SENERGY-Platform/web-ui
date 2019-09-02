@@ -21,7 +21,9 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {DeviceTypeConceptModel, DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
 import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
-import {catchError} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
+import {ProcessModel} from '../../../processes/process-repo/shared/process.model';
+import {ProcessRepoConditionsModel} from '../../../processes/process-repo/shared/process-repo-conditions.model';
 
 @Injectable({
     providedIn: 'root'
@@ -33,9 +35,25 @@ export class ConceptsService {
     }
 
     createConcept(concept: DeviceTypeConceptModel): Observable<DeviceTypeConceptModel | null> {
-        return this.http.post<DeviceTypeConceptModel>(environment.deviceManagerUrl + '/concept', concept).pipe(
+        return this.http.post<DeviceTypeConceptModel>(environment.deviceManagerUrl + '/concepts', concept).pipe(
             catchError(this.errorHandlerService.handleError(ConceptsService.name, 'createConcept', null))
         );
+    }
+
+    getConcepts(query: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypeConceptModel[]> {
+        if (query) {
+            return this.http.get<DeviceTypeConceptModel[]>(environment.permissionSearchUrl + '/jwt/search/concepts/' +
+                encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(search)', []))
+            );
+        } else {
+            return this.http.get<DeviceTypeConceptModel[]>(environment.permissionSearchUrl + '/jwt/list/concepts/r/' +
+                limit + '/' + offset + '/' + feature + '/' + order).pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(list)', []))
+            );
+        }
     }
 
 }

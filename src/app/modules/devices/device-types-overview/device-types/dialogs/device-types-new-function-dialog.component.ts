@@ -68,30 +68,12 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
             {
                 id: 'urn:infai:ses:concept:1',
                 name: 'color',
-                characteristics: [
-                    {
-                        id: 'urn:infai:ses:characteristic:1',
-                        name: 'rgb',
-                        type: 'http://schema.org/structure',
-                        sub_characteristics: [
-                            {
-                                id: 'urn:infai:ses:characteristic:2',
-                                name: 'r',
-                                type: 'xsd:integer',
-                                min_value: 0,
-                                max_value: 255,
-                            }
-                        ]
-                    }]
+                characteristic_ids: ['urn:infai:ses:characteristic:1']
             },
             {
                 id: 'urn:infai:ses:concept:2',
                 name: 'temperature',
-                characteristics: [{
-                    id: 'urn:infai:ses:characteristic:3',
-                    name: 'DegreeCelsius',
-                    type: 'xsd:float',
-                }]
+                characteristic_ids: ['urn:infai:ses:characteristic:2']
             },
         ];
     }
