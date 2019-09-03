@@ -21,6 +21,8 @@ import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../device-
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {CharacteristicsNewDialogComponent} from './dialogs/characteristics-new-dialog.component';
 import {Navigation, Router} from '@angular/router';
+import {ConceptsNewDialogComponent} from '../concepts/dialogs/concepts-new-dialog.component';
+import {CharacteristicsService} from './shared/characteristics.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -45,6 +47,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
 
     constructor(private dialog: MatDialog,
                 private responsiveService: ResponsiveService,
+                private characteristicsService: CharacteristicsService,
                 private router: Router) {
         this.getRouterParams();
     }
@@ -63,17 +66,27 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
         // this.searchSub.unsubscribe();
     }
 
-    newConcept() {
+    newCharacteristic() {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(CharacteristicsNewDialogComponent, dialogConfig);
 
-        // editDialogRef.afterClosed().subscribe((conceptName: string) => {
-        //     if (conceptName !== '') {
-        //         console.log(conceptName);
-        //     }
-        // });
-
+        editDialogRef.afterClosed().subscribe((resp: {conceptId: string, characteristic: DeviceTypeConceptModel}) => {
+            console.log(resp);
+            if (resp !== undefined) {
+                // this.reset();
+                this.characteristicsService.createCharacteristic(resp.conceptId, resp.characteristic).subscribe((characteristic) => {
+                    console.log(characteristic);
+                    // if (concept === null) {
+                    //     this.snackBar.open('Error while creating the concept!', undefined, {duration: 2000});
+                    //     this.getConcepts(true);
+                    // } else {
+                    //     this.snackBar.open('Concept created successfully.', undefined, {duration: 2000});
+                    //     this.reloadConcepts(true);
+                    // }
+                });
+            }
+        });
     }
 
     tagRemoved(): void {

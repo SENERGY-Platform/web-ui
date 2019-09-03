@@ -15,24 +15,45 @@
  *  limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material';
+import {FormControl, Validators} from '@angular/forms';
+import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
+import {ConceptsService} from '../../concepts/shared/concepts.service';
+import {jsonValidator} from '../../../../core/validators/json.validator';
 
 @Component({
     templateUrl: './characteristics-new-dialog.component.html',
     styleUrls: ['./characteristics-new-dialog.component.css']
 })
-export class CharacteristicsNewDialogComponent {
+export class CharacteristicsNewDialogComponent implements OnInit {
 
-    constructor(private dialogRef: MatDialogRef<CharacteristicsNewDialogComponent>) {
+    conceptControl = new FormControl('', [Validators.required]);
+    characteristicControl = new FormControl('', [Validators.required, jsonValidator(false)]);
+    concepts: DeviceTypeConceptModel[] = [];
+
+    constructor(private conceptsService: ConceptsService,
+        private dialogRef: MatDialogRef<CharacteristicsNewDialogComponent>) {
+    }
+
+    ngOnInit(): void {
+        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: DeviceTypeConceptModel[]) => {
+            this.concepts = concepts;
+        });
     }
 
     close(): void {
         this.dialogRef.close();
     }
 
-    create(name: string): void {
-        this.dialogRef.close(name);
+    create(): void {
+        this.dialogRef.close({
+            conceptId: this.conceptControl.value.id,
+            characteristic: JSON.parse(this.characteristicControl.value)});
+    }
+
+    compare(a: any, b: any): boolean {
+        return a && b && a.id === b.id && a.name === b.name;
     }
 
 }
