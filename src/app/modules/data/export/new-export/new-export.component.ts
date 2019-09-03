@@ -49,6 +49,7 @@ export class NewExportComponent implements OnInit {
     devices: DeviceInstancesModel [] = [];
     pipelines: PipelineModel [] = [];
     paths = new Map<string, string | undefined>();
+    allMessages = true;
 
     timeSuggest = ['time'];
 
@@ -88,6 +89,11 @@ export class NewExportComponent implements OnInit {
             this.export.FilterType = 'pipeId';
             this.export.ServiceName = this.operator.name;
             this.export.Topic = 'analytics-' + this.operator.name;
+        }
+        if (this.allMessages) {
+            this.export.Offset = 'smallest';
+        } else {
+            this.export.Offset = 'largest';
         }
         this.exportService.startPipeline(this.export).subscribe(function () {
             self.router.navigate(['/data/export']);

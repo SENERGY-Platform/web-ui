@@ -266,7 +266,13 @@ export class DiagramEditorComponent implements OnInit {
     }
 
     reinitializePaper() {
-        this.graph = new dia.Graph();
+        const { standard, devs } = shapes;
+        this.graph = new dia.Graph({}, {
+            cellNamespace: {
+                standard,
+                devs,
+                senergy: { NodeElement: this.NodeElement }
+            } });
         this.paper = new dia.Paper({
             el: $('#paper'),
             model: this.graph,
@@ -302,6 +308,32 @@ export class DiagramEditorComponent implements OnInit {
         return this.graph.toJSON();
     }
 
+    public newCloudNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
+        const node = this.newNode(name, image, inputs, outputs, config, operatorId);
+        node.attributes.deploymentType = 'cloud';
+        node.attr({
+            body: {
+                fill: '#4484ce',
+            }
+        });
+        this.graph.addCells([node]);
+        this.graph.maxZIndex();
+        return node;
+    }
+
+    public newLocalNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
+        const node = this.newNode(name, image, inputs, outputs, config, operatorId);
+        node.attributes.deploymentType = 'local';
+        node.attr({
+            body: {
+                fill: '#ddd',
+            }
+        });
+        this.graph.addCells([node]);
+        this.graph.maxZIndex();
+        return node;
+    }
+
     public newNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
         const inPorts = [];
         for (const input of inputs) {
@@ -316,6 +348,7 @@ export class DiagramEditorComponent implements OnInit {
             }
         }
         const node = new this.NodeElement({
+            type: 'senergy.NodeElement',
             inPorts: inPorts,
             outPorts: outPorts,
             name: name,
@@ -347,10 +380,8 @@ export class DiagramEditorComponent implements OnInit {
                 fontWeight: 'bold'
             }
         });
-
-        this.graph.addCells([node]);
-        this.graph.maxZIndex();
-
         return node;
     }
+
+
 }

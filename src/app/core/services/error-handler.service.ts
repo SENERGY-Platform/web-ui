@@ -17,6 +17,7 @@
 import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {HttpErrorResponse} from '@angular/common/http';
+import {ErrorModel} from '../model/error.model';
 
 @Injectable({
     providedIn: 'root'
@@ -32,5 +33,12 @@ export class ErrorHandlerService {
             console.error(error);
             return of(result as T);
         };
+    }
+
+    checkIfErrorExists(toBeDetermined: any): toBeDetermined is ErrorModel {
+        if ((toBeDetermined as ErrorModel).error) {
+            return true;
+        }
+        return false;
     }
 }

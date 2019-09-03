@@ -69,6 +69,8 @@
             </mat-select>
         </mat-form-field>
 
+        <mat-checkbox class="example-margin" [(ngModel)]="allMessages">Consume all messages</mat-checkbox>
+
         <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
             <button mat-raised-button color="accent" (click)="addValue()">Add Export Value</button>
         </div>
@@ -98,7 +100,6 @@
                 </mat-icon>
             </button>
         </div>
-
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
             <button mat-raised-button color="accent" (click)="startExport()">Start</button>
         </div>

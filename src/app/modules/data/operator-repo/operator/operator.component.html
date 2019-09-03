@@ -28,6 +28,13 @@
             <mat-label>Description</mat-label>
             <input matInput [(ngModel)]="operator.description" placeholder="Description">
         </mat-form-field>
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-select placeholder="Deployment type" [(ngModel)]="operator.deploymentType" >
+                <mat-option  value="cloud">cloud</mat-option>
+                <mat-option  value="local">local</mat-option>
+                <mat-option  value="both">both</mat-option>
+            </mat-select>
+        </mat-form-field>
         <mat-checkbox [(ngModel)]="operator.pub">Public</mat-checkbox>
         <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
             <button mat-raised-button color="accent" (click)="addInput()">Add Input</button>

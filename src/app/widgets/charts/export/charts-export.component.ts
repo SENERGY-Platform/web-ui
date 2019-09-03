@@ -22,6 +22,8 @@ import {ChartsModel} from '../shared/charts.model';
 import {ChartsExportService} from './shared/charts-export.service';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
+import {ErrorModel} from '../../../core/model/error.model';
+import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 
 @Component({
     selector: 'senergy-charts-export',
@@ -34,6 +36,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     ready = false;
     destroy = new Subscription();
     configureWidget = false;
+    error = false;
+    errorMessage = {} as ErrorModel;
 
     private resizeTimeout = 0;
     private measurementId = '';
@@ -56,7 +60,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
 
     constructor(private chartsExportService: ChartsExportService,
                 private elementSizeService: ElementSizeService,
-                private dashboardService: DashboardService) {
+                private dashboardService: DashboardService,
+                private errorHandlerService: ErrorHandlerService) {
     }
 
     ngOnInit() {
@@ -77,15 +82,20 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                 this.ready = false;
                 this.checkConfiguration();
                 if (this.configureWidget === false) {
-                    this.chartsExportService.getChartData(this.widget).subscribe((chartExportData: ChartsModel) => {
-                        this.chartExportData = chartExportData;
-                        this.ready = true;
+                    this.chartsExportService.getChartData(this.widget).subscribe((resp: (ChartsModel | ErrorModel)) => {
+                        if (this.errorHandlerService.checkIfErrorExists(resp)) {
+                            this.error = true;
+                            this.errorMessage = resp;
+                            this.ready = true;
+                        } else {
+                            this.error = false;
+                            this.chartExportData = resp;
+                            this.ready = true;
+                        }
                     });
                 } else {
                     this.ready = true;
                 }
-
-
             }
         });
     }

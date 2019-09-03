@@ -20,6 +20,8 @@ export interface ParseModel {
     inPorts: string [];
     device: string;
     service: string;
+    deploymentType: string;
+    operatorId: string;
     path: string;
     config: ConfigModel [];
 }

@@ -20,6 +20,7 @@ export interface OperatorModel {
     image: string | undefined;
     description: string | undefined;
     pub: boolean | undefined;
+    deploymentType: string | undefined;
     userId: string | undefined;
     inputs: IOModel [] | undefined;
     outputs: IOModel [] | undefined;
