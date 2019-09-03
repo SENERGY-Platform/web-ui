@@ -20,9 +20,15 @@
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
             <div *ngIf="ready">
-                <div *ngIf="configureWidget === true">Please configure widget!</div>
-                <google-chart *ngIf="configureWidget === false && chartExportData.dataTable[0].length !== 0" #chartExport [data]="chartExportData"></google-chart>
-                <senergy-no-data [showIf]="configureWidget === false && chartExportData.dataTable[0].length === 0"></senergy-no-data>
+                <div *ngIf="error">
+                    <div>{{errorMessage.error}}</div>
+                </div>
+                <div *ngIf="!error">
+                    <div *ngIf="configureWidget === true">Please configure widget!</div>
+                    <google-chart *ngIf="configureWidget === false && chartExportData.dataTable[0].length !== 0" #chartExport [data]="chartExportData"></google-chart>
+                    <senergy-no-data [showIf]="configureWidget === false && chartExportData.dataTable[0].length === 0"></senergy-no-data>
+                </div>
+
             </div>
         </div>
     </mat-card-content>

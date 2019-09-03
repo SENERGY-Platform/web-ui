@@ -31,6 +31,7 @@ import {ChartsExportEditDialogComponent} from '../dialog/charts-export-edit-dial
 import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
+import {ErrorModel} from '../../../../core/model/error.model';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -62,34 +63,37 @@ export class ChartsExportService {
         });
     }
 
-    getData(id: string, limit: number | undefined): Observable<ChartsExportModel> {
+    getData(id: string, limit: number | undefined): Observable<ChartsExportModel | { error: string }> {
         return this.http.get<ChartsExportModel>(environment.influxAPIURL + '/measurement/' + id + '?limit=' + limit).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as ChartsExportModel))
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {error: 'error'}))
         );
     }
 
 
-    getChartData(widget: WidgetModel): Observable<ChartsModel> {
-        return new Observable<ChartsModel>((observer) => {
-            this.getData(widget.properties.measurement ? widget.properties.measurement.id : '', widget.properties.interval).subscribe((resp: ChartsExportModel) => {
-                if (resp.results[0].series === undefined) {
-                    // no data
-                    observer.next(this.setProcessInstancesStatusValues(
-                        widget.id,
-                        widget.properties.hAxisLabel || '',
-                        widget.properties.vAxisLabel || '',
-                        new ChartDataTableModel([[]])));
+    getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
+        return new Observable<ChartsModel | ErrorModel>((observer) => {
+            this.getData(widget.properties.measurement ? widget.properties.measurement.id : '', widget.properties.interval).subscribe((resp: (ChartsExportModel | ErrorModel)) => {
+                if (this.errorHandlerService.checkIfErrorExists(resp)) {
+                    observer.next(resp);
                 } else {
-                    let vAxisIndex = 1;
-                    if (widget.properties.vAxis) {
-                        vAxisIndex = resp.results[0].series[0].columns.indexOf(widget.properties.vAxis.Name);
+                    if (resp.results[0].series === undefined) {
+                        // no data
+                        observer.next(this.setProcessInstancesStatusValues(
+                            widget.id,
+                            widget.properties.hAxisLabel || '',
+                            widget.properties.vAxisLabel || '',
+                            new ChartDataTableModel([[]])));
+                    } else {
+                        let vAxisIndex = 1;
+                        if (widget.properties.vAxis) {
+                            vAxisIndex = resp.results[0].series[0].columns.indexOf(widget.properties.vAxis.Name);
+                        }
+                        observer.next(this.setProcessInstancesStatusValues(
+                            widget.id,
+                            widget.properties.hAxisLabel || '',
+                            widget.properties.vAxisLabel || '',
+                            this.setData(widget.properties.vAxis, resp.results[0].series[0].values, vAxisIndex)));
                     }
-                    observer.next(this.setProcessInstancesStatusValues(
-                        widget.id,
-                        widget.properties.hAxisLabel || '',
-                        widget.properties.vAxisLabel || '',
-                        this.setData(widget.properties.vAxis, resp.results[0].series[0].values, vAxisIndex)));
                 }
                 observer.complete();
             });
@@ -123,5 +127,9 @@ export class ChartsExportService {
                 vAxis: {title: vAxisLabel},
             });
     }
+
+
 }
+
+
 
