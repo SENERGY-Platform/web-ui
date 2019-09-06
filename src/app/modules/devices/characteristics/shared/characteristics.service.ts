@@ -18,7 +18,11 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {DeviceTypeConceptModel, DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeConceptModel,
+    DeviceTypeModel
+} from '../../device-types-overview/shared/device-type.model';
 import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
@@ -52,20 +56,29 @@ export class CharacteristicsService {
     //     );
     // }
     //
-    // getConcepts(query: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypeConceptModel[]> {
-    //     if (query) {
-    //         return this.http.get<DeviceTypeConceptModel[]>(environment.permissionSearchUrl + '/jwt/search/concepts/' +
-    //             encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
-    //             map(resp => resp || []),
-    //             catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(search)', []))
-    //         );
-    //     } else {
-    //         return this.http.get<DeviceTypeConceptModel[]>(environment.permissionSearchUrl + '/jwt/list/concepts/r/' +
-    //             limit + '/' + offset + '/' + feature + '/' + order).pipe(
-    //             map(resp => resp || []),
-    //             catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(list)', []))
-    //         );
-    //     }
-    // }
+
+    getCharacteristicByConceptId(conceptId: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypeCharacteristicsModel[]> {
+        return this.http.get<DeviceTypeCharacteristicsModel[]>(environment.permissionSearchUrl + '/jwt/select/characteristics/concept_id/' + conceptId + '/r/' +
+            limit + '/' + offset + '/' + feature + '/' + order).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic(list)', []))
+        );
+    }
+
+    getCharacteristic(query: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypeCharacteristicsModel[]> {
+        if (query) {
+            return this.http.get<DeviceTypeCharacteristicsModel[]>(environment.permissionSearchUrl + '/jwt/search/characteristics/' +
+                encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic(search)', []))
+            );
+        } else {
+            return this.http.get<DeviceTypeCharacteristicsModel[]>(environment.permissionSearchUrl + '/jwt/list/characteristics/r/' +
+                limit + '/' + offset + '/' + feature + '/' + order).pipe(
+                map(resp => resp || []),
+                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic(list)', []))
+            );
+        }
+    }
 
 }

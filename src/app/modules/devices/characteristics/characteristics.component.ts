@@ -15,14 +15,16 @@
  *  limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {CharacteristicsNewDialogComponent} from './dialogs/characteristics-new-dialog.component';
 import {Navigation, Router} from '@angular/router';
-import {ConceptsNewDialogComponent} from '../concepts/dialogs/concepts-new-dialog.component';
 import {CharacteristicsService} from './shared/characteristics.service';
+import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {Subscription} from 'rxjs';
+import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -33,37 +35,55 @@ const grids = new Map([
 ]);
 
 @Component({
-    selector: 'senergy-concepts',
+    selector: 'senergy-characteristic',
     templateUrl: './characteristics.component.html',
     styleUrls: ['./characteristics.component.css']
 })
-export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class CharacteristicsComponent implements OnInit, OnDestroy {
 
     characteristics: DeviceTypeCharacteristicsModel[] = [];
     gridCols = 0;
-    ready = true;
+    ready = false;
     routerConcept: DeviceTypeConceptModel | null = null;
     selectedTag = '';
+    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
+
+    private searchText = '';
+    private limit = 54;
+    private offset = 0;
+    private sortAttribute = this.sortAttributes[0];
+    private searchSub: Subscription = new Subscription();
+    private allDataLoaded = false;
 
     constructor(private dialog: MatDialog,
                 private responsiveService: ResponsiveService,
                 private characteristicsService: CharacteristicsService,
+                private searchbarService: SearchbarService,
+                private snackBar: MatSnackBar,
                 private router: Router) {
         this.getRouterParams();
     }
 
     ngOnInit() {
         this.initGridCols();
-        this.getConcepts();
-        this.initSearchAndGetValuetypes();
-    }
-
-    ngAfterViewInit(): void {
-
+        this.initSearchAndGetCharacteristics();
     }
 
     ngOnDestroy() {
-        // this.searchSub.unsubscribe();
+        this.searchSub.unsubscribe();
+    }
+
+    receiveSortingAttribute(sortAttribute: SortModel) {
+        this.sortAttribute = sortAttribute;
+        this.getCharacteristics(true);
+    }
+
+    onScroll() {
+        if (!this.allDataLoaded && this.ready) {
+            this.ready = false;
+            this.offset = this.offset + this.limit;
+            this.getCharacteristics(false);
+        }
     }
 
     newCharacteristic() {
@@ -71,19 +91,17 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(CharacteristicsNewDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((resp: {conceptId: string, characteristic: DeviceTypeConceptModel}) => {
-            console.log(resp);
+        editDialogRef.afterClosed().subscribe((resp: { conceptId: string, characteristic: DeviceTypeConceptModel }) => {
             if (resp !== undefined) {
-                // this.reset();
+                this.reset();
                 this.characteristicsService.createCharacteristic(resp.conceptId, resp.characteristic).subscribe((characteristic) => {
-                    console.log(characteristic);
-                    // if (concept === null) {
-                    //     this.snackBar.open('Error while creating the concept!', undefined, {duration: 2000});
-                    //     this.getConcepts(true);
-                    // } else {
-                    //     this.snackBar.open('Concept created successfully.', undefined, {duration: 2000});
-                    //     this.reloadConcepts(true);
-                    // }
+                    if (characteristic === null) {
+                        this.snackBar.open('Error while creating the characteristic!', undefined, {duration: 2000});
+                        this.getCharacteristics(true);
+                    } else {
+                        this.snackBar.open('Characteristic created successfully.', undefined, {duration: 2000});
+                        this.reloadCharacterisitics(true);
+                    }
                 });
             }
         });
@@ -92,36 +110,46 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
     tagRemoved(): void {
         this.routerConcept = null;
         this.selectedTag = '';
-        this.getConcepts();
+        this.getCharacteristics(true);
     }
 
-    private getConcepts() {
-        this.characteristics.push({
-            id: 'char1',
-            name: 'DegreeCelsius',
-            type: 'https://schema.org/Integer',
-            min_value: -273.15
-        });
-        this.characteristics.push({
-            id: 'char2',
-            name: 'Kelvin',
-            type: 'https://schema.org/Integer',
-            min_value: 0
-        });
-        this.characteristics.push({
-            id: 'char3',
-            name: 'DegreeFahrenheit',
-            type: 'https://schema.org/Integer',
-            min_value: -459.67
-        });
+    private getCharacteristics(reset: boolean) {
+        if (reset) {
+            this.reset();
+        }
+        if (this.routerConcept !== null) {
+            this.selectedTag = this.routerConcept.name;
+            this.characteristicsService.getCharacteristicByConceptId(this.routerConcept.id, this.limit, this.offset,
+                this.sortAttribute.value, this.sortAttribute.order).subscribe(
+                (characteristics: DeviceTypeCharacteristicsModel[]) => {
+                    this.setCharacteristics(characteristics);
+                });
+        } else {
+            this.characteristicsService.getCharacteristic(this.searchText, this.limit, this.offset, this.sortAttribute.value,
+                this.sortAttribute.order).subscribe(
+                (characteristics: DeviceTypeCharacteristicsModel[]) => {
+                    this.setCharacteristics(characteristics);
+                });
+        }
     }
 
-    private initSearchAndGetValuetypes() {
-        // this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-        //     this.isLoadingResults = true;
-        //     this.searchText = searchText;
-        //     this.paginator.pageIndex = 0;
-        // });
+    private setCharacteristics(characteristics: DeviceTypeCharacteristicsModel[]) {
+        if (characteristics.length !== this.limit) {
+            this.allDataLoaded = true;
+        }
+        this.characteristics = this.characteristics.concat(characteristics);
+        this.ready = true;
+    }
+
+    private initSearchAndGetCharacteristics() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            if (searchText) {
+                this.routerConcept = null;
+            }
+            this.selectedTag = '';
+            this.searchText = searchText;
+            this.getCharacteristics(true);
+        });
     }
 
     private initGridCols(): void {
@@ -137,10 +165,27 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
             if (navigation.extras.state !== undefined) {
                 const concept = navigation.extras.state as DeviceTypeConceptModel;
                 this.routerConcept = concept;
-                this.selectedTag = this.routerConcept.name;
-                console.log(this.routerConcept);
             }
         }
+    }
+
+    private reset() {
+        this.characteristics = [];
+        this.offset = 0;
+        this.allDataLoaded = false;
+        this.ready = false;
+    }
+
+    private setRepoItemsParams(limit: number) {
+        this.ready = false;
+        this.limit = limit;
+        this.offset = this.characteristics.length;
+    }
+
+    private reloadCharacterisitics(reset: boolean) {
+        setTimeout(() => {
+            this.getCharacteristics(reset);
+        }, 1500);
     }
 
 }
