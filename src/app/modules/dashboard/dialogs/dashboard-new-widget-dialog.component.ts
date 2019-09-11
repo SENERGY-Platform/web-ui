@@ -57,6 +57,7 @@ export class DashboardNewWidgetDialogComponent {
         {value: DashboardTypesEnum.DeviceDowntimeList, viewValue: 'Device downtime list'},
         {value: DashboardTypesEnum.SingleValue, viewValue: 'Single Value'},
         {value: DashboardTypesEnum.EnergyPrediction, viewValue: 'Energy Prediction'},
+        {value: DashboardTypesEnum.AirQuality, viewValue: 'Air Quality'},
     ];
     switchCategories: SwitchCategories[] = [
         {

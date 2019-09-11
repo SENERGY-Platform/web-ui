@@ -63,6 +63,9 @@
   <div *ngSwitchCase="'energy_prediction'" fxFill>
     <senergy-energy-prediction [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-energy-prediction>
   </div>
+  <div *ngSwitchCase="'air_quality'" fxFill>
+    <senergy-air-quality [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-air-quality>
+  </div>
   <div *ngSwitchDefault>
     <div>default</div>
   </div>
