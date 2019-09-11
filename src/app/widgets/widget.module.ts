@@ -22,8 +22,8 @@ import {
     MatCardModule,
     MatCheckboxModule,
     MatDialogModule,
-    MatDividerModule,
-    MatFormFieldModule,
+    MatDividerModule, MatExpansionModule,
+    MatFormFieldModule, MatGridListModule,
     MatIconModule,
     MatInputModule,
     MatListModule,
@@ -31,7 +31,7 @@ import {
     MatOptionModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    MatSlideToggleModule,
+    MatSlideToggleModule, MatStepperModule,
     MatTableModule,
     MatTooltipModule
 } from '@angular/material';
@@ -76,6 +76,10 @@ import {SingleValueComponent} from './single-value/single-value.component';
 import {SingleValueEditDialogComponent} from './single-value/dialog/single-value-edit-dialog.component';
 import {EnergyPredictionComponent} from './energy-prediction/energy-prediction.component';
 import {EnergyPredictionEditDialogComponent} from './energy-prediction/dialog/energy-prediction-edit-dialog.component';
+import {AirQualityComponent} from './air-quality/air-quality.component';
+import {AirQualityEditDialogComponent} from './air-quality/dialog/air-quality-edit-dialog.component';
+import {AgmCoreModule} from '@agm/core';
+import {MatGoogleMapsAutocompleteModule} from '@angular-material-extensions/google-maps-autocomplete';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -106,6 +110,15 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         MatTooltipModule,
         MatCheckboxModule,
         RouterModule,
+        MatStepperModule,
+        MatGridListModule,
+
+        AgmCoreModule.forRoot({
+            apiKey: 'placeholder', // TODO make env, currently just testing
+            libraries: ['places']
+        }),
+        MatGoogleMapsAutocompleteModule.forRoot(),
+        MatExpansionModule
     ],
     declarations: [
         SwitchComponent,
@@ -141,7 +154,9 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         SingleValueComponent,
         SingleValueEditDialogComponent,
         EnergyPredictionComponent,
-        EnergyPredictionEditDialogComponent
+        EnergyPredictionEditDialogComponent,
+        AirQualityComponent,
+        AirQualityEditDialogComponent
     ],
     exports: [
         SwitchComponent,
@@ -170,7 +185,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ProcessModelListEditDialogComponent,
         DeviceDowntimeListEditDialogComponent,
         SingleValueEditDialogComponent,
-        EnergyPredictionEditDialogComponent
+        EnergyPredictionEditDialogComponent,
+        AirQualityEditDialogComponent
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 

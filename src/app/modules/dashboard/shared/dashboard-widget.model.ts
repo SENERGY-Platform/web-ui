@@ -18,6 +18,7 @@ import {SwitchPropertiesModel} from '../../../widgets/switch/shared/switch-prope
 import {ChartsExportPropertiesModel} from '../../../widgets/charts/export/shared/charts-export-properties.model';
 import {DeviceDowntimeGatewayPropertiesModel} from '../../../widgets/charts/device/device-downtime-gateway/shared/device-downtime-gateway-properties.model';
 import {EnergyPredictionPropertiesModel} from '../../../widgets/energy-prediction/shared/energy-prediction.model';
+import {AirQualityPropertiesModel} from '../../../widgets/air-quality/shared/air-quality.model';
 
 export interface WidgetModel {
     id: string;
@@ -28,5 +29,5 @@ export interface WidgetModel {
     y?: number;
 }
 
-interface WidgetPropertiesModels extends SwitchPropertiesModel, ChartsExportPropertiesModel, DeviceDowntimeGatewayPropertiesModel, EnergyPredictionPropertiesModel {
+interface WidgetPropertiesModels extends SwitchPropertiesModel, ChartsExportPropertiesModel, DeviceDowntimeGatewayPropertiesModel, EnergyPredictionPropertiesModel, AirQualityPropertiesModel {
 }

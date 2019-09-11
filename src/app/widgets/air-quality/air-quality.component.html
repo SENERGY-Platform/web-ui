@@ -1,0 +1,84 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<mat-card>
+    <senergy-widget-header [widget]="widget"></senergy-widget-header>
+    <mat-card-content class="content-size drag-handler">
+        <senergy-widget-spinner [show]="!isReady()"></senergy-widget-spinner>
+        <div *ngIf="isReady()" fxLayout="column"  fxFill>
+            <div *ngIf="!inDetailView" (click)="clicked()" matTooltip="Click to view details!"
+                 [matTooltipShowDelay]="500"
+                 class="center">
+                <div *ngIf="warnings === 0 && criticals === 0">
+                    <button mat-icon-button class="icon">
+                        <mat-icon [inline]="true">sentiment_very_satisfied</mat-icon>
+                    </button>
+                    <div class="text"><p>No warnings!</p></div>
+                </div>
+                <div *ngIf="warnings > 0 && criticals === 0">
+                    <button mat-icon-button class="icon" (click)="clicked()">
+                        <mat-icon [inline]="true">sentiment_dissatisfied</mat-icon>
+                    </button>
+                    <div class="text">
+                        <span *ngIf="warnings === 1">1 warning!</span>
+                        <span *ngIf="warnings > 1">{{warnings}} warnings!</span>
+                    </div>
+                </div>
+                <div *ngIf="criticals > 0">
+                    <button mat-icon-button class="icon" (click)="clicked()">
+                        <mat-icon [inline]="true">sentiment_very_dissatisfied</mat-icon>
+                    </button>
+                    <div class="text orange">
+                        <span *ngIf="criticals === 1">1 critical alert!</span>
+                        <span *ngIf="criticals > 1">{{criticals}} critical alerts!</span>
+                    </div>
+                    <div class="text">
+                        <span *ngIf="warnings === 1">1 warning!</span>
+                        <span *ngIf="warnings > 1">{{warnings}} warnings!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="inDetailView" (click)="clicked()" matTooltip="Click to hide details!"
+                 [matTooltipShowDelay]="500">
+                <mat-grid-list cols="6" rowHeight="fit" class="grid-container">
+                <span *ngFor="let measurement of widget.properties.measurements">
+                    <mat-grid-tile *ngIf="measurement.is_enabled" matTooltip="{{measurement.tooltip}}" [colspan]="2"
+                                   [rowspan]="1">
+                        <div class="grid-content">
+                            <span *ngIf="measurement.is_critical">
+                                <mat-icon [inline]="true" color="warn">error</mat-icon>
+                            </span>
+                            <span *ngIf="measurement.is_warning">
+                                <mat-icon [inline]="true" color="warn">warning</mat-icon>
+                            </span>
+                            <span *ngIf="!measurement.is_critical && !measurement.is_warning">
+                                <mat-icon [inline]="true" color="accent">check</mat-icon>
+                            </span>
+                            <span class="tile-text" [innerHTML]="measurement.name_html"></span>
+                        </div>
+                    </mat-grid-tile>
+                </span>
+                </mat-grid-list>
+            </div>
+        </div>
+    </mat-card-content>
+    <div>
+        <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget"
+                               (editEvent)="edit()"></senergy-widget-footer>
+    </div>
+</mat-card>
+

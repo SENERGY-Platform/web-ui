@@ -1,0 +1,151 @@
+<!--
+  ~ Copyright 2018 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>Edit Air Recommendation</h2>
+
+<mat-dialog-content>
+
+    <mat-vertical-stepper [linear]="true" #stepper>
+        <mat-step label="Give the widget a name">
+            <mat-form-field color="accent">
+                <input type="text" matInput placeholder="Name" [(ngModel)]="name" required>
+            </mat-form-field>
+            <div>
+                <button mat-button matStepperNext>Next</button>
+            </div>
+        </mat-step>
+        <mat-step label="Select additional measurements">
+            <mat-form-field color="accent">
+                <mat-label>Select measurements</mat-label>
+                <mat-select multiple [(ngModel)]="measurementSelected" (closed)="measurementsSelected()">
+                    <mat-option *ngFor="let option of measurements" [value]="option.name_html">
+                        <div [innerHTML]="option.name_html"></div>
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <div>
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button matStepperNext>Next</button>
+            </div>
+        </mat-step>
+        <!--
+        <mat-step label="Select your location">
+            <div *ngIf="!changeLocation">
+                {{formatted_address}}
+                <button mat-icon-button (click)="changeLocationButtonClicked()">
+                    <mat-icon>edit</mat-icon>
+                </button>
+            </div>
+            <div *ngIf="changeLocation">
+                <mat-google-maps-autocomplete
+                        [types]="['(cities)']"
+                        (onLocationSelected)="onLocationSelected($event)"
+                        (onAutocompleteSelected)="onAutocompleteSelected($event)">
+                </mat-google-maps-autocomplete>
+            </div>
+            <div>
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button matStepperNext>Next</button>
+            </div>
+        </mat-step>
+        -->
+        <mat-step label="Configure additional measurements">
+            <mat-accordion>
+                <div *ngFor="let option of measurements">
+                    <mat-expansion-panel *ngIf="option.is_enabled || false">
+                        <mat-expansion-panel-header class="right-aligned-header">
+                            <mat-panel-title>
+                                <div [innerHTML]="option.name_html"></div>
+                            </mat-panel-title>
+                            <mat-panel-description *ngIf="option.description_html !== undefined">
+                                <div [innerHTML]="option.description_html"></div>
+                            </mat-panel-description>
+                        </mat-expansion-panel-header>
+                        <ng-template matExpansionPanelContent>
+                        <div>
+                            <mat-form-field color="accent">
+                                <mat-label>Export</mat-label>
+                                <mat-select placeholder="Export" [(ngModel)]="option.export" [compareWith]="compare">
+                                    <mat-option *ngFor="let export of exports" [value]="export">
+                                        {{export.name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field color="accent">
+                                <mat-label>Value</mat-label>
+                                <mat-select placeholder="Value" [(ngModel)]="option.data.column" [compareWith]="compare">
+                                    <mat-option *ngFor="let value of option.export?.values || []" [value]="value"> <!-- TODO check this -->
+                                        {{value.Name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div>
+                            <mat-form-field color="accent" class="boundary-input-field">
+                                <input type="number" matInput placeholder="Min Warning"
+                                       [(ngModel)]="option.boundaries.warn.lower" required>
+                            </mat-form-field>
+                            <span [innerHTML]="option.unit_html" class="unit"></span>
+                            <mat-form-field color="accent" class="boundary-input-field">
+                                <input type="number" matInput placeholder="Max Warning"
+                                       [(ngModel)]="option.boundaries.warn.upper" required>
+                            </mat-form-field>
+                            <span [innerHTML]="option.unit_html" class="unit"></span>
+                        </div>
+                        <div>
+                            <mat-form-field color="accent" class="boundary-input-field">
+                                <input type="number" matInput placeholder="Min Critical"
+                                       [(ngModel)]="option.boundaries.critical.lower" required>
+                            </mat-form-field>
+                            <span [innerHTML]="option.unit_html" class="unit"></span>
+                            <mat-form-field color="accent" class="boundary-input-field">
+                                <input type="number" matInput placeholder="Max Critical"
+                                       [(ngModel)]="option.boundaries.critical.upper" required>
+                            </mat-form-field>
+                            <span [innerHTML]="option.unit_html" class="unit"></span>
+                        </div>
+                        <div class="help-text" matTooltip=
+                                "If the measured value is below the Min Warning value, a warning will be shown.
+                                If it's below the Min Critical value, a severe warning will be shown.
+                                If it's above a Max value warnings will be shown accordingly.
+                                Default values are our suggestions.">
+                            What do those numbers mean?
+                        </div>
+                        </ng-template>
+                    </mat-expansion-panel>
+                </div>
+            </mat-accordion>
+            <div>
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button matStepperNext>Next</button>
+            </div>
+        </mat-step>
+        <mat-step label="Done">
+            Done. Hit save or go back and make some more changes.
+            <div>
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button (click)="stepper.reset()">Reset</button>
+            </div>
+        </mat-step>
+    </mat-vertical-stepper>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
+    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="disableSave">Save</button>
+</mat-dialog-actions>
