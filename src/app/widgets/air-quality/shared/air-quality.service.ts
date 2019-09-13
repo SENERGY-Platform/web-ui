@@ -47,7 +47,7 @@ export class AirQualityService {
             widgetId: widgetId,
             dashboardId: dashboardId
         };
-        dialogConfig.minWidth = '650px';
+        dialogConfig.minWidth = '700px';
         const editDialogRef = this.dialog.open(AirQualityEditDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
@@ -76,7 +76,9 @@ export class AirQualityService {
             return;
         }
         const series = influxData.results[0].series[0];
-        measurement.data.value = this.getValue(measurement.data.column.Name, series) as number;
+        if (measurement.data && measurement.data.column) {
+            measurement.data.value = this.getValue(measurement.data.column.Name, series) as number;
+        }
     }
 
     private getData(measurement: MeasurementModel): Observable<ChartsExportModel> {

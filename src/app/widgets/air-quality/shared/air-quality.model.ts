@@ -16,17 +16,25 @@
 
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {ExportValueModel} from '../../../modules/data/export/shared/export.model';
-import {Location} from '@angular-material-extensions/google-maps-autocomplete';
+import {UBAData, UBAStation} from './uba.model';
+import {DWDSinglePollenForecast} from './dwd-pollen.model';
+import {YrWeatherModel} from './yr-weather.model';
 
 
 export interface AirQualityPropertiesModel {
     location?: (Location);
+    ubaStation?: (UBAStation);
     formatted_address?: (string);
     measurements?: (MeasurementModel[]);
+    dwd_partregion_name?: (string);
+    pollen?: (MeasurementModel[]);
+    weather?: (YrWeatherModel);
+    yrPath?: string;
 }
 
 export interface MeasurementModel {
     name_html: (string);
+    short_name: (string);
     description_html?: (string);
     is_enabled?: (boolean);
     is_warning?: (boolean);
@@ -34,13 +42,15 @@ export interface MeasurementModel {
     tooltip?: (string);
     export?: (ChartsExportMeasurementModel);
     unit_html: (string);
-    data: (SensorDataModel);
+    data?: (SensorDataModel);
     boundaries: (BoundaryModel);
+    ubaData?: (UBAData);
+    pollenData?: (DWDSinglePollenForecast);
 }
 
 export interface SensorDataModel {
     value: (number);
-    column: (ExportValueModel);
+    column?: (ExportValueModel);
 }
 
 export interface BoundaryModel {
@@ -52,3 +62,9 @@ export interface UpperLowerModel {
     lower: number;
     upper: number;
 }
+
+export interface Location {
+    longitude: number;
+    latitude: number;
+}
+

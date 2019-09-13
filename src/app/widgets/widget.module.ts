@@ -22,8 +22,10 @@ import {
     MatCardModule,
     MatCheckboxModule,
     MatDialogModule,
-    MatDividerModule, MatExpansionModule,
-    MatFormFieldModule, MatGridListModule,
+    MatDividerModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatGridListModule,
     MatIconModule,
     MatInputModule,
     MatListModule,
@@ -31,7 +33,8 @@ import {
     MatOptionModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    MatSlideToggleModule, MatStepperModule,
+    MatSlideToggleModule,
+    MatStepperModule,
     MatTableModule,
     MatTooltipModule
 } from '@angular/material';
@@ -78,8 +81,6 @@ import {EnergyPredictionComponent} from './energy-prediction/energy-prediction.c
 import {EnergyPredictionEditDialogComponent} from './energy-prediction/dialog/energy-prediction-edit-dialog.component';
 import {AirQualityComponent} from './air-quality/air-quality.component';
 import {AirQualityEditDialogComponent} from './air-quality/dialog/air-quality-edit-dialog.component';
-import {AgmCoreModule} from '@agm/core';
-import {MatGoogleMapsAutocompleteModule} from '@angular-material-extensions/google-maps-autocomplete';
 import {AngularFittextModule} from "angular-fittext";
 
 registerLocaleData(localeDe, 'de'); // todo: language;
@@ -113,12 +114,6 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         RouterModule,
         MatStepperModule,
         MatGridListModule,
-
-        AgmCoreModule.forRoot({
-            apiKey: 'placeholder', // TODO make env, currently just testing
-            libraries: ['places']
-        }),
-        MatGoogleMapsAutocompleteModule.forRoot(),
         MatExpansionModule,
         AngularFittextModule
     ],

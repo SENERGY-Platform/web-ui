@@ -14,39 +14,19 @@
  * limitations under the License.
  */
 
-
-.center {
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    width: 80%;
-    padding: 10px;
+export interface DWDPollenForecast {
+    forecast: DWDSinglePollenForecast[];
+    next_update?: Date;
 }
 
-.text-inside-grid {
-    position: absolute;
-    left: 5px;
+export interface DWDSinglePollenForecast {
+    name: string;
+    today: string;
+    tomorrow: string;
+    dayafter_to: string;
 }
 
-.boundary-input-field {
-    width: 15%;
-}
-
-.unit {
-    margin-left: 1%;
-    margin-right: 5%;
-}
-
-.help-text {
-    color: #4484ce;
-    font-size: smaller;
-}
-
-.small-error-text {
-    color: red;
-    font-size: smaller;
-}
-
-.searchbox {
-    min-width: 50%;
+export interface NameValuePair {
+    name: string;
+    value: number;
 }

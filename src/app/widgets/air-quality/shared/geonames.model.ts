@@ -14,39 +14,26 @@
  * limitations under the License.
  */
 
-
-.center {
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    width: 80%;
-    padding: 10px;
+export interface GeonamesResponse {
+    geonames: Geoname[];
 }
 
-.text-inside-grid {
-    position: absolute;
-    left: 5px;
-}
-
-.boundary-input-field {
-    width: 15%;
-}
-
-.unit {
-    margin-left: 1%;
-    margin-right: 5%;
-}
-
-.help-text {
-    color: #4484ce;
-    font-size: smaller;
-}
-
-.small-error-text {
-    color: red;
-    font-size: smaller;
-}
-
-.searchbox {
-    min-width: 50%;
+export interface Geoname {
+    adminCode1: string;
+    adminCodes1: {ISO3166_2: string};
+    adminName1: string;
+    countryCode: string;
+    countryName: string;
+    countryId: string;
+    distance: string;
+    fcl: string;
+    fclName: string;
+    fcode: string;
+    fcodeName: string;
+    geonameId: number;
+    lat: string;
+    lng: string;
+    name: string;
+    population: number;
+    toponymName: string;
 }
