@@ -17,7 +17,7 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
-import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
+import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {CharacteristicsNewDialogComponent} from './dialogs/characteristics-new-dialog.component';
 import {Navigation, Router} from '@angular/router';
@@ -25,6 +25,8 @@ import {CharacteristicsService} from './shared/characteristics.service';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-search.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -41,7 +43,7 @@ const grids = new Map([
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy {
 
-    characteristics: DeviceTypeCharacteristicsModel[] = [];
+    characteristics: CharacteristicsPermSearchModel[] = [];
     gridCols = 0;
     ready = false;
     routerConcept: DeviceTypeConceptModel | null = null;
@@ -60,7 +62,8 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                 private characteristicsService: CharacteristicsService,
                 private searchbarService: SearchbarService,
                 private snackBar: MatSnackBar,
-                private router: Router) {
+                private router: Router,
+                private dialogsService: DialogsService) {
         this.getRouterParams();
     }
 
@@ -113,6 +116,24 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.getCharacteristics(true);
     }
 
+    deleteCharacteristic(characteristic: CharacteristicsPermSearchModel): void {
+        this.dialogsService.openDeleteDialog('characteristic ' + characteristic.name).afterClosed().subscribe((deleteCharacteristic: boolean) => {
+            if (deleteCharacteristic) {
+                this.characteristicsService.deleteCharacteristic(characteristic.concept_id, characteristic.id).subscribe((resp: boolean) => {
+                    console.log(resp);
+                    if (resp === true) {
+                        this.characteristics.splice(this.characteristics.indexOf(characteristic), 1);
+                        this.snackBar.open('Characteristic deleted successfully.', undefined, {duration: 2000});
+                        this.setRepoItemsParams(1);
+                        this.reloadCharacterisitics(false);
+                    } else {
+                        this.snackBar.open('Error while deleting the characteristic!', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
+    }
+
     private getCharacteristics(reset: boolean) {
         if (reset) {
             this.reset();
@@ -121,19 +142,19 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             this.selectedTag = this.routerConcept.name;
             this.characteristicsService.getCharacteristicByConceptId(this.routerConcept.id, this.limit, this.offset,
                 this.sortAttribute.value, this.sortAttribute.order).subscribe(
-                (characteristics: DeviceTypeCharacteristicsModel[]) => {
+                (characteristics: CharacteristicsPermSearchModel[]) => {
                     this.setCharacteristics(characteristics);
                 });
         } else {
             this.characteristicsService.getCharacteristic(this.searchText, this.limit, this.offset, this.sortAttribute.value,
                 this.sortAttribute.order).subscribe(
-                (characteristics: DeviceTypeCharacteristicsModel[]) => {
+                (characteristics: CharacteristicsPermSearchModel[]) => {
                     this.setCharacteristics(characteristics);
                 });
         }
     }
 
-    private setCharacteristics(characteristics: DeviceTypeCharacteristicsModel[]) {
+    private setCharacteristics(characteristics: CharacteristicsPermSearchModel[]) {
         if (characteristics.length !== this.limit) {
             this.allDataLoaded = true;
         }

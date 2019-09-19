@@ -19,15 +19,12 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {
-    DeviceTypeCharacteristicsModel,
     DeviceTypeConceptModel,
-    DeviceTypeModel
 } from '../../device-types-overview/shared/device-type.model';
 import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
-import {ProcessModel} from '../../../processes/process-repo/shared/process.model';
-import {ProcessRepoConditionsModel} from '../../../processes/process-repo/shared/process-repo-conditions.model';
+import {CharacteristicsPermSearchModel} from './characteristics-perm-search.model';
 
 @Injectable({
     providedIn: 'root'
@@ -50,30 +47,30 @@ export class CharacteristicsService {
     //     );
     // }
     //
-    // deleteConcept(conceptId: string): Observable<boolean> {
-    //     return this.http.delete<boolean>(environment.deviceManagerUrl + '/concepts/' + conceptId).pipe(
-    //         catchError(this.errorHandlerService.handleError(ConceptsService.name, 'deleteConcept', false))
-    //     );
-    // }
-    //
+    deleteCharacteristic(conceptId: string, characteristicsId: string): Observable<boolean> {
+        return this.http.delete<boolean>(environment.deviceManagerUrl + '/concepts/' + conceptId + '/characteristics/' + characteristicsId).pipe(
+            catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'deleteCharacteristic', false))
+        );
+    }
 
-    getCharacteristicByConceptId(conceptId: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypeCharacteristicsModel[]> {
-        return this.http.get<DeviceTypeCharacteristicsModel[]>(environment.permissionSearchUrl + '/jwt/select/characteristics/concept_id/' + conceptId + '/r/' +
+
+    getCharacteristicByConceptId(conceptId: string, limit: number, offset: number, feature: string, order: string): Observable<CharacteristicsPermSearchModel[]> {
+        return this.http.get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/select/characteristics/concept_id/' + conceptId + '/r/' +
             limit + '/' + offset + '/' + feature + '/' + order).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic(list)', []))
         );
     }
 
-    getCharacteristic(query: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypeCharacteristicsModel[]> {
+    getCharacteristic(query: string, limit: number, offset: number, feature: string, order: string): Observable<CharacteristicsPermSearchModel[]> {
         if (query) {
-            return this.http.get<DeviceTypeCharacteristicsModel[]>(environment.permissionSearchUrl + '/jwt/search/characteristics/' +
+            return this.http.get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/characteristics/' +
                 encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic(search)', []))
             );
         } else {
-            return this.http.get<DeviceTypeCharacteristicsModel[]>(environment.permissionSearchUrl + '/jwt/list/characteristics/r/' +
+            return this.http.get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/characteristics/r/' +
                 limit + '/' + offset + '/' + feature + '/' + order).pipe(
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic(list)', []))

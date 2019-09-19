@@ -53,7 +53,8 @@
                                         <button mat-icon-button class="color-accent" matTooltip="Edit">
                                             <mat-icon>edit</mat-icon>
                                         </button>
-                                        <button mat-icon-button class="color-accent" matTooltip="Delete">
+                                        <button (click)="deleteCharacteristic(characteristic)"
+                                                mat-icon-button class="color-accent" matTooltip="Delete">
                                             <mat-icon>delete</mat-icon>
                                         </button>
                                     </div>
@@ -62,7 +63,7 @@
                         </mat-grid-tile-footer>
                     </mat-grid-tile>
                 </mat-grid-list>
-                <div *ngIf="characteristics.length === 0 && ready">No concept found.</div>
+                <div *ngIf="characteristics.length === 0 && ready">No characteristic found.</div>
                 <senergy-spinner [elementCount]="characteristics.length" [show]="!ready"></senergy-spinner>
             </div>
         </div>
