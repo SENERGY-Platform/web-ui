@@ -58,22 +58,22 @@ export class CharacteristicsService {
         return this.http.get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/select/characteristics/concept_id/' + conceptId + '/r/' +
             limit + '/' + offset + '/' + feature + '/' + order).pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic(list)', []))
+            catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristicByConceptId', []))
         );
     }
 
-    getCharacteristic(query: string, limit: number, offset: number, feature: string, order: string): Observable<CharacteristicsPermSearchModel[]> {
+    getCharacteristics(query: string, limit: number, offset: number, feature: string, order: string): Observable<CharacteristicsPermSearchModel[]> {
         if (query) {
             return this.http.get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/characteristics/' +
                 encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
                 map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic(search)', []))
+                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristics(search)', []))
             );
         } else {
             return this.http.get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/characteristics/r/' +
                 limit + '/' + offset + '/' + feature + '/' + order).pipe(
                 map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic(list)', []))
+                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristics(list)', []))
             );
         }
     }

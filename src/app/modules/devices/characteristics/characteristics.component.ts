@@ -146,7 +146,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                     this.setCharacteristics(characteristics);
                 });
         } else {
-            this.characteristicsService.getCharacteristic(this.searchText, this.limit, this.offset, this.sortAttribute.value,
+            this.characteristicsService.getCharacteristics(this.searchText, this.limit, this.offset, this.sortAttribute.value,
                 this.sortAttribute.order).subscribe(
                 (characteristics: CharacteristicsPermSearchModel[]) => {
                     this.setCharacteristics(characteristics);
