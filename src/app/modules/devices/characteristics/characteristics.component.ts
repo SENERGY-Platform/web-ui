@@ -17,7 +17,7 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
-import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
+import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {CharacteristicsNewDialogComponent} from './dialogs/characteristics-new-dialog.component';
 import {Navigation, Router} from '@angular/router';
@@ -27,6 +27,8 @@ import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-search.model';
+import {ConceptsEditDialogComponent} from '../concepts/dialogs/concepts-edit-dialog.component';
+import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -94,7 +96,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(CharacteristicsNewDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((resp: { conceptId: string, characteristic: DeviceTypeConceptModel }) => {
+        editDialogRef.afterClosed().subscribe((resp: { conceptId: string, characteristic: DeviceTypeCharacteristicsModel }) => {
             if (resp !== undefined) {
                 this.reset();
                 this.characteristicsService.createCharacteristic(resp.conceptId, resp.characteristic).subscribe((characteristic) => {
@@ -107,7 +109,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                     }
                 });
             }
-        });
+        }); 
     }
 
     tagRemoved(): void {
@@ -128,6 +130,32 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                         this.reloadCharacterisitics(false);
                     } else {
                         this.snackBar.open('Error while deleting the characteristic!', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
+    }
+
+    editCharacteristic(inputCharacteristic: CharacteristicsPermSearchModel): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            characteristic: JSON.parse(JSON.stringify(inputCharacteristic))         // create copy of object
+        };
+
+        const editDialogRef = this.dialog.open(CharacteristicsEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((newCharacteristic: DeviceTypeCharacteristicsModel) => {
+            if (newCharacteristic !== undefined) {
+                console.log(newCharacteristic);
+                this.reset();
+                this.characteristicsService.updateConcept(inputCharacteristic.concept_id, newCharacteristic).subscribe((characteristic: (DeviceTypeCharacteristicsModel | null)) => {
+                    if (characteristic === null) {
+                        this.snackBar.open('Error while updating the characteristic!', undefined, {duration: 2000});
+                        this.getCharacteristics(true);
+                    } else {
+                        this.snackBar.open('Characteristic updated successfully.', undefined, {duration: 2000});
+                        this.reloadCharacterisitics(true);
                     }
                 });
             }

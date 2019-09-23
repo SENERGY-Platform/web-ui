@@ -50,7 +50,8 @@
                                 <form fxLayout="row" class="footer-buttons">
                                     <div fxFlex></div>
                                     <div [fxLayoutAlign]="'start center'">
-                                        <button mat-icon-button class="color-accent" matTooltip="Edit">
+                                        <button (click)="editCharacteristic(characteristic)"
+                                                mat-icon-button class="color-accent" matTooltip="Edit">
                                             <mat-icon>edit</mat-icon>
                                         </button>
                                         <button (click)="deleteCharacteristic(characteristic)"

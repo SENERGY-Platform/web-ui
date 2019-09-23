@@ -19,6 +19,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {
+    DeviceTypeCharacteristicsModel,
     DeviceTypeConceptModel,
 } from '../../device-types-overview/shared/device-type.model';
 import {Observable} from 'rxjs';
@@ -35,18 +36,18 @@ export class CharacteristicsService {
                 private errorHandlerService: ErrorHandlerService) {
     }
 
-    createCharacteristic(conceptId: string, characteristic: DeviceTypeConceptModel): Observable<DeviceTypeConceptModel | null> {
-        return this.http.post<DeviceTypeConceptModel>(environment.deviceManagerUrl + '/concepts/' + conceptId + '/characteristics', characteristic).pipe(
+    createCharacteristic(conceptId: string, characteristic: DeviceTypeCharacteristicsModel): Observable<DeviceTypeCharacteristicsModel | null> {
+        return this.http.post<DeviceTypeCharacteristicsModel>(environment.deviceManagerUrl + '/concepts/' + conceptId + '/characteristics', characteristic).pipe(
             catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'createCharacteristic', null))
         );
     }
 
-    // updateConcept(concept: DeviceTypeConceptModel): Observable<DeviceTypeConceptModel | null> {
-    //     return this.http.put<DeviceTypeConceptModel>(environment.deviceManagerUrl + '/concepts/' + concept.id, concept).pipe(
-    //         catchError(this.errorHandlerService.handleError(ConceptsService.name, 'createConcept', null))
-    //     );
-    // }
-    //
+    updateConcept(conceptId: string, characteristics: DeviceTypeCharacteristicsModel): Observable<DeviceTypeCharacteristicsModel | null> {
+        return this.http.put<DeviceTypeCharacteristicsModel>(environment.deviceManagerUrl + '/concepts/' + conceptId + '/characteristics/' + characteristics.id , characteristics).pipe(
+            catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'updateConcept', null))
+        );
+    }
+
     deleteCharacteristic(conceptId: string, characteristicsId: string): Observable<boolean> {
         return this.http.delete<boolean>(environment.deviceManagerUrl + '/concepts/' + conceptId + '/characteristics/' + characteristicsId).pipe(
             catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'deleteCharacteristic', false))
@@ -59,6 +60,13 @@ export class CharacteristicsService {
             limit + '/' + offset + '/' + feature + '/' + order).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristicByConceptId', []))
+        );
+    }
+
+    getCharacteristic(characteristicsId: string): Observable<CharacteristicsPermSearchModel[]> {
+        return this.http.get<CharacteristicsPermSearchModel[]>(environment.semanticRepoUrl + '/characteristics/' + characteristicsId).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic', []))
         );
     }
 
