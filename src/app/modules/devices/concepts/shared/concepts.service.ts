@@ -24,6 +24,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ProcessModel} from '../../../processes/process-repo/shared/process.model';
 import {ProcessRepoConditionsModel} from '../../../processes/process-repo/shared/process-repo-conditions.model';
+import {ConceptsPermSearchModel} from './concepts-perm-search.model';
 
 @Injectable({
     providedIn: 'root'
@@ -52,15 +53,15 @@ export class ConceptsService {
         );
     }
 
-    getConcepts(query: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypeConceptModel[]> {
+    getConcepts(query: string, limit: number, offset: number, feature: string, order: string): Observable<ConceptsPermSearchModel[]> {
         if (query) {
-            return this.http.get<DeviceTypeConceptModel[]>(environment.permissionSearchUrl + '/jwt/search/concepts/' +
+            return this.http.get<ConceptsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/concepts/' +
                 encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(search)', []))
             );
         } else {
-            return this.http.get<DeviceTypeConceptModel[]>(environment.permissionSearchUrl + '/jwt/list/concepts/r/' +
+            return this.http.get<ConceptsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/concepts/r/' +
                 limit + '/' + offset + '/' + feature + '/' + order).pipe(
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(list)', []))

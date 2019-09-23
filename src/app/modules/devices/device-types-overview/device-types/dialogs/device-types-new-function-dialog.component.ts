@@ -26,6 +26,7 @@ import {
 import {util} from 'jointjs';
 import uuid = util.uuid;
 import {ConceptsService} from '../../../concepts/shared/concepts.service';
+import {ConceptsPermSearchModel} from '../../../concepts/shared/concepts-perm-search.model';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',
@@ -35,7 +36,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
 
     nameControl = new FormControl('', [Validators.required]);
     conceptControl = new FormControl('', [Validators.required]);
-    concepts: DeviceTypeConceptModel[] = [];
+    concepts: ConceptsPermSearchModel[] = [];
     functionType = {} as DeviceTypeFunctionType;
 
     constructor(private snackBar: MatSnackBar,
@@ -66,7 +67,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: DeviceTypeConceptModel[]) => {
+        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: ConceptsPermSearchModel[]) => {
             this.concepts = concepts;
         });
     }

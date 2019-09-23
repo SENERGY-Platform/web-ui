@@ -23,6 +23,7 @@ import {ConceptsService} from '../../concepts/shared/concepts.service';
 import {jsonValidator} from '../../../../core/validators/json.validator';
 import {CharacteristicsPermSearchModel} from '../shared/characteristics-perm-search.model';
 import {CharacteristicsService} from '../shared/characteristics.service';
+import {ConceptsPermSearchModel} from '../../concepts/shared/concepts-perm-search.model';
 
 @Component({
     templateUrl: './characteristics-edit-dialog.component.html',
@@ -33,7 +34,7 @@ export class CharacteristicsEditDialogComponent implements OnInit {
     conceptControl = new FormControl({value: '', disabled: true}, [Validators.required]);
     characteristicControl = new FormControl('', [Validators.required, jsonValidator(false)]);
     characteristics!: CharacteristicsPermSearchModel;
-    concepts: DeviceTypeConceptModel[] = [];
+    concepts: ConceptsPermSearchModel[] = [];
 
     constructor(private conceptsService: ConceptsService,
                 private characteristicsService: CharacteristicsService,
@@ -44,7 +45,7 @@ export class CharacteristicsEditDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: DeviceTypeConceptModel[]) => {
+        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: ConceptsPermSearchModel[]) => {
             this.concepts = concepts;
         });
         this.characteristicsService.getCharacteristic(this.characteristics.id).subscribe((resp) => {
