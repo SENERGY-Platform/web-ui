@@ -21,6 +21,7 @@ import {FormControl, Validators} from '@angular/forms';
 import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
 import {jsonValidator} from '../../../../core/validators/json.validator';
+import {ConceptsPermSearchModel} from '../../concepts/shared/concepts-perm-search.model';
 
 @Component({
     templateUrl: './characteristics-new-dialog.component.html',
@@ -30,14 +31,14 @@ export class CharacteristicsNewDialogComponent implements OnInit {
 
     conceptControl = new FormControl('', [Validators.required]);
     characteristicControl = new FormControl('', [Validators.required, jsonValidator(false)]);
-    concepts: DeviceTypeConceptModel[] = [];
+    concepts: ConceptsPermSearchModel[] = [];
 
     constructor(private conceptsService: ConceptsService,
         private dialogRef: MatDialogRef<CharacteristicsNewDialogComponent>) {
     }
 
     ngOnInit(): void {
-        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: DeviceTypeConceptModel[]) => {
+        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: ConceptsPermSearchModel[]) => {
             this.concepts = concepts;
         });
     }
