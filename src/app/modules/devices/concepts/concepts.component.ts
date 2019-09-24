@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
-import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {Router} from '@angular/router';
 import {ConceptsService} from './shared/concepts.service';
@@ -26,6 +25,8 @@ import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
+import {ConceptsPermSearchModel} from './shared/concepts-perm-search.model';
+import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -42,7 +43,7 @@ const grids = new Map([
 })
 export class ConceptsComponent implements OnInit, OnDestroy {
 
-    concepts: DeviceTypeConceptModel[] = [];
+    concepts: ConceptsPermSearchModel[] = [];
     gridCols = 0;
     ready = false;
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
@@ -106,18 +107,18 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         });
     }
 
-    editConcept(conceptInput: DeviceTypeConceptModel) {
+    editConcept(conceptInput: ConceptsPermSearchModel) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
-            concept: conceptInput
+            conceptId: conceptInput.id
         };
         const editDialogRef = this.dialog.open(ConceptsEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((newConcept: DeviceTypeConceptModel) => {
-            if (newConcept !== undefined) {
+        editDialogRef.afterClosed().subscribe((editConcept: DeviceTypeConceptModel) => {
+            if (editConcept !== undefined) {
                 this.reset();
-                this.conceptsService.updateConcept(newConcept).subscribe((concept: (DeviceTypeConceptModel | null)) => {
+                this.conceptsService.updateConcept(editConcept).subscribe((concept: (DeviceTypeConceptModel | null)) => {
                     if (concept === null) {
                         this.snackBar.open('Error while updating the concept!', undefined, {duration: 2000});
                         this.getConcepts(true);
@@ -130,7 +131,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         });
     }
 
-    deleteConcept(concept: DeviceTypeConceptModel): void {
+    deleteConcept(concept: ConceptsPermSearchModel): void {
         this.dialogsService.openDeleteDialog('concept ' + concept.name).afterClosed().subscribe((deleteConcept: boolean) => {
             if (deleteConcept) {
                 this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
@@ -148,7 +149,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         });
     }
 
-    showCharacteristics(concept: DeviceTypeConceptModel) {
+    showCharacteristics(concept: ConceptsPermSearchModel) {
         this.router.navigateByUrl('/devices/characteristics', {state: concept});
     }
 
@@ -158,7 +159,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         }
         this.conceptsService.getConcepts(this.searchText, this.limit, this.offset, this.sortAttribute.value,
             this.sortAttribute.order).subscribe(
-            (concepts: DeviceTypeConceptModel[]) => {
+            (concepts: ConceptsPermSearchModel[]) => {
                 if (concepts.length !== this.limit) {
                     this.allDataLoaded = true;
                 }

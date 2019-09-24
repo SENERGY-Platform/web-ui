@@ -47,6 +47,12 @@ export class ConceptsService {
         );
     }
 
+    getConceptWithoutCharacteristics(conceptId: string): Observable<DeviceTypeConceptModel | null> {
+        return this.http.get<DeviceTypeConceptModel>(environment.semanticRepoUrl + '/concepts/' + conceptId + '?sub-class=false').pipe(
+            catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcept', null))
+        );
+    }
+
     deleteConcept(conceptId: string): Observable<boolean> {
         return this.http.delete<boolean>(environment.deviceManagerUrl + '/concepts/' + conceptId).pipe(
             catchError(this.errorHandlerService.handleError(ConceptsService.name, 'deleteConcept', false))

@@ -15,24 +15,36 @@
  *  limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import {FormControl, Validators} from '@angular/forms';
 import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
+import {ConceptsPermSearchModel} from '../shared/concepts-perm-search.model';
+import {ConceptsService} from '../shared/concepts.service';
 
 @Component({
     templateUrl: './concepts-edit-dialog.component.html',
     styleUrls: ['./concepts-edit-dialog.component.css']
 })
-export class ConceptsEditDialogComponent {
+export class ConceptsEditDialogComponent implements OnInit{
 
-    concept: DeviceTypeConceptModel;
+    conceptId: string;
     formControl = new FormControl('', [Validators.required]);
+    concept!: DeviceTypeConceptModel;
 
     constructor(private dialogRef: MatDialogRef<ConceptsEditDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: { concept: DeviceTypeConceptModel}) {
-        this.concept = data.concept;
-        this.formControl.setValue(this.concept.name);
+                @Inject(MAT_DIALOG_DATA) data: { conceptId: string},
+                private conceptsService: ConceptsService) {
+        this.conceptId = data.conceptId;
+    }
+
+    ngOnInit(): void {
+        this.conceptsService.getConceptWithoutCharacteristics(this.conceptId).subscribe((concept: DeviceTypeConceptModel | null) => {
+            if (concept !== null) {
+                this.concept = concept;
+                this.formControl.setValue(this.concept.name);
+            }
+        });
     }
 
     close(): void {
