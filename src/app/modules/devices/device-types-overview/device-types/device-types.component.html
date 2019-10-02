@@ -208,6 +208,10 @@
 
                         </mat-tab-group>
                         <div fxLayoutAlign="end center">
+                            <button (click)="showConcepts(control.value.functions)" mat-icon-button class="mat-accent"
+                                    matTooltip="show related concepts">
+                                <mat-icon>info</mat-icon>
+                            </button>
                             <button (click)="deleteService(control.value)" mat-icon-button class="mat-accent"
                                     matTooltip="delete service" [disabled]="!editable">
                                 <mat-icon>delete</mat-icon>

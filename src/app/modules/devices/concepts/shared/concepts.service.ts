@@ -25,6 +25,7 @@ import {catchError, map} from 'rxjs/operators';
 import {ProcessModel} from '../../../processes/process-repo/shared/process.model';
 import {ProcessRepoConditionsModel} from '../../../processes/process-repo/shared/process-repo-conditions.model';
 import {ConceptsPermSearchModel} from './concepts-perm-search.model';
+import {ConceptsCharacteristicsModel} from './concepts-characteristics.model';
 
 @Injectable({
     providedIn: 'root'
@@ -49,6 +50,12 @@ export class ConceptsService {
 
     getConceptWithoutCharacteristics(conceptId: string): Observable<DeviceTypeConceptModel | null> {
         return this.http.get<DeviceTypeConceptModel>(environment.semanticRepoUrl + '/concepts/' + conceptId + '?sub-class=false').pipe(
+            catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcept', null))
+        );
+    }
+
+    getConceptWithCharacteristics(conceptId: string): Observable<ConceptsCharacteristicsModel | null> {
+        return this.http.get<ConceptsCharacteristicsModel>(environment.semanticRepoUrl + '/concepts/' + conceptId + '?sub-class=true').pipe(
             catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcept', null))
         );
     }

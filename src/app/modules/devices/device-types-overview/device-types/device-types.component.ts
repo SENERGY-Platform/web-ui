@@ -36,6 +36,8 @@ import {ActivatedRoute} from '@angular/router';
 import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
 import {util} from 'jointjs';
 import uuid = util.uuid;
+import {ConceptsService} from '../../concepts/shared/concepts.service';
+import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
 
 
 const functionTypes: DeviceTypeFunctionType[] = [
@@ -121,6 +123,15 @@ export class DeviceTypesComponent implements OnInit {
     deleteService(deviceTypeService: DeviceTypeServiceModel) {
         const control = <FormArray>this.secondFormGroup.controls['services'];
         control.removeAt(this.secondFormGroup.value.services.indexOf(deviceTypeService));
+    }
+
+    showConcepts(functions: DeviceTypeFunctionModel[]) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            functions: functions,
+        };
+        this.dialog.open(DeviceTypesShowConceptDialogComponent, dialogConfig);
     }
 
     compare(a: any, b: any): boolean {

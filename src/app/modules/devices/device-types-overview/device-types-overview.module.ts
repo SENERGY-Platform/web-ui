@@ -51,6 +51,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {DeviceTypesNewDeviceClassDialogComponent} from './device-types/dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './device-types/dialogs/device-types-new-function-dialog.component';
 import {DeviceTypesNewAspectDialogComponent} from './device-types/dialogs/device-types-new-aspect-dialog.component';
+import {DeviceTypesShowConceptDialogComponent} from './device-types/dialogs/device-types-show-concept-dialog.component';
 
 const devicetypes = {path: 'devices/devicetypesoverview/devicetypes', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Devices' }};
 const devicetypesEdit = {path: 'devices/devicetypesoverview/devicetypes/:id', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Devices' }};
@@ -94,11 +95,13 @@ const devicetypesEdit = {path: 'devices/devicetypesoverview/devicetypes/:id', pa
         DeviceTypesNewDeviceClassDialogComponent,
         DeviceTypesNewFunctionDialogComponent,
         DeviceTypesNewAspectDialogComponent,
+        DeviceTypesShowConceptDialogComponent,
     ],
     entryComponents: [
         DeviceTypesNewDeviceClassDialogComponent,
         DeviceTypesNewFunctionDialogComponent,
         DeviceTypesNewAspectDialogComponent,
+        DeviceTypesShowConceptDialogComponent,
     ]
 })
 export class DeviceTypesOverviewModule {
