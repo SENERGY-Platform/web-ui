@@ -106,9 +106,9 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     }
 
     downloadDiagram(process: ProcessModel): void {
-        this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel[] | null) => {
+        this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel | null) => {
             if (processModel) {
-                const xml = this.utilService.convertJSONtoXML(processModel[0].process);
+                const xml = this.utilService.convertJSONtoXML(processModel.process);
                 const file = new Blob([xml], {type: 'application/bpmn-xml'});
                 saveAs(file, process.name + '.bpmn');
             }
@@ -123,8 +123,8 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     deleteProcess(process: ProcessModel): void {
         this.dialogsService.openDeleteDialog('process').afterClosed().subscribe((deleteProcess: boolean) => {
             if (deleteProcess) {
-                this.processRepoService.deleteProcess(process.id).subscribe((resp: { status: string }) => {
-                    if (resp.status === 'OK') {
+                this.processRepoService.deleteProcess(process.id).subscribe((resp: {status: number}) => {
+                    if (resp.status === 200) {
                         this.repoItems.splice(this.repoItems.indexOf(process), 1);
                         this.snackBar.open('Process deleted successfully.', undefined, {duration: 2000});
                     } else {
@@ -137,15 +137,15 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     copyProcess(process: ProcessModel): void {
         this.reset();
-        this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel[] | null) => {
+        this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel | null) => {
             if (processModel) {
-                const newProcess = processModel[0].process;
+                const newProcess = processModel.process;
                 newProcess.definitions.process._id = newProcess.definitions.process._id + '_Copy';  // todo: translation
                 if (newProcess.definitions.collaboration) {
                     newProcess.definitions.collaboration.participant._processRef =
                         newProcess.definitions.collaboration.participant._processRef + '_Copy';  // todo: translation
                 }
-                this.processRepoService.saveProcess('', newProcess, processModel[0].svgXML).subscribe(
+                this.processRepoService.saveProcess('', newProcess, processModel.svgXML).subscribe(
                     (processResp: DesignerProcessModel | null) => {
                         if (processResp === null) {
                             this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
