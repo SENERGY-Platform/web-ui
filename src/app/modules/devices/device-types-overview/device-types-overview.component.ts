@@ -123,7 +123,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     newInstance(deviceType: DeviceTypePermSearchModel): void {
-        this.deviceInstancesService.openDeviceCreateDialog(deviceType.id);
+        this.deviceInstancesService.openDeviceCreateDialog(deviceType);
     }
 
     private updateDeviceType(deviceTypeResp: DeviceTypeModel, deviceTypeInput: DeviceTypePermSearchModel) {

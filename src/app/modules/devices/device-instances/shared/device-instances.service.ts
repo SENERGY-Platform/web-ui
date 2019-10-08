@@ -28,6 +28,7 @@ import {DeviceTypeModel} from '../../device-types-overview/shared/device-type.mo
 import {DeviceTypeService} from '../../device-types-overview/shared/device-type.service';
 import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
+import {DeviceTypePermSearchModel} from '../../device-types-overview/shared/device-type-perm-search.model';
 
 ​
 
@@ -171,12 +172,12 @@ export class DeviceInstancesService {
         });
     }
 
-    openDeviceCreateDialog(deviceTypeId: string): void {
+    openDeviceCreateDialog(deviceType: DeviceTypePermSearchModel): void {
 
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            // device: {device_type_id: deviceTypeId} as DeviceInstancesModel
+            device: {device_type: JSON.parse(JSON.stringify(deviceType))} as DeviceInstancesModel
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);

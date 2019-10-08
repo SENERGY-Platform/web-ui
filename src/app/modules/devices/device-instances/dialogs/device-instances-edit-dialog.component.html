@@ -22,7 +22,10 @@
             <input matInput placeholder="ID" disabled value="{{device.id}}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
-            <input matInput placeholder="Devicetype ID" disabled value="{{device.device_type_id}}">
+            <input matInput placeholder="Devicetype ID" disabled value="{{device.device_type.id}}">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
+            <input matInput placeholder="Devicetype Name" disabled value="{{device.device_type.name}}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="Name" [(ngModel)]="device.name" [ngModelOptions]="{standalone: true}">
