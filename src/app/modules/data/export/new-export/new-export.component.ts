@@ -94,7 +94,7 @@ export class NewExportComponent implements OnInit {
 
     deviceChanged(device: DeviceInstancesModel) {
         if (this.device !== device) {
-            this.deviceTypeService.getDeviceType(device.device_type_id).subscribe((resp: DeviceTypeModel | null) => {
+            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((resp: DeviceTypeModel | null) => {
                 if (resp !== null) {
                     this.deviceType = resp;
                 }

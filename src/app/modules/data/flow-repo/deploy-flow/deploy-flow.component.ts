@@ -154,7 +154,7 @@ export class DeployFlowComponent {
 
     deviceChanged(device: DeviceInstancesModel, inputId: string, port: string) {
         if (this.selectedValues.get(inputId).get(port).device !== device) {
-            this.deviceTypeService.getDeviceType(device.device_type_id).subscribe((resp: DeviceTypeModel | null) => {
+            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((resp: DeviceTypeModel | null) => {
                 if (resp !== null) {
                     this.deviceTypes[inputId][port] = resp;
                 }

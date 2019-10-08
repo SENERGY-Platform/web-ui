@@ -176,7 +176,7 @@ export class DeviceInstancesService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            device: {device_type_id: deviceTypeId} as DeviceInstancesModel
+            // device: {device_type_id: deviceTypeId} as DeviceInstancesModel
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
@@ -200,7 +200,7 @@ export class DeviceInstancesService {
             id: deviceOut.id,
             local_id: deviceOut.local_id,
             name: deviceOut.name,
-            device_type_id: deviceOut.device_type_id,
+            device_type_id: deviceOut.device_type.id,
         };
     }
 }

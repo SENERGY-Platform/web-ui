@@ -20,7 +20,7 @@ export interface DeviceTypePermSearchModel {
     description: string;
     device_class: string;
     id: string;
-    img: string;
+    image: string;
     name: string;
     services: string[] | string;
     permissions: {

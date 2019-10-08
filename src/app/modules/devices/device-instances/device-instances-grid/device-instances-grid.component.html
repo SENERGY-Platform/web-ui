@@ -20,7 +20,7 @@
                    *ngIf="deviceInstances.length > 0">
         <mat-grid-tile class="mat-elevation-z1" *ngFor="let device of deviceInstances">
             <div class="background" fxFill>
-                <!--<img class="device-icon" src="{{device.img}}">-->
+                <img class="device-icon" src="{{device.device_type.image}}">
             </div>
             <mat-grid-tile-footer>
                 <div fxLayout="column" fxFill>
