@@ -84,7 +84,8 @@
                                                 <mat-icon>insert_photo</mat-icon>
                                                 <span>Download SVG</span>
                                             </button>
-                                            <button mat-menu-item [disabled]="item.permissions.x === false">
+                                            <button mat-menu-item routerLink="/processes/deployments/{{item.id}}"
+                                                    [disabled]="item.permissions.x === false">
                                                 <mat-icon>publish</mat-icon>
                                                 <span>Deploy</span>
                                             </button>
