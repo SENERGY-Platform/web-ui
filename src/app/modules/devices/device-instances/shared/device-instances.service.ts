@@ -74,7 +74,7 @@ export class DeviceInstancesService {
 
     saveDeviceInstance(device: DeviceInstancesUpdateModel): Observable<DeviceInstancesUpdateModel | null> {
         return this.http.post<DeviceInstancesUpdateModel>
-        (environment.iotRepoUrl + '/deviceInstance', device).pipe(
+        (environment.deviceManagerUrl + '/devices', device).pipe(
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'saveDeviceInstance', null))
         );
     }
@@ -176,7 +176,7 @@ export class DeviceInstancesService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            device: {devicetype: deviceTypeId} as DeviceInstancesModel
+            device: {device_type_id: deviceTypeId} as DeviceInstancesModel
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
@@ -197,13 +197,10 @@ export class DeviceInstancesService {
 
     private convertDeviceInstance(deviceOut: DeviceInstancesModel): DeviceInstancesUpdateModel {
         return {
-            device_type: deviceOut.devicetype,
             id: deviceOut.id,
-            img: deviceOut.img,
+            local_id: deviceOut.local_id,
             name: deviceOut.name,
-            tags: deviceOut.tag,
-            uri: deviceOut.uri,
-            user_tags: deviceOut.usertag
+            device_type_id: deviceOut.device_type_id,
         };
     }
 }

@@ -20,21 +20,12 @@
                    *ngIf="deviceInstances.length > 0">
         <mat-grid-tile class="mat-elevation-z1" *ngFor="let device of deviceInstances">
             <div class="background" fxFill>
-                <img class="device-icon" src="{{device.img}}">
+                <!--<img class="device-icon" src="{{device.img}}">-->
             </div>
             <mat-grid-tile-footer>
                 <div fxLayout="column" fxFill>
                     <div class="truncate footer-item-header" matTooltip="{{device.name}}">
                         {{device.name}}
-                    </div>
-                    <div fxLayout="row" class="truncate footer-item-subtitle">
-                        <div class="tag color-accent" *ngFor="let tag of device.tag"
-                             matTooltip="{{tag | tagValue:''}}"
-                             (click)="emitTag(tag, 'tag')">{{tag | tagValue:'#'}} </div>
-                        <div class="tag color-accent" *ngFor="let tag of device.usertag"
-                             matTooltip="{{tag}}" (click)="emitTag(tag, 'usertag')">
-                            #{{tag}}</div>
-                        <div *ngIf="(device.tag === null || device.tag.length === 0) && (device.usertag === null || device.usertag.length === 0)" class="no-tags"></div>
                     </div>
                     <form fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                         <senergy-state-icon [state]="device.log_state"></senergy-state-icon>

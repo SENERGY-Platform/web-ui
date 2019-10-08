@@ -15,10 +15,23 @@
  *  limitations under the License.
  */
 
-export interface DeviceInstancesUpdateModel {
+export interface DeploymentsPreparedModel {
+    elements: DeploymentsPreparedElementModel[];
     id: string;
-    local_id: string;
+    lanes: any;
     name: string;
-    device_type_id: string;
+    svg: string;
+    xml: string;
+    xml_raw: string;
 }
+
+export interface DeploymentsPreparedElementModel {
+    Order: number;
+    Task: any;
+    MultiTask: any;
+    ReceiveTaskEvent: any;
+    MsgEvent: any;
+    TimeEvent: any;
+}
+
 

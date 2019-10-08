@@ -15,15 +15,17 @@
  */
 
 export interface DeviceInstancesModel {
-    id: string;
     creator: string;
+    device_type_id: string;
+    id: string;
+    local_id: string;
     name: string;
-    log_state: boolean;
-    tag: string[] | null;
-    usertag: string[] | null;
-    img: string;
-    devicetype: string;
-    uri: string;
+    permissions: {
+        a: boolean;
+        x: boolean;
+        r: boolean;
+        w: boolean;
+    };
     shared: boolean;
 }
 
