@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpResponse, HttpResponseBase} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
@@ -72,10 +72,9 @@ export class ProcessRepoService {
         }
     }
 
-    getProcessModel(id: string): Observable<DesignerProcessModel[] | null> {
-        return this.http.get<DesignerProcessModel[]>(environment.processRepoUrl + '/' + id).pipe(
-            map(resp => resp),
-            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModel()', []))
+    getProcessModel(id: string): Observable<DesignerProcessModel | null> {
+        return this.http.get<DesignerProcessModel>(environment.processRepoUrl + '/' + id).pipe(
+            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModel()', null))
         );
     }
 
@@ -98,14 +97,17 @@ export class ProcessRepoService {
         );
     }
 
-    deleteProcess(id: string): Observable<{ status: string }> {
-        return this.http.delete<{ status: string }>(environment.processRepoUrl + '/' + id).pipe(
-            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteProcess', {status: 'error'}))
+    deleteProcess(id: string): Observable<{status: number}> {
+        return this.http.delete<HttpResponseBase>(environment.processRepoUrl + '/' + id, {observe: 'response'}).pipe(
+            map(resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteProcess', {status: 500}))
         );
     }
 
     saveProcess(id: string, process: any, svgXML: string): Observable<DesignerProcessModel | null> {
-        const processModel: DesignerProcessModel = {owner: '', _id: '', svgXML: svgXML, process: process, date: Date.now()};
+        const processModel: DesignerProcessModel = {owner: '', _id: id, svgXML: svgXML, process: process, date: Date.now()};
         if (id === '') {
             return this.http.post<DesignerProcessModel>(environment.processRepoUrl, processModel).pipe(
                 catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'saveProcess', null))

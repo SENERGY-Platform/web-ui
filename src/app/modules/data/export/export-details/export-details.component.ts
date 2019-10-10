@@ -15,22 +15,10 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
-import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
-import {DeviceTypeService} from '../../../devices/device-types/shared/device-type.service';
-import {DeviceTypeAssignmentModel, DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-types/shared/device-type.model';
-import {ExportModel, ExportValueModel} from '../shared/export.model';
+import {ExportModel} from '../shared/export.model';
+import {ActivatedRoute} from '@angular/router';
 import {ExportService} from '../shared/export.service';
-import {MatSnackBar} from '@angular/material';
-import {PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shared/pipeline.model';
-import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {IOModel, OperatorModel} from '../../operator-repo/shared/operator.model';
-import {ValueTypesFieldTypeModel} from '../../../devices/value-types/shared/value-types.model';
-import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
-import {DialogsService} from '../../../../core/services/dialogs.service';
-import {ResponsiveService} from '../../../../core/services/responsive.service';
-import {ClipboardService} from 'ngx-clipboard';
+
 
 
 @Component({

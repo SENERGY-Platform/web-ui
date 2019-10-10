@@ -1,0 +1,249 @@
+<!--
+  ~
+  ~  Copyright 2019 InfAI (CC SES)
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<div class="device-type-container">
+    <mat-horizontal-stepper>
+        <mat-step [stepControl]="firstFormGroup">
+            <form [formGroup]="firstFormGroup">
+                <ng-template matStepLabel>Information</ng-template>
+                <div class="form">
+                    <mat-form-field class="full-width" color="accent">
+                        <input matInput placeholder="Id" formControlName="id">
+                    </mat-form-field>
+                    <mat-form-field class="full-width" color="accent">
+                        <input matInput placeholder="Name" formControlName="name" required>
+                    </mat-form-field>
+                    <mat-form-field class="full-width" color="accent">
+                        <input matInput placeholder="Description" formControlName="description">
+                    </mat-form-field>
+                    <mat-form-field class="full-width" color="accent">
+                        <input matInput placeholder="Image" formControlName="image">
+                    </mat-form-field>
+                    <table class="full-width" cellspacing="0">
+                        <tr>
+                            <td>
+                                <mat-form-field class="full-width" color="accent">
+                                    <mat-select placeholder="Device class" [compareWith]="compare"
+                                                formControlName="device_class" required>
+                                        <mat-option *ngFor="let deviceTypeClass of deviceTypeDeviceClasses"
+                                                    [value]="deviceTypeClass">
+                                            {{deviceTypeClass.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td class="table-button-size">
+                                <button mat-icon-button class="mat-accent" (click)="newDeviceClass()"
+                                        [disabled]="!editable">
+                                    <mat-icon matTooltip="Create Device Class">playlist_add</mat-icon>
+                                </button>
+                            </td>
+                    </table>
+                </div>
+            </form>
+        </mat-step>
+        <mat-step [stepControl]="secondFormGroup">
+            <form [formGroup]="secondFormGroup">
+                <ng-template matStepLabel>Service</ng-template>
+                <mat-accordion formArrayName="services" *ngIf="secondFormGroup.get('services')">
+                    <mat-expansion-panel [formGroupName]="i"
+                                         *ngFor="let control of secondFormGroup.get('services').controls; let i = index">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                Service {{control.value.name}}
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <mat-tab-group color="accent" headerPosition="above" dynamicHeight="true">
+                            <mat-tab label="Information">
+                                <div class="form">
+                                    <mat-form-field class="full-width" color="accent">
+                                        <input matInput placeholder="Id" formControlName="id">
+                                    </mat-form-field>
+                                    <table class="full-width" cellspacing="0">
+                                        <tr>
+                                            <td>
+                                                <mat-form-field class="full-width" color="accent">
+                                                    <mat-label>Function Type</mat-label>
+                                                    <mat-select formControlName="functionType" required>
+                                                        <mat-option
+                                                                *ngFor="let item of deviceTypeFunctionType"
+                                                                [value]="item">
+                                                            {{item.text}}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                            <td>
+                                                <mat-form-field class="full-width" color="accent">
+                                                    <mat-label>{{control.controls.functionType.invalid ? 'Function' : control.controls.functionType.value.text + ' Function'}}</mat-label>
+                                                    <mat-select formControlName="functions" multiple required
+                                                                [compareWith]="compare">
+                                                        <mat-select-trigger>
+                                                            {{control.controls.functions.value[0] ? control.controls.functions.value[0].name : ''}}
+                                                            <span *ngIf="control.controls.functions.value?.length > 1"
+                                                                  class="example-additional-selection">
+                                                                {{'(+' + (control.controls.functions.value.length - 1) + (control.controls.functions.value?.length === 2 ? ' other)' : ' others)')}}
+                                                                      </span>
+                                                        </mat-select-trigger>
+                                                        <mat-option *ngFor="let func of functions"
+                                                                    [value]="func">{{func.name}}</mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="table-button-size">
+                                                <button mat-icon-button class="mat-accent"
+                                                        (click)="openCreateFunctionDialog(i)"
+                                                        [disabled]="control.controls.functionType.invalid">
+                                                    <mat-icon
+                                                            matTooltip="{{control.controls.functionType.invalid ? 'Create Function' : 'Create ' + control.controls.functionType.value.text + ' Function'}}">
+                                                        playlist_add
+                                                    </mat-icon>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <mat-form-field class="full-width" color="accent">
+                                        <input matInput placeholder="Name" formControlName="name" required>
+                                    </mat-form-field>
+                                    <mat-form-field class="full-width" color="accent">
+                                        <input matInput placeholder="Description" formControlName="description">
+                                    </mat-form-field>
+                                    <mat-form-field class="full-width" color="accent">
+                                        <input matInput placeholder="Local Id" formControlName="local_id" required>
+                                    </mat-form-field>
+                                    <table class="full-width" cellspacing="0">
+                                        <tr>
+                                            <td>
+                                                <mat-form-field class="full-width" color="accent">
+                                                    <mat-label>Aspects</mat-label>
+                                                    <mat-select formControlName="aspects" multiple required
+                                                                [compareWith]="compare">
+                                                        <mat-select-trigger>
+                                                            {{control.controls.aspects.value[0] ? control.controls.aspects.value[0].name : ''}}
+                                                            <span *ngIf="control.controls.aspects.value?.length > 1"
+                                                                  class="example-additional-selection">
+                                                                {{'(+' + (control.controls.aspects.value.length - 1) + (control.controls.aspects.value?.length === 2 ? ' other)' : ' others)')}}
+                                                                      </span>
+                                                        </mat-select-trigger>
+                                                        <mat-option *ngFor="let aspect of aspects"
+                                                                    [value]="aspect">{{aspect.name}}</mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="table-button-size">
+                                                <button mat-icon-button class="mat-accent"
+                                                        (click)="newAspect(i)">
+                                                    <mat-icon
+                                                            matTooltip="Create Aspect">
+                                                        playlist_add
+                                                    </mat-icon>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <mat-form-field class="full-width" color="accent">
+                                        <mat-select placeholder="Protocol"
+                                                    formControlName="protocol_id"
+                                                    required>
+                                            <mat-option
+                                                    *ngFor="let item of protocols"
+                                                    [value]="item.id">
+                                                {{item.name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            </mat-tab>
+
+                            <mat-tab label="{{tab.label}}" disabled="{{control.value.protocol_id === null}}"
+                                     formArrayName="{{tab.formArrayName}}"
+                                     *ngFor="let tab of [{label: 'Input', formArrayName: 'inputs'},{label: 'Output', formArrayName: 'outputs'}]">
+                                <div [formGroupName]="i"
+                                     *ngFor="let control of control.get(tab.formArrayName).controls;  let i = index">
+                                    <div fxLayout="row" fxLayoutAlign="start center">
+                                        <button mat-icon-button class="mat-accent"
+                                                (click)="expand(control)">
+                                            <mat-icon>{{control.value.show ? 'expand_less' : 'expand_more'}}</mat-icon>
+                                        </button>
+                                        <div>{{control.value.name}}</div>
+                                    </div>
+
+                                    <div fxLayout="row" [fxShow]="control.value.show === true">
+                                        <div fxFlex>
+                                            <mat-form-field class="full-width" color="accent">
+                                                <mat-select placeholder="Serialization"
+                                                            formControlName="serialization">
+                                                    <mat-option>-- None --</mat-option>
+                                                    <mat-option *ngFor="let serialization of serializations"
+                                                                [value]="serialization">
+                                                        {{serialization}}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                            <mat-form-field class="full-width" color="accent">
+                                            <textarea formControlName="content_variable_raw" matInput
+                                                      placeholder="Insert data structure in json format"></textarea>
+                                                <mat-error *ngIf="control.controls.content_variable_raw.invalid">
+                                                Enter valid json!
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-tab>
+
+                        </mat-tab-group>
+                        <div fxLayoutAlign="end center">
+                            <button (click)="showConcepts(control.value.functions)" mat-icon-button class="mat-accent"
+                                    matTooltip="show related concepts">
+                                <mat-icon>info</mat-icon>
+                            </button>
+                            <button (click)="deleteService(control.value)" mat-icon-button class="mat-accent"
+                                    matTooltip="delete service" [disabled]="!editable">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+
+                    </mat-expansion-panel>
+                </mat-accordion>
+                <div class="button-margin" fxLayoutAlign="center center" *ngIf="editable">
+                    <button class="mat-raised-button color-accent" (click)="addService()">ADD Service</button>
+                </div>
+            </form>
+        </mat-step>
+        <mat-step *ngIf="editable">
+            <ng-template matStepLabel>Save</ng-template>
+            <div *ngIf="firstFormGroup.valid && secondFormGroup.valid">You are now done.</div>
+            <div *ngIf="firstFormGroup.invalid || secondFormGroup.invalid">Can't save, please fix errors.</div>
+            <div *ngIf="firstFormGroup.invalid">Error in section "1 Information".</div>
+            <div *ngIf="secondFormGroup.invalid">Error in section "2 Service". You need at least one service.</div>
+            <div>
+                <div fxFlex></div>
+                <button class="mat-raised-button color-accent button-save-margin" (click)="close()">Cancel</button>
+                <button class="mat-raised-button mat-accent button-save-margin" [disabled]="firstFormGroup.invalid || secondFormGroup.invalid"
+                        (click)="save()">Save
+                </button>
+            </div>
+        </mat-step>
+    </mat-horizontal-stepper>
+</div>
+
+
+
+
+
+

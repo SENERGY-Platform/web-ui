@@ -42,18 +42,22 @@ import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 
 import {DeviceInstancesComponent} from './device-instances/device-instances.component';
 import {NetworksComponent} from './networks/networks.component';
-import {ValueTypesComponent} from './value-types/value-types.component';
-import {DeviceTypesComponent} from './device-types/device-types.component';
+import {DeviceTypesOverviewComponent} from './device-types-overview/device-types-overview.component';
 import {CoreModule} from '../../core/core.module';
 import {NetworksEditDialogComponent} from './networks/dialogs/networks-edit-dialog.component';
 import {DeviceInstancesServiceDialogComponent} from './device-instances/dialogs/device-instances-service-dialog.component';
 import {DeviceInstancesEditDialogComponent} from './device-instances/dialogs/device-instances-edit-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NetworksClearDialogComponent} from './networks/dialogs/networks-clear-dialog.component';
-import {ValueTypesNewDialogComponent} from './value-types/dialogs/value-types-new-dialog.component';
-import {SelectDeviceTypeAndServiceDialogComponent} from './device-types/dialogs/select-device-type-and-service-dialog.component';
-import {DeviceTypesDialogComponent} from './device-types/dialogs/device-types-dialog.component';
+import {SelectDeviceTypeAndServiceDialogComponent} from './device-types-overview/dialogs/select-device-type-and-service-dialog.component';
 import {DeviceInstancesGridComponent} from './device-instances/device-instances-grid/device-instances-grid.component';
+import {DeviceTypesOverviewModule} from './device-types-overview/device-types-overview.module';
+import {ConceptsComponent} from './concepts/concepts.component';
+import {ConceptsNewDialogComponent} from './concepts/dialogs/concepts-new-dialog.component';
+import {CharacteristicsComponent} from './characteristics/characteristics.component';
+import {CharacteristicsNewDialogComponent} from './characteristics/dialogs/characteristics-new-dialog.component';
+import {ConceptsEditDialogComponent} from './concepts/dialogs/concepts-edit-dialog.component';
+import {CharacteristicsEditDialogComponent} from './characteristics/dialogs/characteristics-edit-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -62,8 +66,9 @@ const deviceInstances = {
     component: DeviceInstancesComponent,
     data: {header: 'Devices'}
 };
-const deviceTypes = {path: 'devices/devicetypes', pathMatch: 'full', component: DeviceTypesComponent, data: {header: 'Devices'}};
-const valueTypes = {path: 'devices/valuetypes', pathMatch: 'full', component: ValueTypesComponent, data: {header: 'Devices'}};
+const deviceTypes = {path: 'devices/devicetypesoverview', pathMatch: 'full', component: DeviceTypesOverviewComponent, data: {header: 'Devices'}};
+const concepts = {path: 'devices/concepts', pathMatch: 'full', component: ConceptsComponent, data: {header: 'Devices'}};
+const characteristics = {path: 'devices/characteristics', pathMatch: 'full', component: CharacteristicsComponent, data: {header: 'Devices'}};
 
 @NgModule({
     imports: [MatGridListModule,
@@ -97,30 +102,36 @@ const valueTypes = {path: 'devices/valuetypes', pathMatch: 'full', component: Va
         MatCheckboxModule,
         MatSortModule,
         MatProgressSpinnerModule,
-        RouterModule.forChild([networks, deviceInstances, deviceTypes, valueTypes])],
+        DeviceTypesOverviewModule,
+        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics])],
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,
         DeviceInstancesComponent,
-        DeviceTypesComponent,
-        ValueTypesComponent,
+        DeviceTypesOverviewComponent,
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
-        ValueTypesNewDialogComponent,
         SelectDeviceTypeAndServiceDialogComponent,
-        DeviceTypesDialogComponent,
         DeviceInstancesGridComponent,
+        ConceptsComponent,
+        ConceptsNewDialogComponent,
+        CharacteristicsComponent,
+        CharacteristicsNewDialogComponent,
+        ConceptsEditDialogComponent,
+        CharacteristicsEditDialogComponent,
     ],
     entryComponents: [
         NetworksEditDialogComponent,
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
-        ValueTypesNewDialogComponent,
         SelectDeviceTypeAndServiceDialogComponent,
-        DeviceTypesDialogComponent,
         DeviceInstancesGridComponent,
+        ConceptsNewDialogComponent,
+        CharacteristicsNewDialogComponent,
+        ConceptsEditDialogComponent,
+        CharacteristicsEditDialogComponent,
     ]
 })
 

@@ -24,8 +24,6 @@ import {COMMA, ENTER, SEMICOLON} from '@angular/cdk/keycodes';
     styleUrls: ['./device-instances-edit-dialog.component.css'],
 })
 export class DeviceInstancesEditDialogComponent implements OnInit {
-
-    readonly separatorKeysCodes: number[] = [ENTER, COMMA, SEMICOLON];
     device: DeviceInstancesModel;
 
     constructor(private dialogRef: MatDialogRef<DeviceInstancesEditDialogComponent>,
@@ -42,28 +40,5 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
 
     save(): void {
         this.dialogRef.close(this.device);
-    }
-
-    add(event: MatChipInputEvent): void {
-        const input = event.input;
-        const value = event.value;
-
-        if ((value || '').trim()) {
-            if (this.device.usertag) {
-                this.device.usertag.push(value.trim());
-            } else {
-                this.device.usertag = [value.trim()];
-            }
-        }
-
-        if (input) {
-            input.value = '';
-        }
-    }
-
-    remove(i: number): void {
-        if (this.device.usertag) {
-            this.device.usertag.splice(i, 1);
-        }
     }
 }

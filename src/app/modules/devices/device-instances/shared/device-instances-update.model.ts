@@ -16,12 +16,9 @@
  */
 
 export interface DeviceInstancesUpdateModel {
-    device_type: string;
     id: string;
-    img: string;
+    local_id: string;
     name: string;
-    tags: string[] | null;
-    uri: string;
-    user_tags: string[] | null;
+    device_type_id: string;
 }
 

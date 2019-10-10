@@ -42,7 +42,6 @@ import {DeleteDialogComponent} from './dialogs/delete-dialog.component';
 import {ShortInputVariableNamePipe} from './pipe/short-input-variable-name.pipe';
 import {ShortOutputVariableNamePipe} from './pipe/short-output-variable-name.pipe';
 import {ShortInputVariableValuePipe} from './pipe/short-input-variable-value.pipe';
-import {PreviewFormatPipe} from './pipe/preview-format.pipe';
 import {WidgetNoDataComponent} from './components/widget-no-data/widget-no-data.component';
 
 
@@ -79,7 +78,6 @@ import {WidgetNoDataComponent} from './components/widget-no-data/widget-no-data.
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
         DeleteDialogComponent,
-        PreviewFormatPipe,
         DeleteDialogComponent,
         WidgetNoDataComponent,
     ],
@@ -95,7 +93,6 @@ import {WidgetNoDataComponent} from './components/widget-no-data/widget-no-data.
         ShortOutputVariableNamePipe,
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
-        PreviewFormatPipe,
         WidgetNoDataComponent,
     ],
     entryComponents: [

@@ -36,8 +36,8 @@ import {
 import {
     DeviceTypeSelectionRefModel,
     DeviceTypeSelectionResultModel
-} from '../../devices/device-types/shared/device-type-selection.model';
-import {DeviceTypeDialogService} from '../../devices/device-types/shared/device-type-dialog.service';
+} from '../../devices/device-types-overview/shared/device-type-selection.model';
+import {DeviceTypeDialogService} from '../../devices/device-types-overview/shared/device-type-dialog.service';
 import {DesignerDialogService} from './shared/designer-dialog.service';
 import {DesignerService} from './shared/designer.service';
 import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
@@ -55,7 +55,6 @@ import {last} from 'rxjs/operators';
 export class ProcessDesignerComponent implements OnInit {
 
     modeler: any;
-    processModel: DesignerProcessModel[] = [];
     id = '';
 
     constructor(
@@ -173,10 +172,9 @@ export class ProcessDesignerComponent implements OnInit {
     }
 
     loadProcessDiagram(id: string) {
-        this.processRepoService.getProcessModel(id).subscribe((resp: DesignerProcessModel[] | null) => {
+        this.processRepoService.getProcessModel(id).subscribe((resp: DesignerProcessModel | null) => {
             if (resp !== null) {
-                this.processModel = resp;
-                const xml = this.utilService.convertJSONtoXML(this.processModel[0].process);
+                const xml = this.utilService.convertJSONtoXML(resp.process);
 
                 this.modeler.importXML(xml, this.handleError);
             }

@@ -64,6 +64,7 @@ import {HistoricDataConfigDialogComponent} from './designer/dialogs/historic-dat
 import {MonitorDetailsDialogComponent} from './monitor/dialogs/monitor-details-dialog.component';
 import {EmailConfigDialogComponent} from './designer/dialogs/email-config-dialog/email-config-dialog.component';
 import {DeploymentsMissingDependenciesDialogComponent} from './deployments/dialogs/deployments-missing-dependencies-dialog.component';
+import {ProcessDeploymentsConfigComponent} from './deployments/deployments-config/deployments-config.component';
 
 const processRepo = {
     path: 'processes/repository',
@@ -75,6 +76,12 @@ const processDeployments = {
     path: 'processes/deployments',
     pathMatch: 'full',
     component: ProcessDeploymentsComponent,
+    data: {header: 'Processes'}
+};
+const processDeploymentsConfig = {
+    path: 'processes/deployments/:id',
+    pathMatch: 'full',
+    component: ProcessDeploymentsConfigComponent,
     data: {header: 'Processes'}
 };
 const processMonitor = {
@@ -97,7 +104,7 @@ const processDesigner = {
 
 @NgModule({
     imports: [
-        RouterModule.forChild([processRepo, processDeployments, processMonitor, processDesignerEdit, processDesigner]),
+        RouterModule.forChild([processRepo, processDeployments, processMonitor, processDesignerEdit, processDesigner, processDeploymentsConfig]),
         FlexLayoutModule,
         CoreModule,
         CommonModule,
@@ -132,6 +139,7 @@ const processDesigner = {
     declarations: [
         ProcessRepoComponent,
         ProcessDeploymentsComponent,
+        ProcessDeploymentsConfigComponent,
         ProcessMonitorComponent,
         ProcessDesignerComponent,
         EditOutputDialogComponent,

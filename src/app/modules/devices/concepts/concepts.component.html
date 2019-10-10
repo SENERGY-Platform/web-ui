@@ -1,0 +1,82 @@
+<!--
+  ~ Copyright 2019 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="concepts-container">
+    <div fxLayout="row">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <senergy-sort [sortAttributes]="sortAttributes"
+                      (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+    </div>
+    <div class="main-panel">
+        <div infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [infiniteScrollContainer]="'.main-panel'"
+             [fromRoot]="true"
+             (scrolled)="onScroll()">
+            <div class="layout-margin" fxLayout="column">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+                               *ngIf="concepts.length > 0">
+                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let concept of concepts; let i = index">
+                        <div fxFill>
+                            <img class="background" src="src/img/concept.jpg">
+                        </div>
+                        <mat-grid-tile-footer>
+                            <div fxLayout="column" fxFill>
+                                <div class="truncate footer-item-header" matTooltip="{{concept.name}}">
+                                    {{concept.name}}
+                                </div>
+                                <form fxLayout="row" class="footer-buttons">
+                                    <div fxFlex></div>
+                                    <div [fxLayoutAlign]="'start center'">
+                                        <button mat-icon-button [matMenuTriggerFor]="menu" color="accent">
+                                            <mat-icon>more_vert</mat-icon>
+                                        </button>
+                                        <mat-menu #menu="matMenu" [overlapTrigger]="false">
+                                            <button mat-menu-item (click)="editConcept(concept)">
+                                                <mat-icon>edit</mat-icon>
+                                                <span>Change name</span>
+                                            </button>
+                                            <button mat-menu-item (click)="showCharacteristics(concept)">
+                                                <mat-icon>palette</mat-icon>
+                                                <span>characteristics</span>
+                                            </button>
+                                            <button mat-menu-item (click)="deleteConcept(concept)">
+                                                <mat-icon>delete</mat-icon>
+                                                <span>Delete</span>
+                                            </button>
+                                        </mat-menu>
+                                    </div>
+                                </form>
+                            </div>
+                        </mat-grid-tile-footer>
+                    </mat-grid-tile>
+                </mat-grid-list>
+                <div *ngIf="concepts.length === 0 && ready">No concept found.</div>
+                <senergy-spinner [elementCount]="concepts.length" [show]="!ready"></senergy-spinner>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button mat-fab class="fab" matTooltip="Add new concept" (click)="newConcept()">
+    <mat-icon>add</mat-icon>
+</button>
+
+
+
+
+

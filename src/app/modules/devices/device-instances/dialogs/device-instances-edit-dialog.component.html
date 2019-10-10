@@ -22,31 +22,16 @@
             <input matInput placeholder="ID" disabled value="{{device.id}}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
-            <input matInput placeholder="Devicetype" disabled value="{{device.devicetype}}">
+            <input matInput placeholder="Devicetype ID" disabled value="{{device.device_type.id}}">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
+            <input matInput placeholder="Devicetype Name" disabled value="{{device.device_type.name}}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="Name" [(ngModel)]="device.name" [ngModelOptions]="{standalone: true}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
-            <input matInput placeholder="Image" [(ngModel)]="device.img" [ngModelOptions]="{standalone: true}">
-        </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
-            <input matInput placeholder="URI" [(ngModel)]="device.uri" [ngModelOptions]="{standalone: true}">
-        </mat-form-field>
-        <mat-form-field class="full-width" color="accent">
-            <mat-chip-list #chipList>
-                <mat-chip *ngFor="let usertag of device.usertag; let i = index" color="accent" selected
-                          [removable]="true" (removed)="remove(i)">
-                    {{usertag}}
-                    <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-                <input
-                        [matChipInputFor]="chipList"
-                        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                        [matChipInputAddOnBlur]="true"
-                        (matChipInputTokenEnd)="add($event)"
-                placeholder="Tags">
-            </mat-chip-list>
+            <input matInput placeholder="Local ID" [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}">
         </mat-form-field>
     </form>
 </mat-dialog-content>

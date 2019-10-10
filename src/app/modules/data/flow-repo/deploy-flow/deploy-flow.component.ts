@@ -20,12 +20,15 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ConfigModel, ParseModel} from '../shared/parse.model';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
-import {DeviceTypeAssignmentModel, DeviceTypeModel, DeviceTypeServiceModel} from '../../../devices/device-types/shared/device-type.model';
-import {DeviceTypeService} from '../../../devices/device-types/shared/device-type.service';
+import {
+    DeviceTypeContentModel, DeviceTypeContentVariableModel,
+    DeviceTypeModel,
+    DeviceTypeServiceModel
+} from '../../../devices/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../../devices/device-types-overview/shared/device-type.service';
 import {FlowEngineService} from '../shared/flow-engine.service';
 import {NodeInput, NodeModel, NodeValue, PipelineRequestModel} from './shared/pipeline-request.model';
 import {MatSnackBar} from '@angular/material';
-import {ValueTypesFieldTypeModel} from '../../../devices/value-types/shared/value-types.model';
 
 @Component({
     selector: 'senergy-deploy-flow',
@@ -190,7 +193,7 @@ export class DeployFlowComponent {
 
     deviceChanged(device: DeviceInstancesModel, inputId: string, port: string) {
         if (this.selectedValues.get(inputId).get(port).device !== device) {
-            this.deviceTypeService.getDeviceType(device.devicetype).subscribe((resp: DeviceTypeModel | null) => {
+            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((resp: DeviceTypeModel | null) => {
                 if (resp !== null) {
                     this.deviceTypes[inputId][port] = resp;
                     this.paths[inputId][port] = [];
@@ -200,38 +203,41 @@ export class DeployFlowComponent {
     }
 
     serviceChanged(service: DeviceTypeServiceModel, inputId: string, port: string) {
+        console.log(service);
         const input = this.inputs.find(x => x.id === inputId);
         this.vals = [];
         let pathString = 'value';
         if (input !== undefined && input.deploymentType === 'local') {
             pathString = '';
-            service.output.forEach((out: DeviceTypeAssignmentModel) => {
-                if (out.type.fields != null) {
-                    pathString += out.msg_segment.name;
-                    out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
-                        this.traverseDataStructure(pathString, field);
-                    });
-                }
+            service.outputs.forEach((out: DeviceTypeContentModel) => {
+                // if (out.type.fields != null) {
+                //     pathString += out.content_variable.name;
+                    // out.content_variable.fields.forEach((field: ValueTypesFieldTypeModel) => {
+                        this.traverseDataStructure(pathString, out.content_variable);
+                    // });
+                // }
             });
         } else {
-            service.output.forEach((out: DeviceTypeAssignmentModel) => {
-                if (out.type.fields != null) {
-                    pathString += '.' + out.name;
-                    out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
-                        this.traverseDataStructure(pathString, field);
-                    });
-                }
+            service.outputs.forEach((out: DeviceTypeContentModel) => {
+                // if (out.type.fields != null) {
+                //     pathString += '.' + out.content_variable.name;
+                    // out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
+                        this.traverseDataStructure(pathString, out.content_variable);
+                    // });
+                // }
             });
         }
         this.paths[inputId][port] = this.vals;
     }
 
-    traverseDataStructure(pathString: string, field: ValueTypesFieldTypeModel) {
-        if (field.type.base_type.split('#')[1] === 'structure' && field.type.fields !== undefined && field.type.fields !== null) {
+    traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel) {
+        if (field.type === 'structure' && field.type !== undefined && field.type !== null) {
             pathString += '.' + field.name;
-            field.type.fields.forEach((innerField: ValueTypesFieldTypeModel) => {
-                this.traverseDataStructure(pathString, innerField);
-            });
+            if (field.sub_content_variables !== undefined) {
+                field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel) => {
+                    this.traverseDataStructure(pathString, innerField);
+                });
+            }
         } else {
             this.vals.push(pathString + '.' + field.name);
         }

@@ -1,0 +1,81 @@
+<!--
+  ~
+  ~  Copyright 2019 InfAI (CC SES)
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<div class="characteristics-container">
+    <div fxLayout="row">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <mat-chip-list class="offset" *ngIf="selectedTag !== ''">
+            <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
+                      selected>{{selectedTag}}
+                <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+        </mat-chip-list>
+        <senergy-sort [sortAttributes]="sortAttributes"
+                      (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+    </div>
+    <div class="main-panel">
+        <div infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [infiniteScrollContainer]="'.main-panel'"
+             [fromRoot]="true"
+             (scrolled)="onScroll()">
+            <div class="layout-margin" fxLayout="column">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+                               *ngIf="characteristics.length > 0">
+                    <mat-grid-tile class="mat-elevation-z1"
+                                   *ngFor="let characteristic of characteristics; let i = index">
+                        <div fxFill>
+                            <img class="background" src="src/img/characteristic.jpg">
+                        </div>
+                        <mat-grid-tile-footer>
+                            <div fxLayout="column" fxFill>
+                                <div class="truncate footer-item-header" matTooltip="{{characteristic.name}}">
+                                    {{characteristic.name}}
+                                </div>
+                                <form fxLayout="row" class="footer-buttons">
+                                    <div fxFlex></div>
+                                    <div [fxLayoutAlign]="'start center'">
+                                        <button (click)="editCharacteristic(characteristic)"
+                                                mat-icon-button class="color-accent" matTooltip="Edit">
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+                                        <button (click)="deleteCharacteristic(characteristic)"
+                                                mat-icon-button class="color-accent" matTooltip="Delete">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </mat-grid-tile-footer>
+                    </mat-grid-tile>
+                </mat-grid-list>
+                <div *ngIf="characteristics.length === 0 && ready">No characteristic found.</div>
+                <senergy-spinner [elementCount]="characteristics.length" [show]="!ready"></senergy-spinner>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button mat-fab class="fab" matTooltip="Add new characteristic" (click)="newCharacteristic()">
+    <mat-icon>add</mat-icon>
+</button>
+
+
+
+
+
