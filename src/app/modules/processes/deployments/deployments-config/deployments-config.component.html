@@ -15,7 +15,40 @@
   ~  limitations under the License.
   -->
 <div class="deployments-config-container">
-    <div class="main-panel">
+    <div class="layout-margin" fxLayout="column">
         <div>deployments-config-container</div>
+        <div *ngIf="deployment !== null">
+            <!--<h2>{{deploymentFormGroup.get('name').value}}</h2>-->
+            <h2>{{deployment.name}}</h2>
+            <!--<form [formGroup]="deploymentFormGroup">-->
+                <!--<div formArrayName="elements">-->
+                    <!--<div *ngFor="let control of deploymentFormGroup.get('elements').controls; let i=index" [formGroupName]="i">-->
+                        <!--<div>-->
+                            <!--{{control.value.order}}-->
+                        <!--</div>-->
+
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</form>-->
+
+
+            <!--<div *ngFor="let element of deployment.elements">-->
+                <!--<div *ngIf="element.task !== undefined">-->
+                    <!--<h3>{{element.task.label}}</h3>-->
+                    <!--<mat-form-field class="full-width" color="accent">-->
+                        <!--<mat-select placeholder="Selectables" required>-->
+                                    <!--&lt;!&ndash;formControlName="device_class" &ndash;&gt;-->
+
+                            <!--<mat-option *ngFor="let selectable of element.task.selectables"-->
+                                        <!--[value]="selectable">-->
+                                <!--{{selectable.device.name}}-->
+                            <!--</mat-option>-->
+                        <!--</mat-select>-->
+                    <!--</mat-form-field>-->
+                <!--</div>-->
+                <!--<div *ngIf="element.multi_task !== undefined">{{element.multi_task.label}}</div>-->
+                <!--<div *ngIf="element.msg_event !== undefined">{{element.msg_event.label}}</div>-->
+            <!--</div>-->
+        </div>
     </div>
 </div>

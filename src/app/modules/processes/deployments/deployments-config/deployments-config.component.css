@@ -20,4 +20,12 @@
     overflow-y: auto;
 }
 
+.layout-margin {
+    margin: 8px;
+}
+
+.full-width {
+    width: 100%;
+}
+
 

@@ -18,10 +18,15 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DesignerProcessModel} from '../../designer/shared/designer.model';
-import {DeploymentsPreparedModel} from '../shared/deployments-prepared.model';
+import {
+    DeploymentsPreparedElementModel,
+    DeploymentsPreparedModel,
+    DeploymentsPreparedTaskModel
+} from '../shared/deployments-prepared.model';
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
+import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 
 
 @Component({
@@ -33,8 +38,11 @@ import {UtilService} from '../../../../core/services/util.service';
 export class ProcessDeploymentsConfigComponent implements OnInit {
 
     processId = '';
+    deployment: DeploymentsPreparedModel | null = null;
+    deploymentFormGroup!: FormGroup;
 
-    constructor(private route: ActivatedRoute,
+    constructor(private _formBuilder: FormBuilder,
+                private route: ActivatedRoute,
                 private processRepoService: ProcessRepoService,
                 private utilService: UtilService,
                 private deploymentsService: DeploymentsService) {
@@ -51,10 +59,43 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 const xml = this.utilService.convertJSONtoXML(resp.process);
                 this.deploymentsService.getPreparedDeployments(xml).subscribe((deployment: DeploymentsPreparedModel | null) => {
                     if (deployment !== null) {
-                        console.log(deployment);
+                        this.deployment = deployment;
+                        this.initElementsFormArray();
                     }
                 });
             }
+        });
+    }
+
+    initElementsFormArray(): void {
+
+        const array: FormGroup[] = [];
+
+        if (this.deployment !== null) {
+            this.deployment.elements.forEach((el: DeploymentsPreparedElementModel) => {
+                array.push(this.initElementFormGroup(el));
+            });
+            this.deploymentFormGroup = this._formBuilder.group({
+                name: this.deployment.name,
+                elements: this._formBuilder.array(array)
+            });
+
+        }
+        console.log(this.deploymentFormGroup);
+        console.log(this.deploymentFormGroup.value);
+    }
+
+    initElementFormGroup(element: DeploymentsPreparedElementModel): FormGroup {
+        return this._formBuilder.group({
+            order: [element.order],
+            task: [element.task ? this.initTaskFormGroup(element.task) : null]
+        });
+    }
+
+    initTaskFormGroup(task: DeploymentsPreparedTaskModel): FormGroup {
+        return this._formBuilder.group({
+            label: [task.label],
+            selectables: [task.selectables],
         });
     }
 }

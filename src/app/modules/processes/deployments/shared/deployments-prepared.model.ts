@@ -15,6 +15,9 @@
  *  limitations under the License.
  */
 
+import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
+import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
+
 export interface DeploymentsPreparedModel {
     elements: DeploymentsPreparedElementModel[];
     id: string;
@@ -26,12 +29,29 @@ export interface DeploymentsPreparedModel {
 }
 
 export interface DeploymentsPreparedElementModel {
-    Order: number;
-    Task: any;
-    MultiTask: any;
-    ReceiveTaskEvent: any;
-    MsgEvent: any;
-    TimeEvent: any;
+    order: number;
+    task: DeploymentsPreparedTaskModel;
+    multi_task: DeploymentsPreparedMultiTaskModel;
+    receive_task_event: DeploymentsPreparedMsgEventModel;
+    msg_event: DeploymentsPreparedMsgEventModel;
+    time_event: any;
 }
 
+export interface DeploymentsPreparedTaskModel {
+    label: number;
+    selectables: DeploymentsPreparedSelectableModel[];
+}
+
+export interface DeploymentsPreparedMultiTaskModel {
+    label: number;
+}
+
+export interface DeploymentsPreparedMsgEventModel {
+    label: number;
+}
+
+export interface DeploymentsPreparedSelectableModel {
+    device: DeviceInstancesUpdateModel;
+    services: DeviceTypeServiceModel[];
+}
 
