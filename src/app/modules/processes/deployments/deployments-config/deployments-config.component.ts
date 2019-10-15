@@ -27,6 +27,7 @@ import {ProcessRepoService} from '../../process-repo/shared/process-repo.service
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
 
 
 @Component({
@@ -76,14 +77,16 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 array.push(this.initElementFormGroup(el));
             });
             this.deploymentFormGroup = this._formBuilder.group({
+                elements: this._formBuilder.array(array),
+                id: this.deployment.id,
+                lanes: this.deployment.lanes,
                 name: this.deployment.name,
-                elements: this._formBuilder.array(array)
+                svg: this.deployment.svg,
+                xml: this.deployment.xml,
+                xml_raw: this.deployment.xml_raw
             });
 
         }
-        // console.log(this.deploymentFormGroup);
-        // console.log(this.deploymentFormGroup.value);
-        console.log(this.deploymentFormGroup.get('elements'));
     }
 
     initElementFormGroup(element: DeploymentsPreparedElementModel): FormGroup {
@@ -96,16 +99,21 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     initTaskFormGroup(task: DeploymentsPreparedTaskModel): FormGroup {
         return this._formBuilder.group({
             label: [task.label],
+            device_description: [task.device_description],
+            bpmn_element_id: [task.bpmn_element_id],
+            input: [task.input],
             selectables: this.initSelectablesFormArray(task.selectables),
             selection: this.initSelectionFormGroup(task.selection),
-            selectableIndex: [task.selectableIndex]
+            selectableIndex: [task.selectableIndex],
+            parameter: [task.parameter]
         });
     }
 
     initSelectionFormGroup(selection: DeploymentsPreparedSelectionModel): FormGroup {
         return this._formBuilder.group({
             device: [selection.device],
-            service: [{value: selection.service, disabled: true}]
+            service: [{value: selection.service, disabled: false}],
+            show: [{value: false}]
         });
     }
 
@@ -130,14 +138,23 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     save(): void {
         console.log(this.deploymentFormGroup.value);
+        this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: any) => {
+            console.log(resp);
+        });
     }
 
     changeTaskSelectables(elementIndex: number, selectableIndex: number): void {
+        console.log(elementIndex, selectableIndex);
         const task = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'task']);
+        const selection = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selection']);
+        const services = <FormArray>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selectables', selectableIndex, 'services']);
         task.patchValue({'selectableIndex': selectableIndex});
-        const service = <FormControl>task.get(['selection', 'service']);
-        service.enable();
-        console.log(this.deploymentFormGroup.get(['elements', elementIndex, 'task']));
-
+        if (services.value.length <= 1) {
+            selection.patchValue({'service': services.value[0]});
+            selection.patchValue({'show': false});
+        } else {
+            selection.patchValue({'service': []});
+            selection.patchValue({'show': true});
+        }
     }
 }

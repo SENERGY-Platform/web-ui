@@ -16,7 +16,12 @@
  */
 
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
-import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeDeviceClassModel,
+    DeviceTypeFunctionModel,
+    DeviceTypeServiceModel
+} from '../../../devices/device-types-overview/shared/device-type.model';
 
 export interface DeploymentsPreparedModel {
     elements: DeploymentsPreparedElementModel[];
@@ -38,10 +43,21 @@ export interface DeploymentsPreparedElementModel {
 }
 
 export interface DeploymentsPreparedTaskModel {
-    label: number;
+    label: string;
+    device_description: DeploymentsPreparedDeviceDescriptionModel,
+    bpmn_element_id: string;
+    input: any;
     selectables: DeploymentsPreparedSelectableModel[];
     selectableIndex: number;
     selection: DeploymentsPreparedSelectionModel;
+    parameter: any;
+}
+
+export interface DeploymentsPreparedDeviceDescriptionModel {
+    characteristic_id: string;
+    function: DeviceTypeFunctionModel;
+    device_class: DeviceTypeDeviceClassModel;
+    aspect: DeviceTypeAspectModel;
 }
 
 export interface DeploymentsPreparedMultiTaskModel {
@@ -60,5 +76,6 @@ export interface DeploymentsPreparedSelectableModel {
 export interface DeploymentsPreparedSelectionModel {
     device: DeviceInstancesUpdateModel;
     service: DeviceTypeServiceModel;
+    show: boolean;
 }
 

@@ -18,23 +18,23 @@
     <div class="layout-margin" fxLayout="column">
         <div *ngIf="deployment !== null">
             <form [formGroup]="deploymentFormGroup">
-                <h2>{{'Deployment Name: ' + deploymentFormGroup.get('name').value}}</h2>
+                <h2>{{'Process: ' + deploymentFormGroup.get('name').value}}</h2>
                 <div formArrayName="elements" *ngIf="deploymentFormGroup.get('elements')">
                     <div [formGroupName]="elementIndex"
                          *ngFor="let element of deploymentFormGroup.get('elements').controls; let elementIndex = index">
                         <div formGroupName="task" *ngIf="element.value.task !== null">
-                            <h3 formGroupName="label">{{'Label: ' + element.value.task.label}}</h3>
+                            <div>{{element.value.task.label}}</div>
                             <div formGroupName="selection">
                                 <mat-form-field class="full-width" color="accent">
                                     <mat-select placeholder="Device" required formControlName="device">
                                         <mat-option *ngFor="let selectables of element.value.task.selectables; let selectableIndex = index"
-                                                    [value]="selectables.device" (onSelectionChange)="changeTaskSelectables(elementIndex, selectableIndex)">
+                                                    [value]="selectables.device" (click)="changeTaskSelectables(elementIndex, selectableIndex)">
                                             {{selectables.device.name}}
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
 
-                                <mat-form-field class="full-width" color="accent">
+                                <mat-form-field class="full-width" color="accent" *ngIf="element.value.task.selection.show === true">
                                     <mat-select placeholder="Service" required formControlName="service">
                                         <mat-option *ngFor="let services of element.value.task.selectables[element.value.task.selectableIndex || 0].services"
                                                     [value]="services">

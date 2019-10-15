@@ -72,4 +72,10 @@ export class DeploymentsService {
         );
     }
 
+    postDeployments(deployment: DeploymentsPreparedModel): Observable<DeploymentsPreparedModel | null> {
+        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments', deployment).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', null))
+        );
+    }
+
 }
