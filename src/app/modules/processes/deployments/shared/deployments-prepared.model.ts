@@ -40,6 +40,8 @@ export interface DeploymentsPreparedElementModel {
 export interface DeploymentsPreparedTaskModel {
     label: number;
     selectables: DeploymentsPreparedSelectableModel[];
+    selectableIndex: number;
+    selection: DeploymentsPreparedSelectionModel;
 }
 
 export interface DeploymentsPreparedMultiTaskModel {
@@ -53,5 +55,10 @@ export interface DeploymentsPreparedMsgEventModel {
 export interface DeploymentsPreparedSelectableModel {
     device: DeviceInstancesUpdateModel;
     services: DeviceTypeServiceModel[];
+}
+
+export interface DeploymentsPreparedSelectionModel {
+    device: DeviceInstancesUpdateModel;
+    service: DeviceTypeServiceModel;
 }
 

@@ -20,13 +20,13 @@ import {ActivatedRoute} from '@angular/router';
 import {DesignerProcessModel} from '../../designer/shared/designer.model';
 import {
     DeploymentsPreparedElementModel,
-    DeploymentsPreparedModel,
+    DeploymentsPreparedModel, DeploymentsPreparedSelectableModel, DeploymentsPreparedSelectionModel,
     DeploymentsPreparedTaskModel
 } from '../shared/deployments-prepared.model';
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 
 
 @Component({
@@ -81,21 +81,63 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             });
 
         }
-        console.log(this.deploymentFormGroup);
-        console.log(this.deploymentFormGroup.value);
+        // console.log(this.deploymentFormGroup);
+        // console.log(this.deploymentFormGroup.value);
+        console.log(this.deploymentFormGroup.get('elements'));
     }
 
     initElementFormGroup(element: DeploymentsPreparedElementModel): FormGroup {
         return this._formBuilder.group({
             order: [element.order],
-            task: [element.task ? this.initTaskFormGroup(element.task) : null]
+            task: element.task ? this.initTaskFormGroup(element.task) : null
         });
     }
 
     initTaskFormGroup(task: DeploymentsPreparedTaskModel): FormGroup {
         return this._formBuilder.group({
             label: [task.label],
-            selectables: [task.selectables],
+            selectables: this.initSelectablesFormArray(task.selectables),
+            selection: this.initSelectionFormGroup(task.selection),
+            selectableIndex: [task.selectableIndex]
         });
+    }
+
+    initSelectionFormGroup(selection: DeploymentsPreparedSelectionModel): FormGroup {
+        return this._formBuilder.group({
+            device: [selection.device],
+            service: [{value: selection.service, disabled: true}]
+        });
+    }
+
+    initSelectablesFormArray(selectables: DeploymentsPreparedSelectableModel[]): FormArray {
+        const array: FormGroup[] = [];
+
+        if (selectables !== null) {
+            selectables.forEach((selectable: DeploymentsPreparedSelectableModel) => {
+                array.push(this.initDeviceServicesGroup(selectable));
+            });
+        }
+
+        return this._formBuilder.array(array);
+    }
+
+    initDeviceServicesGroup(selectable: DeploymentsPreparedSelectableModel): FormGroup {
+        return this._formBuilder.group({
+            device: [selectable.device],
+            services: [selectable.services]
+        });
+    }
+
+    save(): void {
+        console.log(this.deploymentFormGroup.value);
+    }
+
+    changeTaskSelectables(elementIndex: number, selectableIndex: number): void {
+        const task = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'task']);
+        task.patchValue({'selectableIndex': selectableIndex});
+        const service = <FormControl>task.get(['selection', 'service']);
+        service.enable();
+        console.log(this.deploymentFormGroup.get(['elements', elementIndex, 'task']));
+
     }
 }

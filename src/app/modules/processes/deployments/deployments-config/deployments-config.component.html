@@ -16,39 +16,39 @@
   -->
 <div class="deployments-config-container">
     <div class="layout-margin" fxLayout="column">
-        <div>deployments-config-container</div>
         <div *ngIf="deployment !== null">
-            <!--<h2>{{deploymentFormGroup.get('name').value}}</h2>-->
-            <h2>{{deployment.name}}</h2>
-            <!--<form [formGroup]="deploymentFormGroup">-->
-                <!--<div formArrayName="elements">-->
-                    <!--<div *ngFor="let control of deploymentFormGroup.get('elements').controls; let i=index" [formGroupName]="i">-->
-                        <!--<div>-->
-                            <!--{{control.value.order}}-->
-                        <!--</div>-->
+            <form [formGroup]="deploymentFormGroup">
+                <h2>{{'Deployment Name: ' + deploymentFormGroup.get('name').value}}</h2>
+                <div formArrayName="elements" *ngIf="deploymentFormGroup.get('elements')">
+                    <div [formGroupName]="elementIndex"
+                         *ngFor="let element of deploymentFormGroup.get('elements').controls; let elementIndex = index">
+                        <div formGroupName="task" *ngIf="element.value.task !== null">
+                            <h3 formGroupName="label">{{'Label: ' + element.value.task.label}}</h3>
+                            <div formGroupName="selection">
+                                <mat-form-field class="full-width" color="accent">
+                                    <mat-select placeholder="Device" required formControlName="device">
+                                        <mat-option *ngFor="let selectables of element.value.task.selectables; let selectableIndex = index"
+                                                    [value]="selectables.device" (onSelectionChange)="changeTaskSelectables(elementIndex, selectableIndex)">
+                                            {{selectables.device.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
 
-                    <!--</div>-->
-                <!--</div>-->
-            <!--</form>-->
+                                <mat-form-field class="full-width" color="accent">
+                                    <mat-select placeholder="Service" required formControlName="service">
+                                        <mat-option *ngFor="let services of element.value.task.selectables[element.value.task.selectableIndex || 0].services"
+                                                    [value]="services">
+                                            {{services.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-
-            <!--<div *ngFor="let element of deployment.elements">-->
-                <!--<div *ngIf="element.task !== undefined">-->
-                    <!--<h3>{{element.task.label}}</h3>-->
-                    <!--<mat-form-field class="full-width" color="accent">-->
-                        <!--<mat-select placeholder="Selectables" required>-->
-                                    <!--&lt;!&ndash;formControlName="device_class" &ndash;&gt;-->
-
-                            <!--<mat-option *ngFor="let selectable of element.task.selectables"-->
-                                        <!--[value]="selectable">-->
-                                <!--{{selectable.device.name}}-->
-                            <!--</mat-option>-->
-                        <!--</mat-select>-->
-                    <!--</mat-form-field>-->
-                <!--</div>-->
-                <!--<div *ngIf="element.multi_task !== undefined">{{element.multi_task.label}}</div>-->
-                <!--<div *ngIf="element.msg_event !== undefined">{{element.msg_event.label}}</div>-->
-            <!--</div>-->
+            </form>
         </div>
+        <button class="mat-raised-button color-accent button-save-margin" (click)="save()">Save</button>
     </div>
 </div>
