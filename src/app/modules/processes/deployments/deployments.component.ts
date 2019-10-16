@@ -116,16 +116,16 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     deleteDeployment(deployment: DeploymentsModel): void {
         this.dialogsService.openDeleteDialog('deployment ' + deployment.name).afterClosed().subscribe((deleteDeployment: boolean) => {
             if (deleteDeployment) {
-                this.deploymentsService.deleteDeployment(deployment.id).subscribe((resp) => {
-                    if (resp === 'error') {
-                        this.snackBar.open('Error while deleting the deployment!', undefined, {duration: 2000});
-                    } else {
+                this.deploymentsService.deleteDeployment(deployment.id).subscribe((resp: { status: number }) => {
+                    if (resp.status === 200) {
                         this.repoItems.splice(this.repoItems.indexOf(deployment), 1);
                         this.snackBar.open('Deployment deleted successfully.', undefined, {duration: 2000});
                         this.setRepoItemsParams(1);
                         setTimeout(() => {
                             this.getRepoItems(false);
                         }, 1000);
+                    } else {
+                        this.snackBar.open('Error while deleting the deployment!', undefined, {duration: 2000});
                     }
                 });
             }

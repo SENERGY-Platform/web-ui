@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpResponseBase} from '@angular/common/http';
 import {environment} from '../../../../../environments/environment';
 import {Observable} from 'rxjs';
 import {catchError, map} from 'rxjs/internal/operators';
@@ -60,9 +60,12 @@ export class DeploymentsService {
         );
     }
 
-    deleteDeployment(deploymentId: string): Observable<string> {
-        return this.http.delete(environment.processDeploymentUrl + '/deployment/' + encodeURIComponent(deploymentId), {responseType: 'text'}).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'deleteDeployment', 'error'))
+    deleteDeployment(deploymentId: string): Observable<{status: number}> {
+        return this.http.delete(environment.processDeploymentUrl + '/deployments/' + encodeURIComponent(deploymentId), {responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'deleteDeployment', {status: 500}))
         );
     }
 
