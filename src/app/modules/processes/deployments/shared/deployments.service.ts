@@ -69,8 +69,8 @@ export class DeploymentsService {
         );
     }
 
-    getPreparedDeployments(xml: string): Observable<DeploymentsPreparedModel | null> {
-        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/prepared-deployments', {xml: xml}).pipe(
+    getPreparedDeployments(processId: string): Observable<DeploymentsPreparedModel | null> {
+        return this.http.get<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/prepared-deployments/' + processId).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null))
         );
     }

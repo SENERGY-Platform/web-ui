@@ -55,15 +55,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     deploy(): void {
-        this.processRepoService.getProcessModel(this.processId).subscribe((resp: DesignerProcessModel | null) => {
-            if (resp !== null) {
-                const xml = resp.bpmn_xml;
-                this.deploymentsService.getPreparedDeployments(xml).subscribe((deployment: DeploymentsPreparedModel | null) => {
-                    if (deployment !== null) {
-                        this.deployment = deployment;
-                        this.initElementsFormArray();
-                    }
-                });
+        this.deploymentsService.getPreparedDeployments(this.processId).subscribe((deployment: DeploymentsPreparedModel | null) => {
+            if (deployment !== null) {
+                this.deployment = deployment;
+                this.initElementsFormArray();
             }
         });
     }
