@@ -78,7 +78,7 @@ export interface DurationResult {
 export interface DesignerProcessModel {
     date: number;
     owner: string;
-    process: any;
+    bpmn_xml: string;
     svgXML: string;
     _id: string;
 }

@@ -21,7 +21,7 @@ export interface ProcessModel {
     name: string;
     date: number;
     svgXML: string;
-    process: any;
+    bpmn_xml: string;
     publish: boolean;
     shared: boolean;
     parent_id: string;

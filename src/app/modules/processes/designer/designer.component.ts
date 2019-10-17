@@ -174,8 +174,7 @@ export class ProcessDesignerComponent implements OnInit {
     loadProcessDiagram(id: string) {
         this.processRepoService.getProcessModel(id).subscribe((resp: DesignerProcessModel | null) => {
             if (resp !== null) {
-                const xml = this.utilService.convertJSONtoXML(resp.process);
-
+                const xml = resp.bpmn_xml;
                 this.modeler.importXML(xml, this.handleError);
             }
         });
@@ -219,7 +218,7 @@ export class ProcessDesignerComponent implements OnInit {
                             this.snackBar.open('Error SVG! ' + errSVG, undefined, {duration: 3500});
                         } else {
                             this.processRepoService.saveProcess(
-                                this.id, this.utilService.convertXMLtoJSON(processXML), svgXML).subscribe(() => {
+                                this.id, processXML, svgXML).subscribe(() => {
                                 this.snackBar.open('Model saved.', undefined, {duration: 2000});
                             });
                         }

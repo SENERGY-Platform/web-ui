@@ -24,19 +24,7 @@ import * as X2JS from 'x2js';
 
 export class UtilService {
 
-    x2js: any;
-
-    constructor() {
-        this.x2js = new X2JS();
-    }
-
-    convertJSONtoXML(svg: string): string {
-        return this.x2js.js2xml(svg);
-    }
-
-    convertXMLtoJSON(xml: string): string {
-        return this.x2js.xml2js(xml);
-    }
+    constructor() {}
 
     convertSVGtoBase64(svg: string): string {
         return window.btoa(unescape(encodeURIComponent(svg)));

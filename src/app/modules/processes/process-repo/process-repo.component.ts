@@ -108,7 +108,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     downloadDiagram(process: ProcessModel): void {
         this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel | null) => {
             if (processModel) {
-                const xml = this.utilService.convertJSONtoXML(processModel.process);
+                const xml = processModel.bpmn_xml;
                 const file = new Blob([xml], {type: 'application/bpmn-xml'});
                 saveAs(file, process.name + '.bpmn');
             }
@@ -144,12 +144,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         this.reset();
         this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel | null) => {
             if (processModel) {
-                const newProcess = processModel.process;
-                newProcess.definitions.process._id = newProcess.definitions.process._id + '_Copy';  // todo: translation
-                if (newProcess.definitions.collaboration) {
-                    newProcess.definitions.collaboration.participant._processRef =
-                        newProcess.definitions.collaboration.participant._processRef + '_Copy';  // todo: translation
-                }
+                const newProcess = processModel.bpmn_xml;
                 this.processRepoService.saveProcess('', newProcess, processModel.svgXML).subscribe(
                     (processResp: DesignerProcessModel | null) => {
                         if (processResp === null) {
@@ -164,7 +159,6 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                                 }
                                 this.getRepoItems(true);
                             });
-
                         }
                     });
             }

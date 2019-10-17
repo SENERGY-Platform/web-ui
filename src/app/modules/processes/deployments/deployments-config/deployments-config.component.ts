@@ -57,7 +57,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     deploy(): void {
         this.processRepoService.getProcessModel(this.processId).subscribe((resp: DesignerProcessModel | null) => {
             if (resp !== null) {
-                const xml = this.utilService.convertJSONtoXML(resp.process);
+                const xml = resp.bpmn_xml;
                 this.deploymentsService.getPreparedDeployments(xml).subscribe((deployment: DeploymentsPreparedModel | null) => {
                     if (deployment !== null) {
                         this.deployment = deployment;
