@@ -25,6 +25,11 @@ import {DurationDialogComponent} from '../dialogs/duration-dialog/duration-dialo
 import {BpmnElement, BpmnParameter, DurationResult, HistoricDataConfig} from './designer.model';
 import {HistoricDataConfigDialogComponent} from '../dialogs/historic-data-config-dialog/historic-data-config-dialog.component';
 import {EmailConfigDialogComponent} from '../dialogs/email-config-dialog/email-config-dialog.component';
+import {
+    DeviceTypeSelectionRefModel,
+    DeviceTypeSelectionResultModel
+} from '../../../devices/device-types-overview/shared/device-type-selection.model';
+import {TaskConfigDialogComponent} from '../dialogs/task-config-dialog/task-config-dialog.component';
 
 @Injectable({
     providedIn: 'root'
@@ -103,6 +108,18 @@ export class DesignerDialogService {
         editDialogRef.afterClosed().subscribe((value: {to: string, subj: string, content: string}) => {
             if (value) {
                 callback(value.to, value.subj, value.content);
+            }
+        });
+    }
+
+    openTaskConfigDialog(defaultSelection: DeviceTypeSelectionRefModel, callback: (connectorInfo: DeviceTypeSelectionResultModel) => void) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {selection: defaultSelection};
+        const editDialogRef = this.dialog.open(TaskConfigDialogComponent, dialogConfig);
+        editDialogRef.afterClosed().subscribe((result: DeviceTypeSelectionResultModel) => {
+            if (result) {
+                callback(result);
             }
         });
     }

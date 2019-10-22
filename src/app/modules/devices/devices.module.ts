@@ -49,7 +49,6 @@ import {DeviceInstancesServiceDialogComponent} from './device-instances/dialogs/
 import {DeviceInstancesEditDialogComponent} from './device-instances/dialogs/device-instances-edit-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NetworksClearDialogComponent} from './networks/dialogs/networks-clear-dialog.component';
-import {SelectDeviceTypeAndServiceDialogComponent} from './device-types-overview/dialogs/select-device-type-and-service-dialog.component';
 import {DeviceInstancesGridComponent} from './device-instances/device-instances-grid/device-instances-grid.component';
 import {DeviceTypesOverviewModule} from './device-types-overview/device-types-overview.module';
 import {ConceptsComponent} from './concepts/concepts.component';
@@ -112,7 +111,6 @@ const characteristics = {path: 'devices/characteristics', pathMatch: 'full', com
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
-        SelectDeviceTypeAndServiceDialogComponent,
         DeviceInstancesGridComponent,
         ConceptsComponent,
         ConceptsNewDialogComponent,
@@ -126,7 +124,6 @@ const characteristics = {path: 'devices/characteristics', pathMatch: 'full', com
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
-        SelectDeviceTypeAndServiceDialogComponent,
         DeviceInstancesGridComponent,
         ConceptsNewDialogComponent,
         CharacteristicsNewDialogComponent,

@@ -65,6 +65,7 @@ import {MonitorDetailsDialogComponent} from './monitor/dialogs/monitor-details-d
 import {EmailConfigDialogComponent} from './designer/dialogs/email-config-dialog/email-config-dialog.component';
 import {DeploymentsMissingDependenciesDialogComponent} from './deployments/dialogs/deployments-missing-dependencies-dialog.component';
 import {ProcessDeploymentsConfigComponent} from './deployments/deployments-config/deployments-config.component';
+import {TaskConfigDialogComponent} from './designer/dialogs/task-config-dialog/task-config-dialog.component';
 
 const processRepo = {
     path: 'processes/repository',
@@ -154,6 +155,7 @@ const processDesigner = {
         MonitorDetailsDialogComponent,
         EmailConfigDialogComponent,
         DeploymentsMissingDependenciesDialogComponent,
+        TaskConfigDialogComponent,
     ],
     entryComponents: [
         EditOutputDialogComponent,
@@ -165,6 +167,7 @@ const processDesigner = {
         MonitorDetailsDialogComponent,
         EmailConfigDialogComponent,
         DeploymentsMissingDependenciesDialogComponent,
+        TaskConfigDialogComponent,
     ]
 })
 

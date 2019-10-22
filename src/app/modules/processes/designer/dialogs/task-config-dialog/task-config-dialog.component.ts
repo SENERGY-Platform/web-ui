@@ -1,49 +1,50 @@
 /*
- * Copyright 2019 InfAI (CC SES)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Copyright 2019 InfAI (CC SES)
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatRadioChange} from '@angular/material';
+import {Observable, Subscriber} from 'rxjs';
+import {FormControl} from '@angular/forms';
+import {DeviceTypeModel, DeviceTypeServiceModel} from '../../../../devices/device-types-overview/shared/device-type.model';
+import {DeviceTypePermSearchModel} from '../../../../devices/device-types-overview/shared/device-type-perm-search.model';
 import {
     BpmnSkeletonModel,
     DeviceTypeInfoModel,
     DeviceTypeSelectionRefModel,
     DeviceTypeSelectionResultModel, ServiceInfoModel
-} from '../shared/device-type-selection.model';
-import {FormControl} from '@angular/forms';
-import {DeviceTypeService} from '../shared/device-type.service';
-import {DeviceTypePermSearchModel} from '../shared/device-type-perm-search.model';
-import {DeviceTypeModel, DeviceTypeServiceModel} from '../shared/device-type.model';
-import {Observable, Subscriber} from 'rxjs';
+} from '../../../../devices/device-types-overview/shared/device-type-selection.model';
+import {DeviceTypeService} from '../../../../devices/device-types-overview/shared/device-type.service';
 
 @Component({
-    templateUrl: './select-device-type-and-service-dialog.component.html',
-    styleUrls: ['./select-device-type-and-service-dialog.component.css'],
+    templateUrl: './task-config-dialog.component.html',
+    styleUrls: ['./task-config-dialog.component.css'],
 })
-export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
+export class TaskConfigDialogComponent implements OnInit {
     devicetypeSelectionFormControl = new FormControl('');
     serviceSelectionFormControl = new FormControl('');
     serviceOptions: Observable<DeviceTypeServiceModel[]>;
     devicetypeOptions: Observable<DeviceTypePermSearchModel[]>;
-    completionStrategy = "";
+    completionStrategy = '';
     limit = 20;
 
     result: DeviceTypeSelectionResultModel;
 
     constructor(
-        private dialogRef: MatDialogRef<SelectDeviceTypeAndServiceDialogComponent>,
+        private dialogRef: MatDialogRef<TaskConfigDialogComponent>,
         private dtService: DeviceTypeService,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { selection: DeviceTypeSelectionRefModel }
     ) {
@@ -51,7 +52,7 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
             deviceType: {name: '', id: ''},
             service: {name: '', id: ''},
             skeleton: {},
-            completionStrategy: ""
+            completionStrategy: ''
         };
 
         this.devicetypeOptions = this.getDeviceTypeOptionsObservable(this.devicetypeSelectionFormControl);
@@ -108,7 +109,7 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
                 }
             });
         } else {
-            if (this.completionStrategy == "") {
+            if (this.completionStrategy === '') {
                 this.setCompletionStrategy('optimistic');
             }
         }
@@ -162,7 +163,7 @@ export class SelectDeviceTypeAndServiceDialogComponent implements OnInit {
     }
 
     isChecked(completionSrategy: string) {
-        return this.completionStrategy == completionSrategy
+        return this.completionStrategy === completionSrategy;
     }
 
     // expect serviceSelectionFormControl as FormControl with ServiceInfoModel

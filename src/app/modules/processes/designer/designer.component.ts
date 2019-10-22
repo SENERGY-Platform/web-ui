@@ -37,14 +37,11 @@ import {
     DeviceTypeSelectionRefModel,
     DeviceTypeSelectionResultModel
 } from '../../devices/device-types-overview/shared/device-type-selection.model';
-import {DeviceTypeDialogService} from '../../devices/device-types-overview/shared/device-type-dialog.service';
 import {DesignerDialogService} from './shared/designer-dialog.service';
 import {DesignerService} from './shared/designer.service';
 import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
 import {ActivatedRoute} from '@angular/router';
-import {UtilService} from '../../../core/services/util.service';
 import {MatSnackBar} from '@angular/material';
-import {last} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -60,9 +57,7 @@ export class ProcessDesignerComponent implements OnInit {
     constructor(
         private http: HttpClient,
         private route: ActivatedRoute,
-        protected utilService: UtilService,
         protected auth: AuthorizationService,
-        protected dtDialogService: DeviceTypeDialogService,
         protected designerDialogService: DesignerDialogService,
         protected designerService: DesignerService,
         protected processRepoService: ProcessRepoService,
@@ -156,7 +151,7 @@ export class ProcessDesignerComponent implements OnInit {
                 devicetypeService: DeviceTypeSelectionRefModel,
                 callback: (connectorInfo: DeviceTypeSelectionResultModel) => void
             ) => {
-                that.dtDialogService.openSelectDeviceTypeAndServiceDialog(devicetypeService, callback);
+                that.designerDialogService.openTaskConfigDialog(devicetypeService, callback);
             },
             configEmail: (to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void) => {
                 that.designerDialogService.openEmailConfigDialog(to, subj, content, callback);
