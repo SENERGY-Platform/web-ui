@@ -211,6 +211,9 @@ export class DeployFlowComponent {
                     out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
                         this.traverseDataStructure(pathString, field);
                     });
+                } else {
+                    pathString += '.' + out.msg_segment.name;
+                    this.vals.push(pathString);
                 }
             });
         } else {
@@ -220,6 +223,9 @@ export class DeployFlowComponent {
                     out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
                         this.traverseDataStructure(pathString, field);
                     });
+                } else {
+                    pathString += '.' + out.msg_segment.name;
+                    this.vals.push(pathString);
                 }
             });
         }

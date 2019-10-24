@@ -132,6 +132,9 @@ export class NewExportComponent implements OnInit {
                 out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
                     this.traverseDataStructure(pathString, field);
                 });
+            } else {
+                pathString += '.' + out.msg_segment.name;
+                this.paths.set(pathString, out.type.base_type.split('#')[1]);
             }
         });
     }
