@@ -17,8 +17,14 @@
 <mat-card>
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="content-size drag-handler">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready" fxLayout="column" fxFill>
+        <div *ngIf="!configured" fxFill fxLayout="row" fxLayoutAlign="center center">
+            Please configure widget!
+        </div>
+        <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
+        <div *ngIf="configured && ready && !dataReady" fxFill fxLayout="row" fxLayoutAlign="center center">
+            <div class="center-text">Problem fetching data: Operator might have not received data for selected time frame. Check config otherwise.</div>
+        </div>
+        <div *ngIf="configured && ready && dataReady" fxLayout="column" fxFill>
             <div fxFlex="1 1 calc(33.33% - 5.33px)">
                 <div class="widget-icon" fxFill fxFlex="30" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">trending_up</mat-icon>
