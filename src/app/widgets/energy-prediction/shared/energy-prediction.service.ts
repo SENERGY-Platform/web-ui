@@ -60,9 +60,15 @@ export class EnergyPredictionService {
         return new Observable<EnergyPredictionModel>((observer) => {
             this.getData(widget.properties.measurement ? widget.properties.measurement.id : '').
             subscribe((resp: ChartsExportModel) => {
-                observer.next(
-                    this.extractData(resp, widget)
-                );
+                const energyPredictionModel = this.extractData(resp, widget);
+                if (energyPredictionModel.timestamp !== undefined
+                    && energyPredictionModel.timestamp !== null
+                    && energyPredictionModel.timestamp !== ''
+                    && energyPredictionModel.timestamp !== 'None') {
+                    observer.next(energyPredictionModel);
+                } else {
+                    observer.error();
+                }
                 observer.complete();
             });
         });
