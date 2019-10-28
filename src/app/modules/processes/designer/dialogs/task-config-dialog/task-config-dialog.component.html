@@ -18,37 +18,52 @@
 
 <h2 mat-dialog-title>Task Configuration</h2>
 
+<mat-radio-group [formControl]="optionsFormControl">
+    <mat-radio-button class="radio-button" value="controlling">Controlling</mat-radio-button>
+    <mat-radio-button class="radio-button" value="measuring">Measuring</mat-radio-button>
+</mat-radio-group>
+
 <mat-dialog-content>
     <form class="form">
-        <mat-form-field color="accent" class="form-field">
-            <mat-label>Insert Device Type</mat-label>
-            <input type="text" placeholder="Search first {{this.limit}} entries" matInput
-                   [formControl]="devicetypeSelectionFormControl" [matAutocomplete]="auto">
-            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                <mat-option *ngFor="let option of devicetypeOptions | async" [value]="option">
-                    {{option.name || 'unknown'}}
+        <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value === 'controlling'">
+            <mat-select placeholder="Device class" [compareWith]="compare"
+                        [formControl]="deviceClassFormControl" required>
+                <mat-option *ngFor="let deviceClass of deviceClasses"
+                            [value]="deviceClass">
+                    {{deviceClass.name}}
                 </mat-option>
-            </mat-autocomplete>
+            </mat-select>
         </mat-form-field>
-        <mat-form-field color="accent" class="form-field">
-            <mat-select placeholder="Service" [compareWith]="idComparision" [formControl]="serviceSelectionFormControl"
-                        required>
-                <mat-option *ngFor="let service of serviceOptions | async" [value]="service">
-                    {{service.name}}
+
+        <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value === 'measuring'">
+            <mat-select placeholder="Aspect" [compareWith]="compare"
+                        [formControl]="aspectFormControl" required>
+                <mat-option *ngFor="let aspect of aspects"
+                            [value]="aspect">
+                    {{aspect.name}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value !== ''">
+            <mat-select placeholder="Function" [compareWith]="compare"
+                        [formControl]="functionFormControl" required>
+                <mat-option *ngFor="let func of functions"
+                            [value]="func">
+                    {{func.name}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
     </form>
 </mat-dialog-content>
 
-<h3>Task Completion Strategy</h3>
-<mat-radio-group name="completionStrategy" (change)="changeCompletionStrategy($event)" aria-label="Select a Completion Strategy">
-    <mat-radio-button value="optimistic" class="radio-button" [checked]="isChecked('optimistic')">Optimistic</mat-radio-button>
-    <mat-radio-button value="pessimistic" class="radio-button" [checked]="isChecked('pessimistic')">Pessimistic</mat-radio-button>
+<mat-radio-group [formControl]="completionStrategyFormControl">
+    <mat-radio-button class="radio-button" value="optimistic">Optimistic</mat-radio-button>
+    <mat-radio-button class="radio-button" value="pessimistic">Pessimistic</mat-radio-button>
 </mat-radio-group>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" [disabled]="!isValid()" (click)="save()">Save</button>
+    <button class="mat-raised-button mat-accent" [disabled]="functionFormControl.value === ''" (click)="save()">Save</button>
 </mat-dialog-actions>
 

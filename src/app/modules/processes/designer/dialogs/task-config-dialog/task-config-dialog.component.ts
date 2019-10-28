@@ -17,15 +17,14 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatRadioChange} from '@angular/material';
-import {Observable, Subscriber} from 'rxjs';
-import {FormControl} from '@angular/forms';
-import {DeviceTypeModel, DeviceTypeServiceModel} from '../../../../devices/device-types-overview/shared/device-type.model';
-import {DeviceTypePermSearchModel} from '../../../../devices/device-types-overview/shared/device-type-perm-search.model';
+import {FormBuilder, FormControl} from '@angular/forms';
 import {
-    BpmnSkeletonModel,
-    DeviceTypeInfoModel,
+    DeviceTypeAspectModel,
+    DeviceTypeDeviceClassModel, DeviceTypeFunctionModel,
+} from '../../../../devices/device-types-overview/shared/device-type.model';
+import {
     DeviceTypeSelectionRefModel,
-    DeviceTypeSelectionResultModel, ServiceInfoModel
+    DeviceTypeSelectionResultModel
 } from '../../../../devices/device-types-overview/shared/device-type-selection.model';
 import {DeviceTypeService} from '../../../../devices/device-types-overview/shared/device-type.service';
 
@@ -34,52 +33,34 @@ import {DeviceTypeService} from '../../../../devices/device-types-overview/share
     styleUrls: ['./task-config-dialog.component.css'],
 })
 export class TaskConfigDialogComponent implements OnInit {
-    devicetypeSelectionFormControl = new FormControl('');
-    serviceSelectionFormControl = new FormControl('');
-    serviceOptions: Observable<DeviceTypeServiceModel[]>;
-    devicetypeOptions: Observable<DeviceTypePermSearchModel[]>;
+    optionsFormControl = new FormControl('');
+    deviceClassFormControl = new FormControl('');
+    aspectFormControl = new FormControl('');
+    functionFormControl = new FormControl({value: '', disabled: true});
+    completionStrategyFormControl = new FormControl('');
+
+    deviceClasses: DeviceTypeDeviceClassModel[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
+    functions: DeviceTypeFunctionModel[] = [];
     completionStrategy = '';
     limit = 20;
 
-    result: DeviceTypeSelectionResultModel;
+    result!: DeviceTypeSelectionResultModel;
 
     constructor(
         private dialogRef: MatDialogRef<TaskConfigDialogComponent>,
         private dtService: DeviceTypeService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { selection: DeviceTypeSelectionRefModel }
-    ) {
-        this.result = {
-            deviceType: {name: '', id: ''},
-            service: {name: '', id: ''},
-            skeleton: {},
-            completionStrategy: ''
-        };
-
-        this.devicetypeOptions = this.getDeviceTypeOptionsObservable(this.devicetypeSelectionFormControl);
-        this.serviceOptions = this.createServiceOptionsObservable(this.devicetypeSelectionFormControl);
+        private _formBuilder: FormBuilder,
+        private deviceTypeService: DeviceTypeService,
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { selection: DeviceTypeSelectionRefModel }) {
     }
 
     ngOnInit() {
-        this.devicetypeSelectionFormControl.valueChanges.subscribe(() => {
-            this.setDeviceTypeResult(<DeviceTypeInfoModel>this.devicetypeSelectionFormControl.value);
-        });
-        this.serviceOptions.subscribe((serviceOptions: DeviceTypeServiceModel[]) => {
-            this.resetServiceSelection(this.serviceSelectionFormControl, serviceOptions);
-        });
-        this.serviceSelectionFormControl.valueChanges.subscribe(() => {
-            this.setServiceResult(this.devicetypeSelectionFormControl, this.serviceSelectionFormControl);
-        });
-
-        this.useDialogParams();
-    }
-
-
-    displayFn(input?: { name: string }): string | undefined {
-        return input ? input.name : undefined;
-    }
-
-    idComparision(a: any, b: any): boolean {
-        return a.id === b.id;
+        this.initOptions();
+        this.getDeviceClasses();
+        this.getAspects();
+        this.initFunctions();
+        this.initCompletionStrategy();
     }
 
     close(): void {
@@ -87,71 +68,17 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     save(): void {
+        this.result = {
+            deviceType: {name: '', id: ''},
+            service: {name: '', id: ''},
+            skeleton: {},
+            completionStrategy: ''
+        };
         this.dialogRef.close(this.result);
-        this.result.completionStrategy = this.completionStrategy;
     }
 
-    isValid() {
-        return this.result && this.result.service && this.result.service.id;
-    }
-
-    private useDialogParams() {
-        if (this.dialogParams.selection && this.dialogParams.selection.deviceTypeId && this.dialogParams.selection.serviceId && this.dialogParams.selection.completionStrategy) {
-            this.dtService.getDeviceType(this.dialogParams.selection.deviceTypeId).subscribe((dt: DeviceTypeModel | null) => {
-                if (dt) {
-                    const serviceSelection = dt.services.find((service: DeviceTypeServiceModel) => service.id === this.dialogParams.selection.serviceId)
-                        || {id: '', name: ''};
-                    // order is important to prevent race between change handler
-                    // service change handler terminates immediately because result.deviceType.id === ''
-                    this.serviceSelectionFormControl.setValue(serviceSelection);
-                    this.devicetypeSelectionFormControl.setValue(dt);
-                    this.setCompletionStrategy(this.dialogParams.selection.completionStrategy);
-                }
-            });
-        } else {
-            if (this.completionStrategy === '') {
-                this.setCompletionStrategy('optimistic');
-            }
-        }
-    }
-
-    // expects FormControl with DeviceTypeModel
-    private createServiceOptionsObservable(devicetypeSelectionFormControl: FormControl) {
-        return new Observable<DeviceTypeServiceModel[]>((observer: Subscriber<DeviceTypeServiceModel[]>) => {
-            devicetypeSelectionFormControl.valueChanges.subscribe(() => {
-                const dt: any = devicetypeSelectionFormControl.value;
-                if (dt.id) {
-                    this.dtService.getDeviceType(dt.id).subscribe((value: DeviceTypeModel | null) => {
-                        if (value) {
-                            observer.next(value.services);
-                        }
-                    });
-                }
-            });
-        });
-    }
-
-    // expects FormControl with DeviceTypeModel (reads DeviceTypeModel.name) or string
-    private getDeviceTypeOptionsObservable(devicetypeSelectionFormControl: FormControl) {
-        return new Observable<DeviceTypePermSearchModel[]>((observer: Subscriber<DeviceTypePermSearchModel[]>) => {
-            devicetypeSelectionFormControl.valueChanges.subscribe(() => {
-                const dt: any = devicetypeSelectionFormControl.value;
-                const searchText: string = (dt.name === '' || dt.name) ? dt.name : dt;
-                this.dtService.getDeviceTypes(searchText, this.limit, 0, 'name', 'asc').subscribe(value => observer.next(value));
-            });
-        });
-    }
-
-    private setDeviceTypeResult(dtSelection: DeviceTypeInfoModel) {
-        if (dtSelection && dtSelection.id) {
-            this.dtService.getDeviceType(dtSelection.id).subscribe((dt: DeviceTypeModel | null) => {
-                if (dt) {
-                    this.result.deviceType = {name: dt.name || '', id: dt.id};
-                }
-            });
-        } else {
-            this.result.deviceType = {name: '', id: ''};
-        }
+    compare(a: any, b: any): boolean {
+        return a && b && a.id === b.id && a.name === b.name;
     }
 
     changeCompletionStrategy(event: MatRadioChange) {
@@ -166,32 +93,53 @@ export class TaskConfigDialogComponent implements OnInit {
         return this.completionStrategy === completionSrategy;
     }
 
-    // expect serviceSelectionFormControl as FormControl with ServiceInfoModel
-    private resetServiceSelection(serviceSelectionFormControl: FormControl, serviceOptions: DeviceTypeServiceModel[]) {
-        const sSelection = <ServiceInfoModel>serviceSelectionFormControl.value;
-        if (sSelection && sSelection.id) {
-            const selection = serviceOptions.find((service: DeviceTypeServiceModel) => service.id === sSelection.id);
-            if (selection) {
-                serviceSelectionFormControl.setValue(selection);
-            } else {
-                serviceSelectionFormControl.reset();
-            }
-        }
+    private initOptions(): void {
+        this.optionsFormControl.setValue('controlling');
+        this.optionsFormControl.valueChanges.subscribe(() => {
+            this.deviceClassFormControl.setValue('');
+            this.aspectFormControl.setValue('');
+            this.functionFormControl.setValue('');
+            this.functionFormControl.disable();
+        });
     }
 
-    // expect devicetypeSelectionFormControl as FormControl with DeviceTypeInfoModel
-    // expect serviceSelectionFormControl as FormControl with ServiceInfoModel
-    private setServiceResult(devicetypeSelectionFormControl: FormControl, serviceSelectionFormControl: FormControl) {
-        const dtSelection = <DeviceTypeInfoModel>devicetypeSelectionFormControl.value;
-        const serviceSelection = <ServiceInfoModel>serviceSelectionFormControl.value;
-        if (dtSelection && dtSelection.id && serviceSelection && serviceSelection.id) {
-            this.result.service = {name: serviceSelection.name || '', id: serviceSelection.id};
-            this.dtService.getDeviceTypeSkeleton(dtSelection.id, serviceSelection.id).subscribe((skeleton: BpmnSkeletonModel | null) => {
-                this.result.skeleton = skeleton || {};
+    private initCompletionStrategy(): void {
+        this.completionStrategyFormControl.setValue('optimistic');
+    }
+
+    private getDeviceClasses(): void {
+        this.deviceTypeService.getDeviceClasses().subscribe(
+            (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
+                this.deviceClasses = deviceTypeDeviceClasses;
             });
-        } else {
-            this.result.service = {id: '', name: ''};
-            this.result.skeleton = {};
-        }
+    }
+
+    private getAspects(): void {
+        this.deviceTypeService.getAspects().subscribe(
+            (aspects: DeviceTypeAspectModel[]) => {
+                this.aspects = aspects;
+            });
+    }
+
+    private initFunctions(): void {
+        this.deviceClassFormControl.valueChanges.subscribe((deviceClass: DeviceTypeDeviceClassModel) => {
+            this.resetFunctions();
+            this.deviceTypeService.getDeviceClassesControllingFunctions(deviceClass.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
+                this.functions = functions;
+            });
+        });
+
+        this.aspectFormControl.valueChanges.subscribe((aspect: DeviceTypeAspectModel) => {
+            this.resetFunctions();
+            this.deviceTypeService.getAspectsMeasuringFunctions(aspect.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
+                this.functions = functions;
+            });
+        });
+    }
+
+    private resetFunctions() {
+        this.functions = [];
+        this.functionFormControl.setValue('');
+        this.functionFormControl.enable();
     }
 }
