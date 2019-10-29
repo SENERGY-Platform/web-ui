@@ -95,6 +95,11 @@ export interface DeviceTypeFunctionType {
    urn_part: string;
 }
 
+export const functionTypes: DeviceTypeFunctionType[] = [
+    {text: 'Controlling', rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction', urn_part: 'controlling-function'},
+    {text: 'Measuring', rdf_type: 'https://senergy.infai.org/ontology/MeasuringFunction', urn_part: 'measuring-function'},
+];
+
 export interface DeviceTypeProtocolModel {
     id: string;
     name: string;

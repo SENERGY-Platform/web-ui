@@ -24,7 +24,7 @@ import {
     DeviceTypeModel,
     DeviceTypeProtocolModel,
     DeviceTypeProtocolSegmentModel,
-    DeviceTypeServiceModel,
+    DeviceTypeServiceModel, functionTypes,
 } from '../shared/device-type.model';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
@@ -38,12 +38,6 @@ import {util} from 'jointjs';
 import uuid = util.uuid;
 import {ConceptsService} from '../../concepts/shared/concepts.service';
 import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
-
-
-const functionTypes: DeviceTypeFunctionType[] = [
-    {text: 'Controlling', rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction', urn_part: 'controlling-function'},
-    {text: 'Measuring', rdf_type: 'https://senergy.infai.org/ontology/MeasuringFunction', urn_part: 'measuring-function'},
-];
 
 const controllingIndex = 0;
 const measuringIndex = 1;
