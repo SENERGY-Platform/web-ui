@@ -16,15 +16,17 @@
 
 
 
+import {DeviceTypeDeviceClassModel, DeviceTypeFunctionModel} from './device-type.model';
+
 export interface DeviceTypeSelectionRefModel {
-    serviceId: string;
-    deviceTypeId: string;
+    function: DeviceTypeFunctionModel;
+    device_class: DeviceTypeDeviceClassModel;
     completionStrategy: string;
 }
 
 export interface DeviceTypeSelectionResultModel {
-    deviceType: DeviceTypeInfoModel;
-    service: ServiceInfoModel;
+    function: DeviceTypeFunctionModel;
+    device_class: DeviceTypeDeviceClassModel;
     skeleton: BpmnSkeletonModel;
     completionStrategy: string;
 }

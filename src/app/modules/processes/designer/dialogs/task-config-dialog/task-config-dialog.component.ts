@@ -46,13 +46,15 @@ export class TaskConfigDialogComponent implements OnInit {
     limit = 20;
 
     result!: DeviceTypeSelectionResultModel;
+    selection: DeviceTypeSelectionRefModel;
 
     constructor(
         private dialogRef: MatDialogRef<TaskConfigDialogComponent>,
         private dtService: DeviceTypeService,
         private _formBuilder: FormBuilder,
         private deviceTypeService: DeviceTypeService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { selection: DeviceTypeSelectionRefModel }) {
+        @Inject(MAT_DIALOG_DATA) private data: { selection: DeviceTypeSelectionRefModel }) {
+        this.selection = this.data.selection;
     }
 
     ngOnInit() {
@@ -61,6 +63,7 @@ export class TaskConfigDialogComponent implements OnInit {
         this.getAspects();
         this.initFunctions();
         this.initCompletionStrategy();
+        this.initSelection();
     }
 
     close(): void {
@@ -69,10 +72,10 @@ export class TaskConfigDialogComponent implements OnInit {
 
     save(): void {
         this.result = {
-            deviceType: {name: '', id: ''},
-            service: {name: '', id: ''},
+            function: this.functionFormControl.value,
+            device_class: this.deviceClassFormControl.value,
             skeleton: {},
-            completionStrategy: ''
+            completionStrategy: this.completionStrategyFormControl.value
         };
         this.dialogRef.close(this.result);
     }
@@ -141,5 +144,10 @@ export class TaskConfigDialogComponent implements OnInit {
         this.functions = [];
         this.functionFormControl.setValue('');
         this.functionFormControl.enable();
+    }
+
+    private initSelection() {
+        this.deviceClassFormControl.setValue(this.selection.device_class);
+        this.functionFormControl.setValue(this.selection.function);
     }
 }
