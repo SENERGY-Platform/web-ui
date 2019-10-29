@@ -46,14 +46,14 @@ export class TaskConfigDialogComponent implements OnInit {
     limit = 20;
 
     result!: DeviceTypeSelectionResultModel;
-    selection: DeviceTypeSelectionRefModel;
+    selection: DeviceTypeSelectionRefModel | null;
 
     constructor(
         private dialogRef: MatDialogRef<TaskConfigDialogComponent>,
         private dtService: DeviceTypeService,
         private _formBuilder: FormBuilder,
         private deviceTypeService: DeviceTypeService,
-        @Inject(MAT_DIALOG_DATA) private data: { selection: DeviceTypeSelectionRefModel }) {
+        @Inject(MAT_DIALOG_DATA) private data: { selection: DeviceTypeSelectionRefModel | null }) {
         this.selection = this.data.selection;
     }
 
@@ -147,7 +147,9 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private initSelection() {
-        this.deviceClassFormControl.setValue(this.selection.device_class);
-        this.functionFormControl.setValue(this.selection.function);
+        if (this.selection !== null) {
+            this.deviceClassFormControl.setValue(this.selection.device_class);
+            this.functionFormControl.setValue(this.selection.function);
+        }
     }
 }

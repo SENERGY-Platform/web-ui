@@ -115,7 +115,7 @@ export class DesignerDialogService {
     openTaskConfigDialog(defaultSelection: DeviceTypeSelectionRefModel, callback: (connectorInfo: DeviceTypeSelectionResultModel) => void) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
-        dialogConfig.data = {selection: JSON.parse(JSON.stringify(defaultSelection))};         // create copy of object
+        dialogConfig.data = {selection: JSON.parse(JSON.stringify(defaultSelection || null))};         // create copy of object
         const editDialogRef = this.dialog.open(TaskConfigDialogComponent, dialogConfig);
         editDialogRef.afterClosed().subscribe((result: DeviceTypeSelectionResultModel) => {
             if (result) {
