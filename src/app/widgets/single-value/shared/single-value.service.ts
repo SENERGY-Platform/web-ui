@@ -60,9 +60,12 @@ export class SingleValueService {
         return new Observable<SingleValueModel>((observer) => {
             this.getData(widget.properties.measurement ? widget.properties.measurement.id : '').
             subscribe((resp: ChartsExportModel) => {
-                observer.next(
-                    this.extractData(resp, widget.properties.vAxis)
-                );
+                try {
+                    const singleValueModel = this.extractData(resp, widget.properties.vAxis);
+                    observer.next(singleValueModel);
+                } catch (e) {
+                    observer.error(e);
+                }
                 observer.complete();
             });
         });

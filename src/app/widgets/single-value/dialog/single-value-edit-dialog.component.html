@@ -20,7 +20,7 @@
     <div fxLayout="column">
         <mat-form-field color="accent">
             <mat-label>Name</mat-label>
-            <input type="text" matInput placeholder="Name" [(ngModel)]="widget.name">
+            <input type="text" matInput placeholder="Name" [(ngModel)]="name">
         </mat-form-field>
 
         <mat-form-field color="accent">
@@ -38,7 +38,7 @@
         </mat-form-field>
 
         <table cellspacing="0">
-            <tr >
+            <tr>
                 <td>
                     <mat-form-field color="accent">
                         <mat-select [(value)]="widget.properties.vAxis" [disabled]="vAxisValues.length < 2" placeholder="Value" [compareWith]="compare">
@@ -51,9 +51,34 @@
                 <td>
                     <mat-form-field color="accent">
                         <mat-label>Unit</mat-label>
-                        <input type="text" matInput placeholder="Unit" [(ngModel)]="widget.properties.vAxisLabel">
+                        <input type="text" matInput placeholder="Unit" [(ngModel)]="vAxisLabel">
                     </mat-form-field>
                 </td>
+            </tr>
+            <tr>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-select [(ngModel)]="type" placeholder="Type" [compareWith]="compareStrings">
+                            <mat-option [value]="'String'">String</mat-option>
+                            <mat-option [value]="'Number'">Number</mat-option>
+                            <mat-option [value]="'Date'">Date</mat-option>
+                            <mat-option [value]="'Currency'">Currency</mat-option>
+                            <mat-option [value]="'Percent'">Percent</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent" hintLabel="For use in Angular pipes">
+                        <mat-label>Format</mat-label>
+                        <input type="text" matInput placeholder="Format" [(ngModel)]="format" [disabled]="type === 'String'">
+                    </mat-form-field>
+                </td>
+            </tr>
+            <tr>
+                <mat-form-field color="accent">
+                    <mat-label>Max. font size (px)</mat-label>
+                    <input type="number" matInput [(ngModel)]="threshold">
+                </mat-form-field>
             </tr>
         </table>
     </div>
