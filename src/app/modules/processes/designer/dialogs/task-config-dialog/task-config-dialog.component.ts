@@ -20,7 +20,7 @@ import {MAT_DIALOG_DATA, MatDialogRef, MatRadioChange} from '@angular/material';
 import {FormBuilder, FormControl} from '@angular/forms';
 import {
     DeviceTypeAspectModel,
-    DeviceTypeDeviceClassModel, DeviceTypeFunctionModel,
+    DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeFunctionType, functionTypes,
 } from '../../../../devices/device-types-overview/shared/device-type.model';
 import {
     DeviceTypeSelectionRefModel,
@@ -47,6 +47,7 @@ export class TaskConfigDialogComponent implements OnInit {
 
     result!: DeviceTypeSelectionResultModel;
     selection: DeviceTypeSelectionRefModel | null;
+    functionTypes: DeviceTypeFunctionType[] = functionTypes;
 
     constructor(
         private dialogRef: MatDialogRef<TaskConfigDialogComponent>,
@@ -58,12 +59,13 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.initSelection();
         this.initOptions();
         this.getDeviceClasses();
         this.getAspects();
         this.initFunctions();
         this.initCompletionStrategy();
-        this.initSelection();
+
     }
 
     close(): void {
@@ -72,6 +74,7 @@ export class TaskConfigDialogComponent implements OnInit {
 
     save(): void {
         this.result = {
+            aspect: this.aspectFormControl.value,
             function: this.functionFormControl.value,
             device_class: this.deviceClassFormControl.value,
             skeleton: {},
@@ -84,20 +87,7 @@ export class TaskConfigDialogComponent implements OnInit {
         return a && b && a.id === b.id && a.name === b.name;
     }
 
-    changeCompletionStrategy(event: MatRadioChange) {
-        this.setCompletionStrategy(event.value);
-    }
-
-    private setCompletionStrategy(strategy: string) {
-        this.completionStrategy = strategy;
-    }
-
-    isChecked(completionSrategy: string) {
-        return this.completionStrategy === completionSrategy;
-    }
-
     private initOptions(): void {
-        this.optionsFormControl.setValue('controlling');
         this.optionsFormControl.valueChanges.subscribe(() => {
             this.deviceClassFormControl.setValue('');
             this.aspectFormControl.setValue('');
@@ -107,7 +97,7 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private initCompletionStrategy(): void {
-        this.completionStrategyFormControl.setValue('optimistic');
+
     }
 
     private getDeviceClasses(): void {
@@ -127,16 +117,24 @@ export class TaskConfigDialogComponent implements OnInit {
     private initFunctions(): void {
         this.deviceClassFormControl.valueChanges.subscribe((deviceClass: DeviceTypeDeviceClassModel) => {
             this.resetFunctions();
-            this.deviceTypeService.getDeviceClassesControllingFunctions(deviceClass.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
-                this.functions = functions;
-            });
+            this.getDeviceClassFunctions(deviceClass);
         });
 
         this.aspectFormControl.valueChanges.subscribe((aspect: DeviceTypeAspectModel) => {
             this.resetFunctions();
-            this.deviceTypeService.getAspectsMeasuringFunctions(aspect.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
-                this.functions = functions;
-            });
+            this.getAspectFunctions(aspect);
+        });
+    }
+
+    private getAspectFunctions(aspect: DeviceTypeAspectModel) {
+        this.deviceTypeService.getAspectsMeasuringFunctions(aspect.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
+            this.functions = functions;
+        });
+    }
+
+    private getDeviceClassFunctions(deviceClass: DeviceTypeDeviceClassModel) {
+        this.deviceTypeService.getDeviceClassesControllingFunctions(deviceClass.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
+            this.functions = functions;
         });
     }
 
@@ -149,7 +147,24 @@ export class TaskConfigDialogComponent implements OnInit {
     private initSelection() {
         if (this.selection !== null) {
             this.deviceClassFormControl.setValue(this.selection.device_class);
+            this.aspectFormControl.setValue(this.selection.aspect);
+            this.functionTypes.forEach((functionType: DeviceTypeFunctionType) => {
+                if (this.selection !== null && functionType.rdf_type === this.selection.function.rdf_type) {
+                    this.optionsFormControl.setValue(functionType.text);
+                    if (functionType.text === 'Controlling') {
+                        this.getDeviceClassFunctions(this.selection.device_class);
+                    }
+                    if (functionType.text === 'Measuring') {
+                        this.getAspectFunctions(this.selection.aspect);
+                    }
+                }
+            });
             this.functionFormControl.setValue(this.selection.function);
+            this.functionFormControl.enable();
+            this.completionStrategyFormControl.setValue(this.selection.completionStrategy);
+        } else {
+            this.optionsFormControl.setValue('Controlling');
+            this.completionStrategyFormControl.setValue('optimistic');
         }
     }
 }

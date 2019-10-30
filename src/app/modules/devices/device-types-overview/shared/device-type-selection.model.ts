@@ -16,15 +16,17 @@
 
 
 
-import {DeviceTypeDeviceClassModel, DeviceTypeFunctionModel} from './device-type.model';
+import {DeviceTypeAspectModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel} from './device-type.model';
 
 export interface DeviceTypeSelectionRefModel {
+    aspect: DeviceTypeAspectModel;
     function: DeviceTypeFunctionModel;
     device_class: DeviceTypeDeviceClassModel;
     completionStrategy: string;
 }
 
 export interface DeviceTypeSelectionResultModel {
+    aspect: DeviceTypeAspectModel;
     function: DeviceTypeFunctionModel;
     device_class: DeviceTypeDeviceClassModel;
     skeleton: BpmnSkeletonModel;

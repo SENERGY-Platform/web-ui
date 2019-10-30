@@ -19,13 +19,13 @@
 <h2 mat-dialog-title>Task Configuration</h2>
 
 <mat-radio-group [formControl]="optionsFormControl">
-    <mat-radio-button class="radio-button" value="controlling">Controlling</mat-radio-button>
-    <mat-radio-button class="radio-button" value="measuring">Measuring</mat-radio-button>
+    <mat-radio-button class="radio-button" value="Controlling">Controlling</mat-radio-button>
+    <mat-radio-button class="radio-button" value="Measuring">Measuring</mat-radio-button>
 </mat-radio-group>
 
 <mat-dialog-content>
     <form class="form">
-        <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value === 'controlling'">
+        <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Controlling'">
             <mat-select placeholder="Device class" [compareWith]="compare"
                         [formControl]="deviceClassFormControl" required>
                 <mat-option *ngFor="let deviceClass of deviceClasses"
@@ -35,7 +35,7 @@
             </mat-select>
         </mat-form-field>
 
-        <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value === 'measuring'">
+        <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Measuring'">
             <mat-select placeholder="Aspect" [compareWith]="compare"
                         [formControl]="aspectFormControl" required>
                 <mat-option *ngFor="let aspect of aspects"
