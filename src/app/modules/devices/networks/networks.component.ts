@@ -98,8 +98,8 @@ export class NetworksComponent implements OnInit, OnDestroy {
     delete(network: NetworksModel) {
         this.dialogsService.openDeleteDialog('hub').afterClosed().subscribe((deleteNetwork: boolean) => {
             if (deleteNetwork) {
-                this.networksService.delete(network.id).subscribe((respMessage: string) => {
-                    if (respMessage === 'ok') {
+                this.networksService.delete(network.id).subscribe((resp: {status: number}) => {
+                    if (resp.status === 200) {
                         this.networks.splice(this.networks.indexOf(network), 1);
                         this.snackBar.open('Hub deleted successfully.', undefined, {duration: 2000});
                         this.setRepoItemsParams(1);

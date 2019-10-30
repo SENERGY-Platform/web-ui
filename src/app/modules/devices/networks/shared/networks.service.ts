@@ -54,9 +54,12 @@ export class NetworksService {
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'changeName', 'error')));
     }
 
-    delete(networkId: string): Observable<string> {
-        return this.http.delete(environment.iotRepoUrl + '/gateway/' + encodeURIComponent(networkId), {responseType: 'text'}).pipe(
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'delete', 'error'))
+    delete(networkId: string): Observable<{status: number}> {
+        return this.http.delete(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(networkId), {responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'delete', {status: 500}))
         );
     }
 
