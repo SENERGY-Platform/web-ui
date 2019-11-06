@@ -20,12 +20,13 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
-import {NetworksModel} from './networks.model';
+import {HubModel, NetworksModel} from './networks.model';
 import {MatDialog, MatDialogConfig, MatDialogRef, MatSnackBar} from '@angular/material';
 import {NetworksEditDialogComponent} from '../dialogs/networks-edit-dialog.component';
 import {NetworksHistoryModel} from './networks-history.model';
 import {DialogsService} from '../../../../core/services/dialogs.service';
 import {NetworksClearDialogComponent} from '../dialogs/networks-clear-dialog.component';
+import {DeviceInstancesUpdateModel} from '../../device-instances/shared/device-instances-update.model';
 
 @Injectable({
     providedIn: 'root'
@@ -48,10 +49,12 @@ export class NetworksService {
         );
     }
 
-    changeName(networkId: string, networkName: string): Observable<string> {
-        return this.http.post(environment.iotRepoUrl + '/gateway/' + encodeURIComponent(networkId) + '/name/' +
-            encodeURIComponent(networkName), null, {responseType: 'text'}).pipe(
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'changeName', 'error')));
+    changeName(hubId: string, hubName: string): Observable<HubModel | null> {
+        return this.http.put<HubModel>(
+            environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hubId) + '/name',
+            '"' + hubName + '"'
+        ).pipe(
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'changeName', null)));
     }
 
     delete(networkId: string): Observable<{status: number}> {
@@ -63,9 +66,12 @@ export class NetworksService {
         );
     }
 
-    clear(networkId: string): Observable<string> {
-        return this.http.post(environment.iotRepoUrl + '/gateway/' + encodeURIComponent(networkId) + '/clear', null, {responseType: 'text'}).pipe(
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'clear', 'error'))
+    update(hub: HubModel): Observable<HubModel | null> {
+        return this.http.put<HubModel>(
+            environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hub.id),
+            hub)
+        .pipe(
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'update', null))
         );
     }
 
@@ -84,8 +90,8 @@ export class NetworksService {
 
         editDialogRef.afterClosed().subscribe((networkName: string) => {
             if (networkName !== undefined) {
-                this.changeName(network.id, networkName).subscribe((resp: string) => {
-                    if (resp === 'ok') {
+                this.changeName(network.id, networkName).subscribe((resp: HubModel | null) => {
+                    if (resp) {
                         network.name = networkName;
                     }
                 });
@@ -100,8 +106,8 @@ export class NetworksService {
 
         editDialogRef.afterClosed().subscribe((clearNetwork: boolean) => {
             if (clearNetwork) {
-                this.clear(network.id).subscribe((respMessage: string) => {
-                    if (respMessage === 'ok') {
+                this.update({id: network.id, name: network.name, hash: '', device_local_ids: []}).subscribe((respMessage: HubModel|null) => {
+                    if (respMessage) {
                         this.snackBar.open('Hub cleared successfully.', undefined, {duration: 2000});
                     } else {
                         this.snackBar.open('Error while clearing the hub!', undefined, {duration: 2000});

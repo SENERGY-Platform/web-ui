@@ -21,3 +21,10 @@ export interface NetworksModel {
     devices: string[] | null;
 }
 
+export interface HubModel {
+    id: string;
+    name: string;
+    hash: string;
+    device_local_ids: string[] | null;
+}
+
