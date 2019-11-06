@@ -100,7 +100,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             selectables: this.initSelectablesFormArray(task.selectables),
             selection: this.initSelectionFormGroup(task.selection),
             selectableIndex: [task.selectableIndex],
-            parameter: [task.parameter]
+            parameter: [task.parameter],
+            retries: [task.retries]
         });
     }
 

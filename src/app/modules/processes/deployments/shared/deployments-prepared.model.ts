@@ -51,6 +51,7 @@ export interface DeploymentsPreparedTaskModel {
     selectableIndex: number;
     selection: DeploymentsPreparedSelectionModel;
     parameter: any;
+    retries: number;
 }
 
 export interface DeploymentsPreparedDeviceDescriptionModel {
@@ -62,6 +63,7 @@ export interface DeploymentsPreparedDeviceDescriptionModel {
 
 export interface DeploymentsPreparedMultiTaskModel {
     label: number;
+    retries: number;
 }
 
 export interface DeploymentsPreparedMsgEventModel {
