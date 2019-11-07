@@ -24,7 +24,7 @@
                         <h3 fxFlex class="layout-margin">{{item.name}}</h3>
                     </div>
                     <mat-divider class="no-margin"></mat-divider>
-                    <div fxLayout="column">
+                    <div [innerHtml]="item.image">
                     </div>
                 </div>
                 <mat-grid-tile-footer>

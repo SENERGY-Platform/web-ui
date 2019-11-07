@@ -19,6 +19,8 @@ import {MatSnackBar} from '@angular/material';
 import {FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {DomSanitizer} from '@angular/platform-browser';
+import {forEach} from '@angular/router/src/utils/collection';
 
 @Component({
     selector: 'senergy-operator-repo',
@@ -32,12 +34,18 @@ export class FlowRepoComponent implements OnInit {
 
     constructor(private flowRepoService: FlowRepoService,
                 public snackBar: MatSnackBar,
-                private dialogsService: DialogsService) {
+                private dialogsService: DialogsService,
+                private sanitizer: DomSanitizer) {
     }
 
     ngOnInit() {
         this.flowRepoService.getFlows().subscribe((resp: {flows: FlowModel[]}) => {
             this.flows = resp.flows;
+            this.flows.forEach((flow: FlowModel) => {
+                if (typeof flow.image === 'string') {
+                    flow.image = this.sanitizer.bypassSecurityTrustHtml(flow.image);
+                }
+            });
             this.ready = true;
         });
     }

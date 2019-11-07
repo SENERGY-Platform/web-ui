@@ -15,9 +15,11 @@
  */
 
 import {DiagramModel} from '../../../../core/components/diagram-editor/shared/diagram.model';
+import {SafeHtml} from '@angular/platform-browser';
 
 export interface FlowModel {
     _id: string;
     name: string;
     model: DiagramModel;
+    image: string | SafeHtml;
 }
