@@ -57,9 +57,57 @@ mat-grid-tile {
     overflow-y: auto;
 }
 
+mat-grid-tile {
+    background: whitesmoke !important;
+    transition: box-shadow 280ms cubic-bezier(.4,0,.2,1);
+    border-radius: 4px;
+}
+
+mat-grid-tile-footer {
+    height: 110px !important;
+    background-color: white !important;
+    color: black !important;
+    padding: 8px !important;
+}
+
+.footer-item-header {
+    min-height: 20px;
+    padding: 5px;
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.footer-item-subtitle {
+    min-height: 20px;
+    margin-top: -4px;
+    padding: 5px;
+    margin-bottom: 16px;
+}
+
+mat-grid-list {
+    margin-bottom: 100px;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .fab {
     position: fixed;
     bottom: 15px;
     right: 15px;
     z-index: 100;
+}
+
+.footer-buttons {
+    max-height: 30px;
+}
+
+.widget-image {
+    height: 156px;
+    width: 100%;
+    background-color: whitesmoke;
 }

@@ -16,34 +16,40 @@
 
 <div class="main-panel">
     <div class="layout-margin" fxLayout="column">
-        <mat-grid-list cols="2" rowHeight="300px" gutterSize="16px"
+        <mat-grid-list cols="3" rowHeight="282px" gutterSize="16px"
                        *ngIf="flows.length > 0">
             <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of flows">
-                <div fxFill fxLayout="column">
-                    <div fxLayout="row">
-                        <h3 fxFlex class="layout-margin">{{item.name}}</h3>
-                    </div>
-                    <mat-divider class="no-margin"></mat-divider>
-                    <div [innerHtml]="item.image">
+                <div fxFill>
+                    <div fxFill>
+                        <div class="widget-image" [innerHtml]="item.image"></div>
                     </div>
                 </div>
                 <mat-grid-tile-footer>
-                    <div fxLayout="row" fxLayoutAlign="end center" fxFill>
-                        <button class="mat-icon-button" routerLink="/data/flow-repo/deploy/{{item._id}}">
-                            <mat-icon class="mat-accent">
-                                start
-                            </mat-icon>
-                        </button>
-                        <button class="mat-icon-button" routerLink="/data/designer/{{item._id}}">
-                            <mat-icon class="mat-accent">
-                                edit
-                            </mat-icon>
-                        </button>
-                        <button class="mat-icon-button">
-                            <mat-icon class="mat-warn" (click)="deleteFlow(item)">
-                                delete
-                            </mat-icon>
-                        </button>
+                    <div fxLayout="column" fxFill>
+                        <div class="truncate footer-item-header" matTooltip="{{item.name}}">
+                            {{item.name}}
+                        </div>
+                        <div class="truncate footer-item-subtitle"
+                             matTooltip="{{item.name }}">
+                            {{item.name}}
+                        </div>
+                        <div fxLayout="row" fxLayoutAlign="end center" class="footer-buttons">
+                            <button class="mat-icon-button" routerLink="/data/flow-repo/deploy/{{item._id}}">
+                                <mat-icon class="mat-accent">
+                                    start
+                                </mat-icon>
+                            </button>
+                            <button class="mat-icon-button" routerLink="/data/designer/{{item._id}}">
+                                <mat-icon class="mat-accent">
+                                    edit
+                                </mat-icon>
+                            </button>
+                            <button class="mat-icon-button">
+                                <mat-icon class="mat-warn" (click)="deleteFlow(item)">
+                                    delete
+                                </mat-icon>
+                            </button>
+                        </div>
                     </div>
                 </mat-grid-tile-footer>
             </mat-grid-tile>
