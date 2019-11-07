@@ -101,7 +101,8 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 }
             }
         }
-        this.flowRepoService.saveFlow(this.flow).subscribe();
+        const flow = Object.assign({}, this.flow);
+        this.flowRepoService.saveFlow(flow).subscribe();
         this.snackBar.open('Flow saved', undefined, {
             duration: 2000,
         });
