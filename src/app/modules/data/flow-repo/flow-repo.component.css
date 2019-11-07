@@ -111,3 +111,5 @@ mat-grid-list {
     width: 100%;
     background-color: whitesmoke;
 }
+
+.link-tools .tool-remove { display: none }

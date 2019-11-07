@@ -20,25 +20,37 @@ import {FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DomSanitizer} from '@angular/platform-browser';
-import {forEach} from '@angular/router/src/utils/collection';
+import {ResponsiveService} from '../../../core/services/responsive.service';
+
+const GRIDS = new Map([
+    ['xs', 1],
+    ['sm', 3],
+    ['md', 3],
+    ['lg', 4],
+    ['xl', 6],
+]);
 
 @Component({
     selector: 'senergy-operator-repo',
     templateUrl: './flow-repo.component.html',
     styleUrls: ['./flow-repo.component.css']
 })
+
 export class FlowRepoComponent implements OnInit {
 
     flows: FlowModel[] = [];
     ready = false;
+    gridCols =  0;
 
     constructor(private flowRepoService: FlowRepoService,
                 public snackBar: MatSnackBar,
+                private responsiveService: ResponsiveService,
                 private dialogsService: DialogsService,
                 private sanitizer: DomSanitizer) {
     }
 
     ngOnInit() {
+        this.initGridCols();
         this.flowRepoService.getFlows().subscribe((resp: {flows: FlowModel[]}) => {
             this.flows = resp.flows;
             this.flows.forEach((flow: FlowModel) => {
@@ -62,7 +74,13 @@ export class FlowRepoComponent implements OnInit {
                     duration: 2000,
                 });
             }
-        })
+        });
+    }
 
+    private initGridCols(): void {
+        this.gridCols = GRIDS.get(this.responsiveService.getActiveMqAlias()) || 0;
+        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+            this.gridCols = GRIDS.get(mqAlias) || 0;
+        });
     }
 }

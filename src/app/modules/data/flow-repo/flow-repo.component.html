@@ -16,7 +16,7 @@
 
 <div class="main-panel">
     <div class="layout-margin" fxLayout="column">
-        <mat-grid-list cols="3" rowHeight="282px" gutterSize="16px"
+        <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
                        *ngIf="flows.length > 0">
             <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of flows">
                 <div fxFill>
