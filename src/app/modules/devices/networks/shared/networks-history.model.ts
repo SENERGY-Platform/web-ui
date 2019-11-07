@@ -16,7 +16,7 @@
 
 export interface NetworksHistoryModel {
     name: string;
-    devices: string[];
+    device_local_ids: string[];
     log_state: string;
     log_history: {values: LogHistoryValues[] | null};
     log_edge: (string|boolean)[] | null;

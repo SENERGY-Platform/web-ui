@@ -97,7 +97,7 @@ export class DeviceGatewayService {
     private getGatewayDataTableArray(gateways: NetworksHistoryModel[]): ChartDataTableModel {
         const dataTable = new ChartDataTableModel([['Name', 'Count', {role: 'annotation'}, {role: 'style'}]]);
         gateways.forEach((gateway) => {
-            const count = gateway.devices === null ? 0 : gateway.devices.length;
+            const count = gateway.device_local_ids === null ? 0 : gateway.device_local_ids.length;
             dataTable.data.push([gateway.name, count, count, customColor]);
         });
         return dataTable;

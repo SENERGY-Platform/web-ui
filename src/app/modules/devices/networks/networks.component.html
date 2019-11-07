@@ -40,7 +40,7 @@
                                     {{network.name}}
                                 </div>
                                 <div class="truncate footer-item-subtitle">
-                                    Devices: {{network.devices?.length || 0}}
+                                    Devices: {{network.device_local_ids?.length || 0}}
                                 </div>
                                 <form fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                                     <senergy-state-icon [state]="network.log_state"></senergy-state-icon>
