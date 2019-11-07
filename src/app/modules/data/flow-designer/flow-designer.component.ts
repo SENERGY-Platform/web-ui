@@ -166,6 +166,11 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                     '<svg xmlns="http://www.w3.org/2000/svg" viewbox="'
                     + viewbox[0] + ' ' + viewbox[1] + ' ' + viewbox[2] + ' ' + viewbox[3] + '"');
             }
+            source = source.replace( 'class="connection-wrap"', 'style="display:none;"');
+            source = source.replace( 'class="marker-vertices"', 'style="display:none;"');
+            source = source.replace( 'class="marker-arrowheads"', 'style="display:none;"');
+            source = source.replace( 'class="link-tools"', 'style="display:none;"');
+            source = source.replace( 'class="joint-port-body"', 'class=""');
             source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
         }
         return source;
