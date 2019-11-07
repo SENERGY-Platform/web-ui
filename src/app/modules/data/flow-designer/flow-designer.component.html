@@ -19,6 +19,10 @@
             <mat-label>Name</mat-label>
             <input matInput [(ngModel)]="flow.name" placeholder="Name">
         </mat-form-field>
+        <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-label>Beschreibung</mat-label>
+            <input matInput [(ngModel)]="flow.description" placeholder="Beschreibung">
+        </mat-form-field>
         <div fxLayout="row">
             <div id="senergy-diagram-editor" fxFlex="75">
                 <senergy-diagram-editor></senergy-diagram-editor>

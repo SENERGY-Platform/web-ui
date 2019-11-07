@@ -20,6 +20,7 @@ import {SafeHtml} from '@angular/platform-browser';
 export interface FlowModel {
     _id: string;
     name: string;
+    description: string;
     model: DiagramModel;
     image: string | SafeHtml;
 }
