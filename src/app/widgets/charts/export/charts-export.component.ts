@@ -39,7 +39,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     error = false;
     errorMessage = {} as ErrorModel;
 
-    private resizeTimeout = 0;
+    private resizeTimeout = 0 as any;
     private measurementId = '';
     private interval = 0;
 

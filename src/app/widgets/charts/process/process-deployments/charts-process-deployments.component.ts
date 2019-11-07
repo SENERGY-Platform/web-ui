@@ -34,7 +34,7 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
     ready = false;
     destroy = new Subscription();
 
-    private resizeTimeout = 0;
+    private resizeTimeout = 0 as any;
 
     @ViewChild('processDeploymentsHistoryChart') processDeploymentsHistoryChart!: GoogleChartComponent;
     @Input() dashboardId = '';

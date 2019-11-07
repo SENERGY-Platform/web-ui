@@ -34,7 +34,7 @@ export class DeviceGatewayComponent implements OnInit, OnDestroy {
     ready = false;
     destroy = new Subscription();
 
-    private resizeTimeout = 0;
+    private resizeTimeout = 0 as any;
 
     @ViewChild('deviceGatewayChart') deviceGatewayChart!: GoogleChartComponent;
     @Input() dashboardId = '';

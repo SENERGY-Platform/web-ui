@@ -34,7 +34,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
     ready = false;
     destroy = new Subscription();
 
-    private resizeTimeout = 0;
+    private resizeTimeout = 0 as any;
 
     @ViewChild('deviceTotalDowntimeChart') deviceTotalDowntimeChart!: GoogleChartComponent;
     @Input() dashboardId = '';

@@ -45,7 +45,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     dashboards: DashboardModel[] = [];
     dashboardsRetrieved = false;
     activeTabIndex = 0;
-    interval = 0;
+    interval = 0 as any;
     options: GridsterConfig = {};
     zoomedWidgetIndex: number | null = null;
     dashWidgetSubscription = new Subscription;
