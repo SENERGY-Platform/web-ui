@@ -22,9 +22,13 @@
             </div>
             <mat-card style="margin-bottom:10px;">
                 <mat-card-header>
-                    <div mat-card-avatar><mat-icon>timeline</mat-icon></div>
+                    <div mat-card-avatar>
+                        <mat-icon>timeline</mat-icon>
+                    </div>
                     <mat-card-title>{{pipe.name}}</mat-card-title>
-                    <mat-card-subtitle>{{pipe.id}}</mat-card-subtitle>
+                    <mat-card-subtitle>Id: {{pipe.id}}</mat-card-subtitle>
+                    <mat-card-subtitle>Flow Id: <a routerLink="/data/designer/{{pipe.flowId}}">{{pipe.flowId}}</a>
+                    </mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
                     <div fxLayout="column">
@@ -32,7 +36,7 @@
                     </div>
                 </mat-card-content>
             </mat-card>
-            <mat-expansion-panel  *ngFor="let operator of pipe.operators">
+            <mat-expansion-panel *ngFor="let operator of pipe.operators">
                 <mat-expansion-panel-header>
                     <mat-panel-title style="width:40%">
                         {{ operator.id }} - {{ operator.name }}
@@ -45,7 +49,9 @@
 
                 </p>
             </mat-expansion-panel>
-
+            <mat-card style="margin-top: 10px;">
+                <div class="widget-image" [innerHtml]="pipe.image"></div>
+            </mat-card>
         </div>
     </div>
 </div>

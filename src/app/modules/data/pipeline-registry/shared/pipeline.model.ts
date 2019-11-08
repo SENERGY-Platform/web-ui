@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import {SafeHtml} from '@angular/platform-browser';
+
 export interface PipelineModel {
     id: string;
     name: string;
     description: string;
+    flowId: string;
+    image: string | SafeHtml;
     createdAt: Date;
     updatedAt: Date;
     operators: PipelineOperatorModel [];

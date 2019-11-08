@@ -64,3 +64,8 @@ mat-grid-list {
     right: 15px;
     z-index: 100;
 }
+
+.widget-image {
+    height: auto;
+    width: 100%;
+}
