@@ -41,7 +41,13 @@ export class PipelineDetailsComponent implements OnInit {
                 if (resp !== null) {
                     this.pipe = resp;
                     if (typeof this.pipe.image === 'string') {
-                        this.pipe.image = this.sanitizer.bypassSecurityTrustHtml(this.pipe.image);
+                        const parser = new DOMParser();
+                        const svg = parser.parseFromString(this.pipe.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+                        // @ts-ignore
+                        const viewbox = svg.getAttribute('viewbox').split(' ');
+                        svg.setAttribute('height', viewbox[3]);
+                        this.pipe.image = this.sanitizer.bypassSecurityTrustHtml(
+                            new XMLSerializer().serializeToString(svg));
                     }
                 }
                 this.ready = true;
