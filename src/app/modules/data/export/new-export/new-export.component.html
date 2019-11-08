@@ -37,7 +37,7 @@
             </mat-select>
             <mat-select *ngIf="selector==='pipe'" (ngModelChange)="pipelineChanged()" placeholder="Pipeline" [(ngModel)]="pipeline">
                 <mat-option *ngFor="let pipe of pipelines" [value]="pipe">
-                    {{pipe.id}}
+                    {{pipe.name}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
