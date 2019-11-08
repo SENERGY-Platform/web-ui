@@ -71,9 +71,6 @@
 
         <mat-checkbox class="example-margin" [(ngModel)]="allMessages">Consume all messages</mat-checkbox>
 
-        <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
-            <button mat-raised-button color="accent" (click)="addValue()">Add Export Value</button>
-        </div>
         <div *ngFor="let item of export.Values; let key = index" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
@@ -100,8 +97,13 @@
                 </mat-icon>
             </button>
         </div>
-        <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
-            <button mat-raised-button color="accent" (click)="startExport()">Start</button>
+        <div fxLayout="row" style="margin-top:8px;">
+            <div fxLayout="column" fxFlex fxLayoutAlign="center start">
+                <button mat-raised-button color="accent" (click)="addValue()">Add Export Value</button>
+            </div>
+            <div fxLayout="column" fxFlex fxLayoutAlign="center end">
+                <button mat-raised-button color="accent" (click)="startExport()">Start Export</button>
+            </div>
         </div>
     </div>
 </div>
