@@ -43,6 +43,12 @@ export class SingleValueEditDialogComponent implements OnInit {
     vAxisValues: ExportValueModel[] = [];
     disableSave = false;
 
+    vAxisLabel: string = '';
+    name: string = '';
+    type: string = '';
+    format: string = '';
+    threshold = 128;
+
     constructor(private dialogRef: MatDialogRef<SingleValueEditDialogComponent>,
                 private deploymentsService: DeploymentsService,
                 private dashboardService: DashboardService,
@@ -59,6 +65,11 @@ export class SingleValueEditDialogComponent implements OnInit {
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
+            this.vAxisLabel = widget.properties.vAxisLabel ? widget.properties.vAxisLabel : this.vAxisLabel;
+            this.name = widget.name;
+            this.type = widget.properties.type ? widget.properties.type : this.type;
+            this.format =  widget.properties.format ? widget.properties.format : this.format;
+            this.threshold = widget.properties.threshold ? widget.properties.threshold : this.threshold;
             this.formControl.setValue(this.widget.properties.measurement || '');
             this.initDeployments();
         });
@@ -100,6 +111,12 @@ export class SingleValueEditDialogComponent implements OnInit {
                 values: this.formControl.value.values
             };
         }
+        this.widget.properties.vAxisLabel = this.vAxisLabel;
+        this.widget.name = this.name;
+        this.widget.properties.type = this.type;
+        this.widget.properties.format = this.format;
+        this.widget.properties.threshold = this.threshold;
+
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widget);
@@ -123,6 +140,10 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     compare(a: any, b: any) {
         return a.InstanceID === b.InstanceID && a.Name === b.Name && a.Path === b.Path;
+    }
+
+    compareStrings(a: any, b: any) {
+        return a === b;
     }
 
 

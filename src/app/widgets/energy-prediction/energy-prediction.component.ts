@@ -96,7 +96,6 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
     }
 
     private setConfigured() {
-        console.log(this.widget.properties); // TODO
         this.configured = !(
             this.widget.properties === undefined
             || this.widget.properties.thresholdOption === ''
