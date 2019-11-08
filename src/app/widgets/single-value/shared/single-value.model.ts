@@ -18,3 +18,8 @@ export interface SingleValueModel {
     value: (number | string);
 }
 
+export interface SingleValuePropertiesModel {
+    type?: string;
+    format?: string;
+}
+

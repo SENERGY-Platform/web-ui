@@ -32,6 +32,8 @@ export class SingleValueComponent implements OnInit, OnDestroy {
 
     devicesStatus: SingleValueModel = {value: 0};
     ready = false;
+    configured = false;
+    dataReady = false;
     destroy = new Subscription();
 
     @Input() dashboardId = '';
@@ -40,13 +42,14 @@ export class SingleValueComponent implements OnInit, OnDestroy {
 
     constructor(private iconRegistry: MatIconRegistry,
                 private sanitizer: DomSanitizer,
-                private devicesStateService: SingleValueService,
+                private singleValueService: SingleValueService,
                 private dashboardService: DashboardService) {
     }
 
     ngOnInit() {
-        this.setDeviceStatus();
+        this.update();
         this.registerIcons();
+        this.setConfigured();
     }
 
     ngOnDestroy() {
@@ -59,18 +62,29 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.devicesStateService.openEditDialog(this.dashboardId, this.widget.id);
+        this.singleValueService.openEditDialog(this.dashboardId, this.widget.id);
     }
 
-    private setDeviceStatus() {
+    private update() {
+        this.setConfigured();
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
-                this.devicesStateService.getSingleValue(this.widget).subscribe((devicesStatus: SingleValueModel) => {
+                this.dataReady = false;
+                this.singleValueService.getSingleValue(this.widget).subscribe((devicesStatus: SingleValueModel) => {
                     this.devicesStatus = devicesStatus;
+                    this.ready = true;
+                    this.dataReady = true;
+                }, () => {
                     this.ready = true;
                 });
             }
         });
+    }
+
+    private setConfigured() {
+        this.configured = !(
+          this.widget.properties.measurement === undefined
+        );
     }
 }

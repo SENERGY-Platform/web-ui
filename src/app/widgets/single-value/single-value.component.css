@@ -21,9 +21,7 @@ mat-card {
 }
 
 .value {
-    font-size: xx-large;
-    text-align: center;
-    height: 100%;
+    font-size: 3.5vw;
 }
 
 .content-size {
@@ -38,4 +36,13 @@ mat-card {
 
 .white {
     color: white;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.content-box {
+    height: 90%;
+    white-space: nowrap;
 }

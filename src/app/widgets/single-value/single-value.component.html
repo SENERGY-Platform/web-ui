@@ -17,11 +17,33 @@
 <mat-card>
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="content-size drag-handler">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready" class="value">
-            <span style="vertical-align: -2.5em">
-                {{devicesStatus.value}} {{widget.properties.vAxisLabel}}
-            </span>
+        <div *ngIf="!configured" fxFill fxLayout="row" fxLayoutAlign="center center">
+            <div fittext>Please configure widget!</div>
+        </div>
+        <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
+        <div *ngIf="configured && ready && !dataReady" fxFill fxLayout="row" fxLayoutAlign="center center">
+            <div fittext>Problem fetching data! Check config</div>
+        </div>
+        <div class="content-box">
+            <div *ngIf="configured && ready && dataReady" fxFill fxLayout="row" fxLayoutAlign="center center">
+                <div fittext [maxFontSize]="widget.properties.threshold ? widget.properties.threshold : 128">
+                    <span *ngIf="widget.properties.type === 'String'">
+                        {{devicesStatus.value}} {{widget.properties.vAxisLabel}}
+                    </span>
+                    <span *ngIf="widget.properties.type === 'Number'">
+                        {{devicesStatus.value | number: widget.properties.format}} {{widget.properties.vAxisLabel}}
+                    </span>
+                    <span *ngIf="widget.properties.type === 'Date'">
+                        {{devicesStatus.value | date: widget.properties.format}} {{widget.properties.vAxisLabel}}
+                    </span>
+                    <span *ngIf="widget.properties.type === 'Currency'">
+                            {{devicesStatus.value | currency: widget.properties.format}} {{widget.properties.vAxisLabel}}
+                    </span>
+                    <span *ngIf="widget.properties.type === 'Percent'">
+                            {{devicesStatus.value | percent: widget.properties.format}} {{widget.properties.vAxisLabel}}
+                    </span>
+                </div>
+            </div>
         </div>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>

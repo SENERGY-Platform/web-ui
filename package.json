@@ -55,7 +55,8 @@
     "zone.js": "~0.8.26",
     "@agm/core": "^1.0.0-beta.7",
     "@angular-material-extensions/google-maps-autocomplete": "^2.0.0",
-    "@types/googlemaps": "^3.37.5"
+    "@types/googlemaps": "^3.37.5",
+    "angular-fittext": "^2.1.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.12.1",
