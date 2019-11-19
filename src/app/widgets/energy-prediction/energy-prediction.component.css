@@ -53,3 +53,6 @@ mat-card {
 .white {
     color: white;
 }
+.center-text {
+    text-align: center;
+}

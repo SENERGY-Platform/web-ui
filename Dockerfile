@@ -8,7 +8,7 @@ WORKDIR /workspace
 # use git
 RUN apk add --no-cache git
 
-RUN npm install
+RUN npm ci
 RUN npm rebuild node-sass
 RUN npm run config -- --environment=prod
 RUN node --max_old_space_size=8192 $(npm bin)/ng build --prod

@@ -80,6 +80,7 @@ import {AirQualityComponent} from './air-quality/air-quality.component';
 import {AirQualityEditDialogComponent} from './air-quality/dialog/air-quality-edit-dialog.component';
 import {AgmCoreModule} from '@agm/core';
 import {MatGoogleMapsAutocompleteModule} from '@angular-material-extensions/google-maps-autocomplete';
+import {AngularFittextModule} from "angular-fittext";
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -118,7 +119,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
             libraries: ['places']
         }),
         MatGoogleMapsAutocompleteModule.forRoot(),
-        MatExpansionModule
+        MatExpansionModule,
+        AngularFittextModule
     ],
     declarations: [
         SwitchComponent,
