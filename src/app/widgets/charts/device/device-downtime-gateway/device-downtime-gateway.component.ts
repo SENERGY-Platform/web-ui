@@ -34,7 +34,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
     ready = false;
     destroy = new Subscription();
 
-    private resizeTimeout = 0 as any;
+    private resizeTimeout = 0;
 
     @ViewChild('deviceDowntimeGatewayChart') deviceDowntimeGatewayChart!: GoogleChartComponent;
     @Input() dashboardId = '';
@@ -44,7 +44,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
     @HostListener('window:resize')
     onResize() {
         if (this.resizeTimeout === 0) {
-            this.resizeTimeout = setTimeout(() => {
+            this.resizeTimeout = window.setTimeout(() => {
                 this.resizeProcessInstancesStatusChart();
                 this.resizeTimeout = 0;
             }, 300);

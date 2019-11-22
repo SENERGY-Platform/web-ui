@@ -39,7 +39,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     error = false;
     errorMessage = {} as ErrorModel;
 
-    private resizeTimeout = 0 as any;
+    private resizeTimeout = 0;
     private measurementId = '';
     private interval = 0;
 
@@ -51,7 +51,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     @HostListener('window:resize')
     onResize() {
         if (this.resizeTimeout === 0) {
-            this.resizeTimeout = setTimeout(() => {
+            this.resizeTimeout = window.setTimeout(() => {
                 this.resizeProcessInstancesStatusChart();
                 this.resizeTimeout = 0;
             }, 500);
