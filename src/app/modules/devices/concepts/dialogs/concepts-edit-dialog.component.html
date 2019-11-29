@@ -20,12 +20,22 @@
 <mat-dialog-content>
     <form class="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input matInput placeholder="Name" [formControl]="formControl">
+            <input matInput placeholder="Name" [formControl]="nameFormControl">
+        </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+
+            <mat-select placeholder="Base Characteristic"
+                        [formControl]="baseCharacteristicControl" required>
+                <mat-option *ngFor="let characteristic of characteristics"
+                            [value]="characteristic.id">
+                    {{characteristic.name}}
+                </mat-option>
+            </mat-select>
         </mat-form-field>
     </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="formControl.invalid">Save</button>
+    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="nameFormControl.invalid || baseCharacteristicControl.invalid">Save</button>
 </mat-dialog-actions>

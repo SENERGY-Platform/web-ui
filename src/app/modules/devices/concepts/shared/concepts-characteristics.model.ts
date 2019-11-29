@@ -20,5 +20,6 @@ import {DeviceTypeCharacteristicsModel} from '../../device-types-overview/shared
 export interface ConceptsCharacteristicsModel {
     id: string;
     name: string;
+    base_characteristic_id: string;
     characteristics: DeviceTypeCharacteristicsModel[];
 }

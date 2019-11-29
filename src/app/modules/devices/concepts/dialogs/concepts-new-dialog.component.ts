@@ -39,6 +39,7 @@ export class ConceptsNewDialogComponent {
         const concept: DeviceTypeConceptModel = {
             id: '',
             name: this.nameControl.value,
+            base_characteristic_id: '',
             characteristic_ids: []
         };
         this.dialogRef.close(concept);
