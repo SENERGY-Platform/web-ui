@@ -19,7 +19,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatRadioChange} from '@angular/material';
 import {FormBuilder, FormControl} from '@angular/forms';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeFunctionType, functionTypes,
 } from '../../../../devices/device-types-overview/shared/device-type.model';
 import {
@@ -77,7 +77,7 @@ export class TaskConfigDialogComponent implements OnInit {
             aspect: this.aspectFormControl.value,
             function: this.functionFormControl.value,
             device_class: this.deviceClassFormControl.value,
-            skeleton: {},
+            characteristic: {} as DeviceTypeCharacteristicsModel, // FIXME
             completionStrategy: this.completionStrategyFormControl.value
         };
         this.dialogRef.close(this.result);
