@@ -1,6 +1,9 @@
 ## STAGE 1: Build Angular application ##
 FROM node:10-alpine as builder
 
+ARG branch
+ENV SOURCE=git+https://github.com/SENERGY-Platform/properties-provider.git#${branch}
+
 COPY . /workspace
 
 WORKDIR /workspace
@@ -9,6 +12,8 @@ WORKDIR /workspace
 RUN apk add --no-cache git
 
 RUN npm ci
+RUN echo $SOURCE
+RUN npm install $SOURCE
 RUN npm rebuild node-sass
 RUN npm run config -- --environment=prod
 RUN node --max_old_space_size=8192 $(npm bin)/ng build --prod
