@@ -27,6 +27,8 @@ import {
     DeviceTypeSelectionResultModel
 } from '../../../../devices/device-types-overview/shared/device-type-selection.model';
 import {DeviceTypeService} from '../../../../devices/device-types-overview/shared/device-type.service';
+import {ConceptsService} from '../../../../devices/concepts/shared/concepts.service';
+import {ConceptsCharacteristicsModel} from '../../../../devices/concepts/shared/concepts-characteristics.model';
 
 @Component({
     templateUrl: './task-config-dialog.component.html',
@@ -42,7 +44,7 @@ export class TaskConfigDialogComponent implements OnInit {
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
-    completionStrategy = '';
+    characteristic: DeviceTypeCharacteristicsModel = {} as DeviceTypeCharacteristicsModel;
     limit = 20;
 
     result!: DeviceTypeSelectionResultModel;
@@ -54,6 +56,7 @@ export class TaskConfigDialogComponent implements OnInit {
         private dtService: DeviceTypeService,
         private _formBuilder: FormBuilder,
         private deviceTypeService: DeviceTypeService,
+        private conceptsService: ConceptsService,
         @Inject(MAT_DIALOG_DATA) private data: { selection: DeviceTypeSelectionRefModel | null }) {
         this.selection = this.data.selection;
     }
@@ -64,8 +67,6 @@ export class TaskConfigDialogComponent implements OnInit {
         this.getDeviceClasses();
         this.getAspects();
         this.initFunctions();
-        this.initCompletionStrategy();
-
     }
 
     close(): void {
@@ -77,7 +78,7 @@ export class TaskConfigDialogComponent implements OnInit {
             aspect: this.aspectFormControl.value,
             function: this.functionFormControl.value,
             device_class: this.deviceClassFormControl.value,
-            characteristic: {} as DeviceTypeCharacteristicsModel, // FIXME
+            characteristic: this.characteristic,
             completionStrategy: this.completionStrategyFormControl.value
         };
         this.dialogRef.close(this.result);
@@ -96,10 +97,6 @@ export class TaskConfigDialogComponent implements OnInit {
         });
     }
 
-    private initCompletionStrategy(): void {
-
-    }
-
     private getDeviceClasses(): void {
         this.deviceTypeService.getDeviceClasses().subscribe(
             (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
@@ -115,6 +112,9 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private initFunctions(): void {
+        this.functionFormControl.valueChanges.subscribe((func: DeviceTypeFunctionModel) => {
+            this.getBaseCharacteristics(func);
+        });
         this.deviceClassFormControl.valueChanges.subscribe((deviceClass: DeviceTypeDeviceClassModel) => {
             this.resetFunctions();
             this.getDeviceClassFunctions(deviceClass);
@@ -144,6 +144,23 @@ export class TaskConfigDialogComponent implements OnInit {
         this.functionFormControl.enable();
     }
 
+    private getBaseCharacteristics(func: DeviceTypeFunctionModel): void {
+        if (func) {
+            this.conceptsService.getConceptWithCharacteristics(func.concept_id).subscribe(
+                (concept: (ConceptsCharacteristicsModel | null)) => {
+                    if (concept) {
+                        let index = -1;
+                        concept.characteristics.forEach((char: DeviceTypeCharacteristicsModel, i: number) => {
+                            if (char.id === concept.base_characteristic_id) {
+                                index = i;
+                            }
+                        });
+                        this.characteristic = concept.characteristics[index];
+                    }
+                });
+        }
+    }
+
     private initSelection() {
         if (this.selection !== null) {
             this.deviceClassFormControl.setValue(this.selection.device_class);
@@ -161,6 +178,7 @@ export class TaskConfigDialogComponent implements OnInit {
             });
             this.functionFormControl.setValue(this.selection.function);
             this.functionFormControl.enable();
+            this.getBaseCharacteristics(this.selection.function);
             this.completionStrategyFormControl.setValue(this.selection.completionStrategy);
         } else {
             this.optionsFormControl.setValue('Controlling');
