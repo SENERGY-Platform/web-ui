@@ -211,8 +211,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                 this.cons.push('It might be raining soon');
             }
         }
-        console.log(this.pros);
-        console.log(this.cons);
     }
 
     private updateMeasurements() {
