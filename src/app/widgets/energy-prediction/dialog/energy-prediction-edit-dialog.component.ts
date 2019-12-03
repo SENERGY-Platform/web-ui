@@ -119,8 +119,6 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
                 this.dialogRef.close(this.widget);
             }
         });
-
-        console.log(this.widget); // TODO
     }
 
     private _filter(value: string): ChartsExportMeasurementModel[] {

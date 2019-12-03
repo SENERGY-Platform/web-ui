@@ -42,7 +42,11 @@ export const environment = {
     usersServiceUrl: 'http://localhost',
     deviceRepoUrl: 'http://localhost',
     deviceManagerUrl: 'https://localhost',
-    semanticRepoUrl: 'https://localhost',
+    semanticRepoUrl: 'https://localhost',    ubaUrl: 'http://localhost',
+    gmapsApiKey: '1234',
+    dwdOpenUrl: 'http://localhost',
+    geonamesUrl: 'http://localhost',
+    yrUrl: 'http://localhost',
 };
 
 /*
