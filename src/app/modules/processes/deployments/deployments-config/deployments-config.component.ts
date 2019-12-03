@@ -100,7 +100,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             selectables: this.initSelectablesFormArray(task.selectables),
             selection: this.initSelectionFormGroup(task.selection),
             selectableIndex: [task.selectableIndex],
-            parameter: [task.parameter],
+            parameter: this.initParameterFormGroup(task.parameter),
             retries: [task.retries]
         });
     }
@@ -111,6 +111,14 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             service: [{value: selection.service, disabled: false}],
             show: [{value: false}]
         });
+    }
+
+    initParameterFormGroup(parameter: any): FormGroup {
+        const fbGroup = this._formBuilder.group({});
+        for (const [key, value] of Object.entries(parameter)) {
+            fbGroup.addControl(key, new FormControl(value));
+        }
+        return fbGroup;
     }
 
     initSelectablesFormArray(selectables: DeploymentsPreparedSelectableModel[]): FormArray {
@@ -125,6 +133,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         return this._formBuilder.array(array);
     }
 
+    trackByFn(index: any) {
+        return index;
+    }
+
     initDeviceServicesGroup(selectable: DeploymentsPreparedSelectableModel): FormGroup {
         return this._formBuilder.group({
             device: [selectable.device],
@@ -133,14 +145,12 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     save(): void {
-        console.log(this.deploymentFormGroup.value);
         this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: any) => {
             console.log(resp);
         });
     }
 
     changeTaskSelectables(elementIndex: number, selectableIndex: number): void {
-        console.log(elementIndex, selectableIndex);
         const task = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'task']);
         const selection = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selection']);
         const services = <FormArray>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selectables', selectableIndex, 'services']);

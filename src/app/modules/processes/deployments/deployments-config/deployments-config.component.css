@@ -28,4 +28,6 @@
     width: 100%;
 }
 
-
+td {
+    padding-right: 8px;
+}

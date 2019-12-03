@@ -24,25 +24,40 @@
                          *ngFor="let element of deploymentFormGroup.get('elements').controls; let elementIndex = index">
                         <div formGroupName="task" *ngIf="element.value.task !== null">
                             <div>{{element.value.task.label}}</div>
-                            <div formGroupName="selection">
-                                <mat-form-field class="full-width" color="accent">
-                                    <mat-select placeholder="Device" required formControlName="device">
-                                        <mat-option *ngFor="let selectables of element.value.task.selectables; let selectableIndex = index"
-                                                    [value]="selectables.device" (click)="changeTaskSelectables(elementIndex, selectableIndex)">
-                                            {{selectables.device.name}}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
+                            <table class="full-width" cellspacing="0">
+                                <tr>
+                                    <td formGroupName="selection">
+                                        <mat-form-field class="full-width" color="accent">
+                                            <mat-select placeholder="Device" required formControlName="device">
+                                                <mat-option
+                                                        *ngFor="let selectables of element.value.task.selectables; let selectableIndex = index"
+                                                        [value]="selectables.device"
+                                                        (click)="changeTaskSelectables(elementIndex, selectableIndex)">
+                                                    {{selectables.device.name}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
 
-                                <mat-form-field class="full-width" color="accent" *ngIf="element.value.task.selection.show === true">
-                                    <mat-select placeholder="Service" required formControlName="service">
-                                        <mat-option *ngFor="let services of element.value.task.selectables[element.value.task.selectableIndex || 0].services"
-                                                    [value]="services">
-                                            {{services.name}}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
+                                        <mat-form-field class="full-width" color="accent"
+                                                        *ngIf="element.value.task.selection.show === true">
+                                            <mat-select placeholder="Service" required formControlName="service">
+                                                <mat-option
+                                                        *ngFor="let services of element.value.task.selectables[element.value.task.selectableIndex || 0].services"
+                                                        [value]="services">
+                                                    {{services.name}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                    <td formGroupName="parameter"
+                                        *ngFor="let item of element.value.task.parameter | keyvalue; trackBy:trackByFn">
+                                        <mat-form-field class="full-width" color="accent">
+                                            <input type="text" matInput placeholder="{{item.key}}"
+                                                   [formControlName]="item.key">
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
