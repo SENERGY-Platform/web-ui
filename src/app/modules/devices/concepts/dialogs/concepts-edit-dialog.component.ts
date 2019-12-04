@@ -33,6 +33,7 @@ export class ConceptsEditDialogComponent implements OnInit {
 
     conceptId: string;
     nameFormControl = new FormControl('', [Validators.required]);
+    idFormControl = new FormControl({value: '', disabled: true});
     baseCharacteristicControl = new FormControl('', [Validators.required]);
     concept!: ConceptsCharacteristicsModel;
     characteristics: DeviceTypeCharacteristicsModel[] = [];
@@ -50,6 +51,7 @@ export class ConceptsEditDialogComponent implements OnInit {
                 this.characteristics = concept.characteristics;
                 this.baseCharacteristicControl.setValue(this.concept.base_characteristic_id);
                 this.nameFormControl.setValue(this.concept.name);
+                this.idFormControl.setValue(this.concept.id);
             }
         });
     }
