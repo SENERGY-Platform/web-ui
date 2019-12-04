@@ -89,7 +89,7 @@ export class DeviceTypesComponent implements OnInit {
             name: this.firstFormGroup.value.name,
             description: this.firstFormGroup.value.description,
             image: this.firstFormGroup.value.image,
-            services: this.secondFormGroup.value.services,
+            services: this.secondFormGroup.getRawValue().services,
             device_class: this.firstFormGroup.value.device_class,
         };
 
@@ -247,7 +247,8 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private cleanUpServices() {
-        this.secondFormGroup.value.services.forEach((service: DeviceTypeServiceModel) => {
+
+        this.secondFormGroup.value.services.forEach((service: DeviceTypeServiceModel, serviceIndex: number) => {
             const deleteIndexInput: DeviceTypeContentModel[] = [];
             const deleteIndexOutput: DeviceTypeContentModel[] = [];
             service.inputs.forEach((item: DeviceTypeContentModel) => {
@@ -264,12 +265,21 @@ export class DeviceTypesComponent implements OnInit {
                     item.content_variable = JSON.parse(item.content_variable_raw);
                 }
             });
-            deleteIndexInput.forEach((item: DeviceTypeContentModel) => {
-                service.inputs.splice(service.inputs.indexOf(item), 1);
-            });
-            deleteIndexOutput.forEach((item: DeviceTypeContentModel) => {
-                service.outputs.splice(service.outputs.indexOf(item), 1);
-            });
+
+            // loop from highest Index! Otherwise it could cause index problems
+            for (let j = deleteIndexInput.length - 1; j >= 0 ; j--) {
+                const serviceControl = <FormGroup>this.secondFormGroup.controls['services'].get([serviceIndex]);
+                const inputs = <FormArray>serviceControl.controls['inputs'];
+                inputs.removeAt(service.inputs.indexOf(deleteIndexInput[j]));
+            }
+
+            // loop from highest Index! Otherwise it could cause index problems
+            for (let i = deleteIndexOutput.length - 1; i >= 0 ; i--) {
+                const serviceControl = <FormGroup>this.secondFormGroup.controls['services'].get([serviceIndex]);
+                const outputs = <FormArray>serviceControl.controls['outputs'];
+                const index = service.outputs.indexOf(deleteIndexOutput[i]);
+                outputs.removeAt(index);
+            }
         });
     }
 
