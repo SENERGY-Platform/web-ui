@@ -35,14 +35,14 @@ import {ConceptsPermSearchModel} from '../../../concepts/shared/concepts-perm-se
 export class DeviceTypesNewFunctionDialogComponent implements OnInit {
 
     nameControl = new FormControl('', [Validators.required]);
-    conceptControl = new FormControl('', [Validators.required]);
+    conceptControl = new FormControl('');
     concepts: ConceptsPermSearchModel[] = [];
     functionType = {} as DeviceTypeFunctionType;
 
     constructor(private snackBar: MatSnackBar,
                 private conceptsService: ConceptsService,
                 private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: {functionType: DeviceTypeFunctionType}) {
+                @Inject(MAT_DIALOG_DATA) data: { functionType: DeviceTypeFunctionType }) {
         this.functionType = data.functionType;
     }
 
@@ -56,9 +56,8 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
             id: this.setId(),
             name: this.nameControl.value,
             rdf_type: this.functionType.rdf_type,
-            concept_id: this.conceptControl.value.id,
+            concept_id: this.conceptControl.value.id || null,
         };
-
         this.dialogRef.close(func);
     }
 

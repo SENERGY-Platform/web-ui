@@ -37,7 +37,7 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" [disabled]="nameControl.invalid || conceptControl.invalid"
+    <button class="mat-raised-button mat-accent" [disabled]="nameControl.invalid"
             (click)="save()">Save
     </button>
 </mat-dialog-actions>
