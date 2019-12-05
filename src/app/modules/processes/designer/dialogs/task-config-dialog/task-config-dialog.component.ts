@@ -144,8 +144,8 @@ export class TaskConfigDialogComponent implements OnInit {
         this.functionFormControl.enable();
     }
 
-    private getBaseCharacteristics(func: DeviceTypeFunctionModel): void {
-        if (func) {
+    private getBaseCharacteristics(func: DeviceTypeFunctionModel): void { 
+        if (func && func.concept_id !== '') {
             this.conceptsService.getConceptWithCharacteristics(func.concept_id).subscribe(
                 (concept: (ConceptsCharacteristicsModel | null)) => {
                     if (concept) {
