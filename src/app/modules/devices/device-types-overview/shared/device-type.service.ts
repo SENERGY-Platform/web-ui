@@ -74,7 +74,6 @@ export class DeviceTypeService {
     }
 
     getDeviceClasses(): Observable<DeviceTypeDeviceClassModel[]> {
-        console.log('getDeviceClasses');
         return this.http.get<DeviceTypeDeviceClassModel[]>
         (environment.semanticRepoUrl + '/device-classes').pipe(
             map(resp => resp || []),
@@ -89,7 +88,6 @@ export class DeviceTypeService {
     }
 
     updateDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
-        console.log(deviceType);
         return this.http.put<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types/' + encodeURIComponent(deviceType.id), deviceType).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'updateDeviceType', null))
         );
