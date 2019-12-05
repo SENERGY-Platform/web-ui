@@ -248,39 +248,29 @@ export class DeviceTypesComponent implements OnInit {
 
     private cleanUpServices() {
 
-        this.secondFormGroup.value.services.forEach((service: DeviceTypeServiceModel, serviceIndex: number) => {
-            const deleteIndexInput: DeviceTypeContentModel[] = [];
-            const deleteIndexOutput: DeviceTypeContentModel[] = [];
-            service.inputs.forEach((item: DeviceTypeContentModel) => {
-                if (!this.checkIfContentExists(item)) {
-                    deleteIndexInput.push(item);
-                } else {
-                    item.content_variable = JSON.parse(item.content_variable_raw);
-                }
-            });
-            service.outputs.forEach((item: DeviceTypeContentModel) => {
-                if (!this.checkIfContentExists(item)) {
-                    deleteIndexOutput.push(item);
-                } else {
-                    item.content_variable = JSON.parse(item.content_variable_raw);
-                }
-            });
+        const services = <FormArray>this.secondFormGroup.controls['services'];
 
+        for (let i = 0; i < services.length; i++) {
+            const formGroup = <FormGroup>services.controls[i];
+            const inputs = <FormArray>formGroup.controls['inputs'];
             // loop from highest Index! Otherwise it could cause index problems
-            for (let j = deleteIndexInput.length - 1; j >= 0 ; j--) {
-                const serviceControl = <FormGroup>this.secondFormGroup.controls['services'].get([serviceIndex]);
-                const inputs = <FormArray>serviceControl.controls['inputs'];
-                inputs.removeAt(service.inputs.indexOf(deleteIndexInput[j]));
+            for (let j = inputs.length - 1; j >= 0; j--) {
+                if (!this.checkIfContentExists(inputs.controls[j].value)) {
+                    inputs.removeAt(j);
+                } else {
+                    inputs.controls[j].patchValue({'content_variable': JSON.parse(inputs.controls[j].value.content_variable_raw)});
+                }
             }
-
+            const outputs = <FormArray>formGroup.controls['outputs'];
             // loop from highest Index! Otherwise it could cause index problems
-            for (let i = deleteIndexOutput.length - 1; i >= 0 ; i--) {
-                const serviceControl = <FormGroup>this.secondFormGroup.controls['services'].get([serviceIndex]);
-                const outputs = <FormArray>serviceControl.controls['outputs'];
-                const index = service.outputs.indexOf(deleteIndexOutput[i]);
-                outputs.removeAt(index);
+            for (let k = outputs.length - 1; k >= 0; k--) {
+                if (!this.checkIfContentExists(outputs.controls[k].value)) {
+                    outputs.removeAt(k);
+                } else {
+                    outputs.controls[k].patchValue({'content_variable': JSON.parse(outputs.controls[k].value.content_variable_raw)});
+                }
             }
-        });
+        }
     }
 
 
@@ -413,6 +403,7 @@ export class DeviceTypesComponent implements OnInit {
             name: [protocolSegment.name],
             serialization: [content.serialization],
             content_variable_raw: [JSON.stringify(content.content_variable, null, 5), jsonValidator(true)],
+            content_variable: [content.content_variable],
             protocol_segment_id: [protocolSegment.id],
             show: [content.protocol_segment_id ? true : false],
         });
@@ -503,7 +494,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private snackbarAlreadyExists(type: string) {
-        this.snackBar.open(type + ' already exists! ' +  type + ' auto selected!', undefined, {duration: 4000});
+        this.snackBar.open(type + ' already exists! ' + type + ' auto selected!', undefined, {duration: 4000});
     }
 
 
