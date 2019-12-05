@@ -23,12 +23,11 @@
                     <div [formGroupName]="elementIndex"
                          *ngFor="let element of deploymentFormGroup.get('elements').controls; let elementIndex = index">
                         <div formGroupName="task" *ngIf="element.value.task !== null">
-                            <div>{{element.value.task.label}}</div>
                             <table class="full-width" cellspacing="0">
                                 <tr>
                                     <td formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent">
-                                            <mat-select placeholder="Device" required formControlName="device">
+                                            <mat-select placeholder="{{element.value.task.label}}" required formControlName="device">
                                                 <mat-option
                                                         *ngFor="let selectables of element.value.task.selectables; let selectableIndex = index"
                                                         [value]="selectables.device"
