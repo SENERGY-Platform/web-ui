@@ -18,7 +18,10 @@
     <div class="layout-margin" fxLayout="column">
         <div *ngIf="deployment !== null">
             <form [formGroup]="deploymentFormGroup">
-                <h2>{{'Process: ' + deploymentFormGroup.get('name').value}}</h2>
+                <mat-form-field class="full-width" color="accent">
+                    <input type="text" matInput placeholder="Prozessname"
+                           formControlName="name">
+                </mat-form-field>
                 <div formArrayName="elements" *ngIf="deploymentFormGroup.get('elements')">
                     <div [formGroupName]="elementIndex"
                          *ngFor="let element of deploymentFormGroup.get('elements').controls; let elementIndex = index">
