@@ -20,7 +20,8 @@
 <mat-dialog-content>
     <form class="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input [formControl]="nameControl" matInput placeholder="Name">
+            <mat-label>Name</mat-label>
+            <input [formControl]="nameControl" matInput placeholder="Name" required>
         </mat-form-field>
     </form>
 </mat-dialog-content>
