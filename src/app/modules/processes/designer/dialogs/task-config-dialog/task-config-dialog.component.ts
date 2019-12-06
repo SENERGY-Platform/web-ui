@@ -77,9 +77,9 @@ export class TaskConfigDialogComponent implements OnInit {
 
     save(): void {
         this.result = {
-            aspect: this.aspectFormControl.value,
+            aspect: this.aspectFormControl.value || null,
             function: this.functionFormControl.value,
-            device_class: this.deviceClassFormControl.value,
+            device_class: this.deviceClassFormControl.value || null,
             characteristic: this.characteristic,
             completionStrategy: this.completionStrategyFormControl.value,
             retries: this.retriesFormControl.value
