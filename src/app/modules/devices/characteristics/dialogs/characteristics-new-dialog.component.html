@@ -20,6 +20,7 @@
 <mat-dialog-content>
     <form class="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Concept</mat-label>
             <mat-select placeholder="Concept" [compareWith]="compare"
                         [formControl]="conceptControl" required>
                 <mat-option *ngFor="let concept of concepts"
@@ -29,6 +30,7 @@
             </mat-select>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Characteristics JSON</mat-label>
             <textarea [formControl]="characteristicControl" matInput
                       placeholder="Insert structure in json format"></textarea>
             <mat-error *ngIf="characteristicControl.invalid">
