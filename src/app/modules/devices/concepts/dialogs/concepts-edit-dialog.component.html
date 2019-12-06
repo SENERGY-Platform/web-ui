@@ -20,13 +20,15 @@
 <mat-dialog-content>
     <form class="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Id</mat-label>
             <input matInput placeholder="Id" [formControl]="idFormControl">
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
-            <input matInput placeholder="Name" [formControl]="nameFormControl">
+            <mat-label>Name</mat-label>
+            <input matInput placeholder="Name" [formControl]="nameFormControl" required>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
-
+            <mat-label>Base Characteristic</mat-label>
             <mat-select placeholder="Base Characteristic"
                         [formControl]="baseCharacteristicControl" required>
                 <mat-option *ngFor="let characteristic of characteristics"
