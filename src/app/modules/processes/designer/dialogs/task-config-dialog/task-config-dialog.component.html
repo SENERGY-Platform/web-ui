@@ -62,6 +62,11 @@
     <mat-radio-button class="radio-button" value="pessimistic">Pessimistic</mat-radio-button>
 </mat-radio-group>
 
+<mat-form-field class="full-width" color="accent">
+    <input type="number" matInput placeholder="Retries"
+           [formControl]="retriesFormControl">
+</mat-form-field>
+
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
     <button class="mat-raised-button mat-accent" [disabled]="functionFormControl.value === ''" (click)="save()">Save</button>

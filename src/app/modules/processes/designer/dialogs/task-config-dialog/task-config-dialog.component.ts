@@ -17,7 +17,7 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatRadioChange} from '@angular/material';
-import {FormBuilder, FormControl} from '@angular/forms';
+import {FormBuilder, FormControl, Validators} from '@angular/forms';
 import {
     DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeFunctionType, functionTypes,
@@ -40,6 +40,7 @@ export class TaskConfigDialogComponent implements OnInit {
     aspectFormControl = new FormControl('');
     functionFormControl = new FormControl({value: '', disabled: true});
     completionStrategyFormControl = new FormControl('');
+    retriesFormControl = new FormControl({value: 0, disabled: true}, [Validators.min(0), Validators.max(100)]);
 
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
@@ -67,6 +68,7 @@ export class TaskConfigDialogComponent implements OnInit {
         this.getDeviceClasses();
         this.getAspects();
         this.initFunctions();
+        this.initCompletionStrategy();
     }
 
     close(): void {
@@ -79,7 +81,8 @@ export class TaskConfigDialogComponent implements OnInit {
             function: this.functionFormControl.value,
             device_class: this.deviceClassFormControl.value,
             characteristic: this.characteristic,
-            completionStrategy: this.completionStrategyFormControl.value
+            completionStrategy: this.completionStrategyFormControl.value,
+            retries: this.retriesFormControl.value
         };
         this.dialogRef.close(this.result);
     }
@@ -94,6 +97,18 @@ export class TaskConfigDialogComponent implements OnInit {
             this.aspectFormControl.setValue('');
             this.functionFormControl.setValue('');
             this.functionFormControl.disable();
+        });
+    }
+
+    private initCompletionStrategy(): void {
+        this.completionStrategyFormControl.valueChanges.subscribe((completionStrategy) => {
+            if (completionStrategy === 'optimistic') {
+                this.retriesFormControl.patchValue(0);
+                this.retriesFormControl.disable();
+            }
+            if (completionStrategy === 'pessimistic') {
+                this.retriesFormControl.enable();
+            }
         });
     }
 
@@ -144,7 +159,7 @@ export class TaskConfigDialogComponent implements OnInit {
         this.functionFormControl.enable();
     }
 
-    private getBaseCharacteristics(func: DeviceTypeFunctionModel): void { 
+    private getBaseCharacteristics(func: DeviceTypeFunctionModel): void {
         if (func && func.concept_id !== '') {
             this.conceptsService.getConceptWithCharacteristics(func.concept_id).subscribe(
                 (concept: (ConceptsCharacteristicsModel | null)) => {
@@ -180,6 +195,13 @@ export class TaskConfigDialogComponent implements OnInit {
             this.functionFormControl.enable();
             this.getBaseCharacteristics(this.selection.function);
             this.completionStrategyFormControl.setValue(this.selection.completionStrategy);
+            this.retriesFormControl.setValue(this.selection.retries || 0);
+            if (this.selection.completionStrategy === 'optimistic') {
+                this.retriesFormControl.disable();
+            }
+            if (this.selection.completionStrategy === 'pessimistic') {
+                this.retriesFormControl.enable();
+            }
         } else {
             this.optionsFormControl.setValue('Controlling');
             this.completionStrategyFormControl.setValue('optimistic');

@@ -28,6 +28,7 @@ export interface DeviceTypeSelectionRefModel {
     function: DeviceTypeFunctionModel;
     device_class: DeviceTypeDeviceClassModel;
     completionStrategy: string;
+    retries: number;
 }
 
 export interface DeviceTypeSelectionResultModel {
@@ -36,6 +37,7 @@ export interface DeviceTypeSelectionResultModel {
     device_class: DeviceTypeDeviceClassModel;
     characteristic: DeviceTypeCharacteristicsModel;
     completionStrategy: string;
+    retries: number;
 }
 
 export interface DeviceTypeInfoModel {

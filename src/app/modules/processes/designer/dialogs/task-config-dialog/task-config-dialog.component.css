@@ -28,6 +28,10 @@
     width: 100%;
 }
 
+.full-width {
+    width: 100%;
+}
+
 .radio-button {
     margin: 5px;
 }
