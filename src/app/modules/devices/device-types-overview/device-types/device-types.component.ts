@@ -110,7 +110,6 @@ export class DeviceTypesComponent implements OnInit {
             }
 
             formGroup.controls['functions'].setValue([]);
-            this.initFunctions(formGroup);
         });
     }
 
@@ -312,22 +311,11 @@ export class DeviceTypesComponent implements OnInit {
         const formArray = <FormArray>this.secondFormGroup.controls['services'];
         formArray.controls.forEach((control: AbstractControl) => {
             const formGroup = <FormGroup>control;
-            this.initFunctions(formGroup);
             this.initProtocolIdChangeListener(formGroup);
             formGroup.controls['functionType'].valueChanges.subscribe(() => {
                 formGroup.controls['functions'].setValue([]);
-                this.initFunctions(formGroup);
             });
         });
-    }
-
-    private initFunctions(formGroup: FormGroup) {
-        if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[measuringIndex]) {
-            this.functions = this.measuringFunctions;
-        }
-        if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[controllingIndex]) {
-            this.functions = this.controllingFunctions;
-        }
     }
 
     private initFirstFormGroup(deviceType: DeviceTypeModel) {
