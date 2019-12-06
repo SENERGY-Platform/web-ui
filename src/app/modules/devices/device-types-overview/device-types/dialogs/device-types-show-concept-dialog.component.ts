@@ -38,12 +38,17 @@ export class DeviceTypesShowConceptDialogComponent implements OnInit{
     }
 
     ngOnInit(): void {
-        this.functions.forEach((func: DeviceTypeFunctionModel) => {
-            this.conceptsService.getConceptWithCharacteristics(func.concept_id).subscribe((concept: ConceptsCharacteristicsModel | null) => {
-                if (concept !== null) {
-                    this.concepts.push(JSON.stringify(concept, null, 5));
-                }
-            });
+        this.functions.forEach(
+            (func: DeviceTypeFunctionModel) => {
+            if (func.concept_id === '') {
+                this.concepts.push('Function ' + func.name + ' has no Concept');
+            } else {
+                this.conceptsService.getConceptWithCharacteristics(func.concept_id).subscribe((concept: ConceptsCharacteristicsModel | null) => {
+                    if (concept !== null) {
+                        this.concepts.push(JSON.stringify(concept, null, 5));
+                    }
+                });
+            }
         });
     }
 
