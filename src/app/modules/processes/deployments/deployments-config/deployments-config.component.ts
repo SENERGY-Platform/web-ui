@@ -65,14 +65,12 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     initElementsFormArray(): void {
 
-        const array: FormGroup[] = [];
+
 
         if (this.deployment !== null) {
-            this.deployment.elements.forEach((el: DeploymentsPreparedElementModel) => {
-                array.push(this.initElementFormGroup(el));
-            });
+
             this.deploymentFormGroup = this._formBuilder.group({
-                elements: this._formBuilder.array(array),
+                elements: this.initElementsArray(this.deployment.elements),
                 id: this.deployment.id,
                 lanes: this.deployment.lanes,
                 name: this.deployment.name,
@@ -82,6 +80,16 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             });
 
         }
+    }
+
+    initElementsArray(elements: DeploymentsPreparedElementModel[]): FormArray {
+        const array = new FormArray([]);
+        if (elements) {
+            elements.forEach((el: DeploymentsPreparedElementModel) => {
+                array.push(this.initElementFormGroup(el));
+            });
+        }
+        return array;
     }
 
     initElementFormGroup(element: DeploymentsPreparedElementModel): FormGroup {
