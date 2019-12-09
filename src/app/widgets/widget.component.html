@@ -60,6 +60,9 @@
   <div *ngSwitchCase="'single_value'" fxFill>
     <senergy-single-value [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-single-value>
   </div>
+  <div *ngSwitchCase="'multi_value'" fxFill>
+    <senergy-multi-value [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-multi-value>
+  </div>
   <div *ngSwitchCase="'energy_prediction'" fxFill>
     <senergy-energy-prediction [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-energy-prediction>
   </div>

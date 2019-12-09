@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-export enum DashboardTypesEnum {
-    Switch = 'switch',
-    Chart = 'chart',
-    DevicesState = 'devices_state',
-    ProcessState = 'process_state',
-    EventList = 'event_list',
-    RankingList = 'ranking_list',
-    ProcessModelList = 'process_model_list',
-    DeviceDowntimeList = 'device_downtime_list',
-    SingleValue = 'single_value',
-    MultiValue = 'multi_value',
-    EnergyPrediction = 'energy_prediction',
-    AirQuality = 'air_quality',
+import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
+import {ExportValueModel} from '../../../modules/data/export/shared/export.model';
+
+export interface MultiValueModel {
+    value: (number | string);
+    index: number;
 }
+
+export interface MultiValuePropertiesModel {
+    multivaluemeasurements?: MultiValueMeasurement[];
+}
+
+export interface MultiValueMeasurement {
+    name: string;
+    type: string;
+    format: string;
+    export: ChartsExportMeasurementModel;
+    column: ExportValueModel;
+    unit: string;
+    data?: (number | string);
+}
+
