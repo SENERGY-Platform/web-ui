@@ -188,7 +188,6 @@ export class NewExportComponent implements OnInit {
 
     pathChanged(id: number) {
         if (id !== undefined) {
-            console.log(this.paths.get(this.export.Values[id].Path));
             let type = this.paths.get(this.export.Values[id].Path);
             switch (this.paths.get(this.export.Values[id].Path)) {
                 case this.typeString:

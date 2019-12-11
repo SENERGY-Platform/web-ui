@@ -203,7 +203,6 @@ export class DeployFlowComponent {
     }
 
     serviceChanged(service: DeviceTypeServiceModel, inputId: string, port: string) {
-        console.log(service);
         const input = this.inputs.find(x => x.id === inputId);
         this.vals = [];
         let pathString = 'value';
