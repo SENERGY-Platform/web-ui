@@ -141,7 +141,7 @@ export class DeployFlowComponent {
                         } else {
                             z = {
                             deviceId: entry[1].device.id,
-                            topicName: entry[1].service.id.replace(/#/g, '_'),
+                            topicName: entry[1].service.id.replace(/#/g, '_').replace(/:/g, '_'),
                             values: y
                             } as NodeInput;
                         }
@@ -210,28 +210,18 @@ export class DeployFlowComponent {
         if (input !== undefined && input.deploymentType === 'local') {
             pathString = '';
             service.outputs.forEach((out: DeviceTypeContentModel) => {
-                // if (out.type.fields != null) {
-                //     pathString += out.content_variable.name;
-                    // out.content_variable.fields.forEach((field: ValueTypesFieldTypeModel) => {
-                        this.traverseDataStructure(pathString, out.content_variable);
-                    // });
-                // }
+                this.traverseDataStructure(pathString, out.content_variable);
             });
         } else {
             service.outputs.forEach((out: DeviceTypeContentModel) => {
-                // if (out.type.fields != null) {
-                //     pathString += '.' + out.content_variable.name;
-                    // out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
-                        this.traverseDataStructure(pathString, out.content_variable);
-                    // });
-                // }
+                this.traverseDataStructure(pathString, out.content_variable);
             });
         }
         this.paths[inputId][port] = this.vals;
     }
 
     traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel) {
-        if (field.type === 'structure' && field.type !== undefined && field.type !== null) {
+        if (field.type === 'https://schema.org/StructuredValue' && field.type !== undefined && field.type !== null) {
             pathString += '.' + field.name;
             if (field.sub_content_variables !== undefined) {
                 field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel) => {
