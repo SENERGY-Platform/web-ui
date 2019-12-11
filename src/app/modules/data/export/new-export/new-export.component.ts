@@ -59,8 +59,15 @@ export class NewExportComponent implements OnInit {
     dropdown = [
         'float',
         'string',
-        'int'
+        'int',
+        'bool'
     ];
+
+    typeString = 'https://schema.org/Text';
+    typeInteger = 'https://schema.org/Integer';
+    typeFloat = 'https://schema.org/Float';
+    typeBoolean = 'https://schema.org/Boolean';
+
 
 
     constructor(private pipelineRegistryService: PipelineRegistryService,
@@ -85,7 +92,7 @@ export class NewExportComponent implements OnInit {
             this.export.Filter = this.device.id;
             this.export.FilterType = 'deviceId';
             this.export.ServiceName = this.service.name;
-            this.export.Topic = this.service.id.replace(/#/g, '_');
+            this.export.Topic = this.service.id.replace(/#/g, '_').replace(/:/g, '_');
         } else if (this.selector === 'pipe') {
             this.export.EntityName = this.pipeline.id;
             this.export.Filter = this.pipeline.id;
@@ -128,14 +135,10 @@ export class NewExportComponent implements OnInit {
     }
 
     serviceChanged(service: DeviceTypeServiceModel) {
-        let pathString = 'value';
+        this.resetVars();
+        const pathString = 'value';
         service.outputs.forEach((out: DeviceTypeContentModel) => {
-            // if (out.type.fields != null) {
-                // pathString += '.' + out.name;
-                // out.type.fields.forEach((field: ValueTypesFieldTypeModel) => {
-                    this.traverseDataStructure(pathString, out.content_variable);
-                // });
-            // }
+            this.traverseDataStructure(pathString, out.content_variable);
         });
     }
 
@@ -185,9 +188,22 @@ export class NewExportComponent implements OnInit {
 
     pathChanged(id: number) {
         if (id !== undefined) {
+            console.log(this.paths.get(this.export.Values[id].Path));
             let type = this.paths.get(this.export.Values[id].Path);
-            if (this.paths.get(this.export.Values[id].Path) === 'decimal') {
-                type =  'float';
+            switch (this.paths.get(this.export.Values[id].Path)) {
+                case this.typeString:
+                    type = 'string';
+                    break;
+                case this.typeFloat:
+                    type = 'float';
+                    break;
+                case this.typeInteger:
+                    type = 'int';
+                    break;
+                case this.typeBoolean:
+                    type = 'bool';
+                    break;
+
             }
             // @ts-ignore
             this.export.Values[id].Type = type;
