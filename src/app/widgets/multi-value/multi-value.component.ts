@@ -21,6 +21,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {MultiValueService} from './shared/multi-value.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
+import {MultiValueMeasurement, MultiValueOrderEnum} from './shared/multi-value.model';
 
 @Component({
     selector: 'senergy-multi-value',
@@ -96,5 +97,32 @@ export class MultiValueComponent implements OnInit, OnDestroy {
                 }
             }
         }
+    }
+
+    private orderedValues(): MultiValueMeasurement[] {
+        const m = this.widget.properties.multivaluemeasurements || [];
+        switch (this.widget.properties.order || 0) {
+            case MultiValueOrderEnum.AlphabeticallyAsc:
+                m.sort((a, b) => {
+                    return a.name.charCodeAt(0) - b.name.charCodeAt(0);
+                });
+                return m;
+            case MultiValueOrderEnum.AlphabeticallyDesc:
+                m.sort((a, b) => {
+                    return b.name.charCodeAt(0) - a.name.charCodeAt(0);
+                });
+                return m;
+            case MultiValueOrderEnum.ValueAsc:
+                m.sort((a, b) => {
+                    return Number(a.data) - Number(b.data);
+                });
+                return m;
+            case MultiValueOrderEnum.ValueDesc:
+                m.sort((a, b) => {
+                    return Number(b.data) - Number(a.data);
+                });
+                return m;
+        }
+        return m;
     }
 }

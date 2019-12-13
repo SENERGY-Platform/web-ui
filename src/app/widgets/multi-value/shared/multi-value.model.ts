@@ -24,6 +24,7 @@ export interface MultiValueModel {
 
 export interface MultiValuePropertiesModel {
     multivaluemeasurements?: MultiValueMeasurement[];
+    order?: number;
 }
 
 export interface MultiValueMeasurement {
@@ -36,3 +37,10 @@ export interface MultiValueMeasurement {
     data?: (number | string);
 }
 
+export enum MultiValueOrderEnum {
+    Default,
+    AlphabeticallyAsc,
+    AlphabeticallyDesc,
+    ValueAsc,
+    ValueDesc
+}

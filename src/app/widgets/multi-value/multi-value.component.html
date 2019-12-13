@@ -24,7 +24,7 @@
         <senergy-widget-spinner [show]="configured && !isDataReady"></senergy-widget-spinner>
         <div *ngIf="configured && isDataReady()" style="height: 100%" fxLayout="column"  fxFill>
             <mat-list style="overflow: auto; max-height: 100%">
-                <mat-list-item *ngFor="let m of widget.properties.multivaluemeasurements">
+                <mat-list-item *ngFor="let m of orderedValues()">
                     {{m.name}}:&nbsp;
                     <span *ngIf="m.type === 'String'">
                         {{m.data}} {{m.unit}}

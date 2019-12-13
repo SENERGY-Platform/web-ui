@@ -23,7 +23,7 @@ import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {MultiValueMeasurement} from '../shared/multi-value.model';
+import {MultiValueMeasurement, MultiValueOrderEnum} from '../shared/multi-value.model';
 
 
 @Component({
@@ -38,6 +38,8 @@ export class MultiValueEditDialogComponent implements OnInit {
     widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
     disableSave = false;
     name = '';
+    order = 0;
+    orderValues = MultiValueOrderEnum;
     measurements: MultiValueMeasurement[] = [];
 
     constructor(private dialogRef: MatDialogRef<MultiValueEditDialogComponent>,
@@ -62,6 +64,7 @@ export class MultiValueEditDialogComponent implements OnInit {
                 this.add();
             }
             this.name = widget.name;
+            this.order = widget.properties.order || 0;
             this.initDeployments();
         });
     }
@@ -86,6 +89,7 @@ export class MultiValueEditDialogComponent implements OnInit {
     save(): void {
         this.widget.properties.multivaluemeasurements = this.measurements;
         this.widget.name = this.name;
+        this.widget.properties.order = this.order;
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widget);
@@ -131,5 +135,23 @@ export class MultiValueEditDialogComponent implements OnInit {
             return a.id === b.id;
         }
         return false;
+    }
+
+    moveUp(index: number) {
+        this.changePosition(index, true);
+    }
+
+    moveDown(index: number) {
+        this.changePosition(index, false);
+    }
+
+    changePosition(index: number, isUp: boolean) {
+        const removed = this.measurements[index];
+        this.measurements.splice(index, 1);
+        if (isUp) {
+            this.measurements.splice(index - 1, 0, removed);
+        } else {
+            this.measurements.splice(index + 1, 0, removed);
+        }
     }
 }
