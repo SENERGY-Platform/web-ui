@@ -33,6 +33,10 @@
                 <mat-option [value]="orderValues.ValueDesc">Value desc</mat-option>
             </mat-select>
         </mat-form-field>
+        <mat-form-field color="accent">
+            <mat-label>Warning color</mat-label>
+            <input type="color" matInput [(ngModel)]="color" maxlength="8">
+        </mat-form-field>
     </div>
     <mat-accordion>
         <mat-expansion-panel *ngFor="let tab of measurements; let index = index">
@@ -88,6 +92,21 @@
                     <input type="text" matInput placeholder="Format" [(ngModel)]="tab.format"
                            [disabled]="tab.type === 'String'">
                 </mat-form-field>
+            </div>
+            <div>
+                <mat-slide-toggle [(ngModel)]="tab.warning_enabled" [disabled]="tab.type === 'String'">Enable warnings</mat-slide-toggle>
+                <div *ngIf="tab.warning_enabled">
+                    <mat-form-field color="accent">
+                        <mat-label>Lower boundary</mat-label>
+                        <input matInput type="number" [(ngModel)]="tab.lowerBoundary"
+                               [disabled]="tab.type === 'String'">
+                    </mat-form-field>
+                    <mat-form-field color="accent">
+                        <mat-label>Upper boundary</mat-label>
+                        <input matInput  type="number" [(ngModel)]="tab.upperBoundary"
+                               [disabled]="tab.type === 'String'">
+                    </mat-form-field>
+                </div>
             </div>
             <div>
                 <button mat-icon-button

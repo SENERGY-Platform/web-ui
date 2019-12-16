@@ -29,17 +29,21 @@
                     <span *ngIf="m.type === 'String'">
                         {{m.data}} {{m.unit}}
                     </span>
+                    <span *ngIf="m.type !== 'String'"
+                          [ngStyle]="m.warning_enabled && (m.data < m.lowerBoundary || m.data > m. upperBoundary) && colorStyle()">
                         <span *ngIf="m.type === 'Number'">
-                        {{m.data | number: m.format}} {{m.unit}}
-                    </span>
+                            {{m.data | number: m.format}}
+                        </span>
                         <span *ngIf="m.type === 'Date'">
-                        {{m.data | date: m.format}} {{m.unit}}
-                    </span>
+                            {{m.data | date: m.format}}
+                        </span>
                         <span *ngIf="m.type === 'Currency'">
-                            {{m.data | currency: m.format}} {{m.unit}}
-                    </span>
-                    <span *ngIf="m.type === 'Percent'">
-                        {{m.data | percent: m.format}} {{m.unit}}
+                                {{m.data | currency: m.format}}
+                        </span>
+                        <span *ngIf="m.type === 'Percent'">
+                            {{m.data | percent: m.format}}
+                        </span>
+                        {{m.unit}}
                     </span>
                 </mat-list-item>
             </mat-list>

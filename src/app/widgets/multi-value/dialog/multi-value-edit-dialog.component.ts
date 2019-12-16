@@ -38,6 +38,7 @@ export class MultiValueEditDialogComponent implements OnInit {
     widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
     disableSave = false;
     name = '';
+    color = '#FF0000';
     order = 0;
     orderValues = MultiValueOrderEnum;
     measurements: MultiValueMeasurement[] = [];
@@ -65,6 +66,7 @@ export class MultiValueEditDialogComponent implements OnInit {
             }
             this.name = widget.name;
             this.order = widget.properties.order || 0;
+            this.color = widget.properties.color || this.color;
             this.initDeployments();
         });
     }
@@ -90,6 +92,7 @@ export class MultiValueEditDialogComponent implements OnInit {
         this.widget.properties.multivaluemeasurements = this.measurements;
         this.widget.name = this.name;
         this.widget.properties.order = this.order;
+        this.widget.properties.color = this.color;
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widget);

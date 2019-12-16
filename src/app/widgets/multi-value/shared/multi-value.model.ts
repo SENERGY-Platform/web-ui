@@ -25,6 +25,7 @@ export interface MultiValueModel {
 export interface MultiValuePropertiesModel {
     multivaluemeasurements?: MultiValueMeasurement[];
     order?: number;
+    color?: any;
 }
 
 export interface MultiValueMeasurement {
@@ -35,6 +36,9 @@ export interface MultiValueMeasurement {
     column: ExportValueModel;
     unit: string;
     data?: (number | string);
+    lowerBoundary?: number;
+    upperBoundary?: number;
+    warning_enabled?: boolean;
 }
 
 export enum MultiValueOrderEnum {

@@ -37,3 +37,7 @@ mat-card {
 .center-text {
     text-align: center;
 }
+
+.red {
+    color: red;
+}
