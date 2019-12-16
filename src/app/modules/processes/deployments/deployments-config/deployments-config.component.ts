@@ -19,7 +19,7 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DesignerProcessModel} from '../../designer/shared/designer.model';
 import {
-    DeploymentsPreparedElementModel,
+    DeploymentsPreparedElementModel, DeploymentsPreparedLaneElementModel, DeploymentsPreparedLaneModel,
     DeploymentsPreparedModel, DeploymentsPreparedSelectableModel, DeploymentsPreparedSelectionModel,
     DeploymentsPreparedTaskModel
 } from '../shared/deployments-prepared.model';
@@ -28,6 +28,7 @@ import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
+import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 
 
 @Component({
@@ -72,7 +73,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             this.deploymentFormGroup = this._formBuilder.group({
                 elements: this.initElementsArray(this.deployment.elements),
                 id: this.deployment.id,
-                lanes: this.deployment.lanes,
+                lanes: this.initLanesArray(this.deployment.lanes),
                 name: this.deployment.name,
                 svg: this.deployment.svg,
                 xml: this.deployment.xml,
@@ -92,10 +93,38 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         return array;
     }
 
+    initLanesArray(elements: DeploymentsPreparedLaneElementModel[]): FormArray {
+        const array = new FormArray([]);
+        if (elements) {
+            elements.forEach((el: DeploymentsPreparedLaneElementModel) => {
+                array.push(this.initLaneElementFormGroup(el));
+            });
+        }
+        return array;
+    }
+
     initElementFormGroup(element: DeploymentsPreparedElementModel): FormGroup {
         return this._formBuilder.group({
             order: [element.order],
             task: element.task ? this.initTaskFormGroup(element.task) : null
+        });
+    }
+
+    initLaneElementFormGroup(laneElement: DeploymentsPreparedLaneElementModel): FormGroup {
+        return this._formBuilder.group({
+            order: [laneElement.order],
+            lane: this.initLaneGroup(laneElement.lane),
+        });
+    }
+
+    initLaneGroup(lane: DeploymentsPreparedLaneModel): FormGroup {
+        return this._formBuilder.group({
+            label: [lane.label],
+            bpmn_element_id: [lane.bpmn_element_id],
+            device_description: [lane.device_descriptions],
+            selectables: this.initSelectablesFormArray(lane.selectables),
+            selection: this.initLaneSelectionFormGroup(lane.selection),
+            elements: [lane.elements],
         });
     }
 
@@ -118,6 +147,15 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             device: [selection.device],
             service: [{value: selection.service, disabled: false}],
             show: [{value: false}]
+        });
+    }
+
+    initLaneSelectionFormGroup(selection: DeviceInstancesUpdateModel): FormGroup {
+        return this._formBuilder.group({
+            id: [selection.id],
+            device_type_id: [selection.device_type_id],
+            local_id: [selection.local_id],
+            name: [selection.name],
         });
     }
 
@@ -170,5 +208,11 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             selection.patchValue({'service': []});
             selection.patchValue({'show': true});
         }
+    }
+
+    changeLaneSelectables(lanesIndex: number, selectableIndex: number): void {
+        const selectables = <FormGroup>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'selectables', selectableIndex]);
+        const selection = <FormGroup>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'selection']);
+        selection.setValue(selectables.value.device);
     }
 }

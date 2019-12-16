@@ -64,6 +64,25 @@
                     </div>
                 </div>
 
+                <div formArrayName="lanes" *ngIf="deploymentFormGroup.get('lanes')">
+                    <div [formGroupName]="elementLanesIndex"
+                         *ngFor="let element of deploymentFormGroup.get('lanes').controls; let elementLanesIndex = index">
+                        <div formGroupName="lane" *ngIf="element.value.lane !== null">
+                            <div>{{element.value.lane.label}}</div>
+                                <mat-form-field class="full-width" color="accent">
+                                    <mat-select placeholder="Device" required formGroupName="selectables">
+                                        <mat-option
+                                                *ngFor="let selectables of element.value.lane.selectables; let selectableLaneIndex = index"
+                                                [value]="selectables.device"
+                                                (click)="changeLaneSelectables(elementLanesIndex, selectableLaneIndex)">
+                                            {{selectables.device.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
             </form>
         </div>
         <button class="mat-raised-button color-accent button-save-margin" (click)="save()">Save</button>

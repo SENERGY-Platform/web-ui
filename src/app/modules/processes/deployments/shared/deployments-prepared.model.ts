@@ -26,7 +26,7 @@ import {
 export interface DeploymentsPreparedModel {
     elements: DeploymentsPreparedElementModel[];
     id: string;
-    lanes: any;
+    lanes: DeploymentsPreparedLaneElementModel[];
     name: string;
     svg: string;
     xml: string;
@@ -52,6 +52,39 @@ export interface DeploymentsPreparedTaskModel {
     selection: DeploymentsPreparedSelectionModel;
     parameter: any;
     retries: number;
+}
+
+export interface DeploymentsPreparedLaneElementModel {
+    order: number;
+    lane: DeploymentsPreparedLaneModel;
+}
+
+export interface DeploymentsPreparedLaneModel {
+    label: string;
+    bpmn_element_id: string;
+    device_descriptions: DeploymentsPreparedDeviceDescriptionModel[];
+    selectables: DeploymentsPreparedSelectableModel[];
+    selection: DeviceInstancesUpdateModel;
+    elements: DeploymentsPreparedLaneSubElementModel[];
+}
+
+export interface DeploymentsPreparedLaneSubElementModel {
+    order: number;
+    task: DeploymentsPreparedLaneTaskElementModel;
+    msg_event: any;
+    receive_task_event: any;
+    time_event: any;
+}
+
+export interface DeploymentsPreparedLaneTaskElementModel {
+    label: string;
+    retries: number;
+    device_description: DeploymentsPreparedDeviceDescriptionModel[];
+    input: any;
+    bpmn_element_id: string;
+    multi_task: boolean;
+    selected_service: DeviceTypeServiceModel;
+    parameter: any;
 }
 
 export interface DeploymentsPreparedDeviceDescriptionModel {
