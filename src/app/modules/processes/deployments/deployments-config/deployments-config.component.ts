@@ -19,8 +19,13 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DesignerProcessModel} from '../../designer/shared/designer.model';
 import {
-    DeploymentsPreparedElementModel, DeploymentsPreparedLaneElementModel, DeploymentsPreparedLaneModel,
-    DeploymentsPreparedModel, DeploymentsPreparedSelectableModel, DeploymentsPreparedSelectionModel,
+    DeploymentsPreparedElementModel,
+    DeploymentsPreparedLaneElementModel,
+    DeploymentsPreparedLaneModel,
+    DeploymentsPreparedLaneSubElementModel, DeploymentsPreparedLaneTaskElementModel,
+    DeploymentsPreparedModel,
+    DeploymentsPreparedSelectableModel,
+    DeploymentsPreparedSelectionModel,
     DeploymentsPreparedTaskModel
 } from '../shared/deployments-prepared.model';
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
@@ -67,7 +72,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     initElementsFormArray(): void {
 
 
-
         if (this.deployment !== null) {
 
             this.deploymentFormGroup = this._formBuilder.group({
@@ -97,7 +101,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         const array = new FormArray([]);
         if (elements) {
             elements.forEach((el: DeploymentsPreparedLaneElementModel) => {
-                array.push(this.initLaneElementFormGroup(el));
+                array.push(this.initLaneFormGroup(el));
             });
         }
         return array;
@@ -110,7 +114,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         });
     }
 
-    initLaneElementFormGroup(laneElement: DeploymentsPreparedLaneElementModel): FormGroup {
+    initLaneFormGroup(laneElement: DeploymentsPreparedLaneElementModel): FormGroup {
         return this._formBuilder.group({
             order: [laneElement.order],
             lane: this.initLaneGroup(laneElement.lane),
@@ -124,7 +128,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             device_description: [lane.device_descriptions],
             selectables: this.initSelectablesFormArray(lane.selectables),
             selection: this.initLaneSelectionFormGroup(lane.selection),
-            elements: [lane.elements],
+            elements: this.initLaneElementFormArray(lane.elements),
         });
     }
 
@@ -190,6 +194,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         });
     }
 
+
     save(): void {
         this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: any) => {
             console.log(resp);
@@ -214,5 +219,25 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         const selectables = <FormGroup>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'selectables', selectableIndex]);
         const selection = <FormGroup>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'selection']);
         selection.setValue(selectables.value.device);
+    }
+
+    private initLaneElementFormArray(elements: DeploymentsPreparedLaneSubElementModel[]): FormArray {
+        const array: FormGroup[] = [];
+        if (elements !== null) {
+            elements.forEach((element: DeploymentsPreparedLaneSubElementModel) => {
+                array.push(this.initLaneElementGroup(element));
+            });
+        }
+        return this._formBuilder.array(array);
+    }
+
+    private initLaneElementGroup(element: DeploymentsPreparedLaneSubElementModel): FormGroup {
+        return this._formBuilder.group({
+            order: [element.order],
+            task: [element.task],
+            msg_event: [element.msg_event],
+            receive_task_event: [element.receive_task_event],
+            time_event: [element.time_event],
+        });
     }
 }
