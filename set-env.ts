@@ -58,6 +58,7 @@ export const environment = {
   dwdOpenUrl: '${process.env.DWD_OPEN_URL}',
   geonamesUrl: '${process.env.GEONAMES_URL}',
   yrUrl: '${process.env.YR_URL}',
+  notificationsUrl: '${process.env.NOTIFICATION_SERVICE_URL}',
 };
 `;
 
