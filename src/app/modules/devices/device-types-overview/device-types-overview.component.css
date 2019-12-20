@@ -56,10 +56,11 @@ mat-grid-tile {
 }
 
 .device-icon {
-    top: 40px;
-    max-height: 70%;
+    height: 156px;
+    top: 20px;
     max-width: 70%;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
     display: block;
     position: relative;
 }
