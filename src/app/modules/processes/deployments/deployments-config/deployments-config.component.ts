@@ -35,6 +35,7 @@ import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angul
 import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import * as moment from 'moment';
+import {MatSnackBar} from '@angular/material';
 
 
 @Component({
@@ -53,7 +54,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 private route: ActivatedRoute,
                 private processRepoService: ProcessRepoService,
                 private utilService: UtilService,
-                private deploymentsService: DeploymentsService) {
+                private deploymentsService: DeploymentsService,
+                private snackBar: MatSnackBar) {
     }
 
     ngOnInit() {
@@ -225,8 +227,12 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
 
     save(): void {
-        this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: any) => {
-            console.log(resp);
+        this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: {status: number}) => {
+            if (resp.status === 200) {
+                this.snackBar.open('Deployment stored successfully.', undefined, {duration: 2000});
+            } else {
+                this.snackBar.open('Error while storing the deployment!', undefined, {duration: 2000});
+            }
         });
     }
 
