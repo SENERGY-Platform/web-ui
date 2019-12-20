@@ -123,7 +123,9 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                 this.chartExportData.options.chartArea.height = element.heightPercentage;
                 this.chartExportData.options.chartArea.width = element.widthPercentage;
             }
-            this.chartExport.redraw();
+            if (this.chartExportData.dataTable[0].length > 0 ) {
+                this.chartExport.redraw();
+            }
         }
     }
 }
