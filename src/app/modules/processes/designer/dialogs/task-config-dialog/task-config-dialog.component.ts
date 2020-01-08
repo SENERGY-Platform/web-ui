@@ -113,7 +113,7 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private getDeviceClasses(): void {
-        this.deviceTypeService.getDeviceClasses().subscribe(
+        this.deviceTypeService.getDeviceClassesWithControllingFunction().subscribe(
             (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceClasses = deviceTypeDeviceClasses;
             });

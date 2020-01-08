@@ -81,6 +81,14 @@ export class DeviceTypeService {
         );
     }
 
+    getDeviceClassesWithControllingFunction(): Observable<DeviceTypeDeviceClassModel[]> {
+        return this.http.get<DeviceTypeDeviceClassModel[]>
+        (environment.semanticRepoUrl + '/device-classes?function=controlling-function').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceClasses', []))
+        );
+    }
+
     createDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
         return this.http.post<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types', deviceType).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createDeviceType', null))
