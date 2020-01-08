@@ -13,3 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+::ng-deep .mat-list .mat-list-item .mat-line{
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
