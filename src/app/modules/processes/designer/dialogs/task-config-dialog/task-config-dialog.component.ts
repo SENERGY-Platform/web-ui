@@ -181,6 +181,8 @@ export class TaskConfigDialogComponent implements OnInit {
                         this.characteristic = concept.characteristics[index];
                     }
                 });
+        } else {
+            this.characteristic = {} as DeviceTypeCharacteristicsModel;
         }
     }
 
