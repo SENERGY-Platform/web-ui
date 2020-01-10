@@ -128,7 +128,7 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private getAspects(): void {
-        this.deviceTypeService.getAspects().subscribe(
+        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe(
             (aspects: DeviceTypeAspectModel[]) => {
                 this.aspects = aspects;
             });

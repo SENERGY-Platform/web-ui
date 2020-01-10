@@ -135,6 +135,13 @@ export class DeviceTypeService {
         );
     }
 
+    getAspectsWithMeasuringFunction(): Observable<DeviceTypeAspectModel[]> {
+        return this.http.get<DeviceTypeAspectModel[]>(environment.semanticRepoUrl + '/aspects?function=measuring-function').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsWithMeasuringFunction', []))
+        );
+    }
+
     getAspectsMeasuringFunctions(deviceClassId: string): Observable<DeviceTypeFunctionModel[]> {
         return this.http.get<DeviceTypeFunctionModel[]>
         (environment.semanticRepoUrl + '/aspects/' + deviceClassId + '/measuring-functions').pipe(
