@@ -16,5 +16,11 @@
  */
 
 export interface MonitorProcessIncidentModel {
-    incidentMessage: string;
+    msg_version: number;
+    external_task_id: string;
+    process_instance_id: string;
+    process_definition_id: string;
+    worker_id: string;
+    error_message: string;
+    time: string;
 }

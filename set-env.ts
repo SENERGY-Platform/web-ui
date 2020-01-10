@@ -37,6 +37,7 @@ export const environment = {
   processRepoUrl: '${process.env.PROCESS_REPO_URL}',
   processDeploymentUrl: '${process.env.PROCESS_DEPLOYMENT_URL}',
   processServiceUrl: '${process.env.PROCESS_SERVICE_URL}',
+  processIncidentApiUrl: '${process.env.PROCESS_INCIDENT_API_URL}',
   operatorRepoUrl: '${process.env.OPERATOR_REPO_URL}',
   exportService: '${process.env.EXPORT_SERVICE}',
   influxAPIURL: '${process.env.INFLUX_API_URL}',

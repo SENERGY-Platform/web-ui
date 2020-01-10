@@ -27,6 +27,7 @@ export const environment = {
     processDeploymentUrl: 'http://localhost',
     processServiceUrl: 'http://localhost',
     processRepoUrl: 'http://localhost',
+    processIncidentApiUrl: 'http://localhost',
     operatorRepoUrl: 'http://localhost',
     exportService: 'http://localhost',
     influxAPIURL: 'http://localhost',
