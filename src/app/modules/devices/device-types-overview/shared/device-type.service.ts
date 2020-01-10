@@ -85,7 +85,7 @@ export class DeviceTypeService {
         return this.http.get<DeviceTypeDeviceClassModel[]>
         (environment.semanticRepoUrl + '/device-classes?function=controlling-function').pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceClasses', []))
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceClassesWithControllingFunction', []))
         );
     }
 
