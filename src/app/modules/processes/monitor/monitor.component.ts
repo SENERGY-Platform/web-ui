@@ -39,7 +39,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();
     dataSourceRunning = new MatTableDataSource<MonitorProcessModel>();
     displayedColumnsFinished: string[] = ['select', 'definitionName', 'id', 'startTime', 'endTime', 'duration', 'info', 'delete'];
-    displayedColumnsRunning: string[] = ['definitionName', 'id', 'startTime', 'info', 'action'];
+    displayedColumnsRunning: string[] = ['definitionName', 'id', 'startTime', 'action'];
     selection = new SelectionModel<MonitorProcessModel>(true, []);
     activeIndex = 0;
     totalCountFinished = 0;
