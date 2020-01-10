@@ -18,7 +18,7 @@
 <h2 mat-dialog-title>Details</h2>
 
 <mat-dialog-content>
-    <div *ngIf="incidents.length === 0">no details available</div>
+    <div *ngIf="incidents.length === 0">process terminated manually</div>
     <div *ngIf="incidents.length > 0">
         <div *ngFor="let incident of incidents">
             {{incident.error_message}}
