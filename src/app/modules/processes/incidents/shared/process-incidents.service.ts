@@ -41,4 +41,12 @@ export class ProcessIncidentsService {
         );
     }
 
+    getProcessIncidents(limit: number): Observable<ProcessIncidentsModel[]> {
+        return this.http.get<ProcessIncidentsModel[]>
+        (environment.processIncidentApiUrl + '/incidents?sort=time.desc&limit=' + limit).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(ProcessIncidentsService.name, 'getProcessIncidents', []))
+        );
+    }
+
 }

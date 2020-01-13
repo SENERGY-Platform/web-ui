@@ -15,14 +15,6 @@
  *  limitations under the License.
  */
 
-export interface ProcessIncidentsModel {
-    msg_version: number;
-    external_task_id: string;
-    process_instance_id: string;
-    process_definition_id: string;
-    worker_id: string;
-    error_message: string;
-    time: string;
-    tenant_id: string;
-    deployment_name: string;
+export interface ProcessIncidentPropertiesModel {
+    limit?: number;
 }
