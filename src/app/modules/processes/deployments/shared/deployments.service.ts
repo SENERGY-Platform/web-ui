@@ -49,7 +49,7 @@ export class DeploymentsService {
     }
 
     getMissingDependencies(id: string): Observable<DeploymentsMissingDependenciesModel | null> {
-        return this.http.get<DeploymentsMissingDependenciesModel>(environment.processDeploymentUrl + '/deployment/' + encodeURIComponent(id) + '/dependencies').pipe(
+        return this.http.get<DeploymentsMissingDependenciesModel>(environment.processDeploymentUrl + '/dependencies/' + encodeURIComponent(id)).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getMissingDependencies', null))
         );
     }

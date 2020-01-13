@@ -16,24 +16,10 @@
  */
 
 export interface DeploymentsMissingDependenciesModel {
-    abstract: {
-        abstract_tasks: DeploymentsMissingDependenciesAbstractTasksModel[];
-        msg_events: DeploymentsMissingDependenciesMsgEventsModel[];
-        receive_tasks: DeploymentsMissingDependenciesMsgEventsModel[];
-    };
-}
-
-export interface DeploymentsMissingDependenciesAbstractTasksModel {
-    selected: {
+    devices: {
+        device_id: string
         name: string;
-    };
-    state: string;
-}
-
-export interface DeploymentsMissingDependenciesMsgEventsModel {
-    filter_id: string;
-    shape_id: string;
-    state: string;
+    }[];
 }
 
 

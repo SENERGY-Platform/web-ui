@@ -19,7 +19,6 @@ import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import {DeploymentsService} from '../shared/deployments.service';
 import {
-    DeploymentsMissingDependenciesAbstractTasksModel,
     DeploymentsMissingDependenciesModel
 } from '../shared/deployments-missing-dependencies.model';
 
@@ -29,8 +28,8 @@ import {
 })
 export class DeploymentsMissingDependenciesDialogComponent {
 
-    displayedColumns: string[] = ['device', 'state'];
-    abstractTasksDataSource: DeploymentsMissingDependenciesAbstractTasksModel[] | null = null;
+    displayedColumns: string[] = ['name', 'device_id'];
+    missingDependencies: DeploymentsMissingDependenciesModel | null = null;
 
     constructor(private dialogRef: MatDialogRef<DeploymentsMissingDependenciesDialogComponent>,
                 private deploymentsService: DeploymentsService,
@@ -38,7 +37,7 @@ export class DeploymentsMissingDependenciesDialogComponent {
 
         this.deploymentsService.getMissingDependencies(data.id).subscribe((missingDependencies: DeploymentsMissingDependenciesModel | null) => {
             if (missingDependencies != null) {
-                this.abstractTasksDataSource = missingDependencies.abstract.abstract_tasks;
+                this.missingDependencies = missingDependencies;
             }
         });
     }
