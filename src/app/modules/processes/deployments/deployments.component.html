@@ -44,7 +44,7 @@
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                                     <button *ngIf="!item.online" mat-icon-button matTooltip="Missing Dependencies"
-                                            class="warning-color" (click)="showMissingDependencies(item.id)">
+                                            class="mat-warn" (click)="showMissingDependencies(item.id)">
                                         <mat-icon>warning</mat-icon>
                                     </button>
                                     <div fxFlex></div>
