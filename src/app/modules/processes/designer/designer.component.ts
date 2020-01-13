@@ -155,6 +155,9 @@ export class ProcessDesignerComponent implements OnInit {
             },
             configEmail: (to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void) => {
                 that.designerDialogService.openEmailConfigDialog(to, subj, content, callback);
+            },
+            configNotification: (subj: string, content: string, callback: (subj: string, content: string) => void) => {
+                that.designerDialogService.openNotificationConfigDialog(subj, content, callback);
             }
         };
 

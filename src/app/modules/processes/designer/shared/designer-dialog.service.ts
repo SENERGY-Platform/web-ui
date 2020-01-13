@@ -30,6 +30,7 @@ import {
     DeviceTypeSelectionResultModel
 } from '../../../devices/device-types-overview/shared/device-type-selection.model';
 import {TaskConfigDialogComponent} from '../dialogs/task-config-dialog/task-config-dialog.component';
+import {NotificationConfigDialogComponent} from '../dialogs/notification-config-dialog/notification-config-dialog.component';
 
 @Injectable({
     providedIn: 'root'
@@ -108,6 +109,19 @@ export class DesignerDialogService {
         editDialogRef.afterClosed().subscribe((value: {to: string, subj: string, content: string}) => {
             if (value) {
                 callback(value.to, value.subj, value.content);
+            }
+        });
+    }
+
+    openNotificationConfigDialog(subj: string, content: string, callback: (subj: string, content: string) => void) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.autoFocus = false;
+        dialogConfig.data = {subj: subj, content: content};
+        const editDialogRef = this.dialog.open(NotificationConfigDialogComponent, dialogConfig);
+        editDialogRef.afterClosed().subscribe((value: {subj: string, content: string}) => {
+            if (value) {
+                callback(value.subj, value.content);
             }
         });
     }
