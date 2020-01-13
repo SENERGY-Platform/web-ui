@@ -61,6 +61,50 @@
                                 </tr>
                             </table>
                         </div>
+                        <div formGroupName="time_event" *ngIf="element.value.time_event !== null">
+                            <div>{{element.value.time_event.label}}</div>
+                            <table class="full-width" cellspacing="0" formGroupName="time_raw" (change)="change(elementIndex)">
+                                <tr>
+                                    <td>
+                                        <mat-form-field class="full-width" color="accent">
+                                            <input type="number" matInput placeholder="Years"
+                                                   formControlName="years">
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field class="full-width" color="accent">
+                                            <input type="number" matInput placeholder="Months"
+                                                   formControlName="months">
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field class="full-width" color="accent">
+                                            <input type="number" matInput placeholder="Days"
+                                                   formControlName="days">
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field class="full-width" color="accent">
+                                            <input type="number" matInput placeholder="Hours"
+                                                   formControlName="hours">
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field class="full-width" color="accent">
+                                            <input type="number" matInput placeholder="Minutes"
+                                                   formControlName="minutes">
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field class="full-width" color="accent">
+                                            <input type="number" matInput placeholder="Seconds"
+                                                   formControlName="seconds">
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
                     </div>
                 </div>
 

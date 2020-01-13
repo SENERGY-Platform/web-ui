@@ -38,7 +38,7 @@
                                 <mat-icon>more_vert</mat-icon>
                             </button>
                             <mat-menu #deviceMenu="matMenu" [overlapTrigger]="false">
-                                <button mat-menu-item (click)="service(device.devicetype)">
+                                <button mat-menu-item (click)="service(device.device_type.id)">
                                     <mat-icon>info</mat-icon>
                                     Services
                                 </button>

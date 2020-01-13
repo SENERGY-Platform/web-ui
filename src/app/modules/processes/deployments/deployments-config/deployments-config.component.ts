@@ -26,7 +26,7 @@ import {
     DeploymentsPreparedModel,
     DeploymentsPreparedSelectableModel,
     DeploymentsPreparedSelectionModel,
-    DeploymentsPreparedTaskModel
+    DeploymentsPreparedTaskModel, DeploymentsPreparedTimeEventModel
 } from '../shared/deployments-prepared.model';
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
@@ -34,6 +34,8 @@ import {UtilService} from '../../../../core/services/util.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
+import * as moment from 'moment';
+import {MatSnackBar} from '@angular/material';
 
 
 @Component({
@@ -52,7 +54,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 private route: ActivatedRoute,
                 private processRepoService: ProcessRepoService,
                 private utilService: UtilService,
-                private deploymentsService: DeploymentsService) {
+                private deploymentsService: DeploymentsService,
+                private snackBar: MatSnackBar) {
     }
 
     ngOnInit() {
@@ -67,6 +70,12 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 this.initElementsFormArray();
             }
         });
+    }
+
+    change(elementIndex: number): void {
+        const time_event = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'time_event']);
+        const time_raw = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'time_event', 'time_raw']);
+        time_event.patchValue({time: moment.duration(JSON.parse(JSON.stringify(time_raw.value))).toISOString()});
     }
 
     initElementsFormArray(): void {
@@ -110,7 +119,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     initElementFormGroup(element: DeploymentsPreparedElementModel): FormGroup {
         return this._formBuilder.group({
             order: [element.order],
-            task: element.task ? this.initTaskFormGroup(element.task) : null
+            task: element.task ? this.initTaskFormGroup(element.task) : null,
+            time_event: element.time_event ? this.initTimeEventFormGroup(element.time_event) : null
         });
     }
 
@@ -143,6 +153,27 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             selectableIndex: [task.selectableIndex],
             parameter: this.initParameterFormGroup(task.parameter),
             retries: [task.retries]
+        });
+    }
+
+    initTimeEventFormGroup(timeEvent: DeploymentsPreparedTimeEventModel): FormGroup {
+        return this._formBuilder.group({
+            bpmn_element_id: [timeEvent.bpmn_element_id],
+            kind: [timeEvent.kind],
+            label: [timeEvent.label],
+            time: [timeEvent.time],
+            time_raw: this.initTimeRawFormGroup(timeEvent.time)
+        });
+    }
+
+    private initTimeRawFormGroup(timeEvent: string): FormGroup {
+        return this._formBuilder.group({
+            years: [moment.duration(timeEvent).years()],
+            months: [moment.duration(timeEvent).months()],
+            days: [moment.duration(timeEvent).days()],
+            hours: [moment.duration(timeEvent).hours()],
+            minutes: [moment.duration(timeEvent).minutes()],
+            seconds: [moment.duration(timeEvent).seconds()],
         });
     }
 
@@ -196,8 +227,12 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
 
     save(): void {
-        this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: any) => {
-            console.log(resp);
+        this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: {status: number}) => {
+            if (resp.status === 200) {
+                this.snackBar.open('Deployment stored successfully.', undefined, {duration: 2000});
+            } else {
+                this.snackBar.open('Error while storing the deployment!', undefined, {duration: 2000});
+            }
         });
     }
 

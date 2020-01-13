@@ -110,4 +110,9 @@ mat-sidenav-container {
 
 .sidenav-container ::ng-deep .mat-drawer-backdrop {
     position: fixed;
+    overflow: visible;
+}
+
+.sidenav-container {
+    overflow: visible;
 }

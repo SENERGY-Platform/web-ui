@@ -24,8 +24,9 @@
     </a>
     <div class="mat-h4 color-accent">{{header}}</div>
     <span class="fill-remaining-space"></span>
-    <button mat-icon-button color="accent">
-        <mat-icon>notifications_none</mat-icon>
+    <button mat-icon-button color="accent" (click)="openNotificationsDialog()">
+        <mat-icon *ngIf="unreadCounter < 1">notifications_none</mat-icon>
+        <mat-icon *ngIf="unreadCounter > 0" matBadge="{{unreadCounter}}" matBadgeColor="warn">notifications</mat-icon>
     </button>
 
     <button mat-icon-button [matMenuTriggerFor]="user" color="accent">

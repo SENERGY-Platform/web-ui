@@ -37,6 +37,7 @@ export const environment = {
   processRepoUrl: '${process.env.PROCESS_REPO_URL}',
   processDeploymentUrl: '${process.env.PROCESS_DEPLOYMENT_URL}',
   processServiceUrl: '${process.env.PROCESS_SERVICE_URL}',
+  processIncidentApiUrl: '${process.env.PROCESS_INCIDENT_API_URL}',
   operatorRepoUrl: '${process.env.OPERATOR_REPO_URL}',
   exportService: '${process.env.EXPORT_SERVICE}',
   influxAPIURL: '${process.env.INFLUX_API_URL}',
@@ -58,6 +59,7 @@ export const environment = {
   dwdOpenUrl: '${process.env.DWD_OPEN_URL}',
   geonamesUrl: '${process.env.GEONAMES_URL}',
   yrUrl: '${process.env.YR_URL}',
+  notificationsUrl: '${process.env.NOTIFICATION_SERVICE_URL}',
 };
 `;
 

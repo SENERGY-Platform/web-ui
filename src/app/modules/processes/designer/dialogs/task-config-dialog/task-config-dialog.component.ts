@@ -92,11 +92,19 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private initOptions(): void {
-        this.optionsFormControl.valueChanges.subscribe(() => {
+        this.optionsFormControl.valueChanges.subscribe((options) => {
             this.deviceClassFormControl.setValue('');
             this.aspectFormControl.setValue('');
             this.functionFormControl.setValue('');
             this.functionFormControl.disable();
+            if (options === 'Measuring') {
+                this.completionStrategyFormControl.patchValue('pessimistic');
+                this.completionStrategyFormControl.disable();
+            }
+            if (options === 'Controlling') {
+                this.completionStrategyFormControl.patchValue('optimistic');
+                this.completionStrategyFormControl.enable();
+            }
         });
     }
 
@@ -113,14 +121,14 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private getDeviceClasses(): void {
-        this.deviceTypeService.getDeviceClasses().subscribe(
+        this.deviceTypeService.getDeviceClassesWithControllingFunction().subscribe(
             (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceClasses = deviceTypeDeviceClasses;
             });
     }
 
     private getAspects(): void {
-        this.deviceTypeService.getAspects().subscribe(
+        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe(
             (aspects: DeviceTypeAspectModel[]) => {
                 this.aspects = aspects;
             });
@@ -173,6 +181,8 @@ export class TaskConfigDialogComponent implements OnInit {
                         this.characteristic = concept.characteristics[index];
                     }
                 });
+        } else {
+            this.characteristic = {} as DeviceTypeCharacteristicsModel;
         }
     }
 
@@ -187,6 +197,7 @@ export class TaskConfigDialogComponent implements OnInit {
                         this.getDeviceClassFunctions(this.selection.device_class);
                     }
                     if (functionType.text === 'Measuring') {
+                        this.completionStrategyFormControl.disable();
                         this.getAspectFunctions(this.selection.aspect);
                     }
                 }

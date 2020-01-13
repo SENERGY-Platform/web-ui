@@ -18,16 +18,14 @@
 <h2 mat-dialog-title>Details</h2>
 
 <mat-dialog-content>
+    <div *ngIf="incidents.length === 0">process terminated manually</div>
     <div *ngIf="incidents.length > 0">
-        <h3>Incidents</h3>
-        <div *ngFor="let incident of incidents">{{'message: ' + incident.incidentMessage}}</div>
-        <mat-divider class="divider-margin"></mat-divider>
+        <div *ngFor="let incident of incidents">
+            {{incident.error_message}}
+        </div>
     </div>
-    <h3>Variables</h3>
-    <pre>{{variables | json}}</pre>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button mat-accent" (click)="ok()">Ok</button>
 </mat-dialog-actions>
-

@@ -25,17 +25,13 @@ import {MonitorProcessIncidentModel} from '../shared/monitor-process-incident.mo
     styleUrls: ['./monitor-details-dialog.component.css'],
 })
 export class MonitorDetailsDialogComponent implements OnInit {
-
-    variables: {name: string, value: string}[] = [];
     incidents: MonitorProcessIncidentModel[] = [];
 
     constructor(private dialogRef: MatDialogRef<MonitorDetailsDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: { variables: MonitorProcessVariableInstancesModel[], incident: MonitorProcessIncidentModel[]}
+                @Inject(MAT_DIALOG_DATA) data: { incident: MonitorProcessIncidentModel[] }
     ) {
-        data.variables.forEach((variable: MonitorProcessVariableInstancesModel) => {
-            this.variables.push({name: variable.name, value: variable.value});
-        });
         this.incidents = data.incident;
+        console.log(this.incidents);
     }
 
     ngOnInit() {

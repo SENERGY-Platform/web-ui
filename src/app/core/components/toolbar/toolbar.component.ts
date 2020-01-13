@@ -20,6 +20,8 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {filter, map, mergeMap} from 'rxjs/internal/operators';
 import {AuthorizationService} from '../../services/authorization.service';
 import {SettingsDialogService} from '../../../modules/settings/shared/settings-dialog.service';
+import {NotificationService} from './notification/shared/notification.service';
+import {NotificationModel} from './notification/shared/notification.model';
 
 @Component({
     selector: 'senergy-toolbar',
@@ -30,18 +32,21 @@ export class ToolbarComponent implements OnInit {
 
     userName = '';
     header = '';
+    notifications: NotificationModel[] = [];
+    unreadCounter = 0;
 
     constructor(private sidenavService: SidenavService,
                 private router: Router,
                 private activatedRoute: ActivatedRoute,
                 private authorizationService: AuthorizationService,
-                private settingsDialogService: SettingsDialogService) {
+                private settingsDialogService: SettingsDialogService,
+                private notificationService: NotificationService) {
     }
 
     ngOnInit() {
         this.setHeader();
         this.initUser();
-
+        this.updateNotifications();
     }
 
     toggle(sidenavOpen: boolean): void {
@@ -68,12 +73,11 @@ export class ToolbarComponent implements OnInit {
         this.router.events.pipe(
             filter(event => event instanceof NavigationEnd),
             map(() => {
-                let route = this.activatedRoute.firstChild;
+                const route = this.activatedRoute.firstChild;
                 let child = route;
                 while (child) {
                     if (child.firstChild) {
                         child = child.firstChild;
-                        route = child;
                     } else {
                         child = null;
                     }
@@ -86,4 +90,15 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
+    private updateNotifications() {
+        this.notificationService.getNotifications().subscribe( nots => {
+            this.notifications = nots;
+            this.unreadCounter = 0;
+            this.notifications.forEach(n => !n.isRead ? this.unreadCounter++ : null);
+        });
+    }
+
+    openNotificationsDialog() {
+        this.notificationService.openDialog(this.notifications).subscribe(() => this.updateNotifications());
+    }
 }

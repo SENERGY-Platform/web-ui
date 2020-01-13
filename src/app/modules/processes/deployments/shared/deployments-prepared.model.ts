@@ -39,7 +39,7 @@ export interface DeploymentsPreparedElementModel {
     multi_task: DeploymentsPreparedMultiTaskModel;
     receive_task_event: DeploymentsPreparedMsgEventModel;
     msg_event: DeploymentsPreparedMsgEventModel;
-    time_event: any;
+    time_event: DeploymentsPreparedTimeEventModel;
 }
 
 export interface DeploymentsPreparedTaskModel {
@@ -73,7 +73,7 @@ export interface DeploymentsPreparedLaneSubElementModel {
     task: DeploymentsPreparedLaneTaskElementModel;
     msg_event: any;
     receive_task_event: any;
-    time_event: any;
+    time_event: DeploymentsPreparedTimeEventModel;
 }
 
 export interface DeploymentsPreparedLaneTaskElementModel {
@@ -85,6 +85,13 @@ export interface DeploymentsPreparedLaneTaskElementModel {
     multi_task: boolean;
     selected_service: DeviceTypeServiceModel;
     parameter: any;
+}
+
+export interface DeploymentsPreparedTimeEventModel {
+    bpmn_element_id: string;
+    kind: string;
+    time: string;
+    label: string;
 }
 
 export interface DeploymentsPreparedDeviceDescriptionModel {

@@ -49,7 +49,7 @@ export class DeploymentsService {
     }
 
     getMissingDependencies(id: string): Observable<DeploymentsMissingDependenciesModel | null> {
-        return this.http.get<DeploymentsMissingDependenciesModel>(environment.processDeploymentUrl + '/deployment/' + encodeURIComponent(id) + '/dependencies').pipe(
+        return this.http.get<DeploymentsMissingDependenciesModel>(environment.processDeploymentUrl + '/dependencies/' + encodeURIComponent(id)).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getMissingDependencies', null))
         );
     }
@@ -75,9 +75,12 @@ export class DeploymentsService {
         );
     }
 
-    postDeployments(deployment: DeploymentsPreparedModel): Observable<DeploymentsPreparedModel | null> {
-        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments', deployment).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', null))
+    postDeployments(deployment: DeploymentsPreparedModel): Observable<{status: number}> {
+        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments', deployment, {observe: 'response'}).pipe(
+            map(resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', {status: 500}))
         );
     }
 

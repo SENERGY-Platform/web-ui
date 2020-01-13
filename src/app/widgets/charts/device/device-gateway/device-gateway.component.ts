@@ -91,7 +91,9 @@ export class DeviceGatewayComponent implements OnInit, OnDestroy {
                 this.deviceGateway.options.chartArea.height = element.heightPercentage;
                 this.deviceGateway.options.chartArea.width = element.widthPercentage;
             }
-            this.deviceGatewayChart.redraw();
+            if (this.deviceGateway.dataTable[0].length > 0 ) {
+                this.deviceGatewayChart.redraw();
+            }
         }
     }
 }

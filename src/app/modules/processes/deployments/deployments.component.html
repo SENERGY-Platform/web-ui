@@ -43,18 +43,10 @@
                                     {{item.deploymentTime | date:"medium"}}
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
-                                    <button mat-icon-button [matMenuTriggerFor]="deploymentMenuWarning"
-                                           style="color: red" matTooltip="More" *ngIf="item.has_incidents || !item.online">
+                                    <button *ngIf="!item.online" mat-icon-button matTooltip="Missing Dependencies"
+                                            class="warning-color" (click)="showMissingDependencies(item.id)">
                                         <mat-icon>warning</mat-icon>
                                     </button>
-                                    <mat-menu #deploymentMenuWarning="matMenu" [overlapTrigger]="false">
-                                        <button mat-menu-item [disabled]="!item.has_incidents" (click)="navigateToMonitorSection(item, 0)">
-                                            <span>Show Execution Issues</span>
-                                        </button>
-                                        <button mat-menu-item [disabled]="item.online" (click)="showMissingDependencies(item.id)">
-                                            <span>Show Missing Dependencies</span>
-                                        </button>
-                                    </mat-menu>
                                     <div fxFlex></div>
                                     <button mat-icon-button matTooltip="Run" class="color-accent"
                                             (click)="run(item.definition_id)">

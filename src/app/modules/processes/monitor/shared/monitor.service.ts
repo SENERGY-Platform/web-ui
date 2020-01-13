@@ -69,7 +69,7 @@ export class MonitorService {
 
     getInstancesIncidents(id: string): Observable<MonitorProcessIncidentModel[]> {
         return this.http.get<MonitorProcessIncidentModel[]>
-        (environment.processServiceUrl + '/process-instance/' + id + '/incident').pipe(
+        (environment.processIncidentApiUrl + '/incidents?process_instance_id=' + id).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(MonitorService.name, 'getInstancesIncidents', []))
         );
@@ -104,15 +104,12 @@ export class MonitorService {
 
     openDetailsDialog(id: string): void {
         this.getInstancesIncidents(id).subscribe((incident: MonitorProcessIncidentModel[]) => {
-            this.getVariableInstances(id).subscribe((variables: MonitorProcessVariableInstancesModel[]) => {
-                const dialogConfig = new MatDialogConfig();
-                dialogConfig.disableClose = false;
-                dialogConfig.data = {
-                    variables: variables,
-                    incident: incident,
-                };
-                this.dialog.open(MonitorDetailsDialogComponent, dialogConfig);
-            });
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.disableClose = false;
+            dialogConfig.data = {
+                incident: incident,
+            };
+            this.dialog.open(MonitorDetailsDialogComponent, dialogConfig);
         });
 
     }

@@ -81,6 +81,14 @@ export class DeviceTypeService {
         );
     }
 
+    getDeviceClassesWithControllingFunction(): Observable<DeviceTypeDeviceClassModel[]> {
+        return this.http.get<DeviceTypeDeviceClassModel[]>
+        (environment.semanticRepoUrl + '/device-classes?function=controlling-function').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceClassesWithControllingFunction', []))
+        );
+    }
+
     createDeviceType(deviceType: DeviceTypeModel): Observable<DeviceTypeModel | null> {
         return this.http.post<DeviceTypeModel>(environment.deviceManagerUrl + '/device-types', deviceType).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'createDeviceType', null))
@@ -124,6 +132,13 @@ export class DeviceTypeService {
         return this.http.get<DeviceTypeAspectModel[]>(environment.semanticRepoUrl + '/aspects').pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspects', []))
+        );
+    }
+
+    getAspectsWithMeasuringFunction(): Observable<DeviceTypeAspectModel[]> {
+        return this.http.get<DeviceTypeAspectModel[]>(environment.semanticRepoUrl + '/aspects?function=measuring-function').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsWithMeasuringFunction', []))
         );
     }
 

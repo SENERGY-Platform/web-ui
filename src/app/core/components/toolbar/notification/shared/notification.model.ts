@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2019 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 
-::ng-deep .mat-list .mat-list-item .mat-line{
-    word-wrap: break-word;
-    white-space: pre-wrap;
+export interface NotificationModel {
+    title: string;
+    message: string;
+    userId: string;
+    _id: string;
+    isRead: boolean;
+}
+
+export interface NotificationUpdateModel {
+    title: string;
+    message: string;
+    userId: string;
+    isRead: boolean;
+}
+
+export interface NotificationServiceResponse {
+    notifications: NotificationModel[];
 }

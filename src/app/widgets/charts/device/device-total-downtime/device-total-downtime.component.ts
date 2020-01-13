@@ -91,7 +91,9 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
                 this.deviceTotalDowntime.options.chartArea.height = element.heightPercentage;
                 this.deviceTotalDowntime.options.chartArea.width = element.widthPercentage;
             }
-            this.deviceTotalDowntimeChart.redraw();
+            if (this.deviceTotalDowntime.dataTable[0].length > 0 ) {
+                this.deviceTotalDowntimeChart.redraw();
+            }
         }
     }
 }
