@@ -23,7 +23,6 @@ import {catchError, map, share} from 'rxjs/internal/operators';
 import {MonitorProcessModel} from './monitor-process.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {MonitorDetailsDialogComponent} from '../dialogs/monitor-details-dialog.component';
-import {MonitorProcessVariableInstancesModel} from './monitor-process-variable-instances.model';
 import {MonitorProcessTotalModel} from './monitor-process-total.model';
 import {ProcessIncidentsService} from '../../incidents/shared/process-incidents.service';
 import {ProcessIncidentsModel} from '../../incidents/shared/process-incidents.model';
