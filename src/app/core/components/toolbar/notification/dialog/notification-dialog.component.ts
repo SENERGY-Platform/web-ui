@@ -54,7 +54,8 @@ export class NotificationDialogComponent implements OnInit {
     }
 
     deleteAllMessages() {
-        for (let i = 0; i < this.notifications.length; i++) {
+        const notificationCopy = this.notifications;
+        for (let i = 0; i < notificationCopy.length; i++) {
             this.deleteMessage(i);
         }
         this.notifications = [];
