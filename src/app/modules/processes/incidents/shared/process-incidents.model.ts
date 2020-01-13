@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2019 InfAI (CC SES)
+ *  Copyright 2020 InfAI (CC SES)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-export interface MonitorProcessIncidentModel {
+export interface ProcessIncidentsModel {
     msg_version: number;
     external_task_id: string;
     process_instance_id: string;
