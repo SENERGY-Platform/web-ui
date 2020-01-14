@@ -30,14 +30,13 @@ import {Subscription} from 'rxjs';
 })
 export class EnergyPredictionComponent implements OnInit, OnDestroy {
 
-    predictionModel: EnergyPredictionModel = {prediction: 0, timestamp: ''};
+    predictionModel: EnergyPredictionModel = {prediction: 0, predictionTotal: 0, timestamp: ''};
     ready = false;
     configured = false;
     dataReady = false;
     destroy = new Subscription();
     thresholdActive = false;
     price = 0;
-    timestamp = '';
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
@@ -60,8 +59,7 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
     }
 
     registerIcons() {
-        this.iconRegistry.addSvgIcon('online', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/connect_white.svg'));
-        this.iconRegistry.addSvgIcon('offline', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/disconnect_white.svg'));
+
     }
 
     edit() {

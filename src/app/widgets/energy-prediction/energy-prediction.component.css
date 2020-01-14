@@ -56,3 +56,11 @@ mat-card {
 .center-text {
     text-align: center;
 }
+
+.values {
+    font: 500 18px/22px Roboto,"Helvetica Neue",sans-serif;
+}
+
+.widget-icon {
+    margin-top: 12px;
+}
