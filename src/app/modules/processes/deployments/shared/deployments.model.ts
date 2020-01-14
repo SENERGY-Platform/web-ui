@@ -20,7 +20,6 @@ export interface DeploymentsModel {
     definition_id: string;
     deploymentTime: Date;
     diagram: string;
-    has_incidents: boolean;
     id: string;
     name: string;
     offline_reasons: DeploymentsOfflineReasonsModel[];
