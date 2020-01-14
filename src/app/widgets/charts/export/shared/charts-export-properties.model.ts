@@ -17,6 +17,7 @@
 import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
 
 export interface ChartsExportPropertiesModel {
+        chartType?: string;
         interval?: number;
         hAxisLabel?: string;
         vAxis?: ExportValueModel;

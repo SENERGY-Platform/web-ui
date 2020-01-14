@@ -44,6 +44,18 @@
                 Please set a interval!
             </mat-error>
         </mat-form-field>
+
+        <mat-form-field color="accent">
+            <mat-select [(ngModel)]="widget.properties.chartType" placeholder="Chart Type" required #chartType="ngModel">
+                <mat-option *ngFor="let chartType of chartTypes" [value]="chartType">
+                    {{chartType}}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="chartType.errors">
+                Please choose a Chart Type!
+            </mat-error>
+        </mat-form-field>
+
         <table cellspacing="0">
             <tr>
                 <td>
@@ -84,5 +96,5 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="disableSave || interval.errors">Save</button>
+    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="disableSave || interval.errors || chartType.errors">Save</button>
 </mat-dialog-actions>
