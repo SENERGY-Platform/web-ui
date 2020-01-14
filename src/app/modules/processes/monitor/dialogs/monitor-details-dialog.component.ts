@@ -30,7 +30,6 @@ export class MonitorDetailsDialogComponent implements OnInit {
                 @Inject(MAT_DIALOG_DATA) data: { incident: ProcessIncidentsModel[] }
     ) {
         this.incidents = data.incident;
-        console.log(this.incidents);
     }
 
     ngOnInit() {
