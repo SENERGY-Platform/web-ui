@@ -30,7 +30,8 @@
                                 <tr>
                                     <td formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent">
-                                            <mat-select placeholder="{{element.value.task.label}}" required formControlName="device">
+                                            <mat-select placeholder="{{element.value.task.label}}" required
+                                                        formControlName="device">
                                                 <mat-option
                                                         *ngFor="let selectables of element.value.task.selectables; let selectableIndex = index"
                                                         [value]="selectables.device"
@@ -63,7 +64,8 @@
                         </div>
                         <div formGroupName="time_event" *ngIf="element.value.time_event !== null">
                             <div>{{element.value.time_event.label}}</div>
-                            <table class="full-width" cellspacing="0" formGroupName="time_raw" (change)="change(elementIndex)">
+                            <table class="full-width" cellspacing="0" formGroupName="time_raw"
+                                   (change)="change(elementIndex)">
                                 <tr>
                                     <td>
                                         <mat-form-field class="full-width" color="accent">
@@ -113,16 +115,16 @@
                          *ngFor="let element of deploymentFormGroup.get('lanes').controls; let elementLanesIndex = index">
                         <div formGroupName="lane" *ngIf="element.value.lane !== null">
                             <div>{{element.value.lane.label}}</div>
-                                <mat-form-field class="full-width" color="accent">
-                                    <mat-select placeholder="Device" required formGroupName="selectables">
-                                        <mat-option
-                                                *ngFor="let selectables of element.value.lane.selectables; let selectableLaneIndex = index"
-                                                [value]="selectables.device"
-                                                (click)="changeLaneSelectables(elementLanesIndex, selectableLaneIndex)">
-                                            {{selectables.device.name}}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
+                            <mat-form-field class="full-width" color="accent">
+                                <mat-select placeholder="Device" required formGroupName="selectables">
+                                    <mat-option
+                                            *ngFor="let selectables of element.value.lane.selectables; let selectableLaneIndex = index"
+                                            [value]="selectables.device"
+                                            (click)="changeLaneSelectables(elementLanesIndex, selectableLaneIndex)">
+                                        {{selectables.device.name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
                         </div>
                     </div>
                 </div>
