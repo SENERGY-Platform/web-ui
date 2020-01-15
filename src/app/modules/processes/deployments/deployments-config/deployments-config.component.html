@@ -112,19 +112,43 @@
 
                 <div formArrayName="lanes" *ngIf="deploymentFormGroup.get('lanes')">
                     <div [formGroupName]="elementLanesIndex"
-                         *ngFor="let element of deploymentFormGroup.get('lanes').controls; let elementLanesIndex = index">
-                        <div formGroupName="lane" *ngIf="element.value.lane !== null">
-                            <div>{{element.value.lane.label}}</div>
-                            <mat-form-field class="full-width" color="accent">
+                         *ngFor="let lanesControls of deploymentFormGroup.get('lanes').controls; let elementLanesIndex = index">
+                        <div formGroupName="lane" *ngIf="lanesControls.value.lane !== null">
+                            <div>{{lanesControls.value.lane.label}}</div>
+                            <mat-form-field class="full-width" color="accent" *ngIf="lanesControls.value.lane.selectables.length > 1">
                                 <mat-select placeholder="Device" required formGroupName="selectables">
                                     <mat-option
-                                            *ngFor="let selectables of element.value.lane.selectables; let selectableLaneIndex = index"
+                                            *ngFor="let selectables of lanesControls.value.lane.selectables; let selectableLaneIndex = index"
                                             [value]="selectables.device"
                                             (click)="changeLaneSelectables(elementLanesIndex, selectableLaneIndex)">
                                         {{selectables.device.name}}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
+                            <div formArrayName="elements" *ngIf="lanesControls.value.lane.elements.length > 0">
+                                <div [formGroupName]="elementsIndex"
+                                     *ngFor="let elements of deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements']).controls; let elementsIndex = index">
+                                    <div formGroupName="task" *ngIf="elements.value.task !== null">
+                                        <table class="full-width" cellspacing="0">
+                                            <tr>
+                                                <td>
+                                                    <mat-form-field class="full-width" color="accent">
+                                                        <input type="text" matInput [value]="elements.value.task.label" disabled>
+                                                    </mat-form-field>
+                                                </td>
+                                                <td formGroupName="parameter"
+                                                    *ngFor="let item of elements.value.task.parameter | keyvalue; trackBy:trackByFn">
+                                                        <mat-form-field class="full-width" color="accent">
+                                                            <input type="text" matInput placeholder="{{item.key}}"
+                                                                   [formControlName]="item.key">
+                                                        </mat-form-field>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

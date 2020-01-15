@@ -166,7 +166,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             bpmn_element_id: [laneTask.bpmn_element_id],
             multi_task: [laneTask.multi_task],
             selected_service: laneTask.selected_service,
-            parameter: [laneTask.parameter],
+            parameter: this.initParameterFormGroup(laneTask.parameter),
         });
     }
 
