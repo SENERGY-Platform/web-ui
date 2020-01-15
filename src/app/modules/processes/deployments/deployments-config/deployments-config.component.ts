@@ -49,6 +49,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     processId = '';
     deployment: DeploymentsPreparedModel | null = null;
     deploymentFormGroup!: FormGroup;
+    ready = false;
 
     constructor(private _formBuilder: FormBuilder,
                 private route: ActivatedRoute,
@@ -68,6 +69,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             if (deployment !== null) {
                 this.deployment = deployment;
                 this.initElementsFormArray();
+                this.ready = true;
             }
         });
     }
@@ -79,7 +81,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     initElementsFormArray(): void {
-
 
         if (this.deployment !== null) {
 
@@ -127,7 +128,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     initLaneFormGroup(laneElement: DeploymentsPreparedLaneElementModel): FormGroup {
         return this._formBuilder.group({
             order: [laneElement.order],
-            lane: this.initLaneGroup(laneElement.lane),
+            lane: laneElement.lane ? this.initLaneGroup(laneElement.lane) : null,
         });
     }
 
@@ -153,6 +154,19 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             selectableIndex: [task.selectableIndex],
             parameter: this.initParameterFormGroup(task.parameter),
             retries: [task.retries]
+        });
+    }
+
+    initLaneTaskFormGroup(laneTask: DeploymentsPreparedLaneTaskElementModel): FormGroup {
+        return this._formBuilder.group({
+            label: [laneTask.label],
+            retries: [laneTask.retries],
+            device_description: [laneTask.device_description],
+            input: [laneTask.input],
+            bpmn_element_id: [laneTask.bpmn_element_id],
+            multi_task: [laneTask.multi_task],
+            selected_service: laneTask.selected_service,
+            parameter: [laneTask.parameter],
         });
     }
 
@@ -221,7 +235,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     initDeviceServicesGroup(selectable: DeploymentsPreparedSelectableModel): FormGroup {
         return this._formBuilder.group({
             device: [selectable.device],
-            services: [selectable.services]
+            services: this._formBuilder.array(selectable.services)
         });
     }
 
@@ -252,8 +266,25 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     changeLaneSelectables(lanesIndex: number, selectableIndex: number): void {
         const selectables = <FormGroup>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'selectables', selectableIndex]);
+        const selectableServices = <FormArray>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'selectables', selectableIndex, 'services']);
         const selection = <FormGroup>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'selection']);
         selection.setValue(selectables.value.device);
+        const elements = <FormArray>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'elements']);
+        for (let i = 0; i < elements.length; i++) {
+            const element = <FormGroup>elements.controls[i];
+            const task = <FormGroup>element.controls['task'];
+            const deviceDescription = task.controls['device_description'];
+            const selectedService = task.controls['selected_service'];
+            for (let k = 0; k < selectableServices.length; k++) {
+                const selectableService = <DeviceTypeServiceModel>selectableServices.controls[k].value;
+                if (selectableService.functions.length > 1) {
+                    console.log('todo Error: Multiple Functions');
+                }
+                if (selectableService.functions[0].id === deviceDescription.value.function.id) {
+                    selectedService.setValue(selectableService);
+                }
+            }
+        }
     }
 
     private initLaneElementFormArray(elements: DeploymentsPreparedLaneSubElementModel[]): FormArray {
@@ -269,7 +300,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     private initLaneElementGroup(element: DeploymentsPreparedLaneSubElementModel): FormGroup {
         return this._formBuilder.group({
             order: [element.order],
-            task: [element.task],
+            task: element.task ? this.initLaneTaskFormGroup(element.task) : null,
             msg_event: [element.msg_event],
             receive_task_event: [element.receive_task_event],
             time_event: [element.time_event],

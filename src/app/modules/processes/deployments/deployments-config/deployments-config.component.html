@@ -16,7 +16,7 @@
   -->
 <div class="deployments-config-container">
     <div class="layout-margin" fxLayout="column">
-        <div *ngIf="deployment !== null">
+        <div *ngIf="ready">
             <form [formGroup]="deploymentFormGroup">
                 <mat-form-field class="full-width" color="accent">
                     <input type="text" matInput placeholder="Prozessname"
