@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+@import '../../../../theme.scss';
 
 .center {
     margin-left: auto;
@@ -38,12 +38,12 @@
 }
 
 .help-text {
-    color: #4484ce;
+    color: mat-color($my-app-accent);
     font-size: smaller;
 }
 
 .small-error-text {
-    color: red;
+    color: mat-color($my-app-warn);
     font-size: smaller;
 }
 
