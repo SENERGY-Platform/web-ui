@@ -78,10 +78,10 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
                     this.price = this.predictionModel.prediction * (this.widget.properties.price || 0);
                     switch (this.widget.properties.thresholdOption) {
                         case 'Consumption':
-                            this.thresholdActive = this.predictionModel.prediction > (this.widget.properties.threshold || Infinity);
+                            this.thresholdActive = this.predictionModel.prediction > (this.widget.properties.threshold || -Infinity);
                             break;
                         case 'Price':
-                            this.thresholdActive = this.price > (this.widget.properties.threshold || Infinity);
+                            this.thresholdActive = this.price > (this.widget.properties.threshold || -Infinity);
                             break;
                     }
                     this.dataReady = true;
