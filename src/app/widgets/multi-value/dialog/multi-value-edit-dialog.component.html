@@ -33,10 +33,6 @@
                 <mat-option [value]="orderValues.ValueDesc">Value desc</mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-form-field color="accent">
-            <mat-label>Warning color</mat-label>
-            <input type="color" matInput [(ngModel)]="color" maxlength="8">
-        </mat-form-field>
     </div>
     <mat-accordion>
         <mat-expansion-panel *ngFor="let tab of measurements; let index = index">

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@import '../../../theme.scss';
 
-mat-card {
+.mat-card {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
@@ -40,4 +41,8 @@ mat-card {
 
 .red {
     color: red;
+}
+
+.warn {
+    color: mat-color($my-app-warn)
 }
