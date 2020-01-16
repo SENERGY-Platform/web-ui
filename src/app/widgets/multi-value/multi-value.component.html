@@ -30,7 +30,7 @@
                         {{m.data}} {{m.unit}}
                     </span>
                     <span *ngIf="m.type !== 'String'"
-                          [ngClass]="m.warning_enabled && (m.data < m.lowerBoundary || m.data > m. upperBoundary) && 'warn'">
+                          [ngClass]="m.warning_enabled && (m.data < m.lowerBoundary || m.data > m. upperBoundary) && 'color-warn'">
                         <span *ngIf="m.type === 'Number'">
                             {{m.data | number: m.format}}
                         </span>

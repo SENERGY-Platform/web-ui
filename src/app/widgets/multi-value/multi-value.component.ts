@@ -26,7 +26,7 @@ import {MultiValueMeasurement, MultiValueOrderEnum} from './shared/multi-value.m
 @Component({
     selector: 'senergy-multi-value',
     templateUrl: './multi-value.component.html',
-    styleUrls: ['./multi-value.component.scss'],
+    styleUrls: ['./multi-value.component.css'],
 })
 export class MultiValueComponent implements OnInit, OnDestroy {
 

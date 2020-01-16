@@ -13,36 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@import '../../../theme.scss';
 
-.mat-card {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-}
-
-.value {
-    font-size: 3.5vw;
-}
-
-.content-size {
-    min-height: calc(100% - 72px);
-    height: calc(100% - 72px);
-    margin: 0px;
-}
-
-.white {
-    color: white;
-}
-
-.center-text {
+.center {
+    margin-left: auto;
+    margin-right: auto;
     text-align: center;
+    width: 80%;
+    padding: 10px;
 }
 
-.red {
-    color: red;
+.text-inside-grid {
+    position: absolute;
+    left: 5px;
 }
 
-.warn {
-    color: mat-color($my-app-warn)
+.boundary-input-field {
+    width: 15%;
+}
+
+.unit {
+    margin-left: 1%;
+    margin-right: 5%;
+}
+
+.help-text {
+    font-size: smaller;
+}
+
+.small-error-text {
+    font-size: smaller;
+}
+
+.searchbox {
+    min-width: 50%;
 }

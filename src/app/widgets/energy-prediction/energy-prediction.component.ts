@@ -26,7 +26,7 @@ import {Subscription} from 'rxjs';
 @Component({
     selector: 'senergy-energy-prediction',
     templateUrl: './energy-prediction.component.html',
-    styleUrls: ['./energy-prediction.component.scss'],
+    styleUrls: ['./energy-prediction.component.css'],
 })
 export class EnergyPredictionComponent implements OnInit, OnDestroy {
 

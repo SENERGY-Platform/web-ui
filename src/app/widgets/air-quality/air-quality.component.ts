@@ -31,7 +31,7 @@ import {SensorDataModel} from './shared/air-quality.model';
 @Component({
     selector: 'senergy-air-quality',
     templateUrl: './air-quality.component.html',
-    styleUrls: ['./air-quality.component.scss'],
+    styleUrls: ['./air-quality.component.css'],
 })
 export class AirQualityComponent implements OnInit, OnDestroy {
     numReady = 0;

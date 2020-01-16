@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import '../../../theme.scss';
+
 
 
 .mat-card {
@@ -46,14 +46,6 @@
 .text {
     /*font-size: 18px;*/
     text-align: center;
-}
-
-.accent{
-    color: mat-color($my-app-accent)
-}
-
-.warn {
-    color: mat-color($my-app-warn)
 }
 
 .right{
