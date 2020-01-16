@@ -107,7 +107,10 @@
                                             </tr>
                                         </table>
                                     </div>
-
+                                    <div formGroupName="time_event" *ngIf="elements.value.time_event !== null">
+                                        <senergy-process-deployments-config-time-event
+                                                [time_event]="deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements', elementsIndex, 'time_event'])"></senergy-process-deployments-config-time-event>
+                                    </div>
                                 </div>
                             </div>
                         </div>

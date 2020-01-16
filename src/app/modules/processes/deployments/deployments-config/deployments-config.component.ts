@@ -266,15 +266,17 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         for (let i = 0; i < elements.length; i++) {
             const element = <FormGroup>elements.controls[i];
             const task = <FormGroup>element.controls['task'];
-            const deviceDescription = task.controls['device_description'];
-            const selectedService = task.controls['selected_service'];
-            for (let k = 0; k < selectableServices.length; k++) {
-                const selectableService = <DeviceTypeServiceModel>selectableServices.controls[k].value;
-                if (selectableService.functions.length > 1) {
-                    console.log('todo Error: Multiple Functions');
-                }
-                if (selectableService.functions[0].id === deviceDescription.value.function.id) {
-                    selectedService.setValue(selectableService);
+            if (task.value) {
+                const deviceDescription = task.controls['device_description'];
+                const selectedService = task.controls['selected_service'];
+                for (let k = 0; k < selectableServices.length; k++) {
+                    const selectableService = <DeviceTypeServiceModel>selectableServices.controls[k].value;
+                    if (selectableService.functions.length > 1) {
+                        console.log('todo Error: Multiple Functions');
+                    }
+                    if (selectableService.functions[0].id === deviceDescription.value.function.id) {
+                        selectedService.setValue(selectableService);
+                    }
                 }
             }
         }
@@ -296,7 +298,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             task: element.task ? this.initLaneTaskFormGroup(element.task) : null,
             msg_event: [element.msg_event],
             receive_task_event: [element.receive_task_event],
-            time_event: [element.time_event],
+            time_event: element.time_event ? this.initTimeEventFormGroup(element.time_event) : null,
         });
     }
 }
