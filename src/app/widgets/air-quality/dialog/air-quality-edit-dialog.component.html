@@ -37,22 +37,22 @@
                     <mat-icon [inline]="true">edit</mat-icon>
                 </button>
 
-                <div *ngIf="hasValidUBAStation()" class="help-text">
+                <div *ngIf="hasValidUBAStation()" class="help-text color-accent">
                     Next <span matTooltip="Umweltbundesamt">UBA</span> station: {{ubaStationSelected.station_name}},
                     distance: {{ubaStationSelected.distance | number}} km
                 </div>
-                <div *ngIf="!hasValidUBAStation()" class="small-error-text">
+                <div *ngIf="!hasValidUBAStation()" class="small-error-text color-warn">
                     No <span matTooltip="Umweltbundesamt">UBA</span> station within {{maxUBADistance}} km!
                 </div>
-                <div *ngIf="hasValidPollenArea()" class="help-text">
+                <div *ngIf="hasValidPollenArea()" class="help-text color-accent">
                     <span matTooltip="Deutscher Wetterdienst">DWD</span> pollen area: {{dwd_partregion_name}}
                 </div>
-                <div *ngIf="!hasValidPollenArea()" class="small-error-text">
+                <div *ngIf="!hasValidPollenArea()" class="small-error-text color-warn">
                     Location outside all <span matTooltip="Deutscher Wetterdienst">DWD</span> pollen areas!
                 </div>
             </div>
             <div *ngIf="changeLocation">
-                <div *ngIf="autoLocationFailed" class="small-error-text">
+                <div *ngIf="autoLocationFailed" class="small-error-text color-warn">
                         Could not detect your location, please set manually
                 </div>
                 <mat-form-field color="accent" class="searchbox">
@@ -160,7 +160,7 @@
                                 </mat-form-field>
                                 <span [innerHTML]="option.unit_html" class="unit"></span>
                             </div>
-                            <div class="help-text" matTooltip=
+                            <div class="help-text color-accent" matTooltip=
                                     "If the measured value is below the Min Warning value, a warning will be shown.
                                 If it's below the Min Critical value, a severe warning will be shown.
                                 If it's above a Max value warnings will be shown accordingly.
@@ -201,7 +201,7 @@
                                 </mat-select>
                                 </mat-form-field>
                             </div>
-                            <div class="help-text">
+                            <div class="help-text color-accent">
                                 Pollen levels from DWD. Find out more
                                 <a target="_blank" rel="noopener noreferrer"
                                    href="https://www.dwd.de/DE/leistungen/gefahrenindizespollen/erklaerungen.html;">here.</a>

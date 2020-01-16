@@ -67,6 +67,7 @@ import {DeploymentsMissingDependenciesDialogComponent} from './deployments/dialo
 import {ProcessDeploymentsConfigComponent} from './deployments/deployments-config/deployments-config.component';
 import {TaskConfigDialogComponent} from './designer/dialogs/task-config-dialog/task-config-dialog.component';
 import {NotificationConfigDialogComponent} from './designer/dialogs/notification-config-dialog/notification-config-dialog.component';
+import {DeploymentsConfigTimeEventComponent} from './deployments/deployments-config/components/time-event/deployments-config-time-event.component';
 
 const processRepo = {
     path: 'processes/repository',
@@ -142,6 +143,7 @@ const processDesigner = {
         ProcessRepoComponent,
         ProcessDeploymentsComponent,
         ProcessDeploymentsConfigComponent,
+        DeploymentsConfigTimeEventComponent,
         ProcessMonitorComponent,
         ProcessDesignerComponent,
         EditOutputDialogComponent,

@@ -84,6 +84,8 @@ import {AirQualityEditDialogComponent} from './air-quality/dialog/air-quality-ed
 import {AngularFittextModule} from 'angular-fittext';
 import {MultiValueComponent} from './multi-value/multi-value.component';
 import {MultiValueEditDialogComponent} from './multi-value/dialog/multi-value-edit-dialog.component';
+import {ProcessIncidentListComponent} from './process-incident-list/process-incident-list.component';
+import {ProcessIncidentListEditDialogComponent} from './process-incident-list/dialogs/process-incident-list-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -157,7 +159,9 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         EnergyPredictionComponent,
         EnergyPredictionEditDialogComponent,
         AirQualityComponent,
-        AirQualityEditDialogComponent
+        AirQualityEditDialogComponent,
+        ProcessIncidentListComponent,
+        ProcessIncidentListEditDialogComponent,
     ],
     exports: [
         SwitchComponent,
@@ -188,7 +192,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         SingleValueEditDialogComponent,
         MultiValueEditDialogComponent,
         EnergyPredictionEditDialogComponent,
-        AirQualityEditDialogComponent
+        AirQualityEditDialogComponent,
+        ProcessIncidentListEditDialogComponent
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 

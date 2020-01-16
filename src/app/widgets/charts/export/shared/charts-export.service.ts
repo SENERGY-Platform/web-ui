@@ -80,6 +80,7 @@ export class ChartsExportService {
                         // no data
                         observer.next(this.setProcessInstancesStatusValues(
                             widget.id,
+                            widget.properties.chartType || '',
                             widget.properties.hAxisLabel || '',
                             widget.properties.vAxisLabel || '',
                             new ChartDataTableModel([[]])));
@@ -90,6 +91,7 @@ export class ChartsExportService {
                         }
                         observer.next(this.setProcessInstancesStatusValues(
                             widget.id,
+                            widget.properties.chartType || '',
                             widget.properties.hAxisLabel || '',
                             widget.properties.vAxisLabel || '',
                             this.setData(widget.properties.vAxis, resp.results[0].series[0].values, vAxisIndex)));
@@ -110,12 +112,12 @@ export class ChartsExportService {
         return dataTable;
     }
 
-    private setProcessInstancesStatusValues(widgetId: string, hAxisLabel: string, vAxisLabel: string, dataTable: ChartDataTableModel): ChartsModel {
+    private setProcessInstancesStatusValues(widgetId: string, chartType: string, hAxisLabel: string, vAxisLabel: string, dataTable: ChartDataTableModel): ChartsModel {
 
         const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId, 5);
 
         return new ChartsModel(
-            'LineChart',
+            chartType === '' ? 'LineChart' : chartType,
             dataTable.data,
             {
                 chartArea: {width: element.widthPercentage, height: element.heightPercentage},

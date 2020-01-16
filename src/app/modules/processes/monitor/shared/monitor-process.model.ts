@@ -21,7 +21,6 @@ export interface MonitorProcessModel {
     durationInMillis: number;
     endTime: string;
     id: string;
-    incidents: boolean;
     processDefinitionId: string;
     processDefinitionKey: string;
     processDefinitionName: string;

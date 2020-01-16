@@ -41,6 +41,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
     vAxisValues: ExportValueModel[] = [];
     disableSave = false;
+    chartTypes = ['LineChart', 'ColumnChart'];
 
     constructor(private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
                 private deploymentsService: DeploymentsService,

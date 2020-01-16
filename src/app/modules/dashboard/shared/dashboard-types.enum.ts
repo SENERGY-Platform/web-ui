@@ -27,4 +27,5 @@ export enum DashboardTypesEnum {
     MultiValue = 'multi_value',
     EnergyPrediction = 'energy_prediction',
     AirQuality = 'air_quality',
+    ProcessIncidentList = 'process_incident_list',
 }

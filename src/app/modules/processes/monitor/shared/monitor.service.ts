@@ -23,9 +23,9 @@ import {catchError, map, share} from 'rxjs/internal/operators';
 import {MonitorProcessModel} from './monitor-process.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {MonitorDetailsDialogComponent} from '../dialogs/monitor-details-dialog.component';
-import {MonitorProcessVariableInstancesModel} from './monitor-process-variable-instances.model';
-import {MonitorProcessIncidentModel} from './monitor-process-incident.model';
 import {MonitorProcessTotalModel} from './monitor-process-total.model';
+import {ProcessIncidentsService} from '../../incidents/shared/process-incidents.service';
+import {ProcessIncidentsModel} from '../../incidents/shared/process-incidents.model';
 
 @Injectable({
     providedIn: 'root'
@@ -36,7 +36,8 @@ export class MonitorService {
 
     constructor(private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService,
-                private dialog: MatDialog) {
+                private dialog: MatDialog,
+                private processIncidentsService: ProcessIncidentsService) {
     }
 
     getAllHistoryInstances(): Observable<MonitorProcessModel[]> {
@@ -56,22 +57,6 @@ export class MonitorService {
             '/' + offset + '/' + value + '/' + order ).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(MonitorService.name, 'getFilteredHistoryInstances', {} as MonitorProcessTotalModel))
-        );
-    }
-
-    getVariableInstances(id: string): Observable<MonitorProcessVariableInstancesModel[]> {
-        return this.http.get<MonitorProcessVariableInstancesModel[]>
-        (environment.processServiceUrl + '/history/process-instance/' + id + '/variable-instance').pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(MonitorService.name, 'getVariableInstances', []))
-        );
-    }
-
-    getInstancesIncidents(id: string): Observable<MonitorProcessIncidentModel[]> {
-        return this.http.get<MonitorProcessIncidentModel[]>
-        (environment.processIncidentApiUrl + '/incidents?process_instance_id=' + id).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(MonitorService.name, 'getInstancesIncidents', []))
         );
     }
 
@@ -103,7 +88,7 @@ export class MonitorService {
     }
 
     openDetailsDialog(id: string): void {
-        this.getInstancesIncidents(id).subscribe((incident: MonitorProcessIncidentModel[]) => {
+        this.processIncidentsService.getProcessIncidentsByProcessInstanceId(id).subscribe((incident: ProcessIncidentsModel[]) => {
             const dialogConfig = new MatDialogConfig();
             dialogConfig.disableClose = false;
             dialogConfig.data = {

@@ -55,7 +55,6 @@ export const environment = {
   deviceManagerUrl: '${process.env.DEVICE_MANAGER_URL}',
   semanticRepoUrl: '${process.env.SEMANTIC_REPO_URL}',
   ubaUrl: '${process.env.UBA_URL}',
-  gmapsApiKey: '${process.env.GMAPS_API_KEY}',
   dwdOpenUrl: '${process.env.DWD_OPEN_URL}',
   geonamesUrl: '${process.env.GEONAMES_URL}',
   yrUrl: '${process.env.YR_URL}',

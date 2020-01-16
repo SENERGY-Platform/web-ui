@@ -16,7 +16,7 @@
   -->
 <div class="deployments-config-container">
     <div class="layout-margin" fxLayout="column">
-        <div *ngIf="deployment !== null">
+        <div *ngIf="ready">
             <form [formGroup]="deploymentFormGroup">
                 <mat-form-field class="full-width" color="accent">
                     <input type="text" matInput placeholder="Prozessname"
@@ -30,7 +30,8 @@
                                 <tr>
                                     <td formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent">
-                                            <mat-select placeholder="{{element.value.task.label}}" required formControlName="device">
+                                            <mat-select placeholder="{{element.value.task.label}}" required
+                                                        formControlName="device">
                                                 <mat-option
                                                         *ngFor="let selectables of element.value.task.selectables; let selectableIndex = index"
                                                         [value]="selectables.device"
@@ -62,67 +63,56 @@
                             </table>
                         </div>
                         <div formGroupName="time_event" *ngIf="element.value.time_event !== null">
-                            <div>{{element.value.time_event.label}}</div>
-                            <table class="full-width" cellspacing="0" formGroupName="time_raw" (change)="change(elementIndex)">
-                                <tr>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Years"
-                                                   formControlName="years">
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Months"
-                                                   formControlName="months">
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Days"
-                                                   formControlName="days">
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Hours"
-                                                   formControlName="hours">
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Minutes"
-                                                   formControlName="minutes">
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Seconds"
-                                                   formControlName="seconds">
-                                        </mat-form-field>
-                                    </td>
-                                </tr>
-                            </table>
-
+                            <senergy-process-deployments-config-time-event
+                                    [time_event]="deploymentFormGroup.get(['elements', elementIndex, 'time_event'])"></senergy-process-deployments-config-time-event>
                         </div>
                     </div>
                 </div>
 
                 <div formArrayName="lanes" *ngIf="deploymentFormGroup.get('lanes')">
                     <div [formGroupName]="elementLanesIndex"
-                         *ngFor="let element of deploymentFormGroup.get('lanes').controls; let elementLanesIndex = index">
-                        <div formGroupName="lane" *ngIf="element.value.lane !== null">
-                            <div>{{element.value.lane.label}}</div>
-                                <mat-form-field class="full-width" color="accent">
-                                    <mat-select placeholder="Device" required formGroupName="selectables">
-                                        <mat-option
-                                                *ngFor="let selectables of element.value.lane.selectables; let selectableLaneIndex = index"
-                                                [value]="selectables.device"
-                                                (click)="changeLaneSelectables(elementLanesIndex, selectableLaneIndex)">
-                                            {{selectables.device.name}}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
+                         *ngFor="let lanesControls of deploymentFormGroup.get('lanes').controls; let elementLanesIndex = index">
+                        <div formGroupName="lane" *ngIf="lanesControls.value.lane !== null">
+                            <div>{{lanesControls.value.lane.label}}</div>
+                            <mat-form-field class="full-width" color="accent"
+                                            *ngIf="lanesControls.value.lane.selectables.length > 1">
+                                <mat-select placeholder="Device" required formGroupName="selectables">
+                                    <mat-option
+                                            *ngFor="let selectables of lanesControls.value.lane.selectables; let selectableLaneIndex = index"
+                                            [value]="selectables.device"
+                                            (click)="changeLaneSelectables(elementLanesIndex, selectableLaneIndex)">
+                                        {{selectables.device.name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <div formArrayName="elements" *ngIf="lanesControls.value.lane.elements.length > 0">
+                                <div [formGroupName]="elementsIndex"
+                                     *ngFor="let elements of deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements']).controls; let elementsIndex = index">
+                                    <div formGroupName="task" *ngIf="elements.value.task !== null">
+                                        <table class="full-width" cellspacing="0">
+                                            <tr>
+                                                <td>
+                                                    <mat-form-field class="full-width" color="accent">
+                                                        <input type="text" matInput [value]="elements.value.task.label"
+                                                               disabled>
+                                                    </mat-form-field>
+                                                </td>
+                                                <td formGroupName="parameter"
+                                                    *ngFor="let item of elements.value.task.parameter | keyvalue; trackBy:trackByFn">
+                                                    <mat-form-field class="full-width" color="accent">
+                                                        <input type="text" matInput placeholder="{{item.key}}"
+                                                               [formControlName]="item.key">
+                                                    </mat-form-field>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div formGroupName="time_event" *ngIf="elements.value.time_event !== null">
+                                        <senergy-process-deployments-config-time-event
+                                                [time_event]="deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements', elementsIndex, 'time_event'])"></senergy-process-deployments-config-time-event>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

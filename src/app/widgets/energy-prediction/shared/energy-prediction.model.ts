@@ -16,6 +16,7 @@
 
 export interface EnergyPredictionModel {
     prediction: (number);
+    predictionTotal: number;
     timestamp: (string);
 }
 
@@ -29,6 +30,7 @@ export interface EnergyPredictionPropertiesModel {
 
 interface EnergyPredictionColumnModel {
     prediction: (string);
+    predictionTotal: string;
     timestamp: (string);
 }
 

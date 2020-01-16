@@ -33,7 +33,6 @@ export class MultiValueComponent implements OnInit, OnDestroy {
     configured = false;
     dataReceived = 0;
     destroy = new Subscription();
-    warnstyle = '';
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
@@ -49,7 +48,6 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         this.update();
         this.registerIcons();
         this.setConfigured();
-        this.warnstyle = '{color: \'' + this.widget.properties.color + '\'}';
     }
 
     ngOnDestroy() {
@@ -128,7 +126,4 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         return m;
     }
 
-    colorStyle(): object {
-        return {'color': this.widget.properties.color};
-    }
 }

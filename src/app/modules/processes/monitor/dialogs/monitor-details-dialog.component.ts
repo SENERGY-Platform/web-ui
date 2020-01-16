@@ -17,21 +17,19 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {MonitorProcessVariableInstancesModel} from '../shared/monitor-process-variable-instances.model';
-import {MonitorProcessIncidentModel} from '../shared/monitor-process-incident.model';
+import {ProcessIncidentsModel} from '../../incidents/shared/process-incidents.model';
 
 @Component({
     templateUrl: './monitor-details-dialog.component.html',
     styleUrls: ['./monitor-details-dialog.component.css'],
 })
 export class MonitorDetailsDialogComponent implements OnInit {
-    incidents: MonitorProcessIncidentModel[] = [];
+    incidents: ProcessIncidentsModel[] = [];
 
     constructor(private dialogRef: MatDialogRef<MonitorDetailsDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: { incident: MonitorProcessIncidentModel[] }
+                @Inject(MAT_DIALOG_DATA) data: { incident: ProcessIncidentsModel[] }
     ) {
         this.incidents = data.incident;
-        console.log(this.incidents);
     }
 
     ngOnInit() {

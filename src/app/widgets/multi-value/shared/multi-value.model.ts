@@ -25,7 +25,6 @@ export interface MultiValueModel {
 export interface MultiValuePropertiesModel {
     multivaluemeasurements?: MultiValueMeasurement[];
     order?: number;
-    color?: any;
 }
 
 export interface MultiValueMeasurement {
