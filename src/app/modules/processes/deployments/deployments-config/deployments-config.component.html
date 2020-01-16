@@ -63,49 +63,8 @@
                             </table>
                         </div>
                         <div formGroupName="time_event" *ngIf="element.value.time_event !== null">
-                            <div>{{element.value.time_event.label}}</div>
-                            <table class="full-width" cellspacing="0" formGroupName="time_raw"
-                                   (change)="change(elementIndex)">
-                                <tr>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Years"
-                                                   formControlName="years">
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Months"
-                                                   formControlName="months">
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Days"
-                                                   formControlName="days">
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Hours"
-                                                   formControlName="hours">
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Minutes"
-                                                   formControlName="minutes">
-                                        </mat-form-field>
-                                    </td>
-                                    <td>
-                                        <mat-form-field class="full-width" color="accent">
-                                            <input type="number" matInput placeholder="Seconds"
-                                                   formControlName="seconds">
-                                        </mat-form-field>
-                                    </td>
-                                </tr>
-                            </table>
-
+                            <senergy-process-deployments-config-time-event
+                                    [time_event]="deploymentFormGroup.get(['elements', elementIndex, 'time_event'])"></senergy-process-deployments-config-time-event>
                         </div>
                     </div>
                 </div>
@@ -115,7 +74,8 @@
                          *ngFor="let lanesControls of deploymentFormGroup.get('lanes').controls; let elementLanesIndex = index">
                         <div formGroupName="lane" *ngIf="lanesControls.value.lane !== null">
                             <div>{{lanesControls.value.lane.label}}</div>
-                            <mat-form-field class="full-width" color="accent" *ngIf="lanesControls.value.lane.selectables.length > 1">
+                            <mat-form-field class="full-width" color="accent"
+                                            *ngIf="lanesControls.value.lane.selectables.length > 1">
                                 <mat-select placeholder="Device" required formGroupName="selectables">
                                     <mat-option
                                             *ngFor="let selectables of lanesControls.value.lane.selectables; let selectableLaneIndex = index"
@@ -133,15 +93,16 @@
                                             <tr>
                                                 <td>
                                                     <mat-form-field class="full-width" color="accent">
-                                                        <input type="text" matInput [value]="elements.value.task.label" disabled>
+                                                        <input type="text" matInput [value]="elements.value.task.label"
+                                                               disabled>
                                                     </mat-form-field>
                                                 </td>
                                                 <td formGroupName="parameter"
                                                     *ngFor="let item of elements.value.task.parameter | keyvalue; trackBy:trackByFn">
-                                                        <mat-form-field class="full-width" color="accent">
-                                                            <input type="text" matInput placeholder="{{item.key}}"
-                                                                   [formControlName]="item.key">
-                                                        </mat-form-field>
+                                                    <mat-form-field class="full-width" color="accent">
+                                                        <input type="text" matInput placeholder="{{item.key}}"
+                                                               [formControlName]="item.key">
+                                                    </mat-form-field>
                                                 </td>
                                             </tr>
                                         </table>

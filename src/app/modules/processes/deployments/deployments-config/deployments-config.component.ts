@@ -17,7 +17,6 @@
 
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {DesignerProcessModel} from '../../designer/shared/designer.model';
 import {
     DeploymentsPreparedElementModel,
     DeploymentsPreparedLaneElementModel,
@@ -72,12 +71,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 this.ready = true;
             }
         });
-    }
-
-    change(elementIndex: number): void {
-        const time_event = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'time_event']);
-        const time_raw = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'time_event', 'time_raw']);
-        time_event.patchValue({time: moment.duration(JSON.parse(JSON.stringify(time_raw.value))).toISOString()});
     }
 
     initElementsFormArray(): void {
