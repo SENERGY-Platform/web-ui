@@ -37,7 +37,7 @@ import {NameValuePair} from "../shared/dwd-pollen.model";
 
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',
-    styleUrls: ['./air-quality-edit-dialog.component.css'],
+    styleUrls: ['./air-quality-edit-dialog.component.scss'],
 })
 export class AirQualityEditDialogComponent implements OnInit {
     exports: ChartsExportMeasurementModel[] = [];
