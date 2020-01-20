@@ -16,7 +16,7 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Navigation, Router} from '@angular/router';
 import {
     DeploymentsPreparedElementModel,
     DeploymentsPreparedLaneElementModel,
@@ -35,6 +35,7 @@ import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/sha
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import * as moment from 'moment';
 import {MatSnackBar} from '@angular/material';
+import {DeploymentsModel} from '../shared/deployments.model';
 
 
 @Component({
@@ -55,11 +56,12 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 private processRepoService: ProcessRepoService,
                 private utilService: UtilService,
                 private deploymentsService: DeploymentsService,
-                private snackBar: MatSnackBar) {
+                private snackBar: MatSnackBar,
+                private router: Router) {
+        this.getRouterParams();
     }
 
     ngOnInit() {
-        this.processId = this.route.snapshot.paramMap.get('id') || '';
         this.deploy();
     }
 
@@ -300,5 +302,15 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             receive_task_event: [element.receive_task_event],
             time_event: element.time_event ? this.initTimeEventFormGroup(element.time_event) : null,
         });
+    }
+
+    private getRouterParams(): void {
+        const navigation: Navigation | null = this.router.getCurrentNavigation();
+        if (navigation !== null) {
+            if (navigation.extras.state !== undefined) {
+                const params = navigation.extras.state as {processId: string, deploymentId: string};
+                this.processId = params.processId;
+            }
+        }
     }
 }

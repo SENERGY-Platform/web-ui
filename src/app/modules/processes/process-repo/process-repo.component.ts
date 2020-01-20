@@ -31,6 +31,7 @@ import {saveAs} from 'file-saver';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {MatSnackBar} from '@angular/material';
 import {ProcessRepoConditionModel, ProcessRepoConditionsModel} from './shared/process-repo-conditions.model';
+import {Router} from '@angular/router';
 
 const grids = new Map([
     ['xs', 1],
@@ -76,7 +77,8 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 private keycloakService: KeycloakService,
                 private permissionsDialogService: PermissionsDialogService,
                 private dialogsService: DialogsService,
-                private snackBar: MatSnackBar) {
+                private snackBar: MatSnackBar,
+                private router: Router) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
 
@@ -163,6 +165,10 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                     });
             }
         });
+    }
+
+    deployProcess(processId: string): void {
+        this.router.navigateByUrl('/processes/deployments/config', {state: {processId: processId, deploymentId: ''}});
     }
 
     setIndex(event: number) {
