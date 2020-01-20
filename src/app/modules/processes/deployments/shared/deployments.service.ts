@@ -75,6 +75,12 @@ export class DeploymentsService {
         );
     }
 
+    getDeployments(deploymentId: string): Observable<DeploymentsPreparedModel | null> {
+        return this.http.get<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments/' + deploymentId).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeployments', null))
+        );
+    }
+
     postDeployments(deployment: DeploymentsPreparedModel): Observable<{status: number}> {
         return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments', deployment, {observe: 'response'}).pipe(
             map(resp => {

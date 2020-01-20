@@ -30,12 +30,11 @@ import {
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
-import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import * as moment from 'moment';
 import {MatSnackBar} from '@angular/material';
-import {DeploymentsModel} from '../shared/deployments.model';
 
 
 @Component({
@@ -47,6 +46,7 @@ import {DeploymentsModel} from '../shared/deployments.model';
 export class ProcessDeploymentsConfigComponent implements OnInit {
 
     processId = '';
+    deploymentId = '';
     deployment: DeploymentsPreparedModel | null = null;
     deploymentFormGroup!: FormGroup;
     ready = false;
@@ -62,17 +62,33 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.deploy();
+        if (this.processId !== '') {
+            this.deploymentsService.getPreparedDeployments(this.processId).subscribe((deployment: DeploymentsPreparedModel | null) => {
+                this.initFormGroup(deployment);
+            });
+        } else {
+            if (this.deploymentId !== '') {
+                this.deploymentsService.getDeployments(this.deploymentId).subscribe((deployment: DeploymentsPreparedModel | null) => {
+                    if (deployment) {
+                        deployment.id = '';
+                        deployment.name = deployment.name + '_Copy';
+                    }
+                    this.initFormGroup(deployment);
+                });
+            }
+        }
     }
 
-    deploy(): void {
-        this.deploymentsService.getPreparedDeployments(this.processId).subscribe((deployment: DeploymentsPreparedModel | null) => {
-            if (deployment !== null) {
-                this.deployment = deployment;
-                this.initElementsFormArray();
-                this.ready = true;
-            }
-        });
+    initFormGroup(deployment: DeploymentsPreparedModel | null): void {
+        if (deployment !== null) {
+            this.deployment = deployment;
+            this.initElementsFormArray();
+            this.ready = true;
+        }
+    }
+
+    compare(a: any, b: any): boolean {
+        return a && b && a.id === b.id;
     }
 
     initElementsFormArray(): void {
@@ -236,7 +252,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
 
     save(): void {
-        this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: {status: number}) => {
+        this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: { status: number }) => {
             if (resp.status === 200) {
                 this.snackBar.open('Deployment stored successfully.', undefined, {duration: 2000});
             } else {
@@ -308,8 +324,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         const navigation: Navigation | null = this.router.getCurrentNavigation();
         if (navigation !== null) {
             if (navigation.extras.state !== undefined) {
-                const params = navigation.extras.state as {processId: string, deploymentId: string};
+                const params = navigation.extras.state as { processId: string, deploymentId: string };
                 this.processId = params.processId;
+                this.deploymentId = params.deploymentId;
             }
         }
     }

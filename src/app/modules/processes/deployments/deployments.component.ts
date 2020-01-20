@@ -141,6 +141,10 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
         this.dialog.open(DeploymentsMissingDependenciesDialogComponent, dialogConfig);
     }
 
+    copyDeployment(deploymentId: string): void {
+        this.router.navigateByUrl('/processes/deployments/config', {state: {processId: '', deploymentId: deploymentId}});
+    }
+
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
