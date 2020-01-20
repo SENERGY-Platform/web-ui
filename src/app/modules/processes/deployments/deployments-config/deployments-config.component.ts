@@ -71,7 +71,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 this.deploymentsService.getDeployments(this.deploymentId).subscribe((deployment: DeploymentsPreparedModel | null) => {
                     if (deployment) {
                         deployment.id = '';
-                        deployment.name = deployment.name + '_Copy';
                     }
                     this.initFormGroup(deployment);
                 });
