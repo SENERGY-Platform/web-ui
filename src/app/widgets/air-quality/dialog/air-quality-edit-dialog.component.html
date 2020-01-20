@@ -72,6 +72,7 @@
                 <button mat-button matStepperNext>Next</button>
             </div>
         </mat-step>
+
         <mat-step label="Select additional measurements">
             <div>
                 <mat-form-field color="accent">
@@ -101,20 +102,27 @@
                 <button mat-button matStepperNext>Next</button>
             </div>
         </mat-step>
+
         <mat-step label="Configure additional measurements">
             <mat-accordion>
                 <div *ngFor="let option of measurements">
-                    <mat-expansion-panel *ngIf="option.is_enabled || false">
+                    <mat-expansion-panel *ngIf="option.is_enabled || option.can_web">
                         <mat-expansion-panel-header class="right-aligned-header">
                             <mat-panel-title>
                                 <div [innerHTML]="option.name_html"></div>
                             </mat-panel-title>
                             <mat-panel-description *ngIf="option.description_html !== undefined">
-                                <div [innerHTML]="option.description_html"></div>
+                                <span [innerHTML]="option.description_html"></span>
+                                <span *ngIf="option.can_web">&nbsp;
+                                    <mat-icon color="accent" matTooltip="Outside data available online">cloud</mat-icon>
+                                </span>
                             </mat-panel-description>
                         </mat-expansion-panel-header>
                         <ng-template matExpansionPanelContent>
                             <div>
+                                <mat-slide-toggle [(ngModel)]="option.is_enabled">Enable inside measurement</mat-slide-toggle>
+                            </div>
+                            <div *ngIf="option.is_enabled">
                                 <mat-form-field color="accent">
                                     <mat-label>Export</mat-label>
                                     <mat-select required placeholder="Export" [(ngModel)]="option.export"
@@ -124,7 +132,6 @@
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
-
                                 <mat-form-field color="accent">
                                     <mat-label>Value</mat-label>
                                     <mat-select required placeholder="Value" [(ngModel)]="option.data.column"
@@ -135,7 +142,38 @@
                                     </mat-select>
                                 </mat-form-field>
                             </div>
+                            <div>
 
+                            </div>
+                            <div>
+                                <mat-slide-toggle [(ngModel)]="option.has_outside">Enable outside measurement</mat-slide-toggle>
+                            </div>
+                            <div *ngIf="option.has_outside">
+                                <div *ngIf="option.can_web" class="help-text color-warn">
+                                    Enabling outside measurement will override web data
+                                </div>
+                                <div>
+                                    <mat-form-field color="accent">
+                                        <mat-label>Export</mat-label>
+                                        <mat-select required placeholder="Export" [(ngModel)]="option.outsideExport"
+                                                    [compareWith]="compareExports">
+                                            <mat-option *ngFor="let export of exports" [value]="export">
+                                                {{export.name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field color="accent">
+                                        <mat-label>Value</mat-label>
+                                        <mat-select required placeholder="Value" [(ngModel)]="option.outsideData.column"
+                                                    [compareWith]="compareExportValueModels">
+                                            <mat-option *ngFor="let value of option.outsideExport?.values || []" [value]="value">
+                                                {{value.Name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            </div>
                             <div>
                                 <mat-form-field color="accent" class="boundary-input-field">
                                     <input type="number" matInput placeholder="Min Warning"
@@ -161,10 +199,7 @@
                                 <span [innerHTML]="option.unit_html" class="unit"></span>
                             </div>
                             <div class="help-text color-accent" matTooltip=
-                                    "If the measured value is below the Min Warning value, a warning will be shown.
-                                If it's below the Min Critical value, a severe warning will be shown.
-                                If it's above a Max value warnings will be shown accordingly.
-                                Default values are our suggestions.">
+                                    "Values above or below these thresholds will result in warnings or critical warnings">
                                 What do those numbers mean?
                             </div>
                         </ng-template>

@@ -59,31 +59,46 @@ export class AirQualityService {
 
     readData(measurement: MeasurementModel) {
         return new Observable<void>((observer) => {
-            this.getData(measurement).
-            subscribe((resp: ChartsExportModel) => {
-                observer.next(
-                    this.extractData(resp, measurement)
-                );
-                observer.complete();
+            this.getData(measurement, false).subscribe((resp: ChartsExportModel) => {
+                this.extractData(resp, measurement, false);
+                if (measurement.has_outside) {
+                    this.getData(measurement, true).subscribe((resp2: ChartsExportModel) => {
+                        this.extractData(resp2, measurement, true);
+                        observer.next();
+                        observer.complete();
+                    });
+                } else {
+                    observer.next();
+                    observer.complete();
+                }
             });
         });
     }
 
-    private extractData(influxData: ChartsExportModel, measurement: MeasurementModel) {
+    private extractData(influxData: ChartsExportModel, measurement: MeasurementModel, outside: boolean) {
         if (influxData === undefined || influxData.results === undefined || influxData.results.length === 0
             || influxData.results[0].series === undefined || influxData.results[0].series.length === 0) {
             console.error('Got empty results from Influx');
             return;
         }
         const series = influxData.results[0].series[0];
-        if (measurement.data && measurement.data.column) {
-            measurement.data.value = this.getValue(measurement.data.column.Name, series) as number;
+        if (outside) {
+            if (measurement.outsideData && measurement.outsideData.column) {
+                measurement.outsideData.value = this.getValue(measurement.outsideData.column.Name, series) as number;
+            }
+        } else {
+            if (measurement.data && measurement.data.column) {
+                measurement.data.value = this.getValue(measurement.data.column.Name, series) as number;
+            }
         }
     }
 
-    private getData(measurement: MeasurementModel): Observable<ChartsExportModel> {
+    private getData(measurement: MeasurementModel, outside: boolean): Observable<ChartsExportModel> {
+        const id = outside ?
+            (measurement.outsideExport ? measurement.outsideExport.id : '') :
+            (measurement.export ? measurement.export.id : '');
         return this.http.get<ChartsExportModel>(
-            environment.influxAPIURL + '/measurement/' + (measurement.export ? measurement.export.id : '') + '?limit=1').pipe(
+            environment.influxAPIURL + '/measurement/' + id + '?limit=1').pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as ChartsExportModel))
         );

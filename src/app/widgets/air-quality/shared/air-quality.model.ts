@@ -37,14 +37,16 @@ export interface MeasurementModel {
     short_name: (string);
     description_html?: (string);
     is_enabled?: (boolean);
+    has_outside?: (boolean);
     is_warning?: (boolean);
     is_critical?: (boolean);
-    tooltip?: (string);
+    can_web?: boolean;
     export?: (ChartsExportMeasurementModel);
+    outsideExport?: (ChartsExportMeasurementModel);
     unit_html: (string);
-    data?: (SensorDataModel);
+    data: (SensorDataModel);
+    outsideData: (SensorDataModel);
     boundaries: (BoundaryModel);
-    ubaData?: (UBAData);
     pollenData?: (DWDSinglePollenForecast);
 }
 

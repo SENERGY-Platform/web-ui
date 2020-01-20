@@ -173,5 +173,18 @@ export class UBAService {
             });
         });
     }
+
+    getUBAStationCapabilities(station_id: number): Observable<string[]> {
+        return new Observable<string[]>(obs => {
+            this.getUBAComponents().subscribe(components => {
+                this.getUBAData(station_id, components).subscribe(ubadata => {
+                    const rv: string[] = [];
+                    ubadata.forEach(u => rv.push(u.short_name));
+                    obs.next(rv);
+                    obs.complete();
+                });
+            });
+        });
+    }
 }
 
