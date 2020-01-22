@@ -124,36 +124,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.deviceInstancesService.openDeviceCreateDialog(deviceType);
     }
 
-    private updateDeviceType(deviceTypeResp: DeviceTypeModel, deviceTypeInput: DeviceTypePermSearchModel) {
-        this.deviceTypeService.updateDeviceType(deviceTypeResp).subscribe((deviceTypeUpdated: DeviceTypeModel | null) => {
-            if (deviceTypeUpdated) {
-                const index = this.deviceTypes.indexOf(deviceTypeInput);
-                this.deviceTypes[index] = this.convertDeviceTypes(deviceTypeUpdated);
-                this.snackBar.open('Device type updated successfully.', undefined, {duration: 2000});
-            } else {
-                this.snackBar.open('Error while updating the device type!', undefined, {duration: 2000});
-            }
-        });
-    }
-
-    private convertDeviceTypes(deviceTypeIn: DeviceTypeModel): DeviceTypePermSearchModel {
-        return {
-            id: deviceTypeIn.id,
-            name: deviceTypeIn.name || '',
-            services: [],
-            image: deviceTypeIn.image,
-            device_class: deviceTypeIn.device_class.name,
-            description: deviceTypeIn.description,
-            creator: 'unknown',
-            permissions: {
-                a: false,
-                x: false,
-                r: false,
-                w: false,
-            }
-        };
-    }
-
     private initSearchAndGetDeviceTypes() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.reset();
