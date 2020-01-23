@@ -110,6 +110,18 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         });
     }
 
+    editDeviceType(deviceTypeId: string): void {
+        this.router.navigate(['devices/devicetypesoverview/devicetypes/' + deviceTypeId], {
+            queryParams: {function: 'edit'},
+        });
+    }
+
+    detailsDeviceType(deviceTypeId: string): void {
+        this.router.navigate(['devices/devicetypesoverview/devicetypes/' + deviceTypeId], {
+            queryParams: {function: 'details'},
+        });
+    }
+
     newInstance(deviceType: DeviceTypePermSearchModel): void {
         this.deviceInstancesService.openDeviceCreateDialog(deviceType);
     }

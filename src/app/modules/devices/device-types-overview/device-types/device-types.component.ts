@@ -285,18 +285,13 @@ export class DeviceTypesComponent implements OnInit {
                 if (deviceType !== null) {
                     this.initFirstFormGroup(deviceType);
                     this.initSecondFormGroup(deviceType);
-
-                    if (!this.editable) {
-                        this.firstFormGroup.disable();
-                        this.secondFormGroup.disable();
-                    }
                 }
 
-                switch (this.queryParamFunction) {
-                    case 'copy': {
-                        this.deleteIds();
-                        break;
-                    }
+                // after loading data and init first and second form group
+                // delete ids if function is copy
+
+                if (this.queryParamFunction === 'copy') {
+                    this.deleteIds();
                 }
             });
         }
@@ -554,6 +549,22 @@ export class DeviceTypesComponent implements OnInit {
     private getRouterParams(): void {
         this.id = this.route.snapshot.paramMap.get('id') || '';
         this.queryParamFunction = this.route.snapshot.queryParamMap.get('function') || '';
+
+        switch (this.queryParamFunction) {
+            case 'copy': {
+                break; // ids are deleted later
+            }
+            case 'edit': {
+                break; // do nothing special
+            }
+            case 'details': {
+                this.editable = false; // hide save tab
+                break;
+            }
+            default: {
+                this.editable = false;
+            }
+        }
     }
 
     private deleteIds(): void {
