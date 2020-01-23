@@ -24,7 +24,6 @@ import {HubModel, NetworksModel} from './networks.model';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {NetworksEditDialogComponent} from '../dialogs/networks-edit-dialog.component';
 import {NetworksHistoryModel} from './networks-history.model';
-import {DialogsService} from '../../../../core/services/dialogs.service';
 import {NetworksClearDialogComponent} from '../dialogs/networks-clear-dialog.component';
 
 @Injectable({
@@ -35,7 +34,6 @@ export class NetworksService {
     constructor(private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService,
                 private dialog: MatDialog,
-                private dialogsService: DialogsService,
                 public snackBar: MatSnackBar) {
     }
 
