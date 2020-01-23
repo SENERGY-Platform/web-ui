@@ -23,6 +23,7 @@ export interface ChartsExportPropertiesModel {
         vAxis?: ExportValueModel;
         vAxisLabel?: string;
         measurement?: ChartsExportMeasurementModel;
+        math?: string;
 }
 
 export interface ChartsExportMeasurementModel {

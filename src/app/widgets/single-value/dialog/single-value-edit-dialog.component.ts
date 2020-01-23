@@ -48,6 +48,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     type: string = '';
     format: string = '';
     threshold = 128;
+    math = '';
 
     constructor(private dialogRef: MatDialogRef<SingleValueEditDialogComponent>,
                 private deploymentsService: DeploymentsService,
@@ -70,6 +71,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             this.type = widget.properties.type ? widget.properties.type : this.type;
             this.format =  widget.properties.format ? widget.properties.format : this.format;
             this.threshold = widget.properties.threshold ? widget.properties.threshold : this.threshold;
+            this.math = widget.properties.math ? widget.properties.math : this.math;
             this.formControl.setValue(this.widget.properties.measurement || '');
             this.initDeployments();
         });
@@ -116,6 +118,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.widget.properties.type = this.type;
         this.widget.properties.format = this.format;
         this.widget.properties.threshold = this.threshold;
+        this.widget.properties.math = this.math;
 
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
