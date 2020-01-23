@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders, HttpResponseBase} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../../../environments/environment';
 import {Observable} from 'rxjs';
 import {catchError, map} from 'rxjs/internal/operators';
@@ -23,7 +23,6 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {DeploymentsModel} from './deployments.model';
 import {DeploymentsDefinitionModel} from './deployments-definition.model';
 import {DeploymentsMissingDependenciesModel} from './deployments-missing-dependencies.model';
-import {DesignerProcessModel} from '../../designer/shared/designer.model';
 import {DeploymentsPreparedModel} from './deployments-prepared.model';
 
 @Injectable({

@@ -21,12 +21,11 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {HubModel, NetworksModel} from './networks.model';
-import {MatDialog, MatDialogConfig, MatDialogRef, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {NetworksEditDialogComponent} from '../dialogs/networks-edit-dialog.component';
 import {NetworksHistoryModel} from './networks-history.model';
 import {DialogsService} from '../../../../core/services/dialogs.service';
 import {NetworksClearDialogComponent} from '../dialogs/networks-clear-dialog.component';
-import {DeviceInstancesUpdateModel} from '../../device-instances/shared/device-instances-update.model';
 
 @Injectable({
     providedIn: 'root'
