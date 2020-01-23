@@ -18,7 +18,7 @@
 import {Component, OnInit} from '@angular/core';
 import {
     DeviceTypeAspectModel,
-    DeviceTypeContentModel,
+    DeviceTypeContentModel, DeviceTypeContentVariableModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel, DeviceTypeFunctionType,
     DeviceTypeModel,
@@ -32,11 +32,10 @@ import {DeviceTypeService} from '../shared/device-type.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
 import {jsonValidator} from '../../../../core/validators/json.validator';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
 import {util} from 'jointjs';
 import uuid = util.uuid;
-import {ConceptsService} from '../../concepts/shared/concepts.service';
 import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
 
 const controllingIndex = 0;
@@ -57,19 +56,21 @@ export class DeviceTypesComponent implements OnInit {
     editable = false;
     keys = Object.keys;
     deviceTypeFunctionType = functionTypes;
-    functions: DeviceTypeFunctionModel[] = [];
     measuringFunctions: DeviceTypeFunctionModel[] = [];
     controllingFunctions: DeviceTypeFunctionModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     serializations: string[] = ['json', 'xml'];
     id = '';
+    queryParamFunction = '';
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
                 private dialog: MatDialog,
                 private snackBar: MatSnackBar,
-                private route: ActivatedRoute) {
+                private route: ActivatedRoute,
+                private router: Router) {
         this.editable = true;
+        this.getRouterParams();
     }
 
     ngOnInit() {
@@ -279,7 +280,6 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private loadDataIfIdExists() {
-        this.id = this.route.snapshot.paramMap.get('id') || '';
         if (this.id !== '') {
             this.deviceTypeService.getDeviceType(this.id).subscribe((deviceType: DeviceTypeModel | null) => {
                 if (deviceType !== null) {
@@ -289,6 +289,13 @@ export class DeviceTypesComponent implements OnInit {
                     if (!this.editable) {
                         this.firstFormGroup.disable();
                         this.secondFormGroup.disable();
+                    }
+                }
+
+                switch (this.queryParamFunction) {
+                    case 'copy': {
+                        this.deleteIds();
+                        break;
                     }
                 }
             });
@@ -391,10 +398,32 @@ export class DeviceTypesComponent implements OnInit {
             name: [protocolSegment.name],
             serialization: [content.serialization],
             content_variable_raw: [JSON.stringify(content.content_variable, null, 5), jsonValidator(true)],
-            content_variable: [content.content_variable],
+            content_variable: content.content_variable ? this.createContentVariableGroup(content.content_variable) : '',
             protocol_segment_id: [protocolSegment.id],
             show: [content.protocol_segment_id ? true : false],
         });
+    }
+
+    private createContentVariableGroup(contentVariable: DeviceTypeContentVariableModel): FormGroup {
+        return this._formBuilder.group({
+            id: [contentVariable.id],
+            name: [contentVariable.name],
+            type: [contentVariable.type],
+            characteristic_id: [contentVariable.characteristic_id],
+            value: [contentVariable.value],
+            sub_content_variables: contentVariable.sub_content_variables ? this.createContentSubVariableArray(contentVariable.sub_content_variables) : null,
+            serialization_options: [contentVariable.serialization_options],
+        });
+    }
+
+    private createContentSubVariableArray(subContentVariables: DeviceTypeContentVariableModel[]): FormArray {
+        const array: FormGroup[] = [];
+
+        subContentVariables.forEach((subContentVariable: DeviceTypeContentVariableModel) => {
+            array.push(this.createContentVariableGroup(subContentVariable));
+        });
+
+        return this._formBuilder.array(array);
     }
 
     private checkIfDeviceClassNameExists(name: string): number {
@@ -520,5 +549,46 @@ export class DeviceTypesComponent implements OnInit {
 
     private generateUUID(type: string): string {
         return 'urn:infai:ses:' + type + ':' + uuid();
+    }
+
+    private getRouterParams(): void {
+        this.id = this.route.snapshot.paramMap.get('id') || '';
+        this.queryParamFunction = this.route.snapshot.queryParamMap.get('function') || '';
+    }
+
+    private deleteIds(): void {
+        const emptyId = {'id': ''};
+        this.firstFormGroup.patchValue(emptyId);
+        const services = <FormArray>this.secondFormGroup.controls['services'];
+        services.controls.forEach((service) => {
+            service.patchValue(emptyId);
+            clearContent(<FormArray>service.get('inputs'));
+            clearContent(<FormArray>service.get('outputs'));
+        });
+
+        function clearContent(contents: FormArray) {
+            if (contents) {
+                contents.controls.forEach(content => {
+                    const contentFormGroup = <FormGroup>content;
+                    contentFormGroup.patchValue(emptyId);
+                    const contentVariable = <FormGroup>contentFormGroup.get('content_variable');
+                    if (contentVariable.value !== '' && contentVariable.controls['id']) {
+                        contentVariable.removeControl('id');
+                        clearContentVariable(<FormArray>contentVariable.get('sub_content_variables'));
+                        contentFormGroup.patchValue({'content_variable_raw': JSON.stringify(contentVariable.value, null, 5)});
+                    }
+                });
+            }
+        }
+
+        function clearContentVariable(subContentVariables: FormArray) {
+            if (subContentVariables.length > 0) {
+                subContentVariables.controls.forEach( (subContentVariable: AbstractControl) => {
+                    const subContentVariableFormGroup = <FormGroup>subContentVariable;
+                    subContentVariableFormGroup.removeControl('id');
+                    clearContentVariable(<FormArray>subContentVariableFormGroup.get('sub_content_variables'));
+                });
+            }
+        }
     }
 }

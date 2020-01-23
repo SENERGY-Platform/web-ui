@@ -25,6 +25,7 @@ import {DeviceTypeContentModel, DeviceTypeModel, DeviceTypeServiceModel} from '.
 import {MatSnackBar} from '@angular/material';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {Router} from '@angular/router';
 
 const grids = new Map([
     ['xs', 1],
@@ -59,7 +60,8 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
                 private deviceTypeService: DeviceTypeService,
                 private snackBar: MatSnackBar,
                 private deviceInstancesService: DeviceInstancesService,
-                private dialogsService: DialogsService) {
+                private dialogsService: DialogsService,
+                private router: Router) {
     }
 
     ngOnInit() {
@@ -102,22 +104,10 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         });
     }
 
-    private resetIds(deviceType: DeviceTypeModel): DeviceTypeModel {
-        deviceType.id = '';
-        deviceType.services.forEach((service: DeviceTypeServiceModel) => {
-            service.id = '';
-            if (service.inputs) {
-                service.inputs.forEach((serviceInput: DeviceTypeContentModel) => {
-                    serviceInput.id = '';
-                });
-            }
-            if (service.outputs) {
-                service.outputs.forEach((serviceOutput: DeviceTypeContentModel) => {
-                    serviceOutput.id = '';
-                });
-            }
+    copyDeviceType(deviceTypeId: string): void {
+        this.router.navigate(['devices/devicetypesoverview/devicetypes/' + deviceTypeId], {
+            queryParams: {function: 'copy'},
         });
-        return deviceType;
     }
 
     newInstance(deviceType: DeviceTypePermSearchModel): void {
