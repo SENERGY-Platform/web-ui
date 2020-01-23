@@ -56,9 +56,4 @@ export class DateTimeEventConfigComponent implements OnInit {
         date.setMinutes(this.minute.value);
         return {iso: date.toISOString(), text: date.toLocaleString(this.localeId)};
     }
-
-    private isoToText(iso: string) {
-        console.log('todo: interpret cycle-event-config as text');
-        return iso;
-    }
 }
