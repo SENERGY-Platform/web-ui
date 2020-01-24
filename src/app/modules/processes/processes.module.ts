@@ -82,7 +82,7 @@ const processDeployments = {
     data: {header: 'Processes'}
 };
 const processDeploymentsConfig = {
-    path: 'processes/deployments/:id',
+    path: 'processes/deployments/config',
     pathMatch: 'full',
     component: ProcessDeploymentsConfigComponent,
     data: {header: 'Processes'}

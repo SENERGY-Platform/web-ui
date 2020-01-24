@@ -33,7 +33,7 @@ import {Geoname} from '../shared/geonames.model';
 import {FormControl} from '@angular/forms';
 import {map, startWith} from 'rxjs/operators';
 import {from, Observable} from 'rxjs';
-import {NameValuePair} from "../shared/dwd-pollen.model";
+import {NameValuePair} from '../shared/dwd-pollen.model';
 
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',
@@ -48,7 +48,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     changeLocation = false;
     name = ' ';
     emptyExportValueModel: ExportValueModel = {InstanceID: '', Name: '', Path: '', Type: ''};
-    emptyDataModel: SensorDataModel = {column: this.emptyExportValueModel, value: 0};
+    emptyDataModel: SensorDataModel = {column: this.emptyExportValueModel, value: NaN};
     measurements: MeasurementModel[] = [
         {
             name_html: 'PM10',
@@ -56,6 +56,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Particulate matter up to 10μm',
             unit_html: 'μg/m<sup>3</sup>',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 40}, critical: {lower: 0, upper: 50}}
         },
         {
@@ -64,14 +66,18 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Particulate matter up to 2.5μm',
             unit_html: 'μg/m<sup>3</sup>',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 25}, critical: {lower: 0, upper: 30}}
         },
         {
             name_html: 'PM1',
             short_name: 'PM1',
-            description_html: 'Particulate matter up to 2.5μm',
+            description_html: 'Particulate matter up to 1μm',
             unit_html: 'μg/m<sup>3</sup>',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 0}, critical: {lower: 0, upper: 0}}
         },
         {
@@ -80,6 +86,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Carbon Dioxide',
             unit_html: 'ppm',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 1000}, critical: {lower: 0, upper: 5000}}
         },
         {
@@ -88,6 +96,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Oxygen',
             unit_html: '%',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 19, upper: 21}, critical: {lower: 18, upper: 25}}
         },
         {
@@ -96,6 +106,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Sulfur Dioxide',
             unit_html: 'μg/m<sup>3</sup>',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 0}, critical: {lower: 1, upper: 0}}
         },
         {
@@ -103,6 +115,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'CH4',
             description_html: 'Methane',
             unit_html: '%', data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 0}, critical: {lower: 1, upper: 0}}
         },
         {
@@ -111,6 +125,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Nitrogen Dioxide',
             unit_html: 'μg/m<sup>3</sup>',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 40}, critical: {lower: 0, upper: 200}}
         },
         {
@@ -119,6 +135,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Carbon Monoxide',
             unit_html: 'μg/m<sup>3</sup>',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 8}, critical: {lower: 0, upper: 35}}
         },
         {
@@ -127,6 +145,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Ozone',
             unit_html: 'μg/m<sup>3</sup>',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 0}, critical: {lower: 0, upper: 180}}
         },
         {
@@ -135,6 +155,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Radon',
             unit_html: 'Bq/m<sup>3</sup>',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 250}, critical: {lower: 0, upper: 1000}}
         },
         {
@@ -143,6 +165,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'relative Humidity',
             unit_html: '%',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 40, upper: 50}, critical: {lower: 30, upper: 70}}
         },
         {
@@ -151,6 +175,9 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Temperature',
             unit_html: '°C',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
+            can_web: true,
             boundaries: {warn: {lower: 20, upper: 22}, critical: {lower: 18, upper: 26}}
         },
         {
@@ -158,6 +185,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'Noise',
             unit_html: 'dB',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 40}, critical: {lower: 0, upper: 65}}
         },
         {
@@ -166,6 +195,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             description_html: 'Volatile Organic Compounds',
             unit_html: 'mg/m<sup>3</sup>',
             data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 10}}
         },
     ];
@@ -188,48 +219,64 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'Ambrosia',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
+            data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
         },
         {
             name_html: 'Birke',
             short_name: 'Birke',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
+            data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
         },
         {
             name_html: 'Erle',
             short_name: 'Erle',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
+            data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
         },
         {
             name_html: 'Hasel',
             short_name: 'Hasel',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
+            data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
         },
         {
             name_html: 'Beifuss',
             short_name: 'Beifuss',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
+            data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
         },
         {
             name_html: 'Esche',
             short_name: 'Esche',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
+            data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
         },
         {
             name_html: 'Roggen',
             short_name: 'Roggen',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
+            data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
         },
         {
             name_html: 'Graeser',
             short_name: 'Graeser',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
+            data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
         },
     ];
     pollenLevel: NameValuePair[];
@@ -304,7 +351,6 @@ export class AirQualityEditDialogComponent implements OnInit {
         });
     }
 
-
     close(): void {
         this.dialogRef.close();
     }
@@ -329,7 +375,6 @@ export class AirQualityEditDialogComponent implements OnInit {
             }
         });
     }
-
 
     displayFn(input?: ChartsExportMeasurementModel): string | undefined {
         return input ? input.name : undefined;
@@ -397,6 +442,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                 this.ubaStations = resp;
                 this.sortUBAStations();
                 this.selectClosestUBAStation();
+                this.mergeUBAStationCapabilities();
             });
         } else {
             this.sortUBAStations();
@@ -416,6 +462,23 @@ export class AirQualityEditDialogComponent implements OnInit {
         } else {
             this.ubaStationSelected = this.invalidUbaStation;
         }
+    }
+
+    private mergeUBAStationCapabilities() {
+        this.ubaService.getUBAStationCapabilities(this.ubaStationSelected.station_id).subscribe(short_names => {
+            this.measurements.forEach(m => {
+                if (m.short_name !== 'Temp.') {
+                    const idx = short_names.findIndex(short_name => m.short_name === short_name);
+                    if (idx === -1) {
+                        m.can_web = false;
+                    } else {
+                        m.can_web = true;
+                    }
+                } else {
+                    m.can_web = true;
+                }
+            });
+        });
     }
 
     hasValidUBAStation(): boolean {

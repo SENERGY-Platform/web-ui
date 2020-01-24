@@ -24,7 +24,7 @@
         </mat-form-field>
 
         <mat-form-field color="accent">
-            <mat-label>Choose Deployment</mat-label>
+            <mat-label>Choose Export</mat-label>
             <input type="text" matInput [formControl]="formControl"
                    [matAutocomplete]="auto" required>
             <mat-error *ngIf="formControl.hasError('valid') === false">
@@ -54,6 +54,11 @@
             <mat-error *ngIf="chartType.errors">
                 Please choose a Chart Type!
             </mat-error>
+        </mat-form-field>
+
+        <mat-form-field color="accent">
+            <mat-label>Math</mat-label>
+            <input type="text" matInput placeholder="Math" [(ngModel)]="widget.properties.math">
         </mat-form-field>
 
         <table cellspacing="0">

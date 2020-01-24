@@ -31,7 +31,7 @@
                 <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
                                *ngIf="deviceTypes.length > 0">
                     <mat-grid-tile class="mat-elevation-z1" *ngFor="let deviceType of deviceTypes; let i = index">
-                        <div class="background" fxFill>
+                        <div class="background">
                             <img class="device-icon" src="{{deviceType.image}}">
                         </div>
                         <mat-grid-tile-footer>
@@ -47,11 +47,11 @@
                                         </button>
                                         <mat-menu #menu="matMenu" [overlapTrigger]="false">
                                             <button mat-menu-item [disabled]="!deviceType.permissions.w"
-                                                    routerLink="/devices/devicetypesoverview/devicetypes/{{deviceType.id}}">
+                                                    (click)="editDeviceType(deviceType.id)">
                                                 <mat-icon>edit</mat-icon>
                                                 <span>Edit</span>
                                             </button>
-                                            <button mat-menu-item (click)="copy(deviceType)">
+                                            <button mat-menu-item (click)="copyDeviceType(deviceType.id)">
                                                 <mat-icon>content_copy</mat-icon>
                                                 <span>Copy</span>
                                             </button>
@@ -59,7 +59,7 @@
                                                 <mat-icon>add_box</mat-icon>
                                                 <span>New instance</span>
                                             </button>
-                                            <button mat-menu-item (click)="details(deviceType)">
+                                            <button mat-menu-item (click)="detailsDeviceType(deviceType.id)">
                                                 <mat-icon>info</mat-icon>
                                                 <span>Details</span>
                                             </button>

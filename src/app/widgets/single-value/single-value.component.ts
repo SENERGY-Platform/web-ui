@@ -72,7 +72,11 @@ export class SingleValueComponent implements OnInit, OnDestroy {
                 this.ready = false;
                 this.dataReady = false;
                 this.singleValueService.getSingleValue(this.widget).subscribe((devicesStatus: SingleValueModel) => {
-                    this.devicesStatus = devicesStatus;
+                    if (this.widget.properties.math !== '' && typeof devicesStatus.value === 'number') {
+                            this.devicesStatus.value = eval(devicesStatus.value + (this.widget.properties.math || '+ 0'));
+                    } else {
+                        this.devicesStatus = devicesStatus;
+                    }
                     this.ready = true;
                     this.dataReady = true;
                 }, () => {

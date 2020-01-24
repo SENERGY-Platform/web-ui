@@ -94,7 +94,7 @@ export class ChartsExportService {
                             widget.properties.chartType || '',
                             widget.properties.hAxisLabel || '',
                             widget.properties.vAxisLabel || '',
-                            this.setData(widget.properties.vAxis, resp.results[0].series[0].values, vAxisIndex)));
+                            this.setData(widget.properties.vAxis, resp.results[0].series[0].values, vAxisIndex, widget.properties.math || '')));
                     }
                 }
                 observer.complete();
@@ -102,11 +102,12 @@ export class ChartsExportService {
         });
     }
 
-    private setData(vAxis: ExportValueModel | undefined, exportData: (string | number)[][], vAxisIndex: number): ChartDataTableModel {
+    private setData(vAxis: ExportValueModel | undefined, exportData: (string | number)[][], vAxisIndex: number, math: string): ChartDataTableModel {
         const dataTable = new ChartDataTableModel([['time', vAxis ? vAxis.Name : '']]);
         exportData.forEach((item: (string | number)[]) => {
                 const date = new Date(<string>item[0]);
-                dataTable.data.push([date, item[vAxisIndex]]);
+                const value = math !== '' ? eval(<number>item[vAxisIndex] + math) : <number>item[vAxisIndex];
+                dataTable.data.push([date, value]);
             }
         );
         return dataTable;

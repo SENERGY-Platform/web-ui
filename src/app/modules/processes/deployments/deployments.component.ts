@@ -22,14 +22,12 @@ import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';
 import {DeploymentsService} from './shared/deployments.service';
-import {DeploymentsModel, DeploymentsOfflineReasonsModel} from './shared/deployments.model';
+import {DeploymentsModel} from './shared/deployments.model';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {ClipboardService} from 'ngx-clipboard';
 import {environment} from '../../../../environments/environment';
-import {NetworksModel} from '../../devices/networks/shared/networks.model';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {DeleteDialogComponent} from '../../../core/dialogs/delete-dialog.component';
 import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deployments-missing-dependencies-dialog.component';
 
 const grids = new Map([
@@ -139,6 +137,10 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
             id: id
         };
         this.dialog.open(DeploymentsMissingDependenciesDialogComponent, dialogConfig);
+    }
+
+    copyDeployment(deploymentId: string): void {
+        this.router.navigateByUrl('/processes/deployments/config', {state: {processId: '', deploymentId: deploymentId}});
     }
 
     private initGridCols(): void {

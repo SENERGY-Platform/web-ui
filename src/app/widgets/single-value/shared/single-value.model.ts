@@ -21,5 +21,6 @@ export interface SingleValueModel {
 export interface SingleValuePropertiesModel {
     type?: string;
     format?: string;
+    math?: string;
 }
 

@@ -24,7 +24,7 @@
         </mat-form-field>
 
         <mat-form-field color="accent">
-            <mat-label>Choose Deployment</mat-label>
+            <mat-label>Choose Export</mat-label>
             <input type="text" matInput [formControl]="formControl"
                    [matAutocomplete]="auto" required>
             <mat-error *ngIf="formControl.hasError('valid') === false">
@@ -73,6 +73,12 @@
                         <input type="text" matInput placeholder="Format" [(ngModel)]="format" [disabled]="type === 'String'">
                     </mat-form-field>
                 </td>
+            </tr>
+            <tr>
+                <mat-form-field color="accent">
+                    <mat-label>Math</mat-label>
+                    <input type="text" matInput [(ngModel)]="math">
+                </mat-form-field>
             </tr>
             <tr>
                 <mat-form-field color="accent">

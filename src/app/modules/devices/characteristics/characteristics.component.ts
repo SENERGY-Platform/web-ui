@@ -27,7 +27,6 @@ import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-search.model';
-import {ConceptsEditDialogComponent} from '../concepts/dialogs/concepts-edit-dialog.component';
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
 
 const grids = new Map([

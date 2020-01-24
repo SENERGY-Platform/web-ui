@@ -84,7 +84,7 @@
                                                 <mat-icon>insert_photo</mat-icon>
                                                 <span>Download SVG</span>
                                             </button>
-                                            <button mat-menu-item routerLink="/processes/deployments/{{item.id}}"
+                                            <button mat-menu-item (click)="deployProcess(item.id)"
                                                     [disabled]="item.permissions.x === false">
                                                 <mat-icon>publish</mat-icon>
                                                 <span>Deploy</span>

@@ -1,6 +1,7 @@
 {
     "extends": "../tslint.json",
     "rules": {
+        "no-eval": false,
         "directive-selector": [
             true,
             "attribute",

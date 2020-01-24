@@ -52,7 +52,8 @@
                                             (click)="run(item.definition_id)">
                                         <mat-icon>play_arrow</mat-icon>
                                     </button>
-                                    <button mat-icon-button matTooltip="Copy Deployment" class="color-accent">
+                                    <button mat-icon-button matTooltip="Copy Deployment" class="color-accent"
+                                    (click)="copyDeployment(item.id)">
                                         <mat-icon>content_copy</mat-icon>
                                     </button>
                                     <button mat-icon-button matTooltip="Delete" class="color-accent"
