@@ -30,7 +30,8 @@
             <mat-error *ngIf="formControl.hasError('valid') === false">
                 Please make a selection!
             </mat-error>
-            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="optionSelected($event)" (closed)="autoCompleteClosed()">
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
+                              (optionSelected)="optionSelected($event)" (closed)="autoCompleteClosed()">
                 <mat-option *ngFor="let option of filteredExports | async" [value]="option">
                     {{option.name}}
                 </mat-option>
@@ -39,22 +40,34 @@
 
         <mat-form-field color="accent">
             <mat-label>Interval</mat-label>
-            <input type="number" matInput placeholder="Interval" [(ngModel)]="widget.properties.interval" required #interval="ngModel">
+            <input type="number" matInput placeholder="Interval" [(ngModel)]="widget.properties.interval" required
+                   #interval="ngModel">
             <mat-error *ngIf="interval.errors">
                 Please set a interval!
             </mat-error>
         </mat-form-field>
 
-        <mat-form-field color="accent">
-            <mat-select [(ngModel)]="widget.properties.chartType" placeholder="Chart Type" required #chartType="ngModel">
-                <mat-option *ngFor="let chartType of chartTypes" [value]="chartType">
-                    {{chartType}}
-                </mat-option>
-            </mat-select>
-            <mat-error *ngIf="chartType.errors">
-                Please choose a Chart Type!
-            </mat-error>
-        </mat-form-field>
+        <table class="full-width" cellspacing="0">
+            <tr>
+                <td>
+                    <mat-form-field color="accent" class="full-width">
+                        <mat-select [(ngModel)]="widget.properties.chartType" placeholder="Chart Type" required
+                                    #chartType="ngModel">
+                            <mat-option *ngFor="let chartType of chartTypes" [value]="chartType">
+                                {{chartType}}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="chartType.errors">
+                            Please choose a Chart Type!
+                        </mat-error>
+                    </mat-form-field>
+                </td>
+                <td *ngIf="widget.properties.chartType === 'LineChart'">
+                    <mat-slide-toggle [(ngModel)]="widget.properties.curvedFunction"> Curved?
+                    </mat-slide-toggle>
+                </td>
+            </tr>
+        </table>
 
         <mat-form-field color="accent">
             <mat-label>Math</mat-label>
@@ -72,18 +85,20 @@
                 <td>
                     <mat-form-field color="accent">
                         <mat-label>X-Axis-Label</mat-label>
-                        <input type="text" matInput placeholder="X-Axis-Label" [(ngModel)]="widget.properties.hAxisLabel">
+                        <input type="text" matInput placeholder="X-Axis-Label"
+                               [(ngModel)]="widget.properties.hAxisLabel">
                     </mat-form-field>
                 </td>
             </tr>
         </table>
         <table cellspacing="0">
-            <tr >
+            <tr>
                 <td>
                     <mat-form-field color="accent">
-                        <mat-select [(value)]="widget.properties.vAxis" [disabled]="vAxisValues.length < 2" placeholder="Y-Axis" [compareWith]="compare">
+                        <mat-select [(value)]="widget.properties.vAxis" [disabled]="vAxisValues.length < 2"
+                                    placeholder="Y-Axis" [compareWith]="compare">
                             <mat-option *ngFor="let vAxisValue of vAxisValues" [value]="vAxisValue">
-                            {{vAxisValue.Name}}
+                                {{vAxisValue.Name}}
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
@@ -91,7 +106,8 @@
                 <td>
                     <mat-form-field color="accent">
                         <mat-label>Y-Axis-Label</mat-label>
-                        <input type="text" matInput placeholder="Y-Axis-Label" [(ngModel)]="widget.properties.vAxisLabel">
+                        <input type="text" matInput placeholder="Y-Axis-Label"
+                               [(ngModel)]="widget.properties.vAxisLabel">
                     </mat-form-field>
                 </td>
             </tr>
@@ -101,5 +117,7 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="disableSave || interval.errors || chartType.errors">Save</button>
+    <button class="mat-raised-button mat-accent" (click)="save()"
+            [disabled]="disableSave || interval.errors || chartType.errors">Save
+    </button>
 </mat-dialog-actions>

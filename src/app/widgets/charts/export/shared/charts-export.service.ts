@@ -81,6 +81,7 @@ export class ChartsExportService {
                         observer.next(this.setProcessInstancesStatusValues(
                             widget.id,
                             widget.properties.chartType || '',
+                            widget.properties.curvedFunction || false,
                             widget.properties.hAxisLabel || '',
                             widget.properties.vAxisLabel || '',
                             new ChartDataTableModel([[]])));
@@ -92,6 +93,7 @@ export class ChartsExportService {
                         observer.next(this.setProcessInstancesStatusValues(
                             widget.id,
                             widget.properties.chartType || '',
+                            widget.properties.curvedFunction || false,
                             widget.properties.hAxisLabel || '',
                             widget.properties.vAxisLabel || '',
                             this.setData(widget.properties.vAxis, resp.results[0].series[0].values, vAxisIndex, widget.properties.math || '')));
@@ -113,7 +115,7 @@ export class ChartsExportService {
         return dataTable;
     }
 
-    private setProcessInstancesStatusValues(widgetId: string, chartType: string, hAxisLabel: string, vAxisLabel: string, dataTable: ChartDataTableModel): ChartsModel {
+    private setProcessInstancesStatusValues(widgetId: string, chartType: string, curvedFunction: boolean, hAxisLabel: string, vAxisLabel: string, dataTable: ChartDataTableModel): ChartsModel {
 
         const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId, 5);
 
@@ -127,6 +129,7 @@ export class ChartsExportService {
                 height: element.height,
                 width: element.width,
                 legend: 'none',
+                curveType: curvedFunction ? 'function' : '',
                 vAxis: {title: vAxisLabel},
             });
     }

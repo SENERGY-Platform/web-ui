@@ -24,6 +24,7 @@ export interface ChartsExportPropertiesModel {
         vAxisLabel?: string;
         measurement?: ChartsExportMeasurementModel;
         math?: string;
+        curvedFunction?: boolean;
 }
 
 export interface ChartsExportMeasurementModel {
