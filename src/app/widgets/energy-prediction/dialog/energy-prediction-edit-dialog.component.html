@@ -66,6 +66,11 @@
         </mat-form-field>
 
         <mat-form-field color="accent">
+            <mat-label>Currency</mat-label>
+            <input type="text" matInput [(ngModel)]="currency">
+        </mat-form-field>
+
+        <mat-form-field color="accent">
             <mat-select [(value)]="selectedThresholdOption" [formControl]="thresholdOptionsFormControl" placeholder="Threshold Type">
                 <mat-option *ngFor="let opt of thresholdOptions" [value]="opt">
                     {{opt}}

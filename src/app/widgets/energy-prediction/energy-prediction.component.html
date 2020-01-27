@@ -75,7 +75,7 @@
                     <div fxLayout="row">
                         <div [ngClass]="{'color-warn': thresholdActive && widget.properties.thresholdOption === 'Price' }"
                              [matTooltip]="thresholdActive && widget.properties.thresholdOption === 'Price' ? 'Estimation above threshold!' : null" >
-                            <div class="values kpi-1-3">{{price | number: '1.2-2'}} €</div> <!-- TODO: hardcoded currency -->
+                            <div class="values kpi-1-3">{{price | number: '1.2-2'}} {{widget.properties.currency || '€'}}</div>
                         </div>
                     </div>
                 </div>
