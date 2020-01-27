@@ -50,10 +50,10 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     searchInitialized = false;
     animation = true;
     selectedDeployment: DeploymentsModel | null = null;
-    @ViewChild('paginatorFinished') paginatorFinished!: MatPaginator;
-    @ViewChild('paginatorRunning') paginatorRunning!: MatPaginator;
-    @ViewChild('sortFinished') sortFinished!: MatSort;
-    @ViewChild('sortRunning') sortRunning!: MatSort;
+    @ViewChild('paginatorFinished', {static: false}) paginatorFinished!: MatPaginator;
+    @ViewChild('paginatorRunning', {static: false}) paginatorRunning!: MatPaginator;
+    @ViewChild('sortFinished', {static: false}) sortFinished!: MatSort;
+    @ViewChild('sortRunning', {static: false}) sortRunning!: MatSort;
 
     private searchSub: Subscription = new Subscription();
     private finishedSub: Subscription = new Subscription();

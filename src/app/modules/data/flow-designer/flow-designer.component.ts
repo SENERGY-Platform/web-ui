@@ -22,8 +22,6 @@ import {OperatorRepoService} from '../operator-repo/shared/operator-repo.service
 import {FlowModel} from '../flow-repo/shared/flow.model';
 import {DiagramEditorComponent} from '../../../core/components/diagram-editor/diagram-editor.component';
 import {MatSnackBar} from '@angular/material';
-import {element} from 'protractor';
-import {el} from '@angular/platform-browser/testing/src/browser_util';
 
 @Component({
     selector: 'senergy-flow-designer',
@@ -39,7 +37,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     ) {
     }
 
-    @ViewChild(DiagramEditorComponent) diagram!: DiagramEditorComponent;
+    @ViewChild(DiagramEditorComponent, {static: false}) diagram!: DiagramEditorComponent;
 
     operators: OperatorModel[] = [];
     ready = false;

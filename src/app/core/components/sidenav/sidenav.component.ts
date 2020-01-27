@@ -33,7 +33,7 @@ import {fadeInAnimation} from '../../../animations/fade-in.animation';
 
 export class SidenavComponent implements OnInit, AfterViewInit {
 
-    @ViewChild('sidenav') sidenav!: MatSidenav;
+    @ViewChild('sidenav', {static: false}) sidenav!: MatSidenav;
     mode = '';
     sections: SidenavSectionModel[] = [];
     openSection: null | string = null;

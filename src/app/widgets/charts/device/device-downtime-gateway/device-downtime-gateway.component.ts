@@ -36,7 +36,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
 
     private resizeTimeout = 0;
 
-    @ViewChild('deviceDowntimeGatewayChart') deviceDowntimeGatewayChart!: GoogleChartComponent;
+    @ViewChild('deviceDowntimeGatewayChart', {static: false}) deviceDowntimeGatewayChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
     @Input() zoom = false;
@@ -92,7 +92,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
                 this.deviceDowntimeGateway.options.chartArea.width = element.widthPercentage;
             }
             if (this.deviceDowntimeGateway.dataTable[0].length > 0 ) {
-                this.deviceDowntimeGatewayChart.redraw();
+                this.deviceDowntimeGatewayChart.draw();
             }
         }
     }

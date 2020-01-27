@@ -29,7 +29,7 @@ import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/d
 })
 export class EventListEditDialogComponent implements OnInit {
 
-    @ViewChild(MatTable) table!: MatTable<DeploymentsModel>;
+    @ViewChild(MatTable, {static: false}) table!: MatTable<DeploymentsModel>;
 
     dashboardId: string;
     widgetId: string;

@@ -30,7 +30,7 @@ import {PermissionsService} from '../../shared/permissions.service';
 })
 export class PermissionDialogComponent implements OnInit {
 
-    @ViewChild(MatTable) table!: MatTable<PermissionsEditModel>;
+    @ViewChild(MatTable, {static: false}) table!: MatTable<PermissionsEditModel>;
     formControl = new FormControl('');
     name: string;
     userId: null | string = null;
