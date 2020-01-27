@@ -43,7 +43,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     private measurementId = '';
     private interval = 0;
 
-    @ViewChild('chartExport') chartExport!: GoogleChartComponent;
+    @ViewChild('chartExport', {static: false}) chartExport!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
     @Input() zoom = false;
@@ -124,7 +124,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                 this.chartExportData.options.chartArea.width = element.widthPercentage;
             }
             if (this.chartExportData.dataTable[0].length > 0 ) {
-                this.chartExport.redraw();
+                this.chartExport.draw();
             }
         }
     }

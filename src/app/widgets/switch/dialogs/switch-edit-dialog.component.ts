@@ -40,7 +40,7 @@ export interface TableElement {
 })
 export class SwitchEditDialogComponent implements OnInit {
 
-    @ViewChild(MatTable) table!: MatTable<DeploymentsModel>;
+    @ViewChild(MatTable, {static: false}) table!: MatTable<DeploymentsModel>;
 
     formControl = new FormControl('');
     deployments: DeploymentsModel[] = [];

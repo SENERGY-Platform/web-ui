@@ -34,7 +34,7 @@
                     <div fxLayout="row">
                         <div [ngClass]="{'color-warn': thresholdActive && widget.properties.thresholdOption === 'Consumption'}"
                              [matTooltip]="thresholdActive && widget.properties.thresholdOption === 'Consumption' ? 'Estimation above threshold!' : null" >
-                            <div class="values kpi-1-3">{{predictionModel.prediction | number: '1.3-3'}} kWh</div>
+                            <div class="values kpi-1-3">{{predictionModel.prediction | number: widget.properties.format || '1.3-3'}} {{widget.properties.unit || 'kWh'}}</div>
                         </div>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                     <div class="kpi-header-1-3" [matTooltip]="'Total consumption at the end of this period'">TOTAL ESTIMATION</div>
                     <div fxLayout="row">
                         <div>
-                            <div class="values kpi-1-3">{{predictionModel.predictionTotal| number: '1.3-3'}} kWh</div>
+                            <div class="values kpi-1-3">{{predictionModel.predictionTotal| number: widget.properties.format || '1.3-3'}} {{widget.properties.unit || 'kWh'}}</div>
                         </div>
                     </div>
                 </div>
@@ -75,7 +75,7 @@
                     <div fxLayout="row">
                         <div [ngClass]="{'color-warn': thresholdActive && widget.properties.thresholdOption === 'Price' }"
                              [matTooltip]="thresholdActive && widget.properties.thresholdOption === 'Price' ? 'Estimation above threshold!' : null" >
-                            <div class="values kpi-1-3">{{price | number: '1.2-2'}} €</div> <!-- TODO: hardcoded currency -->
+                            <div class="values kpi-1-3">{{price | number: '1.2-2'}} {{widget.properties.currency || '€'}}</div>
                         </div>
                     </div>
                 </div>

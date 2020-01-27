@@ -33,8 +33,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     ready = false;
     displayedColumns: string[] = ['id', 'name', 'createdat', 'info', 'delete'];
 
-    @ViewChild(MatTable) table!: MatTable<PipelineModel>;
-    @ViewChild(MatSort) sort!: MatSort;
+    @ViewChild(MatTable, {static: false}) table!: MatTable<PipelineModel>;
+    @ViewChild(MatSort, {static: false}) sort!: MatSort;
 
     constructor(private pipelineRegistryService: PipelineRegistryService,
                 private flowEngineService: FlowEngineService,

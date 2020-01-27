@@ -28,7 +28,7 @@ import {DashboardResponseMessageModel} from '../../../../../modules/dashboard/sh
 })
 export class ChartsProcessInstancesEditDialogComponent implements OnInit {
 
-    @ViewChild(MatTable) table!: MatTable<DeploymentsModel>;
+    @ViewChild(MatTable, {static: false}) table!: MatTable<DeploymentsModel>;
 
     dashboardId: string;
     widgetId: string;

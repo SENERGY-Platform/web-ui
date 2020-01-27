@@ -36,7 +36,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
 
     private resizeTimeout = 0;
 
-    @ViewChild('deviceTotalDowntimeChart') deviceTotalDowntimeChart!: GoogleChartComponent;
+    @ViewChild('deviceTotalDowntimeChart', {static: false}) deviceTotalDowntimeChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
     @Input() zoom = false;
@@ -92,7 +92,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
                 this.deviceTotalDowntime.options.chartArea.width = element.widthPercentage;
             }
             if (this.deviceTotalDowntime.dataTable[0].length > 0 ) {
-                this.deviceTotalDowntimeChart.redraw();
+                this.deviceTotalDowntimeChart.draw();
             }
         }
     }

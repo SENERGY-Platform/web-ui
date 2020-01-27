@@ -36,7 +36,7 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     private resizeTimeout = 0;
 
-    @ViewChild('processDeploymentsHistoryChart') processDeploymentsHistoryChart!: GoogleChartComponent;
+    @ViewChild('processDeploymentsHistoryChart', {static: false}) processDeploymentsHistoryChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
     @Input() zoom = false;
@@ -92,7 +92,7 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
                 this.processDeploymentsHistory.options.chartArea.width = element.widthPercentage;
             }
             if (this.processDeploymentsHistory.dataTable[0].length > 0 ) {
-                this.processDeploymentsHistoryChart.redraw();
+                this.processDeploymentsHistoryChart.draw();
             }
         }
     }

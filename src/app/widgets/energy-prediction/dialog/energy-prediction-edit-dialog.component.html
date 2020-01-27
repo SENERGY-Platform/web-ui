@@ -38,6 +38,21 @@
         </mat-form-field>
 
         <mat-form-field color="accent">
+            <mat-label>Unit</mat-label>
+            <input type="text" matInput [(ngModel)]="unit">
+        </mat-form-field>
+
+        <mat-form-field color="accent">
+            <mat-label>Math Operation</mat-label>
+            <input type="text" matInput [(ngModel)]="math">
+        </mat-form-field>
+
+        <mat-form-field color="accent" hintLabel="For use in Angular pipes">
+            <mat-label>Number format</mat-label>
+            <input type="text" matInput [(ngModel)]="format">
+        </mat-form-field>
+
+        <mat-form-field color="accent">
             <mat-select [(value)]="selectedOption" [formControl]="optionsFormControl" placeholder="Prediction Type">
                 <mat-option *ngFor="let opt of options" [value]="opt">
                     {{opt}}
@@ -48,6 +63,11 @@
         <mat-form-field color="accent">
             <mat-label>Price per Unit</mat-label>
             <input type="number" matInput placeholder="Price per Unit" [(ngModel)]="widget.properties.price">
+        </mat-form-field>
+
+        <mat-form-field color="accent">
+            <mat-label>Currency</mat-label>
+            <input type="text" matInput [(ngModel)]="currency">
         </mat-form-field>
 
         <mat-form-field color="accent">

@@ -152,7 +152,7 @@ export class DiagramEditorComponent implements OnInit {
             }],
 
             initialize: function () {
-                shapes.basic.Generic.prototype.initialize.apply(this, arguments);
+                shapes.basic.Generic.prototype.initialize.apply(this, []);
 
                 this.on('change:inPorts change:outPorts', this.updatePortItems, this);
                 this.updatePortItems();

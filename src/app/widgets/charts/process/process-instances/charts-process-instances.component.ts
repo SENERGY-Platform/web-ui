@@ -36,7 +36,7 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
 
     private resizeTimeout = 0;
 
-    @ViewChild('processInstancesStatusChart') processInstancesStatusChart!: GoogleChartComponent;
+    @ViewChild('processInstancesStatusChart', {static: false}) processInstancesStatusChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
     @Input() zoom = false;
@@ -93,7 +93,7 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
                 this.processInstancesStatus.options.chartArea.width = element.widthPercentage;
             }
             if (this.processInstancesStatus.dataTable[0].length > 0 ) {
-                this.processInstancesStatusChart.redraw();
+                this.processInstancesStatusChart.draw();
             }
         }
     }
