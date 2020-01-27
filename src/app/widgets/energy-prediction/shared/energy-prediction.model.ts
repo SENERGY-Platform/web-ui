@@ -28,6 +28,7 @@ export interface EnergyPredictionPropertiesModel {
     price?: (number);
     math?: string;
     format?: string;
+    unit?: string;
 }
 
 interface EnergyPredictionColumnModel {
