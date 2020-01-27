@@ -47,6 +47,8 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     selectedThresholdOption: string;
     selectedOption: string;
     disableSave = false;
+    math = '';
+    format = '1.3-3';
 
     constructor(private dialogRef: MatDialogRef<EnergyPredictionEditDialogComponent>,
                 private deploymentsService: DeploymentsService,
@@ -69,6 +71,8 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
             this.widget = widget;
             this.formControl.setValue(this.widget.properties.measurement || '');
             this.selectedOption = this.widget.properties.selectedOption || '';
+            this.math = this.widget.properties.math || this.math;
+            this.format = this.widget.properties.format || this.format;
             this.optionsFormControl.setValue(this.selectedOption);
             this.selectedThresholdOption = this.widget.properties.thresholdOption || '';
             this.thresholdOptionsFormControl.setValue(this.selectedThresholdOption);
@@ -107,6 +111,8 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         this.widget.properties.columns.prediction = this.selectedOption + 'Prediction';
         this.widget.properties.columns.predictionTotal = this.selectedOption + 'PredictionTotal';
         this.widget.properties.columns.timestamp = this.selectedOption + 'Timestamp';
+        this.widget.properties.math = this.math;
+        this.widget.properties.format = this.format;
 
         if (this.formControl.value) {
             this.widget.properties.measurement = {

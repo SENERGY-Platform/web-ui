@@ -26,6 +26,8 @@ export interface EnergyPredictionPropertiesModel {
     threshold?: (number);
     thresholdOption?: (string);
     price?: (number);
+    math?: string;
+    format?: string;
 }
 
 interface EnergyPredictionColumnModel {
