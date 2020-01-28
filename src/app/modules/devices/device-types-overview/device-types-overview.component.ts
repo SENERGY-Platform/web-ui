@@ -122,6 +122,12 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         });
     }
 
+    createDeviceType(): void {
+        this.router.navigate(['devices/devicetypesoverview/devicetypes'], {
+            queryParams: {function: 'create'},
+        });
+    }
+
     newInstance(deviceType: DeviceTypePermSearchModel): void {
         this.deviceInstancesService.openDeviceCreateDialog(deviceType);
     }
