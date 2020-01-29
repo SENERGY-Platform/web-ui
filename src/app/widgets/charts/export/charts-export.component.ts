@@ -40,8 +40,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     errorMessage = {} as ErrorModel;
 
     private resizeTimeout = 0;
-    private measurementId = '';
-    private interval = 0;
 
     @ViewChild('chartExport', {static: false}) chartExport!: GoogleChartComponent;
     @Input() dashboardId = '';
@@ -101,16 +99,12 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     }
 
     private checkConfiguration() {
-        if (this.widget.properties.measurement === undefined) {
+        if (this.widget.properties.exports && this.widget.properties.exports.length < 1) {
             this.configureWidget = true;
-        } else {
-            this.measurementId = this.widget.properties.measurement.id;
         }
 
         if (this.widget.properties.interval === undefined || this.widget.properties.interval === null) {
             this.configureWidget = true;
-        } else {
-            this.interval = this.widget.properties.interval;
         }
     }
 

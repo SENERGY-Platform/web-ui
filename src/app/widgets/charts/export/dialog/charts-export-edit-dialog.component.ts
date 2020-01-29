@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatAutocompleteSelectedEvent, MatDialogRef} from '@angular/material';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef, MatTable, MatTableDataSource} from '@angular/material';
 import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {DashboardResponseMessageModel} from '../../../../modules/dashboard/shared/dashboard-response-message.model';
 import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {map, startWith} from 'rxjs/internal/operators';
 import {ExportService} from '../../../../modules/data/export/shared/export.service';
 import {ExportModel, ExportValueModel} from '../../../../modules/data/export/shared/export.model';
-import {ChartsExportMeasurementModel} from '../shared/charts-export-properties.model';
+import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
+import {SelectionModel} from '@angular/cdk/collections';
+import {PipelineModel} from '../../../../modules/data/pipeline-registry/shared/pipeline.model';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -33,15 +33,19 @@ import {ChartsExportMeasurementModel} from '../shared/charts-export-properties.m
 })
 export class ChartsExportEditDialogComponent implements OnInit {
 
-    formControl = new FormControl('');
+    formControl = new FormControl();
     exports: ChartsExportMeasurementModel[] = [];
-    filteredExports: Observable<ChartsExportMeasurementModel[]> = new Observable();
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
-    vAxisValues: ExportValueModel[] = [];
     disableSave = false;
     chartTypes = ['LineChart', 'ColumnChart'];
+
+    displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'color', 'math'];
+    dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
+    selection = new SelectionModel<ChartsExportVAxesModel>(true, []);
+
+    @ViewChild(MatTable, {static: false}) table!: MatTable<PipelineModel>;
 
     constructor(private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
                 private deploymentsService: DeploymentsService,
@@ -59,7 +63,12 @@ export class ChartsExportEditDialogComponent implements OnInit {
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
-            this.formControl.setValue(this.widget.properties.measurement || '');
+            this.formControl.setValue(this.widget.properties.exports || []);
+            if (this.widget.properties.vAxes) {
+                this.widget.properties.vAxes.forEach(row => this.selection.select(row));
+            }
+            this.selectionChange(this.widget.properties.exports || []);
+
             this.initDeployments();
         });
     }
@@ -70,25 +79,14 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 exports.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
                         this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
-                        if (this.widget.properties.vAxis) {
-                            if (this.widget.properties.vAxis.InstanceID === exportModel.ID) {
-                                this.vAxisValues = exportModel.Values;
-                            }
-                        }
                     }
                 });
-                this.filteredExports = this.formControl.valueChanges
-                    .pipe(
-                        startWith<string | ChartsExportMeasurementModel>(''),
-                        map(value => typeof value === 'string' ? value : value.name),
-                        map(name => name ? this._filter(name) : this.exports.slice())
-                    );
             }
         });
     }
 
-    compare(a: any, b: any) {
-        return a.InstanceID === b.InstanceID && a.Name === b.Name && a.Path === b.Path;
+    compare(a: any, b: any): boolean {
+        return a.id === b.id && a.name === b.name;
     }
 
     close(): void {
@@ -96,9 +94,10 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        if (this.formControl.value) {
-            this.widget.properties.measurement = {id: this.formControl.value.id, name: this.formControl.value.name, values: this.formControl.value.values};
-        }
+        this.widget.properties.measurement = undefined; // old field
+        this.widget.properties.vAxis = undefined; // old field
+        this.widget.properties.vAxes = this.selection.selected;
+        this.widget.properties.exports = this.formControl.value;
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widget);
@@ -106,35 +105,48 @@ export class ChartsExportEditDialogComponent implements OnInit {
         });
     }
 
-    private _filter(value: string): ChartsExportMeasurementModel[] {
-        const filterValue = value.toLowerCase();
-        return this.exports.filter(option => {
-            if (option.name) {
-                return option.name.toLowerCase().indexOf(filterValue) === 0;
-            }
-            return false;
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const numRows = this.dataSource.data.length;
+        return numSelected === numRows;
+    }
+
+    masterToggle() {
+        this.isAllSelected() ?
+            this.selection.clear() :
+            this.dataSource.data.forEach(row => this.selection.select(row));
+    }
+
+    selectionChange(selectedExports: ChartsExportMeasurementModel[]) {
+        const newData: ChartsExportVAxesModel[] = [];
+        const newSelection: ChartsExportVAxesModel[] = [];
+        selectedExports.forEach((selectedExport: ChartsExportMeasurementModel) => {
+            selectedExport.values.forEach((value: ExportValueModel) => {
+                const newVAxis: ChartsExportVAxesModel = {
+                    instanceId: value.InstanceID,
+                    exportName: selectedExport.name,
+                    valueName: value.Name,
+                    valueType: value.Type,
+                    color: '',
+                    math: ''
+                };
+                const index = this.selection.selected.findIndex(
+                    item => item.instanceId === newVAxis.instanceId &&
+                        item.exportName === newVAxis.exportName &&
+                        item.valueName === newVAxis.valueName &&
+                        item.valueType === newVAxis.valueType);
+                if (index === -1) {
+                    newData.push(newVAxis);
+                } else {
+                    newSelection.push(this.selection.selected[index]);
+                    newData.push(this.selection.selected[index]);
+                }
+            });
         });
-    }
-
-    displayFn(input?: ChartsExportMeasurementModel): string | undefined {
-        return input ? input.name : undefined;
-    }
-
-    optionSelected(input: MatAutocompleteSelectedEvent ) {
-        this.vAxisValues = input.option.value.values;
-        this.widget.properties.vAxis = this.vAxisValues[0];
-    }
-
-    autoCompleteClosed() {
-        if (typeof this.formControl.value === 'string') {
-            this.disableSave = true;
-            this.vAxisValues = [];
-            this.formControl.setErrors({'valid': false});
-        } else {
-            this.disableSave = false;
-            this.formControl.updateValueAndValidity();
-        }
-
+        this.dataSource.data = newData;
+        this.selection.clear();
+        newSelection.forEach(row => this.selection.select(row));
+        this.table.renderRows();
     }
 
 }

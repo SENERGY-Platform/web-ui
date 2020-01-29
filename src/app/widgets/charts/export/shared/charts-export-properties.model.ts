@@ -21,7 +21,9 @@ export interface ChartsExportPropertiesModel {
         interval?: number;
         hAxisLabel?: string;
         vAxis?: ExportValueModel;
+        vAxes?: ChartsExportVAxesModel[];
         vAxisLabel?: string;
+        exports?: ChartsExportMeasurementModel[];
         measurement?: ChartsExportMeasurementModel;
         math?: string;
         curvedFunction?: boolean;
@@ -31,5 +33,14 @@ export interface ChartsExportMeasurementModel {
     id: string;
     name: string;
     values: ExportValueModel [];
+}
+
+export interface ChartsExportVAxesModel {
+    instanceId: string;
+    exportName: string;
+    valueName: string;
+    valueType: string;
+    math: string;
+    color: string;
 }
 

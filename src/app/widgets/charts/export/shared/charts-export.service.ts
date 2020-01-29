@@ -23,7 +23,7 @@ import {catchError, map} from 'rxjs/internal/operators';
 import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
 import {environment} from '../../../../../environments/environment';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {ChartsExportModel} from './charts-export.model';
+import {ChartsExportColumnsModel, ChartsExportModel} from './charts-export.model';
 import {ChartDataTableModel} from '../../../../core/components/chart/chart-data-table.model';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
@@ -32,6 +32,7 @@ import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
 import {ErrorModel} from '../../../../core/model/error.model';
+import {ChartsExportVAxesModel} from './charts-export-properties.model';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -69,34 +70,21 @@ export class ChartsExportService {
         );
     }
 
-
     getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
-            this.getData(widget.properties.measurement ? widget.properties.measurement.id : '', widget.properties.interval).subscribe((resp: (ChartsExportModel | ErrorModel)) => {
+            this.getData(widget.properties.exports ? widget.properties.exports[0].id : '', widget.properties.interval).subscribe((resp: (ChartsExportModel | ErrorModel)) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     observer.next(resp);
                 } else {
                     if (resp.results[0].series === undefined) {
                         // no data
                         observer.next(this.setProcessInstancesStatusValues(
-                            widget.id,
-                            widget.properties.chartType || '',
-                            widget.properties.curvedFunction || false,
-                            widget.properties.hAxisLabel || '',
-                            widget.properties.vAxisLabel || '',
+                            widget,
                             new ChartDataTableModel([[]])));
                     } else {
-                        let vAxisIndex = 1;
-                        if (widget.properties.vAxis) {
-                            vAxisIndex = resp.results[0].series[0].columns.indexOf(widget.properties.vAxis.Name);
-                        }
                         observer.next(this.setProcessInstancesStatusValues(
-                            widget.id,
-                            widget.properties.chartType || '',
-                            widget.properties.curvedFunction || false,
-                            widget.properties.hAxisLabel || '',
-                            widget.properties.vAxisLabel || '',
-                            this.setData(widget.properties.vAxis, resp.results[0].series[0].values, vAxisIndex, widget.properties.math || '')));
+                            widget,
+                            this.setData(resp.results[0].series[0], widget.properties.vAxes || [])));
                     }
                 }
                 observer.complete();
@@ -104,34 +92,53 @@ export class ChartsExportService {
         });
     }
 
-    private setData(vAxis: ExportValueModel | undefined, exportData: (string | number)[][], vAxisIndex: number, math: string): ChartDataTableModel {
-        const dataTable = new ChartDataTableModel([['time', vAxis ? vAxis.Name : '']]);
-        exportData.forEach((item: (string | number)[]) => {
-                const date = new Date(<string>item[0]);
-                const value = math !== '' ? eval(<number>item[vAxisIndex] + math) : <number>item[vAxisIndex];
-                dataTable.data.push([date, value]);
+    private setData(series: ChartsExportColumnsModel, vAxes: ChartsExportVAxesModel[]): ChartDataTableModel {
+        const indices: { index: number, math: string }[] = [];
+        const header: string[] = ['time'];
+        if (vAxes) {
+            vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
+                indices.push({index: series.columns.indexOf(vAxis.valueName), math: vAxis.math});
+                header.push(vAxis.valueName);
+            });
+        }
+        const dataTable = new ChartDataTableModel([header]);
+
+        series.values.forEach((item: (string | number)[]) => {
+                const dataPoint: (Date | number) [] = [new Date(<string>item[0])];
+                indices.forEach((resp: { index: number, math: string }) => {
+                    dataPoint.push(resp.math !== '' ? eval(<number>item[resp.index] + resp.math) : <number>item[resp.index]);
+                });
+                dataTable.data.push(dataPoint);
             }
         );
         return dataTable;
     }
 
-    private setProcessInstancesStatusValues(widgetId: string, chartType: string, curvedFunction: boolean, hAxisLabel: string, vAxisLabel: string, dataTable: ChartDataTableModel): ChartsModel {
+    private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel): ChartsModel {
 
-        const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId, 5);
+        const element = this.elementSizeService.getHeightAndWidthByElementId(widget.id, 5);
 
         return new ChartsModel(
-            chartType === '' ? 'LineChart' : chartType,
+            (widget.properties.chartType === undefined || widget.properties.chartType === '') ? 'LineChart' : widget.properties.chartType,
             dataTable.data,
             {
                 chartArea: {width: element.widthPercentage, height: element.heightPercentage},
-                colors: [customColor],
-                hAxis: {title: hAxisLabel, gridlines: {count: -1}},
+                colors: this.getColorArray(widget.properties.vAxes || []),
+                hAxis: {title: widget.properties.hAxisLabel, gridlines: {count: -1}},
                 height: element.height,
                 width: element.width,
                 legend: 'none',
-                curveType: curvedFunction ? 'function' : '',
-                vAxis: {title: vAxisLabel},
+                curveType: widget.properties.curvedFunction ? 'function' : '',
+                vAxis: {title: widget.properties.vAxisLabel},
             });
+    }
+
+    private getColorArray(vAxes: ChartsExportVAxesModel[]): string[] {
+        const array: string[] = [];
+        vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
+            array.push(vAxis.color ? vAxis.color : customColor);
+        });
+        return array;
     }
 
 
