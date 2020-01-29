@@ -29,6 +29,7 @@ export class ChartsModel {
             width?: number,
             pieSliceText?: string,
             legend?: string,
+            curveType?: string,
             tooltip?: {
                 trigger?: string;
             }

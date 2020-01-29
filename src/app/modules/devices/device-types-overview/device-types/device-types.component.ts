@@ -556,6 +556,9 @@ export class DeviceTypesComponent implements OnInit {
             case 'edit': {
                 break; // do nothing special
             }
+            case 'create': {
+               break; // do nothing special
+            }
             case 'details': {
                 this.editable = false; // hide save tab
                 break;
