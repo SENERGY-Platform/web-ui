@@ -32,7 +32,7 @@ import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
 import {ErrorModel} from '../../../../core/model/error.model';
-import {ChartsExportVAxesModel} from './charts-export-properties.model';
+import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from './charts-export-properties.model';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -64,15 +64,16 @@ export class ChartsExportService {
         });
     }
 
-    getData(id: string, limit: number | undefined): Observable<ChartsExportModel | { error: string }> {
-        return this.http.get<ChartsExportModel>(environment.influxAPIURL + '/measurement/' + id + '?limit=' + limit).pipe(
+    getData(exports: ChartsExportMeasurementModel[], limit: number | undefined): Observable<ChartsExportModel | { error: string }> {
+        const ids = exports.map(e => e.id).join(',');
+        return this.http.get<ChartsExportModel>(environment.influxAPIURL + '/merge?ids=' + ids + '&limit=' + limit).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {error: 'error'}))
         );
     }
 
     getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
-            this.getData(widget.properties.exports ? widget.properties.exports[0].id : '', widget.properties.interval).subscribe((resp: (ChartsExportModel | ErrorModel)) => {
+            this.getData(widget.properties.exports || [], widget.properties.interval).subscribe((resp: (ChartsExportModel | ErrorModel)) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     observer.next(resp);
                 } else {
@@ -97,7 +98,7 @@ export class ChartsExportService {
         const header: string[] = ['time'];
         if (vAxes) {
             vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
-                indices.push({index: series.columns.indexOf(vAxis.valueName), math: vAxis.math});
+                indices.push({index: series.columns.indexOf(vAxis.instanceId + '.' + vAxis.valueName), math: vAxis.math});
                 header.push(vAxis.valueName);
             });
         }
@@ -130,6 +131,7 @@ export class ChartsExportService {
                 legend: 'none',
                 curveType: widget.properties.curvedFunction ? 'function' : '',
                 vAxis: {title: widget.properties.vAxisLabel},
+                interpolateNulls: true,
             });
     }
 
