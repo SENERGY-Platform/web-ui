@@ -34,8 +34,10 @@ import {ErrorModel} from '../../../../core/model/error.model';
 import {ChartsExportPropertiesModel, ChartsExportVAxesModel} from './charts-export-properties.model';
 import {
     ChartsExportRequestPayloadModel,
-    ChartsExportRequestPayloadQueriesModel, ChartsExportRequestPayloadTimeModel
+    ChartsExportRequestPayloadQueriesModel,
 } from './charts-export-request-payload.model';
+import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
+import {UtilService} from '../../../../core/services/util.service';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -48,7 +50,8 @@ export class ChartsExportService {
                 private elementSizeService: ElementSizeService,
                 private errorHandlerService: ErrorHandlerService,
                 private dialog: MatDialog,
-                private dashboardService: DashboardService) {
+                private dashboardService: DashboardService,
+                private utilService: UtilService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -71,9 +74,9 @@ export class ChartsExportService {
         const widgetProperties = <ChartsExportPropertiesModel>properties;
         const requestPayload: ChartsExportRequestPayloadModel = {
             time: {
-                last: '',
-                end: '',
-                start: ''
+                last: undefined,
+                end: undefined,
+                start: undefined
             },
             group: {
                 type: undefined,
@@ -82,7 +85,14 @@ export class ChartsExportService {
             queries: []
         };
 
-        requestPayload.time = widgetProperties.time || {} as ChartsExportRequestPayloadTimeModel;
+        if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Relative && widgetProperties.time) {
+            requestPayload.time.last = widgetProperties.time.last;
+        }
+
+        if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute && widgetProperties.time) {
+            requestPayload.time.start = '\'' + this.utilService.convertStringToSODateString(<string>widgetProperties.time.start) + '\'';
+            requestPayload.time.end = '\'' + this.utilService.convertStringToSODateString(<string>widgetProperties.time.end) + '\'';
+        }
 
         if (widgetProperties.vAxes) {
             const array: ChartsExportRequestPayloadQueriesModel[] = [];
@@ -169,7 +179,6 @@ export class ChartsExportService {
         });
         return array;
     }
-
 
 }
 

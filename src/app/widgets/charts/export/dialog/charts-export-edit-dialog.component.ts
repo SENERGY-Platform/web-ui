@@ -27,6 +27,7 @@ import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/ch
 import {SelectionModel} from '@angular/cdk/collections';
 import {PipelineModel} from '../../../../modules/data/pipeline-registry/shared/pipeline.model';
 import {ChartsExportRequestPayloadGroupModel} from '../shared/charts-export-request-payload.model';
+import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -41,7 +42,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
     widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
     disableSave = false;
     chartTypes = ['LineChart', 'ColumnChart'];
-    timeRangeTypes = ['relative', 'absolute'];
+    timeRangeEnum = ChartsExportRangeTimeTypeEnum;
+    timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
 
     displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'color', 'math'];
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();

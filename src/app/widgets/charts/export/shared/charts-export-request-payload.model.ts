@@ -21,9 +21,9 @@ export interface ChartsExportRequestPayloadModel {
 }
 
 export interface ChartsExportRequestPayloadTimeModel {
-    last: string;
-    start: string;
-    end: string;
+    last: string | undefined;
+    start: string | undefined;
+    end: string | undefined;
 }
 
 export interface ChartsExportRequestPayloadGroupModel {
