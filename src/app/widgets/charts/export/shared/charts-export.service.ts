@@ -31,9 +31,8 @@ import {ChartsExportEditDialogComponent} from '../dialog/charts-export-edit-dial
 import {WidgetModel, WidgetPropertiesModels} from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ErrorModel} from '../../../../core/model/error.model';
-import {ChartsExportMeasurementModel, ChartsExportPropertiesModel, ChartsExportVAxesModel} from './charts-export-properties.model';
+import {ChartsExportPropertiesModel, ChartsExportVAxesModel} from './charts-export-properties.model';
 import {
-    ChartsExportRequestPayloadGroupModel,
     ChartsExportRequestPayloadModel,
     ChartsExportRequestPayloadQueriesModel, ChartsExportRequestPayloadTimeModel
 } from './charts-export-request-payload.model';
