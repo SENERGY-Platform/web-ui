@@ -56,34 +56,36 @@
             </mat-error>
         </mat-form-field>
 
-        <mat-form-field color="accent" class="full-width">
-            <mat-select [(ngModel)]="widget.properties.timeRangeType" placeholder="Time Range Type" required
-                        #timeRangeType="ngModel">
-                <mat-option *ngFor="let timeRangeType of timeRangeTypes" [value]="timeRangeType">
-                    {{timeRangeType}}
-                </mat-option>
-            </mat-select>
-            <mat-error *ngIf="timeRangeType.errors">
-                Please choose a time Range Type!
-            </mat-error>
-        </mat-form-field>
-
-        <mat-form-field color="accent" class="full-width" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Relative">
-            <mat-label>Last</mat-label>
-            <input type="text" matInput placeholder="e.g. 15m, 1h"
-                   [(ngModel)]="widget.properties.time.last">
-        </mat-form-field>
-
-        <table cellspacing="0" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Absolute">
+        <table cellspacing="0">
             <tr>
-                <td>
+                <td fxFlex="33%">
+                    <mat-form-field color="accent" class="full-width">
+                        <mat-select [(ngModel)]="widget.properties.timeRangeType" placeholder="Time Range Type" required
+                                    #timeRangeType="ngModel">
+                            <mat-option *ngFor="let timeRangeType of timeRangeTypes" [value]="timeRangeType">
+                                {{timeRangeType}}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="timeRangeType.errors">
+                            Please choose a time Range Type!
+                        </mat-error>
+                    </mat-form-field>
+                </td>
+                <td fxFlex="66%" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Relative">
+                    <mat-form-field color="accent" class="full-width">
+                        <mat-label>Last</mat-label>
+                        <input type="text" matInput placeholder="e.g. 15m, 1h"
+                               [(ngModel)]="widget.properties.time.last">
+                    </mat-form-field>
+                </td>
+                <td fxFlex="33%" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Absolute">
                     <mat-form-field color="accent" class="full-width">
                         <mat-label>Start</mat-label>
                         <input type="datetime-local" matInput placeholder="Start"
                                [(ngModel)]="widget.properties.time.start">
                     </mat-form-field>
                 </td>
-                <td>
+                <td fxFlex="33%" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Absolute">
                     <mat-form-field color="accent" class="full-width">
                         <mat-label>End</mat-label>
                         <input type="datetime-local" matInput placeholder="Start"
