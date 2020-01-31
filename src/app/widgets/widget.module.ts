@@ -31,7 +31,7 @@ import {
     MatListModule,
     MatMenuModule,
     MatOptionModule,
-    MatProgressSpinnerModule,
+    MatProgressSpinnerModule, MatRadioModule,
     MatSelectModule,
     MatSlideToggleModule,
     MatStepperModule,
@@ -119,7 +119,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         MatStepperModule,
         MatGridListModule,
         MatExpansionModule,
-        AngularFittextModule
+        AngularFittextModule,
+        MatRadioModule,
     ],
     declarations: [
         SwitchComponent,

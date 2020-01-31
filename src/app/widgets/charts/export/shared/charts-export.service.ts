@@ -19,7 +19,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {ChartsModel} from '../../shared/charts.model';
 import {ElementSizeService} from '../../../../core/services/element-size.service';
-import {catchError, map} from 'rxjs/internal/operators';
+import {catchError} from 'rxjs/internal/operators';
 import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
 import {environment} from '../../../../../environments/environment';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
@@ -28,11 +28,16 @@ import {ChartDataTableModel} from '../../../../core/components/chart/chart-data-
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {ChartsExportEditDialogComponent} from '../dialog/charts-export-edit-dialog.component';
-import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import {WidgetModel, WidgetPropertiesModels} from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
 import {ErrorModel} from '../../../../core/model/error.model';
-import {ChartsExportVAxesModel} from './charts-export-properties.model';
+import {ChartsExportPropertiesModel, ChartsExportVAxesModel} from './charts-export-properties.model';
+import {
+    ChartsExportRequestPayloadModel,
+    ChartsExportRequestPayloadQueriesModel,
+} from './charts-export-request-payload.model';
+import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
+import {UtilService} from '../../../../core/services/util.service';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -64,19 +69,55 @@ export class ChartsExportService {
         });
     }
 
-    getData(id: string, limit: number | undefined): Observable<ChartsExportModel | { error: string }> {
-        return this.http.get<ChartsExportModel>(environment.influxAPIURL + '/measurement/' + id + '?limit=' + limit).pipe(
+    getData(properties: WidgetPropertiesModels): Observable<ChartsExportModel | { error: string }> {
+        const widgetProperties = <ChartsExportPropertiesModel>properties;
+        const requestPayload: ChartsExportRequestPayloadModel = {
+            time: {
+                last: undefined,
+                end: undefined,
+                start: undefined
+            },
+            group: {
+                type: undefined,
+                time: ''
+            },
+            queries: []
+        };
+
+        if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Relative && widgetProperties.time) {
+            requestPayload.time.last = widgetProperties.time.last;
+        }
+
+        if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute && widgetProperties.time) {
+            requestPayload.time.start = '\'' + new Date(<string>widgetProperties.time.start).toISOString() + '\'';
+            requestPayload.time.end = '\'' + new Date(<string>widgetProperties.time.end).toISOString() + '\'';
+        }
+
+        if (widgetProperties.group && widgetProperties.group.type !== undefined && widgetProperties.group.type !== '') {
+            requestPayload.group = widgetProperties.group;
+        }
+
+        if (widgetProperties.vAxes) {
+            const array: ChartsExportRequestPayloadQueriesModel[] = [];
+            widgetProperties.vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
+                // todo: gruppenwechsel implementieren;
+                array.push({id: vAxis.instanceId, fields: [{name: vAxis.valueName, math: vAxis.math}]});
+            });
+            requestPayload.queries = array;
+        }
+
+        return this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {error: 'error'}))
         );
     }
 
     getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
-            this.getData(widget.properties.exports ? widget.properties.exports[0].id : '', widget.properties.interval).subscribe((resp: (ChartsExportModel | ErrorModel)) => {
+            this.getData(widget.properties).subscribe((resp: (ChartsExportModel | ErrorModel)) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     observer.next(resp);
                 } else {
-                    if (resp.results[0].series === undefined) {
+                    if (resp.results[0].series[0].values.length === 0) {
                         // no data
                         observer.next(this.setProcessInstancesStatusValues(
                             widget,
@@ -97,7 +138,7 @@ export class ChartsExportService {
         const header: string[] = ['time'];
         if (vAxes) {
             vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
-                indices.push({index: series.columns.indexOf(vAxis.valueName), math: vAxis.math});
+                indices.push({index: series.columns.indexOf(vAxis.instanceId + '.' + vAxis.valueName), math: vAxis.math});
                 header.push(vAxis.valueName);
             });
         }
@@ -106,7 +147,7 @@ export class ChartsExportService {
         series.values.forEach((item: (string | number)[]) => {
                 const dataPoint: (Date | number) [] = [new Date(<string>item[0])];
                 indices.forEach((resp: { index: number, math: string }) => {
-                    dataPoint.push(resp.math !== '' ? eval(<number>item[resp.index] + resp.math) : <number>item[resp.index]);
+                    dataPoint.push(<number>item[resp.index]);
                 });
                 dataTable.data.push(dataPoint);
             }
@@ -130,6 +171,7 @@ export class ChartsExportService {
                 legend: 'none',
                 curveType: widget.properties.curvedFunction ? 'function' : '',
                 vAxis: {title: widget.properties.vAxisLabel},
+                interpolateNulls: true,
             });
     }
 
@@ -140,7 +182,6 @@ export class ChartsExportService {
         });
         return array;
     }
-
 
 }
 

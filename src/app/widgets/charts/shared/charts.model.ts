@@ -52,6 +52,7 @@ export class ChartsModel {
                 }
             }
             colors?: string[];
+            interpolateNulls?: boolean;
         }
     ) {
     }

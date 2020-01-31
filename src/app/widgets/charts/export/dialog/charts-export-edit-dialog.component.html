@@ -47,7 +47,8 @@
 
         <mat-form-field color="accent">
             <mat-label>Choose Exports</mat-label>
-            <mat-select [formControl]="formControl" multiple required (valueChange)="selectionChange($event)" [compareWith]="compare">
+            <mat-select [formControl]="formControl" multiple required (valueChange)="selectionChange($event)"
+                        [compareWith]="compare">
                 <mat-option *ngFor="let option of exports" [value]="option">{{option.name}}</mat-option>
             </mat-select>
             <mat-error *ngIf="formControl.hasError('valid') === false">
@@ -55,14 +56,66 @@
             </mat-error>
         </mat-form-field>
 
-        <mat-form-field color="accent">
-            <mat-label>Interval</mat-label>
-            <input type="number" matInput placeholder="Interval" [(ngModel)]="widget.properties.interval" required
-                   #interval="ngModel">
-            <mat-error *ngIf="interval.errors">
-                Please set a interval!
-            </mat-error>
-        </mat-form-field>
+        <table cellspacing="0">
+            <tr>
+                <td fxFlex="33%">
+                    <mat-form-field color="accent" class="full-width">
+                        <mat-select [(ngModel)]="widget.properties.timeRangeType" placeholder="Time Range Type" required
+                                    #timeRangeType="ngModel">
+                            <mat-option *ngFor="let timeRangeType of timeRangeTypes" [value]="timeRangeType">
+                                {{timeRangeType}}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="timeRangeType.errors">
+                            Please choose a time Range Type!
+                        </mat-error>
+                    </mat-form-field>
+                </td>
+                <td fxFlex="66%" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Relative">
+                    <mat-form-field color="accent" class="full-width">
+                        <mat-label>Last</mat-label>
+                        <input type="text" matInput placeholder="e.g. 15m, 1h"
+                               [(ngModel)]="widget.properties.time.last">
+                    </mat-form-field>
+                </td>
+                <td fxFlex="33%" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Absolute">
+                    <mat-form-field color="accent" class="full-width">
+                        <mat-label>Start</mat-label>
+                        <input type="datetime-local" matInput placeholder="Start"
+                               [(ngModel)]="widget.properties.time.start">
+                    </mat-form-field>
+                </td>
+                <td fxFlex="33%" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Absolute">
+                    <mat-form-field color="accent" class="full-width">
+                        <mat-label>End</mat-label>
+                        <input type="datetime-local" matInput placeholder="Start"
+                               [(ngModel)]="widget.properties.time.end">
+                    </mat-form-field>
+                </td>
+            </tr>
+        </table>
+
+        <table cellspacing="0" *ngIf="widget.properties.group">
+            <tr>
+                <td>
+                    <mat-form-field color="accent" class="full-width">
+                        <mat-select [(ngModel)]="widget.properties.group.type" placeholder="Group Type">
+                            <mat-option [value]="">none</mat-option>
+                            <mat-option *ngFor="let groupType of groupTypes" [value]="groupType">
+                                {{groupType}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent" class="full-width">
+                        <mat-label>Time interval</mat-label>
+                        <input type="text" matInput placeholder="e.g. 15m, 1h"
+                               [(ngModel)]="widget.properties.group.time">
+                    </mat-form-field>
+                </td>
+            </tr>
+        </table>
 
         <table cellspacing="0">
             <tr>
@@ -107,22 +160,26 @@
             </ng-container>
 
             <ng-container matColumnDef="exportName">
-                <th mat-header-cell *matHeaderCellDef> Export Name </th>
-                <td mat-cell *matCellDef="let element"> {{element.exportName}} </td>
+                <th mat-header-cell *matHeaderCellDef>Export Name</th>
+                <td mat-cell *matCellDef="let element" matTooltip="{{element.exportName}}" matTooltipPosition="right">
+                    {{element.exportName}}
+                </td>
             </ng-container>
 
             <ng-container matColumnDef="valueName">
-                <th mat-header-cell *matHeaderCellDef> Value Name </th>
-                <td mat-cell *matCellDef="let element"> {{element.valueName}} </td>
+                <th mat-header-cell *matHeaderCellDef>Value Name</th>
+                <td mat-cell *matCellDef="let element" matTooltip="{{element.valueName}}" matTooltipPosition="right">
+                    {{element.valueName}}
+                </td>
             </ng-container>
 
             <ng-container matColumnDef="valueType">
-                <th mat-header-cell *matHeaderCellDef> Value Type </th>
+                <th mat-header-cell *matHeaderCellDef>Value Type</th>
                 <td mat-cell *matCellDef="let element"> {{element.valueType}} </td>
             </ng-container>
 
             <ng-container matColumnDef="color">
-                <th mat-header-cell *matHeaderCellDef> Color </th>
+                <th mat-header-cell *matHeaderCellDef>Color</th>
                 <td mat-cell *matCellDef="let element">
                     <mat-form-field color="accent" appearance="standard">
                         <input type="text" matInput placeholder="e.g. red, #004411"
@@ -132,7 +189,7 @@
             </ng-container>
 
             <ng-container matColumnDef="math">
-                <th mat-header-cell *matHeaderCellDef> Math </th>
+                <th mat-header-cell *matHeaderCellDef>Math</th>
                 <td mat-cell *matCellDef="let element">
                     <mat-form-field color="accent" appearance="standard">
                         <input type="text" matInput placeholder="e.g. / 1000"
@@ -152,6 +209,7 @@
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
     <button class="mat-raised-button mat-accent" (click)="save()"
-            [disabled]="disableSave || interval.errors || chartType.errors || formControl.hasError('valid') || selection.selected.length === 0">Save
+            [disabled]="disableSave || chartType.errors || formControl.hasError('valid') || selection.selected.length === 0">
+        Save
     </button>
 </mat-dialog-actions>

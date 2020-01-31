@@ -26,6 +26,8 @@ import {ExportModel, ExportValueModel} from '../../../../modules/data/export/sha
 import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
 import {SelectionModel} from '@angular/cdk/collections';
 import {PipelineModel} from '../../../../modules/data/pipeline-registry/shared/pipeline.model';
+import {ChartsExportRequestPayloadGroupModel} from '../shared/charts-export-request-payload.model';
+import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -37,9 +39,14 @@ export class ChartsExportEditDialogComponent implements OnInit {
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {id: '', name: '', type: '', properties: {
+        group: {time: '', type: ''}
+        }};
     disableSave = false;
     chartTypes = ['LineChart', 'ColumnChart'];
+    timeRangeEnum = ChartsExportRangeTimeTypeEnum;
+    timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
+    groupTypes = ['mean', 'sum', 'count', 'median'];
 
     displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'color', 'math'];
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
@@ -63,12 +70,13 @@ export class ChartsExportEditDialogComponent implements OnInit {
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
+            this.setDefaultValues();
             this.formControl.setValue(this.widget.properties.exports || []);
             if (this.widget.properties.vAxes) {
                 this.widget.properties.vAxes.forEach(row => this.selection.select(row));
             }
-            this.selectionChange(this.widget.properties.exports || []);
 
+            this.selectionChange(this.widget.properties.exports || []);
             this.initDeployments();
         });
     }
@@ -94,8 +102,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.widget.properties.measurement = undefined; // old field
-        this.widget.properties.vAxis = undefined; // old field
+        this.deleteOldFields();
         this.widget.properties.vAxes = this.selection.selected;
         this.widget.properties.exports = this.formControl.value;
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
@@ -149,4 +156,31 @@ export class ChartsExportEditDialogComponent implements OnInit {
         this.table.renderRows();
     }
 
+    private setDefaultValues(): void {
+        if (this.widget.properties.chartType === undefined) {
+            this.widget.properties.chartType = this.chartTypes[0];
+        }
+
+        if (this.widget.properties.time === undefined) {
+            this.widget.properties.timeRangeType = 'relative';
+            this.widget.properties.time = {
+                last: '1d',
+                start: '',
+                end: ''
+            };
+        }
+
+        if (this.widget.properties.group === undefined) {
+            this.widget.properties.group = {
+                time: '',
+                type: '',
+            };
+        }
+    }
+
+    private deleteOldFields(): void {
+        this.widget.properties.measurement = undefined;
+        this.widget.properties.vAxis = undefined;
+        this.widget.properties.interval = undefined;
+    }
 }
