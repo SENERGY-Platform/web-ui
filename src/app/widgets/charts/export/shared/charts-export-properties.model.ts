@@ -15,18 +15,25 @@
  */
 
 import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
+import {
+    ChartsExportRequestPayloadGroupModel,
+    ChartsExportRequestPayloadTimeModel
+} from './charts-export-request-payload.model';
 
 export interface ChartsExportPropertiesModel {
         chartType?: string;
-        interval?: number;
+        interval?: number; // deprecated
         hAxisLabel?: string;
-        vAxis?: ExportValueModel;
+        vAxis?: ExportValueModel; // deprecated
         vAxes?: ChartsExportVAxesModel[];
         vAxisLabel?: string;
         exports?: ChartsExportMeasurementModel[];
-        measurement?: ChartsExportMeasurementModel;
+        measurement?: ChartsExportMeasurementModel; // deprecated
         math?: string;
         curvedFunction?: boolean;
+        timeRangeType?: string;
+        time?: ChartsExportRequestPayloadTimeModel;
+        group?: ChartsExportRequestPayloadGroupModel;
 }
 
 export interface ChartsExportMeasurementModel {

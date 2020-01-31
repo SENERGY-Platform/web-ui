@@ -19,7 +19,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {ChartsModel} from '../../shared/charts.model';
 import {ElementSizeService} from '../../../../core/services/element-size.service';
-import {catchError, map} from 'rxjs/internal/operators';
+import {catchError} from 'rxjs/internal/operators';
 import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
 import {environment} from '../../../../../environments/environment';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
@@ -28,11 +28,15 @@ import {ChartDataTableModel} from '../../../../core/components/chart/chart-data-
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {ChartsExportEditDialogComponent} from '../dialog/charts-export-edit-dialog.component';
-import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import {WidgetModel, WidgetPropertiesModels} from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
 import {ErrorModel} from '../../../../core/model/error.model';
-import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from './charts-export-properties.model';
+import {ChartsExportMeasurementModel, ChartsExportPropertiesModel, ChartsExportVAxesModel} from './charts-export-properties.model';
+import {
+    ChartsExportRequestPayloadGroupModel,
+    ChartsExportRequestPayloadModel,
+    ChartsExportRequestPayloadQueriesModel, ChartsExportRequestPayloadTimeModel
+} from './charts-export-request-payload.model';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -64,20 +68,44 @@ export class ChartsExportService {
         });
     }
 
-    getData(exports: ChartsExportMeasurementModel[], limit: number | undefined): Observable<ChartsExportModel | { error: string }> {
-        const ids = exports.map(e => e.id).join(',');
-        return this.http.get<ChartsExportModel>(environment.influxAPIURL + '/merge?ids=' + ids + '&limit=' + limit).pipe(
+    getData(properties: WidgetPropertiesModels): Observable<ChartsExportModel | { error: string }> {
+        const widgetProperties = <ChartsExportPropertiesModel>properties;
+        const requestPayload: ChartsExportRequestPayloadModel = {
+            time: {
+                last: '',
+                end: '',
+                start: ''
+            },
+            group: {
+                type: undefined,
+                time: ''
+            },
+            queries: []
+        };
+
+        requestPayload.time = widgetProperties.time || {} as ChartsExportRequestPayloadTimeModel;
+
+        if (widgetProperties.vAxes) {
+            const array: ChartsExportRequestPayloadQueriesModel[] = [];
+            widgetProperties.vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
+                // todo: gruppenwechsel implementieren;
+                array.push({id: vAxis.instanceId, fields: [{name: vAxis.valueName, math: vAxis.math}]});
+            });
+            requestPayload.queries = array;
+        }
+
+        return this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {error: 'error'}))
         );
     }
 
     getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
-            this.getData(widget.properties.exports || [], widget.properties.interval).subscribe((resp: (ChartsExportModel | ErrorModel)) => {
+            this.getData(widget.properties).subscribe((resp: (ChartsExportModel | ErrorModel)) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
                     observer.next(resp);
                 } else {
-                    if (resp.results[0].series === undefined) {
+                    if (resp.results[0].series[0].values.length === 0) {
                         // no data
                         observer.next(this.setProcessInstancesStatusValues(
                             widget,
@@ -107,7 +135,7 @@ export class ChartsExportService {
         series.values.forEach((item: (string | number)[]) => {
                 const dataPoint: (Date | number) [] = [new Date(<string>item[0])];
                 indices.forEach((resp: { index: number, math: string }) => {
-                    dataPoint.push(resp.math !== '' ? eval(<number>item[resp.index] + resp.math) : <number>item[resp.index]);
+                    dataPoint.push(<number>item[resp.index]);
                 });
                 dataTable.data.push(dataPoint);
             }

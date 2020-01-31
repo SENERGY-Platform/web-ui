@@ -32,6 +32,6 @@ export interface WidgetModel {
     y?: number;
 }
 
-interface WidgetPropertiesModels extends SwitchPropertiesModel, ChartsExportPropertiesModel, DeviceDowntimeGatewayPropertiesModel,
+export interface WidgetPropertiesModels extends SwitchPropertiesModel, ChartsExportPropertiesModel, DeviceDowntimeGatewayPropertiesModel,
     EnergyPredictionPropertiesModel, AirQualityPropertiesModel, SingleValuePropertiesModel, MultiValuePropertiesModel, ProcessIncidentPropertiesModel {
 }

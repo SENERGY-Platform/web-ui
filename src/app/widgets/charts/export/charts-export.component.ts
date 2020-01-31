@@ -99,11 +99,15 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     }
 
     private checkConfiguration() {
-        if (this.widget.properties.exports && this.widget.properties.exports.length < 1) {
+        if (this.widget.properties.exports) {
+            if (this.widget.properties.exports.length < 1) {
+                this.configureWidget = true;
+            }
+        } else {
             this.configureWidget = true;
         }
 
-        if (this.widget.properties.interval === undefined || this.widget.properties.interval === null) {
+        if (this.widget.properties.time === undefined) {
             this.configureWidget = true;
         }
     }

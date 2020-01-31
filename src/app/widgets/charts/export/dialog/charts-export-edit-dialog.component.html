@@ -56,13 +56,22 @@
             </mat-error>
         </mat-form-field>
 
-        <mat-form-field color="accent">
-            <mat-label>Interval</mat-label>
-            <input type="number" matInput placeholder="Interval" [(ngModel)]="widget.properties.interval" required
-                   #interval="ngModel">
-            <mat-error *ngIf="interval.errors">
-                Please set a interval!
+        <mat-form-field color="accent" class="full-width">
+            <mat-select [(ngModel)]="widget.properties.timeRangeType" placeholder="Time Range Type" required
+                        #timeRangeType="ngModel">
+                <mat-option *ngFor="let timeRangeType of timeRangeTypes" [value]="timeRangeType">
+                    {{timeRangeType}}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="timeRangeType.errors">
+                Please choose a time Range Type!
             </mat-error>
+        </mat-form-field>
+
+        <mat-form-field color="accent" class="full-width" *ngIf="widget.properties.timeRangeType === timeRangeTypes[0]">
+            <mat-label>Last</mat-label>
+            <input type="text" matInput placeholder="e.g. 15m, 1h"
+                   [(ngModel)]="widget.properties.time.last" [value]="'test'">
         </mat-form-field>
 
         <table cellspacing="0">
@@ -157,7 +166,7 @@
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
     <button class="mat-raised-button mat-accent" (click)="save()"
-            [disabled]="disableSave || interval.errors || chartType.errors || formControl.hasError('valid') || selection.selected.length === 0">
+            [disabled]="disableSave || chartType.errors || formControl.hasError('valid') || selection.selected.length === 0">
         Save
     </button>
 </mat-dialog-actions>
