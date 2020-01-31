@@ -30,17 +30,4 @@ export class UtilService {
         return window.btoa(unescape(encodeURIComponent(svg)));
     }
 
-    convertStringToSODateString(d: string): string {
-        const date = new Date(d);
-        function pad(n: any) {
-            return n < 10 ? '0' + n : n;
-        }
-        return date.getUTCFullYear() + '-'
-            + pad(date.getUTCMonth() + 1) + '-'
-            + pad(date.getUTCDate()) + 'T'
-            + pad(date.getUTCHours()) + ':'
-            + pad(date.getUTCMinutes()) + ':'
-            + pad(date.getUTCSeconds()) + 'Z';
-    }
-
 }

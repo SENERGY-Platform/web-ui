@@ -50,8 +50,7 @@ export class ChartsExportService {
                 private elementSizeService: ElementSizeService,
                 private errorHandlerService: ErrorHandlerService,
                 private dialog: MatDialog,
-                private dashboardService: DashboardService,
-                private utilService: UtilService) {
+                private dashboardService: DashboardService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -90,8 +89,8 @@ export class ChartsExportService {
         }
 
         if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute && widgetProperties.time) {
-            requestPayload.time.start = '\'' + this.utilService.convertStringToSODateString(<string>widgetProperties.time.start) + '\'';
-            requestPayload.time.end = '\'' + this.utilService.convertStringToSODateString(<string>widgetProperties.time.end) + '\'';
+            requestPayload.time.start = '\'' + new Date(<string>widgetProperties.time.start).toISOString() + '\'';
+            requestPayload.time.end = '\'' + new Date(<string>widgetProperties.time.end).toISOString() + '\'';
         }
 
         if (widgetProperties.vAxes) {
