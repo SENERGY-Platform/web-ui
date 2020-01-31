@@ -93,6 +93,10 @@ export class ChartsExportService {
             requestPayload.time.end = '\'' + new Date(<string>widgetProperties.time.end).toISOString() + '\'';
         }
 
+        if (widgetProperties.group && widgetProperties.group.type !== undefined && widgetProperties.group.type !== '') {
+            requestPayload.group = widgetProperties.group;
+        }
+
         if (widgetProperties.vAxes) {
             const array: ChartsExportRequestPayloadQueriesModel[] = [];
             widgetProperties.vAxes.forEach((vAxis: ChartsExportVAxesModel) => {

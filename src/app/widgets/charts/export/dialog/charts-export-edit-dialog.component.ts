@@ -39,11 +39,14 @@ export class ChartsExportEditDialogComponent implements OnInit {
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {id: '', name: '', type: '', properties: {
+        group: {time: '', type: ''}
+        }};
     disableSave = false;
     chartTypes = ['LineChart', 'ColumnChart'];
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
+    groupTypes = ['mean', 'sum', 'count', 'median'];
 
     displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'color', 'math'];
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
@@ -164,6 +167,13 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 last: '1d',
                 start: '',
                 end: ''
+            };
+        }
+
+        if (this.widget.properties.group === undefined) {
+            this.widget.properties.group = {
+                time: '',
+                type: '',
             };
         }
     }
