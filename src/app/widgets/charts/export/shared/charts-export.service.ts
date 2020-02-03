@@ -99,8 +99,13 @@ export class ChartsExportService {
         if (widgetProperties.vAxes) {
             const array: ChartsExportRequestPayloadQueriesModel[] = [];
             widgetProperties.vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
-                // todo: gruppenwechsel implementieren;
-                array.push({id: vAxis.instanceId, fields: [{name: vAxis.valueName, math: vAxis.math}]});
+
+                if (array.length > 0 && array[array.length - 1].id === vAxis.instanceId) {
+                    array[array.length - 1].fields.push({name: vAxis.valueName, math: vAxis.math});
+                } else {
+                    array.push({id: vAxis.instanceId, fields: [{name: vAxis.valueName, math: vAxis.math}]});
+                }
+                
             });
             requestPayload.queries = array;
         }
