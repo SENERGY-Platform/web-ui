@@ -37,7 +37,6 @@ import {
     ChartsExportRequestPayloadQueriesModel,
 } from './charts-export-request-payload.model';
 import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
-import {UtilService} from '../../../../core/services/util.service';
 
 const customColor = '#4484ce'; // /* cc */
 
