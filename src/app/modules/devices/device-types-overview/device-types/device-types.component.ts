@@ -59,7 +59,7 @@ export class DeviceTypesComponent implements OnInit {
     measuringFunctions: DeviceTypeFunctionModel[] = [];
     controllingFunctions: DeviceTypeFunctionModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
-    serializations: string[] = ['json', 'xml'];
+    serializations: string[] = ['json', 'xml', 'plain-text'];
     id = '';
     queryParamFunction = '';
 
