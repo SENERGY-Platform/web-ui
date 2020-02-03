@@ -89,8 +89,8 @@ export class ChartsExportService {
         }
 
         if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute && widgetProperties.time) {
-            requestPayload.time.start = '\'' + new Date(<string>widgetProperties.time.start).toISOString() + '\'';
-            requestPayload.time.end = '\'' + new Date(<string>widgetProperties.time.end).toISOString() + '\'';
+            requestPayload.time.start = new Date(<string>widgetProperties.time.start).toISOString();
+            requestPayload.time.end = new Date(<string>widgetProperties.time.end).toISOString();
         }
 
         if (widgetProperties.group && widgetProperties.group.type !== undefined && widgetProperties.group.type !== '') {
