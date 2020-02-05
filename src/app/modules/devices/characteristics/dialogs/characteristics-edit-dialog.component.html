@@ -31,7 +31,7 @@
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Characteristics JSON</mat-label>
-            <textarea class="textarea-size" [formControl]="characteristicControl" matInput
+            <textarea rows="10" [formControl]="characteristicControl" matInput
                       placeholder="Insert structure in json format" rows="10"></textarea>
             <mat-error *ngIf="characteristicControl.invalid">
                 Enter valid json!
@@ -41,8 +41,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" [disabled]="conceptControl.invalid || characteristicControl.invalid"
+    <button class="mat-raised-button color-accent button-margin" (click)="close()">Cancel</button>
+    <button class="mat-raised-button mat-accent button-margin" [disabled]="conceptControl.invalid || characteristicControl.invalid"
             (click)="save()">Save
     </button>
 </mat-dialog-actions>
