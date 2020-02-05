@@ -39,3 +39,7 @@ table {
 .example-first-footer-row td{
     border-bottom: none;
 }
+
+mat-dialog-actions button:not(:last-child) {
+    margin-right: 8px;
+}
