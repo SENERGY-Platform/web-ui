@@ -24,3 +24,8 @@
 .full-width {
     width: 100%;
 }
+
+.button-margin {
+    margin-left: 4px;
+    margin-right: 4px;
+}
