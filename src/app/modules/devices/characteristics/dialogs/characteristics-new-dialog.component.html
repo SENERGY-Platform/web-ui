@@ -32,7 +32,7 @@
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Characteristics JSON</mat-label>
             <textarea [formControl]="characteristicControl" matInput
-                      placeholder="Insert structure in json format"></textarea>
+                      placeholder="Insert structure in json format" rows="10"></textarea>
             <mat-error *ngIf="characteristicControl.invalid">
                 Enter valid json!
             </mat-error>
