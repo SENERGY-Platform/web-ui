@@ -17,6 +17,7 @@
 import {Injectable} from '@angular/core';
 import {BpmnElement, BpmnParameter} from './designer.model';
 import {DeviceTypeSelectionResultModel} from '../../../devices/device-types-overview/shared/device-type-selection.model';
+import {DesignerErrorModel} from './designer-error.model';
 
 @Injectable({
     providedIn: 'root'
@@ -47,17 +48,13 @@ export class DesignerService {
     }
 
 
-    checkConstraints(modeler: any): { error: boolean, text: string[] } {
-        const response: { error: boolean, text: string[] } = {error: false, text: []};
+    checkConstraints(modeler: any): DesignerErrorModel {
+        let response: DesignerErrorModel = {error: false, text: []};
         const elements = modeler.injector.get('elementRegistry');
         elements.forEach((el: DesignerElementModel) => {
             if (el.type === 'bpmn:Collaboration') {
                 el.businessObject.participants.forEach(((participant: DesignerElementParticipantsModel) => {
-                        const checkLane = this.checkLaneConstraints(participant);
-                        if (checkLane.error) {
-                            response.error = true;
-                            response.text = checkLane.text;
-                        }
+                    response = this.checkLaneConstraints(participant);
                     })
                 );
             }
@@ -65,8 +62,8 @@ export class DesignerService {
         return response;
     }
 
-    private checkLaneConstraints(participant: DesignerElementParticipantsModel): { error: boolean, text: string[] } {
-        let response: { error: boolean, text: string[] } = {error: false, text: []};
+    private checkLaneConstraints(participant: DesignerElementParticipantsModel): DesignerErrorModel {
+        let response: DesignerErrorModel = {error: false, text: []};
 
         if (participant.processRef.laneSets) {
             participant.processRef.laneSets.forEach((laneSet: DesignerElementLaneSetsModel) => {
@@ -82,8 +79,8 @@ export class DesignerService {
         return response;
     }
 
-    private checkFlowNodeElements(flowNode: DesignerElementFlowNodeRefModel[], errorText: string): { error: boolean, text: string[] } {
-        const response: { error: boolean, text: string[] } = {error: false, text: []};
+    private checkFlowNodeElements(flowNode: DesignerElementFlowNodeRefModel[], errorText: string): DesignerErrorModel {
+        const response: DesignerErrorModel = {error: false, text: []};
         let meta: (DeviceTypeSelectionResultModel | null) = null;
         flowNode.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
             const newMeta = this.getMeta(flowElement);
