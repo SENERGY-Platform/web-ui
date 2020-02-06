@@ -29,7 +29,6 @@
     min-height: 200px;
 }
 
-.button-margin {
-    margin-left: 4px;
-    margin-right: 4px;
+mat-dialog-actions button:not(:last-child) {
+    margin-right: 8px;
 }

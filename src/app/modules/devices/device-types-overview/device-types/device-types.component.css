@@ -36,9 +36,8 @@
     width: 100%;
 }
 
-.button-save-margin {
-    margin-left: 4px;
-    margin-right: 4px;
+.buttons button:not(:last-child) {
+    margin-right: 8px;
 }
 
 .button-margin {

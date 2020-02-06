@@ -41,8 +41,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button class="mat-raised-button color-accent button-margin" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent button-margin" [disabled]="conceptControl.invalid || characteristicControl.invalid"
+    <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
+    <button class="mat-raised-button mat-accent" [disabled]="conceptControl.invalid || characteristicControl.invalid"
             (click)="create()">Create
     </button>
 </mat-dialog-actions>
