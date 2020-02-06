@@ -47,8 +47,8 @@ export class DesignerService {
     }
 
 
-    checkConstraints(modeler: any): {error: boolean, text: string[]} {
-        const response: {error: boolean, text: string[]} = {error: false, text: []};
+    checkConstraints(modeler: any): { error: boolean, text: string[] } {
+        const response: { error: boolean, text: string[] } = {error: false, text: []};
         const elements = modeler.injector.get('elementRegistry');
         elements.forEach((el: DesignerElementModel) => {
             if (el.type === 'bpmn:Collaboration') {
@@ -65,44 +65,38 @@ export class DesignerService {
         return response;
     }
 
-    private checkLaneConstraints(participant: DesignerElementParticipantsModel): {error: boolean, text: string[]} {
-        const response: {error: boolean, text: string[]} = {error: false, text: []};
+    private checkLaneConstraints(participant: DesignerElementParticipantsModel): { error: boolean, text: string[] } {
+        let response: { error: boolean, text: string[] } = {error: false, text: []};
 
         if (participant.processRef.laneSets) {
             participant.processRef.laneSets.forEach((laneSet: DesignerElementLaneSetsModel) => {
                 laneSet.lanes.forEach((lane: DesignerElementLanesModel) => {
-                    let meta: (DeviceTypeSelectionResultModel | null) = null;
-                    lane.flowNodeRef.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
-                        const newMeta = this.getMeta(flowElement);
-                        if (newMeta) {
-                            if (!meta && newMeta) {
-                                meta = newMeta;
-                            }
-                            if (this.checkDeviceClasses(meta, newMeta)) {
-                                response.error = true;
-                                response.text.push(lane.name || lane.id);
-                            }
-                        }
-                    });
+                    response = this.checkFlowNodeElements(lane.flowNodeRef, lane.name || lane.id);
                 });
             });
         } else {
             if (participant.processRef.flowElements) {
-                let meta: (DeviceTypeSelectionResultModel | null) = null;
-                participant.processRef.flowElements.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
-                    const newMeta = this.getMeta(flowElement);
-                    if (newMeta) {
-                        if (!meta && newMeta) {
-                            meta = newMeta;
-                        }
-                        if (this.checkDeviceClasses(meta, newMeta)) {
-                            response.error = true;
-                            response.text.push(participant.name || participant.id);
-                        }
-                    }
-                });
+                response = this.checkFlowNodeElements(participant.processRef.flowElements, participant.name || participant.id);
             }
         }
+        return response;
+    }
+
+    private checkFlowNodeElements(flowNode: DesignerElementFlowNodeRefModel[], errorText: string): { error: boolean, text: string[] } {
+        const response: { error: boolean, text: string[] } = {error: false, text: []};
+        let meta: (DeviceTypeSelectionResultModel | null) = null;
+        flowNode.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
+            const newMeta = this.getMeta(flowElement);
+            if (newMeta) {
+                if (!meta && newMeta) {
+                    meta = newMeta;
+                }
+                if (this.checkDeviceClasses(meta, newMeta)) {
+                    response.error = true;
+                    response.text.push(errorText);
+                }
+            }
+        });
         return response;
     }
 
