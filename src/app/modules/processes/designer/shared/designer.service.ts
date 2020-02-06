@@ -80,7 +80,7 @@ export class DesignerService {
                             }
                             if (this.checkDeviceClasses(meta, newMeta)) {
                                 response.error = true;
-                                response.text.push(lane.name);
+                                response.text.push(lane.name || lane.id);
                             }
                         }
                     });
@@ -97,7 +97,7 @@ export class DesignerService {
                         }
                         if (this.checkDeviceClasses(meta, newMeta)) {
                             response.error = true;
-                            response.text.push('todo');
+                            response.text.push(participant.name || participant.id);
                         }
                     }
                 });

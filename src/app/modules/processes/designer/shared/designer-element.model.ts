@@ -42,6 +42,7 @@ interface DesignerElementFlowNodeRefModel {
 }
 
 interface DesignerElementParticipantsModel {
+    id: string;
     processRef: DesignerElementProcessRefModel;
     name: string;
 }
@@ -56,6 +57,7 @@ interface DesignerElementLaneSetsModel {
 }
 
 interface DesignerElementLanesModel {
+    id: string;
     flowNodeRef: DesignerElementFlowNodeRefModel[];
     name: string;
 }
