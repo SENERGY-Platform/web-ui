@@ -23,3 +23,7 @@
 .full-width {
     width: 100%;
 }
+
+mat-dialog-actions button:not(:last-child) {
+    margin-right: 8px;
+}

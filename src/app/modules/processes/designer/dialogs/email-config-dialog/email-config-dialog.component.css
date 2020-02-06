@@ -23,3 +23,8 @@
 .form-filed-area-checkbox {
     margin-left: 5px;
 }
+
+mat-dialog-actions button:not(:last-child) {
+    margin-right: 8px;
+}
+
