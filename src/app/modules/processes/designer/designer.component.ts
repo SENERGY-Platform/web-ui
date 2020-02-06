@@ -204,8 +204,8 @@ export class ProcessDesignerComponent implements OnInit {
 
     save(): void {
         const invalidLanes = this.designerService.checkConstraints(this.modeler);
-        if (invalidLanes.length > 0) {
-            this.snackBar.open('Error! Multiple device types in ' + this.errorText(invalidLanes) + '!', undefined, {duration: 3500});
+        if (invalidLanes.error) {
+            this.snackBar.open('Error! Multiple device classes in ' + invalidLanes.text.join(', ') + '!', undefined, {duration: 3500});
         } else {
             this.saveXML((errXML, processXML) => {
                 if (errXML) {
@@ -238,17 +238,6 @@ export class ProcessDesignerComponent implements OnInit {
         } else {
             this.snackBar.open('Failed to load file!', undefined, {duration: 2000});
         }
-    }
-
-    private errorText(invalidLanes: { businessObject: { id: string } }[]): string {
-        let text = '';
-        for (let i = 0; i < invalidLanes.length; i++) {
-            text = text + invalidLanes[i].businessObject.id;
-            if (i < invalidLanes.length - 1) {
-                text = text + ', ';
-            }
-        }
-        return text;
     }
 
     private saveXML(callback: (error: Error, processXML: string) => void) {

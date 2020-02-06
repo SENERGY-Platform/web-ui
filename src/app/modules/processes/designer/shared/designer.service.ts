@@ -16,6 +16,7 @@
 
 import {Injectable} from '@angular/core';
 import {BpmnElement, BpmnParameter} from './designer.model';
+import {DeviceTypeSelectionResultModel} from '../../../devices/device-types-overview/shared/device-type-selection.model';
 
 @Injectable({
     providedIn: 'root'
@@ -45,43 +46,89 @@ export class DesignerService {
         return result;
     }
 
-    checkConstraints(modeler: any): {businessObject: {id: string}}[] {
-        return modeler.injector.get('elementRegistry').filter((element: any) => {
-            return element.type === 'bpmn:Lane' && !checkLaneConstraints(element.businessObject);
+
+    checkConstraints(modeler: any): {error: boolean, text: string[]} {
+        const response: {error: boolean, text: string[]} = {error: false, text: []};
+        const elements = modeler.injector.get('elementRegistry');
+        elements.forEach((el: DesignerElementModel) => {
+            if (el.type === 'bpmn:Collaboration') {
+                el.businessObject.participants.forEach(((participant: DesignerElementParticipantsModel) => {
+                        const checkLane = this.checkLaneConstraints(participant);
+                        if (checkLane.error) {
+                            response.error = true;
+                            response.text = checkLane.text;
+                        }
+                    })
+                );
+            }
         });
+        return response;
+    }
 
-        function checkLaneConstraints(businessObject: any): boolean {
-            let meta = null;
-            for (let i = 0; businessObject.flowNodeRef && i < businessObject.flowNodeRef.length; i++) {
-                const newMeta = getMeta(businessObject.flowNodeRef[i]);
-                if (!meta && newMeta) {
-                    meta = newMeta;
-                }
-                if (!compatibleMeta(meta, newMeta)) {
-                    return false;
-                }
-            }
-            return true;
-        }
+    private checkLaneConstraints(participant: DesignerElementParticipantsModel): {error: boolean, text: string[]} {
+        const response: {error: boolean, text: string[]} = {error: false, text: []};
 
-        function getMeta(flowNodeRef: any): any {
-            if (flowNodeRef.$type === 'bpmn:ServiceTask' && flowNodeRef.type === 'external' && flowNodeRef.topic === 'execute_in_dose') {
-                return getPayload(flowNodeRef);
-            }
-        }
-
-        function getPayload(element: any): any {
-            for (let i = 0; i < element.extensionElements.values.length; i++) {
-                for (let j = 0; j < element.extensionElements.values[i].inputParameters.length; j++) {
-                    if (element.extensionElements.values[i].inputParameters[j].name === 'payload') {
-                        return JSON.parse(element.extensionElements.values[i].inputParameters[j].value);
+        if (participant.processRef.laneSets) {
+            participant.processRef.laneSets.forEach((laneSet: DesignerElementLaneSetsModel) => {
+                laneSet.lanes.forEach((lane: DesignerElementLanesModel) => {
+                    let meta: (DeviceTypeSelectionResultModel | null) = null;
+                    lane.flowNodeRef.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
+                        const newMeta = this.getMeta(flowElement);
+                        if (newMeta) {
+                            if (!meta && newMeta) {
+                                meta = newMeta;
+                            }
+                            if (this.checkDeviceClasses(meta, newMeta)) {
+                                response.error = true;
+                                response.text.push(lane.name);
+                            }
+                        }
+                    });
+                });
+            });
+        } else {
+            if (participant.processRef.flowElements) {
+                let meta: (DeviceTypeSelectionResultModel | null) = null;
+                participant.processRef.flowElements.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
+                    const newMeta = this.getMeta(flowElement);
+                    if (newMeta) {
+                        if (!meta && newMeta) {
+                            meta = newMeta;
+                        }
+                        if (this.checkDeviceClasses(meta, newMeta)) {
+                            response.error = true;
+                            response.text.push('todo');
+                        }
                     }
+                });
+            }
+        }
+        return response;
+    }
+
+    private getMeta(flowNodeRef: DesignerElementFlowNodeRefModel): (DeviceTypeSelectionResultModel | null) {
+        if (flowNodeRef.$type === 'bpmn:ServiceTask' && flowNodeRef.type === 'external') {
+            return this.getPayload(flowNodeRef);
+        }
+        return null;
+    }
+
+    private getPayload(flowNode: DesignerElementFlowNodeRefModel): (DeviceTypeSelectionResultModel | null) {
+        for (let i = 0; i < flowNode.extensionElements.values.length; i++) {
+            for (let j = 0; j < flowNode.extensionElements.values[i].inputParameters.length; j++) {
+                if (flowNode.extensionElements.values[i].inputParameters[j].name === 'payload') {
+                    return JSON.parse(flowNode.extensionElements.values[i].inputParameters[j].value);
                 }
             }
         }
+        return null;
+    }
 
-        function compatibleMeta(meta: any, newMeta: any): boolean {
-            return !(meta && newMeta && meta.device_type !== newMeta.device_type);
+    private checkDeviceClasses(meta: (DeviceTypeSelectionResultModel | null), newMeta: (DeviceTypeSelectionResultModel | null)): boolean {
+        if (meta === null || newMeta === null) {
+            return false;
+        } else {
+            return meta.device_class.id !== newMeta.device_class.id;
         }
     }
 }
