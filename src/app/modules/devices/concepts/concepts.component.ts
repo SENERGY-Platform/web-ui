@@ -135,7 +135,6 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.dialogsService.openDeleteDialog('concept ' + concept.name).afterClosed().subscribe((deleteConcept: boolean) => {
             if (deleteConcept) {
                 this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
-                    console.log(resp);
                     if (resp === true) {
                         this.concepts.splice(this.concepts.indexOf(concept), 1);
                         this.snackBar.open('Concept deleted successfully.', undefined, {duration: 2000});

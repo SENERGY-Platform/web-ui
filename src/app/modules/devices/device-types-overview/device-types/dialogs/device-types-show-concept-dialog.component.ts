@@ -34,7 +34,6 @@ export class DeviceTypesShowConceptDialogComponent implements OnInit{
                 @Inject(MAT_DIALOG_DATA) data: { functions: DeviceTypeFunctionModel[] },
                 private conceptsService: ConceptsService) {
         this.functions = data.functions;
-        console.log(this.functions);
     }
 
     ngOnInit(): void {

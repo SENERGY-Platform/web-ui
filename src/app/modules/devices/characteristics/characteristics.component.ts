@@ -121,7 +121,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.dialogsService.openDeleteDialog('characteristic ' + characteristic.name).afterClosed().subscribe((deleteCharacteristic: boolean) => {
             if (deleteCharacteristic) {
                 this.characteristicsService.deleteCharacteristic(characteristic.concept_id, characteristic.id).subscribe((resp: boolean) => {
-                    console.log(resp);
                     if (resp === true) {
                         this.characteristics.splice(this.characteristics.indexOf(characteristic), 1);
                         this.snackBar.open('Characteristic deleted successfully.', undefined, {duration: 2000});
@@ -146,7 +145,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
         editDialogRef.afterClosed().subscribe((newCharacteristic: DeviceTypeCharacteristicsModel) => {
             if (newCharacteristic !== undefined) {
-                console.log(newCharacteristic);
                 this.reset();
                 this.characteristicsService.updateConcept(inputCharacteristic.concept_id, newCharacteristic).subscribe((characteristic: (DeviceTypeCharacteristicsModel | null)) => {
                     if (characteristic === null) {
