@@ -160,9 +160,7 @@ export class ProcessDesignerComponent implements OnInit {
                         }
                         const invalidLanes = this.designerService.checkConstraints(this.modeler);
                         if (invalidLanes.error) {
-                            this.snackBar.open('Error! Multiple device classes in Lane ' + invalidLanes.text.join(', ') + '!',
-                                undefined,
-                                {duration: 3500});
+                            this.showDeviceClassError(invalidLanes.text);
                         }
                     }
                 );
@@ -219,7 +217,7 @@ export class ProcessDesignerComponent implements OnInit {
     save(): void {
         const invalidLanes = this.designerService.checkConstraints(this.modeler);
         if (invalidLanes.error) {
-            this.snackBar.open('Error! Multiple device classes in Lane ' + invalidLanes.text.join(', ') + '!', undefined, {duration: 3500});
+            this.showDeviceClassError(invalidLanes.text);
         } else {
             this.saveXML((errXML, processXML) => {
                 if (errXML) {
@@ -272,5 +270,9 @@ export class ProcessDesignerComponent implements OnInit {
         } else {
             return '';
         }
+    }
+
+    private showDeviceClassError(text: string[]): void {
+        this.snackBar.open('Error! Multiple device classes in Lane ' + text.join(', ') + '!', undefined, {duration: 3500});
     }
 }
