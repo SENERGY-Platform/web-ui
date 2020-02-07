@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Navigation, Router} from '@angular/router';
 import {
     DeploymentsPreparedElementModel,
@@ -35,6 +35,7 @@ import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/sha
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import * as moment from 'moment';
 import {MatSnackBar} from '@angular/material';
+import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 
 
 @Component({
@@ -44,6 +45,8 @@ import {MatSnackBar} from '@angular/material';
 })
 
 export class ProcessDeploymentsConfigComponent implements OnInit {
+
+    @ViewChild('autosize', {static: false}) autosize!: CdkTextareaAutosize;
 
     processId = '';
     deploymentId = '';
@@ -101,7 +104,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 name: this.deployment.name,
                 svg: this.deployment.svg,
                 xml: this.deployment.xml,
-                xml_raw: this.deployment.xml_raw
+                xml_raw: this.deployment.xml_raw,
+                description: [{value: this.deployment.description || 'no description', disabled: true}],
             });
 
         }

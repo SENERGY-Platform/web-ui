@@ -31,6 +31,7 @@ export interface DeploymentsPreparedModel {
     svg: string;
     xml: string;
     xml_raw: string;
+    description: string;
 }
 
 export interface DeploymentsPreparedElementModel {

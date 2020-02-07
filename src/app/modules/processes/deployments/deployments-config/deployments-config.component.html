@@ -22,6 +22,10 @@
                     <input type="text" matInput placeholder="Prozessname"
                            formControlName="name">
                 </mat-form-field>
+                <mat-form-field class="full-width" color="accent">
+                    <textarea type="text" matInput placeholder="Process Description"
+                              formControlName="description" cdkTextareaAutosize #autosize="cdkTextareaAutosize"></textarea>
+                </mat-form-field>
                 <div formArrayName="elements" *ngIf="deploymentFormGroup.get('elements')">
                     <div [formGroupName]="elementIndex"
                          *ngFor="let element of deploymentFormGroup.get('elements').controls; let elementIndex = index">
