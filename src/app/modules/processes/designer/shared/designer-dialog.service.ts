@@ -31,6 +31,7 @@ import {
 } from '../../../devices/device-types-overview/shared/device-type-selection.model';
 import {TaskConfigDialogComponent} from '../dialogs/task-config-dialog/task-config-dialog.component';
 import {NotificationConfigDialogComponent} from '../dialogs/notification-config-dialog/notification-config-dialog.component';
+import {MatDialogRef} from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root'
@@ -126,15 +127,12 @@ export class DesignerDialogService {
         });
     }
 
-    openTaskConfigDialog(defaultSelection: DeviceTypeSelectionRefModel, callback: (connectorInfo: DeviceTypeSelectionResultModel) => void) {
+    openTaskConfigDialog(defaultSelection: DeviceTypeSelectionRefModel): Observable<DeviceTypeSelectionResultModel> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {selection: JSON.parse(JSON.stringify(defaultSelection || null))};         // create copy of object
-        const editDialogRef = this.dialog.open(TaskConfigDialogComponent, dialogConfig);
-        editDialogRef.afterClosed().subscribe((result: DeviceTypeSelectionResultModel) => {
-            if (result) {
-                callback(result);
-            }
-        });
+        return this.dialog.open(TaskConfigDialogComponent, dialogConfig).afterClosed();
     }
+
+
 }

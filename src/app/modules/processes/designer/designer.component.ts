@@ -42,6 +42,8 @@ import {DesignerService} from './shared/designer.service';
 import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
 import {ActivatedRoute} from '@angular/router';
 import {MatSnackBar} from '@angular/material';
+import {TaskConfigDialogComponent} from './dialogs/task-config-dialog/task-config-dialog.component';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -62,6 +64,7 @@ export class ProcessDesignerComponent implements OnInit {
         protected designerService: DesignerService,
         protected processRepoService: ProcessRepoService,
         private snackBar: MatSnackBar,
+        private dialog: MatDialog,
     ) {
     }
 
@@ -151,7 +154,18 @@ export class ProcessDesignerComponent implements OnInit {
                 devicetypeService: DeviceTypeSelectionRefModel,
                 callback: (connectorInfo: DeviceTypeSelectionResultModel) => void
             ) => {
-                that.designerDialogService.openTaskConfigDialog(devicetypeService, callback);
+                that.designerDialogService.openTaskConfigDialog(devicetypeService).subscribe((result: DeviceTypeSelectionResultModel) => {
+                        if (result) {
+                            callback(result);
+                        }
+                        const invalidLanes = this.designerService.checkConstraints(this.modeler);
+                        if (invalidLanes.error) {
+                            this.snackBar.open('Error! Multiple device classes in Lane ' + invalidLanes.text.join(', ') + '!',
+                                undefined,
+                                {duration: 3500});
+                        }
+                    }
+                );
             },
             configEmail: (to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void) => {
                 that.designerDialogService.openEmailConfigDialog(to, subj, content, callback);
@@ -205,7 +219,7 @@ export class ProcessDesignerComponent implements OnInit {
     save(): void {
         const invalidLanes = this.designerService.checkConstraints(this.modeler);
         if (invalidLanes.error) {
-            this.snackBar.open('Error! Multiple device classes in ' + invalidLanes.text.join(', ') + '!', undefined, {duration: 3500});
+            this.snackBar.open('Error! Multiple device classes in Lane ' + invalidLanes.text.join(', ') + '!', undefined, {duration: 3500});
         } else {
             this.saveXML((errXML, processXML) => {
                 if (errXML) {
