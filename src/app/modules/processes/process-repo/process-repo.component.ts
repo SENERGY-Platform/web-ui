@@ -32,6 +32,7 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {MatSnackBar} from '@angular/material';
 import {ProcessRepoConditionModel, ProcessRepoConditionsModel} from './shared/process-repo-conditions.model';
 import {Router} from '@angular/router';
+import {FormArray, FormBuilder} from '@angular/forms';
 
 const grids = new Map([
     ['xs', 1],
@@ -51,7 +52,7 @@ const sortingAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel(
 
 export class ProcessRepoComponent implements OnInit, OnDestroy {
 
-    repoItems: ProcessModel[] = [];
+    repoItemArray: FormArray = new FormArray([]);
     activeIndex = 0;
     gridCols = 0;
     animationDone = true;
@@ -78,7 +79,8 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 private permissionsDialogService: PermissionsDialogService,
                 private dialogsService: DialogsService,
                 private snackBar: MatSnackBar,
-                private router: Router) {
+                private router: Router,
+                private _formBuilder: FormBuilder) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
 
@@ -125,9 +127,9 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     deleteProcess(process: ProcessModel): void {
         this.dialogsService.openDeleteDialog('process').afterClosed().subscribe((deleteProcess: boolean) => {
             if (deleteProcess) {
-                this.processRepoService.deleteProcess(process.id).subscribe((resp: {status: number}) => {
+                this.processRepoService.deleteProcess(process.id).subscribe((resp: { status: number }) => {
                     if (resp.status === 200) {
-                        this.repoItems.splice(this.repoItems.indexOf(process), 1);
+                        this.repoItemArray.removeAt(this.repoItemArray.value.findIndex((item: ProcessModel) => process.id === item.id));
                         this.snackBar.open('Process deleted successfully.', undefined, {duration: 2000});
                         this.setRepoItemsParams(1);
                         setTimeout(() => {
@@ -210,19 +212,36 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
             this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.getConditions()).subscribe(
             (repoItems: ProcessModel[]) => {
                 this.animationDone = true;
+                this.addToFormArray(repoItems);
                 if (repoItems.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
-                this.repoItems = this.repoItems.concat(repoItems);
-                this.repoItems.forEach((repoItem: ProcessModel) => {
-                    repoItem.image = this.provideImg(repoItem.svgXML);
-                });
                 this.ready = true;
             });
     }
 
+    private addToFormArray(repoItems: ProcessModel[]): void {
+        repoItems.forEach((repoItem: ProcessModel) => {
+            this.repoItemArray.push(this._formBuilder.group(
+                {
+                    id: repoItem.id,
+                    name: repoItem.name,
+                    date: repoItem.date,
+                    svgXML: repoItem.svgXML,
+                    bpmn_xml: repoItem.bpmn_xml,
+                    publish: repoItem.publish,
+                    shared: repoItem.shared,
+                    parent_id: repoItem.parent_id,
+                    image: this.provideImg(repoItem.svgXML),
+                    permissions: repoItem.permissions,
+                    selected: repoItem.selected
+                }
+            ));
+        });
+    }
+
     private reset() {
-        this.repoItems = [];
+        this.repoItemArray.clear();
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
@@ -236,18 +255,22 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     private getConditions(): (ProcessRepoConditionsModel | null) {
         let conditions: ProcessRepoConditionsModel | null = {};
         switch (this.activeIndex) {
-            case 0: /** all */
+            case 0:
+                /** all */
                 conditions = null;
                 break;
-            case 1: /** own */
+            case 1:
+                /** own */
                 conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
                     {'condition': this.setCondition('features.parent_id', '==', 'null')}];
                 break;
-            case 2: /** marketplace */
-            conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
-                {'condition': this.setCondition('features.parent_id', '!=', 'null')}];
+            case 2:
+                /** marketplace */
+                conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
+                    {'condition': this.setCondition('features.parent_id', '!=', 'null')}];
                 break;
-            case 3: /** shared */
+            case 3:
+                /** shared */
                 conditions.condition = this.setCondition('creator', '!=', 'jwt.user');
                 break;
         }
@@ -265,6 +288,6 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     private setRepoItemsParams(limit: number) {
         this.ready = false;
         this.limit = limit;
-        this.offset = this.repoItems.length;
+        this.offset = this.repoItemArray.length;
     }
 }
