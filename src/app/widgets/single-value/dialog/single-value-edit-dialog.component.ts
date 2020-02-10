@@ -15,7 +15,6 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatAutocompleteSelectedEvent, MatDialogRef} from '@angular/material';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/internal/operators';
@@ -26,6 +25,8 @@ import {ExportModel, ExportValueModel} from '../../../modules/data/export/shared
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 
 
 @Component({

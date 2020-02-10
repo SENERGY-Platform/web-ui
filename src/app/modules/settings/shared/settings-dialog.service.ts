@@ -19,7 +19,8 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {SettingsChangeDialogComponent} from '../dialogs/settings-change-dialog.component';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Injectable({
     providedIn: 'root'

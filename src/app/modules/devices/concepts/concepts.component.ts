@@ -15,7 +15,7 @@
  */
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {Router} from '@angular/router';
@@ -27,6 +27,7 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
 import {ConceptsPermSearchModel} from './shared/concepts-perm-search.model';
 import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 const grids = new Map([
     ['xs', 1],

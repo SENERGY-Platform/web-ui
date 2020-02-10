@@ -34,7 +34,7 @@ import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import * as moment from 'moment';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 
 

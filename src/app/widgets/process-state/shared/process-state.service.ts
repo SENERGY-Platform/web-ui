@@ -17,7 +17,6 @@
 import {Injectable} from '@angular/core';
 import {forkJoin, Observable} from 'rxjs';
 import {ProcessStateModel} from './process-state.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {ProcessStateEditDialogComponent} from '../dialog/process-state-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -25,7 +24,8 @@ import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashb
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {catchError} from 'rxjs/operators';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {ProcessRepoService} from "../../../modules/processes/process-repo/shared/process-repo.service";
+import {ProcessRepoService} from '../../../modules/processes/process-repo/shared/process-repo.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root'

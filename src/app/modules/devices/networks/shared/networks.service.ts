@@ -21,10 +21,11 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {HubModel, NetworksModel} from './networks.model';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {NetworksEditDialogComponent} from '../dialogs/networks-edit-dialog.component';
 import {NetworksHistoryModel} from './networks-history.model';
 import {NetworksClearDialogComponent} from '../dialogs/networks-clear-dialog.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Injectable({
     providedIn: 'root'

@@ -21,7 +21,7 @@ import {ResponsiveService} from '../../../../core/services/responsive.service';
 import {DeviceInstancesService} from '../shared/device-instances.service';
 import {PermissionsDialogService} from '../../../permissions/shared/permissions-dialog.service';
 import {DialogsService} from '../../../../core/services/dialogs.service';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesUpdateModel} from '../shared/device-instances-update.model';
 import {KeycloakService} from 'keycloak-angular';
 

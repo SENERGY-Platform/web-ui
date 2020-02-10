@@ -15,7 +15,7 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {NotificationModel} from '../shared/notification.model';
 import {NotificationService} from '../shared/notification.service';
 

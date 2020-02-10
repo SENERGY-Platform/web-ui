@@ -16,12 +16,12 @@
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material';
 import {DomSanitizer} from '@angular/platform-browser';
 import {SingleValueService} from './shared/single-value.service';
 import {SingleValueModel} from './shared/single-value.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
+import {MatIconRegistry} from '@angular/material/icon';
 
 @Component({
     selector: 'senergy-single-value',

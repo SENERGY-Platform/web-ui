@@ -15,7 +15,6 @@
  */
 
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatTable, MatTableDataSource} from '@angular/material';
 import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
@@ -26,8 +25,9 @@ import {ExportModel, ExportValueModel} from '../../../../modules/data/export/sha
 import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
 import {SelectionModel} from '@angular/cdk/collections';
 import {PipelineModel} from '../../../../modules/data/pipeline-registry/shared/pipeline.model';
-import {ChartsExportRequestPayloadGroupModel} from '../shared/charts-export-request-payload.model';
 import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
+import {MatTable, MatTableDataSource} from '@angular/material/table';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',

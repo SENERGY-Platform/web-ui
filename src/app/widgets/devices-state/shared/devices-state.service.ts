@@ -19,7 +19,7 @@ import {Observable} from 'rxjs';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {DeviceInstancesHistoryModel} from '../../../modules/devices/device-instances/shared/device-instances-history.model';
 import {DevicesStateModel} from './devices-state.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {DevicesStateEditDialogComponent} from '../dialog/devices-state-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';

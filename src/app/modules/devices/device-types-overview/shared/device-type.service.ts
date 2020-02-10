@@ -27,7 +27,7 @@ import {
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
-import {MatDialog} from '@angular/material';
+import {MatDialog} from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root'

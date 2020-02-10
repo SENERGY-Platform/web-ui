@@ -17,7 +17,6 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {SingleValueModel} from './single-value.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {SingleValueEditDialogComponent} from '../dialog/single-value-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -28,6 +27,7 @@ import {DeploymentsService} from '../../../modules/processes/deployments/shared/
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {HttpClient} from '@angular/common/http';
 import {ChartsExportModel} from '../../charts/export/shared/charts-export.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root'

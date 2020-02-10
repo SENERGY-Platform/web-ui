@@ -17,7 +17,7 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {MultiValueModel} from './multi-value.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {MultiValueEditDialogComponent} from '../dialog/multi-value-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';

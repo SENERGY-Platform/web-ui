@@ -16,8 +16,8 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {DeviceTypeFunctionModel, DeviceTypeFunctionType} from '../../shared/device-type.model';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {DeviceTypeFunctionModel} from '../../shared/device-type.model';
 import {ConceptsService} from '../../../concepts/shared/concepts.service';
 import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
 

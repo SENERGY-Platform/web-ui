@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {ProcessModelListEditDialogComponent} from '../dialogs/process-model-list-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -23,7 +23,7 @@ import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashb
 import {Observable} from 'rxjs';
 import {ProcessModelListModel} from './process-model-list.model';
 import {ProcessModel} from '../../../modules/processes/process-repo/shared/process.model';
-import {ProcessRepoService} from "../../../modules/processes/process-repo/shared/process-repo.service";
+import {ProcessRepoService} from '../../../modules/processes/process-repo/shared/process-repo.service';
 
 
 @Injectable({

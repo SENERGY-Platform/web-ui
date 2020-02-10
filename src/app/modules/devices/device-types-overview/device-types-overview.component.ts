@@ -21,8 +21,7 @@ import {SearchbarService} from '../../../core/components/searchbar/shared/search
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DeviceTypeService} from './shared/device-type.service';
 import {DeviceTypePermSearchModel} from './shared/device-type-perm-search.model';
-import {DeviceTypeContentModel, DeviceTypeModel, DeviceTypeServiceModel} from './shared/device-type.model';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {Router} from '@angular/router';

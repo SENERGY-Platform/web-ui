@@ -19,7 +19,7 @@ import {Observable} from 'rxjs';
 import {ChartsModel} from '../../../shared/charts.model';
 import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
 import {ElementSizeService} from '../../../../../core/services/element-size.service';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
@@ -28,7 +28,6 @@ import {DeviceDowntimeGatewayEditDialogComponent} from '../dialogs/device-downti
 import {NetworksService} from '../../../../../modules/devices/networks/shared/networks.service';
 import {DeviceDowntimeGatewayModel} from './device-downtime-gateway.model';
 import {NetworksHistoryModel} from '../../../../../modules/devices/networks/shared/networks-history.model';
-import {DeviceInstancesHistoryModel} from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
 
 const stateConnected = 'connected';
 const stateDisconnected = 'disconnected';

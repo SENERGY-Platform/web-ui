@@ -23,12 +23,13 @@ import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';
 import {DeploymentsService} from './shared/deployments.service';
 import {DeploymentsModel} from './shared/deployments.model';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ClipboardService} from 'ngx-clipboard';
 import {environment} from '../../../../environments/environment';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deployments-missing-dependencies-dialog.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 const grids = new Map([
     ['xs', 1],

@@ -16,10 +16,9 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
 import {
-    DeviceTypeConceptModel,
     DeviceTypeFunctionModel,
     DeviceTypeFunctionType
 } from '../../shared/device-type.model';
@@ -27,6 +26,7 @@ import {util} from 'jointjs';
 import uuid = util.uuid;
 import {ConceptsService} from '../../../concepts/shared/concepts.service';
 import {ConceptsPermSearchModel} from '../../../concepts/shared/concepts-perm-search.model';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',

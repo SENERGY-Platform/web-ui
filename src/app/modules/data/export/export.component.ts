@@ -18,7 +18,7 @@ import {Component, OnInit} from '@angular/core';
 import {ExportService} from './shared/export.service';
 import {ExportModel} from './shared/export.model';
 import {environment} from '../../../../environments/environment';
-import {MatInput, MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {ClipboardService} from 'ngx-clipboard';

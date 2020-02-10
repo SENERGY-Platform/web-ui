@@ -22,13 +22,14 @@ import {catchError, map, share} from 'rxjs/internal/operators';
 import {DeviceInstancesModel} from './device-instances.model';
 import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
 import {DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../device-types-overview/shared/device-type.service';
 import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {DeviceTypePermSearchModel} from '../../device-types-overview/shared/device-type-perm-search.model';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 ​
 

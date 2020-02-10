@@ -15,9 +15,8 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatChipInputEvent, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DeviceInstancesModel} from '../shared/device-instances.model';
-import {COMMA, ENTER, SEMICOLON} from '@angular/cdk/keycodes';
 
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',

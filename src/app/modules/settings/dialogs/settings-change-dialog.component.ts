@@ -16,10 +16,11 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {MatDialogRef, MatSnackBar} from '@angular/material';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {AuthorizationProfileModel} from '../../../core/components/authorization/authorization-profile.model';
 import {AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
+import {MatDialogRef} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
     templateUrl: './settings-change-dialog.component.html',

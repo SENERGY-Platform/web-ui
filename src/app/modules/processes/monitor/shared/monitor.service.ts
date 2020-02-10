@@ -21,7 +21,7 @@ import {forkJoin, Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
 import {MonitorProcessModel} from './monitor-process.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {MonitorDetailsDialogComponent} from '../dialogs/monitor-details-dialog.component';
 import {MonitorProcessTotalModel} from './monitor-process-total.model';
 import {ProcessIncidentsService} from '../../incidents/shared/process-incidents.service';

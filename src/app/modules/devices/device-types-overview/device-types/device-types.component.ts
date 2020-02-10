@@ -27,7 +27,7 @@ import {
     DeviceTypeServiceModel, functionTypes,
 } from '../shared/device-type.model';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
@@ -37,6 +37,7 @@ import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-as
 import {util} from 'jointjs';
 import uuid = util.uuid;
 import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 const controllingIndex = 0;
 const measuringIndex = 1;

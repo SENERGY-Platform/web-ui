@@ -16,9 +16,8 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
-import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
 import {jsonValidator} from '../../../../core/validators/json.validator';
 import {CharacteristicsPermSearchModel} from '../shared/characteristics-perm-search.model';

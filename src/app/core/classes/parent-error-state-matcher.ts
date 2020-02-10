@@ -1,4 +1,4 @@
-import {ErrorStateMatcher} from '@angular/material/typings/core';
+import {ErrorStateMatcher} from '@angular/material/core';
 import {FormControl, FormGroupDirective, NgForm} from '@angular/forms';
 
 export class ParentErrorStateMatcher implements ErrorStateMatcher {

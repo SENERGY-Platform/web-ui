@@ -15,7 +15,6 @@
  */
 
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatTable} from '@angular/material';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/internal/operators';
@@ -26,6 +25,8 @@ import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.mo
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {DeploymentsDefinitionModel} from '../../../modules/processes/deployments/shared/deployments-definition.model';
 import {SwitchPropertiesDeploymentsModel} from '../shared/switch-properties.model';
+import {MatTable} from '@angular/material/table';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 export interface TableElement {
     deploymentId: string;

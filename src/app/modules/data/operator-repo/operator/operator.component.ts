@@ -18,7 +18,7 @@ import {Component, OnInit} from '@angular/core';
 import {IOModel, OperatorModel} from '../shared/operator.model';
 import {ActivatedRoute} from '@angular/router';
 import {OperatorRepoService} from '../shared/operator-repo.service';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 
 @Component({

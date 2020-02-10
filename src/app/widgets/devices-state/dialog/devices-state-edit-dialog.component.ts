@@ -15,12 +15,13 @@
  */
 
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatTable} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import {MatTable} from '@angular/material/table';
 
 
 @Component({

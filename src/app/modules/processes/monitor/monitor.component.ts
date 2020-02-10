@@ -17,7 +17,6 @@
 import {map, startWith, switchMap} from 'rxjs/operators';
 
 import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
 import {merge, Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {MonitorService} from './shared/monitor.service';
@@ -27,6 +26,9 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {MonitorProcessTotalModel} from './shared/monitor-process-total.model';
 import {Navigation, Router} from '@angular/router';
 import {DeploymentsModel} from '../deployments/shared/deployments.model';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatPaginator} from '@angular/material/paginator';
+import {MatSort} from '@angular/material/sort';
 
 @Component({
     selector: 'senergy-process-monitor',

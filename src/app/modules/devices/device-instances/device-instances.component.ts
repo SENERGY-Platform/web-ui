@@ -25,7 +25,7 @@ import {KeycloakService} from 'keycloak-angular';
 import {TagValuePipe} from '../../../core/pipe/tag-value.pipe';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {Navigation, Router} from '@angular/router';
 import {NetworksModel} from '../networks/shared/networks.model';
 

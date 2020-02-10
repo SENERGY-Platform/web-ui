@@ -15,7 +15,6 @@
  */
 
 import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
 
 import {SwitchEditDialogComponent} from '../dialogs/switch-edit-dialog.component';
 import {environment} from '../../../../environments/environment';
@@ -27,6 +26,7 @@ import {ErrorHandlerService} from '../../../core/services/error-handler.service'
 import {SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel} from './switch-properties.model';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root'

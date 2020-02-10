@@ -24,7 +24,7 @@ import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 const grids = new Map([
     ['xs', 1],

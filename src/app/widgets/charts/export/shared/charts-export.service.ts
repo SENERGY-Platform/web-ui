@@ -25,7 +25,7 @@ import {environment} from '../../../../../environments/environment';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {ChartsExportColumnsModel, ChartsExportModel} from './charts-export.model';
 import {ChartDataTableModel} from '../../../../core/components/chart/chart-data-table.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {ChartsExportEditDialogComponent} from '../dialog/charts-export-edit-dialog.component';
 import {WidgetModel, WidgetPropertiesModels} from '../../../../modules/dashboard/shared/dashboard-widget.model';

@@ -25,7 +25,7 @@ import {
 } from '../../../devices/device-types-overview/shared/device-type.model';
 import {ExportModel, ExportValueModel} from '../shared/export.model';
 import {ExportService} from '../shared/export.service';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shared/pipeline.model';
 import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
 import {Router} from '@angular/router';

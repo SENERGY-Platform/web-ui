@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {MatDialog} from '@angular/material';
+import {MatDialog} from '@angular/material/dialog';
 
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';

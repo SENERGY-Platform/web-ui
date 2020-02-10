@@ -18,19 +18,21 @@ import {NgModule} from '@angular/core';
 
 import {RouterModule} from '@angular/router';
 import {CommonModule} from '@angular/common';
-import {
-    MatButtonModule, MatCheckboxModule, MatDialogModule,
-    MatDividerModule,
-    MatFormFieldModule,
-    MatGridListModule,
-    MatIconModule, MatInputModule,
-    MatListModule, MatSelectModule,
-    MatTooltipModule
-} from '@angular/material';
 import {CoreModule} from '../../../core/core.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {OperatorComponent} from './operator/operator.component';
 import {FormsModule} from '@angular/forms';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatListModule} from '@angular/material/list';
+import {MatButtonModule} from '@angular/material/button';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatInputModule} from '@angular/material/input';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatSelectModule} from '@angular/material/select';
 
 
 const operator = {path: 'data/operator-repo/op', pathMatch: 'full', component: OperatorComponent, data: { header: 'Analytics' }};

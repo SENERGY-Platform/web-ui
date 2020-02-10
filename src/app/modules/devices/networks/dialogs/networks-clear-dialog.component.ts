@@ -15,8 +15,7 @@
  */
 
 import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {NetworksModel} from '../shared/networks.model';
+import {MatDialogRef} from '@angular/material/dialog';
 
 @Component({
     templateUrl: './networks-clear-dialog.component.html',

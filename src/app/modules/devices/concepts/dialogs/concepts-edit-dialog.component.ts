@@ -16,13 +16,10 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
 import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
-import {ConceptsPermSearchModel} from '../shared/concepts-perm-search.model';
 import {ConceptsService} from '../shared/concepts.service';
-import {CharacteristicsService} from '../../characteristics/shared/characteristics.service';
-import {CharacteristicsPermSearchModel} from '../../characteristics/shared/characteristics-perm-search.model';
 import {ConceptsCharacteristicsModel} from '../shared/concepts-characteristics.model';
 
 @Component({

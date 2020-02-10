@@ -24,10 +24,11 @@ import {PermissionsResourceModel} from './permissions-resource.model';
 import {PermissionsUserModel} from './permissions-user.model';
 import {PermissionsRightsModel} from './permissions-rights.model';
 import {PermissionsEditModel} from './permissions-edit.model';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {PermissionDialogComponent} from '../dialogs/permission/permission-dialog.component';
 import {PermissionsService} from './permissions.service';
 import {PermissionsResponseModel} from './permissions-response.model';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Injectable({
     providedIn: 'root'

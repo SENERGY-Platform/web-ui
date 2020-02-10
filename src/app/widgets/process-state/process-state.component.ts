@@ -18,7 +18,7 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {
     WidgetModel
 } from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material';
+import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ProcessStateService} from './shared/process-state.service';
 import {ProcessStateModel} from './shared/process-state.model';

@@ -1,6 +1,5 @@
 import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
-import {MAT_DIALOG_DATA} from '@angular/material';
 
 @Component({
     selector: 'senergy-date-time-event-config',

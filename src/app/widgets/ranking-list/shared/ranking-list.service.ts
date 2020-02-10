@@ -15,11 +15,11 @@
  */
 
 import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {RankingListEditDialogComponent} from '../dialogs/ranking-list-edit-dialog.component';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 
 
 @Injectable({
