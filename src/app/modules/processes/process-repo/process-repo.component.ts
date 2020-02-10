@@ -32,7 +32,7 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {MatSnackBar} from '@angular/material';
 import {ProcessRepoConditionModel, ProcessRepoConditionsModel} from './shared/process-repo-conditions.model';
 import {Router} from '@angular/router';
-import {FormArray, FormBuilder} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
 
 const grids = new Map([
     ['xs', 1],
@@ -51,8 +51,7 @@ const sortingAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel(
 })
 
 export class ProcessRepoComponent implements OnInit, OnDestroy {
-
-    repoItemArray: FormArray = new FormArray([]);
+    formGroup: FormGroup = new FormGroup({repoItems: new FormArray([])});
     activeIndex = 0;
     gridCols = 0;
     animationDone = true;
@@ -60,6 +59,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     userID: string;
     ready = false;
     searchInitialized = false;
+    selectedItems: ProcessModel[] = [];
 
     private searchText = '';
     private limitInit = 54;
@@ -87,6 +87,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.initGridCols();
         this.initSearchAndGetDevices();
+        this.initSelectedChangeListener();
     }
 
     ngOnDestroy() {
@@ -129,7 +130,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
             if (deleteProcess) {
                 this.processRepoService.deleteProcess(process.id).subscribe((resp: { status: number }) => {
                     if (resp.status === 200) {
-                        this.repoItemArray.removeAt(this.repoItemArray.value.findIndex((item: ProcessModel) => process.id === item.id));
+                        this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => process.id === item.id));
                         this.snackBar.open('Process deleted successfully.', undefined, {duration: 2000});
                         this.setRepoItemsParams(1);
                         setTimeout(() => {
@@ -187,6 +188,23 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         }
     }
 
+    deleteMultipleItems(): void {
+        this.dialogsService.openDeleteDialog(this.selectedItems.length + ' processes').afterClosed().subscribe((deleteProcess: boolean) => {
+            if (deleteProcess) {
+                this.selectedItems.forEach((item: ProcessModel) => {
+                    this.processRepoService.deleteProcess(item.id).subscribe((resp: { status: number }) => {
+                        if (resp.status !== 200) {
+                            this.snackBar.open('Error while deleting the process!', undefined, {duration: 2000});
+                        }
+                    });
+                });
+                setTimeout(() => {
+                    this.getRepoItems(true);
+                }, 1500);
+            }
+        });
+    }
+
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
@@ -222,7 +240,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     private addToFormArray(repoItems: ProcessModel[]): void {
         repoItems.forEach((repoItem: ProcessModel) => {
-            this.repoItemArray.push(this._formBuilder.group(
+            this.repoItems.push(this._formBuilder.group(
                 {
                     id: repoItem.id,
                     name: repoItem.name,
@@ -234,17 +252,18 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                     parent_id: repoItem.parent_id,
                     image: this.provideImg(repoItem.svgXML),
                     permissions: repoItem.permissions,
-                    selected: repoItem.selected
+                    selected: false,
                 }
             ));
         });
     }
 
     private reset() {
-        this.repoItemArray.clear();
+        this.repoItems.clear();
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+        this.selectedItems = [];
     }
 
     private provideImg(jsonSVG: string): SafeUrl {
@@ -288,6 +307,16 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     private setRepoItemsParams(limit: number) {
         this.ready = false;
         this.limit = limit;
-        this.offset = this.repoItemArray.length;
+        this.offset = this.repoItems.length;
+    }
+
+    get repoItems(): FormArray {
+        return this.formGroup.get('repoItems') as FormArray;
+    }
+
+    private initSelectedChangeListener(): void {
+        this.repoItems.valueChanges.subscribe((resp: ProcessModel[]) => {
+                this.selectedItems = resp.filter(item => item.selected === true);
+        });
     }
 }

@@ -25,16 +25,26 @@
                 <senergy-sort [sortAttributes]="sortAttributes"
                               (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
             </div>
+            <div fxLayout="row" *ngIf="selectedItems.length > 0" style="margin: 8px">
+                <div fxLayoutAlign="center center">
+                    You have selected {{selectedItems.length}} items
+                </div>
+                <button matTooltip="Delete" mat-icon-button color="accent"
+                        (click)="deleteMultipleItems()">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
             <div class="main-panel"
                  infiniteScroll
                  [infiniteScrollDistance]="1"
                  [infiniteScrollThrottle]="50"
                  [scrollWindow]="false"
                  (scrolled)="onScroll()">
-                <div class="layout-margin" fxLayout="column" *ngIf="animationDone">
-                    <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                                   *ngIf="repoItemArray.controls.length > 0">
-                        <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItemArray.controls">
+                <div class="layout-margin" fxLayout="column" *ngIf="animationDone" [formGroup]="formGroup">
+                    <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px" formArrayName="repoItems"
+                                   *ngIf="this.repoItems.length > 0">
+                        <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
+                                       [formGroupName]="i">
                             <div fxFill>
                                 <img class="widget-image" [src]="item.value.image">
                             </div>
@@ -49,8 +59,10 @@
                                     </div>
                                     <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                                         <mat-icon matTooltip="Process is shared" *ngIf="item.value.shared"
-                                        class="color-sidenav info-icon">share
+                                                  class="color-sidenav info-icon">share
                                         </mat-icon>
+                                        <mat-checkbox formControlName="selected">
+                                        </mat-checkbox>
                                         <div fxFlex></div>
                                         <button mat-icon-button class="color-accent" matTooltip="Edit"
                                                 routerLink="/processes/designer/{{item.value.id}}">
@@ -95,8 +107,8 @@
                             </mat-grid-tile-footer>
                         </mat-grid-tile>
                     </mat-grid-list>
-                    <div *ngIf="repoItemArray.controls.length === 0 && ready">No process models found.</div>
-                    <senergy-spinner [elementCount]="repoItemArray.controls.length" [show]="!ready"></senergy-spinner>
+                    <div *ngIf="repoItems.length === 0 && ready">No process models found.</div>
+                    <senergy-spinner [elementCount]="repoItems.controls.length" [show]="!ready"></senergy-spinner>
                 </div>
             </div>
         </mat-tab>
