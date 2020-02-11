@@ -61,7 +61,7 @@
                                         <mat-icon matTooltip="Process is shared" *ngIf="item.value.shared"
                                                   class="color-sidenav info-icon">share
                                         </mat-icon>
-                                        <mat-checkbox formControlName="selected">
+                                        <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
                                         </mat-checkbox>
                                         <div fxFlex></div>
                                         <button mat-icon-button class="color-accent" matTooltip="Edit"

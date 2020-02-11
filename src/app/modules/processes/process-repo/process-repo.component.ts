@@ -87,7 +87,6 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.initGridCols();
         this.initSearchAndGetDevices();
-        this.initSelectedChangeListener();
     }
 
     ngOnDestroy() {
@@ -205,6 +204,10 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         });
     }
 
+    countCheckboxes(): void {
+        this.selectedItems = this.repoItems.value.filter((item: ProcessModel) => item.selected === true);
+    }
+
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
@@ -314,9 +317,4 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         return this.formGroup.get('repoItems') as FormArray;
     }
 
-    private initSelectedChangeListener(): void {
-        this.repoItems.valueChanges.subscribe((resp: ProcessModel[]) => {
-                this.selectedItems = resp.filter(item => item.selected === true);
-        });
-    }
 }
