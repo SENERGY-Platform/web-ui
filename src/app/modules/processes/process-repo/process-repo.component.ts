@@ -155,7 +155,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                             this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
                             this.getRepoItems(true);
                         } else {
-                            this.processRepoService.checkForProcessModelWithRetries(processResp._id, 10, 100).subscribe((exists) => {
+                            this.processRepoService.checkForCopiedProcess(processResp._id, 10, 100).subscribe((exists) => {
                                 if (exists) {
                                     this.snackBar.open('Process copied successfully.', undefined, {duration: 2000});
                                 } else {
@@ -190,6 +190,9 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     deleteMultipleItems(): void {
         this.dialogsService.openDeleteDialog(this.selectedItems.length + ' processes').afterClosed().subscribe((deleteProcess: boolean) => {
             if (deleteProcess) {
+                // clear repoItems and ready, that spinner occurs
+                this.repoItems.clear();
+                this.ready = false;
                 this.selectedItems.forEach((item: ProcessModel) => {
                     this.processRepoService.deleteProcess(item.id).subscribe((resp: { status: number }) => {
                         if (resp.status !== 200) {
@@ -197,9 +200,14 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                         }
                     });
                 });
-                setTimeout(() => {
+                this.processRepoService.checkForDeletedProcess(this.selectedItems[this.selectedItems.length - 1].id, 15, 100).subscribe((exists) => {
+                    if (exists) {
+                        this.snackBar.open('Error while deleting the process!', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Processes deleted successfully.', undefined, {duration: 2000});
+                    }
                     this.getRepoItems(true);
-                }, 1500);
+                });
             }
         });
     }

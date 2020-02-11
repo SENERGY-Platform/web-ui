@@ -25,7 +25,7 @@
                 <senergy-sort [sortAttributes]="sortAttributes"
                               (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
             </div>
-            <div fxLayout="row" *ngIf="selectedItems.length > 0" style="margin: 8px">
+            <div fxLayout="row" *ngIf="selectedItems.length > 0 && ready" style="margin: 8px">
                 <div fxLayoutAlign="center center">
                     You have selected {{selectedItems.length}} items
                 </div>
