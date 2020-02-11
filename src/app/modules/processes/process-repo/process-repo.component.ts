@@ -132,15 +132,15 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                         this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => process.id === item.id));
                         this.processRepoService.checkForDeletedProcess(process.id, 10, 100).subscribe((exists) => {
                             if (exists) {
-                                this.snackBar.open('Error while deleting the process!', undefined, {duration: 2000});
+                                this.showSnackBarError('deleting the process!');
                             } else {
-                                this.snackBar.open('Process deleted successfully.', undefined, {duration: 2000});
+                                this.showSnackBarSuccess('Process deleted');
                             }
                             this.setRepoItemsParams(1);
                             this.getRepoItems(false);
                         });
                     } else {
-                        this.snackBar.open('Error while deleting the process!', undefined, {duration: 2000});
+                        this.showSnackBarError('deleting the process!');
                     }
                 });
             }
@@ -155,14 +155,14 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 this.processRepoService.saveProcess('', newProcess, processModel.svgXML).subscribe(
                     (processResp: DesignerProcessModel | null) => {
                         if (processResp === null) {
-                            this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
+                            this.showSnackBarError('copying the process!');
                             this.getRepoItems(true);
                         } else {
                             this.processRepoService.checkForCopiedProcess(processResp._id, 10, 100).subscribe((exists) => {
                                 if (exists) {
-                                    this.snackBar.open('Process copied successfully.', undefined, {duration: 2000});
+                                    this.showSnackBarSuccess('Process copied');
                                 } else {
-                                    this.snackBar.open('Error while copying the process!', undefined, {duration: 2000});
+                                    this.showSnackBarError('copying the process!');
                                 }
                                 this.getRepoItems(true);
                             });
@@ -199,15 +199,15 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 this.selectedItems.forEach((item: ProcessModel) => {
                     this.processRepoService.deleteProcess(item.id).subscribe((resp: { status: number }) => {
                         if (resp.status !== 200) {
-                            this.snackBar.open('Error while deleting the process!', undefined, {duration: 2000});
+                            this.showSnackBarError('deleting the process!');
                         }
                     });
                 });
                 this.processRepoService.checkForDeletedProcess(this.selectedItems[this.selectedItems.length - 1].id, 15, 100).subscribe((exists) => {
                     if (exists) {
-                        this.snackBar.open('Error while deleting the process!', undefined, {duration: 2000});
+                        this.showSnackBarError('deleting the process!');
                     } else {
-                        this.snackBar.open('Processes deleted successfully.', undefined, {duration: 2000});
+                        this.showSnackBarSuccess('Process deleted');
                     }
                     this.getRepoItems(true);
                 });
@@ -326,6 +326,14 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     get repoItems(): FormArray {
         return this.formGroup.get('repoItems') as FormArray;
+    }
+
+    private showSnackBarError(text: string): void {
+        this.snackBar.open('Error while ' + text + ' !', undefined, {duration: 2000});
+    }
+
+    private showSnackBarSuccess(text: string): void {
+        this.snackBar.open(text + ' successfully.', undefined, {duration: 2000});
     }
 
 }
