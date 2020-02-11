@@ -191,7 +191,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     }
 
     deleteMultipleItems(): void {
-        this.dialogsService.openDeleteDialog(this.selectedItems.length + ' processes').afterClosed().subscribe((deleteProcess: boolean) => {
+        this.dialogsService.openDeleteDialog(this.selectedItems.length + (this.selectedItems.length === 1 ? ' process' : ' processes')).afterClosed().subscribe((deleteProcess: boolean) => {
             if (deleteProcess) {
                 // clear repoItems and ready, that spinner occurs
                 this.repoItems.clear();
@@ -199,15 +199,15 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 this.selectedItems.forEach((item: ProcessModel) => {
                     this.processRepoService.deleteProcess(item.id).subscribe((resp: { status: number }) => {
                         if (resp.status !== 200) {
-                            this.showSnackBarError('deleting the process!');
+                            this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!');
                         }
                     });
                 });
                 this.processRepoService.checkForDeletedProcess(this.selectedItems[this.selectedItems.length - 1].id, 15, 100).subscribe((exists) => {
                     if (exists) {
-                        this.showSnackBarError('deleting the process!');
+                        this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!');
                     } else {
-                        this.showSnackBarSuccess('Process deleted');
+                        this.showSnackBarSuccess(this.selectedItems.length === 1 ? 'Process deleted' : 'Processes deleted');
                     }
                     this.getRepoItems(true);
                 });
