@@ -27,7 +27,7 @@
             </div>
             <div fxLayout="row" *ngIf="selectedItems.length > 0 && ready" style="margin: 8px">
                 <div fxLayoutAlign="center center">
-                    You have selected {{selectedItems.length}} {{selectedItems.length === 1 ? 'item' : 'items'}}
+                    You have selected {{selectedItems.length}} {{selectedItems.length === 1 ? 'process' : 'processes'}}
                 </div>
                 <button matTooltip="Delete" mat-icon-button color="accent"
                         (click)="deleteMultipleItems()">
