@@ -16,13 +16,13 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs/index';
+import {forkJoin, Observable, Subscription} from 'rxjs/index';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';
 import {DeploymentsService} from './shared/deployments.service';
-import {DeploymentsModel, DeploymentsOfflineReasonsModel} from './shared/deployments.model';
+import {DeploymentsModel} from './shared/deployments.model';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {ClipboardService} from 'ngx-clipboard';
 import {environment} from '../../../../environments/environment';
@@ -30,7 +30,7 @@ import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deployments-missing-dependencies-dialog.component';
 import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
-import {ProcessModel} from '../process-repo/shared/process.model';
+import {repeat} from 'rxjs/operators';
 
 const grids = new Map([
     ['xs', 1],
@@ -59,6 +59,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
+    selectedItems: DeploymentsModel[] = [];
 
     constructor(private sanitizer: DomSanitizer,
                 private utilService: UtilService,
@@ -119,13 +120,17 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 this.deploymentsService.deleteDeployment(deployment.id).subscribe((resp: { status: number }) => {
                     if (resp.status === 200) {
                         this.repoItems.removeAt(this.repoItems.value.findIndex((item: DeploymentsModel) => deployment.id === item.id));
-                        this.snackBar.open('Deployment deleted successfully.', undefined, {duration: 2000});
-                        this.setRepoItemsParams(1);
-                        setTimeout(() => {
+                        this.deploymentsService.checkForDeletedDeploymentWithRetries(deployment.id, 10, 100).subscribe((exists: boolean) => {
+                            if (exists) {
+                                this.showSnackBarError('deleting the deployment!');
+                            } else {
+                                this.showSnackBarSuccess('Deployment deleted');
+                            }
+                            this.setRepoItemsParams(1);
                             this.getRepoItems(false);
-                        }, 1000);
+                        });
                     } else {
-                        this.snackBar.open('Error while deleting the deployment!', undefined, {duration: 2000});
+                        this.showSnackBarError('deleting the deployment!');
                     }
                 });
             }
@@ -143,6 +148,41 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     copyDeployment(deploymentId: string): void {
         this.router.navigateByUrl('/processes/deployments/config', {state: {processId: '', deploymentId: deploymentId}});
+    }
+
+    countCheckboxes(): void {
+        this.selectedItems = this.repoItems.value.filter((item: DeploymentsModel) => item.selected === true);
+    }
+
+    deleteMultipleItems(): void {
+        this.dialogsService.openDeleteDialog(this.selectedItems.length + (this.selectedItems.length === 1 ? ' deployment' : ' deployments')).afterClosed().subscribe((deleteProcess: boolean) => {
+            if (deleteProcess) {
+                // clear repoItems and ready, that spinner occurs
+                this.repoItems.clear();
+                this.ready = false;
+                const array: Observable<boolean>[] = [];
+                this.selectedItems.forEach((item: DeploymentsModel) => {
+                    array.push(this.deploymentsService.checkForDeletedDeploymentWithRetries (item.id, 15, 200));
+                    this.deploymentsService.deleteDeployment(item.id).subscribe((resp: { status: number }) => {
+                        if (resp.status !== 200) {
+                            this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!');
+                        }
+                    });
+                });
+
+                forkJoin(array).subscribe((resp: boolean[]) => {
+                    const error = resp.some((item: boolean) => item === true);
+                        if (error) {
+                            this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!');
+                        } else {
+                            this.showSnackBarSuccess(this.selectedItems.length === 1 ? 'Deployment deleted' : 'Deployments deleted');
+                        }
+                    this.getRepoItems(true);
+                    }
+                );
+
+            }
+        });
     }
 
     private initGridCols(): void {
@@ -186,6 +226,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+        this.selectedItems = [];
     }
 
     private setRepoItemsParams(limit: number) {
@@ -214,5 +255,13 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 }
             ));
         });
+    }
+
+    private showSnackBarError(text: string): void {
+        this.snackBar.open('Error while ' + text + ' !', undefined, {duration: 2000});
+    }
+
+    private showSnackBarSuccess(text: string): void {
+        this.snackBar.open(text + ' successfully.', undefined, {duration: 2000});
     }
 }

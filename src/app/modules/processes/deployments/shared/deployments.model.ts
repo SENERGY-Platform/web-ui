@@ -25,6 +25,7 @@ export interface DeploymentsModel {
     offline_reasons: DeploymentsOfflineReasonsModel[];
     online: boolean;
     image: SafeUrl;
+    selected: boolean;
 }
 
 export interface DeploymentsOfflineReasonsModel {

@@ -19,6 +19,15 @@
         <senergy-sort [sortAttributes]="sortAttributes"
                       (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
     </div>
+    <div fxLayout="row" *ngIf="selectedItems.length > 0 && ready" style="margin: 8px">
+        <div fxLayoutAlign="center center">
+            You have selected {{selectedItems.length}} {{selectedItems.length === 1 ? 'deployment' : 'deployments'}}
+        </div>
+        <button matTooltip="Delete" mat-icon-button color="accent"
+                (click)="deleteMultipleItems()">
+            <mat-icon>delete</mat-icon>
+        </button>
+    </div>
     <div class="main-panel">
         <div infiniteScroll
              [infiniteScrollDistance]="1"
@@ -44,6 +53,8 @@
                                     {{item.value.deploymentTime | date:"medium"}}
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
+                                    <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
+                                    </mat-checkbox>
                                     <button *ngIf="!item.value.online" mat-icon-button matTooltip="Missing Dependencies"
                                             class="mat-warn" (click)="showMissingDependencies(item.value.id)">
                                         <mat-icon>warning</mat-icon>
@@ -57,8 +68,8 @@
                                     (click)="copyDeployment(item.value.id)">
                                         <mat-icon>content_copy</mat-icon>
                                     </button>
-                                    <button mat-icon-button matTooltip="Delete" class="color-accent"
-                                            (click)="deleteDeployment(item.value)">
+                                    <button mat-icon-button matTooltip="Delete" color="accent"
+                                            (click)="deleteDeployment(item.value)" [disabled]="selectedItems.length > 0">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                     <button mat-icon-button [matMenuTriggerFor]="deploymentMenu"
