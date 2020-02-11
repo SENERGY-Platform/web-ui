@@ -68,8 +68,8 @@
                                                 routerLink="/processes/designer/{{item.value.id}}">
                                             <mat-icon>edit</mat-icon>
                                         </button>
-                                        <button mat-icon-button matTooltip="Delete" class="color-accent"
-                                                (click)="deleteProcess(item.value)">
+                                        <button mat-icon-button matTooltip="Delete" color="accent"
+                                                (click)="deleteProcess(item.value)" [disabled]="selectedItems.length > 0">
                                             <mat-icon>delete</mat-icon>
                                         </button>
 
