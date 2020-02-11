@@ -17,3 +17,6 @@
 mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
+mat-dialog-content {
+    min-height: 300px;
+}
