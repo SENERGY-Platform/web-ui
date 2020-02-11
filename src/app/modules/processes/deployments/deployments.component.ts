@@ -22,13 +22,15 @@ import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';
 import {DeploymentsService} from './shared/deployments.service';
-import {DeploymentsModel} from './shared/deployments.model';
+import {DeploymentsModel, DeploymentsOfflineReasonsModel} from './shared/deployments.model';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {ClipboardService} from 'ngx-clipboard';
 import {environment} from '../../../../environments/environment';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deployments-missing-dependencies-dialog.component';
+import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {ProcessModel} from '../process-repo/shared/process.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -45,8 +47,7 @@ const grids = new Map([
 })
 
 export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
-
-    repoItems: DeploymentsModel[] = [];
+    formGroup: FormGroup = new FormGroup({repoItems: new FormArray([])});
     gridCols = 0;
     sortAttributes = [new SortModel('Date', 'deploymentTime', 'desc'), new SortModel('Name', 'name', 'asc')];
     ready = false;
@@ -68,7 +69,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 private clipboardService: ClipboardService,
                 private router: Router,
                 private dialogsService: DialogsService,
-                private dialog: MatDialog) {
+                private dialog: MatDialog,
+                private _formBuilder: FormBuilder) {
     }
 
     ngOnInit() {
@@ -116,7 +118,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
             if (deleteDeployment) {
                 this.deploymentsService.deleteDeployment(deployment.id).subscribe((resp: { status: number }) => {
                     if (resp.status === 200) {
-                        this.repoItems.splice(this.repoItems.indexOf(deployment), 1);
+                        this.repoItems.removeAt(this.repoItems.value.findIndex((item: DeploymentsModel) => deployment.id === item.id));
                         this.snackBar.open('Deployment deleted successfully.', undefined, {duration: 2000});
                         this.setRepoItemsParams(1);
                         setTimeout(() => {
@@ -169,10 +171,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 if (repoItems.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
-                this.repoItems = this.repoItems.concat(repoItems);
-                this.repoItems.forEach((repoItem: DeploymentsModel) => {
-                    repoItem.image = this.provideImg(repoItem.diagram);
-                });
+                this.addToFormArray(repoItems);
                 this.ready = true;
             });
     }
@@ -183,7 +182,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     }
 
     private reset() {
-        this.repoItems = [];
+        this.repoItems.clear();
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
@@ -193,5 +192,27 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.limit = limit;
         this.offset = this.repoItems.length;
+    }
+
+    get repoItems(): FormArray {
+        return this.formGroup.get('repoItems') as FormArray;
+    }
+
+    private addToFormArray(repoItems: DeploymentsModel[]): void {
+        repoItems.forEach((repoItem: DeploymentsModel) => {
+            this.repoItems.push(this._formBuilder.group(
+                {
+                    id: repoItem.id,
+                    name: repoItem.name,
+                    definition_id: repoItem.definition_id,
+                    deploymentTime: repoItem.deploymentTime,
+                    diagram: repoItem.diagram,
+                    offline_reasons: repoItem.offline_reasons,
+                    online: repoItem.online,
+                    image: this.provideImg(repoItem.diagram),
+                    selected: false,
+                }
+            ));
+        });
     }
 }
