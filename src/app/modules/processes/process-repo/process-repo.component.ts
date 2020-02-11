@@ -130,12 +130,15 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 this.processRepoService.deleteProcess(process.id).subscribe((resp: { status: number }) => {
                     if (resp.status === 200) {
                         this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => process.id === item.id));
-                        this.snackBar.open('Process deleted successfully.', undefined, {duration: 2000});
-                        this.setRepoItemsParams(1);
-                        setTimeout(() => {
+                        this.processRepoService.checkForDeletedProcess(process.id, 10, 100).subscribe((exists) => {
+                            if (exists) {
+                                this.snackBar.open('Error while deleting the process!', undefined, {duration: 2000});
+                            } else {
+                                this.snackBar.open('Process deleted successfully.', undefined, {duration: 2000});
+                            }
+                            this.setRepoItemsParams(1);
                             this.getRepoItems(false);
-                        }, 1000);
-
+                        });
                     } else {
                         this.snackBar.open('Error while deleting the process!', undefined, {duration: 2000});
                     }
