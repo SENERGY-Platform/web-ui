@@ -17,7 +17,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs/index';
+import {forkJoin, Observable, Subscription} from 'rxjs/index';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {KeycloakService} from 'keycloak-angular';
 import {ResponsiveService} from '../../../core/services/responsive.service';
@@ -196,15 +196,18 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
                 // clear repoItems and ready, that spinner occurs
                 this.repoItems.clear();
                 this.ready = false;
+                const array: Observable<boolean>[] = [];
                 this.selectedItems.forEach((item: ProcessModel) => {
+                    array.push(this.processRepoService.checkForDeletedProcess(item.id, 15, 200));
                     this.processRepoService.deleteProcess(item.id).subscribe((resp: { status: number }) => {
                         if (resp.status !== 200) {
                             this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!');
                         }
                     });
                 });
-                this.processRepoService.checkForDeletedProcess(this.selectedItems[this.selectedItems.length - 1].id, 15, 100).subscribe((exists) => {
-                    if (exists) {
+                forkJoin(array).subscribe((resp: boolean[]) => {
+                    const error = resp.some((item: boolean) => item === true);
+                    if (error) {
                         this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!');
                     } else {
                         this.showSnackBarSuccess(this.selectedItems.length === 1 ? 'Process deleted' : 'Processes deleted');
