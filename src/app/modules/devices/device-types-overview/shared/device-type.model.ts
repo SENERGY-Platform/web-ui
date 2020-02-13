@@ -51,6 +51,8 @@ export interface DeviceTypeContentModel {
     content_variable_raw: string;
     serialization: string;
     protocol_segment_id: string;
+    show?: boolean;
+    name?: string;
 }
 
 export interface DeviceTypeContentVariableModel {
