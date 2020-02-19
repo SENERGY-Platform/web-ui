@@ -101,6 +101,9 @@
             <div fxLayout="column" fxFlex fxLayoutAlign="center start">
                 <button mat-raised-button color="accent" (click)="addValue()">Add Export Value</button>
             </div>
+            <div fxLayout="column" fxFlex fxLayoutAlign="center center">
+                <button mat-raised-button color="accent" (click)="autofillValues()" disabled="{{paths.size === 0}}">Autofill Export Values</button>
+            </div>
             <div fxLayout="column" fxFlex fxLayoutAlign="center end">
                 <button mat-raised-button color="accent" (click)="startExport()">Start Export</button>
             </div>
