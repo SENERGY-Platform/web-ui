@@ -77,6 +77,12 @@ export class MultiValueEditDialogComponent implements OnInit {
                         this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
                     }
                 });
+                this.exports = this.exports.sort((a, b) => {
+                    if (a.name.toLowerCase() > b.name.toLowerCase()) {
+                        return 1;
+                    }
+                    return -1;
+                });
             }
         });
     }
