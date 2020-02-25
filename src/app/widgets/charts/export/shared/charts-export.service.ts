@@ -34,7 +34,7 @@ import {ErrorModel} from '../../../../core/model/error.model';
 import {ChartsExportPropertiesModel, ChartsExportVAxesModel} from './charts-export-properties.model';
 import {
     ChartsExportRequestPayloadModel,
-    ChartsExportRequestPayloadQueriesModel,
+    ChartsExportRequestPayloadQueriesModel, ChartsExportRequestPayloadTimeModel,
 } from './charts-export-request-payload.model';
 import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
 
@@ -71,11 +71,7 @@ export class ChartsExportService {
     getData(properties: WidgetPropertiesModels): Observable<ChartsExportModel | { error: string }> {
         const widgetProperties = <ChartsExportPropertiesModel>properties;
         const requestPayload: ChartsExportRequestPayloadModel = {
-            time: {
-                last: undefined,
-                end: undefined,
-                start: undefined
-            },
+            time: {} as ChartsExportRequestPayloadTimeModel,
             group: {
                 type: undefined,
                 time: ''
@@ -105,7 +101,7 @@ export class ChartsExportService {
                 } else {
                     array.push({id: vAxis.instanceId, fields: [{name: vAxis.valueName, math: vAxis.math}]});
                 }
-                
+
             });
             requestPayload.queries = array;
         }
