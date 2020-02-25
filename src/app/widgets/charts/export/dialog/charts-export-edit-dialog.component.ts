@@ -73,16 +73,12 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
-            // this.widget = widget;
             this.setDefaultValues(widget);
-            // this.exports.setValue(this.widget.properties.exports || []);
             if (widget.properties.vAxes) {
                 widget.properties.vAxes.forEach(row => this.selection.select(row));
             }
-
             this.selectionChange(widget.properties.exports || []);
             this.initDeployments();
-
             this.initFormGroup(widget);
         });
     }
