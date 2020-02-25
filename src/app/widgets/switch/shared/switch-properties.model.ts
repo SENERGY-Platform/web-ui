@@ -22,7 +22,6 @@ export interface SwitchPropertiesModel {
 }
 
 export interface SwitchPropertiesDeploymentsModel {
-    deploymentId: string;
     name: string;
     id: string;
     trigger: string;
