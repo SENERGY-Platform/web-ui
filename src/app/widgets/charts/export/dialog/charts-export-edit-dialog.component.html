@@ -28,7 +28,7 @@
                 <tr>
                     <td>
                         <mat-form-field color="accent" class="full-width">
-                            <mat-select id="chartType" formControlName="chartType" placeholder="Chart Type" required>
+                            <mat-select formControlName="chartType" placeholder="Chart Type" required>
                                 <mat-option *ngFor="let chartType of chartTypes" [value]="chartType">
                                     {{chartType}}
                                 </mat-option>
