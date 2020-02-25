@@ -99,7 +99,7 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         }
     }
 
-    private orderedValues(): MultiValueMeasurement[] {
+    orderedValues(): MultiValueMeasurement[] {
         const m = this.widget.properties.multivaluemeasurements || [];
         switch (this.widget.properties.order || 0) {
             case MultiValueOrderEnum.AlphabeticallyAsc:
