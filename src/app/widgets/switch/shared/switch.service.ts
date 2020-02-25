@@ -58,12 +58,14 @@ export class SwitchService {
         });
     }
 
+
+
     startMultipleDeployments(deployments: SwitchPropertiesDeploymentsModel[]): Observable<SwitchPropertiesInstancesModel[]> {
 
         const array: Observable<SwitchPropertiesInstancesModel>[] = [];
         deployments.forEach((deploy: SwitchPropertiesDeploymentsModel) => {
             array.push(this.http.get<SwitchPropertiesInstancesModel>(environment.processServiceUrl +
-                '/process-definition/' + encodeURIComponent(deploy.id) + '/start/id'));
+                '/deployment/' + encodeURIComponent(deploy.id) + '/start'));
         });
 
         return forkJoin(array);

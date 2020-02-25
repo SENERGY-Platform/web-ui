@@ -28,7 +28,6 @@ import {DeploymentsDefinitionModel} from '../../../modules/processes/deployments
 import {SwitchPropertiesDeploymentsModel} from '../shared/switch-properties.model';
 
 export interface TableElement {
-    deploymentId: string;
     name: string;
     id: string;
     trigger: string;
@@ -73,7 +72,7 @@ export class SwitchEditDialogComponent implements OnInit {
 
             if (widget.properties.deployments) {
                 widget.properties.deployments.forEach((deploy: SwitchPropertiesDeploymentsModel) => {
-                    this.data.push({deploymentId: deploy.deploymentId, name: deploy.name, id: deploy.id, trigger: deploy.trigger});
+                    this.data.push({name: deploy.name, id: deploy.id, trigger: deploy.trigger});
                 });
             }
             this.table.renderRows();
@@ -117,16 +116,13 @@ export class SwitchEditDialogComponent implements OnInit {
 
     addColumn() {
         if (this.deployments.indexOf(this.formControl.value) >= 0) {
-            this.deploymentsService.getDefinition(this.formControl.value.id).subscribe((deploymentDefinition: DeploymentsDefinitionModel[]) => {
-                this.data.push({
-                    deploymentId: deploymentDefinition[0].deploymentId,
-                    name: deploymentDefinition[0].name,
-                    id: deploymentDefinition[0].id,
-                    trigger: this.newTrigger,
-                });
-                this.table.renderRows();
-                this.formControl.reset('');
+            this.data.push({
+                name: this.formControl.value.name,
+                id: this.formControl.value.id,
+                trigger: this.newTrigger,
             });
+            this.table.renderRows();
+            this.formControl.reset('');
         } else {
             this.formControl.setErrors({'valid': false});
         }
