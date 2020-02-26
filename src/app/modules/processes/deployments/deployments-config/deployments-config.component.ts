@@ -30,8 +30,8 @@ import {
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
-import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {DeviceTypeFunctionType, DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import * as moment from 'moment';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -303,6 +303,19 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
     }
 
+    elementsTimeEvent(elementIndex: number): FormControl {
+        return this.deploymentFormGroup.get(['elements', elementIndex, 'time_event']) as FormControl;
+    }
+
+    lanesTimeEvent(elementLanesIndex: number, elementsIndex: number): FormControl {
+        return this.deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements', elementsIndex, 'time_event']) as FormControl;
+    }
+
+    lanesElements(elementLanesIndex: number): DeploymentsPreparedLaneSubElementModel[] {
+        const elements = this.deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements']) as FormArray;
+        return elements.value;
+    }
+
     private initLaneElementFormArray(elements: DeploymentsPreparedLaneSubElementModel[]): FormArray {
         const array: FormGroup[] = [];
         if (elements !== null) {
@@ -332,5 +345,15 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 this.deploymentId = params.deploymentId;
             }
         }
+    }
+
+    get elements(): DeploymentsPreparedElementModel[] {
+        const elements = this.deploymentFormGroup.get(['elements']) as FormArray;
+        return elements.value;
+    }
+
+    get lanes(): DeploymentsPreparedLaneElementModel[] {
+        const elements = this.deploymentFormGroup.get(['lanes']) as FormArray;
+        return elements.value;
     }
 }
