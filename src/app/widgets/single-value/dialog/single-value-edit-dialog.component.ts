@@ -138,8 +138,8 @@ export class SingleValueEditDialogComponent implements OnInit {
         });
     }
 
-    displayFn(input?: ChartsExportMeasurementModel): string | undefined {
-        return input ? input.name : undefined;
+    displayFn(input?: ChartsExportMeasurementModel): string {
+        return input ? input.name : '';
     }
 
     compare(a: any, b: any) {
