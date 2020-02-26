@@ -144,8 +144,8 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         });
     }
 
-    displayFn(input?: ChartsExportMeasurementModel): string | undefined {
-        return input ? input.name : undefined;
+    displayFn(input?: ChartsExportMeasurementModel): string {
+        return input ? input.name : '';
     }
 
     autoCompleteClosed() {
