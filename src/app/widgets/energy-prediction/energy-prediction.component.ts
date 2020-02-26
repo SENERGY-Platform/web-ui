@@ -39,7 +39,7 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
     price = 0;
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     constructor(private iconRegistry: MatIconRegistry,

@@ -28,7 +28,7 @@ import {WidgetFooterService} from './shared/widget-footer.service';
 export class WidgetFooterComponent implements OnInit {
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() optionZoom = false;
     @Input() zoom = false;
     @Output() editEvent = new EventEmitter<boolean>();

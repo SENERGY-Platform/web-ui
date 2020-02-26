@@ -38,7 +38,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
 
     @ViewChild('deviceTotalDowntimeChart', {static: false}) deviceTotalDowntimeChart!: GoogleChartComponent;
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     @HostListener('window:resize')

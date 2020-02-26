@@ -33,7 +33,7 @@ export class DeviceTotalDowntimeEditDialogComponent implements OnInit {
 
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {} as WidgetModel;
 
     constructor(private dialogRef: MatDialogRef<DeviceTotalDowntimeEditDialogComponent>,
                 private deploymentsService: DeploymentsService,

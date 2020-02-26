@@ -35,7 +35,7 @@ export class SwitchComponent implements OnInit, OnDestroy {
     private destroy = new Subscription();
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     constructor(private switchService: SwitchService,

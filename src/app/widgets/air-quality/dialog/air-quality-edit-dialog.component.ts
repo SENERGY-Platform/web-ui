@@ -43,7 +43,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {} as WidgetModel;
     disableSave = false;
     changeLocation = false;
     name = ' ';

@@ -114,7 +114,7 @@ export class DashboardNewWidgetDialogComponent {
     }
 
     create(inputName: string): void {
-        const widget: WidgetModel = {id: '', name: inputName, type: this.selectedType.value, properties: {}};
+        const widget: WidgetModel = {id: '', name: inputName, type: this.selectedType.value, properties: {}, x: -1, y: -1, cols: -1, rows: -1};
         switch (this.selectedType.value) {
             case DashboardTypesEnum.Switch: {
                 widget.properties = {

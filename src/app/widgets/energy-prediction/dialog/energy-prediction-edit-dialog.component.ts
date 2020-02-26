@@ -41,7 +41,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     filteredExports: Observable<ChartsExportMeasurementModel[]> = new Observable();
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {} as WidgetModel;
     options: string[] = ['Day', 'Month', 'Year'];
     thresholdOptions: string[] = ['Consumption', 'Price'];
     selectedThresholdOption: string;

@@ -38,7 +38,7 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     @ViewChild('processDeploymentsHistoryChart', {static: false}) processDeploymentsHistoryChart!: GoogleChartComponent;
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     @HostListener('window:resize')

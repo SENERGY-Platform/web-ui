@@ -25,7 +25,7 @@ import {WidgetModel} from '../modules/dashboard/shared/dashboard-widget.model';
 export class WidgetComponent implements OnInit {
 
   @Input() dashboardId = '';
-  @Input() widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+  @Input() widget: WidgetModel = {} as WidgetModel;
   @Input() zoom = false;
 
   constructor() { }

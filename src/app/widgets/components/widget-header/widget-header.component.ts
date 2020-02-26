@@ -26,7 +26,7 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 })
 export class WidgetHeaderComponent implements OnInit {
 
-    @Input() widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     constructor(private dashboardService: DashboardService) {

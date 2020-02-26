@@ -50,7 +50,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     cons: string[] = [];
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     constructor(private iconRegistry: MatIconRegistry,

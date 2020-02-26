@@ -35,7 +35,7 @@ export class MultiValueComponent implements OnInit, OnDestroy {
     destroy = new Subscription();
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     constructor(private iconRegistry: MatIconRegistry,

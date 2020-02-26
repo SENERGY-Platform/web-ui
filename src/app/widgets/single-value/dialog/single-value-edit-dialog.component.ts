@@ -40,7 +40,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     filteredExports: Observable<ChartsExportMeasurementModel[]> = new Observable();
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {} as WidgetModel;
     vAxisValues: ExportValueModel[] = [];
     disableSave = false;
 

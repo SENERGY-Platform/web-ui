@@ -38,7 +38,7 @@ export class DeviceGatewayComponent implements OnInit, OnDestroy {
 
     @ViewChild('deviceGatewayChart', {static: false}) deviceGatewayChart!: GoogleChartComponent;
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     @HostListener('window:resize')

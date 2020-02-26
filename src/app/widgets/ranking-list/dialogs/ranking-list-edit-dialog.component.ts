@@ -34,7 +34,7 @@ export class RankingListEditDialogComponent implements OnInit {
 
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {} as WidgetModel;
 
     constructor(private dialogRef: MatDialogRef<RankingListEditDialogComponent>,
                 private deploymentsService: DeploymentsService,

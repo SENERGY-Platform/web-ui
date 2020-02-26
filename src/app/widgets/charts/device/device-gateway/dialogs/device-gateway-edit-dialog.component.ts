@@ -33,7 +33,7 @@ export class DeviceGatewayEditDialogComponent implements OnInit {
 
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {} as WidgetModel;
 
     constructor(private dialogRef: MatDialogRef<DeviceGatewayEditDialogComponent>,
                 private deploymentsService: DeploymentsService,

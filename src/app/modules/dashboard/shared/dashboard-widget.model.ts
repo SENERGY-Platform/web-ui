@@ -28,8 +28,10 @@ export interface WidgetModel {
     name: string;
     type: string;
     properties: WidgetPropertiesModels;
-    x?: number;
-    y?: number;
+    x: number;
+    y: number;
+    cols: number;
+    rows: number;
 }
 
 export interface WidgetPropertiesModels extends SwitchPropertiesModel, ChartsExportPropertiesModel, DeviceDowntimeGatewayPropertiesModel,
