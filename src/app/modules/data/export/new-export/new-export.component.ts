@@ -224,4 +224,20 @@ export class NewExportComponent implements OnInit {
     resetVars() {
         this.paths.clear();
     }
+
+    autofillValues() {
+        this.export.Values = [];
+        this.paths.forEach((_type, path) => {
+            this.addValue();
+            const index = this.export.Values.length - 1;
+            this.export.Values[index].Name = path.slice(path.lastIndexOf('.') + 1);
+            this.export.Values[index].Path = path;
+            this.pathChanged(index);
+        });
+        if (this.selector === 'pipe' && this.timeSuggest.length === 1) {
+            this.export.TimePath = this.timeSuggest[0];
+        } else if (this.selector === 'device' && this.paths.size === 0) {
+            this.export.TimePath = this.paths.keys().next().value;
+        }
+    }
 }

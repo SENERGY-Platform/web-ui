@@ -31,10 +31,10 @@ export class ExportService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getExports(): Observable<ExportModel[] | null> {
+    getExports(sort: string, order: string): Observable<ExportModel[] | null> {
         return this.http.get<ExportModel[]>
-        (environment.exportService + '/instance').pipe(
-            map(resp => resp || []),
+        (environment.exportService + '/instance?order=' + sort + ':' + order).pipe(
+            map((resp: ExportModel[]) => resp || []),
             catchError(this.errorHandlerService.handleError(ExportService.name, 'getExports: Error', null))
         );
 

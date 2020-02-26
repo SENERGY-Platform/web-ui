@@ -75,7 +75,7 @@ export class HistoricDataConfigDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) private dialogParams: {initial: HistoricDataConfig}
     ) {
         this.config = dialogParams.initial || {dateInterval: {}, interval: {}, analysisAction: ''};
-        exportsService.getExports().subscribe(value => {
+        exportsService.getExports('name', 'asc').subscribe(value => {
             if (value) {
                 this.availableMeasurements = value;
             }

@@ -32,6 +32,7 @@ export interface ProcessModel {
         r: boolean;
         w: boolean;
     };
+    selected: boolean;
 }
 
 

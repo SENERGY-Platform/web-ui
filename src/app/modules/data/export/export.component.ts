@@ -53,7 +53,7 @@ export class ExportComponent implements OnInit {
 
     ngOnInit() {
         this.initGridCols();
-        this.exportService.getExports().subscribe((resp: ExportModel [] | null) => {
+        this.exportService.getExports('name', 'asc').subscribe((resp: ExportModel [] | null) => {
             if (resp !== null) {
                 this.exports = resp;
             }

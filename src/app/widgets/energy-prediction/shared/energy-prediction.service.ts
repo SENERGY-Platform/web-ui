@@ -42,6 +42,7 @@ export class EnergyPredictionService {
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
+        dialogConfig.minWidth = '450px';
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             widgetId: widgetId,
