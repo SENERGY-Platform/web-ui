@@ -16,19 +16,19 @@
  *
  */
 
-interface DesignerElementModel {
+export interface DesignerElementModel {
     type: string;
     businessObject: DesignerElementBusinessObjectModel;
 }
 
-interface DesignerElementBusinessObjectModel {
+export interface DesignerElementBusinessObjectModel {
     id: string;
     name: string;
     flowNodeRef: DesignerElementFlowNodeRefModel[];
     participants: DesignerElementParticipantsModel[];
 }
 
-interface DesignerElementFlowNodeRefModel {
+export interface DesignerElementFlowNodeRefModel {
     $type: string;
     type: string;
     extensionElements: {
@@ -41,22 +41,22 @@ interface DesignerElementFlowNodeRefModel {
     };
 }
 
-interface DesignerElementParticipantsModel {
+export interface DesignerElementParticipantsModel {
     id: string;
     processRef: DesignerElementProcessRefModel;
     name: string;
 }
 
-interface DesignerElementProcessRefModel {
+export interface DesignerElementProcessRefModel {
     laneSets: DesignerElementLaneSetsModel[];
     flowElements: DesignerElementFlowNodeRefModel[];
 }
 
-interface DesignerElementLaneSetsModel {
+export interface DesignerElementLaneSetsModel {
     lanes: DesignerElementLanesModel[];
 }
 
-interface DesignerElementLanesModel {
+export interface DesignerElementLanesModel {
     id: string;
     flowNodeRef: DesignerElementFlowNodeRefModel[];
     name: string;

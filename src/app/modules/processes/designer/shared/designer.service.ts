@@ -18,6 +18,13 @@ import {Injectable} from '@angular/core';
 import {BpmnElement, BpmnParameter} from './designer.model';
 import {DeviceTypeSelectionResultModel} from '../../../devices/device-types-overview/shared/device-type-selection.model';
 import {DesignerErrorModel} from './designer-error.model';
+import {
+    DesignerElementFlowNodeRefModel,
+    DesignerElementLaneSetsModel,
+    DesignerElementLanesModel,
+    DesignerElementModel,
+    DesignerElementParticipantsModel
+} from './designer-element.model';
 
 @Injectable({
     providedIn: 'root'
