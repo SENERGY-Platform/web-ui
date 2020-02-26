@@ -134,7 +134,7 @@ export class SwitchEditDialogComponent implements OnInit {
         this.table.renderRows();
     }
 
-    displayFn(input?: DeploymentsModel): string | undefined {
-        return input ? input.name : undefined;
+    displayFn(input?: DeploymentsModel): string {
+        return input ? input.name : '';
     }
 }
