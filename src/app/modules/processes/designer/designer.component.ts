@@ -97,7 +97,12 @@ export class ProcessDesignerComponent implements OnInit {
                 parent: '#js-properties-panel'
             },
             moddleExtensions: {
-                camunda: camundaBpmnModdle
+                camunda: camundaBpmnModdle,
+                senergy: {
+                    'name': 'senergy',
+                    'uri': 'https://senergy.infai.org',
+                    'prefix': 'senergy',
+                }
             }
         });
 
