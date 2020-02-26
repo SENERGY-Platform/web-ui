@@ -152,7 +152,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             bpmn_element_id: [lane.bpmn_element_id],
             device_description: [lane.device_descriptions],
             selectables: this.initSelectablesFormArray(lane.selectables),
-            selection: this.initLaneSelectionFormGroup(lane.selection),
+            selection: this.initLaneSelectionFormGroup(lane.selection ? lane.selection : {} as DeviceInstancesUpdateModel),
             elements: this.initLaneElementFormArray(lane.elements),
         });
     }
