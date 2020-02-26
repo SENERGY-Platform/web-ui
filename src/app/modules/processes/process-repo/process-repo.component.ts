@@ -59,8 +59,8 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     userID: string;
     ready = false;
     searchInitialized = false;
+    searchText = '';
 
-    private searchText = '';
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
