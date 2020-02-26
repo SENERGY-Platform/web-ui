@@ -303,12 +303,12 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
     }
 
-    elementsTimeEvent(elementIndex: number): FormControl {
-        return this.deploymentFormGroup.get(['elements', elementIndex, 'time_event']) as FormControl;
+    elementsTimeEvent(elementIndex: number): FormGroup {
+        return this.deploymentFormGroup.get(['elements', elementIndex, 'time_event']) as FormGroup;
     }
 
-    lanesTimeEvent(elementLanesIndex: number, elementsIndex: number): FormControl {
-        return this.deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements', elementsIndex, 'time_event']) as FormControl;
+    lanesTimeEvent(elementLanesIndex: number, elementsIndex: number): FormGroup {
+        return this.deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements', elementsIndex, 'time_event']) as FormGroup;
     }
 
     lanesElements(elementLanesIndex: number): DeploymentsPreparedLaneSubElementModel[] {
