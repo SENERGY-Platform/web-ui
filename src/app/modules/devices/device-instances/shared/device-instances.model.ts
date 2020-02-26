@@ -21,6 +21,7 @@ export interface DeviceInstancesModel {
     device_type: DeviceTypePermSearchModel;
     id: string;
     local_id: string;
+    log_state: boolean;
     name: string;
     permissions: {
         a: boolean;
