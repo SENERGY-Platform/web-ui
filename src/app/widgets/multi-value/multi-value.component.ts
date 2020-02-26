@@ -62,6 +62,16 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         this.multiValueService.openEditDialog(this.dashboardId, this.widget.id);
     }
 
+    checkWarning(m: MultiValueMeasurement): boolean {
+        if (m.warning_enabled && m.data && m.lowerBoundary && (m.data < m.lowerBoundary)) {
+            return true;
+        }
+        if (m.warning_enabled && m.data && m.upperBoundary && (m.data > m. upperBoundary)) {
+            return true;
+        }
+        return false;
+    }
+
     private update() {
         this.setConfigured();
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
