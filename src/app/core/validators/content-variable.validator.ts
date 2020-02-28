@@ -33,7 +33,7 @@ export function contentVariableValidator(): ValidatorFn {
                 type === 'https://schema.org/StructuredValue') {
                 return null;
             } else {
-                return 'invalid Type: ' + type;
+                return 'invalid Type! Use `https://schema.org/Text` or `Integer, Float, Boolean, StructuredValue`';
             }
         }
     }
@@ -50,19 +50,21 @@ export function contentVariableValidator(): ValidatorFn {
         }
     }
 
-    function checkSubContentVariables(contentVariable: DeviceTypeContentVariableModel[] | undefined): string | null {
-        let error: null | string = null;
+    function checkSubContentVariables(contentVariable: DeviceTypeContentVariableModel[] | undefined, error: null | string): string | null {
+        if (error !== null) {
+            return error;
+        }
         if (contentVariable) {
             contentVariable.forEach((subContentVariable: DeviceTypeContentVariableModel) => {
-                if (error === null) {
-                    error = checkType(subContentVariable.type);
-                }
                 if (error === null) {
                     error = validateName(subContentVariable.name);
                 }
                 if (error === null) {
+                    error = checkType(subContentVariable.type);
+                }
+                if (error === null) {
                     if (subContentVariable.sub_content_variables) {
-                        checkSubContentVariables(subContentVariable.sub_content_variables);
+                        error = checkSubContentVariables(subContentVariable.sub_content_variables, error);
                     }
                 }
             });
@@ -81,7 +83,7 @@ export function contentVariableValidator(): ValidatorFn {
                 errorMsg = checkType(contentVariable.type);
             }
             if (errorMsg === null) {
-                errorMsg = checkSubContentVariables(contentVariable.sub_content_variables);
+                errorMsg = checkSubContentVariables(contentVariable.sub_content_variables, null);
             }
 
             if (errorMsg) {
