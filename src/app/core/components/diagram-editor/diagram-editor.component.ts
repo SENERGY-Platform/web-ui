@@ -244,13 +244,16 @@ export class DiagramEditorComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.setPaperWidth();
-        this.reinitializePaper();
-        this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
-            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
-            const model = elementView.model;
-            model.remove();
-        });
+        // TODO: find better solution for appear / fade-in problem
+        setTimeout(() => {
+            this.setPaperWidth();
+            this.reinitializePaper();
+            this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
+                evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
+                const model = elementView.model;
+                model.remove();
+            });
+        }, 0);
     }
 
     onResize({}) {
