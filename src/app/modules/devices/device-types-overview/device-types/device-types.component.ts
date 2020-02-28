@@ -26,7 +26,7 @@ import {
     DeviceTypeProtocolSegmentModel,
     DeviceTypeServiceModel, functionTypes,
 } from '../shared/device-type.model';
-import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
@@ -37,6 +37,7 @@ import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-as
 import {util} from 'jointjs';
 import uuid = util.uuid;
 import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
+import {contentVariableValidator} from '../../../../core/validators/content-variable.validator';
 
 const controllingIndex = 0;
 const measuringIndex = 1;
@@ -111,6 +112,14 @@ export class DeviceTypesComponent implements OnInit {
 
             formGroup.controls['functions'].setValue([]);
         });
+    }
+
+    getErrorMessage(field: FormControl): string {
+        if (field.errors) {
+            return field.errors.errorMsg;
+        } else {
+            return '';
+        }
     }
 
     deleteService(deviceTypeService: DeviceTypeServiceModel) {
@@ -391,7 +400,7 @@ export class DeviceTypesComponent implements OnInit {
             id: [content.id],
             name: [protocolSegment.name],
             serialization: [content.serialization],
-            content_variable_raw: [JSON.stringify(content.content_variable, null, 5), jsonValidator(true)],
+            content_variable_raw: [JSON.stringify(content.content_variable, null, 5), contentVariableValidator()],
             content_variable: content.content_variable ? this.createContentVariableGroup(content.content_variable) : '',
             protocol_segment_id: [protocolSegment.id],
             show: [content.protocol_segment_id ? true : false],
@@ -557,7 +566,7 @@ export class DeviceTypesComponent implements OnInit {
                 break; // do nothing special
             }
             case 'create': {
-               break; // do nothing special
+                break; // do nothing special
             }
             case 'details': {
                 this.editable = false; // hide save tab
@@ -596,7 +605,7 @@ export class DeviceTypesComponent implements OnInit {
 
         function clearContentVariable(subContentVariables: FormArray) {
             if (subContentVariables.length > 0) {
-                subContentVariables.controls.forEach( (subContentVariable: AbstractControl) => {
+                subContentVariables.controls.forEach((subContentVariable: AbstractControl) => {
                     const subContentVariableFormGroup = <FormGroup>subContentVariable;
                     subContentVariableFormGroup.removeControl('id');
                     clearContentVariable(<FormArray>subContentVariableFormGroup.get('sub_content_variables'));

@@ -196,9 +196,10 @@
                                             </mat-form-field>
                                             <mat-form-field class="full-width" color="accent">
                                             <textarea formControlName="content_variable_raw" matInput
-                                                      placeholder="Insert data structure in json format" rows="10"></textarea>
+                                                      placeholder="Insert data structure in json format"
+                                                      rows="10"></textarea>
                                                 <mat-error *ngIf="control.controls.content_variable_raw.invalid">
-                                                Enter valid json!
+                                                    {{getErrorMessage(control.controls.content_variable_raw)}}
                                                 </mat-error>
                                             </mat-form-field>
                                         </div>
