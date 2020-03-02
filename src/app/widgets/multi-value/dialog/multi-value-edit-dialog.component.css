@@ -21,3 +21,7 @@ table {
 mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
+
+.actions-warn {
+    margin-right: 8px;
+}

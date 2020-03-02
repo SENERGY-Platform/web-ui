@@ -31,8 +31,8 @@ import {MultiValueMeasurement, MultiValueOrderEnum} from './shared/multi-value.m
 export class MultiValueComponent implements OnInit, OnDestroy {
 
     configured = false;
-    dataReceived = 0;
     destroy = new Subscription();
+    dataReady = false;
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
@@ -66,22 +66,13 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         this.setConfigured();
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.dataReceived = 0;
+                this.dataReady = false;
                 this.multiValueService.getValues(this.widget).subscribe(result => {
-                    if (this.widget.properties.multivaluemeasurements) {
-                        this.widget.properties.multivaluemeasurements[result.index].data = result.value;
-                        this.dataReceived++;
-                    }
+                    this.widget = result;
+                    this.dataReady = true;
                 });
             }
         });
-    }
-
-    isDataReady(): boolean {
-        if (this.widget.properties.multivaluemeasurements) {
-            return this.widget.properties.multivaluemeasurements.length === this.dataReceived;
-        }
-        return false;
     }
 
     /**
@@ -91,11 +82,13 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         this.configured = true;
         if (this.widget.properties.multivaluemeasurements) {
             for (const measurement of this.widget.properties.multivaluemeasurements) {
-                if (measurement.export.id === '' && measurement.column.Name === '') {
+                if (measurement.export.id === '' || measurement.column.Name === '' || measurement.type === '') {
                     this.configured = false;
                     return;
                 }
             }
+        } else {
+            this.configured = false;
         }
     }
 

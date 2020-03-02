@@ -17,11 +17,6 @@
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {ExportValueModel} from '../../../modules/data/export/shared/export.model';
 
-export interface MultiValueModel {
-    value: (number | string);
-    index: number;
-}
-
 export interface MultiValuePropertiesModel {
     multivaluemeasurements?: MultiValueMeasurement[];
     order?: number;
@@ -34,6 +29,7 @@ export interface MultiValueMeasurement {
     export: ChartsExportMeasurementModel;
     column: ExportValueModel;
     unit: string;
+    math?: string;
     data?: (number | string);
     lowerBoundary?: number;
     upperBoundary?: number;

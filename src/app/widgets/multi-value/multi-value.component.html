@@ -18,11 +18,11 @@
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="content-size drag-handler">
         <div *ngIf="!configured" fxFill fxLayout="column" fxLayoutAlign="center center">
-            <div>Widget not correctly configured!</div>
-            <div>Check if exports and columns are set.</div>
+            <div>Widget not configured correctly!</div>
+            <div>Check if exports, columns and types are set.</div>
         </div>
-        <senergy-widget-spinner [show]="configured && !isDataReady"></senergy-widget-spinner>
-        <div *ngIf="configured && isDataReady()" style="height: 100%" fxLayout="column"  fxFill>
+        <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
+        <div *ngIf="configured && dataReady" style="height: 100%" fxLayout="column"  fxFill>
             <mat-list style="overflow: auto; max-height: 100%">
                 <mat-list-item *ngFor="let m of orderedValues()">
                     {{m.name}}:&nbsp;
