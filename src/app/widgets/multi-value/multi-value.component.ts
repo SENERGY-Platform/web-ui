@@ -107,12 +107,12 @@ export class MultiValueComponent implements OnInit, OnDestroy {
                 return m;
             case MultiValueOrderEnum.ValueAsc:
                 m.sort((a, b) => {
-                    return Number(a.data) - Number(b.data);
+                    return Number(a.data || Number.MAX_VALUE) - Number(b.data || Number.MAX_VALUE);
                 });
                 return m;
             case MultiValueOrderEnum.ValueDesc:
                 m.sort((a, b) => {
-                    return Number(b.data) - Number(a.data);
+                    return Number(b.data || Number.MIN_VALUE) - Number(a.data || Number.MIN_VALUE);
                 });
                 return m;
         }

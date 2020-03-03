@@ -161,7 +161,14 @@ export class MultiValueEditDialogComponent implements OnInit {
     addMeasurement(measurement: MultiValueMeasurement) {
         const isStringType = measurement.type === 'String' || measurement.type === '';
         const warning_disabled = measurement.warning_enabled !== true;
-        const index = this.getMeasurements().length;
+        let lower: any = measurement.lowerBoundary;
+        let upper: any = measurement.upperBoundary;
+        if (lower === Number.MIN_VALUE) {
+            lower = '';
+        }
+        if (upper === Number.MAX_VALUE) {
+            upper = '';
+        }
         const newGroup = this.fb.group({
             name: [measurement.name, Validators.required],
             export: [measurement.export, emptyObjectValidator()],
@@ -172,8 +179,8 @@ export class MultiValueEditDialogComponent implements OnInit {
             math: [{value: measurement.math, disabled: isStringType}, this.mathValidator],
             warnings: this.fb.group({
                 warning_enabled: [{value: measurement.warning_enabled, disabled: isStringType}],
-                lowerBoundary: [{value: measurement.lowerBoundary, disabled: warning_disabled}],
-                upperBoundary: [{value: measurement.upperBoundary, disabled: warning_disabled}]
+                lowerBoundary: [{value: lower, disabled: warning_disabled}],
+                upperBoundary: [{value: upper, disabled: warning_disabled}]
             }, {validators: [this.boundaryValidator]})
         });
 
@@ -251,8 +258,8 @@ export class MultiValueEditDialogComponent implements OnInit {
                 column: (control.get('column') as FormControl).value,
                 unit: (control.get('unit') as FormControl).value,
                 math: (control.get('math') as FormControl).value,
-                lowerBoundary: (warn_group.get('lowerBoundary') as FormControl).value,
-                upperBoundary: (warn_group.get('upperBoundary') as FormControl).value,
+                lowerBoundary: (warn_group.get('lowerBoundary') as FormControl).value || Number.MIN_VALUE,
+                upperBoundary: (warn_group.get('upperBoundary') as FormControl).value || Number.MAX_VALUE,
                 warning_enabled: (warn_group.get('warning_enabled') as FormControl).value,
             } as MultiValueMeasurement;
             measurements.push(m);
