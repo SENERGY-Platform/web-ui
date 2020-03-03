@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
 import {MatIconRegistry} from '@angular/material';
 import {DomSanitizer} from '@angular/platform-browser';
@@ -22,6 +22,8 @@ import {MultiValueService} from './shared/multi-value.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {MultiValueMeasurement, MultiValueOrderEnum} from './shared/multi-value.model';
+import {Sort} from '@angular/material/sort';
+import {MatTable} from '@angular/material/table';
 
 @Component({
     selector: 'senergy-multi-value',
@@ -33,10 +35,12 @@ export class MultiValueComponent implements OnInit, OnDestroy {
     configured = false;
     destroy = new Subscription();
     dataReady = false;
+    orderedValues: MultiValueMeasurement[] = [];
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
     @Input() zoom = false;
+    @ViewChild(MatTable, {static: false}) table !: MatTable<any>;
 
     constructor(private iconRegistry: MatIconRegistry,
                 private sanitizer: DomSanitizer,
@@ -70,6 +74,7 @@ export class MultiValueComponent implements OnInit, OnDestroy {
                 this.multiValueService.getValues(this.widget).subscribe(result => {
                     this.widget = result;
                     this.dataReady = true;
+                    this.orderValues(this.widget.properties.order || 0);
                 });
             }
         });
@@ -92,31 +97,62 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         }
     }
 
-    private orderedValues(): MultiValueMeasurement[] {
+    private orderValues(sortId: number) {
         const m = this.widget.properties.multivaluemeasurements || [];
-        switch (this.widget.properties.order || 0) {
+        switch (sortId) {
             case MultiValueOrderEnum.AlphabeticallyAsc:
                 m.sort((a, b) => {
                     return a.name.charCodeAt(0) - b.name.charCodeAt(0);
                 });
-                return m;
+                break;
             case MultiValueOrderEnum.AlphabeticallyDesc:
                 m.sort((a, b) => {
                     return b.name.charCodeAt(0) - a.name.charCodeAt(0);
                 });
-                return m;
+                break;
             case MultiValueOrderEnum.ValueAsc:
                 m.sort((a, b) => {
-                    return Number(a.data || Number.MAX_VALUE) - Number(b.data || Number.MAX_VALUE);
+                    return this.parseNumber(a, true) - this.parseNumber(b, true);
                 });
-                return m;
+                break;
             case MultiValueOrderEnum.ValueDesc:
                 m.sort((a, b) => {
-                    return Number(b.data || Number.MIN_VALUE) - Number(a.data || Number.MIN_VALUE);
+                    return this.parseNumber(b, false) - this.parseNumber(a, false);
                 });
-                return m;
+                break;
         }
-        return m;
+        this.orderedValues = m;
+        if (this.table) {
+            this.table.renderRows();
+        }
     }
 
+    private parseNumber(m: MultiValueMeasurement, max: boolean): number {
+        if (m.data == null || m.type === 'String') {
+            if (max) {
+                return Number.MAX_VALUE;
+            }
+            return  Number.MIN_VALUE;
+        }
+        return Number(m.data);
+    }
+
+    matSortChange($event: Sort) {
+        switch ($event.active) {
+            case 'value':
+                if ($event.direction === 'asc') {
+                    this.orderValues(MultiValueOrderEnum.ValueAsc);
+                } else {
+                    this.orderValues(MultiValueOrderEnum.ValueDesc);
+                }
+                break;
+            case 'name':
+                if ($event.direction === 'asc') {
+                    this.orderValues(MultiValueOrderEnum.AlphabeticallyAsc);
+                } else {
+                    this.orderValues(MultiValueOrderEnum.AlphabeticallyDesc);
+                }
+                break;
+        }
+    }
 }

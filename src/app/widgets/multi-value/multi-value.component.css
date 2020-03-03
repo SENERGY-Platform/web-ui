@@ -41,3 +41,16 @@
 .red {
     color: red;
 }
+
+tr.mat-header-row {
+    height: 32px;
+}
+
+tr.mat-row {
+    height: 32px;
+}
+
+.table-container {
+    height: 100%;
+    overflow:auto;
+}

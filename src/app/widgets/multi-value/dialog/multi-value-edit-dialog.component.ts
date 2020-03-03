@@ -53,6 +53,7 @@ export class MultiValueEditDialogComponent implements OnInit {
     formGroup = this.fb.group({
         name: ['', Validators.required],
         order: ['', Validators.required],
+        valueAlias: [''],
         measurements: this.fb.array([])
     });
 
@@ -77,6 +78,7 @@ export class MultiValueEditDialogComponent implements OnInit {
             this.initDeployments();
             (this.formGroup.get('name') as FormControl).setValue(widget.name);
             (this.formGroup.get('order') as FormControl).setValue(widget.properties.order || 0);
+            (this.formGroup.get('valueAlias') as FormControl).setValue(widget.properties.valueAlias);
 
             measurements.forEach(measurement => this.addMeasurement(measurement));
 
@@ -267,6 +269,7 @@ export class MultiValueEditDialogComponent implements OnInit {
         this.widget.properties.multivaluemeasurements = measurements;
         this.widget.name = (this.formGroup.get('name') as FormControl).value;
         this.widget.properties.order = (this.formGroup.get('order') as FormControl).value;
+        this.widget.properties.valueAlias = (this.formGroup.get('valueAlias') as FormControl).value;
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widget);

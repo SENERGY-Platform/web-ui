@@ -60,13 +60,6 @@ export class MultiValueService {
     }
 
 
-    /**
-     * Gets latest values for all exports defined in widget.properties.multivaluemeasurements
-     * and makes sure to only request results once for each individual export.
-     * @param widget
-     * @return An Observable, which will receive a call for each export defined with its result
-     * and index from the defining array
-     */
     getValues(widget: WidgetModel): Observable<WidgetModel> {
         return new Observable<WidgetModel>((observer) => {
             if (widget.properties.multivaluemeasurements) {
@@ -107,6 +100,16 @@ export class MultiValueService {
                                 measurements[idIndex].data = val[columnIndex];
                             }
                         });
+                        if (measurements[idIndex].data == null) {
+                            measurements[idIndex].data = 'N/A';
+                            /* Act like a String if no value found, prevents piping.
+                             * Also remove unit because 'N/A %' is weird.
+                             * This doesn't change the actual configuration,
+                             * because the widget is never written to the dashboard service
+                             */
+                            measurements[idIndex].unit = '';
+                            measurements[idIndex].type = 'String';
+                        }
                     });
                     observer.next(widget);
                     observer.complete();

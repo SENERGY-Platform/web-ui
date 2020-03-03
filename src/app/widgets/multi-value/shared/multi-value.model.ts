@@ -20,6 +20,7 @@ import {ExportValueModel} from '../../../modules/data/export/shared/export.model
 export interface MultiValuePropertiesModel {
     multivaluemeasurements?: MultiValueMeasurement[];
     order?: number;
+    valueAlias?: string;
 }
 
 export interface MultiValueMeasurement {

@@ -86,6 +86,7 @@ import {MultiValueComponent} from './multi-value/multi-value.component';
 import {MultiValueEditDialogComponent} from './multi-value/dialog/multi-value-edit-dialog.component';
 import {ProcessIncidentListComponent} from './process-incident-list/process-incident-list.component';
 import {ProcessIncidentListEditDialogComponent} from './process-incident-list/dialogs/process-incident-list-edit-dialog.component';
+import {MatSortModule} from '@angular/material/sort';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -121,6 +122,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         MatExpansionModule,
         AngularFittextModule,
         MatRadioModule,
+        MatSortModule,
     ],
     declarations: [
         SwitchComponent,
