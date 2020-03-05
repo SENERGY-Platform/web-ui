@@ -42,7 +42,9 @@ export interface MeasurementModel {
     is_critical?: (boolean);
     can_web?: boolean;
     export?: (ChartsExportMeasurementModel);
+    math?: string;
     outsideExport?: (ChartsExportMeasurementModel);
+    outsideMath?: string;
     unit_html: (string);
     data: (SensorDataModel);
     outsideData: (SensorDataModel);

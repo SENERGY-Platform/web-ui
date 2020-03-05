@@ -73,3 +73,15 @@
 .grid-container {
     height: 180px;
 }
+.mat-list-base .mat-list-item {
+    height: 32px;
+}
+
+.mat-subheader {
+    padding-bottom: 0px;
+    padding-top: 0px;
+}
+
+.mat-list-base .mat-subheader {
+    height: 32px;
+}
