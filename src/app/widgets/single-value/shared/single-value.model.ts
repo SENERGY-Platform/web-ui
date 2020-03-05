@@ -16,6 +16,7 @@
 
 export interface SingleValueModel {
     value: (number | string);
+    type: string;
 }
 
 export interface SingleValuePropertiesModel {

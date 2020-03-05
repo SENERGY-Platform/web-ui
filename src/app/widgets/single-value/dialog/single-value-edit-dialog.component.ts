@@ -43,10 +43,10 @@ export class SingleValueEditDialogComponent implements OnInit {
     vAxisValues: ExportValueModel[] = [];
     disableSave = false;
 
-    vAxisLabel: string = '';
-    name: string = '';
-    type: string = '';
-    format: string = '';
+    vAxisLabel = '';
+    name = '';
+    type = '';
+    format = '';
     threshold = 128;
     math = '';
 
