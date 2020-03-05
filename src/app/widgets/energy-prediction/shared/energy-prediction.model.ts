@@ -32,7 +32,7 @@ export interface EnergyPredictionPropertiesModel {
     currency?: string;
 }
 
-interface EnergyPredictionColumnModel {
+export interface EnergyPredictionColumnModel {
     prediction: (string);
     predictionTotal: string;
     timestamp: (string);
