@@ -16,7 +16,7 @@
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material';
+import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {AirQualityService} from './shared/air-quality.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';

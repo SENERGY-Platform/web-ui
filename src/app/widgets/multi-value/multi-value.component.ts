@@ -16,7 +16,7 @@
 
 import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material';
+import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {MultiValueService} from './shared/multi-value.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
@@ -137,17 +137,17 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         return Number(m.data);
     }
 
-    matSortChange($event: Sort) {
-        switch ($event.active) {
+    matSortChange(event: Sort) {
+        switch (event.active) {
             case 'value':
-                if ($event.direction === 'asc') {
+                if (event.direction === 'asc') {
                     this.orderValues(MultiValueOrderEnum.ValueAsc);
                 } else {
                     this.orderValues(MultiValueOrderEnum.ValueDesc);
                 }
                 break;
             case 'name':
-                if ($event.direction === 'asc') {
+                if (event.direction === 'asc') {
                     this.orderValues(MultiValueOrderEnum.AlphabeticallyAsc);
                 } else {
                     this.orderValues(MultiValueOrderEnum.AlphabeticallyDesc);

@@ -22,7 +22,7 @@ import {ErrorHandlerService} from '../../../core/services/error-handler.service'
 import {UtilService} from '../../../core/services/util.service';
 import {HttpClient} from '@angular/common/http';
 import {Geoname, GeonamesResponse} from './geonames.model';
-import {Injectable} from "@angular/core";
+import {Injectable} from '@angular/core';
 
 @Injectable({
     providedIn: 'root'
