@@ -154,13 +154,11 @@ export class DiagramEditorComponent implements OnInit {
 
             initialize: function () {
                 shapes.basic.Generic.prototype.initialize.apply(this, <any>arguments);
-
-                this.on('change:inPorts change:outPorts', this.updatePortItems, this);
                 this.updatePortItems();
             },
 
             // model,changed
-            updatePortItems: function ({}, {}, opt: any) {
+            updatePortItems: function () {
                 // Make sure all ports are unique.
                 const inPorts = util.uniq(this.get('inPorts'));
                 const outPorts = util.uniq(this.get('outPorts'));
@@ -168,7 +166,7 @@ export class DiagramEditorComponent implements OnInit {
                 const inPortItems = this.createPortItems('in', inPorts);
                 const outPortItems = this.createPortItems('out', outPorts);
 
-                this.prop('ports/items', inPortItems.concat(outPortItems), util.assign({rewrite: true}, opt));
+                this.prop('ports/items', inPortItems.concat(outPortItems));
             },
 
             createPortItem: function (group: any, port: any) {
@@ -187,52 +185,6 @@ export class DiagramEditorComponent implements OnInit {
             createPortItems: function (group: any, ports: any) {
 
                 return util.toArray(ports).map(this.createPortItem.bind(this, group));
-            },
-
-            _addGroupPort: function (port: any, group: any, opt: any) {
-
-                const ports = this.get(group);
-                return this.set(group, Array.isArray(ports) ? ports.concat(port) : [port], opt);
-            },
-
-            addOutPort: function (port: any, opt: any) {
-
-                return this._addGroupPort(port, 'outPorts', opt);
-            },
-
-            addInPort: function (port: any, opt: any) {
-
-                return this._addGroupPort(port, 'inPorts', opt);
-            },
-
-            _removeGroupPort: function (port: any, group: any, opt: any) {
-
-                return this.set(group, util.without(this.get(group), port), opt);
-            },
-
-            removeOutPort: function (port: any, opt: any) {
-
-                return this._removeGroupPort(port, 'outPorts', opt);
-            },
-
-            removeInPort: function (port: any, opt: any) {
-
-                return this._removeGroupPort(port, 'inPorts', opt);
-            },
-
-            _changeGroup: function (group: any, properties: any, opt: any) {
-
-                return this.prop('ports/groups/' + group, util.isObject(properties) ? properties : {}, opt);
-            },
-
-            changeInGroup: function (properties: any, opt: any) {
-
-                return this._changeGroup('in', properties, opt);
-            },
-
-            changeOutGroup: function (properties: any, opt: any) {
-
-                return this._changeGroup('out', properties, opt);
             }
         }
     );
