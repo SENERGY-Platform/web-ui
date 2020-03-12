@@ -18,8 +18,6 @@ import {Component, OnInit} from '@angular/core';
 import {dia, shapes, util} from 'jointjs';
 import * as $ from 'jquery';
 import {DiagramModel} from './shared/diagram.model';
-import * as _ from 'lodash';
-
 
 @Component({
     selector: 'senergy-diagram-editor',
