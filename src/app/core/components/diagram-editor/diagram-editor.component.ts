@@ -18,6 +18,7 @@ import {Component, OnInit} from '@angular/core';
 import {dia, shapes, util} from 'jointjs';
 import * as $ from 'jquery';
 import {DiagramModel} from './shared/diagram.model';
+import * as _ from 'lodash';
 
 
 @Component({
@@ -160,10 +161,9 @@ export class DiagramEditorComponent implements OnInit {
 
             // model,changed
             updatePortItems: function ({}, {}, opt: any) {
-
                 // Make sure all ports are unique.
                 const inPorts = util.uniq(this.get('inPorts'));
-                const outPorts = util.difference(util.uniq(this.get('outPorts')), inPorts);
+                const outPorts = util.uniq(this.get('outPorts'));
 
                 const inPortItems = this.createPortItems('in', inPorts);
                 const outPortItems = this.createPortItems('out', outPorts);
@@ -174,7 +174,7 @@ export class DiagramEditorComponent implements OnInit {
             createPortItem: function (group: any, port: any) {
 
                 return {
-                    id: port,
+                    id: group + '-' + port,
                     group: group,
                     attrs: {
                         portLabel: {
