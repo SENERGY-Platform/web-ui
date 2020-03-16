@@ -87,43 +87,39 @@ export class DeployFlowComponent {
         const self = this;
         this.ready = false;
         this.pipeReq.nodes.forEach((pipeReqNode: NodeModel) => {
-            for (const form of this.selectedValues.get(pipeReqNode.nodeId).entries()) {
+            pipeReqNode.config = [];
+            for (const entry of this.selectedValues.get(pipeReqNode.nodeId).entries()) {
                 // check if device and service are selected
-                if (form[1].device[0] !== undefined && form[1].service.id !== undefined) {
+                if (entry[0] === '_config') {
+                    for (const config of entry[1].entries()) {
+                        pipeReqNode.config.push({name: config[0], value: config [1]});
+                    }
+                } else {
                     let deviceIds = '';
-                    for (let x = 0; x < form[1].device.length; x++) {
+                    for (let x = 0; x < entry[1].device.length; x++) {
                         if (x === 0) {
-                            deviceIds = form[1].device[x].id;
+                            deviceIds = entry[1].device[x].id;
                         } else {
-                            deviceIds += ',' + form[1].device[x].id;
+                            deviceIds += ',' + entry[1].device[x].id;
                         }
                     }
-                    if (form[0] === '_config') {
-                        if (pipeReqNode.config === undefined) {
-                            pipeReqNode.config = [];
-                        }
-                        for (const config of form[1].entries()) {
-                            pipeReqNode.config.push({name: config[0], value: config [1]});
-                        }
-                    } else {
-                        // parse input of form fields
-                        const nodeValue = {name: form [0], path: form[1].path} as NodeValue;
-                        const nodeValues = [] as NodeValue [];
-                        nodeValues.push(nodeValue);
-                        // add values from input form
-                        const nodeInput = {
-                            deviceId: deviceIds,
-                            values: nodeValues
-                        } as NodeInput;
+                    // parse input of form fields
+                    const nodeValue = {name: entry [0], path: entry[1].path} as NodeValue;
+                    const nodeValues = [] as NodeValue [];
+                    nodeValues.push(nodeValue);
+                    // add values from input form
+                    const nodeInput = {
+                        deviceId: deviceIds,
+                        values: nodeValues
+                    } as NodeInput;
 
-                        // check if node is local or cloud and set input topic accordingly
-                        if (pipeReqNode.deploymentType === 'local') {
-                            nodeInput.topicName = 'event/' + form[1].device.uri + '/' + form[1].service.url;
-                        } else {
-                            nodeInput.topicName = form[1].service.id.replace(/#/g, '_').replace(/:/g, '_');
-                        }
-                        this.populateRequestNodeInputs(pipeReqNode, deviceIds, nodeValue, nodeInput);
+                    // check if node is local or cloud and set input topic accordingly
+                    if (pipeReqNode.deploymentType === 'local') {
+                        nodeInput.topicName = 'event/' + entry[1].device.uri + '/' + entry[1].service.url;
+                    } else {
+                        nodeInput.topicName = entry[1].service.id.replace(/#/g, '_').replace(/:/g, '_');
                     }
+                    this.populateRequestNodeInputs(pipeReqNode, deviceIds, nodeValue, nodeInput);
                 }
             }
         });
@@ -158,7 +154,7 @@ export class DeployFlowComponent {
                     this.deviceTypes[inputId][port] = resp;
                     this.paths[inputId][port] = [];
                     this.filteredDevices = this.devices.filter(function (dev) {
-                        return dev.device_type.id === device.device_type.id;
+                            return dev.device_type.id === device.device_type.id;
                         }
                     );
                 }
