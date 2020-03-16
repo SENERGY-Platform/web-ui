@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,4 +40,17 @@
 
 .red {
     color: red;
+}
+
+tr.mat-header-row {
+    height: 32px;
+}
+
+tr.mat-row {
+    height: 32px;
+}
+
+.table-container {
+    height: 100%;
+    overflow:auto;
 }

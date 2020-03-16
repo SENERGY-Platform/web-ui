@@ -16,16 +16,24 @@
 
 import {AbstractControl, ValidatorFn} from '@angular/forms';
 
-export function jsonValidator(blankIsValid = false): ValidatorFn {
+/**
+ * Validates the object in a FormControl and checks for the empty object {}.
+ *
+ * By setting errorOnEmpty to false, validation will return an error if the object is not empty (inverse behaviour).
+ * @param errorOnEmpty true by default
+ */
+export function emptyObjectValidator(errorOnEmpty: boolean = true): ValidatorFn {
     return (control: AbstractControl): {[key: string]: any} | null => {
-        if (blankIsValid && control.value === '') {
+        if (errorOnEmpty) {
+            if (Object.entries(control.value).length === 0 && control.value.constructor === Object) {
+                return {'emptyModelValidator': true};
+            }
             return null;
+        } else {
+            if (Object.entries(control.value).length === 0 && control.value.constructor === Object) {
+               return null;
+            }
+            return {'emptyModelValidator': true};
         }
-        try {
-            JSON.parse(control.value);
-        } catch (e) {
-            return {'jsonValidator': {value: control.value}};
-        }
-        return null;
     };
 }

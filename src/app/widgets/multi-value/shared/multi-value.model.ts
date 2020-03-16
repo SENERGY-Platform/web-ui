@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,10 @@
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {ExportValueModel} from '../../../modules/data/export/shared/export.model';
 
-export interface MultiValueModel {
-    value: (number | string);
-    index: number;
-}
-
 export interface MultiValuePropertiesModel {
     multivaluemeasurements?: MultiValueMeasurement[];
     order?: number;
+    valueAlias?: string;
 }
 
 export interface MultiValueMeasurement {
@@ -34,6 +30,7 @@ export interface MultiValueMeasurement {
     export: ChartsExportMeasurementModel;
     column: ExportValueModel;
     unit: string;
+    math?: string;
     data?: (number | string);
     lowerBoundary?: number;
     upperBoundary?: number;

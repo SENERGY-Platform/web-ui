@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,7 @@ import {MatIconRegistry} from '@angular/material/icon';
     styleUrls: ['./single-value.component.css'],
 })
 export class SingleValueComponent implements OnInit, OnDestroy {
-
-    devicesStatus: SingleValueModel = {value: 0};
+    sv: SingleValueModel = {} as SingleValueModel;
     ready = false;
     configured = false;
     dataReady = false;
@@ -57,8 +56,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     }
 
     registerIcons() {
-        this.iconRegistry.addSvgIcon('online', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/connect_white.svg'));
-        this.iconRegistry.addSvgIcon('offline', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/disconnect_white.svg'));
+
     }
 
     edit() {
@@ -71,12 +69,8 @@ export class SingleValueComponent implements OnInit, OnDestroy {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
                 this.dataReady = false;
-                this.singleValueService.getSingleValue(this.widget).subscribe((devicesStatus: SingleValueModel) => {
-                    if (this.widget.properties.math !== '' && typeof devicesStatus.value === 'number') {
-                            this.devicesStatus.value = eval(devicesStatus.value + (this.widget.properties.math || '+ 0'));
-                    } else {
-                        this.devicesStatus = devicesStatus;
-                    }
+                this.singleValueService.getSingleValue(this.widget).subscribe((sv: SingleValueModel) => {
+                    this.sv = sv;
                     this.ready = true;
                     this.dataReady = true;
                 }, () => {

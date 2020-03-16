@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,7 @@ import {MatStepperModule} from '@angular/material/stepper';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatRadioModule} from '@angular/material/radio';
+import {MatSortModule} from '@angular/material/sort';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -120,6 +121,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         MatExpansionModule,
         AngularFittextModule,
         MatRadioModule,
+        MatSortModule,
     ],
     declarations: [
         SwitchComponent,

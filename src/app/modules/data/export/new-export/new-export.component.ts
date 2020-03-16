@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,11 +228,13 @@ export class NewExportComponent implements OnInit {
     autofillValues() {
         this.export.Values = [];
         this.paths.forEach((_type, path) => {
-            this.addValue();
-            const index = this.export.Values.length - 1;
-            this.export.Values[index].Name = path.slice(path.lastIndexOf('.') + 1);
-            this.export.Values[index].Path = path;
-            this.pathChanged(index);
+            if (this.export.TimePath !== path) { // don't add path if it's selected as time
+                this.addValue();
+                const index = this.export.Values.length - 1;
+                this.export.Values[index].Name = path.slice(path.lastIndexOf('.') + 1);
+                this.export.Values[index].Path = path;
+                this.pathChanged(index);
+            }
         });
         if (this.selector === 'pipe' && this.timeSuggest.length === 1) {
             this.export.TimePath = this.timeSuggest[0];
