@@ -37,7 +37,7 @@ import {util} from 'jointjs';
 import uuid = util.uuid;
 import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {contentVariableValidator} from '../../../../core/validators/content-variable.validator';
+import {contentVariableValidator} from './content-variable.validator';
 
 const controllingIndex = 0;
 const measuringIndex = 1;
