@@ -39,7 +39,6 @@ export function contentVariableValidator(): ValidatorFn {
         }
     }
 
-
     function validateName(name: string | undefined): string | null {
         if (name === undefined) {
             return 'name is missing';
@@ -62,28 +61,25 @@ export function contentVariableValidator(): ValidatorFn {
         }
     }
 
-    function checkSubContentVariables(contentVariable: DeviceTypeContentVariableModel[] | undefined, error: null | string): string | null {
-        if (error !== null) {
-            return error;
+    function checkFields(contentVariable: DeviceTypeContentVariableModel, error: null | string): null | string {
+        if (error === null) {
+            error = validateName(contentVariable.name);
         }
-        if (contentVariable) {
-            contentVariable.forEach((subContentVariable: DeviceTypeContentVariableModel) => {
-                if (error === null) {
-                    error = validateName(subContentVariable.name);
-                }
-                if (error === null) {
-                    error = checkType(subContentVariable.type);
-                }
-                if (error === null) {
-                    error = validateId(subContentVariable.id);
-                }
-                if (error === null) {
-                    if (subContentVariable.sub_content_variables) {
-                        error = checkSubContentVariables(subContentVariable.sub_content_variables, error);
-                    }
-                }
-            });
+        if (error === null) {
+            error = checkType(contentVariable.type);
         }
+        if (error === null) {
+            error = validateId(contentVariable.id);
+        }
+
+        if (error === null) {
+            if (contentVariable.sub_content_variables) {
+                contentVariable.sub_content_variables.forEach((subContentVariable: DeviceTypeContentVariableModel) => {
+                    error = checkFields(subContentVariable, error);
+                });
+            }
+        }
+
         return error;
     }
 
@@ -93,16 +89,7 @@ export function contentVariableValidator(): ValidatorFn {
         }
         try {
             const contentVariable: DeviceTypeContentVariableModel = JSON.parse(control.value);
-            errorMsg = validateName(contentVariable.name);
-            if (errorMsg === null) {
-                errorMsg = checkType(contentVariable.type);
-            }
-            if (errorMsg === null) {
-                errorMsg = validateId(contentVariable.id);
-            }
-            if (errorMsg === null) {
-                errorMsg = checkSubContentVariables(contentVariable.sub_content_variables, null);
-            }
+            errorMsg = checkFields(contentVariable, null);
 
             if (errorMsg) {
                 return {'errorMsg': errorMsg};
