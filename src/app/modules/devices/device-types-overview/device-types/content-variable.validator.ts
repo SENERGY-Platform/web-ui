@@ -55,7 +55,6 @@ export function contentVariableValidator(): ValidatorFn {
         if (id === undefined) {
             return null;
         } else {
-            console.log(id);
             if (id.startsWith('urn:infai:ses:content-variable:')) {
                 return null;
             }
