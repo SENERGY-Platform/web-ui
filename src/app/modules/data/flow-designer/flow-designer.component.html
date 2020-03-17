@@ -15,6 +15,10 @@
   -->
 <div class="main-panel">
     <div class="layout-margin" fxLayout="column">
+        <div *ngIf="flow.dateCreated !== undefined" fxLayout="row" fxLayoutAlign="end center" style="margin-bottom: 10px;">
+            <mat-icon>calendar_today</mat-icon>{{flow.dateCreated| date:"medium"}}
+            <mat-icon style="margin-left: 6px;">update</mat-icon>{{flow.dateUpdated| date:"medium"}}
+        </div>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>
             <input matInput [(ngModel)]="flow.name" placeholder="Name">
