@@ -51,6 +51,18 @@ export function contentVariableValidator(): ValidatorFn {
         }
     }
 
+    function validateId(id: string | undefined): string | null {
+        if (id === undefined) {
+            return null;
+        } else {
+            console.log(id);
+            if (id.startsWith('urn:infai:ses:content-variable:')) {
+                return null;
+            }
+            return 'id is wrong';
+        }
+    }
+
     function checkSubContentVariables(contentVariable: DeviceTypeContentVariableModel[] | undefined, error: null | string): string | null {
         if (error !== null) {
             return error;
@@ -62,6 +74,9 @@ export function contentVariableValidator(): ValidatorFn {
                 }
                 if (error === null) {
                     error = checkType(subContentVariable.type);
+                }
+                if (error === null) {
+                    error = validateId(subContentVariable.id);
                 }
                 if (error === null) {
                     if (subContentVariable.sub_content_variables) {
@@ -82,6 +97,9 @@ export function contentVariableValidator(): ValidatorFn {
             errorMsg = validateName(contentVariable.name);
             if (errorMsg === null) {
                 errorMsg = checkType(contentVariable.type);
+            }
+            if (errorMsg === null) {
+                errorMsg = validateId(contentVariable.id);
             }
             if (errorMsg === null) {
                 errorMsg = checkSubContentVariables(contentVariable.sub_content_variables, null);
