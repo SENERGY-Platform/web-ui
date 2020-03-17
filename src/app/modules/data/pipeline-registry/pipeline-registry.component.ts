@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import {PipelineModel} from './shared/pipeline.model';
 import {PipelineRegistryService} from './shared/pipeline-registry.service';
 import {FlowEngineService} from '../flow-repo/shared/flow-engine.service';
-import {MatSnackBar, MatSort, MatTable} from '@angular/material';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {MatTable} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
     selector: 'senergy-pipeline-registry',

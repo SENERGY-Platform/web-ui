@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import {ErrorHandlerService} from '../../../core/services/error-handler.service'
 import {UtilService} from '../../../core/services/util.service';
 import {HttpClient} from '@angular/common/http';
 import {Geoname, GeonamesResponse} from './geonames.model';
-import {Injectable} from "@angular/core";
+import {Injectable} from '@angular/core';
 
 @Injectable({
     providedIn: 'root'

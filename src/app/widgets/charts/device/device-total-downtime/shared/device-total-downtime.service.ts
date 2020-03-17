@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import {Observable} from 'rxjs';
 import {ChartsModel} from '../../../shared/charts.model';
 import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
 import {ElementSizeService} from '../../../../../core/services/element-size.service';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {EditOutputDialogComponent} from '../dialogs/edit-output-dialog/edit-output-dialog.component';
 import {EditInputDialogComponent} from '../dialogs/edit-input-dialog/edit-input-dialog.component';
 import {CycleDialogComponent} from '../dialogs/cycle-dialog/cycle-dialog.component';
@@ -31,7 +31,6 @@ import {
 } from '../../../devices/device-types-overview/shared/device-type-selection.model';
 import {TaskConfigDialogComponent} from '../dialogs/task-config-dialog/task-config-dialog.component';
 import {NotificationConfigDialogComponent} from '../dialogs/notification-config-dialog/notification-config-dialog.component';
-import {MatDialogRef} from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root'

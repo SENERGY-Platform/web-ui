@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,16 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {SingleValueModel} from './single-value.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {SingleValueEditDialogComponent} from '../dialog/single-value-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {environment} from '../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {HttpClient} from '@angular/common/http';
 import {ChartsExportModel} from '../../charts/export/shared/charts-export.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {ChartsExportRequestPayloadModel} from '../../charts/export/shared/charts-export-request-payload.model';
 
 @Injectable({
     providedIn: 'root'
@@ -58,33 +57,42 @@ export class SingleValueService {
 
     getSingleValue(widget: WidgetModel): Observable<SingleValueModel> { // .
         return new Observable<SingleValueModel>((observer) => {
-            this.getData(widget.properties.measurement ? widget.properties.measurement.id : '').
-            subscribe((resp: ChartsExportModel) => {
-                try {
-                    const singleValueModel = this.extractData(resp, widget.properties.vAxis);
-                    observer.next(singleValueModel);
-                } catch (e) {
-                    observer.error(e);
-                }
-                observer.complete();
-            });
+            const m = widget.properties.measurement;
+            const name = widget.properties.vAxis ? widget.properties.vAxis.Name : '';
+            if (m) {
+                const requestPayload: ChartsExportRequestPayloadModel = {
+                    time: {
+                        last: '500000w', // arbitrary high number
+                        end: undefined,
+                        start: undefined
+                    },
+                    group: {
+                        type: undefined,
+                        time: ''
+                    },
+                    queries: [{id: m.id, fields: [{name: name, math: widget.properties.math || ''}]}],
+                    limit: 1
+                };
+
+                this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
+                    const values = model.results[0].series[0].values;
+                    let value: any = '';
+                    let type = widget.properties.type || '';
+                    if (values.length === 0) {
+                        type = 'String';
+                        value = 'N/A';
+                    } else {
+                        value = values[0][1];
+                    }
+                    const svm: SingleValueModel = {
+                        type: type,
+                        value: value
+                    };
+                    observer.next(svm);
+                    observer.complete();
+                });
+            }
         });
     }
-
-    private extractData(data: ChartsExportModel, vAxis: any): SingleValueModel {
-        const name = vAxis.Name || '';
-        const valueIndex = data.results[0].series[0].columns.indexOf(name);
-        const model: SingleValueModel = {value: 0};
-        model.value = data.results[0].series[0].values[0][valueIndex];
-        return model;
-    }
-
-    private getData(id: string): Observable<ChartsExportModel> {
-        return this.http.get<ChartsExportModel>(environment.influxAPIURL + '/measurement/' + id + '?limit=1').pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as ChartsExportModel))
-        );
-    }
-
 }
 

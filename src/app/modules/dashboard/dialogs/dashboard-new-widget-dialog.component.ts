@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material';
+import {MatDialogRef} from '@angular/material/dialog';
 import {WidgetModel} from '../shared/dashboard-widget.model';
 import {DashboardTypesEnum} from '../shared/dashboard-types.enum';
 
@@ -114,7 +114,7 @@ export class DashboardNewWidgetDialogComponent {
     }
 
     create(inputName: string): void {
-        const widget: WidgetModel = {id: '', name: inputName, type: this.selectedType.value, properties: {}};
+        const widget: WidgetModel = {id: '', name: inputName, type: this.selectedType.value, properties: {}, x: -1, y: -1, cols: -1, rows: -1};
         switch (this.selectedType.value) {
             case DashboardTypesEnum.Switch: {
                 widget.properties = {

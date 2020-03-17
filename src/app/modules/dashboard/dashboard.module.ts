@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,6 @@
 
 import {NgModule} from '@angular/core';
 import {DashboardComponent} from './dashboard.component';
-import {
-    MatButtonModule,
-    MatDialogModule,
-    MatDividerModule,
-    MatFormFieldModule,
-    MatGridListModule,
-    MatIconModule,
-    MatInputModule,
-    MatMenuModule,
-    MatOptionModule,
-    MatSelectModule,
-    MatTabsModule,
-    MatTooltipModule
-} from '@angular/material';
 import {CommonModule} from '@angular/common';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {DashboardNewDialogComponent} from './dialogs/dashboard-new-dialog.component';
@@ -38,6 +24,18 @@ import {DashboardNewWidgetDialogComponent} from './dialogs/dashboard-new-widget-
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {GridsterModule} from 'angular-gridster2';
 import {DashboardEditDialogComponent} from './dialogs/dashboard-edit-dialog.component';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatSelectModule} from '@angular/material/select';
+import {MatOptionModule} from '@angular/material/core';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 
 @NgModule({

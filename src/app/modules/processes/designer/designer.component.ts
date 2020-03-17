@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,8 @@ import {DesignerDialogService} from './shared/designer-dialog.service';
 import {DesignerService} from './shared/designer.service';
 import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
 import {ActivatedRoute} from '@angular/router';
-import {MatSnackBar} from '@angular/material';
-import {TaskConfigDialogComponent} from './dialogs/task-config-dialog/task-config-dialog.component';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
     selector: 'senergy-process-designer',

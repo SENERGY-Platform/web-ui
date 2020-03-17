@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -53,13 +53,16 @@
             </div>
             <div *ngIf="changeLocation">
                 <div *ngIf="autoLocationFailed" class="small-error-text color-warn">
-                        Could not detect your location, please set manually
+                    Could not detect your location, please set manually
                 </div>
                 <mat-form-field color="accent" class="searchbox">
                     <mat-label>Location</mat-label>
                     <input matInput required [matAutocomplete]="auto" [formControl]="searchFormControl">
-                    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onLocationSelected($event.option.value)">
-                        <mat-option *ngFor="let option of geonamesSearchResults | async" [value]="option">{{option.name}}, {{option.adminCodes1.ISO3166_2}}, {{option.countryCode}}</mat-option>
+                    <mat-autocomplete #auto="matAutocomplete"
+                                      (optionSelected)="onLocationSelected($event.option.value)">
+                        <mat-option *ngFor="let option of geonamesSearchResults | async"
+                                    [value]="option">{{option.name}}, {{option.adminCodes1.ISO3166_2}}
+                            , {{option.countryCode}}</mat-option>
                     </mat-autocomplete>
                     <mat-hint>Search for landmarks or places near you</mat-hint>
                 </mat-form-field>
@@ -120,59 +123,88 @@
                         </mat-expansion-panel-header>
                         <ng-template matExpansionPanelContent>
                             <div>
-                                <mat-slide-toggle [(ngModel)]="option.is_enabled">Enable inside measurement</mat-slide-toggle>
+                                <mat-slide-toggle [(ngModel)]="option.is_enabled">Enable inside measurement
+                                </mat-slide-toggle>
                             </div>
-                            <div *ngIf="option.is_enabled">
-                                <mat-form-field color="accent">
-                                    <mat-label>Export</mat-label>
-                                    <mat-select required placeholder="Export" [(ngModel)]="option.export"
-                                                [compareWith]="compareExports">
-                                        <mat-option *ngFor="let export of exports" [value]="export">
-                                            {{export.name}}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                                <mat-form-field color="accent">
-                                    <mat-label>Value</mat-label>
-                                    <mat-select required placeholder="Value" [(ngModel)]="option.data.column"
-                                                [compareWith]="compareExportValueModels">
-                                        <mat-option *ngFor="let value of option.export?.values || []" [value]="value">
-                                            {{value.Name}}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
+                            <table *ngIf="option.is_enabled">
+                                <tr>
+                                    <td>
+                                        <mat-form-field color="accent">
+                                            <mat-label>Export</mat-label>
+                                            <mat-select required placeholder="Export" [(ngModel)]="option.export"
+                                                        [compareWith]="compareExports">
+                                                <mat-option *ngFor="let export of exports" [value]="export">
+                                                    {{export.name}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field color="accent">
+                                            <mat-label>Value</mat-label>
+                                            <mat-select required placeholder="Value" [(ngModel)]="option.data.column"
+                                                        [compareWith]="compareExportValueModels">
+                                                <mat-option *ngFor="let value of option.export?.values || []"
+                                                            [value]="value">
+                                                    {{value.Name}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field color="accent">
+                                            <mat-label>Math</mat-label>
+                                            <input matInput placeholder="Math" [(ngModel)]="option.math">
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                            </table>
                             <div>
 
                             </div>
                             <div>
-                                <mat-slide-toggle [(ngModel)]="option.has_outside">Enable outside measurement</mat-slide-toggle>
+                                <mat-slide-toggle [(ngModel)]="option.has_outside">Enable outside measurement
+                                </mat-slide-toggle>
                             </div>
                             <div *ngIf="option.has_outside">
                                 <div *ngIf="option.can_web" class="help-text color-warn">
                                     Enabling outside measurement will override web data
                                 </div>
-                                <div>
-                                    <mat-form-field color="accent">
-                                        <mat-label>Export</mat-label>
-                                        <mat-select required placeholder="Export" [(ngModel)]="option.outsideExport"
-                                                    [compareWith]="compareExports">
-                                            <mat-option *ngFor="let export of exports" [value]="export">
-                                                {{export.name}}
-                                            </mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
-
-                                    <mat-form-field color="accent">
-                                        <mat-label>Value</mat-label>
-                                        <mat-select required placeholder="Value" [(ngModel)]="option.outsideData.column"
-                                                    [compareWith]="compareExportValueModels">
-                                            <mat-option *ngFor="let value of option.outsideExport?.values || []" [value]="value">
-                                                {{value.Name}}
-                                            </mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
-                                </div>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <mat-form-field color="accent">
+                                                <mat-label>Export</mat-label>
+                                                <mat-select required placeholder="Export"
+                                                            [(ngModel)]="option.outsideExport"
+                                                            [compareWith]="compareExports">
+                                                    <mat-option *ngFor="let export of exports" [value]="export">
+                                                        {{export.name}}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </td>
+                                        <td>
+                                            <mat-form-field color="accent">
+                                                <mat-label>Value</mat-label>
+                                                <mat-select required placeholder="Value"
+                                                            [(ngModel)]="option.outsideData.column"
+                                                            [compareWith]="compareExportValueModels">
+                                                    <mat-option *ngFor="let value of option.outsideExport?.values || []"
+                                                                [value]="value">
+                                                        {{value.Name}}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </td>
+                                        <td>
+                                            <mat-form-field color="accent">
+                                                <mat-label>Math</mat-label>
+                                                <input matInput placeholder="Math" [(ngModel)]="option.outsideMath">
+                                            </mat-form-field>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                             <div>
                                 <mat-form-field color="accent" class="boundary-input-field">
@@ -218,22 +250,24 @@
                         <ng-template matExpansionPanelContent>
                             <div>
                                 <mat-form-field color="accent">
-                                <mat-label>Warning level</mat-label>
-                                <mat-select required placeholder="Select warning level" [(ngModel)]="option.boundaries.warn.upper">
-                                    <mat-option *ngFor="let level of pollenLevel" [value]="level.value">
-                                        {{level.name}}
-                                    </mat-option>
-                                </mat-select>
+                                    <mat-label>Warning level</mat-label>
+                                    <mat-select required placeholder="Select warning level"
+                                                [(ngModel)]="option.boundaries.warn.upper">
+                                        <mat-option *ngFor="let level of pollenLevel" [value]="level.value">
+                                            {{level.name}}
+                                        </mat-option>
+                                    </mat-select>
                                 </mat-form-field>
                             </div>
                             <div>
                                 <mat-form-field color="accent">
-                                <mat-label>Critical level</mat-label>
-                                <mat-select required placeholder="Select critical level" [(ngModel)]="option.boundaries.critical.upper">
-                                    <mat-option *ngFor="let level of pollenLevel" [value]="level.value">
-                                        {{level.name}}
-                                    </mat-option>
-                                </mat-select>
+                                    <mat-label>Critical level</mat-label>
+                                    <mat-select required placeholder="Select critical level"
+                                                [(ngModel)]="option.boundaries.critical.upper">
+                                        <mat-option *ngFor="let level of pollenLevel" [value]="level.value">
+                                            {{level.name}}
+                                        </mat-option>
+                                    </mat-select>
                                 </mat-form-field>
                             </div>
                             <div class="help-text color-accent">
@@ -263,11 +297,11 @@
                 </mat-list-item>
                 <mat-list-item>
                     <mat-icon mat-list-icon svgIcon="dwd"></mat-icon>
-                        Pollen data from Deutscher Wetterdienst
+                    Pollen data from Deutscher Wetterdienst
                 </mat-list-item>
                 <mat-list-item>
                     <mat-icon mat-list-icon svgIcon="uba"></mat-icon>
-                        Air quality data from German Umweltbundesamt
+                    Air quality data from German Umweltbundesamt
                 </mat-list-item>
                 <mat-list-item>
                     <mat-icon mat-list-icon svgIcon="geonames"></mat-icon>

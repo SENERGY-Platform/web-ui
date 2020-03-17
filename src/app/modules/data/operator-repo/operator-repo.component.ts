@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {Component, OnInit} from '@angular/core';
 import {OperatorModel} from './shared/operator.model';
 import {OperatorRepoService} from './shared/operator-repo.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 

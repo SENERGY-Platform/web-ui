@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,13 @@ import {Injectable} from '@angular/core';
 import {BpmnElement, BpmnParameter} from './designer.model';
 import {DeviceTypeSelectionResultModel} from '../../../devices/device-types-overview/shared/device-type-selection.model';
 import {DesignerErrorModel} from './designer-error.model';
+import {
+    DesignerElementFlowNodeRefModel,
+    DesignerElementLaneSetsModel,
+    DesignerElementLanesModel,
+    DesignerElementModel,
+    DesignerElementParticipantsModel
+} from './designer-element.model';
 
 @Injectable({
     providedIn: 'root'

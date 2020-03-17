@@ -1,34 +1,32 @@
 /*
+ * Copyright 2020 InfAI (CC SES)
  *
- *   Copyright 2020 InfAI (CC SES)
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-interface DesignerElementModel {
+export interface DesignerElementModel {
     type: string;
     businessObject: DesignerElementBusinessObjectModel;
 }
 
-interface DesignerElementBusinessObjectModel {
+export interface DesignerElementBusinessObjectModel {
     id: string;
     name: string;
     flowNodeRef: DesignerElementFlowNodeRefModel[];
     participants: DesignerElementParticipantsModel[];
 }
 
-interface DesignerElementFlowNodeRefModel {
+export interface DesignerElementFlowNodeRefModel {
     $type: string;
     type: string;
     extensionElements: {
@@ -41,22 +39,22 @@ interface DesignerElementFlowNodeRefModel {
     };
 }
 
-interface DesignerElementParticipantsModel {
+export interface DesignerElementParticipantsModel {
     id: string;
     processRef: DesignerElementProcessRefModel;
     name: string;
 }
 
-interface DesignerElementProcessRefModel {
+export interface DesignerElementProcessRefModel {
     laneSets: DesignerElementLaneSetsModel[];
     flowElements: DesignerElementFlowNodeRefModel[];
 }
 
-interface DesignerElementLaneSetsModel {
+export interface DesignerElementLaneSetsModel {
     lanes: DesignerElementLanesModel[];
 }
 
-interface DesignerElementLanesModel {
+export interface DesignerElementLanesModel {
     id: string;
     flowNodeRef: DesignerElementFlowNodeRefModel[];
     name: string;

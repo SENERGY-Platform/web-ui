@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,10 @@ import {RouterModule} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {CoreModule} from '../../../core/core.module';
 import {PipelineDetailsComponent} from './pipeline-details/pipeline-details.component';
-import {MatButtonModule, MatCardModule, MatExpansionModule, MatIconModule} from '@angular/material';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatCardModule} from '@angular/material/card';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
 
 
 const details = {path: 'data/pipelines/details/:id', pathMatch: 'full', component: PipelineDetailsComponent, data: { header: 'Analytics' }};

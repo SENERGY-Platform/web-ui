@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material';
+import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {MultiValueService} from './shared/multi-value.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {MultiValueMeasurement, MultiValueOrderEnum} from './shared/multi-value.model';
+import {Sort} from '@angular/material/sort';
+import {MatTable} from '@angular/material/table';
 
 @Component({
     selector: 'senergy-multi-value',
@@ -31,12 +33,14 @@ import {MultiValueMeasurement, MultiValueOrderEnum} from './shared/multi-value.m
 export class MultiValueComponent implements OnInit, OnDestroy {
 
     configured = false;
-    dataReceived = 0;
     destroy = new Subscription();
+    dataReady = false;
+    orderedValues: MultiValueMeasurement[] = [];
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
+    @ViewChild(MatTable, {static: false}) table !: MatTable<any>;
 
     constructor(private iconRegistry: MatIconRegistry,
                 private sanitizer: DomSanitizer,
@@ -62,26 +66,28 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         this.multiValueService.openEditDialog(this.dashboardId, this.widget.id);
     }
 
+    checkWarning(m: MultiValueMeasurement): boolean {
+        if (m.warning_enabled && m.data && m.lowerBoundary && (m.data < m.lowerBoundary)) {
+            return true;
+        }
+        if (m.warning_enabled && m.data && m.upperBoundary && (m.data > m. upperBoundary)) {
+            return true;
+        }
+        return false;
+    }
+
     private update() {
         this.setConfigured();
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.dataReceived = 0;
+                this.dataReady = false;
                 this.multiValueService.getValues(this.widget).subscribe(result => {
-                    if (this.widget.properties.multivaluemeasurements) {
-                        this.widget.properties.multivaluemeasurements[result.index].data = result.value;
-                        this.dataReceived++;
-                    }
+                    this.widget = result;
+                    this.dataReady = true;
+                    this.orderValues(this.widget.properties.order || 0);
                 });
             }
         });
-    }
-
-    isDataReady(): boolean {
-        if (this.widget.properties.multivaluemeasurements) {
-            return this.widget.properties.multivaluemeasurements.length === this.dataReceived;
-        }
-        return false;
     }
 
     /**
@@ -91,39 +97,72 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         this.configured = true;
         if (this.widget.properties.multivaluemeasurements) {
             for (const measurement of this.widget.properties.multivaluemeasurements) {
-                if (measurement.export.id === '' && measurement.column.Name === '') {
+                if (measurement.export.id === '' || measurement.column.Name === '' || measurement.type === '') {
                     this.configured = false;
                     return;
                 }
             }
+        } else {
+            this.configured = false;
         }
     }
 
-    private orderedValues(): MultiValueMeasurement[] {
+    private orderValues(sortId: number) {
         const m = this.widget.properties.multivaluemeasurements || [];
-        switch (this.widget.properties.order || 0) {
+        switch (sortId) {
             case MultiValueOrderEnum.AlphabeticallyAsc:
                 m.sort((a, b) => {
                     return a.name.charCodeAt(0) - b.name.charCodeAt(0);
                 });
-                return m;
+                break;
             case MultiValueOrderEnum.AlphabeticallyDesc:
                 m.sort((a, b) => {
                     return b.name.charCodeAt(0) - a.name.charCodeAt(0);
                 });
-                return m;
+                break;
             case MultiValueOrderEnum.ValueAsc:
                 m.sort((a, b) => {
-                    return Number(a.data) - Number(b.data);
+                    return this.parseNumber(a, true) - this.parseNumber(b, true);
                 });
-                return m;
+                break;
             case MultiValueOrderEnum.ValueDesc:
                 m.sort((a, b) => {
-                    return Number(b.data) - Number(a.data);
+                    return this.parseNumber(b, false) - this.parseNumber(a, false);
                 });
-                return m;
+                break;
         }
-        return m;
+        this.orderedValues = m;
+        if (this.table) {
+            this.table.renderRows();
+        }
     }
 
+    private parseNumber(m: MultiValueMeasurement, max: boolean): number {
+        if (m.data == null || m.type === 'String') {
+            if (max) {
+                return Number.MAX_VALUE;
+            }
+            return  Number.MIN_VALUE;
+        }
+        return Number(m.data);
+    }
+
+    matSortChange(event: Sort) {
+        switch (event.active) {
+            case 'value':
+                if (event.direction === 'asc') {
+                    this.orderValues(MultiValueOrderEnum.ValueAsc);
+                } else {
+                    this.orderValues(MultiValueOrderEnum.ValueDesc);
+                }
+                break;
+            case 'name':
+                if (event.direction === 'asc') {
+                    this.orderValues(MultiValueOrderEnum.AlphabeticallyAsc);
+                } else {
+                    this.orderValues(MultiValueOrderEnum.AlphabeticallyDesc);
+                }
+                break;
+        }
+    }
 }

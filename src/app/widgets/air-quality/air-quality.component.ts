@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material';
+import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {AirQualityService} from './shared/air-quality.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
@@ -37,8 +37,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     numReady = 0;
     readyNeeded = 0;
     destroy = new Subscription();
-    warnings = 0;
-    criticals = 0;
     pollenWarnings = 0;
     pollenCriticals = 0;
     tooltip: string[] = [];
@@ -50,7 +48,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     cons: string[] = [];
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     constructor(private iconRegistry: MatIconRegistry,
@@ -87,8 +85,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.readyNeeded = 0;
                 this.numReady = 0;
-                this.warnings = 0;
-                this.criticals = 0;
                 this.tooltip = [];
                 this.updateMeasurements();
                 this.updateUbaData();
@@ -138,7 +134,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                     }
                     if (measurement.is_critical) {
                         this.pros.push(measurement.name_html + ' is critical inside: '
-                            +  measurement.data.value + '&nbsp;' + measurement.unit_html);
+                            + measurement.data.value + '&nbsp;' + measurement.unit_html);
                     }
                 }
                 if (!isNaN(measurement.outsideData.value) && measurement.outsideData.value !== null) {
@@ -192,26 +188,27 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     }
 
     private updateMeasurements() {
+        this.readyNeeded++;
         if (this.widget.properties.measurements) {
-            this.widget.properties.measurements.forEach(measurement => {
-                if (measurement.is_enabled) {
-                    measurement.is_warning = false;
-                    measurement.is_critical = false;
-                    this.readyNeeded++;
-                    this.airRecommendationService.readData(measurement).subscribe(() => {
-                        if (measurement.data) {
-                            const value = Math.round(measurement.data.value * 100) / 100; // rounds to two decimals
-                            if (value < measurement.boundaries.critical.lower || value > measurement.boundaries.critical.upper) {
-                                measurement.is_critical = true;
-                                this.criticals++;
-                            } else if (value < measurement.boundaries.warn.lower || value > measurement.boundaries.warn.upper) {
-                                this.warnings++;
-                                measurement.is_warning = true;
-                            }
+            this.airRecommendationService.readAllData(this.widget).subscribe(measurements => {
+                measurements.forEach((m, index) => {
+                    if (this.widget.properties.measurements) {
+                        this.widget.properties.measurements[index].data.value = m.data.value;
+                        this.widget.properties.measurements[index].outsideData.value = m.outsideData.value;
+
+                        this.widget.properties.measurements[index].is_critical = false;
+                        this.widget.properties.measurements[index].is_warning = false;
+                        const value = m.data.value;
+                        if (value < this.widget.properties.measurements[index].boundaries.critical.lower
+                            || value > this.widget.properties.measurements[index].boundaries.critical.upper) {
+                            this.widget.properties.measurements[index].is_critical = true;
+                        } else if (value < this.widget.properties.measurements[index].boundaries.warn.lower
+                            || value > this.widget.properties.measurements[index].boundaries.warn.upper) {
+                            this.widget.properties.measurements[index].is_warning = true;
                         }
-                        this.numReady++;
-                    });
-                }
+                    }
+                });
+                this.numReady++;
             });
         }
     }
@@ -287,7 +284,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
 
     private updateYrData() {
         if ((this.widget.properties.location && !this.widget.properties.weather) ||
-            (this.widget.properties.location &&  this.widget.properties.weather  &&
+            (this.widget.properties.location && this.widget.properties.weather &&
                 this.widget.properties.weather.cacheUntil &&
                 this.widget.properties.weather.cacheUntil < new Date())
         ) {

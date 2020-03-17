@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import {PermissionsDialogService} from '../../permissions/shared/permissions-dia
 import {DesignerProcessModel} from '../designer/shared/designer.model';
 import {saveAs} from 'file-saver';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {ProcessRepoConditionModel, ProcessRepoConditionsModel} from './shared/process-repo-conditions.model';
 import {Router} from '@angular/router';
 import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
@@ -59,9 +59,9 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     userID: string;
     ready = false;
     searchInitialized = false;
+    searchText = '';
     selectedItems: ProcessModel[] = [];
 
-    private searchText = '';
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;

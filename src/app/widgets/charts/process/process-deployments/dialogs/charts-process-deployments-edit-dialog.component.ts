@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  */
 
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatTable} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DeploymentsModel} from '../../../../../modules/processes/deployments/shared/deployments.model';
 import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DeploymentsService} from '../../../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
 import {DashboardResponseMessageModel} from '../../../../../modules/dashboard/shared/dashboard-response-message.model';
+import {MatTable} from '@angular/material/table';
 
 @Component({
     templateUrl: './charts-process-deployments-edit-dialog.component.html',
@@ -32,7 +33,7 @@ export class ChartsProcessDeploymentsEditDialogComponent implements OnInit {
 
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {} as WidgetModel;
 
     constructor(private dialogRef: MatDialogRef<ChartsProcessDeploymentsEditDialogComponent>,
                 private deploymentsService: DeploymentsService,

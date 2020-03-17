@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import {Component, OnInit} from '@angular/core';
 import {dia, shapes, util} from 'jointjs';
 import * as $ from 'jquery';
 import {DiagramModel} from './shared/diagram.model';
-
 
 @Component({
     selector: 'senergy-diagram-editor',
@@ -153,28 +152,25 @@ export class DiagramEditorComponent implements OnInit {
 
             initialize: function () {
                 shapes.basic.Generic.prototype.initialize.apply(this, <any>arguments);
-
-                this.on('change:inPorts change:outPorts', this.updatePortItems, this);
                 this.updatePortItems();
             },
 
             // model,changed
-            updatePortItems: function ({}, {}, opt: any) {
-
+            updatePortItems: function () {
                 // Make sure all ports are unique.
                 const inPorts = util.uniq(this.get('inPorts'));
-                const outPorts = util.difference(util.uniq(this.get('outPorts')), inPorts);
+                const outPorts = util.uniq(this.get('outPorts'));
 
                 const inPortItems = this.createPortItems('in', inPorts);
                 const outPortItems = this.createPortItems('out', outPorts);
 
-                this.prop('ports/items', inPortItems.concat(outPortItems), util.assign({rewrite: true}, opt));
+                this.prop('ports/items', inPortItems.concat(outPortItems));
             },
 
             createPortItem: function (group: any, port: any) {
 
                 return {
-                    id: port,
+                    id: group + '-' + port,
                     group: group,
                     attrs: {
                         portLabel: {
@@ -187,52 +183,6 @@ export class DiagramEditorComponent implements OnInit {
             createPortItems: function (group: any, ports: any) {
 
                 return util.toArray(ports).map(this.createPortItem.bind(this, group));
-            },
-
-            _addGroupPort: function (port: any, group: any, opt: any) {
-
-                const ports = this.get(group);
-                return this.set(group, Array.isArray(ports) ? ports.concat(port) : [port], opt);
-            },
-
-            addOutPort: function (port: any, opt: any) {
-
-                return this._addGroupPort(port, 'outPorts', opt);
-            },
-
-            addInPort: function (port: any, opt: any) {
-
-                return this._addGroupPort(port, 'inPorts', opt);
-            },
-
-            _removeGroupPort: function (port: any, group: any, opt: any) {
-
-                return this.set(group, util.without(this.get(group), port), opt);
-            },
-
-            removeOutPort: function (port: any, opt: any) {
-
-                return this._removeGroupPort(port, 'outPorts', opt);
-            },
-
-            removeInPort: function (port: any, opt: any) {
-
-                return this._removeGroupPort(port, 'inPorts', opt);
-            },
-
-            _changeGroup: function (group: any, properties: any, opt: any) {
-
-                return this.prop('ports/groups/' + group, util.isObject(properties) ? properties : {}, opt);
-            },
-
-            changeInGroup: function (properties: any, opt: any) {
-
-                return this._changeGroup('in', properties, opt);
-            },
-
-            changeOutGroup: function (properties: any, opt: any) {
-
-                return this._changeGroup('out', properties, opt);
             }
         }
     );
@@ -244,13 +194,16 @@ export class DiagramEditorComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.setPaperWidth();
-        this.reinitializePaper();
-        this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
-            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
-            const model = elementView.model;
-            model.remove();
-        });
+        // TODO: find better solution for appear / fade-in problem
+        setTimeout(() => {
+            this.setPaperWidth();
+            this.reinitializePaper();
+            this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
+                evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
+                const model = elementView.model;
+                model.remove();
+            });
+        }, 0);
     }
 
     onResize({}) {

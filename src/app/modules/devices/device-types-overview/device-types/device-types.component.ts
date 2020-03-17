@@ -1,18 +1,17 @@
 /*
+ * Copyright 2020 InfAI (CC SES)
  *
- *  Copyright 2019 InfAI (CC SES)
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import {Component, OnInit} from '@angular/core';
@@ -26,8 +25,8 @@ import {
     DeviceTypeProtocolSegmentModel,
     DeviceTypeServiceModel, functionTypes,
 } from '../shared/device-type.model';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {AbstractControl, FormArray, FormArrayName, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
@@ -37,6 +36,7 @@ import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-as
 import {util} from 'jointjs';
 import uuid = util.uuid;
 import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {contentVariableValidator} from '../../../../core/validators/content-variable.validator';
 
 const controllingIndex = 0;
@@ -53,13 +53,13 @@ export class DeviceTypesComponent implements OnInit {
     protocols: DeviceTypeProtocolModel[] = [];
 
     firstFormGroup!: FormGroup;
-    secondFormGroup!: FormGroup;
+    secondFormGroup: FormGroup = new FormGroup({services: new FormArray([])});
     editable = false;
     keys = Object.keys;
     deviceTypeFunctionType = functionTypes;
     measuringFunctions: DeviceTypeFunctionModel[] = [];
     controllingFunctions: DeviceTypeFunctionModel[] = [];
-    aspects: DeviceTypeAspectModel[] = [];
+    aspectList: DeviceTypeAspectModel[] = [];
     serializations: string[] = ['json', 'xml', 'plain-text'];
     id = '';
     queryParamFunction = '';
@@ -114,7 +114,7 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    getErrorMessage(field: FormControl): string {
+    getErrorMessage(field: any): string {
         if (field.errors) {
             return field.errors.errorMsg;
         } else {
@@ -140,8 +140,9 @@ export class DeviceTypesComponent implements OnInit {
         return a && b && a.id === b.id && a.name === b.name;
     }
 
-    expand(control: FormGroup): void {
-        control.patchValue({'show': !control.value.show});
+    expand(serviceFormGroup: AbstractControl, formControlName: string, index: number): void {
+        const inOut = this.inputOutput(serviceFormGroup, formControlName, index);
+        inOut.patchValue({'show': !inOut.value.show});
     }
 
     checkIfContentExists(input: DeviceTypeContentModel): boolean {
@@ -151,6 +152,10 @@ export class DeviceTypesComponent implements OnInit {
         } else {
             return true;
         }
+    }
+
+    trackByFn(index: any) {
+        return index;
     }
 
     newDeviceClass() {
@@ -187,13 +192,13 @@ export class DeviceTypesComponent implements OnInit {
                 if (aspectIndex === -1) {
                     const newAspect: DeviceTypeAspectModel = {id: this.generateUUID('aspect'), name: name};
                     aspects.value.push(newAspect);
-                    this.aspects.push(newAspect);
+                    this.aspectList.push(newAspect);
                 } else {
-                    const index = aspects.value.indexOf(this.aspects[aspectIndex]);
+                    const index = aspects.value.indexOf(this.aspectList[aspectIndex]);
                     if (index === -1) {
                         this.snackbarAlreadyExists('Aspect');
                         const array = formGroup.controls['aspects'].value;
-                        formGroup.controls['aspects'].setValue([...array, this.aspects[aspectIndex]]);
+                        formGroup.controls['aspects'].setValue([...array, this.aspectList[aspectIndex]]);
                     } else {
                         this.snackbarAlreadySelected('Aspect');
                     }
@@ -252,6 +257,30 @@ export class DeviceTypesComponent implements OnInit {
                 formGroup.controls['functions'].updateValueAndValidity();
             }
         });
+    }
+
+    functionType(serviceFormGroup: AbstractControl): DeviceTypeFunctionType {
+        return this.getServiceFormControl(serviceFormGroup, 'functionType').value;
+    }
+
+    functions(serviceFormGroup: AbstractControl): DeviceTypeFunctionModel[] {
+        return this.getServiceFormControl(serviceFormGroup, 'functions').value;
+    }
+
+    aspects(serviceFormGroup: AbstractControl): DeviceTypeFunctionModel[] {
+        return this.getServiceFormControl(serviceFormGroup, 'aspects').value;
+    }
+
+    inputOutputArray(serviceFormGroup: AbstractControl, formControlName: string): DeviceTypeContentModel[] {
+        return this.getServiceFormArray(serviceFormGroup, formControlName).value;
+    }
+
+    inputOutput(serviceFormGroup: AbstractControl, formControlName: string, index: number): FormControl {
+        return this.getServiceFormArray(serviceFormGroup, formControlName).get([index]) as FormControl;
+    }
+
+    inputOutputContentVariableRaw(serviceFormGroup: AbstractControl, formControlName: string, index: number): FormControl {
+        return this.getServiceFormArray(serviceFormGroup, formControlName).get([index, 'content_variable_raw']) as FormControl;
     }
 
     private cleanUpServices() {
@@ -345,9 +374,9 @@ export class DeviceTypesComponent implements OnInit {
             name: [deviceTypeService.name, Validators.required],
             description: [deviceTypeService.description],
             protocol_id: [deviceTypeService.protocol_id, Validators.required],
-            inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : [],
-            outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : [],
-            functionType: [deviceTypeService.functions ? this.getFunctionType(deviceTypeService.functions[0].rdf_type) : '', Validators.required],
+            inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : this._formBuilder.array([]),
+            outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : this._formBuilder.array([]),
+            functionType: [deviceTypeService.functions ? this.getFunctionType(deviceTypeService.functions[0].rdf_type) : {text: ''}, Validators.required],
             functions: [{
                 value: deviceTypeService.functions ? deviceTypeService.functions : [],
                 disabled: deviceTypeService.functions ? false : true
@@ -441,7 +470,7 @@ export class DeviceTypesComponent implements OnInit {
 
     private checkIfAspectNameExists(name: string): number {
         let index = -1;
-        this.aspects.forEach((aspect: DeviceTypeAspectModel, i: number) => {
+        this.aspectList.forEach((aspect: DeviceTypeAspectModel, i: number) => {
             if (aspect.name === name) {
                 index = i;
             }
@@ -546,7 +575,7 @@ export class DeviceTypesComponent implements OnInit {
 
         this.deviceTypeService.getAspects().subscribe(
             (aspects: DeviceTypeAspectModel[]) => {
-                this.aspects = aspects;
+                this.aspectList = aspects;
             });
     }
 
@@ -612,5 +641,16 @@ export class DeviceTypesComponent implements OnInit {
                 });
             }
         }
+    }
+    get services(): FormArray {
+        return this.secondFormGroup.get('services') as FormArray;
+    }
+
+    private getServiceFormControl(serviceFormGroup: AbstractControl, FormControlName: string): FormControl {
+        return serviceFormGroup.get(FormControlName) as FormControl;
+    }
+
+    private getServiceFormArray(serviceFormGroup: AbstractControl, FormControlName: string): FormArray {
+        return serviceFormGroup.get(FormControlName) as FormArray;
     }
 }

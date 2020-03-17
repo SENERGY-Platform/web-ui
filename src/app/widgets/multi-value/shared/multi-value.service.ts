@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,20 @@
 
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {MultiValueModel} from './multi-value.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MultiValueMeasurement} from './multi-value.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {MultiValueEditDialogComponent} from '../dialog/multi-value-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {environment} from '../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {HttpClient} from '@angular/common/http';
 import {ChartsExportModel} from '../../charts/export/shared/charts-export.model';
+import {
+    ChartsExportRequestPayloadModel,
+    ChartsExportRequestPayloadQueriesModel
+} from '../../charts/export/shared/charts-export-request-payload.model';
 
 @Injectable({
     providedIn: 'root'
@@ -47,7 +49,7 @@ export class MultiValueService {
             widgetId: widgetId,
             dashboardId: dashboardId,
         };
-        dialogConfig.minWidth = '640px';
+        dialogConfig.minWidth = '675px';
         const editDialogRef = this.dialog.open(MultiValueEditDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
@@ -57,61 +59,62 @@ export class MultiValueService {
         });
     }
 
-    private extractData(data: ChartsExportModel, column: any): (string | number) {
-        const name = column.Name || '';
-        const valueIndex = data.results[0].series[0].columns.indexOf(name);
-        return data.results[0].series[0].values[0][valueIndex];
-    }
 
-    private getData(id: string): Observable<ChartsExportModel> {
-        return this.http.get<ChartsExportModel>(environment.influxAPIURL + '/measurement/' + id + '?limit=1').pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as ChartsExportModel))
-        );
-    }
-
-    /**
-     * Gets latest values for all exports defined in widget.properties.multivaluemeasurements
-     * and makes sure to only request results once for each individual export.
-     * @param widget
-     * @return An Observable, which will receive a call for each export defined with its result
-     * and index from the defining array
-     */
-    getValues(widget: WidgetModel): Observable<MultiValueModel> {
-        return new Observable<MultiValueModel>((observer) => {
+    getValues(widget: WidgetModel): Observable<WidgetModel> {
+        return new Observable<WidgetModel>((observer) => {
             if (widget.properties.multivaluemeasurements) {
-                const measurements = widget.properties.multivaluemeasurements;
-                const ids: string[] = [];
+                const requestPayload: ChartsExportRequestPayloadModel = {
+                    time: {
+                        last: '500000w', // arbitrary high number
+                        end: undefined,
+                        start: undefined
+                    },
+                    group: {
+                        type: undefined,
+                        time: ''
+                    },
+                    queries: [],
+                    limit: 1
+                };
 
-                // get unique ids
-                measurements.forEach( m => {
-                    if (!ids.includes(m.export.id)) {
-                        ids.push(m.export.id);
+                const measurements = widget.properties.multivaluemeasurements;
+                const array: ChartsExportRequestPayloadQueriesModel[] = [];
+                measurements.forEach((measurement: MultiValueMeasurement) => {
+                    if (array.length > 0 && array[array.length - 1].id === measurement.export.id) {
+                        array[array.length - 1].fields.push({name: measurement.column.Name, math: measurement.math || ''});
+                    } else {
+                        array.push({id: measurement.export.id, fields: [{name: measurement.column.Name, math: measurement.math || ''}]});
                     }
                 });
+                requestPayload.queries = array;
 
-                ids.forEach(id => {
-                    this.getData(id).subscribe(resp => {
-                        const fits: number[] = [];
-                        // reverse search
-                        for (let i = 0; i < measurements.length; i++) {
-                            if (measurements[i].export.id === id) {
-                                fits.push(i);
+                const ids: string[] = [];
+                measurements.forEach(m => ids.push(m.export.id + '.' + m.column.Name));
+                this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
+                    const columns = model.results[0].series[0].columns;
+                    const values = model.results[0].series[0].values;
+                    ids.forEach((id, idIndex) => {
+                        const columnIndex = columns.findIndex(col => col === id);
+                        values.forEach(val => {
+                            if (val[columnIndex]) {
+                                measurements[idIndex].data = val[columnIndex];
                             }
-                        }
-                        fits.forEach(index => {
-                            const result: MultiValueModel = {
-                                index: index,
-                                value: this.extractData(resp, measurements[index].column),
-                            };
-                            observer.next(result);
                         });
+                        if (measurements[idIndex].data == null) {
+                            measurements[idIndex].data = 'N/A';
+                            /* Act like a String if no value found, prevents piping.
+                             * Also remove unit because 'N/A %' is weird.
+                             * This doesn't change the actual configuration,
+                             * because the widget is never written to the dashboard service
+                             */
+                            measurements[idIndex].unit = '';
+                            measurements[idIndex].type = 'String';
+                        }
                     });
+                    observer.next(widget);
+                    observer.complete();
                 });
-            } else {
-                observer.error('widget.properties.singlevaluemeasurements undefined');
-            }
-        });
+        }});
     }
 }
 

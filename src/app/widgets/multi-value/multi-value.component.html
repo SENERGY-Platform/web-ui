@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,35 +18,46 @@
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="content-size drag-handler">
         <div *ngIf="!configured" fxFill fxLayout="column" fxLayoutAlign="center center">
-            <div>Widget not correctly configured!</div>
-            <div>Check if exports and columns are set.</div>
+            <div>Widget not configured correctly!</div>
+            <div>Check if exports, columns and types are set.</div>
         </div>
-        <senergy-widget-spinner [show]="configured && !isDataReady"></senergy-widget-spinner>
-        <div *ngIf="configured && isDataReady()" style="height: 100%" fxLayout="column"  fxFill>
-            <mat-list style="overflow: auto; max-height: 100%">
-                <mat-list-item *ngFor="let m of orderedValues()">
-                    {{m.name}}:&nbsp;
-                    <span *ngIf="m.type === 'String'">
-                        {{m.data}} {{m.unit}}
-                    </span>
-                    <span *ngIf="m.type !== 'String'"
-                          [ngClass]="m.warning_enabled && (m.data < m.lowerBoundary || m.data > m. upperBoundary) && 'color-warn'">
-                        <span *ngIf="m.type === 'Number'">
-                            {{m.data | number: m.format}}
+        <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
+        <div *ngIf="configured && dataReady" class="table-container" fxLayout="column" fxFill>
+            <table mat-table [dataSource]="orderedValues" matSort (matSortChange)="matSortChange($event)">
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let m">
+                        {{m.name}}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="value">
+                    <th mat-header-cell mat-sort-header *matHeaderCellDef>{{widget.properties.valueAlias || 'Value'}}</th>
+
+                    <td mat-cell *matCellDef="let m">
+                        <span *ngIf="m.type === 'String'">
+                            {{m.data}} {{m.unit}}
                         </span>
-                        <span *ngIf="m.type === 'Date'">
-                            {{m.data | date: m.format}}
+                        <span *ngIf="m.type !== 'String'"
+                              [ngClass]="{'color-warn': checkWarning(m)}">
+                            <span *ngIf="m.type === 'Number'">
+                                {{m.data | number: m.format}}
+                            </span>
+                            <span *ngIf="m.type === 'Date'">
+                                {{m.data | date: m.format}}
+                            </span>
+                            <span *ngIf="m.type === 'Currency'">
+                                    {{m.data | currency: m.format}}
+                            </span>
+                            <span *ngIf="m.type === 'Percent'">
+                                {{m.data | percent: m.format}}
+                            </span>
+                            {{m.unit}}
                         </span>
-                        <span *ngIf="m.type === 'Currency'">
-                                {{m.data | currency: m.format}}
-                        </span>
-                        <span *ngIf="m.type === 'Percent'">
-                            {{m.data | percent: m.format}}
-                        </span>
-                        {{m.unit}}
-                    </span>
-                </mat-list-item>
-            </mat-list>
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="['name', 'value']; sticky: true"></tr>
+                <tr mat-row *matRowDef="let m; columns: ['name', 'value'];"></tr>
+            </table>
         </div>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>

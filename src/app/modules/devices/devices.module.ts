@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,6 @@
 
 import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
-import {
-    MatAutocompleteModule,
-    MatButtonModule,
-    MatCardModule, MatCheckboxModule,
-    MatChipsModule,
-    MatDialogModule,
-    MatDividerModule, MatExpansionModule,
-    MatFormFieldModule,
-    MatGridListModule,
-    MatIconModule,
-    MatInputModule,
-    MatListModule,
-    MatMenuModule,
-    MatOptionModule,
-    MatPaginatorModule, MatProgressSpinnerModule, MatRadioModule,
-    MatSelectModule, MatSortModule,
-    MatStepperModule,
-    MatTableModule, MatTabsModule,
-    MatTooltipModule
-} from '@angular/material';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {CommonModule} from '@angular/common';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
@@ -57,6 +37,30 @@ import {CharacteristicsComponent} from './characteristics/characteristics.compon
 import {CharacteristicsNewDialogComponent} from './characteristics/dialogs/characteristics-new-dialog.component';
 import {ConceptsEditDialogComponent} from './concepts/dialogs/concepts-edit-dialog.component';
 import {CharacteristicsEditDialogComponent} from './characteristics/dialogs/characteristics-edit-dialog.component';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatCardModule} from '@angular/material/card';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatListModule} from '@angular/material/list';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatTableModule} from '@angular/material/table';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatOptionModule} from '@angular/material/core';
+import {MatSelectModule} from '@angular/material/select';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatStepperModule} from '@angular/material/stepper';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatSortModule} from '@angular/material/sort';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
