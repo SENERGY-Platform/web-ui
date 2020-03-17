@@ -56,6 +56,10 @@ export class DeployFlowComponent {
 
     windowTime = 30;
 
+    allMessages = false;
+
+    metrics = false;
+
     vals = [] as string [];
 
     pipeReq: PipelineRequestModel = {} as PipelineRequestModel;
@@ -74,7 +78,8 @@ export class DeployFlowComponent {
         }
         this.loadDevices();
 
-        this.pipeReq = {id: this.id, name: '', description: '', nodes: [], windowTime: this.windowTime};
+        this.pipeReq = {id: this.id, name: '', description: '', nodes: [], windowTime: this.windowTime, metrics: this.metrics,
+            consumeAllMessages: this.allMessages};
 
         this.parserService.getInputs(this.id).subscribe((resp: ParseModel []) => {
             this.inputs = resp;
@@ -125,6 +130,8 @@ export class DeployFlowComponent {
         });
 
         this.pipeReq.windowTime = this.windowTime;
+        this.pipeReq.consumeAllMessages = this.allMessages;
+        this.pipeReq.metrics = this.metrics;
         this.pipeReq.name = this.name;
         this.pipeReq.description = this.description;
 
