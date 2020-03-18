@@ -289,15 +289,20 @@ export class DiagramEditorComponent implements OnInit {
 
     public newNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
         const inPorts = [];
-        for (const input of inputs) {
-            if (input.name !== undefined) {
-                inPorts.push(input.name);
+        if (inputs !== null) {
+            for (const input of inputs) {
+                if (input.name !== undefined) {
+                    inPorts.push(input.name);
+                }
             }
         }
+
         const outPorts = [];
-        for (const output of outputs) {
-            if (output.name !== undefined) {
-                outPorts.push(output.name);
+        if (outputs !== null) {
+            for (const output of outputs) {
+                if (output.name !== undefined) {
+                    outPorts.push(output.name);
+                }
             }
         }
         const node = new this.NodeElement({
