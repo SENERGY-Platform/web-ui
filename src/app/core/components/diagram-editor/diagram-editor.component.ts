@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {dia, shapes, util} from 'jointjs';
 import * as $ from 'jquery';
 import {DiagramModel} from './shared/diagram.model';
+import uuid = util.uuid;
 
 @Component({
     selector: 'senergy-diagram-editor',
@@ -25,9 +26,11 @@ import {DiagramModel} from './shared/diagram.model';
     styleUrls: ['./diagram-editor.component.css']
 })
 
-export class DiagramEditorComponent implements OnInit {
+export class DiagramEditorComponent implements AfterViewInit {
 
     private graph: any;
+
+    idGenerated = uuid();
 
     NodeElement: any = dia.Element.define('senergy.NodeElement',
         {
@@ -193,9 +196,7 @@ export class DiagramEditorComponent implements OnInit {
     constructor() {
     }
 
-    ngOnInit() {
-        // TODO: find better solution for appear / fade-in problem
-        setTimeout(() => {
+    ngAfterViewInit() {
             this.setPaperWidth();
             this.reinitializePaper();
             this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
@@ -203,7 +204,6 @@ export class DiagramEditorComponent implements OnInit {
                 const model = elementView.model;
                 model.remove();
             });
-        }, 0);
     }
 
     onResize({}) {
@@ -227,7 +227,7 @@ export class DiagramEditorComponent implements OnInit {
                 senergy: { NodeElement: this.NodeElement }
             } });
         this.paper = new dia.Paper({
-            el: $('#paper'),
+            el: $('#' + this.idGenerated),
             model: this.graph,
             defaultLink: new dia.Link({
                 attrs: {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}}

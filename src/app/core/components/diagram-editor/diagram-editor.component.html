@@ -16,7 +16,7 @@
 
 
 <div id="paper-wrap" style="width: 100%" (window:resize)="onResize($event)">
-    <div id="paper">
+    <div [id]="idGenerated" style="border: solid 1px;">
     </div>
 </div>
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/2.2.0/joint.css"/>
