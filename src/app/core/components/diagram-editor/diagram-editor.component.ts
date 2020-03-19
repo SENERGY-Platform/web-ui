@@ -208,12 +208,13 @@ export class DiagramEditorComponent implements AfterViewInit {
 
     onResize({}) {
         this.setPaperWidth();
-        this.reinitializePaper();
+        this.paper.setDimensions(this.paperWidth, 700);
     }
 
     setPaperWidth() {
         const paperWrap = document.getElementById('paper-wrap');
         if (paperWrap !== null) {
+
             this.paperWidth = paperWrap.offsetWidth;
         }
     }
