@@ -51,21 +51,24 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        const id = this.route.snapshot.paramMap.get('id');
-        if (id !== null) {
-            this.flowRepoService.getFlow(id).subscribe((resp: FlowModel | null) => {
-                if (resp !== null) {
-                    this.flow = resp;
-                    for (const cell of this.flow.model.cells) {
-                        if (cell.type === 'link') {
-                            cell.attrs['.marker-target'] = cell.attrs.markerTarget;
-                            delete cell.attrs.markerTarget;
+        setTimeout(() => {
+            const id = this.route.snapshot.paramMap.get('id');
+            if (id !== null) {
+                this.flowRepoService.getFlow(id).subscribe((resp: FlowModel | null) => {
+                    if (resp !== null) {
+                        this.flow = resp;
+                        for (const cell of this.flow.model.cells) {
+                            if (cell.type === 'link') {
+                                cell.attrs['.marker-target'] = cell.attrs.markerTarget;
+                                delete cell.attrs.markerTarget;
+                            }
                         }
+                        this.diagram.loadGraph(this.flow.model);
                     }
-                    this.diagram.loadGraph(this.flow.model);
-                }
-            });
-        }
+                });
+            }
+        }, 0);
+
     }
 
     public addNode(operator: OperatorModel) {
