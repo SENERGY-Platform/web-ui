@@ -54,6 +54,7 @@ export class ProcessDesignerComponent implements OnInit {
 
     modeler: any;
     id = '';
+    ready = false;
 
     constructor(
         private http: HttpClient,
@@ -184,7 +185,8 @@ export class ProcessDesignerComponent implements OnInit {
             } else {
                 this.loadProcessDiagram(this.id);
             }
-        }, 0);
+            this.ready = true;
+        }, 1000);
     }
 
     loadProcessDiagram(id: string) {

@@ -40,6 +40,10 @@
     width: 160px !important;
 }
 
+.process-designer-container ::ng-deep .djs-palette.two-column.open {
+    width: 47px;
+}
+
 .button-header {
     padding-left: 16px;
     padding-top: 7px;
