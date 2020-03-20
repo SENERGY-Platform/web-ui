@@ -18,7 +18,7 @@
     "strictNullChecks": true,
     "skipLibCheck": true,
     "allowJs": true,
-    "target": "es2015",
+    "target": "es5",
     "downlevelIteration": true,
     "typeRoots": [
       "node_modules/@types"
