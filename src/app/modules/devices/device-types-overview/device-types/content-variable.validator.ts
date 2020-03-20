@@ -17,11 +17,12 @@
  */
 
 import {AbstractControl, ValidatorFn} from '@angular/forms';
-import {DeviceTypeContentVariableModel} from '../shared/device-type.model';
+import {DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel} from '../shared/device-type.model';
 
-export function contentVariableValidator(): ValidatorFn {
+export function contentVariableValidator(leafCharacteristics: DeviceTypeCharacteristicsModel[]): ValidatorFn {
 
     let errorMsg: null | string = null;
+    const leafCharIds = leafCharacteristics.map((resp) => resp.id);
 
     function checkType(type: string | undefined): string | null {
         if (type === undefined) {
@@ -61,6 +62,17 @@ export function contentVariableValidator(): ValidatorFn {
         }
     }
 
+    function validateCharacteristicId(characteristicId: string | undefined): string | null {
+        if (characteristicId === undefined || characteristicId === '') {
+            return null;
+        } else {
+            if (leafCharIds.includes(characteristicId)) {
+                return null;
+            }
+            return 'characteristicId is wrong';
+        }
+    }
+
     function checkFields(contentVariable: DeviceTypeContentVariableModel, error: null | string): null | string {
         if (error === null) {
             error = validateName(contentVariable.name);
@@ -70,6 +82,9 @@ export function contentVariableValidator(): ValidatorFn {
         }
         if (error === null) {
             error = validateId(contentVariable.id);
+        }
+        if (error === null) {
+            error = validateCharacteristicId(contentVariable.characteristic_id);
         }
 
         if (error === null) {

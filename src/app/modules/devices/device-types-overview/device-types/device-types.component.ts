@@ -16,7 +16,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
     DeviceTypeContentModel, DeviceTypeContentVariableModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel, DeviceTypeFunctionType,
@@ -38,6 +38,7 @@ import uuid = util.uuid;
 import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {contentVariableValidator} from './content-variable.validator';
+import {forkJoin, Observable} from 'rxjs';
 
 const controllingIndex = 0;
 const measuringIndex = 1;
@@ -63,6 +64,7 @@ export class DeviceTypesComponent implements OnInit {
     serializations: string[] = ['json', 'xml', 'plain-text'];
     id = '';
     queryParamFunction = '';
+    leafCharacteristics: DeviceTypeCharacteristicsModel[] = [];
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
@@ -429,7 +431,7 @@ export class DeviceTypesComponent implements OnInit {
             id: [content.id],
             name: [protocolSegment.name],
             serialization: [content.serialization],
-            content_variable_raw: [JSON.stringify(content.content_variable, null, 5), contentVariableValidator()],
+            content_variable_raw: [JSON.stringify(content.content_variable, null, 5), contentVariableValidator(this.leafCharacteristics)],
             content_variable: content.content_variable ? this.createContentVariableGroup(content.content_variable) : '',
             protocol_segment_id: [protocolSegment.id],
             show: [content.protocol_segment_id ? true : false],
@@ -552,15 +554,19 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private loadData(): void {
+        const array: Observable<DeviceTypeCharacteristicsModel[] | DeviceTypeProtocolModel[]>[] = [];
+        array.push(this.deviceTypeService.getLeafCharacteristics());
+        array.push(this.deviceTypeService.getProtocols(9999, 0, 'name', 'asc'));
+
+        forkJoin(array).subscribe(resp => {
+            this.leafCharacteristics = <DeviceTypeCharacteristicsModel[]>resp[0];
+            this.protocols = <DeviceTypeProtocolModel[]>resp[1];
+            this.loadDataIfIdExists();
+        });
+
         this.deviceTypeService.getDeviceClasses().subscribe(
             (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceTypeDeviceClasses = deviceTypeDeviceClasses;
-            });
-
-        this.deviceTypeService.getProtocols(9999, 0, 'name', 'asc').subscribe(
-            (protocols: DeviceTypeProtocolModel[]) => {
-                this.protocols = protocols;
-                this.loadDataIfIdExists();
             });
 
         this.deviceTypeService.getControllingFunctions().subscribe(
