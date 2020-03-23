@@ -41,6 +41,7 @@ import {MatTableModule} from '@angular/material/table';
 import {MatInputModule} from '@angular/material/input';
 import {MatCardModule} from '@angular/material/card';
 import {MatSortModule} from '@angular/material/sort';
+import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 
 
 const operatorRepo = {path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Analytics' }};
@@ -71,7 +72,8 @@ const pipelineRegistry = {path: 'data/pipelines', pathMatch: 'full', component: 
         MatTableModule,
         MatInputModule,
         MatCardModule,
-        MatSortModule
+        MatSortModule,
+        InfiniteScrollModule
     ],
     declarations: [
         OperatorRepoComponent,

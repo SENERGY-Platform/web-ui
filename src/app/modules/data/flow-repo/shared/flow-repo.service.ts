@@ -30,9 +30,10 @@ export class FlowRepoService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getFlows(): Observable<{flows: FlowModel[]}> {
-        return this.http.get<{flows: FlowModel[]}>
-        (environment.flowRepoUrl + '/flow').pipe(
+    getFlows(search: string, limit: number, offset: number, feature: string, order: string): Observable<{ flows: FlowModel[] }> {
+        return this.http.get<{ flows: FlowModel[] }>
+        (environment.flowRepoUrl + '/flow?limit=' + limit + '&offset=' + offset + '&sort=' + feature +
+            ':' + order + (search ? ('&search=' + search) : '')).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(FlowRepoService.name, 'getFlows: Error', {flows: []}))
         );
