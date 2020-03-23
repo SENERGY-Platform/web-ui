@@ -61,6 +61,11 @@ mat-card {
     margin: 0px;
 }
 
+.operator-repo-container {
+    height: calc(100% - 64px);
+    overflow-y: hidden;
+}
+
 .header-icon {
     padding-left: 8px;
 }
