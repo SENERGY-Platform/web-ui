@@ -20,7 +20,8 @@
     <form class="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Type</mat-label>
-            <mat-select #select (selectionChange)="activateCategory()" placeholder="Type" [(ngModel)]="selectedType" name="type">
+            <mat-select #select (selectionChange)="activateCategory()" placeholder="Type" [(ngModel)]="selectedType"
+                        name="type">
                 <mat-option *ngFor="let type of types" [value]="type">
                     {{type.viewValue}}
                 </mat-option>
@@ -29,7 +30,8 @@
 
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Category</mat-label>
-            <mat-select [disabled]="categoryDisabled" placeholder="Category" [(ngModel)]="selectedCategory" name="category">
+            <mat-select [disabled]="categoryDisabled" placeholder="Category" [(ngModel)]="selectedCategory"
+                        name="category">
                 <mat-option *ngFor="let category of categories" [value]="category">
                     {{category.viewValue}}
                 </mat-option>
@@ -44,5 +46,8 @@
 </mat-dialog-content>
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="create(inputName.value)">Create</button>
+    <button class="mat-raised-button mat-accent"
+            [disabled]="selectedType.value === '' || (categoryDisabled === false && selectedCategory === null)"
+            (click)="create(inputName.value)">Create
+    </button>
 </mat-dialog-actions>
