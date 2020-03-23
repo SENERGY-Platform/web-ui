@@ -79,7 +79,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.exportService.getExports('name', 'asc').subscribe((exports: (ExportModel[] | null)) => {
+        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: (ExportModel[] | null)) => {
             if (exports !== null) {
                 exports.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {

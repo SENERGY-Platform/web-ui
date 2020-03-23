@@ -31,9 +31,10 @@ export class ExportService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getExports(sort: string, order: string): Observable<ExportModel[] | null> {
+    getExports(search: string, limit: number, offset: number, sort: string, order: string): Observable<ExportModel[] | null> {
         return this.http.get<ExportModel[]>
-        (environment.exportService + '/instance?order=' + sort + ':' + order).pipe(
+        (environment.exportService + '/instance?limit=' + limit + '&offset=' + offset + '&order=' + sort +
+            ':' + order + (search ? ('&search=' + search) : '')).pipe(
             map((resp: ExportModel[]) => resp || []),
             catchError(this.errorHandlerService.handleError(ExportService.name, 'getExports: Error', null))
         );
