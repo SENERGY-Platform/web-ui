@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,21 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs/index';
+import {forkJoin, Observable, Subscription} from 'rxjs/index';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';
 import {DeploymentsService} from './shared/deployments.service';
 import {DeploymentsModel} from './shared/deployments.model';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ClipboardService} from 'ngx-clipboard';
 import {environment} from '../../../../environments/environment';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deployments-missing-dependencies-dialog.component';
+import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 const grids = new Map([
     ['xs', 1],
@@ -45,8 +47,7 @@ const grids = new Map([
 })
 
 export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
-
-    repoItems: DeploymentsModel[] = [];
+    formGroup: FormGroup = new FormGroup({repoItems: new FormArray([])});
     gridCols = 0;
     sortAttributes = [new SortModel('Date', 'deploymentTime', 'desc'), new SortModel('Name', 'name', 'asc')];
     ready = false;
@@ -58,6 +59,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
+    selectedItems: DeploymentsModel[] = [];
 
     constructor(private sanitizer: DomSanitizer,
                 private utilService: UtilService,
@@ -68,7 +70,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 private clipboardService: ClipboardService,
                 private router: Router,
                 private dialogsService: DialogsService,
-                private dialog: MatDialog) {
+                private dialog: MatDialog,
+                private _formBuilder: FormBuilder) {
     }
 
     ngOnInit() {
@@ -116,14 +119,18 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
             if (deleteDeployment) {
                 this.deploymentsService.deleteDeployment(deployment.id).subscribe((resp: { status: number }) => {
                     if (resp.status === 200) {
-                        this.repoItems.splice(this.repoItems.indexOf(deployment), 1);
-                        this.snackBar.open('Deployment deleted successfully.', undefined, {duration: 2000});
-                        this.setRepoItemsParams(1);
-                        setTimeout(() => {
+                        this.repoItems.removeAt(this.repoItems.value.findIndex((item: DeploymentsModel) => deployment.id === item.id));
+                        this.deploymentsService.checkForDeletedDeploymentWithRetries(deployment.id, 10, 100).subscribe((exists: boolean) => {
+                            if (exists) {
+                                this.showSnackBarError('deleting the deployment!');
+                            } else {
+                                this.showSnackBarSuccess('Deployment deleted');
+                            }
+                            this.setRepoItemsParams(1);
                             this.getRepoItems(false);
-                        }, 1000);
+                        });
                     } else {
-                        this.snackBar.open('Error while deleting the deployment!', undefined, {duration: 2000});
+                        this.showSnackBarError('deleting the deployment!');
                     }
                 });
             }
@@ -141,6 +148,41 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     copyDeployment(deploymentId: string): void {
         this.router.navigateByUrl('/processes/deployments/config', {state: {processId: '', deploymentId: deploymentId}});
+    }
+
+    countCheckboxes(): void {
+        this.selectedItems = this.repoItems.value.filter((item: DeploymentsModel) => item.selected === true);
+    }
+
+    deleteMultipleItems(): void {
+        this.dialogsService.openDeleteDialog(this.selectedItems.length + (this.selectedItems.length === 1 ? ' deployment' : ' deployments')).afterClosed().subscribe((deleteProcess: boolean) => {
+            if (deleteProcess) {
+                // clear repoItems and ready, that spinner occurs
+                this.repoItems.clear();
+                this.ready = false;
+                const array: Observable<boolean>[] = [];
+                this.selectedItems.forEach((item: DeploymentsModel) => {
+                    array.push(this.deploymentsService.checkForDeletedDeploymentWithRetries (item.id, 15, 200));
+                    this.deploymentsService.deleteDeployment(item.id).subscribe((resp: { status: number }) => {
+                        if (resp.status !== 200) {
+                            this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!');
+                        }
+                    });
+                });
+
+                forkJoin(array).subscribe((resp: boolean[]) => {
+                    const error = resp.some((item: boolean) => item === true);
+                        if (error) {
+                            this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!');
+                        } else {
+                            this.showSnackBarSuccess(this.selectedItems.length === 1 ? 'Deployment deleted' : 'Deployments deleted');
+                        }
+                    this.getRepoItems(true);
+                    }
+                );
+
+            }
+        });
     }
 
     private initGridCols(): void {
@@ -169,10 +211,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 if (repoItems.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
-                this.repoItems = this.repoItems.concat(repoItems);
-                this.repoItems.forEach((repoItem: DeploymentsModel) => {
-                    repoItem.image = this.provideImg(repoItem.diagram);
-                });
+                this.addToFormArray(repoItems);
                 this.ready = true;
             });
     }
@@ -183,15 +222,46 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     }
 
     private reset() {
-        this.repoItems = [];
+        this.repoItems.clear();
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+        this.selectedItems = [];
     }
 
     private setRepoItemsParams(limit: number) {
         this.ready = false;
         this.limit = limit;
         this.offset = this.repoItems.length;
+    }
+
+    get repoItems(): FormArray {
+        return this.formGroup.get('repoItems') as FormArray;
+    }
+
+    private addToFormArray(repoItems: DeploymentsModel[]): void {
+        repoItems.forEach((repoItem: DeploymentsModel) => {
+            this.repoItems.push(this._formBuilder.group(
+                {
+                    id: repoItem.id,
+                    name: repoItem.name,
+                    definition_id: repoItem.definition_id,
+                    deploymentTime: repoItem.deploymentTime,
+                    diagram: repoItem.diagram,
+                    offline_reasons: repoItem.offline_reasons,
+                    online: repoItem.online,
+                    image: this.provideImg(repoItem.diagram),
+                    selected: false,
+                }
+            ));
+        });
+    }
+
+    private showSnackBarError(text: string): void {
+        this.snackBar.open('Error while ' + text + ' !', undefined, {duration: 2000});
+    }
+
+    private showSnackBarSuccess(text: string): void {
+        this.snackBar.open(text + ' successfully.', undefined, {duration: 2000});
     }
 }

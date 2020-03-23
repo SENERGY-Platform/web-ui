@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2019 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@
                                 <th mat-header-cell *matHeaderCellDef>Details</th>
                                 <td mat-cell *matCellDef="let element">
                                     <button mat-icon-button matTooltip="Details" [ngClass]="{'mat-warn': element.state !== 'COMPLETED'}" [disabled]="element.state == 'COMPLETED'"
-                                            (click)="openDetailsDialog(element.id, element)">
+                                            (click)="openDetailsDialog(element.id)">
                                         <mat-icon>info</mat-icon>
                                     </button>
                                 </td>

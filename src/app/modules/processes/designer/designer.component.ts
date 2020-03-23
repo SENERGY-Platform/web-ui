@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,8 @@ import {DesignerDialogService} from './shared/designer-dialog.service';
 import {DesignerService} from './shared/designer.service';
 import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
 import {ActivatedRoute} from '@angular/router';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -53,6 +54,7 @@ export class ProcessDesignerComponent implements OnInit {
 
     modeler: any;
     id = '';
+    ready = false;
 
     constructor(
         private http: HttpClient,
@@ -62,111 +64,129 @@ export class ProcessDesignerComponent implements OnInit {
         protected designerService: DesignerService,
         protected processRepoService: ProcessRepoService,
         private snackBar: MatSnackBar,
+        private dialog: MatDialog,
     ) {
     }
 
     ngOnInit() {
-        const userId = this.auth.getUserId();
-        const that = this;
-        this.id = this.route.snapshot.paramMap.get('id') || '';
+        // TODO: find better solution for appear / fade-in problem
+        setTimeout(() => {
+            const userId = this.auth.getUserId();
+            const that = this;
+            this.id = this.route.snapshot.paramMap.get('id') || '';
 
-        this.modeler = new Modeler({
-            container: '#js-canvas',
-            width: '100%',
-            height: '100%',
-            additionalModules: [
-                PropertiesPanelModule,
+            this.modeler = new Modeler({
+                container: '#js-canvas',
+                width: '100%',
+                height: '100%',
+                additionalModules: [
+                    PropertiesPanelModule,
 
-                // Re-use original bpmn-properties-module, see CustomPropsProvider
-                {[InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
-                // {[InjectionNames.propertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
+                    // Re-use original bpmn-properties-module, see CustomPropsProvider
+                    {[InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
+                    // {[InjectionNames.propertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
 
-                // TODO: Implement functions and UI components to use DeviceProvider
-                {[InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]]},
+                    // TODO: Implement functions and UI components to use DeviceProvider
+                    {[InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]]},
 
-                // Re-use original palette, see CustomPaletteProvider
-                {[InjectionNames.paletteProvider]: ['type', PaletteProvider]},
+                    // Re-use original palette, see CustomPaletteProvider
+                    {[InjectionNames.paletteProvider]: ['type', PaletteProvider]},
 
-                {[InjectionNames.elementTemplates]: ['type', ElementTemplates.elementTemplates[1]]}
+                    {[InjectionNames.elementTemplates]: ['type', ElementTemplates.elementTemplates[1]]}
 
-            ],
-            propertiesPanel: {
-                parent: '#js-properties-panel'
-            },
-            moddleExtensions: {
-                camunda: camundaBpmnModdle
+                ],
+                propertiesPanel: {
+                    parent: '#js-properties-panel'
+                },
+                moddleExtensions: {
+                    camunda: camundaBpmnModdle,
+                    senergy: {
+                        'name': 'senergy',
+                        'uri': 'https://senergy.infai.org',
+                        'prefix': 'senergy',
+                    }
+                }
+            });
+
+            this.modeler.designerCallbacks = {
+                durationDialog: (initial: string): Promise<DurationResult> => {
+                    return new Promise((resolve, reject) => {
+                        that.designerDialogService.openDurationDialog(initial).toPromise().then(value => {
+                            if (value) {
+                                resolve(value);
+                            } else {
+                                reject();
+                            }
+                        });
+                    });
+                },
+                dateDialog: (initial: string): Promise<{ iso: string, text: string }> => {
+                    return new Promise((resolve, reject) => {
+                        that.designerDialogService.openDateTimeDialog(initial).toPromise().then(value => {
+                            if (value) {
+                                resolve(value);
+                            } else {
+                                reject();
+                            }
+                        });
+                    });
+                },
+                cycleDialog: (initial: string): Promise<{ cron: string, text: string }> => {
+                    return new Promise((resolve, reject) => {
+                        that.designerDialogService.openCycleDialog(initial).toPromise().then(value => {
+                            if (value) {
+                                resolve(value);
+                            } else {
+                                reject();
+                            }
+                        });
+                    });
+                },
+                editHistoricDataConfig: function (existingConfig: HistoricDataConfig, callback: (result: HistoricDataConfig) => void) {
+                    that.designerDialogService.openHistoricDataConfigDialog(existingConfig, callback);
+                },
+                registerOutputs: function (outputs: any) {
+                    console.log('WARNING: deprecated call to registerOutputs()', outputs);
+                },
+                getInfoHtml: (element: BpmnElement): string => {
+                    return that.getInfoHtml(element);
+                },
+                editInput: (element: BpmnElement, callback: () => void) => {
+                    that.designerDialogService.openEditInputDialog(element, callback);
+                },
+                editOutput: (outputs: BpmnParameter[], callback: () => void) => {
+                    that.designerDialogService.openEditOutputDialog(outputs, callback);
+                },
+                findIotDeviceType: (
+                    devicetypeService: DeviceTypeSelectionRefModel,
+                    callback: (connectorInfo: DeviceTypeSelectionResultModel) => void
+                ) => {
+                    that.designerDialogService.openTaskConfigDialog(devicetypeService).subscribe((result: DeviceTypeSelectionResultModel) => {
+                            if (result) {
+                                callback(result);
+                            }
+                            const invalidLanes = this.designerService.checkConstraints(this.modeler);
+                            if (invalidLanes.error) {
+                                this.showDeviceClassError(invalidLanes.text);
+                            }
+                        }
+                    );
+                },
+                configEmail: (to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void) => {
+                    that.designerDialogService.openEmailConfigDialog(to, subj, content, callback);
+                },
+                configNotification: (subj: string, content: string, callback: (subj: string, content: string) => void) => {
+                    that.designerDialogService.openNotificationConfigDialog(subj, content, callback);
+                }
+            };
+
+            if (this.id === '') {
+                this.newProcessDiagram();
+            } else {
+                this.loadProcessDiagram(this.id);
             }
-        });
-
-        this.modeler.designerCallbacks = {
-            durationDialog: (initial: string): Promise<DurationResult> => {
-                return new Promise((resolve, reject) => {
-                    that.designerDialogService.openDurationDialog(initial).toPromise().then(value => {
-                        if (value) {
-                            resolve(value);
-                        } else {
-                            reject();
-                        }
-                    });
-                });
-            },
-            dateDialog: (initial: string): Promise<{ iso: string, text: string }> => {
-                return new Promise((resolve, reject) => {
-                    that.designerDialogService.openDateTimeDialog(initial).toPromise().then(value => {
-                        if (value) {
-                            resolve(value);
-                        } else {
-                            reject();
-                        }
-                    });
-                });
-            },
-            cycleDialog: (initial: string): Promise<{ cron: string, text: string }> => {
-                return new Promise((resolve, reject) => {
-                    that.designerDialogService.openCycleDialog(initial).toPromise().then(value => {
-                        if (value) {
-                            resolve(value);
-                        } else {
-                            reject();
-                        }
-                    });
-                });
-            },
-            editHistoricDataConfig: function (existingConfig: HistoricDataConfig, callback: (result: HistoricDataConfig) => void) {
-                that.designerDialogService.openHistoricDataConfigDialog(existingConfig, callback);
-            },
-            registerOutputs: function (outputs: any) {
-                console.log('WARNING: deprecated call to registerOutputs()', outputs);
-            },
-            getInfoHtml: (element: BpmnElement): string => {
-                return that.getInfoHtml(element);
-            },
-            editInput: (element: BpmnElement, callback: () => void) => {
-                that.designerDialogService.openEditInputDialog(element, callback);
-            },
-            editOutput: (outputs: BpmnParameter[], callback: () => void) => {
-                that.designerDialogService.openEditOutputDialog(outputs, callback);
-            },
-            findIotDeviceType: (
-                devicetypeService: DeviceTypeSelectionRefModel,
-                callback: (connectorInfo: DeviceTypeSelectionResultModel) => void
-            ) => {
-                that.designerDialogService.openTaskConfigDialog(devicetypeService, callback);
-            },
-            configEmail: (to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void) => {
-                that.designerDialogService.openEmailConfigDialog(to, subj, content, callback);
-            },
-            configNotification: (subj: string, content: string, callback: (subj: string, content: string) => void) => {
-                that.designerDialogService.openNotificationConfigDialog(subj, content, callback);
-            }
-        };
-
-        if (this.id === '') {
-            this.newProcessDiagram();
-        } else {
-            this.loadProcessDiagram(this.id);
-        }
-
+            this.ready = true;
+        }, 1000);
     }
 
     loadProcessDiagram(id: string) {
@@ -204,8 +224,8 @@ export class ProcessDesignerComponent implements OnInit {
 
     save(): void {
         const invalidLanes = this.designerService.checkConstraints(this.modeler);
-        if (invalidLanes.length > 0) {
-            this.snackBar.open('Error! Multiple device types in ' + this.errorText(invalidLanes) + '!', undefined, {duration: 3500});
+        if (invalidLanes.error) {
+            this.showDeviceClassError(invalidLanes.text);
         } else {
             this.saveXML((errXML, processXML) => {
                 if (errXML) {
@@ -240,17 +260,6 @@ export class ProcessDesignerComponent implements OnInit {
         }
     }
 
-    private errorText(invalidLanes: { businessObject: { id: string } }[]): string {
-        let text = '';
-        for (let i = 0; i < invalidLanes.length; i++) {
-            text = text + invalidLanes[i].businessObject.id;
-            if (i < invalidLanes.length - 1) {
-                text = text + ', ';
-            }
-        }
-        return text;
-    }
-
     private saveXML(callback: (error: Error, processXML: string) => void) {
         this.modeler.saveXML(callback);
     }
@@ -269,5 +278,9 @@ export class ProcessDesignerComponent implements OnInit {
         } else {
             return '';
         }
+    }
+
+    private showDeviceClassError(text: string[]): void {
+        this.snackBar.open('Error! Multiple device classes in Lane ' + text.join(', ') + '!', undefined, {duration: 3500});
     }
 }

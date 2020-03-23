@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,6 @@ import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
 import {OperatorRepoComponent} from './operator-repo/operator-repo.component';
 import {CommonModule} from '@angular/common';
-import {
-    MatButtonModule, MatCardModule,
-    MatDividerModule,
-    MatGridListModule,
-    MatIconModule, MatInputModule,
-    MatListModule, MatSnackBarModule, MatSortModule, MatTableModule,
-    MatTooltipModule
-} from '@angular/material';
 import {CoreModule} from '../../core/core.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {OperatorRepoModule} from './operator-repo/operator-repo.module';
@@ -38,6 +30,17 @@ import {FlowRepoComponent} from './flow-repo/flow-repo.component';
 import {FlowRepoModule} from './flow-repo/flow-repo.module';
 import {PipelineRegistryComponent} from './pipeline-registry/pipeline-registry.component';
 import {PipelineRegistryModule} from './pipeline-registry/pipeline-registry.module';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatListModule} from '@angular/material/list';
+import {MatButtonModule} from '@angular/material/button';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatTableModule} from '@angular/material/table';
+import {MatInputModule} from '@angular/material/input';
+import {MatCardModule} from '@angular/material/card';
+import {MatSortModule} from '@angular/material/sort';
 
 
 const operatorRepo = {path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Analytics' }};

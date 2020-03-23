@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,6 @@
 
 import {LOCALE_ID, NgModule} from '@angular/core';
 import {SwitchComponent} from './switch/switch.component';
-import {
-    MatAutocompleteModule,
-    MatButtonModule,
-    MatCardModule,
-    MatCheckboxModule,
-    MatDialogModule,
-    MatDividerModule,
-    MatExpansionModule,
-    MatFormFieldModule,
-    MatGridListModule,
-    MatIconModule,
-    MatInputModule,
-    MatListModule,
-    MatMenuModule,
-    MatOptionModule,
-    MatProgressSpinnerModule, MatRadioModule,
-    MatSelectModule,
-    MatSlideToggleModule,
-    MatStepperModule,
-    MatTableModule,
-    MatTooltipModule
-} from '@angular/material';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {WidgetHeaderComponent} from './components/widget-header/widget-header.component';
 import {SwitchEditDialogComponent} from './switch/dialogs/switch-edit-dialog.component';
@@ -86,6 +64,28 @@ import {MultiValueComponent} from './multi-value/multi-value.component';
 import {MultiValueEditDialogComponent} from './multi-value/dialog/multi-value-edit-dialog.component';
 import {ProcessIncidentListComponent} from './process-incident-list/process-incident-list.component';
 import {ProcessIncidentListEditDialogComponent} from './process-incident-list/dialogs/process-incident-list-edit-dialog.component';
+import {MatCardModule} from '@angular/material/card';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatIconModule} from '@angular/material/icon';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatOptionModule} from '@angular/material/core';
+import {MatInputModule} from '@angular/material/input';
+import {MatTableModule} from '@angular/material/table';
+import {MatSelectModule} from '@angular/material/select';
+import {MatListModule} from '@angular/material/list';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatStepperModule} from '@angular/material/stepper';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatSortModule} from '@angular/material/sort';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -121,6 +121,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         MatExpansionModule,
         AngularFittextModule,
         MatRadioModule,
+        MatSortModule,
     ],
     declarations: [
         SwitchComponent,

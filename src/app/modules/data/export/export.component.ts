@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {Component, OnInit} from '@angular/core';
 import {ExportService} from './shared/export.service';
 import {ExportModel} from './shared/export.model';
 import {environment} from '../../../../environments/environment';
-import {MatInput, MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {ClipboardService} from 'ngx-clipboard';
@@ -53,7 +53,7 @@ export class ExportComponent implements OnInit {
 
     ngOnInit() {
         this.initGridCols();
-        this.exportService.getExports().subscribe((resp: ExportModel [] | null) => {
+        this.exportService.getExports('name', 'asc').subscribe((resp: ExportModel [] | null) => {
             if (resp !== null) {
                 this.exports = resp;
             }

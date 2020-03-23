@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,70 +18,98 @@
 
 <mat-dialog-content>
     <div fxLayout="column">
-        <mat-form-field color="accent">
-            <mat-label>Name</mat-label>
-            <input type="text" matInput placeholder="Name" [(ngModel)]="widget.name">
-        </mat-form-field>
+        <table class="full-width" cellspacing="0">
+            <tr>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Name</mat-label>
+                        <input type="text" matInput placeholder="Name" [(ngModel)]="widget.name">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Choose Export</mat-label>
+                        <input type="text" matInput [formControl]="formControl"
+                               [matAutocomplete]="auto" required>
+                        <mat-error *ngIf="formControl.hasError('valid') === false">
+                            Please make a selection!
+                        </mat-error>
+                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
+                                          (closed)="autoCompleteClosed()">
+                            <mat-option *ngFor="let option of filteredExports | async" [value]="option">
+                                {{option.name}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Math Operation</mat-label>
+                        <input type="text" matInput [(ngModel)]="math">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Unit</mat-label>
+                        <input type="text" matInput [(ngModel)]="unit">
+                    </mat-form-field>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-select [(value)]="selectedOption" [formControl]="optionsFormControl"
+                                    placeholder="Prediction Type">
+                            <mat-option *ngFor="let opt of options" [value]="opt">
+                                {{opt}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </td>
+                <td>
 
-        <mat-form-field color="accent">
-            <mat-label>Choose Export</mat-label>
-            <input type="text" matInput [formControl]="formControl"
-                   [matAutocomplete]="auto" required>
-            <mat-error *ngIf="formControl.hasError('valid') === false">
-                Please make a selection!
-            </mat-error>
-            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (closed)="autoCompleteClosed()">
-                <mat-option *ngFor="let option of filteredExports | async" [value]="option">
-                    {{option.name}}
-                </mat-option>
-            </mat-autocomplete>
-        </mat-form-field>
-
-        <mat-form-field color="accent">
-            <mat-label>Unit</mat-label>
-            <input type="text" matInput [(ngModel)]="unit">
-        </mat-form-field>
-
-        <mat-form-field color="accent">
-            <mat-label>Math Operation</mat-label>
-            <input type="text" matInput [(ngModel)]="math">
-        </mat-form-field>
-
-        <mat-form-field color="accent" hintLabel="For use in Angular pipes">
-            <mat-label>Number format</mat-label>
-            <input type="text" matInput [(ngModel)]="format">
-        </mat-form-field>
-
-        <mat-form-field color="accent">
-            <mat-select [(value)]="selectedOption" [formControl]="optionsFormControl" placeholder="Prediction Type">
-                <mat-option *ngFor="let opt of options" [value]="opt">
-                    {{opt}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
-
-        <mat-form-field color="accent">
-            <mat-label>Price per Unit</mat-label>
-            <input type="number" matInput placeholder="Price per Unit" [(ngModel)]="widget.properties.price">
-        </mat-form-field>
-
-        <mat-form-field color="accent">
-            <mat-label>Currency</mat-label>
-            <input type="text" matInput [(ngModel)]="currency">
-        </mat-form-field>
-
-        <mat-form-field color="accent">
-            <mat-select [(value)]="selectedThresholdOption" [formControl]="thresholdOptionsFormControl" placeholder="Threshold Type">
-                <mat-option *ngFor="let opt of thresholdOptions" [value]="opt">
-                    {{opt}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
-
-        <mat-form-field color="accent">
-            <mat-label>Threshold</mat-label>
-            <input type="number" matInput placeholder="Threshold" [(ngModel)]="widget.properties.threshold">
-        </mat-form-field>
+                    <mat-form-field color="accent" hintLabel="For use in Angular pipes">
+                        <mat-label>Number format</mat-label>
+                        <input type="text" matInput [(ngModel)]="format">
+                    </mat-form-field>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Price per Unit</mat-label>
+                        <input type="number" matInput placeholder="Price per Unit"
+                               [(ngModel)]="widget.properties.price">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Currency</mat-label>
+                        <input type="text" matInput [(ngModel)]="currency">
+                    </mat-form-field>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-select [(value)]="selectedThresholdOption" [formControl]="thresholdOptionsFormControl"
+                                    placeholder="Threshold Type">
+                            <mat-option *ngFor="let opt of thresholdOptions" [value]="opt">
+                                {{opt}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Threshold</mat-label>
+                        <input type="number" matInput placeholder="Threshold" [(ngModel)]="widget.properties.threshold">
+                    </mat-form-field>
+                </td>
+            </tr>
+        </table>
     </div>
 </mat-dialog-content>
 

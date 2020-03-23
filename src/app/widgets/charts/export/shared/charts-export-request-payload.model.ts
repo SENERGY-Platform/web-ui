@@ -18,6 +18,7 @@ export interface ChartsExportRequestPayloadModel {
     time: ChartsExportRequestPayloadTimeModel;
     group: ChartsExportRequestPayloadGroupModel;
     queries: ChartsExportRequestPayloadQueriesModel[];
+    limit?: number;
 }
 
 export interface ChartsExportRequestPayloadTimeModel {

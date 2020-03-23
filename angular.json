@@ -13,6 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "aot": true,
             "outputPath": "dist/senergy-web-ui",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -21,7 +22,11 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              { "glob": "**/*", "input": "src/img/", "output": "/src/img/" }
+              {
+                "glob": "**/*",
+                "input": "src/img/",
+                "output": "/src/img/"
+              }
             ],
             "styles": [
               "src/styles.css",
@@ -143,5 +148,8 @@
       }
     }
   },
-  "defaultProject": "senergy-web-ui"
+  "defaultProject": "senergy-web-ui",
+  "cli": {
+    "analytics": "62e87629-546a-403a-a1ca-97b9fc601597"
+  }
 }

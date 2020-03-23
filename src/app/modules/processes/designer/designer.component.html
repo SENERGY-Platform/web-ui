@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2019 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,18 +14,21 @@
   ~ limitations under the License.
   -->
 
-<div fxLayout="column" fxFill>
-    <div class="button-header background-color-accent">
-        <input hidden type="file" #uploader (change)="importBPMN($event)" [accept]="'.bpmn'"/>
-        <button mat-icon-button matTooltip="Upload BPMN" (click)="uploader.click()">
-            <mat-icon>cloud_upload</mat-icon>
-        </button>
-        <button mat-icon-button matTooltip="Save" (click)="save()">
-            <mat-icon>save</mat-icon>
-        </button>
+<div class="process-designer-container">
+    <div fxLayout="column" fxFill>
+        <div class="button-header background-color-accent">
+            <input hidden type="file" #uploader (change)="importBPMN($event)" [accept]="'.bpmn'"/>
+            <button mat-icon-button matTooltip="Upload BPMN" (click)="uploader.click()">
+                <mat-icon>cloud_upload</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Save" (click)="save()">
+                <mat-icon>save</mat-icon>
+            </button>
+        </div>
+        <div fxLayout="row" fxFlex [fxShow]="ready">
+            <div class="canvas" id="js-canvas" fxFlex></div>
+            <div id="js-properties-panel"></div>
+        </div>
     </div>
-    <div fxLayout="row" fxFlex>
-        <div class="canvas" id="js-canvas" fxFlex></div>
-        <div id="js-properties-panel"></div>
-    </div>
+    <senergy-spinner [elementCount]="0" [show]="!ready"></senergy-spinner>
 </div>

@@ -1,21 +1,20 @@
 /*
+ * Copyright 2020 InfAI (CC SES)
  *
- *  Copyright 2019 InfAI (CC SES)
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Navigation, Router} from '@angular/router';
 import {
     DeploymentsPreparedElementModel,
@@ -30,11 +29,12 @@ import {
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
-import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {DeviceTypeFunctionType, DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import * as moment from 'moment';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 
 
 @Component({
@@ -44,6 +44,8 @@ import {MatSnackBar} from '@angular/material';
 })
 
 export class ProcessDeploymentsConfigComponent implements OnInit {
+
+    @ViewChild('autosize', {static: false}) autosize!: CdkTextareaAutosize;
 
     processId = '';
     deploymentId = '';
@@ -101,7 +103,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 name: this.deployment.name,
                 svg: this.deployment.svg,
                 xml: this.deployment.xml,
-                xml_raw: this.deployment.xml_raw
+                xml_raw: this.deployment.xml_raw,
+                description: [{value: this.deployment.description || 'no description', disabled: true}],
             });
 
         }
@@ -148,7 +151,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             bpmn_element_id: [lane.bpmn_element_id],
             device_description: [lane.device_descriptions],
             selectables: this.initSelectablesFormArray(lane.selectables),
-            selection: this.initLaneSelectionFormGroup(lane.selection),
+            selection: this.initLaneSelectionFormGroup(lane.selection ? lane.selection : {} as DeviceInstancesUpdateModel),
             elements: this.initLaneElementFormArray(lane.elements),
         });
     }
@@ -299,6 +302,19 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
     }
 
+    elementsTimeEvent(elementIndex: number): FormGroup {
+        return this.deploymentFormGroup.get(['elements', elementIndex, 'time_event']) as FormGroup;
+    }
+
+    lanesTimeEvent(elementLanesIndex: number, elementsIndex: number): FormGroup {
+        return this.deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements', elementsIndex, 'time_event']) as FormGroup;
+    }
+
+    lanesElements(elementLanesIndex: number): DeploymentsPreparedLaneSubElementModel[] {
+        const elements = this.deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements']) as FormArray;
+        return elements.value;
+    }
+
     private initLaneElementFormArray(elements: DeploymentsPreparedLaneSubElementModel[]): FormArray {
         const array: FormGroup[] = [];
         if (elements !== null) {
@@ -328,5 +344,15 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 this.deploymentId = params.deploymentId;
             }
         }
+    }
+
+    get elements(): DeploymentsPreparedElementModel[] {
+        const elements = this.deploymentFormGroup.get(['elements']) as FormArray;
+        return elements.value;
+    }
+
+    get lanes(): DeploymentsPreparedLaneElementModel[] {
+        const elements = this.deploymentFormGroup.get(['lanes']) as FormArray;
+        return elements.value;
     }
 }

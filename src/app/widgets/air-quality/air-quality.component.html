@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
                     <button mat-icon-button class="icon color-accent" (click)="clicked()">
                         <mat-icon [inline]="true">sentiment_very_satisfied</mat-icon>
                     </button>
-                    <div class="text color-accent" fittext [maxFontSize]="36">
+                    <div class="text color-accent" [fittext] [maxFontSize]="24">
                         No reason to open a window!
                     </div>
                 </div>
@@ -34,7 +34,7 @@
                     <button mat-icon-button class="icon color-accent" (click)="clicked()">
                         <mat-icon [inline]="true">sentiment_dissatisfied</mat-icon>
                     </button>
-                    <div class="text color-accent" fittext [maxFontSize]="36">
+                    <div class="text color-accent" [fittext] [maxFontSize]="24">
                         {{pros.length}} reason<span *ngIf="pros.length > 1">s</span> <!-- plural s -->
                         for and {{cons.length}} reason<span *ngIf="cons.length > 1">s</span> <!-- plural s -->
                         against opening a window!
@@ -44,27 +44,21 @@
                     <button mat-icon-button class="icon color-accent" (click)="clicked()">
                         <mat-icon [inline]="true">sentiment_very_dissatisfied</mat-icon>
                     </button>
-                    <div class="text color-warn" fittext [maxFontSize]="36">
+                    <div class="text color-warn" [fittext] [maxFontSize]="24">
                         Consider opening a window!
                     </div>
                 </div>
             </div>
             <div *ngIf="inDetailView" (click)="clicked()" style="height: 100%" fxLayout="column"  fxFill>
                 <mat-list style="overflow: auto; max-height: 100%">
-                    <h2 mat-subheader>Reasons for opening a window</h2>
+                    <h2 mat-subheader *ngIf="pros.length > 0">Reasons for opening a window</h2>
                     <mat-list-item *ngFor="let pro of pros">
                         <span [innerHTML]="pro"></span>
                     </mat-list-item>
-                    <h6 mat-subheader *ngIf="pros.length === 0">
-                        -- no reason --
-                    </h6>
-                    <h2 mat-subheader>Reasons against opening a window</h2>
+                    <h2 mat-subheader *ngIf="cons.length > 0">Reasons against opening a window</h2>
                     <mat-list-item *ngFor="let con of cons">
                         <span [innerHTML]="con"></span>
                     </mat-list-item>
-                    <h6 mat-subheader *ngIf="cons.length === 0">
-                        -- no reason --
-                    </h6>
                 </mat-list>
             </div>
         </div>

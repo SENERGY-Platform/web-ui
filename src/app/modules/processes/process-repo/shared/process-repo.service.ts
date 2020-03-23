@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,26 +78,15 @@ export class ProcessRepoService {
         );
     }
 
-    checkForProcessModelWithRetries(id: string, maxRetries: number, intervalInMs: number): Observable<boolean> {
-        return this.http.get<boolean>(environment.permissionSearchUrl + '/jwt/check/processmodel/' + id + '/r/bool').pipe(
-            map(data => {
-                if (data === false) {
-                    throw Error('');
-                }
-                return data;
-            }),
-            retryWhen(mergeMap((error, i) => {
-                const retryAttempt = i + 1;
-                if (retryAttempt > maxRetries) {
-                    throw(error);
-                }
-                return timer(retryAttempt * intervalInMs);
-            })),
-            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'checkForProcessModelWithRetries', false))
-        );
+    checkForCopiedProcess(id: string, maxRetries: number, intervalInMs: number): Observable<boolean> {
+        return this.checkForProcessModelWithRetries(id, true, maxRetries, intervalInMs);
     }
 
-    deleteProcess(id: string): Observable<{status: number}> {
+    checkForDeletedProcess(id: string, maxRetries: number, intervalInMs: number): Observable<boolean> {
+        return this.checkForProcessModelWithRetries(id, false, maxRetries, intervalInMs);
+    }
+
+    deleteProcess(id: string): Observable<{ status: number }> {
         return this.http.delete<HttpResponseBase>(environment.processRepoUrl + '/' + id, {observe: 'response'}).pipe(
             map(resp => {
                 return {status: resp.status};
@@ -119,4 +108,22 @@ export class ProcessRepoService {
         }
     }
 
+    private checkForProcessModelWithRetries(id: string, shouldIdExists: boolean, maxRetries: number, intervalInMs: number): Observable<boolean> {
+        return this.http.get<boolean>(environment.permissionSearchUrl + '/jwt/check/processmodel/' + id + '/r/bool').pipe(
+            map(data => {
+                if (data === !shouldIdExists) {
+                    throw Error('');
+                }
+                return data;
+            }),
+            retryWhen(mergeMap((error, i) => {
+                const retryAttempt = i + 1;
+                if (retryAttempt > maxRetries) {
+                    throw(error);
+                }
+                return timer(retryAttempt * intervalInMs);
+            })),
+            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'checkForProcessModelWithRetries', !shouldIdExists))
+        );
+    }
 }

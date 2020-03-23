@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,9 @@ export interface MeasurementModel {
     is_critical?: (boolean);
     can_web?: boolean;
     export?: (ChartsExportMeasurementModel);
+    math?: string;
     outsideExport?: (ChartsExportMeasurementModel);
+    outsideMath?: string;
     unit_html: (string);
     data: (SensorDataModel);
     outsideData: (SensorDataModel);

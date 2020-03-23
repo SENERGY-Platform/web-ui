@@ -1,18 +1,17 @@
 <!--
+  ~ Copyright 2020 InfAI (CC SES)
   ~
-  ~  Copyright 2019 InfAI (CC SES)
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
   ~
-  ~  Licensed under the Apache License, Version 2.0 (the "License");
-  ~  you may not use this file except in compliance with the License.
-  ~  You may obtain a copy of the License at
+  ~     http://www.apache.org/licenses/LICENSE-2.0
   ~
-  ~      http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~  Unless required by applicable law or agreed to in writing, software
-  ~  distributed under the License is distributed on an "AS IS" BASIS,
-  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~  See the License for the specific language governing permissions and
-  ~  limitations under the License.
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
   -->
 <div class="deployments-config-container">
     <div class="layout-margin" fxLayout="column">
@@ -22,18 +21,22 @@
                     <input type="text" matInput placeholder="Prozessname"
                            formControlName="name">
                 </mat-form-field>
-                <div formArrayName="elements" *ngIf="deploymentFormGroup.get('elements')">
+                <mat-form-field class="full-width" color="accent">
+                    <textarea type="text" matInput placeholder="Process Description"
+                              formControlName="description" cdkTextareaAutosize #autosize="cdkTextareaAutosize"></textarea>
+                </mat-form-field>
+                <div formArrayName="elements" *ngIf="elements.length > 0">
                     <div [formGroupName]="elementIndex"
-                         *ngFor="let element of deploymentFormGroup.get('elements').controls; let elementIndex = index">
-                        <div formGroupName="task" *ngIf="element.value.task !== null">
+                         *ngFor="let element of elements; let elementIndex = index; trackBy:trackByFn">
+                        <div formGroupName="task" *ngIf="element.task !== null">
                             <table class="full-width" cellspacing="0">
                                 <tr>
                                     <td formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent">
-                                            <mat-select placeholder="{{element.value.task.label}}" required
+                                            <mat-select placeholder="{{element.task.label}}" required
                                                         formControlName="device" [compareWith]="compare">
                                                 <mat-option
-                                                        *ngFor="let selectables of element.value.task.selectables; let selectableIndex = index"
+                                                        *ngFor="let selectables of element.task.selectables; let selectableIndex = index"
                                                         [value]="selectables.device"
                                                         (click)="changeTaskSelectables(elementIndex, selectableIndex)">
                                                     {{selectables.device.name}}
@@ -42,11 +45,11 @@
                                         </mat-form-field>
 
                                         <mat-form-field class="full-width" color="accent"
-                                                        *ngIf="element.value.task.selection.show === true">
+                                                        *ngIf="element.task.selection.show === true">
                                             <mat-select placeholder="Service" required formControlName="service"
                                                         [compareWith]="compare">
                                                 <mat-option
-                                                        *ngFor="let services of element.value.task.selectables[element.value.task.selectableIndex || 0].services"
+                                                        *ngFor="let services of element.task.selectables[element.task.selectableIndex || 0].services"
                                                         [value]="services">
                                                     {{services.name}}
                                                 </mat-option>
@@ -54,7 +57,7 @@
                                         </mat-form-field>
                                     </td>
                                     <td formGroupName="parameter"
-                                        *ngFor="let item of element.value.task.parameter | keyvalue; trackBy:trackByFn">
+                                        *ngFor="let item of element.task.parameter | keyvalue; trackBy:trackByFn">
                                         <mat-form-field class="full-width" color="accent">
                                             <input type="text" matInput placeholder="{{item.key}}"
                                                    [formControlName]="item.key">
@@ -63,26 +66,26 @@
                                 </tr>
                             </table>
                         </div>
-                        <div formGroupName="time_event" *ngIf="element.value.time_event !== null">
+                        <div formGroupName="time_event" *ngIf="element.time_event !== null">
                             <senergy-process-deployments-config-time-event
-                                    [time_event]="deploymentFormGroup.get(['elements', elementIndex, 'time_event'])"></senergy-process-deployments-config-time-event>
+                                    [time_event]="elementsTimeEvent(elementIndex)"></senergy-process-deployments-config-time-event>
                         </div>
                     </div>
                 </div>
 
-                <div formArrayName="lanes" *ngIf="deploymentFormGroup.get('lanes')">
+                <div formArrayName="lanes" *ngIf="lanes.length > 0">
                     <table class="full-width" cellspacing="0">
                         <tr>
                             <td valign="top" [formGroupName]="elementLanesIndex"
-                                *ngFor="let lanesControls of deploymentFormGroup.get('lanes').controls; let elementLanesIndex = index">
-                                <div formGroupName="lane" *ngIf="lanesControls.value.lane !== null">
-                                    <div>{{lanesControls.value.lane.label}}</div>
+                                *ngFor="let lanesControls of lanes; let elementLanesIndex = index; trackBy:trackByFn">
+                                <div formGroupName="lane" *ngIf="lanesControls.lane !== null">
+                                    <div>{{lanesControls.lane.label}}</div>
                                     <div formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent"
-                                                        *ngIf="lanesControls.value.lane.selectables.length > 0">
+                                                        *ngIf="lanesControls.lane.selectables.length > 0">
                                             <mat-select placeholder="Device" formControlName="id" required>
                                                 <mat-option
-                                                        *ngFor="let selectables of lanesControls.value.lane.selectables; let selectableLaneIndex = index"
+                                                        *ngFor="let selectables of lanesControls.lane.selectables; let selectableLaneIndex = index"
                                                         [value]="selectables.device.id"
                                                         (click)="changeLaneSelectables(elementLanesIndex, selectableLaneIndex)">
                                                     {{selectables.device.name}}
@@ -91,21 +94,21 @@
                                         </mat-form-field>
                                     </div>
 
-                                    <div formArrayName="elements" *ngIf="lanesControls.value.lane.elements.length > 0">
+                                    <div formArrayName="elements" *ngIf="lanesElements(elementLanesIndex).length > 0">
                                         <div [formGroupName]="elementsIndex"
-                                             *ngFor="let elements of deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements']).controls; let elementsIndex = index">
-                                            <div formGroupName="task" *ngIf="elements.value.task !== null">
+                                             *ngFor="let elements of lanesElements(elementLanesIndex); let elementsIndex = index; trackBy:trackByFn">
+                                            <div formGroupName="task" *ngIf="elements.task !== null">
                                                 <table class="full-width" cellspacing="0">
                                                     <tr>
                                                         <td>
                                                             <mat-form-field class="full-width" color="accent">
                                                                 <input type="text" matInput
-                                                                       [value]="elements.value.task.label"
+                                                                       [value]="elements.task.label"
                                                                        disabled>
                                                             </mat-form-field>
                                                         </td>
                                                         <td formGroupName="parameter"
-                                                            *ngFor="let item of elements.value.task.parameter | keyvalue; trackBy:trackByFn">
+                                                            *ngFor="let item of elements.task.parameter | keyvalue; trackBy:trackByFn">
                                                             <mat-form-field class="full-width" color="accent">
                                                                 <input type="text" matInput placeholder="{{item.key}}"
                                                                        [formControlName]="item.key">
@@ -114,9 +117,9 @@
                                                     </tr>
                                                 </table>
                                             </div>
-                                            <div formGroupName="time_event" *ngIf="elements.value.time_event !== null">
+                                            <div formGroupName="time_event" *ngIf="elements.time_event !== null">
                                                 <senergy-process-deployments-config-time-event
-                                                        [time_event]="deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements', elementsIndex, 'time_event'])"></senergy-process-deployments-config-time-event>
+                                                        [time_event]="lanesTimeEvent(elementLanesIndex, elementsIndex)"></senergy-process-deployments-config-time-event>
                                             </div>
                                         </div>
                                     </div>

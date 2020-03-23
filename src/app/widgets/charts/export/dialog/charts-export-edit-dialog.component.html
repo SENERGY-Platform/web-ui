@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,199 +17,198 @@
 <h2 mat-dialog-title>Edit Chart Export</h2>
 
 <mat-dialog-content class="form">
-    <div fxLayout="column">
+    <div fxLayout="column" [formGroup]="formGroupController">
         <mat-form-field color="accent">
             <mat-label>Name</mat-label>
-            <input type="text" matInput placeholder="Name" [(ngModel)]="widget.name">
+            <input type="text" matInput placeholder="Name" formControlName="name">
         </mat-form-field>
 
-        <table class="full-width" cellspacing="0">
-            <tr>
-                <td>
-                    <mat-form-field color="accent" class="full-width">
-                        <mat-select [(ngModel)]="widget.properties.chartType" placeholder="Chart Type" required
-                                    #chartType="ngModel">
-                            <mat-option *ngFor="let chartType of chartTypes" [value]="chartType">
-                                {{chartType}}
-                            </mat-option>
-                        </mat-select>
-                        <mat-error *ngIf="chartType.errors">
-                            Please choose a Chart Type!
-                        </mat-error>
-                    </mat-form-field>
-                </td>
-                <td *ngIf="widget.properties.chartType === 'LineChart'">
-                    <mat-slide-toggle [(ngModel)]="widget.properties.curvedFunction"> Curved?
-                    </mat-slide-toggle>
-                </td>
-            </tr>
-        </table>
+        <div formGroupName="properties">
+            <table class="full-width" cellspacing="0">
+                <tr>
+                    <td>
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-select formControlName="chartType" placeholder="Chart Type" required>
+                                <mat-option *ngFor="let chartType of chartTypes" [value]="chartType">
+                                    {{chartType}}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="chartType.errors">
+                                Please choose a Chart Type!
+                            </mat-error>
+                        </mat-form-field>
+                    </td>
+                    <td *ngIf="chartType.value === 'LineChart'">
+                        <mat-slide-toggle formControlName="curvedFunction"> Curved?
+                        </mat-slide-toggle>
+                    </td>
+                </tr>
+            </table>
 
-        <mat-form-field color="accent">
-            <mat-label>Choose Exports</mat-label>
-            <mat-select [formControl]="formControl" multiple required (valueChange)="selectionChange($event)"
-                        [compareWith]="compare">
-                <mat-option *ngFor="let option of exports" [value]="option">{{option.name}}</mat-option>
-            </mat-select>
-            <mat-error *ngIf="formControl.hasError('valid') === false">
-                Please make a selection!
-            </mat-error>
-        </mat-form-field>
+            <mat-form-field color="accent">
+                <mat-label>Choose Exports</mat-label>
+                <mat-select required multiple
+                            [compareWith]="compare" formControlName="exports"  (valueChange)="selectionChange($event)">
+                    <mat-option *ngFor="let option of exportList" [value]="option">{{option.name}}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="exports.invalid">
+                    Please make a selection!
+                </mat-error>
+            </mat-form-field>
+            <table cellspacing="0">
+                <tr>
+                    <td fxFlex="33%">
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-select formControlName="timeRangeType" placeholder="Time Range Type" required>
+                                <mat-option *ngFor="let timeRange of timeRangeTypes" [value]="timeRange">
+                                    {{timeRange}}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="timeRangeType.errors">
+                                Please choose a time Range Type!
+                            </mat-error>
+                        </mat-form-field>
+                    </td>
+                    <td fxFlex="66%" *ngIf="timeRangeType.value === timeRangeEnum.Relative" formGroupName="time">
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-label>Last</mat-label>
+                            <input type="text" matInput placeholder="e.g. 15m, 1h"
+                                   formControlName="last">
+                        </mat-form-field>
+                    </td>
+                    <td fxFlex="33%" *ngIf="timeRangeType.value === timeRangeEnum.Absolute" formGroupName="time">
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-label>Start</mat-label>
+                            <input type="datetime-local" matInput placeholder="Start"
+                                   formControlName="start">
+                        </mat-form-field>
+                    </td>
+                    <td fxFlex="33%" *ngIf="timeRangeType.value === timeRangeEnum.Absolute" formGroupName="time">
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-label>End</mat-label>
+                            <input type="datetime-local" matInput placeholder="Start"
+                                   formControlName="end">
+                        </mat-form-field>
+                    </td>
+                </tr>
+            </table>
 
-        <table cellspacing="0">
-            <tr>
-                <td fxFlex="33%">
-                    <mat-form-field color="accent" class="full-width">
-                        <mat-select [(ngModel)]="widget.properties.timeRangeType" placeholder="Time Range Type" required
-                                    #timeRangeType="ngModel">
-                            <mat-option *ngFor="let timeRangeType of timeRangeTypes" [value]="timeRangeType">
-                                {{timeRangeType}}
-                            </mat-option>
-                        </mat-select>
-                        <mat-error *ngIf="timeRangeType.errors">
-                            Please choose a time Range Type!
-                        </mat-error>
-                    </mat-form-field>
-                </td>
-                <td fxFlex="66%" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Relative">
-                    <mat-form-field color="accent" class="full-width">
-                        <mat-label>Last</mat-label>
-                        <input type="text" matInput placeholder="e.g. 15m, 1h"
-                               [(ngModel)]="widget.properties.time.last">
-                    </mat-form-field>
-                </td>
-                <td fxFlex="33%" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Absolute">
-                    <mat-form-field color="accent" class="full-width">
-                        <mat-label>Start</mat-label>
-                        <input type="datetime-local" matInput placeholder="Start"
-                               [(ngModel)]="widget.properties.time.start">
-                    </mat-form-field>
-                </td>
-                <td fxFlex="33%" *ngIf="widget.properties.timeRangeType === timeRangeEnum.Absolute">
-                    <mat-form-field color="accent" class="full-width">
-                        <mat-label>End</mat-label>
-                        <input type="datetime-local" matInput placeholder="Start"
-                               [(ngModel)]="widget.properties.time.end">
-                    </mat-form-field>
-                </td>
-            </tr>
-        </table>
+            <table cellspacing="0" formGroupName="group">
+                <tr>
+                    <td>
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-select formControlName="type" placeholder="Group Type">
+                                <mat-option [value]="">none</mat-option>
+                                <mat-option *ngFor="let groupType of groupTypes" [value]="groupType">
+                                    {{groupType}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-label>Time interval</mat-label>
+                            <input type="text" matInput placeholder="e.g. 15m, 1h"
+                                   formControlName="time">
+                        </mat-form-field>
+                    </td>
+                </tr>
+            </table>
 
-        <table cellspacing="0" *ngIf="widget.properties.group">
-            <tr>
-                <td>
-                    <mat-form-field color="accent" class="full-width">
-                        <mat-select [(ngModel)]="widget.properties.group.type" placeholder="Group Type">
-                            <mat-option [value]="">none</mat-option>
-                            <mat-option *ngFor="let groupType of groupTypes" [value]="groupType">
-                                {{groupType}}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                </td>
-                <td>
-                    <mat-form-field color="accent" class="full-width">
-                        <mat-label>Time interval</mat-label>
-                        <input type="text" matInput placeholder="e.g. 15m, 1h"
-                               [(ngModel)]="widget.properties.group.time">
-                    </mat-form-field>
-                </td>
-            </tr>
-        </table>
-
-        <table cellspacing="0">
-            <tr>
-                <td>
-                    <mat-form-field color="accent" class="full-width">
-                        <mat-label>X-Axis</mat-label>
-                        <input type="text" matInput placeholder="X-Axis" value="time" disabled>
-                    </mat-form-field>
-                </td>
-                <td>
-                    <mat-form-field color="accent" class="full-width">
-                        <mat-label>X-Axis-Label</mat-label>
-                        <input type="text" matInput placeholder="X-Axis-Label"
-                               [(ngModel)]="widget.properties.hAxisLabel">
-                    </mat-form-field>
-                </td>
-                <td>
-                    <mat-form-field color="accent" class="full-width">
-                        <mat-label>Y-Axis-Label</mat-label>
-                        <input type="text" matInput placeholder="Y-Axis-Label"
-                               [(ngModel)]="widget.properties.vAxisLabel">
-                    </mat-form-field>
-                </td>
-            </tr>
-        </table>
-
-        <table mat-table [dataSource]="dataSource">
-
-            <ng-container matColumnDef="select">
-                <th mat-header-cell *matHeaderCellDef>
-                    <mat-checkbox (change)="$event ? masterToggle() : null"
-                                  [checked]="selection.hasValue() && isAllSelected()"
-                                  [indeterminate]="selection.hasValue() && !isAllSelected()">
-                    </mat-checkbox>
-                </th>
-                <td mat-cell *matCellDef="let row">
-                    <mat-checkbox (click)="$event.stopPropagation()"
-                                  (change)="$event ? selection.toggle(row) : null"
-                                  [checked]="selection.isSelected(row)">
-                    </mat-checkbox>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="exportName">
-                <th mat-header-cell *matHeaderCellDef>Export Name</th>
-                <td mat-cell *matCellDef="let element" matTooltip="{{element.exportName}}" matTooltipPosition="right">
-                    {{element.exportName}}
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="valueName">
-                <th mat-header-cell *matHeaderCellDef>Value Name</th>
-                <td mat-cell *matCellDef="let element" matTooltip="{{element.valueName}}" matTooltipPosition="right">
-                    {{element.valueName}}
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="valueType">
-                <th mat-header-cell *matHeaderCellDef>Value Type</th>
-                <td mat-cell *matCellDef="let element"> {{element.valueType}} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="color">
-                <th mat-header-cell *matHeaderCellDef>Color</th>
-                <td mat-cell *matCellDef="let element">
-                    <mat-form-field color="accent" appearance="standard">
-                        <input type="text" matInput placeholder="e.g. red, #004411"
-                               [(ngModel)]="element.color">
-                    </mat-form-field>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="math">
-                <th mat-header-cell *matHeaderCellDef>Math</th>
-                <td mat-cell *matCellDef="let element">
-                    <mat-form-field color="accent" appearance="standard">
-                        <input type="text" matInput placeholder="e.g. / 1000"
-                               [(ngModel)]="element.math">
-                    </mat-form-field>
-                </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;">
-            </tr>
-        </table>
+            <table cellspacing="0">
+                <tr>
+                    <td>
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-label>X-Axis</mat-label>
+                            <input type="text" matInput placeholder="X-Axis" value="time" disabled>
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-label>X-Axis-Label</mat-label>
+                            <input type="text" matInput placeholder="X-Axis-Label"
+                                   formControlName="hAxisLabel">
+                        </mat-form-field>
+                    </td>
+                    <td>
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-label>Y-Axis-Label</mat-label>
+                            <input type="text" matInput placeholder="Y-Axis-Label"
+                                   formControlName="vAxisLabel">
+                        </mat-form-field>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
     </div>
+
+    <table mat-table [dataSource]="dataSource">
+
+        <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+                <mat-checkbox (change)="$event ? masterToggle() : null"
+                              [checked]="selection.hasValue() && isAllSelected()"
+                              [indeterminate]="selection.hasValue() && !isAllSelected()">
+                </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+                <mat-checkbox (click)="$event.stopPropagation()"
+                              (change)="$event ? selection.toggle(row) : null"
+                              [checked]="selection.isSelected(row)">
+                </mat-checkbox>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="exportName">
+            <th mat-header-cell *matHeaderCellDef>Export Name</th>
+            <td mat-cell *matCellDef="let element" matTooltip="{{element.exportName}}" matTooltipPosition="right">
+                {{element.exportName}}
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="valueName">
+            <th mat-header-cell *matHeaderCellDef>Value Name</th>
+            <td mat-cell *matCellDef="let element" matTooltip="{{element.valueName}}" matTooltipPosition="right">
+                {{element.valueName}}
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="valueType">
+            <th mat-header-cell *matHeaderCellDef>Value Type</th>
+            <td mat-cell *matCellDef="let element"> {{element.valueType}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="color">
+            <th mat-header-cell *matHeaderCellDef>Color</th>
+            <td mat-cell *matCellDef="let element">
+                <mat-form-field color="accent" appearance="standard">
+                    <input type="text" matInput placeholder="e.g. red, #004411"
+                           [(ngModel)]="element.color">
+                </mat-form-field>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="math">
+            <th mat-header-cell *matHeaderCellDef>Math</th>
+            <td mat-cell *matCellDef="let element">
+                <mat-form-field color="accent" appearance="standard">
+                    <input type="text" matInput placeholder="e.g. / 1000"
+                           [(ngModel)]="element.math">
+                </mat-form-field>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;">
+        </tr>
+    </table>
+
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="save()"
-            [disabled]="disableSave || chartType.errors || formControl.hasError('valid') || selection.selected.length === 0">
+    <button class="mat-raised-button mat-accent" (click)="save()" [disabled]="formGroupController.invalid || selection.selected.length === 0">
         Save
     </button>
 </mat-dialog-actions>

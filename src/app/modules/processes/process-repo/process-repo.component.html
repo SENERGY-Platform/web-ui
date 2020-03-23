@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2019 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,39 +25,51 @@
                 <senergy-sort [sortAttributes]="sortAttributes"
                               (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
             </div>
+            <div fxLayout="row" *ngIf="selectedItems.length > 0 && ready" style="margin: 8px">
+                <div fxLayoutAlign="center center">
+                    You have selected {{selectedItems.length}} {{selectedItems.length === 1 ? 'process' : 'processes'}}
+                </div>
+                <button matTooltip="Delete" mat-icon-button color="accent"
+                        (click)="deleteMultipleItems()">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
             <div class="main-panel"
                  infiniteScroll
                  [infiniteScrollDistance]="1"
                  [infiniteScrollThrottle]="50"
                  [scrollWindow]="false"
                  (scrolled)="onScroll()">
-                <div class="layout-margin" fxLayout="column" *ngIf="animationDone">
-                    <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+                <div class="layout-margin" fxLayout="column" *ngIf="animationDone" [formGroup]="formGroup">
+                    <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px" formArrayName="repoItems"
                                    *ngIf="repoItems.length > 0">
-                        <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems">
+                        <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
+                                       [formGroupName]="i">
                             <div fxFill>
-                                <img class="widget-image" [src]="item.image">
+                                <img class="widget-image" [src]="item.value.image">
                             </div>
                             <mat-grid-tile-footer>
                                 <div fxLayout="column" fxFill>
-                                    <div class="truncate footer-item-header" matTooltip="{{item.name}}">
-                                        {{item.name}}
+                                    <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
+                                        {{item.value.name}}
                                     </div>
                                     <div class="truncate footer-item-subtitle"
-                                         matTooltip="{{item.date | date:'medium'}}">
-                                        {{item.date | date:"medium"}}
+                                         matTooltip="{{item.value.date | date:'medium'}}">
+                                        {{item.value.date | date:"medium"}}
                                     </div>
                                     <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
-                                        <mat-icon matTooltip="Process is shared" *ngIf="item.shared"
+                                        <mat-icon matTooltip="Process is shared" *ngIf="item.value.shared"
                                                   class="color-sidenav info-icon">share
                                         </mat-icon>
+                                        <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
+                                        </mat-checkbox>
                                         <div fxFlex></div>
                                         <button mat-icon-button class="color-accent" matTooltip="Edit"
-                                                routerLink="/processes/designer/{{item.id}}">
+                                                routerLink="/processes/designer/{{item.value.id}}">
                                             <mat-icon>edit</mat-icon>
                                         </button>
-                                        <button mat-icon-button matTooltip="Delete" class="color-accent"
-                                                (click)="deleteProcess(item)">
+                                        <button mat-icon-button matTooltip="Delete" color="accent"
+                                                (click)="deleteProcess(item.value)" [disabled]="selectedItems.length > 0">
                                             <mat-icon>delete</mat-icon>
                                         </button>
 
@@ -67,25 +79,25 @@
                                             <mat-icon>more_vert</mat-icon>
                                         </button>
                                         <mat-menu #processMenu="matMenu" [overlapTrigger]="false">
-                                            <button mat-menu-item (click)="copyProcess(item)">
+                                            <button mat-menu-item (click)="copyProcess(item.value)">
                                                 <mat-icon>content_copy</mat-icon>
                                                 <span>Copy</span>
                                             </button>
-                                            <button mat-menu-item (click)="permission(item)"
-                                                    [disabled]="item.permissions.a === false">
+                                            <button mat-menu-item (click)="permission(item.value)"
+                                                    [disabled]="item.value.permissions.a === false">
                                                 <mat-icon>share</mat-icon>
                                                 <span>Share</span>
                                             </button>
-                                            <button mat-menu-item (click)="downloadDiagram(item)">
+                                            <button mat-menu-item (click)="downloadDiagram(item.value)">
                                                 <mat-icon>cloud_download</mat-icon>
                                                 <span>Download BPMN</span>
                                             </button>
-                                            <button mat-menu-item (click)="downloadSvg(item)">
+                                            <button mat-menu-item (click)="downloadSvg(item.value)">
                                                 <mat-icon>insert_photo</mat-icon>
                                                 <span>Download SVG</span>
                                             </button>
-                                            <button mat-menu-item (click)="deployProcess(item.id)"
-                                                    [disabled]="item.permissions.x === false">
+                                            <button mat-menu-item (click)="deployProcess(item.value.id)"
+                                                    [disabled]="item.value.permissions.x === false">
                                                 <mat-icon>publish</mat-icon>
                                                 <span>Deploy</span>
                                             </button>

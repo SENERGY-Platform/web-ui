@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {EditOutputDialogComponent} from '../dialogs/edit-output-dialog/edit-output-dialog.component';
 import {EditInputDialogComponent} from '../dialogs/edit-input-dialog/edit-input-dialog.component';
 import {CycleDialogComponent} from '../dialogs/cycle-dialog/cycle-dialog.component';
@@ -126,15 +126,12 @@ export class DesignerDialogService {
         });
     }
 
-    openTaskConfigDialog(defaultSelection: DeviceTypeSelectionRefModel, callback: (connectorInfo: DeviceTypeSelectionResultModel) => void) {
+    openTaskConfigDialog(defaultSelection: DeviceTypeSelectionRefModel): Observable<DeviceTypeSelectionResultModel> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {selection: JSON.parse(JSON.stringify(defaultSelection || null))};         // create copy of object
-        const editDialogRef = this.dialog.open(TaskConfigDialogComponent, dialogConfig);
-        editDialogRef.afterClosed().subscribe((result: DeviceTypeSelectionResultModel) => {
-            if (result) {
-                callback(result);
-            }
-        });
+        return this.dialog.open(TaskConfigDialogComponent, dialogConfig).afterClosed();
     }
+
+
 }

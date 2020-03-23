@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 })
 export class WidgetHeaderComponent implements OnInit {
 
-    @Input() widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     constructor(private dashboardService: DashboardService) {

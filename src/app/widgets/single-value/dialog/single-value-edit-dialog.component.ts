@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatAutocompleteSelectedEvent, MatDialogRef} from '@angular/material';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/internal/operators';
@@ -26,6 +25,8 @@ import {ExportModel, ExportValueModel} from '../../../modules/data/export/shared
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 
 
 @Component({
@@ -39,14 +40,14 @@ export class SingleValueEditDialogComponent implements OnInit {
     filteredExports: Observable<ChartsExportMeasurementModel[]> = new Observable();
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {} as WidgetModel;
     vAxisValues: ExportValueModel[] = [];
     disableSave = false;
 
-    vAxisLabel: string = '';
-    name: string = '';
-    type: string = '';
-    format: string = '';
+    vAxisLabel = '';
+    name = '';
+    type = '';
+    format = '';
     threshold = 128;
     math = '';
 
@@ -78,7 +79,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.exportService.getExports().subscribe((exports: (ExportModel[] | null)) => {
+        this.exportService.getExports('name', 'asc').subscribe((exports: (ExportModel[] | null)) => {
             if (exports !== null) {
                 exports.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
@@ -137,8 +138,8 @@ export class SingleValueEditDialogComponent implements OnInit {
         });
     }
 
-    displayFn(input?: ChartsExportMeasurementModel): string | undefined {
-        return input ? input.name : undefined;
+    displayFn(input?: ChartsExportMeasurementModel): string {
+        return input ? input.name : '';
     }
 
     compare(a: any, b: any) {

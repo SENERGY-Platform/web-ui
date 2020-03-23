@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../../../environments/environment';
-import {Observable} from 'rxjs';
-import {catchError, map} from 'rxjs/internal/operators';
+import {Observable, timer} from 'rxjs';
+import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {DeploymentsModel} from './deployments.model';
 import {DeploymentsDefinitionModel} from './deployments-definition.model';
@@ -59,9 +59,12 @@ export class DeploymentsService {
         );
     }
 
-    deleteDeployment(deploymentId: string): Observable<{status: number}> {
-        return this.http.delete(environment.processDeploymentUrl + '/deployments/' + encodeURIComponent(deploymentId), {responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
+    deleteDeployment(deploymentId: string): Observable<{ status: number }> {
+        return this.http.delete(environment.processDeploymentUrl + '/deployments/' + encodeURIComponent(deploymentId), {
+            responseType: 'text',
+            observe: 'response'
+        }).pipe(
+            map(resp => {
                 return {status: resp.status};
             }),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'deleteDeployment', {status: 500}))
@@ -80,7 +83,7 @@ export class DeploymentsService {
         );
     }
 
-    postDeployments(deployment: DeploymentsPreparedModel): Observable<{status: number}> {
+    postDeployments(deployment: DeploymentsPreparedModel): Observable<{ status: number }> {
         return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments', deployment, {observe: 'response'}).pipe(
             map(resp => {
                 return {status: resp.status};
@@ -89,4 +92,22 @@ export class DeploymentsService {
         );
     }
 
+    checkForDeletedDeploymentWithRetries(id: string, maxRetries: number, intervalInMs: number): Observable<boolean> {
+        return this.http.get<boolean>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(id) + '/exists').pipe(
+            map(data => {
+                if (data === true) {
+                    throw Error('');
+                }
+                return data;
+            }),
+            retryWhen(mergeMap((error, i) => {
+                const retryAttempt = i + 1;
+                if (retryAttempt > maxRetries) {
+                    throw(error);
+                }
+                return timer(retryAttempt * intervalInMs);
+            })),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'checkForProcessModelWithRetries', true))
+        );
+    }
 }

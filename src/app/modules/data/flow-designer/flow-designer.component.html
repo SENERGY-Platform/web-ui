@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,7 +14,11 @@
   ~ limitations under the License.
   -->
 <div class="main-panel">
-    <div class="layout-margin" fxLayout="column">
+    <div class="layout-margin" fxLayout="column" [fxShow]="ready">
+        <div *ngIf="flow.dateCreated !== undefined" fxLayout="row" fxLayoutAlign="end center" style="margin-bottom: 10px;">
+            <mat-icon>calendar_today</mat-icon>{{flow.dateCreated| date:"medium"}}
+            <mat-icon style="margin-left: 6px;">update</mat-icon>{{flow.dateUpdated| date:"medium"}}
+        </div>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>
             <input matInput [(ngModel)]="flow.name" placeholder="Name">
@@ -44,4 +48,5 @@
             <mat-icon>save</mat-icon>
         </button>
     </div>
+    <senergy-spinner [elementCount]="0" [show]="!ready"></senergy-spinner>
 </div>

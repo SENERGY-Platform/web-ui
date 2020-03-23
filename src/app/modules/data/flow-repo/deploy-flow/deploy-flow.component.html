@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@
     <div class="layout-margin" fxLayout="column" *ngIf="inputs.length > 0 && ready == true">
         <mat-card style="margin-bottom:10px;">
             <mat-card-header>
-                <div mat-card-avatar><mat-icon>folder</mat-icon></div>
+                <div mat-card-avatar>
+                    <mat-icon>folder</mat-icon>
+                </div>
                 <mat-card-title>General</mat-card-title>
                 <mat-card-subtitle></mat-card-subtitle>
             </mat-card-header>
@@ -35,23 +37,45 @@
         </mat-card>
         <mat-card *ngFor="let input of inputs; let key = index" style="margin-bottom:10px;">
             <mat-card-header>
-                <div mat-card-avatar><mat-icon>poll</mat-icon></div>
+                <div mat-card-avatar>
+                    <mat-icon>poll</mat-icon>
+                </div>
                 <mat-card-title>{{input.name}}</mat-card-title>
                 <mat-card-subtitle>{{input.id}}</mat-card-subtitle>
             </mat-card-header>
             <mat-card-content>
                 <div fxLayout="column" *ngFor="let port of input.inPorts">
                     <h4>{{ port }}</h4>
-                    <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-select (ngModelChange)="deviceChanged($event, input.id, port)" placeholder="Device" [(ngModel)]="selectedValues.get(input.id).get(port).device">
-                            <mat-option *ngFor="let device of devices" [value]="device">
-                                {{device.name}}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
+                    <div fxLayout="row" fxFlex="">
+                            <mat-form-field fxFlex color="accent" appearance="outline">
+                                <mat-select (ngModelChange)="deviceChanged($event, input.id, port)" placeholder="Device"
+                                            [(ngModel)]="selectedValues.get(input.id).get(port).device[0]">
+                                    <mat-option *ngFor="let device of devices" [value]="device">
+                                        {{device.name}}
+                                    </mat-option>
+                                </mat-select>
+                                <button mat-icon-button  matSuffix (click)="addAdditionalDevice()">
+                                    <mat-icon>add</mat-icon>
+                                </button>
+                            </mat-form-field>
 
+                    </div>
+                    <div *ngFor="let i of Arr(additionalDevices.length), let key = index">
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-select (ngModelChange)="deviceChanged($event, input.id, port)" placeholder="Device"
+                                        [(ngModel)]="selectedValues.get(input.id).get(port).device[key+1]">
+                                <mat-option *ngFor="let device of filteredDevices" [value]="device">
+                                    {{device.name}}
+                                </mat-option>
+                            </mat-select>
+                            <button mat-icon-button  matSuffix (click)="removeAdditionalDevice(input, port, key)">
+                                <mat-icon>remove</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
                     <mat-form-field fxFlex color="accent" appearance="outline">
-                        <mat-select (ngModelChange)="serviceChanged($event, input.id, port)" placeholder="Service" [(ngModel)]="selectedValues.get(input.id).get(port).service">
+                        <mat-select (ngModelChange)="serviceChanged($event, input.id, port)" placeholder="Service"
+                                    [(ngModel)]="selectedValues.get(input.id).get(port).service">
                             <mat-option *ngFor="let service of deviceTypes[input.id][port].services" [value]="service">
                                 {{service.name}}
                             </mat-option>
@@ -67,12 +91,13 @@
                         </mat-select>
                     </mat-form-field>
                 </div>
-                <h4 *ngIf="input.config != undefined" >Configuration</h4>
+                <h4 *ngIf="input.config != undefined">Configuration</h4>
                 <div fxLayout="column" *ngFor="let conf of input.config">
                     <mat-form-field fxFill color="accent" appearance="outline">
                         <mat-label>{{ conf.name }}</mat-label>
                         <input matInput [ngModel]="selectedValues.get(input.id).get('_config').get(conf.name)"
-                               (ngModelChange)="selectedValues.get(input.id).get('_config').set(conf.name, $event)" placeholder="conf.name">
+                               (ngModelChange)="selectedValues.get(input.id).get('_config').set(conf.name, $event)"
+                               placeholder="conf.name">
                     </mat-form-field>
                 </div>
             </mat-card-content>
@@ -80,7 +105,8 @@
         <mat-expansion-panel>
             <mat-expansion-panel-header>
                 <mat-panel-title style="width:40%">
-                    <mat-icon>settings</mat-icon>Global Settings
+                    <mat-icon>settings</mat-icon>
+                    Global Settings
                 </mat-panel-title>
                 <mat-panel-description style="width:60%">
                     Only change, if you know what you are doing
@@ -90,6 +116,10 @@
                 <mat-label>Window Time</mat-label>
                 <input matInput [(ngModel)]="windowTime" placeholder="Window Time">
             </mat-form-field>
+            <section class="checkbox-section">
+                <mat-checkbox class="checkbox-margin" [(ngModel)]="metrics">Enable Metrics</mat-checkbox>
+                <mat-checkbox class="checkbox-margin" [(ngModel)]="allMessages">Consume all messages</mat-checkbox>
+            </section>
         </mat-expansion-panel>
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
             <button mat-raised-button color="accent" (click)="startPipeline()">Start</button>

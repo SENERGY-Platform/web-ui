@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 <div class="main-panel">
     <div class="layout-margin" fxLayout="column">
-        <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+        <mat-grid-list cols="{{gridCols}}" rowHeight="302px" gutterSize="16px"
                        *ngIf="flows.length > 0">
             <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of flows">
                 <div fxFill>
@@ -26,12 +26,12 @@
                 </div>
                 <mat-grid-tile-footer>
                     <div fxLayout="column" fxFill>
-                        <div class="truncate footer-item-header" matTooltip="{{item.name}}">
+                        <div class="truncate footer-item-header" matTooltip="{{item.description}}">
                             {{item.name}}
                         </div>
-                        <div class="truncate footer-item-subtitle"
-                             matTooltip="{{item.description }}">
-                            {{item.description}}
+                        <div class="truncate footer-item-subtitle" fxLayoutAlign="start center"
+                             matTooltip="last updated">
+                            <mat-icon>update</mat-icon>{{item.dateUpdated| date:"medium"}}
                         </div>
                         <div fxLayout="row" fxLayoutAlign="end center" class="footer-buttons">
                             <button class="mat-icon-button" routerLink="/data/flow-repo/deploy/{{item._id}}">

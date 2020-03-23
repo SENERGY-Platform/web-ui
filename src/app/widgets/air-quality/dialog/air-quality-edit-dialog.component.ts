@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import {Component, Inject, NgZone, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
@@ -43,7 +43,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {} as WidgetModel;
     disableSave = false;
     changeLocation = false;
     name = ' ';
@@ -340,7 +340,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.exportService.getExports().subscribe((exports: (ExportModel[] | null)) => {
+        this.exportService.getExports('name', 'asc').subscribe((exports: (ExportModel[] | null)) => {
             if (exports !== null) {
                 exports.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {

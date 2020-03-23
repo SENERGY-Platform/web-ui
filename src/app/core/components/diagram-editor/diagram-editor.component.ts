@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {dia, shapes, util} from 'jointjs';
 import * as $ from 'jquery';
 import {DiagramModel} from './shared/diagram.model';
-
+import uuid = util.uuid;
 
 @Component({
     selector: 'senergy-diagram-editor',
@@ -26,9 +26,11 @@ import {DiagramModel} from './shared/diagram.model';
     styleUrls: ['./diagram-editor.component.css']
 })
 
-export class DiagramEditorComponent implements OnInit {
+export class DiagramEditorComponent implements AfterViewInit {
 
     private graph: any;
+
+    idGenerated = uuid();
 
     NodeElement: any = dia.Element.define('senergy.NodeElement',
         {
@@ -153,28 +155,25 @@ export class DiagramEditorComponent implements OnInit {
 
             initialize: function () {
                 shapes.basic.Generic.prototype.initialize.apply(this, <any>arguments);
-
-                this.on('change:inPorts change:outPorts', this.updatePortItems, this);
                 this.updatePortItems();
             },
 
             // model,changed
-            updatePortItems: function ({}, {}, opt: any) {
-
+            updatePortItems: function () {
                 // Make sure all ports are unique.
                 const inPorts = util.uniq(this.get('inPorts'));
-                const outPorts = util.difference(util.uniq(this.get('outPorts')), inPorts);
+                const outPorts = util.uniq(this.get('outPorts'));
 
                 const inPortItems = this.createPortItems('in', inPorts);
                 const outPortItems = this.createPortItems('out', outPorts);
 
-                this.prop('ports/items', inPortItems.concat(outPortItems), util.assign({rewrite: true}, opt));
+                this.prop('ports/items', inPortItems.concat(outPortItems));
             },
 
             createPortItem: function (group: any, port: any) {
 
                 return {
-                    id: port,
+                    id: group + '-' + port,
                     group: group,
                     attrs: {
                         portLabel: {
@@ -187,52 +186,6 @@ export class DiagramEditorComponent implements OnInit {
             createPortItems: function (group: any, ports: any) {
 
                 return util.toArray(ports).map(this.createPortItem.bind(this, group));
-            },
-
-            _addGroupPort: function (port: any, group: any, opt: any) {
-
-                const ports = this.get(group);
-                return this.set(group, Array.isArray(ports) ? ports.concat(port) : [port], opt);
-            },
-
-            addOutPort: function (port: any, opt: any) {
-
-                return this._addGroupPort(port, 'outPorts', opt);
-            },
-
-            addInPort: function (port: any, opt: any) {
-
-                return this._addGroupPort(port, 'inPorts', opt);
-            },
-
-            _removeGroupPort: function (port: any, group: any, opt: any) {
-
-                return this.set(group, util.without(this.get(group), port), opt);
-            },
-
-            removeOutPort: function (port: any, opt: any) {
-
-                return this._removeGroupPort(port, 'outPorts', opt);
-            },
-
-            removeInPort: function (port: any, opt: any) {
-
-                return this._removeGroupPort(port, 'inPorts', opt);
-            },
-
-            _changeGroup: function (group: any, properties: any, opt: any) {
-
-                return this.prop('ports/groups/' + group, util.isObject(properties) ? properties : {}, opt);
-            },
-
-            changeInGroup: function (properties: any, opt: any) {
-
-                return this._changeGroup('in', properties, opt);
-            },
-
-            changeOutGroup: function (properties: any, opt: any) {
-
-                return this._changeGroup('out', properties, opt);
             }
         }
     );
@@ -243,24 +196,25 @@ export class DiagramEditorComponent implements OnInit {
     constructor() {
     }
 
-    ngOnInit() {
-        this.setPaperWidth();
-        this.reinitializePaper();
-        this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
-            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
-            const model = elementView.model;
-            model.remove();
-        });
+    ngAfterViewInit() {
+            this.setPaperWidth();
+            this.reinitializePaper();
+            this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
+                evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
+                const model = elementView.model;
+                model.remove();
+            });
     }
 
     onResize({}) {
         this.setPaperWidth();
-        this.reinitializePaper();
+        this.paper.setDimensions(this.paperWidth, 700);
     }
 
     setPaperWidth() {
         const paperWrap = document.getElementById('paper-wrap');
         if (paperWrap !== null) {
+
             this.paperWidth = paperWrap.offsetWidth;
         }
     }
@@ -274,7 +228,7 @@ export class DiagramEditorComponent implements OnInit {
                 senergy: { NodeElement: this.NodeElement }
             } });
         this.paper = new dia.Paper({
-            el: $('#paper'),
+            el: $('#' + this.idGenerated),
             model: this.graph,
             defaultLink: new dia.Link({
                 attrs: {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}}
@@ -336,15 +290,20 @@ export class DiagramEditorComponent implements OnInit {
 
     public newNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
         const inPorts = [];
-        for (const input of inputs) {
-            if (input.name !== undefined) {
-                inPorts.push(input.name);
+        if (inputs !== null) {
+            for (const input of inputs) {
+                if (input.name !== undefined) {
+                    inPorts.push(input.name);
+                }
             }
         }
+
         const outPorts = [];
-        for (const output of outputs) {
-            if (output.name !== undefined) {
-                outPorts.push(output.name);
+        if (outputs !== null) {
+            for (const output of outputs) {
+                if (output.name !== undefined) {
+                    outPorts.push(output.name);
+                }
             }
         }
         const node = new this.NodeElement({

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {Router} from '@angular/router';
@@ -27,6 +27,7 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
 import {ConceptsPermSearchModel} from './shared/concepts-perm-search.model';
 import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 const grids = new Map([
     ['xs', 1],
@@ -135,7 +136,6 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.dialogsService.openDeleteDialog('concept ' + concept.name).afterClosed().subscribe((deleteConcept: boolean) => {
             if (deleteConcept) {
                 this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
-                    console.log(resp);
                     if (resp === true) {
                         this.concepts.splice(this.concepts.indexOf(concept), 1);
                         this.snackBar.open('Concept deleted successfully.', undefined, {duration: 2000});

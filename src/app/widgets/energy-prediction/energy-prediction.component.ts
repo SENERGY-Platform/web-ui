@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material';
+import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {EnergyPredictionService} from './shared/energy-prediction.service';
 import {EnergyPredictionModel} from './shared/energy-prediction.model';
@@ -39,7 +39,7 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
     price = 0;
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {id: '', type: '', name: '', properties: {}};
+    @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
     constructor(private iconRegistry: MatIconRegistry,
@@ -75,16 +75,6 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
                 const prediction = this.predictionService.getPrediction(this.widget);
                 prediction.subscribe((devicesStatus: EnergyPredictionModel) => {
                     this.predictionModel = devicesStatus;
-                    if (this.widget.properties.math !== '') {
-                        if (typeof this.predictionModel.prediction === 'number') {
-                            this.predictionModel.prediction =
-                                eval(this.predictionModel.prediction + (this.widget.properties.math || '+ 0'));
-                        }
-                        if (typeof this.predictionModel.predictionTotal === 'number') {
-                            this.predictionModel.predictionTotal =
-                                eval(this.predictionModel.predictionTotal + (this.widget.properties.math || '+ 0'));
-                        }
-                    }
                     this.price = this.predictionModel.prediction * (this.widget.properties.price || 0);
                     switch (this.widget.properties.thresholdOption) {
                         case 'Consumption':

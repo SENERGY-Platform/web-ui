@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import {ActivatedRoute} from '@angular/router';
 import {OperatorRepoService} from '../operator-repo/shared/operator-repo.service';
 import {FlowModel} from '../flow-repo/shared/flow.model';
 import {DiagramEditorComponent} from '../../../core/components/diagram-editor/diagram-editor.component';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
     selector: 'senergy-flow-designer',
@@ -51,21 +51,24 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        const id = this.route.snapshot.paramMap.get('id');
-        if (id !== null) {
-            this.flowRepoService.getFlow(id).subscribe((resp: FlowModel | null) => {
-                if (resp !== null) {
-                    this.flow = resp;
-                    for (const cell of this.flow.model.cells) {
-                        if (cell.type === 'link') {
-                            cell.attrs['.marker-target'] = cell.attrs.markerTarget;
-                            delete cell.attrs.markerTarget;
+        setTimeout(() => {
+            const id = this.route.snapshot.paramMap.get('id');
+            if (id !== null) {
+                this.flowRepoService.getFlow(id).subscribe((resp: FlowModel | null) => {
+                    if (resp !== null) {
+                        this.flow = resp;
+                        for (const cell of this.flow.model.cells) {
+                            if (cell.type === 'link') {
+                                cell.attrs['.marker-target'] = cell.attrs.markerTarget;
+                                delete cell.attrs.markerTarget;
+                            }
                         }
+                        this.diagram.loadGraph(this.flow.model);
                     }
-                    this.diagram.loadGraph(this.flow.model);
-                }
-            });
-        }
+                });
+            }
+        }, 0);
+
     }
 
     public addNode(operator: OperatorModel) {

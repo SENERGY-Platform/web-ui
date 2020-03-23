@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 .header-container ::ng-deep .mat-card-header-text {
     margin: 0px;
+    width: 100%;
 }
 
 .button-margin {
@@ -23,4 +24,10 @@
 }
 .header-container {
     min-height: 32px;
+}
+
+mat-card-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

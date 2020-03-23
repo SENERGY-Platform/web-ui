@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel, DeviceTypeFunctionModel,
     DeviceTypeModel, DeviceTypeProtocolModel,
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
-import {MatDialog} from '@angular/material';
+import {MatDialog} from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root'
@@ -147,6 +147,14 @@ export class DeviceTypeService {
         (environment.semanticRepoUrl + '/aspects/' + deviceClassId + '/measuring-functions').pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsMeasuringFunctions', []))
+        );
+    }
+
+    getLeafCharacteristics(): Observable<DeviceTypeCharacteristicsModel[]> {
+        return this.http.get<DeviceTypeCharacteristicsModel[]>
+        (environment.semanticRepoUrl + '/characteristics?leafsOnly=true').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getLeafCharacteristics', []))
         );
     }
 

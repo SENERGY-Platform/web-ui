@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import {
 } from '../../../devices/device-types-overview/shared/device-type.model';
 import {ExportModel, ExportValueModel} from '../shared/export.model';
 import {ExportService} from '../shared/export.service';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shared/pipeline.model';
 import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
 import {Router} from '@angular/router';
@@ -223,5 +223,23 @@ export class NewExportComponent implements OnInit {
 
     resetVars() {
         this.paths.clear();
+    }
+
+    autofillValues() {
+        this.export.Values = [];
+        this.paths.forEach((_type, path) => {
+            if (this.export.TimePath !== path) { // don't add path if it's selected as time
+                this.addValue();
+                const index = this.export.Values.length - 1;
+                this.export.Values[index].Name = path.slice(path.lastIndexOf('.') + 1);
+                this.export.Values[index].Path = path;
+                this.pathChanged(index);
+            }
+        });
+        if (this.selector === 'pipe' && this.timeSuggest.length === 1) {
+            this.export.TimePath = this.timeSuggest[0];
+        } else if (this.selector === 'device' && this.paths.size === 0) {
+            this.export.TimePath = this.paths.keys().next().value;
+        }
     }
 }

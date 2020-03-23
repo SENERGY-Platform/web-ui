@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/internal/operators';
@@ -41,7 +41,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     filteredExports: Observable<ChartsExportMeasurementModel[]> = new Observable();
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {id: '', name: '', type: '', properties: {}};
+    widget: WidgetModel = {} as WidgetModel;
     options: string[] = ['Day', 'Month', 'Year'];
     thresholdOptions: string[] = ['Consumption', 'Price'];
     selectedThresholdOption: string;
@@ -84,7 +84,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.exportService.getExports().subscribe((exports: (ExportModel[] | null)) => {
+        this.exportService.getExports('name', 'asc').subscribe((exports: (ExportModel[] | null)) => {
             if (exports !== null) {
                 exports.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
@@ -144,8 +144,8 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         });
     }
 
-    displayFn(input?: ChartsExportMeasurementModel): string | undefined {
-        return input ? input.name : undefined;
+    displayFn(input?: ChartsExportMeasurementModel): string {
+        return input ? input.name : '';
     }
 
     autoCompleteClosed() {

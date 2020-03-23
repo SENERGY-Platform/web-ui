@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {HistoricDataConfig} from '../../shared/designer.model';
 import {ExportModel} from '../../../../data/export/shared/export.model';
 import {ExportService} from '../../../../data/export/shared/export.service';
@@ -75,7 +75,7 @@ export class HistoricDataConfigDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) private dialogParams: {initial: HistoricDataConfig}
     ) {
         this.config = dialogParams.initial || {dateInterval: {}, interval: {}, analysisAction: ''};
-        exportsService.getExports().subscribe(value => {
+        exportsService.getExports('name', 'asc').subscribe(value => {
             if (value) {
                 this.availableMeasurements = value;
             }

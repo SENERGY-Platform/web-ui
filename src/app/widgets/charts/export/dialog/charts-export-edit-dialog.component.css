@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,3 +41,8 @@ th, td {
 mat-form-field {
     width: 100%;
 }
+
+mat-dialog-actions button:not(:last-child) {
+    margin-right: 8px;
+}
+

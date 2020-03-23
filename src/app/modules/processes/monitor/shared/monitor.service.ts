@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import {forkJoin, Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
 import {MonitorProcessModel} from './monitor-process.model';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {MonitorDetailsDialogComponent} from '../dialogs/monitor-details-dialog.component';
 import {MonitorProcessTotalModel} from './monitor-process-total.model';
 import {ProcessIncidentsService} from '../../incidents/shared/process-incidents.service';

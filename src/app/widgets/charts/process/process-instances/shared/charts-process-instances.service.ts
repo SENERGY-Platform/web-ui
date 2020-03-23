@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 InfAI (CC SES)
+ * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import {MonitorProcessModel} from '../../../../../modules/processes/monitor/shar
 import {ChartsDataTableModel} from '../../../shared/charts-data-table.model';
 import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
 import {ElementSizeService} from '../../../../../core/services/element-size.service';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ChartsProcessInstancesEditDialogComponent} from '../dialogs/charts-process-instances-edit-dialog.component';
 import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';

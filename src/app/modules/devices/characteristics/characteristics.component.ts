@@ -1,22 +1,21 @@
 /*
+ * Copyright 2020 InfAI (CC SES)
  *
- *  Copyright 2019 InfAI (CC SES)
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig, MatSnackBar} from '@angular/material';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {CharacteristicsNewDialogComponent} from './dialogs/characteristics-new-dialog.component';
@@ -28,6 +27,7 @@ import {SearchbarService} from '../../../core/components/searchbar/shared/search
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-search.model';
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 const grids = new Map([
     ['xs', 1],
@@ -121,7 +121,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.dialogsService.openDeleteDialog('characteristic ' + characteristic.name).afterClosed().subscribe((deleteCharacteristic: boolean) => {
             if (deleteCharacteristic) {
                 this.characteristicsService.deleteCharacteristic(characteristic.concept_id, characteristic.id).subscribe((resp: boolean) => {
-                    console.log(resp);
                     if (resp === true) {
                         this.characteristics.splice(this.characteristics.indexOf(characteristic), 1);
                         this.snackBar.open('Characteristic deleted successfully.', undefined, {duration: 2000});
@@ -146,7 +145,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
         editDialogRef.afterClosed().subscribe((newCharacteristic: DeviceTypeCharacteristicsModel) => {
             if (newCharacteristic !== undefined) {
-                console.log(newCharacteristic);
                 this.reset();
                 this.characteristicsService.updateConcept(inputCharacteristic.concept_id, newCharacteristic).subscribe((characteristic: (DeviceTypeCharacteristicsModel | null)) => {
                     if (characteristic === null) {

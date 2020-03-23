@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,29 +18,29 @@
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="content-size drag-handler">
         <div *ngIf="!configured" fxFill fxLayout="row" fxLayoutAlign="center center">
-            <div fittext>Please configure widget!</div>
+            <div [fittext]>Please configure widget!</div>
         </div>
         <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
         <div *ngIf="configured && ready && !dataReady" fxFill fxLayout="row" fxLayoutAlign="center center">
-            <div fittext>Problem fetching data! Check config</div>
+            <div [fittext]>Problem fetching data! Check config</div>
         </div>
         <div class="content-box">
             <div *ngIf="configured && ready && dataReady" fxFill fxLayout="row" fxLayoutAlign="center center">
-                <div fittext [maxFontSize]="widget.properties.threshold ? widget.properties.threshold : 128">
-                    <span *ngIf="widget.properties.type === 'String'">
-                        {{devicesStatus.value}} {{widget.properties.vAxisLabel}}
+                <div [fittext] [maxFontSize]="widget.properties.threshold ? widget.properties.threshold : 128">
+                    <span *ngIf="sv.type === 'String'">
+                        {{sv.value}} {{widget.properties.vAxisLabel}}
                     </span>
                     <span *ngIf="widget.properties.type === 'Number'">
-                        {{devicesStatus.value | number: widget.properties.format}} {{widget.properties.vAxisLabel}}
+                        {{sv.value | number: widget.properties.format}} {{widget.properties.vAxisLabel}}
                     </span>
                     <span *ngIf="widget.properties.type === 'Date'">
-                        {{devicesStatus.value | date: widget.properties.format}} {{widget.properties.vAxisLabel}}
+                        {{sv.value | date: widget.properties.format}} {{widget.properties.vAxisLabel}}
                     </span>
                     <span *ngIf="widget.properties.type === 'Currency'">
-                            {{devicesStatus.value | currency: widget.properties.format}} {{widget.properties.vAxisLabel}}
+                            {{sv.value | currency: widget.properties.format}} {{widget.properties.vAxisLabel}}
                     </span>
                     <span *ngIf="widget.properties.type === 'Percent'">
-                            {{devicesStatus.value | percent: widget.properties.format}} {{widget.properties.vAxisLabel}}
+                            {{sv.value | percent: widget.properties.format}} {{widget.properties.vAxisLabel}}
                     </span>
                 </div>
             </div>

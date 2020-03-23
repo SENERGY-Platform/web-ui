@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,12 +15,10 @@
   -->
 
 <mat-card-header class="header-container drag-handler">
-    <mat-card-title-group>
-        <mat-card-title>
-            {{widget.name}}
-        </mat-card-title>
-    </mat-card-title-group>
-    <div fxFlex></div>
+    <mat-card-title [matTooltip]="widget.name">
+        {{widget.name}}
+    </mat-card-title>
+    <div fxFlex *ngIf="zoom"></div>
     <div *ngIf="zoom">
         <button mat-icon-button color="accent" (click)="refresh()" matTooltip="refresh">
             <mat-icon>refresh</mat-icon>
