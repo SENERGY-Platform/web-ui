@@ -53,6 +53,12 @@ export class ChartsModel {
             }
             colors?: string[];
             interpolateNulls?: boolean;
+            explorer?: {
+                actions?: string[];
+                axis?: string;
+                keepInBounds?: boolean;
+                maxZoomIn?: number;
+            }
         }
     ) {
     }

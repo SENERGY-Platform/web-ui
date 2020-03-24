@@ -83,6 +83,11 @@ export class DeviceTotalDowntimeService {
                 legend: 'none',
                 hAxis: {format: 'HH:mm'},
                 vAxis: {format: '#.## %', viewWindow: {min: 0.00}},
+                explorer: {
+                    actions: ['dragToZoom', 'rightClickToReset'],
+                    axis: 'horizontal',
+                    keepInBounds: true,
+                    maxZoomIn: 0.001},
                 colors: [customColor],
             }
         );
