@@ -123,8 +123,6 @@ export class ExportComponent implements OnInit, OnDestroy {
                         this.allDataLoaded = true;
                     }
                     this.exports = this.exports.concat(resp);
-                    console.log(this.exports);
-                    console.log(resp);
                 }
                 this.ready = true;
             });
