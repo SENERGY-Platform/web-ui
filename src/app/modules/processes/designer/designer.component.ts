@@ -43,6 +43,8 @@ import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
 import {ActivatedRoute} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatDialog} from '@angular/material/dialog';
+import {DesignerErrorModel} from './shared/designer-error.model';
+import {DesignerSnackBarComponent} from './snack-bar/designer-snack-bar.component';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -165,10 +167,11 @@ export class ProcessDesignerComponent implements OnInit {
                             if (result) {
                                 callback(result);
                             }
-                            const invalidLanes = this.designerService.checkConstraints(this.modeler);
-                            if (invalidLanes.error) {
-                                this.showDeviceClassError(invalidLanes.text);
-                            }
+                            this.designerService.checkConstraints(this.modeler).subscribe((responses: DesignerErrorModel[][]) => {
+                                if (this.countErrors(responses) > 0) {
+                                    this.showDeviceClassError(responses);
+                                }
+                            });
                         }
                     );
                 },
@@ -223,27 +226,28 @@ export class ProcessDesignerComponent implements OnInit {
     }
 
     save(): void {
-        const invalidLanes = this.designerService.checkConstraints(this.modeler);
-        if (invalidLanes.error) {
-            this.showDeviceClassError(invalidLanes.text);
-        } else {
-            this.saveXML((errXML, processXML) => {
-                if (errXML) {
-                    this.snackBar.open('Error XML! ' + errXML, undefined, {duration: 3500});
-                } else {
-                    this.saveSVG((errSVG, svgXML) => {
-                        if (errSVG) {
-                            this.snackBar.open('Error SVG! ' + errSVG, undefined, {duration: 3500});
-                        } else {
-                            this.processRepoService.saveProcess(
-                                this.id, processXML, svgXML).subscribe(() => {
-                                this.snackBar.open('Model saved.', undefined, {duration: 2000});
-                            });
-                        }
-                    });
-                }
-            });
-        }
+        this.designerService.checkConstraints(this.modeler).subscribe((responses: DesignerErrorModel[][]) => {
+            if (this.countErrors(responses) > 0) {
+                this.showDeviceClassError(responses);
+            } else {
+                this.saveXML((errXML, processXML) => {
+                    if (errXML) {
+                        this.snackBar.open('Error XML! ' + errXML, undefined, {duration: 3500});
+                    } else {
+                        this.saveSVG((errSVG, svgXML) => {
+                            if (errSVG) {
+                                this.snackBar.open('Error SVG! ' + errSVG, undefined, {duration: 3500});
+                            } else {
+                                this.processRepoService.saveProcess(
+                                    this.id, processXML, svgXML).subscribe(() => {
+                                    this.snackBar.open('Model saved.', undefined, {duration: 2000});
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     importBPMN(event: any): void {
@@ -280,7 +284,19 @@ export class ProcessDesignerComponent implements OnInit {
         }
     }
 
-    private showDeviceClassError(text: string[]): void {
-        this.snackBar.open('Error! Multiple device classes in Lane ' + text.join(', ') + '!', undefined, {duration: 3500});
+    private showDeviceClassError(errors: DesignerErrorModel[][]): void {
+        this.snackBar.openFromComponent(DesignerSnackBarComponent, {duration: 5000, data: errors});
+    }
+
+    private countErrors(errors: DesignerErrorModel[][]): number {
+        let errorCount = 0;
+        errors.forEach((poolError: DesignerErrorModel[]) => {
+            poolError.forEach((laneError: DesignerErrorModel) => {
+                if (laneError.error) {
+                    errorCount++;
+                }
+            });
+        });
+        return errorCount;
     }
 }

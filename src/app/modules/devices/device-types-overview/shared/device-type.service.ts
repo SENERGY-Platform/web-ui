@@ -44,6 +44,21 @@ export class DeviceTypeService {
         );
     }
 
+    getDeviceTypeFiltered(functionIds: string[], deviceClassId: string, aspectIds: string[]): Observable<DeviceTypeModel | null> {
+        const filter =
+            '{"function_ids":' +
+            JSON.stringify(functionIds) +
+            ',"aspect_ids":' +
+            JSON.stringify(aspectIds) +
+            ',"device_class_id":' +
+            JSON.stringify(deviceClassId) +
+            '}';
+        return this.http.get<DeviceTypeModel>
+        (environment.semanticRepoUrl + '/device-types?filter=' + filter).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null))
+        );
+    }
+
     getDeviceTypes(searchText: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypePermSearchModel[]> {
         if (searchText === '') {
             return this.http.get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/device-types/r/' +
