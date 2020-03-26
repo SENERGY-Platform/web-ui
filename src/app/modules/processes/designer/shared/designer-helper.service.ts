@@ -29,7 +29,7 @@ import {
 @Injectable({
     providedIn: 'root'
 })
-export class DesignerService {
+export class DesignerHelperService {
 
     constructor() {
     }
@@ -61,7 +61,7 @@ export class DesignerService {
         elements.forEach((el: DesignerElementModel) => {
             if (el.type === 'bpmn:Collaboration') {
                 el.businessObject.participants.forEach(((participant: DesignerElementParticipantsModel) => {
-                    response = this.checkLaneConstraints(participant);
+                        response = this.checkLaneConstraints(participant);
                     })
                 );
             }
@@ -87,20 +87,31 @@ export class DesignerService {
     }
 
     private checkFlowNodeElements(flowNode: DesignerElementFlowNodeRefModel[], errorText: string): DesignerErrorModel {
+        const aspectIds: string[] = [];
+        let deviceClassId = '';
+        const functionIds: string[] = [];
         const response: DesignerErrorModel = {error: false, text: []};
         let meta: (DeviceTypeSelectionResultModel | null) = null;
         flowNode.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
             const newMeta = this.getMeta(flowElement);
             if (newMeta) {
-                if (!meta && newMeta) {
-                    meta = newMeta;
+                if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/ControllingFunction') {
+                    if (!meta && newMeta) {
+                        meta = newMeta;
+                        deviceClassId = newMeta.device_class.id;
+                    }
+                    if (this.checkDeviceClasses(meta, newMeta)) {
+                        response.error = true;
+                        response.text.push(errorText);
+                    }
                 }
-                if (this.checkDeviceClasses(meta, newMeta)) {
-                    response.error = true;
-                    response.text.push(errorText);
+                if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/MeasuringFunction') {
+                    aspectIds.push(newMeta.aspect.id);
                 }
+                functionIds.push(newMeta.function.id);
             }
         });
+
         return response;
     }
 

@@ -38,7 +38,7 @@ import {
     DeviceTypeSelectionResultModel
 } from '../../devices/device-types-overview/shared/device-type-selection.model';
 import {DesignerDialogService} from './shared/designer-dialog.service';
-import {DesignerService} from './shared/designer.service';
+import {DesignerHelperService} from './shared/designer-helper.service';
 import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
 import {ActivatedRoute} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -61,7 +61,7 @@ export class ProcessDesignerComponent implements OnInit {
         private route: ActivatedRoute,
         protected auth: AuthorizationService,
         protected designerDialogService: DesignerDialogService,
-        protected designerService: DesignerService,
+        protected designerService: DesignerHelperService,
         protected processRepoService: ProcessRepoService,
         private snackBar: MatSnackBar,
         private dialog: MatDialog,

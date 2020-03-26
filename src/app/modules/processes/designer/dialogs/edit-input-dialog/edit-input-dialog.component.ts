@@ -17,7 +17,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {BpmnElement, BpmnParameter} from '../../shared/designer.model';
-import {DesignerService} from '../../shared/designer.service';
+import {DesignerHelperService} from '../../shared/designer-helper.service';
 
 @Component({
   templateUrl: './edit-input-dialog.component.html',
@@ -29,7 +29,7 @@ export class EditInputDialogComponent implements OnInit {
 
   constructor(
       private dialogRef: MatDialogRef<EditInputDialogComponent>,
-      private designerService: DesignerService,
+      private designerService: DesignerHelperService,
       @Inject(MAT_DIALOG_DATA) private dialogParams: {inputElement: BpmnElement}
   ) {
       this.outputs = this.designerService.getIncomingOutputs(dialogParams.inputElement);
