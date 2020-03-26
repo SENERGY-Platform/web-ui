@@ -74,7 +74,6 @@ export class DesignerHelperService {
 
     private checkLaneConstraints(participant: DesignerElementParticipantsModel): Observable<DesignerErrorModel[]> {
         const array: Observable<DesignerErrorModel>[] = [];
-        const response: DesignerErrorModel = {error: false, errorType: null, laneName: ''};
 
         if (participant.processRef.laneSets) {
             participant.processRef.laneSets.forEach((laneSet: DesignerElementLaneSetsModel) => {
@@ -91,14 +90,15 @@ export class DesignerHelperService {
     }
 
     private checkFlowNodeElements(flowNode: DesignerElementFlowNodeRefModel[], errorText: string): Observable<DesignerErrorModel> {
-        const aspectIds: string[] = [];
         let deviceClassId = '';
+        const aspectIds: string[] = [];
         const functionIds: string[] = [];
         const response: DesignerErrorModel = {error: false, errorType: null, laneName: ''};
         let meta: (DeviceTypeSelectionResultModel | null) = null;
         flowNode.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
             const newMeta = this.getMeta(flowElement);
             if (newMeta) {
+
                 if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/ControllingFunction') {
                     if (!meta && newMeta) {
                         meta = newMeta;
@@ -110,13 +110,13 @@ export class DesignerHelperService {
                         response.laneName = errorText;
                     }
                 }
+
                 if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/MeasuringFunction') {
                     aspectIds.push(newMeta.aspect.id);
                 }
                 functionIds.push(newMeta.function.id);
             }
         });
-
 
         return new Observable<DesignerErrorModel>((observer) => {
             if (response.error === false) {
