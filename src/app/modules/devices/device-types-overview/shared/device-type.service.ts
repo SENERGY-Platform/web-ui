@@ -44,17 +44,9 @@ export class DeviceTypeService {
         );
     }
 
-    getDeviceTypeFiltered(functionIds: string[], deviceClassId: string, aspectIds: string[]): Observable<DeviceTypeModel | null> {
-        const filter =
-            '{"function_ids":' +
-            JSON.stringify(functionIds) +
-            ',"aspect_ids":' +
-            JSON.stringify(aspectIds) +
-            ',"device_class_id":' +
-            JSON.stringify(deviceClassId) +
-            '}';
+    getDeviceTypeFiltered(filter: {function_id: string, device_class_id: string, aspect_id: string}[]): Observable<DeviceTypeModel | null> {
         return this.http.get<DeviceTypeModel>
-        (environment.semanticRepoUrl + '/device-types?filter=' + filter).pipe(
+        (environment.semanticRepoUrl + '/device-types?filter=' + JSON.stringify(filter)).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null))
         );
     }
