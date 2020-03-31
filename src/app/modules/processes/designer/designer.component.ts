@@ -45,6 +45,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatDialog} from '@angular/material/dialog';
 import {DesignerErrorModel} from './shared/designer-error.model';
 import {DesignerSnackBarComponent} from './snack-bar/designer-snack-bar.component';
+import {defaultIfEmpty} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -167,7 +168,7 @@ export class ProcessDesignerComponent implements OnInit {
                             if (result) {
                                 callback(result);
                             }
-                            this.designerService.checkConstraints(this.modeler).subscribe((responses: DesignerErrorModel[][]) => {
+                            this.designerService.checkConstraints(this.modeler).pipe(defaultIfEmpty<DesignerErrorModel[][]>([])).subscribe((responses: DesignerErrorModel[][]) => {
                                 if (this.countErrors(responses) > 0) {
                                     this.showDeviceClassError(responses);
                                 }
@@ -226,7 +227,7 @@ export class ProcessDesignerComponent implements OnInit {
     }
 
     save(): void {
-        this.designerService.checkConstraints(this.modeler).subscribe((responses: DesignerErrorModel[][]) => {
+        this.designerService.checkConstraints(this.modeler).pipe(defaultIfEmpty<DesignerErrorModel[][]>([])).subscribe((responses: DesignerErrorModel[][]) => {
             if (this.countErrors(responses) > 0) {
                 this.showDeviceClassError(responses);
             } else {
