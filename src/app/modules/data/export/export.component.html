@@ -13,61 +13,76 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<div class="main-panel export-container">
-    <div class="layout-margin" fxLayout="column">
-        <div class="layout-margin" fxLayout="column">
-            <mat-grid-list cols="{{gridCols}}" rowHeight="352px" gutterSize="16px"
-                           *ngIf="exports.length > 0">
-                <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of exports">
-                    <mat-card>
-                        <div class="truncate header-text" matTooltip="{{item.Name}}">{{item.Name}}</div>
-                        <mat-card-content>
-                            <mat-list fxLayoutAlign="center center">
-                                <div fxFill fxLayout="column">
-                                    <mat-list-item>
-                                        <mat-icon mat-list-icon>description</mat-icon>
-                                        <h3 mat-line matTooltip="{{item.Description}}">{{item.Description}}</h3>
-                                        <p mat-line>Description</p>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <mat-icon *ngIf="item.FilterType === 'deviceId'" mat-list-icon>
-                                            router
-                                        </mat-icon>
-                                        <mat-icon *ngIf="item.FilterType === 'pipeId'" mat-list-icon>
-                                            timeline
-                                        </mat-icon>
-                                        <h3 mat-line matTooltip="{{item.EntityName}}">{{item.EntityName}}</h3>
-                                        <p mat-line>Source</p>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <mat-icon mat-list-icon>date_range</mat-icon>
-                                        <h3 mat-line matTooltip="{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}">{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}</h3>
-                                        <p mat-line>createdAt</p>
-                                    </mat-list-item>
-                                </div>
-                            </mat-list>
-                        </mat-card-content>
-                        <mat-card-actions>
-                            <div fxFlex></div>
-                            <button mat-icon-button color="accent" routerLink="/data/export/details/{{item.ID}}" matTooltip="access the details of the export">
-                                <mat-icon>info</mat-icon>
-                            </button>
-                            <button mat-icon-button color="accent" (click)="copyEndpoint(url + '/measurement/' + item.Measurement)" matTooltip="copy endpoint to clipboard">
-                                <mat-icon>content_copy</mat-icon>
-                            </button>
-                            <button mat-icon-button color="accent" (click)="deleteExport(item)">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                        </mat-card-actions>
-                    </mat-card>
-                </mat-grid-tile>
-            </mat-grid-list>
+<div class="export-container">
+    <div fxLayout="row">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <senergy-sort [sortAttributes]="sortAttributes"
+                      (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+    </div>
+    <div class="main-panel">
+        <div infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [infiniteScrollContainer]="'.main-panel'"
+             [fromRoot]="true"
+             (scrolled)="onScroll()">
+            <div class="layout-margin" fxLayout="column">
+                <div class="layout-margin" fxLayout="column">
+                    <mat-grid-list cols="{{gridCols}}" rowHeight="352px" gutterSize="16px"
+                                   *ngIf="exports.length > 0">
+                        <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of exports">
+                            <mat-card>
+                                <div class="truncate header-text" matTooltip="{{item.Name}}">{{item.Name}}</div>
+                                <mat-card-content>
+                                    <mat-list fxLayoutAlign="center center">
+                                        <div fxFill fxLayout="column">
+                                            <mat-list-item>
+                                                <mat-icon mat-list-icon>description</mat-icon>
+                                                <h3 mat-line matTooltip="{{item.Description}}">{{item.Description}}</h3>
+                                                <p mat-line>Description</p>
+                                            </mat-list-item>
+                                            <mat-list-item>
+                                                <mat-icon *ngIf="item.FilterType === 'deviceId'" mat-list-icon>
+                                                    router
+                                                </mat-icon>
+                                                <mat-icon *ngIf="item.FilterType === 'pipeId'" mat-list-icon>
+                                                    timeline
+                                                </mat-icon>
+                                                <h3 mat-line matTooltip="{{item.EntityName}}">{{item.EntityName}}</h3>
+                                                <p mat-line>Source</p>
+                                            </mat-list-item>
+                                            <mat-list-item>
+                                                <mat-icon mat-list-icon>date_range</mat-icon>
+                                                <h3 mat-line matTooltip="{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}">{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}</h3>
+                                                <p mat-line>createdAt</p>
+                                            </mat-list-item>
+                                        </div>
+                                    </mat-list>
+                                </mat-card-content>
+                                <mat-card-actions>
+                                    <div fxFlex></div>
+                                    <button mat-icon-button color="accent" routerLink="/data/export/details/{{item.ID}}" matTooltip="access the details of the export">
+                                        <mat-icon>info</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="accent" (click)="copyEndpoint(url + '/measurement/' + item.Measurement)" matTooltip="copy endpoint to clipboard">
+                                        <mat-icon>content_copy</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="accent" (click)="deleteExport(item)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </mat-card-actions>
+                            </mat-card>
+                        </mat-grid-tile>
+                    </mat-grid-list>
+                </div>
+                <button mat-fab class="fab" routerLink="new" matTooltip="Start new Export">
+                    <mat-icon>add</mat-icon>
+                </button>
+                <div *ngIf="exports.length === 0 && ready">No export instances found.</div>
+                <senergy-spinner [elementCount]="exports.length" [show]="!ready"></senergy-spinner>
+            </div>
         </div>
-        <button mat-fab class="fab" routerLink="new" matTooltip="Start new Export">
-            <mat-icon>add</mat-icon>
-        </button>
-        <div *ngIf="exports.length === 0 && ready">No export instances found.</div>
-        <senergy-spinner [elementCount]="exports.length" [show]="!ready"></senergy-spinner>
     </div>
 </div>
+
+

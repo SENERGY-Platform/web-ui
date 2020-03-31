@@ -30,9 +30,10 @@ export class OperatorRepoService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getOperators(): Observable<{operators: OperatorModel[]}> {
+    getOperators(search: string, limit: number, offset: number, feature: string, order: string): Observable<{operators: OperatorModel[]}> {
         return this.http.get<{operators: OperatorModel[]}>
-        (environment.operatorRepoUrl + '/operator/').pipe(
+        (environment.operatorRepoUrl + '/operator?limit=' + limit + '&offset=' + offset + '&sort=' + feature +
+            ':' + order + (search ? ('&search=' + search) : '')).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'getOperators: Error', {operators: []}))
         );

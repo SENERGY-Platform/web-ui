@@ -16,7 +16,7 @@
 
 <mat-card>
     <senergy-widget-header [widget]="widget" [zoom]="zoom"></senergy-widget-header>
-    <mat-card-content class="content-size drag-handler">
+    <mat-card-content class="content-size">
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
             <div *ngIf="ready">

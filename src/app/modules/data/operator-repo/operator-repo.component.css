@@ -40,7 +40,7 @@ mat-grid-tile {
 }
 
 .main-panel {
-    height: calc(100% - 64px);
+    height: calc(100% - 93px);
     overflow-y: auto;
 }
 
@@ -59,6 +59,11 @@ mat-card {
 
 .operator-repo-container ::ng-deep .mat-card-header-text {
     margin: 0px;
+}
+
+.operator-repo-container {
+    height: calc(100% - 64px);
+    overflow-y: hidden;
 }
 
 .header-icon {

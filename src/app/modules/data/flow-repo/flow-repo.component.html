@@ -14,47 +14,62 @@
   ~ limitations under the License.
   -->
 
-<div class="main-panel">
-    <div class="layout-margin" fxLayout="column">
-        <mat-grid-list cols="{{gridCols}}" rowHeight="302px" gutterSize="16px"
-                       *ngIf="flows.length > 0">
-            <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of flows">
-                <div fxFill>
-                    <div fxFill>
-                        <div class="widget-image" [innerHtml]="item.image"></div>
-                    </div>
-                </div>
-                <mat-grid-tile-footer>
-                    <div fxLayout="column" fxFill>
-                        <div class="truncate footer-item-header" matTooltip="{{item.description}}">
-                            {{item.name}}
-                        </div>
-                        <div class="truncate footer-item-subtitle" fxLayoutAlign="start center"
-                             matTooltip="last updated">
-                            <mat-icon>update</mat-icon>{{item.dateUpdated| date:"medium"}}
-                        </div>
-                        <div fxLayout="row" fxLayoutAlign="end center" class="footer-buttons">
-                            <button class="mat-icon-button" routerLink="/data/flow-repo/deploy/{{item._id}}">
-                                <mat-icon class="mat-accent">
-                                    start
-                                </mat-icon>
-                            </button>
-                            <button class="mat-icon-button" routerLink="/data/designer/{{item._id}}">
-                                <mat-icon class="mat-accent">
-                                    edit
-                                </mat-icon>
-                            </button>
-                            <button class="mat-icon-button">
-                                <mat-icon class="mat-warn" (click)="deleteFlow(item)">
-                                    delete
-                                </mat-icon>
-                            </button>
-                        </div>
-                    </div>
-                </mat-grid-tile-footer>
-            </mat-grid-tile>
-        </mat-grid-list>
-        <div *ngIf="flows.length === 0 && ready">No flows found.</div>
-        <senergy-spinner [elementCount]="flows.length" [show]="!ready"></senergy-spinner>
+<div class="flow-repo-container">
+    <div fxLayout="row">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <senergy-sort [sortAttributes]="sortAttributes"
+                      (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
     </div>
+    <div class="main-panel">
+        <div infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [infiniteScrollContainer]="'.main-panel'"
+             [fromRoot]="true"
+             (scrolled)="onScroll()">
+            <div class="layout-margin" fxLayout="column">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="302px" gutterSize="16px"
+                               *ngIf="flows.length > 0">
+                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of flows">
+                        <div fxFill>
+                            <div fxFill>
+                                <div class="widget-image" [innerHtml]="item.image"></div>
+                            </div>
+                        </div>
+                        <mat-grid-tile-footer>
+                            <div fxLayout="column" fxFill>
+                                <div class="truncate footer-item-header" matTooltip="{{item.description}}">
+                                    {{item.name}}
+                                </div>
+                                <div class="truncate footer-item-subtitle" fxLayoutAlign="start center"
+                                     matTooltip="last updated">
+                                    <mat-icon>update</mat-icon>{{item.dateUpdated| date:"medium"}}
+                                </div>
+                                <div fxLayout="row" fxLayoutAlign="end center" class="footer-buttons">
+                                    <button class="mat-icon-button" routerLink="/data/flow-repo/deploy/{{item._id}}">
+                                        <mat-icon class="mat-accent">
+                                            start
+                                        </mat-icon>
+                                    </button>
+                                    <button class="mat-icon-button" routerLink="/data/designer/{{item._id}}">
+                                        <mat-icon class="mat-accent">
+                                            edit
+                                        </mat-icon>
+                                    </button>
+                                    <button class="mat-icon-button">
+                                        <mat-icon class="mat-warn" (click)="deleteFlow(item)">
+                                            delete
+                                        </mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </mat-grid-tile-footer>
+                    </mat-grid-tile>
+                </mat-grid-list>
+                <div *ngIf="flows.length === 0 && ready">No flows found.</div>
+                <senergy-spinner [elementCount]="flows.length" [show]="!ready"></senergy-spinner>
+            </div>
+        </div>
+    </div>
+
 </div>

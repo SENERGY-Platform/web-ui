@@ -66,6 +66,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatChipsModule} from '@angular/material/chips';
+import {DesignerSnackBarComponent} from './designer/snack-bar/designer-snack-bar.component';
 
 const processRepo = {
     path: 'processes/repository',
@@ -158,6 +159,7 @@ const processDesigner = {
         DeploymentsMissingDependenciesDialogComponent,
         TaskConfigDialogComponent,
         NotificationConfigDialogComponent,
+        DesignerSnackBarComponent
     ],
     entryComponents: [
         EditOutputDialogComponent,
@@ -171,6 +173,7 @@ const processDesigner = {
         DeploymentsMissingDependenciesDialogComponent,
         TaskConfigDialogComponent,
         NotificationConfigDialogComponent,
+        DesignerSnackBarComponent
     ]
 })
 

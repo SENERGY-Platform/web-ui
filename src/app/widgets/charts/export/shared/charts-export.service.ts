@@ -171,6 +171,11 @@ export class ChartsExportService {
                 legend: 'none',
                 curveType: widget.properties.curvedFunction ? 'function' : '',
                 vAxis: {title: widget.properties.vAxisLabel},
+                explorer: {
+                    actions: ['dragToZoom', 'rightClickToReset'],
+                    axis: 'horizontal',
+                    keepInBounds: true,
+                    maxZoomIn: 0.001},
                 interpolateNulls: true,
             });
     }

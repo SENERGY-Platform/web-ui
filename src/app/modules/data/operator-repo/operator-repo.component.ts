@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {OperatorModel} from './shared/operator.model';
 import {OperatorRepoService} from './shared/operator-repo.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ResponsiveService} from '../../../core/services/responsive.service';
+import {SortModel} from '../../../core/components/sort/shared/sort.model';
+import {Subscription} from 'rxjs';
+import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -35,49 +38,90 @@ const grids = new Map([
     templateUrl: './operator-repo.component.html',
     styleUrls: ['./operator-repo.component.css']
 })
-export class OperatorRepoComponent implements OnInit {
+export class OperatorRepoComponent implements OnInit, OnDestroy {
 
     operators = [] as OperatorModel[];
     ready = false;
     gridCols = 0;
+    sortAttributes = [new SortModel('Name', 'name', 'asc')];
+    userId: string | Error = '';
+
+    private searchText = '';
+    private limitInit = 54;
+    private limit = this.limitInit;
+    private offset = 0;
+    private sortAttribute = this.sortAttributes[0];
+    private searchSub: Subscription = new Subscription();
+    private allDataLoaded = false;
 
     constructor(private operatorRepoService: OperatorRepoService,
                 protected auth: AuthorizationService,
+                private searchbarService: SearchbarService,
                 public snackBar: MatSnackBar,
                 private dialogsService: DialogsService,
                 private responsiveService: ResponsiveService) {
     }
 
     ngOnInit() {
+        this.userId = this.auth.getUserId();
         this.initGridCols();
-        const userId = this.auth.getUserId();
-        this.operatorRepoService.getOperators().subscribe((resp: {operators: OperatorModel[]}) => {
-            for (const operator of resp.operators) {
-                if (operator.userId === userId) {
-                    operator.editable = true;
-                } else {
-                    operator.editable = false;
-                }
-            }
-            this.operators = resp.operators;
-            this.ready = true;
-        });
+        this.initSearchAndGetOperators();
+    }
+
+    ngOnDestroy() {
+        this.searchSub.unsubscribe();
+    }
+
+    onScroll() {
+        if (!this.allDataLoaded && this.ready) {
+            this.setRepoItemsParams(this.limitInit);
+            this.getOperators(false);
+        }
+    }
+
+    receiveSortingAttribute(sortAttribute: SortModel) {
+        this.sortAttribute = sortAttribute;
+        this.getOperators(true);
     }
 
     deleteOperator(operator: OperatorModel) {
         this.dialogsService.openDeleteDialog('operator').afterClosed().subscribe((operatorDelete: boolean) => {
-           if (operatorDelete) {
-               const index = this.operators.indexOf(operator);
-               if (index > -1) {
-                   this.operators.splice(index, 1);
-               }
-               this.operatorRepoService.deleteOeprator(operator).subscribe();
-               this.snackBar.open('Operator deleted', undefined, {
-                   duration: 2000,
-               });
-           }
+            if (operatorDelete) {
+                const index = this.operators.indexOf(operator);
+                if (index > -1) {
+                    this.operators.splice(index, 1);
+                }
+                this.operatorRepoService.deleteOeprator(operator).subscribe(() => {
+                    this.snackBar.open('Operator deleted', undefined, {
+                        duration: 2000,
+                    });
+                    this.setRepoItemsParams(1);
+                    this.getOperators(false);
+                });
+            }
         });
 
+    }
+
+    private getOperators(reset: boolean) {
+        if (reset) {
+            this.setRepoItemsParams(this.limitInit);
+            this.reset();
+        }
+        this.operatorRepoService.getOperators(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe((resp: { operators: OperatorModel[] }) => {
+            if (resp.operators.length !== this.limit) {
+                this.allDataLoaded = true;
+            }
+            for (const operator of resp.operators) {
+                if (operator.userId === this.userId) {
+                    operator.editable = true;
+                } else {
+                    operator.editable = false;
+                }
+                this.operators.push(operator);
+            }
+            this.ready = true;
+        });
     }
 
     private initGridCols(): void {
@@ -85,5 +129,25 @@ export class OperatorRepoComponent implements OnInit {
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
             this.gridCols = grids.get(mqAlias) || 0;
         });
+    }
+
+    private initSearchAndGetOperators() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.getOperators(true);
+        });
+    }
+
+    private setRepoItemsParams(limit: number) {
+        this.ready = false;
+        this.limit = limit;
+        this.offset = this.operators.length;
+    }
+
+    private reset() {
+        this.operators = [];
+        this.offset = 0;
+        this.allDataLoaded = false;
+        this.ready = false;
     }
 }

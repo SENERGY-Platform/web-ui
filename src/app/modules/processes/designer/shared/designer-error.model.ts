@@ -16,5 +16,6 @@
 
 export interface DesignerErrorModel {
     error: boolean;
-    text: string[];
+    errorType: string | null;
+    laneName: string;
 }

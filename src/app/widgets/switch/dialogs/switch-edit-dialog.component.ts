@@ -51,7 +51,7 @@ export class SwitchEditDialogComponent implements OnInit {
     data: TableElement[] = [];
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {} as WidgetModel;
+    widget: WidgetModel = {properties: {imgUrl: ''}} as WidgetModel;
     newTrigger = 'on';
 
     constructor(private dialogRef: MatDialogRef<SwitchEditDialogComponent>,

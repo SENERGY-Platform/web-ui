@@ -52,8 +52,13 @@ mat-grid-tile {
     position: relative;
 }
 
-.main-panel {
+.flow-repo-container {
     height: calc(100% - 64px);
+    overflow-y: hidden;
+}
+
+.main-panel {
+    height: calc(100% - 93px);
     overflow-y: auto;
 }
 

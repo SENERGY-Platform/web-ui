@@ -44,7 +44,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     flow = {} as FlowModel;
 
     ngOnInit() {
-        this.operatorRepoService.getOperators().subscribe((resp: { operators: OperatorModel[] }) => {
+        this.operatorRepoService.getOperators('', 9999, 0, 'name', 'asc').subscribe((resp: { operators: OperatorModel[] }) => {
             this.operators = resp.operators;
             this.ready = true;
         });

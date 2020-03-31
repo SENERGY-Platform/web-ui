@@ -44,6 +44,13 @@ export class DeviceTypeService {
         );
     }
 
+    getDeviceTypeFiltered(filter: {function_id: string, device_class_id: string, aspect_id: string}[]): Observable<DeviceTypeModel | null> {
+        return this.http.get<DeviceTypeModel>
+        (environment.semanticRepoUrl + '/device-types?filter=' + JSON.stringify(filter)).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null))
+        );
+    }
+
     getDeviceTypes(searchText: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypePermSearchModel[]> {
         if (searchText === '') {
             return this.http.get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/device-types/r/' +
