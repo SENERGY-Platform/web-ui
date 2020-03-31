@@ -77,9 +77,11 @@ export class DesignerHelperService {
 
         if (participant.processRef.laneSets) {
             participant.processRef.laneSets.forEach((laneSet: DesignerElementLaneSetsModel) => {
-                laneSet.lanes.forEach((lane: DesignerElementLanesModel) => {
-                    array.push(this.checkFlowNodeElements(lane.flowNodeRef, lane.name || lane.id));
-                });
+                if (laneSet.lanes) {
+                    laneSet.lanes.forEach((lane: DesignerElementLanesModel) => {
+                        array.push(this.checkFlowNodeElements(lane.flowNodeRef, lane.name || lane.id));
+                    });
+                }
             });
         } else {
             if (participant.processRef.flowElements) {
@@ -90,36 +92,43 @@ export class DesignerHelperService {
     }
 
     private checkFlowNodeElements(flowNode: DesignerElementFlowNodeRefModel[], errorText: string): Observable<DesignerErrorModel> {
-        const filterArray: {function_id: string, device_class_id: string, aspect_id: string}[] = [];
+        const filterArray: { function_id: string, device_class_id: string, aspect_id: string }[] = [];
         const response: DesignerErrorModel = {error: false, errorType: null, laneName: ''};
         let meta: (DeviceTypeSelectionResultModel | null) = null;
-        flowNode.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
-            const newMeta = this.getMeta(flowElement);
-            const filter: {function_id: string, device_class_id: string, aspect_id: string} = {function_id: '', device_class_id: '', aspect_id: ''};
-            if (newMeta) {
+        if (flowNode) {
+            flowNode.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
+                const newMeta = this.getMeta(flowElement);
+                const filter: { function_id: string, device_class_id: string, aspect_id: string } = {
+                    function_id: '',
+                    device_class_id: '',
+                    aspect_id: ''
+                };
+                if (newMeta) {
 
-                if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/ControllingFunction') {
-                    if (!meta && newMeta) {
-                        meta = newMeta;
+                    if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/ControllingFunction') {
+                        if (!meta && newMeta) {
+                            meta = newMeta;
+                        }
+                        if (this.checkDeviceClasses(meta, newMeta)) {
+                            response.error = true;
+                            response.errorType = 'deviceClass';
+                            response.laneName = errorText;
+                        }
+                        filter.device_class_id = newMeta.device_class.id;
                     }
-                    if (this.checkDeviceClasses(meta, newMeta)) {
-                        response.error = true;
-                        response.errorType = 'deviceClass';
-                        response.laneName = errorText;
-                    }
-                    filter.device_class_id = newMeta.device_class.id;
-                }
 
-                if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/MeasuringFunction') {
-                    filter.aspect_id = newMeta.aspect.id;
+                    if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/MeasuringFunction') {
+                        filter.aspect_id = newMeta.aspect.id;
+                    }
+                    filter.function_id = newMeta.function.id;
+                    filterArray.push(filter);
                 }
-                filter.function_id = newMeta.function.id;
-                filterArray.push(filter);
-            }
-        });
+            });
+        }
+
 
         return new Observable<DesignerErrorModel>((observer) => {
-            if (response.error === false) {
+            if (response.error === false && filterArray.length > 0) {
                 this.deviceTypeService.getDeviceTypeFiltered(filterArray).subscribe(
                     (resp: DeviceTypeModel | null) => {
                         if (resp === null) {
