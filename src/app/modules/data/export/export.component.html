@@ -14,10 +14,13 @@
   ~ limitations under the License.
   -->
 <div class="export-container">
-    <div fxLayout="row">
+    <div fxLayout="column">
         <senergy-searchbar fxFlex></senergy-searchbar>
-        <senergy-sort [sortAttributes]="sortAttributes"
-                      (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        <div fxLayout="row">
+            <div fxFlex></div>
+            <senergy-sort [sortAttributes]="sortAttributes"
+                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        </div>
     </div>
     <div class="main-panel">
         <div infiniteScroll
@@ -53,7 +56,8 @@
                                             </mat-list-item>
                                             <mat-list-item>
                                                 <mat-icon mat-list-icon>date_range</mat-icon>
-                                                <h3 mat-line matTooltip="{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}">{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}</h3>
+                                                <h3 mat-line
+                                                    matTooltip="{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}">{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}</h3>
                                                 <p mat-line>createdAt</p>
                                             </mat-list-item>
                                         </div>
@@ -61,10 +65,13 @@
                                 </mat-card-content>
                                 <mat-card-actions>
                                     <div fxFlex></div>
-                                    <button mat-icon-button color="accent" routerLink="/data/export/details/{{item.ID}}" matTooltip="access the details of the export">
+                                    <button mat-icon-button color="accent" routerLink="/data/export/details/{{item.ID}}"
+                                            matTooltip="access the details of the export">
                                         <mat-icon>info</mat-icon>
                                     </button>
-                                    <button mat-icon-button color="accent" (click)="copyEndpoint(url + '/measurement/' + item.Measurement)" matTooltip="copy endpoint to clipboard">
+                                    <button mat-icon-button color="accent"
+                                            (click)="copyEndpoint(url + '/measurement/' + item.Measurement)"
+                                            matTooltip="copy endpoint to clipboard">
                                         <mat-icon>content_copy</mat-icon>
                                     </button>
                                     <button mat-icon-button color="accent" (click)="deleteExport(item)">

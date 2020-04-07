@@ -20,19 +20,16 @@
                    (selectedIndexChange)="setIndex($event)"
                    (animationDone)="animation()">
         <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Marketplace', 'Shared']">
+            <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
             <div fxLayout="row">
-                <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
+                <div fxFlex></div>
+                <button matTooltip="Delete" mat-icon-button color="accent"
+                        (click)="deleteMultipleItems()"
+                        *ngIf="selectedItems.length > 0 && ready">
+                    <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn">delete</mat-icon>
+                </button>
                 <senergy-sort [sortAttributes]="sortAttributes"
                               (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-            </div>
-            <div fxLayout="row" *ngIf="selectedItems.length > 0 && ready" style="margin: 8px">
-                <div fxLayoutAlign="center center">
-                    You have selected {{selectedItems.length}} {{selectedItems.length === 1 ? 'process' : 'processes'}}
-                </div>
-                <button matTooltip="Delete" mat-icon-button color="accent"
-                        (click)="deleteMultipleItems()">
-                    <mat-icon>delete</mat-icon>
-                </button>
             </div>
             <div class="main-panel"
                  infiniteScroll
@@ -69,7 +66,8 @@
                                             <mat-icon>edit</mat-icon>
                                         </button>
                                         <button mat-icon-button matTooltip="Delete" color="accent"
-                                                (click)="deleteProcess(item.value)" [disabled]="selectedItems.length > 0">
+                                                (click)="deleteProcess(item.value)"
+                                                [disabled]="selectedItems.length > 0">
                                             <mat-icon>delete</mat-icon>
                                         </button>
 

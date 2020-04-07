@@ -67,6 +67,7 @@ import {MatRadioModule} from '@angular/material/radio';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatChipsModule} from '@angular/material/chips';
 import {DesignerSnackBarComponent} from './designer/snack-bar/designer-snack-bar.component';
+import {MatBadgeModule} from '@angular/material/badge';
 
 const processRepo = {
     path: 'processes/repository',
@@ -137,6 +138,7 @@ const processDesigner = {
         MatRadioModule,
         MatTabsModule,
         MatChipsModule,
+        MatBadgeModule,
     ],
     declarations: [
         ProcessRepoComponent,
