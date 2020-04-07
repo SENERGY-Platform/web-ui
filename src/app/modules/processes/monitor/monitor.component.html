@@ -19,14 +19,17 @@
                    (animationDone)="animationDone()"
                    [(selectedIndex)]="activeIndex">
         <mat-tab label="Running">
-            <div fxLayout="row">
+            <div fxLayout="column">
                 <senergy-searchbar fxFlex [searchTextIn]="searchText" [disable]="selectedDeployment !== null"></senergy-searchbar>
-                <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
-                    <mat-chip [removable]="true" (removed)="removeChip()" color="accent"
-                              selected>{{selectedDeployment.name}}
-                        <mat-icon matChipRemove>cancel</mat-icon>
-                    </mat-chip>
-                </mat-chip-list>
+                <div fxLayout="row">
+                    <div fxFlex></div>
+                    <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
+                        <mat-chip [removable]="true" (removed)="removeChip()" color="accent"
+                                  selected>{{selectedDeployment.name}}
+                            <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip>
+                    </mat-chip-list>
+                </div>
             </div>
 
             <div class="layout-margin">
@@ -70,14 +73,17 @@
             </div>
         </mat-tab>
         <mat-tab label="Finished">
-            <div fxLayout="row">
+            <div fxLayout="column">
                 <senergy-searchbar fxFlex [searchTextIn]="searchText" [disable]="selectedDeployment !== null"></senergy-searchbar>
-                <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
-                    <mat-chip [removable]="true" (removed)="removeChip()" color="accent"
-                              selected>{{selectedDeployment.name}}
-                        <mat-icon matChipRemove>cancel</mat-icon>
-                    </mat-chip>
-                </mat-chip-list>
+                <div fxLayout="row">
+                    <div fxFlex></div>
+                    <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
+                        <mat-chip [removable]="true" (removed)="removeChip()" color="accent"
+                                  selected>{{selectedDeployment.name}}
+                            <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip>
+                    </mat-chip-list>
+                </div>
             </div>
 
             <div class="layout-margin">
