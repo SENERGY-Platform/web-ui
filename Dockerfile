@@ -1,20 +1,20 @@
 ## STAGE 1: Build Angular application ##
 FROM node:10-alpine as builder
+# install git
+RUN apk add --no-cache git
 
 WORKDIR /workspace
-
-# install properties-provider
-ARG branch
-ENV SOURCE=git+https://github.com/SENERGY-Platform/properties-provider.git#${branch}
-# use git
-RUN apk add --no-cache git
-RUN echo $SOURCE
-RUN npm install $SOURCE
 
 # install dependencies
 ADD package.json .
 ADD package-lock.json .
 RUN npm ci
+
+# install properties-provider
+ARG branch
+ENV SOURCE=git+https://github.com/SENERGY-Platform/properties-provider.git#${branch}
+RUN echo $SOURCE
+RUN npm install $SOURCE
 
 # copy sourcecode and build
 COPY . .
