@@ -15,10 +15,13 @@
   -->
 
 <div class="hubs-container">
-    <div fxLayout="row">
+    <div fxLayout="column">
         <senergy-searchbar fxFlex></senergy-searchbar>
-        <senergy-sort [sortAttributes]="sortAttributes"
-                      (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        <div fxLayout="row">
+            <div fxFlex></div>
+            <senergy-sort [sortAttributes]="sortAttributes"
+                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        </div>
     </div>
     <div class="main-panel">
         <div infiniteScroll
