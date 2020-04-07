@@ -1,8 +1,5 @@
 ## STAGE 1: Build Angular application ##
 FROM node:10-alpine as builder
-# install git
-RUN apk add --no-cache git
-
 WORKDIR /workspace
 
 # install dependencies
@@ -11,9 +8,12 @@ ADD package-lock.json .
 RUN npm ci
 
 # install properties-provider
-ARG branch
-ENV SOURCE=git+https://github.com/SENERGY-Platform/properties-provider.git#${branch}
-RUN echo $SOURCE
+ARG branch=master
+ENV SOURCE=https://github.com/SENERGY-Platform/properties-provider/archive/${branch}.tar.gz
+# force update of properties provider, date is always different and prevents caching
+ARG DATE
+RUN echo $DATE
+RUN echo "Installing properties-provider from: "$SOURCE
 RUN npm install $SOURCE
 
 # copy sourcecode and build
