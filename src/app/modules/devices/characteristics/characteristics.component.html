@@ -15,16 +15,19 @@
   -->
 
 <div class="characteristics-container">
-    <div fxLayout="row">
+    <div fxLayout="column">
         <senergy-searchbar fxFlex></senergy-searchbar>
-        <mat-chip-list class="offset" *ngIf="selectedTag !== ''">
-            <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
-                      selected>{{selectedTag}}
-                <mat-icon matChipRemove>cancel</mat-icon>
-            </mat-chip>
-        </mat-chip-list>
-        <senergy-sort [sortAttributes]="sortAttributes"
-                      (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        <div fxLayout="row">
+            <div fxFlex></div>
+            <mat-chip-list class="offset" *ngIf="selectedTag !== ''">
+                <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
+                          selected>{{selectedTag}}
+                    <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+            </mat-chip-list>
+            <senergy-sort [sortAttributes]="sortAttributes"
+                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        </div>
     </div>
     <div class="main-panel">
         <div infiniteScroll
