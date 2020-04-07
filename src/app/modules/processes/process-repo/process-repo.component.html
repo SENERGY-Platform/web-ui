@@ -20,8 +20,9 @@
                    (selectedIndexChange)="setIndex($event)"
                    (animationDone)="animation()">
         <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Marketplace', 'Shared']">
+            <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
             <div fxLayout="row">
-                <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
+                <div fxFlex></div>
                 <senergy-sort [sortAttributes]="sortAttributes"
                               (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
             </div>
@@ -69,7 +70,8 @@
                                             <mat-icon>edit</mat-icon>
                                         </button>
                                         <button mat-icon-button matTooltip="Delete" color="accent"
-                                                (click)="deleteProcess(item.value)" [disabled]="selectedItems.length > 0">
+                                                (click)="deleteProcess(item.value)"
+                                                [disabled]="selectedItems.length > 0">
                                             <mat-icon>delete</mat-icon>
                                         </button>
 
