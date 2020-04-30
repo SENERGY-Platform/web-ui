@@ -75,6 +75,8 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                         this.diagram.loadGraph(this.flow.model);
                     }
                 });
+            } else {
+                this.write = true;
             }
         }, 0);
 
