@@ -28,8 +28,10 @@
             <input matInput [(ngModel)]="flow.description" placeholder="Beschreibung">
         </mat-form-field>
         <section class="checkbox-section">
-            <mat-checkbox class="checkbox-margin">Enable Metrics</mat-checkbox>
-            <mat-checkbox class="checkbox-margin">Consume all messages</mat-checkbox>
+            Share Flow:
+            <mat-checkbox class="checkbox-margin" [(ngModel)]="flow.share.list">List</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" [(ngModel)]="flow.share.read">Read</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" [(ngModel)]="flow.share.write">Write</mat-checkbox>
         </section>
         <div fxLayout="row">
             <div id="senergy-diagram-editor" fxFlex="75">

@@ -23,6 +23,13 @@ export interface FlowModel {
     description: string;
     model: DiagramModel;
     image: string | SafeHtml;
+    share: FlowShareModel;
     dateCreated: number;
     dateUpdated: number;
+}
+
+export interface FlowShareModel {
+    list: boolean | undefined;
+    read: boolean | undefined;
+    write: boolean | undefined;
 }

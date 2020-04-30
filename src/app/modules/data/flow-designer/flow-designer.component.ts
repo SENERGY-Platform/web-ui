@@ -19,7 +19,7 @@ import {OperatorModel} from '../operator-repo/shared/operator.model';
 import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
 import {ActivatedRoute} from '@angular/router';
 import {OperatorRepoService} from '../operator-repo/shared/operator-repo.service';
-import {FlowModel} from '../flow-repo/shared/flow.model';
+import {FlowModel, FlowShareModel} from '../flow-repo/shared/flow.model';
 import {DiagramEditorComponent} from '../../../core/components/diagram-editor/diagram-editor.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
@@ -41,7 +41,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
 
     operators: OperatorModel[] = [];
     ready = false;
-    flow = {} as FlowModel;
+    flow = {share: {} as FlowShareModel} as FlowModel;
 
     ngOnInit() {
         this.operatorRepoService.getOperators('', 9999, 0, 'name', 'asc').subscribe((resp: { operators: OperatorModel[] }) => {
@@ -57,6 +57,9 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 this.flowRepoService.getFlow(id).subscribe((resp: FlowModel | null) => {
                     if (resp !== null) {
                         this.flow = resp;
+                        if (this.flow.share === null) {
+                            this.flow.share = {} as FlowShareModel;
+                        }
                         for (const cell of this.flow.model.cells) {
                             if (cell.type === 'link') {
                                 cell.attrs['.marker-target'] = cell.attrs.markerTarget;
