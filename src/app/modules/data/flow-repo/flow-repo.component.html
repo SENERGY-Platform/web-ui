@@ -49,17 +49,20 @@
                                     <mat-icon>update</mat-icon>{{item.dateUpdated| date:"medium"}}
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="end center" class="footer-buttons">
-                                    <button class="mat-icon-button" routerLink="/data/flow-repo/deploy/{{item._id}}">
+                                    <button *ngIf="item.share.read || item.userId === userId" class="mat-icon-button" routerLink="/data/flow-repo/deploy/{{item._id}}">
                                         <mat-icon class="mat-accent">
                                             start
                                         </mat-icon>
                                     </button>
-                                    <button class="mat-icon-button" routerLink="/data/designer/{{item._id}}">
-                                        <mat-icon class="mat-accent">
+                                    <button *ngIf="item.share.write ||  item.share.read || item.userId === userId" class="mat-icon-button" routerLink="/data/designer/{{item._id}}">
+                                        <mat-icon *ngIf="item.share.write || item.userId === userId" class="mat-accent">
                                             edit
                                         </mat-icon>
+                                        <mat-icon *ngIf="!(item.share.write || item.userId === userId)" class="mat-accent">
+                                            visibility
+                                        </mat-icon>
                                     </button>
-                                    <button class="mat-icon-button">
+                                    <button *ngIf="item.share.write || item.userId === userId" class="mat-icon-button">
                                         <mat-icon class="mat-warn" (click)="deleteFlow(item)">
                                             delete
                                         </mat-icon>

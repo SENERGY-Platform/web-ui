@@ -24,6 +24,7 @@ import {ResponsiveService} from '../../../core/services/responsive.service';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
+import {AuthorizationService} from '../../../core/services/authorization.service';
 
 const GRIDS = new Map([
     ['xs', 1],
@@ -54,17 +55,21 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
+    userId = {} as string | Error;
+
     constructor(private flowRepoService: FlowRepoService,
                 public snackBar: MatSnackBar,
                 private responsiveService: ResponsiveService,
                 private dialogsService: DialogsService,
                 private sanitizer: DomSanitizer,
+                private authService: AuthorizationService,
                 private searchbarService: SearchbarService) {
     }
 
     ngOnInit() {
         this.initGridCols();
         this.initSearchAndGetFlows();
+        this.userId = this.authService.getUserId();
     }
 
 

@@ -24,6 +24,7 @@ export interface FlowModel {
     model: DiagramModel;
     image: string | SafeHtml;
     share: FlowShareModel;
+    userId: string;
     dateCreated: number;
     dateUpdated: number;
 }

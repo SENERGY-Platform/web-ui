@@ -21,17 +21,17 @@
         </div>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>
-            <input matInput [(ngModel)]="flow.name" placeholder="Name">
+            <input disabled="{{!write}}" matInput [(ngModel)]="flow.name" placeholder="Name">
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Beschreibung</mat-label>
-            <input matInput [(ngModel)]="flow.description" placeholder="Beschreibung">
+            <input disabled="{{!write}}" matInput [(ngModel)]="flow.description" placeholder="Beschreibung">
         </mat-form-field>
         <section class="checkbox-section">
             Share Flow:
-            <mat-checkbox class="checkbox-margin" [(ngModel)]="flow.share.list">List</mat-checkbox>
-            <mat-checkbox class="checkbox-margin" [(ngModel)]="flow.share.read">Read</mat-checkbox>
-            <mat-checkbox class="checkbox-margin" [(ngModel)]="flow.share.write">Write</mat-checkbox>
+            <mat-checkbox disabled="{{!write}}" class="checkbox-margin" [(ngModel)]="flow.share.list">List</mat-checkbox>
+            <mat-checkbox disabled="{{!write}}" class="checkbox-margin" [(ngModel)]="flow.share.read">Read</mat-checkbox>
+            <mat-checkbox disabled="{{!write}}" class="checkbox-margin" [(ngModel)]="flow.share.write">Write</mat-checkbox>
         </section>
         <div fxLayout="row">
             <div id="senergy-diagram-editor" fxFlex="75">
@@ -44,7 +44,7 @@
                         <mat-list-item *ngFor="let item of operators">
                             <mat-icon mat-list-icon> insert_chart_outlined</mat-icon>
                             <h4 mat-line>{{ item.name }}</h4>
-                            <button (click)="addNode(item)" matTooltip="Add operator" mat-button color="accent">
+                            <button disabled="{{!write}}" (click)="addNode(item)" matTooltip="Add operator" mat-button color="accent">
                                 <mat-icon>add</mat-icon>
                             </button>
                         </mat-list-item>
@@ -52,7 +52,7 @@
                 </div>
             </div>
         </div>
-        <button mat-fab class="fab" (click)="saveModel()" matTooltip="Save">
+        <button *ngIf="write" mat-fab class="fab" (click)="saveModel()" matTooltip="Save">
             <mat-icon>save</mat-icon>
         </button>
     </div>
