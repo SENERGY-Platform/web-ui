@@ -61,6 +61,7 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSortModule} from '@angular/material/sort';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {FunctionsComponent} from './functions/functions.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -72,6 +73,7 @@ const deviceInstances = {
 const deviceTypes = {path: 'devices/devicetypesoverview', pathMatch: 'full', component: DeviceTypesOverviewComponent, data: {header: 'Devices'}};
 const concepts = {path: 'devices/concepts', pathMatch: 'full', component: ConceptsComponent, data: {header: 'Devices'}};
 const characteristics = {path: 'devices/characteristics', pathMatch: 'full', component: CharacteristicsComponent, data: {header: 'Devices'}};
+const functions = {path: 'devices/functions', pathMatch: 'full', component: FunctionsComponent, data: {header: 'Devices'}};
 
 @NgModule({
     imports: [MatGridListModule,
@@ -106,7 +108,7 @@ const characteristics = {path: 'devices/characteristics', pathMatch: 'full', com
         MatSortModule,
         MatProgressSpinnerModule,
         DeviceTypesOverviewModule,
-        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics])],
+        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics, functions])],
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,
@@ -122,6 +124,7 @@ const characteristics = {path: 'devices/characteristics', pathMatch: 'full', com
         CharacteristicsNewDialogComponent,
         ConceptsEditDialogComponent,
         CharacteristicsEditDialogComponent,
+        FunctionsComponent,
     ],
     entryComponents: [
         NetworksEditDialogComponent,

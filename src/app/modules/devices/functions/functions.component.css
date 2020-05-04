@@ -14,28 +14,5 @@
  * limitations under the License.
  */
 
-.main-panel {
-    height: calc(100% - 106px);
-    overflow-y: auto;
-}
 
-.main-panel-alternative {
-    height: calc(100% - 106px);
-    overflow-y: auto;
-}
 
-.offset {
-    margin-top: 4px;
-}
-
-.device-instance-container ::ng-deep .mat-tab-body-content {
-    overflow: hidden;
-}
-
-.device-instance-container ::ng-deep .mat-tab-body-wrapper {
-    height: calc(100vh - 118px);
-}
-
-.device-instance-container ::ng-deep .mat-tab-header {
-    min-height: 54px;
-}

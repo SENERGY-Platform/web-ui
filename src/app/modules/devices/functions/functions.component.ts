@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-.main-panel {
-    height: calc(100% - 106px);
-    overflow-y: auto;
-}
+import {Component, OnDestroy, OnInit} from '@angular/core';
 
-.main-panel-alternative {
-    height: calc(100% - 106px);
-    overflow-y: auto;
-}
+@Component({
+    selector: 'senergy-functions',
+    templateUrl: './functions.component.html',
+    styleUrls: ['./functions.component.css']
+})
+export class FunctionsComponent implements OnInit, OnDestroy {
 
-.offset {
-    margin-top: 4px;
-}
+    constructor() {
+    }
 
-.device-instance-container ::ng-deep .mat-tab-body-content {
-    overflow: hidden;
-}
+    ngOnInit() {
+    }
 
-.device-instance-container ::ng-deep .mat-tab-body-wrapper {
-    height: calc(100vh - 118px);
-}
+    ngOnDestroy() {
+    }
 
-.device-instance-container ::ng-deep .mat-tab-header {
-    min-height: 54px;
 }

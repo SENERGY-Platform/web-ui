@@ -70,3 +70,7 @@ mat-grid-list {
 .checkbox-margin {
     margin: 0 10px;
 }
+
+.full-width {
+    width: 100%;
+}

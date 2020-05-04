@@ -19,16 +19,19 @@
                    (selectedIndexChange)="setIndex($event)"
                    (animationDone)="animation()">
         <mat-tab label="All">
-            <div fxLayout="row">
+            <div fxLayout="column">
                 <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
-                <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
-                    <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
-                              selected>{{selectedTagTransformed}}
-                        <mat-icon matChipRemove>cancel</mat-icon>
-                    </mat-chip>
-                </mat-chip-list>
-                <senergy-sort [sortAttributes]="sortAttributes"
-                              (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+                <div fxLayout="row">
+                    <div fxFlex></div>
+                    <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
+                        <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
+                                  selected>{{selectedTagTransformed}}
+                            <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip>
+                    </mat-chip-list>
+                    <senergy-sort [sortAttributes]="sortAttributes"
+                                  (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+                </div>
             </div>
             <div class="main-panel">
 
@@ -49,16 +52,19 @@
             </div>
         </mat-tab>
         <mat-tab label="{{tab.label}}" *ngFor="let tab of tabs; let i = index">
-            <div fxLayout="row">
+            <div fxLayout="column">
                 <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
+                <div fxLayout="row">
+                    <div fxFlex></div>
                 <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
                     <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
                               selected>{{selectedTagTransformed}}
                         <mat-icon matChipRemove>cancel</mat-icon>
                     </mat-chip>
                 </mat-chip-list>
-                <senergy-sort [sortAttributes]="sortAttributes"
-                              (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+                    <senergy-sort [sortAttributes]="sortAttributes"
+                                  (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+                </div>
             </div>
             <div class="main-panel-alternative">
                 <div *ngIf="activeIndex - 1 === i && animationDone">

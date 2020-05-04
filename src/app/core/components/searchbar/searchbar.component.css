@@ -15,9 +15,13 @@
  */
 
 .layout-margin {
-    margin: 8px;
+    margin: 8px 8px 0px 8px;
 }
 
 .pointer {
     cursor: pointer;
+}
+
+.searchbar-container ::ng-deep .mat-form-field-wrapper {
+    padding-bottom: 0px;
 }
