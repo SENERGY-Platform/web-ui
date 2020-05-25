@@ -200,7 +200,7 @@ export class AirQualityEditDialogComponent implements OnInit {
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 10}}
         },
         {
-            name_html: 'Barometric Pressure',
+            name_html: 'Pressure',
             short_name: 'Pressure',
             description_html: 'Barometric Air Pressure',
             unit_html: 'hPa',
