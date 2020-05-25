@@ -293,22 +293,26 @@ export class AirQualityComponent implements OnInit, OnDestroy {
             if (this.widget.properties.yrPath) {
                 this.yrWeatherService.getYrForecast(this.widget.properties.yrPath)
                     .subscribe(model => {
-                        this.widget.properties.weather = model;
-                        const mm = this.widget.properties.measurements || [];
-                        if (this.widget.properties.measurements) {
-                            let index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
-                            if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
-                                this.widget.properties.measurements[index].outsideData.value =
-                                    Number(model.weatherdata.forecast.tabular.time[0].temperature._value);
+                            this.widget.properties.weather = model;
+                            const mm = this.widget.properties.measurements || [];
+                            if (this.widget.properties.measurements) {
+                                let index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
+                                if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
+                                    this.widget.properties.measurements[index].outsideData.value =
+                                        Number(model.weatherdata.forecast.tabular.time[0].temperature._value);
+                                }
+                                index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Pressure');
+                                if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
+                                    this.widget.properties.measurements[index].outsideData.value =
+                                        Number(model.weatherdata.forecast.tabular.time[0].pressure._value);
+                                }
                             }
-                            index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Pressure');
-                            if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
-                                this.widget.properties.measurements[index].outsideData.value =
-                                    Number(model.weatherdata.forecast.tabular.time[0].pressure._value);
-                            }
-                        }
-                        this.numReady++;
-                    });
+                            this.numReady++;
+                        },
+                        error => {
+                            console.error('Air Quality Widget: Could not load Yr data', error);
+                            this.numReady++;
+                        });
             } else {
                 console.error('AirWidget: Does not have Yr Path. Should be set when editing widget.');
                 this.numReady++;
