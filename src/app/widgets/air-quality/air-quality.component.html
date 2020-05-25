@@ -60,6 +60,9 @@
                         <span matLine [innerHTML]="con"></span>
                     </mat-list-item>
                 </mat-list>
+                <div *ngIf="pros.length === 0 && cons.length === 0" fxFill fxLayout="row" fxLayoutAlign="center center">
+                    No reasons for or against opening a window
+                </div>
             </div>
         </div>
         <div *ngIf="!isWidgetConfigured()" fxFill fxLayout="row" fxLayoutAlign="center center">
