@@ -295,10 +295,15 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                         this.widget.properties.weather = model;
                         const mm = this.widget.properties.measurements || [];
                         if (this.widget.properties.measurements) {
-                            const index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
+                            let index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
                             if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
                                 this.widget.properties.measurements[index].outsideData.value =
                                     Number(model.weatherdata.forecast.tabular.time[0].temperature._value);
+                            }
+                            index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Pressure');
+                            if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
+                                this.widget.properties.measurements[index].outsideData.value =
+                                    Number(model.weatherdata.forecast.tabular.time[0].pressure._value);
                             }
                         }
                         this.numReady++;

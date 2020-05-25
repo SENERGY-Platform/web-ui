@@ -199,6 +199,17 @@ export class AirQualityEditDialogComponent implements OnInit {
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 10}}
         },
+        {
+            name_html: 'Barometric Pressure',
+            short_name: 'Pressure',
+            description_html: 'Barometric Air Pressure',
+            unit_html: 'hPa',
+            data: this.emptyDataModel,
+            outsideData: this.emptyDataModel,
+            has_outside: false,
+            can_web: true,
+            boundaries: {warn: {lower: 0, upper: 1100}, critical: {lower: 0, upper: 1100}}
+        },
     ];
     measurementSelected: string[] = [];
     location: Location =  {
@@ -467,7 +478,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     private mergeUBAStationCapabilities() {
         this.ubaService.getUBAStationCapabilities(this.ubaStationSelected.station_id).subscribe(short_names => {
             this.measurements.forEach(m => {
-                if (m.short_name !== 'Temp.') {
+                if (m.short_name !== 'Temp.' && m.short_name !== 'Pressure') {
                     const idx = short_names.findIndex(short_name => m.short_name === short_name);
                     if (idx === -1) {
                         m.can_web = false;
