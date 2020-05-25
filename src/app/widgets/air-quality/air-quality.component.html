@@ -53,11 +53,11 @@
                 <mat-list style="overflow: auto; max-height: 100%">
                     <h2 mat-subheader *ngIf="pros.length > 0">Reasons for opening a window</h2>
                     <mat-list-item *ngFor="let pro of pros">
-                        <span [innerHTML]="pro"></span>
+                        <span matLine [innerHTML]="pro"></span>
                     </mat-list-item>
                     <h2 mat-subheader *ngIf="cons.length > 0">Reasons against opening a window</h2>
                     <mat-list-item *ngFor="let con of cons">
-                        <span [innerHTML]="con"></span>
+                        <span matLine [innerHTML]="con"></span>
                     </mat-list-item>
                 </mat-list>
             </div>
