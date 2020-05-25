@@ -46,17 +46,20 @@ export class YrWeatherService {
             this.http.get(environment.yrUrl +
                 yrPath + '/forecast_hour_by_hour.xml',
                 {responseType: 'text'})
-                .pipe(map(resp => resp || []),
-                    catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getYrForecast', '' as string))
-                ).subscribe(resp => {
-                const model: YrWeatherModel =
-                    this.convertXMLtoJSON(resp as string) as unknown as YrWeatherModel;
-                const cacheUntil = new Date();
-                cacheUntil.setHours(cacheUntil.getHours() + 1); // automagically increases day if >23
-                model.cacheUntil = cacheUntil;
-                obs.next(model);
-                obs.complete();
-            });
+                .subscribe(resp => {
+                        const model: YrWeatherModel =
+                            this.convertXMLtoJSON(resp as string) as unknown as YrWeatherModel;
+                        const cacheUntil = new Date();
+                        cacheUntil.setHours(cacheUntil.getHours() + 1); // automagically increases day if >23
+                        model.cacheUntil = cacheUntil;
+                        obs.next(model);
+                        obs.complete();
+                    },
+                    error => {
+                        obs.error(error);
+                        obs.complete();
+                    }
+                );
         });
     }
 

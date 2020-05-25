@@ -137,7 +137,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                             + measurement.data.value + '&nbsp;' + measurement.unit_html);
                     }
                 }
-                if (!isNaN(measurement.outsideData.value) && measurement.outsideData.value !== null) {
+                if (!isNaN(measurement.outsideData.value) && measurement.outsideData.value !== null && measurement.short_name !== 'Hum.') {
                     const outsideValue = measurement.outsideData.value;
                     if (outsideValue > measurement.boundaries.critical.upper
                         || outsideValue < measurement.boundaries.critical.lower) {
@@ -147,19 +147,43 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                         this.cons.push(measurement.name_html + ' is warning outside: ' + outsideValue + measurement.unit_html);
                     }
                     if (measurement.is_warning || measurement.is_critical) {
-                        if (measurement.data && measurement.data.value > measurement.boundaries.warn.upper) { // too high inside
+                        if (measurement.data && measurement.data.value &&
+                            measurement.data.value > measurement.boundaries.warn.upper) { // too high inside
                             if (outsideValue < measurement.data.value) {
                                 this.pros.push(measurement.name_html + ' is better outside: ' + outsideValue + measurement.unit_html);
                             } else if (outsideValue > measurement.data.value) {
                                 this.cons.push(measurement.name_html + ' is worse outside: ' + outsideValue + measurement.unit_html);
                             }
-                        } else if (measurement.data &&
+                        } else if (measurement.data && measurement.data.value &&
                             measurement.data.value < measurement.boundaries.warn.lower) { // too low inside
                             if (outsideValue < measurement.data.value) {
                                 this.cons.push(measurement.name_html + ' is worse outside: ' + outsideValue + measurement.unit_html);
                             } else if (outsideValue > measurement.data.value) {
                                 this.pros.push(measurement.name_html + ' is better outside: ' + outsideValue + measurement.unit_html);
                             }
+                        }
+                    }
+                }
+            }
+
+            const humIndex = this.widget.properties.measurements.findIndex(m => m.short_name === 'Hum.');
+            const tempIndex = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
+            if (humIndex !== -1 && tempIndex !== -1) {
+                const temp = this.widget.properties.measurements[tempIndex];
+                const hum = this.widget.properties.measurements[humIndex];
+                if (hum.is_enabled && (hum.has_outside || hum.can_web) && temp.is_enabled && (temp.has_outside || temp.can_web)) {
+                    const absOutsideNow = AirQualityService.getAbsoluteHumidity(temp.outsideData.value, hum.outsideData.value);
+                    const relAfter = AirQualityService.getRelativeHumidity(temp.data.value, absOutsideNow);
+                    if (relAfter > hum.boundaries.critical.upper || relAfter < hum.boundaries.critical.lower) {
+                        this.cons.push(hum.name_html + ' could reach critical level');
+                    } else if (relAfter > hum.boundaries.warn.upper || relAfter < hum.boundaries.warn.lower) {
+                        this.cons.push(hum.name_html + ' could reach warning level');
+                    }
+                    if (hum.is_critical || hum.is_warning) {
+                        if (hum.data.value > hum.boundaries.warn.upper && relAfter < hum.data.value) { // too high inside
+                            this.pros.push(hum.name_html + ' would decrease');
+                        } else if (hum.data.value < hum.boundaries.warn.lower && relAfter > hum.data.value) { // too low inside
+                            this.pros.push(hum.name_html + ' would increase');
                         }
                     }
                 }
@@ -181,7 +205,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
         if (this.widget.properties.weather && this.widget.properties.measurements) {
             const now = this.widget.properties.weather.weatherdata.forecast.tabular.time[0];
             const nextHour = this.widget.properties.weather.weatherdata.forecast.tabular.time[1];
-            if (Number(now.precipitation) + Number(nextHour.precipitation) > 0) {
+            if (Number(now.precipitation._value) + Number(nextHour.precipitation._value) > 0) {
                 this.cons.push('It might be raining soon');
             }
         }
@@ -292,19 +316,27 @@ export class AirQualityComponent implements OnInit, OnDestroy {
             if (this.widget.properties.yrPath) {
                 this.yrWeatherService.getYrForecast(this.widget.properties.yrPath)
                     .subscribe(model => {
-                        this.widget.properties.weather = model;
-                        const mm = this.widget.properties.measurements || [];
-                        if (this.widget.properties.measurements) {
-                            const index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
-                            if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
-                                this.widget.properties.measurements[index].outsideData.value =
-                                    Number(model.weatherdata.forecast.tabular.time[0].temperature._value);
+                            this.widget.properties.weather = model;
+                            const mm = this.widget.properties.measurements || [];
+                            if (this.widget.properties.measurements) {
+                                let index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
+                                if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
+                                    this.widget.properties.measurements[index].outsideData.value =
+                                        Number(model.weatherdata.forecast.tabular.time[0].temperature._value);
+                                }
+                                index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Pressure');
+                                if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
+                                    this.widget.properties.measurements[index].outsideData.value =
+                                        Number(model.weatherdata.forecast.tabular.time[0].pressure._value);
+                                }
                             }
-                        }
-                        this.numReady++;
-                    });
+                            this.numReady++;
+                        },
+                        error => {
+                            console.error('Air Quality Widget: Could not load Yr data', error);
+                            this.numReady++;
+                        });
             } else {
-                console.error('AirWidget: Does not have Yr Path. Should be set when editing widget.');
                 this.numReady++;
             }
         }
