@@ -314,7 +314,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                             this.numReady++;
                         });
             } else {
-                console.error('AirWidget: Does not have Yr Path. Should be set when editing widget.');
                 this.numReady++;
             }
         }

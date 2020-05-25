@@ -212,13 +212,18 @@ export class AirQualityEditDialogComponent implements OnInit {
         },
     ];
     measurementSelected: string[] = [];
-    location: Location =  {
+    location: Location = {
         latitude: 0,
         longitude: 0
     };
     formatted_address = ' ';
     ubaStations: UBAStation[] = [];
-    invalidUbaStation: UBAStation = {station_id: -1, station_longitude: -1000, station_latitude: -1000, station_name: ''};
+    invalidUbaStation: UBAStation = {
+        station_id: -1,
+        station_longitude: -1000,
+        station_latitude: -1000,
+        station_name: ''
+    };
     ubaStationSelected = this.invalidUbaStation;
     maxUBADistance = 10;
     pollenAreaResponse: any = undefined;
@@ -317,9 +322,9 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.initDeployments();
 
         this.searchFormControl.valueChanges.pipe(
-                startWith(''),
-                map(value => this.geonamesService.searchPlaces(value)))
-        .subscribe(obs => this.geonamesSearchResults = obs);
+            startWith(''),
+            map(value => this.geonamesService.searchPlaces(value)))
+            .subscribe(obs => this.geonamesSearchResults = obs);
     }
 
     getWidgetData() {
@@ -401,7 +406,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         return a.id === b.id && a.name === b.name;
     }
 
-    compareExportValueModels (a: ExportValueModel, b: ExportValueModel): boolean {
+    compareExportValueModels(a: ExportValueModel, b: ExportValueModel): boolean {
         if (a === undefined && b === undefined) {
             return true;
         }
@@ -432,6 +437,13 @@ export class AirQualityEditDialogComponent implements OnInit {
             }
         }
         this.yrPath = this.yrWeatherService.getYrPath(geoname);
+        this.yrWeatherService.getYrForecast(this.yrPath).subscribe(() => {
+                this.toggleYrCanWeb(true);
+            },
+            () => {
+                this.toggleYrCanWeb(false);
+                this.yrPath = '';
+            });
         this.formatted_address = geoname.name + ', ' + geoname.adminCodes1.ISO3166_2 + ', ' + geoname.countryCode;
     }
 
@@ -485,8 +497,6 @@ export class AirQualityEditDialogComponent implements OnInit {
                     } else {
                         m.can_web = true;
                     }
-                } else {
-                    m.can_web = true;
                 }
             });
         });
@@ -546,19 +556,30 @@ export class AirQualityEditDialogComponent implements OnInit {
             this.geonamesService.getClosestGeoname(pos.coords.latitude, pos.coords.longitude)
                 .subscribe(geoname => this.onLocationSelected(geoname));
         }, posError => {
-           switch (posError.code) {
-               case posError.PERMISSION_DENIED:
+            switch (posError.code) {
+                case posError.PERMISSION_DENIED:
                     console.log('Position request denied');
-                   break;
-               case posError.POSITION_UNAVAILABLE:
+                    break;
+                case posError.POSITION_UNAVAILABLE:
                     console.log('Position unavailable');
-                   break;
-               case posError.TIMEOUT:
+                    break;
+                case posError.TIMEOUT:
                     console.log('Position request timed out');
-                   break;
-           }
-           this.changeLocation = true;
-           this.autoLocationFailed = true;
+                    break;
+            }
+            this.changeLocation = true;
+            this.autoLocationFailed = true;
         });
+    }
+
+    private toggleYrCanWeb(state: boolean) {
+        let index = this.measurements.findIndex(m => m.short_name === 'Temp.');
+        if (index !== -1) {
+            this.measurements[index].can_web = state;
+        }
+        index = this.measurements.findIndex(m => m.short_name === 'Pressure');
+        if (index !== -1) {
+            this.measurements[index].can_web = state;
+        }
     }
 }

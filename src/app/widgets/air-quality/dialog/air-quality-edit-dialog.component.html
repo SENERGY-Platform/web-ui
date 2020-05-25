@@ -50,6 +50,12 @@
                 <div *ngIf="!hasValidPollenArea()" class="small-error-text color-warn">
                     Location outside all <span matTooltip="Deutscher Wetterdienst">DWD</span> pollen areas!
                 </div>
+                <div *ngIf="!this.yrPath" class="small-error-text color-warn">
+                    Can't get weather forecast for this location!
+                </div>
+                <div *ngIf="this.yrPath" class="small-error-text color-accent">
+                    Weather forecast available
+                </div>
             </div>
             <div *ngIf="changeLocation">
                 <div *ngIf="autoLocationFailed" class="small-error-text color-warn">
