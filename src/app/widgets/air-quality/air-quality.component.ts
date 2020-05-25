@@ -137,7 +137,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                             + measurement.data.value + '&nbsp;' + measurement.unit_html);
                     }
                 }
-                if (!isNaN(measurement.outsideData.value) && measurement.outsideData.value !== null) {
+                if (!isNaN(measurement.outsideData.value) && measurement.outsideData.value !== null && measurement.short_name !== 'Hum.') {
                     const outsideValue = measurement.outsideData.value;
                     if (outsideValue > measurement.boundaries.critical.upper
                         || outsideValue < measurement.boundaries.critical.lower) {
@@ -161,6 +161,29 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                             } else if (outsideValue > measurement.data.value) {
                                 this.pros.push(measurement.name_html + ' is better outside: ' + outsideValue + measurement.unit_html);
                             }
+                        }
+                    }
+                }
+            }
+
+            const humIndex = this.widget.properties.measurements.findIndex(m => m.short_name === 'Hum.');
+            const tempIndex = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
+            if (humIndex !== -1 && tempIndex !== -1) {
+                const temp = this.widget.properties.measurements[tempIndex];
+                const hum = this.widget.properties.measurements[humIndex];
+                if (hum.is_enabled && (hum.has_outside || hum.can_web) && temp.is_enabled && (temp.has_outside || temp.can_web)) {
+                    const absOutsideNow = AirQualityService.getAbsoluteHumidity(temp.outsideData.value, hum.outsideData.value);
+                    const relAfter = AirQualityService.getRelativeHumidity(temp.data.value, absOutsideNow);
+                    if (relAfter > hum.boundaries.critical.upper || relAfter < hum.boundaries.critical.lower) {
+                        this.cons.push(hum.name_html + ' could reach critical level');
+                    } else if (relAfter > hum.boundaries.warn.upper || relAfter < hum.boundaries.warn.lower) {
+                        this.cons.push(hum.name_html + ' could reach warning level');
+                    }
+                    if (hum.is_critical || hum.is_warning) {
+                        if (hum.data.value > hum.boundaries.warn.upper && relAfter < hum.data.value) { // too high inside
+                            this.pros.push(hum.name_html + ' would decrease');
+                        } else if (hum.data.value < hum.boundaries.warn.lower && relAfter > hum.data.value) { // too low inside
+                            this.pros.push(hum.name_html + ' would increase');
                         }
                     }
                 }
