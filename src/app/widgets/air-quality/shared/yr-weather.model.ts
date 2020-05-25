@@ -64,7 +64,7 @@ export interface YrLink {
 export interface YrForecast {
     _from: string;
     _to: string;
-    precipitation: {value: number;};
+    precipitation: {_value: number; };
     windDirection: {
         _deg: string;
         _code: string;

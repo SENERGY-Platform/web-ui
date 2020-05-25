@@ -17,7 +17,7 @@
 <mat-card>
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="content-size">
-        <senergy-widget-spinner [show]="!isReady()"></senergy-widget-spinner>
+        <senergy-widget-spinner [show]="!isReady() && isWidgetConfigured()"></senergy-widget-spinner>
         <div *ngIf="isReady() && isWidgetConfigured()" style="height: 100%">
             <div *ngIf="!inDetailView" (click)="clicked()" matTooltip="Click to view details!"
                  [matTooltipShowDelay]="500"
@@ -53,13 +53,16 @@
                 <mat-list style="overflow: auto; max-height: 100%">
                     <h2 mat-subheader *ngIf="pros.length > 0">Reasons for opening a window</h2>
                     <mat-list-item *ngFor="let pro of pros">
-                        <span [innerHTML]="pro"></span>
+                        <span matLine [innerHTML]="pro"></span>
                     </mat-list-item>
                     <h2 mat-subheader *ngIf="cons.length > 0">Reasons against opening a window</h2>
                     <mat-list-item *ngFor="let con of cons">
-                        <span [innerHTML]="con"></span>
+                        <span matLine [innerHTML]="con"></span>
                     </mat-list-item>
                 </mat-list>
+                <div *ngIf="pros.length === 0 && cons.length === 0" fxFill fxLayout="row" fxLayoutAlign="center center">
+                    No reasons for or against opening a window
+                </div>
             </div>
         </div>
         <div *ngIf="!isWidgetConfigured()" fxFill fxLayout="row" fxLayoutAlign="center center">
