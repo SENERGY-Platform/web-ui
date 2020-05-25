@@ -31,7 +31,7 @@ import {YrWeatherService} from '../shared/yr-weather.service';
 import {GeonamesService} from '../shared/geonames.service';
 import {Geoname} from '../shared/geonames.model';
 import {FormControl} from '@angular/forms';
-import {map, startWith} from 'rxjs/operators';
+import {debounceTime, map, startWith} from 'rxjs/operators';
 import {from, Observable} from 'rxjs';
 import {NameValuePair} from '../shared/dwd-pollen.model';
 
@@ -322,7 +322,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.initDeployments();
 
         this.searchFormControl.valueChanges.pipe(
-            startWith(''),
+            debounceTime(300),
             map(value => this.geonamesService.searchPlaces(value)))
             .subscribe(obs => this.geonamesSearchResults = obs);
     }
