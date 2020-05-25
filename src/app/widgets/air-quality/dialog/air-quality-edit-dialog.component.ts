@@ -445,6 +445,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                 this.yrPath = '';
             });
         this.formatted_address = geoname.name + ', ' + geoname.adminCodes1.ISO3166_2 + ', ' + geoname.countryCode;
+        this.searchFormControl.patchValue(this.formatted_address);
     }
 
     measurementsSelected(measurements: MeasurementModel[], measurementSelected: string[]) {
