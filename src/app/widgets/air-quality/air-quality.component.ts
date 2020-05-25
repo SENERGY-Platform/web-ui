@@ -181,7 +181,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
         if (this.widget.properties.weather && this.widget.properties.measurements) {
             const now = this.widget.properties.weather.weatherdata.forecast.tabular.time[0];
             const nextHour = this.widget.properties.weather.weatherdata.forecast.tabular.time[1];
-            if (Number(now.precipitation) + Number(nextHour.precipitation) > 0) {
+            if (Number(now.precipitation._value) + Number(nextHour.precipitation._value) > 0) {
                 this.cons.push('It might be raining soon');
             }
         }
