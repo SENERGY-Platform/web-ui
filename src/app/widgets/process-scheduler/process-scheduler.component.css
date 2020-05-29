@@ -14,19 +14,32 @@
  * limitations under the License.
  */
 
-export enum DashboardTypesEnum {
-    Switch = 'switch',
-    Chart = 'chart',
-    DevicesState = 'devices_state',
-    ProcessState = 'process_state',
-    EventList = 'event_list',
-    RankingList = 'ranking_list',
-    ProcessModelList = 'process_model_list',
-    DeviceDowntimeList = 'device_downtime_list',
-    SingleValue = 'single_value',
-    MultiValue = 'multi_value',
-    EnergyPrediction = 'energy_prediction',
-    AirQuality = 'air_quality',
-    ProcessIncidentList = 'process_incident_list',
-    ProcessScheduler = 'process_scheduler',
+mat-card {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.margin {
+    margin-top: 8px;
+}
+
+.content-size {
+    min-height: calc(100% - 72px);
+    height: calc(100% - 72px);
+    margin: 0 -16px 0px -16px;
+    width: calc(100% + 32px);
+}
+
+mat-list {
+    flex-grow: 1;
+    overflow: auto;
+}
+
+.mat-list-base .mat-list-item.mat-2-line, .mat-list-base .mat-list-option.mat-2-line {
+    height: 59px;
+}
+
+.fix-position {
+    margin-top: -20px;
 }

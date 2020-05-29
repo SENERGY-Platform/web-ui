@@ -72,6 +72,9 @@
   <div *ngSwitchCase="'process_incident_list'" fxFill>
     <senergy-process-incident-list [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-process-incident-list>
   </div>
+  <div *ngSwitchCase="'process_scheduler'" fxFill>
+    <senergy-process-scheduler [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-process-scheduler>
+  </div>
   <div *ngSwitchDefault>
     <div>default</div>
   </div>

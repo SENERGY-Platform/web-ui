@@ -37,7 +37,9 @@
               "node_modules/jointjs/css/layout.css"
             ],
             "scripts": [
-              "node_modules/@webcomponents/custom-elements/src/native-shim.js"
+              "node_modules/@webcomponents/custom-elements/src/native-shim.js",
+              "node_modules/cronstrue/dist/cronstrue.min.js"
+
             ]
           },
           "configurations": {
