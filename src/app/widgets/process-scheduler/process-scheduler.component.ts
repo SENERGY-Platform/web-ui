@@ -76,6 +76,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
                 this.processSchedulerService.getSchedules().subscribe((schedules: ProcessSchedulerModel[]) => {
+                    this.schedules = [];
                     schedules.forEach((schedule: ProcessSchedulerModel) => {
                         this.deploymentsService.getDeployments(schedule.process_deployment_id).subscribe((deployment: (DeploymentsPreparedModel | null)) => {
                             if (deployment) {
