@@ -62,8 +62,10 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     }
 
     delete(id: string) {
-        this.processSchedulerService.deleteSchedule(id).subscribe((resp) => {
-            console.log(resp);
+        this.processSchedulerService.deleteSchedule(id).subscribe((resp: {status: number}) => {
+            if (resp.status === 200) {
+                this.reload();
+            }
         });
     }
 
@@ -74,25 +76,29 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     private getSchedules() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
-                this.processSchedulerService.getSchedules().subscribe((schedules: ProcessSchedulerModel[]) => {
-                    this.schedules = [];
-                    schedules.forEach((schedule: ProcessSchedulerModel) => {
-                        this.deploymentsService.getDeployments(schedule.process_deployment_id).subscribe((deployment: (DeploymentsPreparedModel | null)) => {
-                            if (deployment) {
-                                this.schedules.push({
-                                    cron: schedule.cron,
-                                    cronHumanReadable: cronstrue.toString(schedule.cron, {locale: 'de'}),
-                                    processId: schedule.process_deployment_id,
-                                    scheduleId: schedule.id,
-                                    processName: deployment.name,
-                                });
-                            }
-                        });
-                    });
-                    this.ready = true;
-                });
+                this.reload();
             }
+        });
+    }
+
+    private reload() {
+        this.ready = false;
+        this.processSchedulerService.getSchedules().subscribe((schedules: ProcessSchedulerModel[]) => {
+            this.schedules = [];
+            schedules.forEach((schedule: ProcessSchedulerModel) => {
+                this.deploymentsService.getDeployments(schedule.process_deployment_id).subscribe((deployment: (DeploymentsPreparedModel | null)) => {
+                    if (deployment) {
+                        this.schedules.push({
+                            cron: schedule.cron,
+                            cronHumanReadable: cronstrue.toString(schedule.cron, {locale: 'de'}),
+                            processId: schedule.process_deployment_id,
+                            scheduleId: schedule.id,
+                            processName: deployment.name,
+                        });
+                    }
+                });
+            });
+            this.ready = true;
         });
     }
 }
