@@ -37,7 +37,6 @@
     "bpmn-js-properties-panel": "^0.32.1",
     "camunda-bpmn-moddle": "^4.1.0",
     "core-js": "^2.5.4",
-    "cronstrue": "^1.94.0",
     "dotenv": "^8.2.0",
     "file-saver": "^2.0.2",
     "hammerjs": "^2.0.8",
