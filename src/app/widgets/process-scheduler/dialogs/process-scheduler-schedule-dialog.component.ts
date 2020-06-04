@@ -41,7 +41,7 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
             new FormControl(false),
         ]),
         process: new FormControl(''),
-        time: new FormControl('15:15')
+        time: new FormControl('')
     });
 
     widget: WidgetModel = {} as WidgetModel;
@@ -74,7 +74,7 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
         const date = new Date();
         date.setHours(time.split(':')[0]);
         date.setMinutes(time.split(':')[1]);
-        this.dialogRef.close({id: '', cron: date.getUTCMinutes() + ' ' + ' ' + date.getUTCHours() + ' * * ' + cronDays.join(), process_deployment_id: process.id} as ProcessSchedulerModel);
+        this.dialogRef.close({id: '', cron: date.getUTCMinutes() + ' ' + date.getUTCHours() + ' * * ' + cronDays.join(), process_deployment_id: process.id} as ProcessSchedulerModel);
     }
 
 }

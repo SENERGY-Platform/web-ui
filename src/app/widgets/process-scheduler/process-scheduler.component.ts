@@ -21,13 +21,10 @@ import {
 import {ProcessSchedulerService} from './shared/process-scheduler.service';
 import {ProcessSchedulerModel} from './shared/process-scheduler.model';
 import {Subscription} from 'rxjs';
-import {ChartsModel} from '../charts/shared/charts.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
 import {ProcessSchedulerWidgetModel} from './shared/process-scheduler-widget.model';
-import {DeploymentsModel} from '../../modules/processes/deployments/shared/deployments.model';
 import {DeploymentsPreparedModel} from '../../modules/processes/deployments/shared/deployments-prepared.model';
-import cronstrue from 'cronstrue/i18n';
 
 @Component({
     selector: 'senergy-process-scheduler',
@@ -89,7 +86,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
                 this.deploymentsService.getDeployments(schedule.process_deployment_id).subscribe((deployment: (DeploymentsPreparedModel | null)) => {
                     this.schedules.push({
                         cron: schedule.cron,
-                        cronHumanReadable: cronstrue.toString(schedule.cron, {locale: 'de'}),
+                        cronHumanReadable: this.splitCron(schedule.cron),
                         processId: schedule.process_deployment_id,
                         scheduleId: schedule.id,
                         processName: deployment ? deployment.name : 'Invalid Deployment',
@@ -98,5 +95,15 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
             });
             this.ready = true;
         });
+    }
+
+    private splitCron(cron: string) {
+        const min = cron.split(' ')[0];
+        const hours = cron.split(' ')[1];
+        const days = cron.split(' ')[4];
+        const date = new Date();
+        date.setUTCHours(parseInt(hours, 10));
+        date.setUTCMinutes(parseInt(min, 10));
+        return date.getHours() + ':' + date.getMinutes() + ' ' + days;
     }
 }
