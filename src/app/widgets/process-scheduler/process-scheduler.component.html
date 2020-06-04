@@ -33,14 +33,7 @@
         </div>
         <senergy-no-data [showIf]="ready && schedules.length === 0"></senergy-no-data>
     </mat-card-content>
-    <div fxLayout="row">
-        <button mat-icon-button class="mat-warn" matTooltip="add new schedule"
-                (click)="add()">
-            <mat-icon>add</mat-icon>
-        </button>
-        <div fxFlex class="drag-handler"></div>
-        <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget"
-                               (editEvent)="edit()"></senergy-widget-footer>
-    </div>
+    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionAdd]="true" (editEvent)="edit()"
+                           (addEvent)="add()"></senergy-widget-footer>
 </mat-card>
 

@@ -15,6 +15,11 @@
   -->
 
 <mat-card-actions *ngIf="!zoom">
+    <div *ngIf="optionAdd">
+        <button mat-icon-button color="accent" (click)="add()" matTooltip="add element">
+            <mat-icon>add</mat-icon>
+        </button>
+    </div>
     <div fxFlex class="drag-handler"></div>
     <div>
         <button mat-icon-button color="accent" (click)="refresh()" matTooltip="refresh widget">
