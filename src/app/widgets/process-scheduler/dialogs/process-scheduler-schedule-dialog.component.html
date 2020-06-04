@@ -17,8 +17,32 @@
 <h2 mat-dialog-title>Schedule</h2>
 
 <mat-dialog-content>
-    <div fxLayout="column">
-        <div>xxx</div>
+    <div fxLayout="column" [formGroup]="form">
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Time</mat-label>
+            <input formControlName="time" matInput type="time" required>
+        </mat-form-field>
+
+        <section formArrayName="days">
+            <mat-checkbox class="checkbox-margin" formControlName="1">Monday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="2">Tuesday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="3">Wednesday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="4">Thursday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="5">Friday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="6">Saturday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="0">Sunday</mat-checkbox>
+        </section>
+
+        <mat-form-field class="full-width" appearance="outline"  color="accent">
+            <mat-label>Deployment</mat-label>
+                <mat-select formControlName="process"
+                           required>
+                <mat-option *ngFor="let deployment of deployments"
+                            [value]="deployment">
+                    {{deployment.name}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
     </div>
 </mat-dialog-content>
 

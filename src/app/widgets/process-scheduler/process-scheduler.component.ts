@@ -62,7 +62,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     }
 
     delete(id: string) {
-        this.processSchedulerService.deleteSchedule(id).subscribe((resp: {status: number}) => {
+        this.processSchedulerService.deleteSchedule(id).subscribe((resp: { status: number }) => {
             if (resp.status === 200) {
                 this.reload();
             }
@@ -87,15 +87,13 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
             this.schedules = [];
             schedules.forEach((schedule: ProcessSchedulerModel) => {
                 this.deploymentsService.getDeployments(schedule.process_deployment_id).subscribe((deployment: (DeploymentsPreparedModel | null)) => {
-                    if (deployment) {
-                        this.schedules.push({
-                            cron: schedule.cron,
-                            cronHumanReadable: cronstrue.toString(schedule.cron, {locale: 'de'}),
-                            processId: schedule.process_deployment_id,
-                            scheduleId: schedule.id,
-                            processName: deployment.name,
-                        });
-                    }
+                    this.schedules.push({
+                        cron: schedule.cron,
+                        cronHumanReadable: cronstrue.toString(schedule.cron, {locale: 'de'}),
+                        processId: schedule.process_deployment_id,
+                        scheduleId: schedule.id,
+                        processName: deployment ? deployment.name : 'Invalid Deployment',
+                    });
                 });
             });
             this.ready = true;

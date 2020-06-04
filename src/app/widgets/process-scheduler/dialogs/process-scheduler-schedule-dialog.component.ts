@@ -17,6 +17,11 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {FormArray, FormControl, FormGroup} from '@angular/forms';
+import {ProcessSchedulerModel} from '../shared/process-scheduler.model';
+import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
+import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
+import {ProcessModel} from '../../../modules/processes/process-repo/shared/process.model';
 
 
 @Component({
@@ -25,12 +30,31 @@ import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.mo
 })
 export class ProcessSchedulerScheduleDialogComponent implements OnInit {
 
-    widget: WidgetModel = {} as WidgetModel;
+    form = new FormGroup({
+        days: new FormArray([
+            new FormControl(false),
+            new FormControl(false),
+            new FormControl(false),
+            new FormControl(false),
+            new FormControl(false),
+            new FormControl(false),
+            new FormControl(false),
+        ]),
+        process: new FormControl(''),
+        time: new FormControl('15:15')
+    });
 
-    constructor(private dialogRef: MatDialogRef<ProcessSchedulerScheduleDialogComponent>) {
+    widget: WidgetModel = {} as WidgetModel;
+    deployments: DeploymentsModel[] = [];
+
+    constructor(private dialogRef: MatDialogRef<ProcessSchedulerScheduleDialogComponent>,
+                private deploymentsService: DeploymentsService) {
     }
 
     ngOnInit() {
+        this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc').subscribe((deployments: DeploymentsModel[]) => {
+            this.deployments = deployments;
+        });
     }
 
     close(): void {
@@ -38,7 +62,19 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     }
 
     save(): void {
-
+        const cronDays: number[] = [];
+        const days = <boolean[]>(this.form.get('days') as FormArray).value;
+        days.forEach((day: boolean, index: number) => {
+            if (day === true) {
+                cronDays.push(index);
+            }
+        });
+        const process = <ProcessModel>(this.form.get('process') as FormControl).value;
+        const time = (this.form.get('time') as FormControl).value;
+        const date = new Date();
+        date.setHours(time.split(':')[0]);
+        date.setMinutes(time.split(':')[1]);
+        this.dialogRef.close({id: '', cron: date.getUTCMinutes() + ' ' + ' ' + date.getUTCHours() + ' * * ' + cronDays.join(), process_deployment_id: process.id} as ProcessSchedulerModel);
     }
 
 }

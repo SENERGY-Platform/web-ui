@@ -28,6 +28,8 @@ import {catchError, map} from 'rxjs/internal/operators';
 import {HttpClient, HttpResponseBase} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {ProcessSchedulerScheduleDialogComponent} from '../dialogs/process-scheduler-schedule-dialog.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {ProcessSchedulerScheduleEditDialogComponent} from '../dialogs/process-scheduler-schedule-edit-dialog.component';
 
 
 @Injectable({
@@ -39,7 +41,8 @@ export class ProcessSchedulerService {
                 private dashboardService: DashboardService,
                 private processRepoService: ProcessRepoService,
                 private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService) {
+                private errorHandlerService: ErrorHandlerService,
+                private snackBar: MatSnackBar) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -49,13 +52,13 @@ export class ProcessSchedulerService {
             widgetId: widgetId,
             dashboardId: dashboardId,
         };
-        // const editDialogRef = this.dialog.open(ProcessModelListEditDialogComponent, dialogConfig);
+        const editDialogRef = this.dialog.open(ProcessSchedulerScheduleEditDialogComponent, dialogConfig);
 
-        // editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-        //     if (widget !== undefined) {
-        //         this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-        //     }
-        // });
+        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
+            if (widget !== undefined) {
+                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
+            }
+        });
     }
 
     openScheduleDialog(): void {
@@ -63,11 +66,15 @@ export class ProcessSchedulerService {
         dialogConfig.disableClose = false;
         const editDialogRef = this.dialog.open(ProcessSchedulerScheduleDialogComponent, dialogConfig);
 
-        // editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-        //     if (widget !== undefined) {
-        //         this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-        //     }
-        // });
+        editDialogRef.afterClosed().subscribe((schedule: ProcessSchedulerModel) => {
+            if (schedule !== undefined) {
+                this.createSchedule(schedule).subscribe((resp: (ProcessSchedulerModel | null)) => {
+                    if (resp !== null) {
+                        this.snackBar.open('Schedule saved!', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
     }
 
     getSchedules(): Observable<ProcessSchedulerModel[]> {
@@ -86,10 +93,10 @@ export class ProcessSchedulerService {
         );
     }
 
-    createSchedule(schedule: ProcessSchedulerModel): Observable<ProcessSchedulerModel> {
+    createSchedule(schedule: ProcessSchedulerModel): Observable<ProcessSchedulerModel | null> {
         return this.http.post<ProcessSchedulerModel>(environment.processSchedulerUrl + '/schedules', schedule).pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteSchedule', {} as ProcessSchedulerModel))
+            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteSchedule', null))
         );
     }
 

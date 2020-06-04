@@ -88,6 +88,7 @@ import {MatRadioModule} from '@angular/material/radio';
 import {MatSortModule} from '@angular/material/sort';
 import {ProcessSchedulerComponent} from './process-scheduler/process-scheduler.component';
 import {ProcessSchedulerScheduleDialogComponent} from './process-scheduler/dialogs/process-scheduler-schedule-dialog.component';
+import {ProcessSchedulerScheduleEditDialogComponent} from './process-scheduler/dialogs/process-scheduler-schedule-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -168,6 +169,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ProcessIncidentListEditDialogComponent,
         ProcessSchedulerComponent,
         ProcessSchedulerScheduleDialogComponent,
+        ProcessSchedulerScheduleEditDialogComponent,
     ],
     exports: [
         SwitchComponent,
@@ -201,6 +203,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         AirQualityEditDialogComponent,
         ProcessIncidentListEditDialogComponent,
         ProcessSchedulerScheduleDialogComponent,
+        ProcessSchedulerScheduleEditDialogComponent,
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 
