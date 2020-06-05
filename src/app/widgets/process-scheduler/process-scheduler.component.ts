@@ -28,6 +28,8 @@ import {DeploymentsPreparedModel} from '../../modules/processes/deployments/shar
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ProcessSchedulerScheduleDialogComponent} from './dialogs/process-scheduler-schedule-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {DialogsService} from '../../core/services/dialogs.service';
 
 @Component({
     selector: 'senergy-process-scheduler',
@@ -48,7 +50,8 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
                 private dashboardService: DashboardService,
                 private deploymentsService: DeploymentsService,
                 private dialog: MatDialog,
-                private snackBar: MatSnackBar) {
+                private snackBar: MatSnackBar,
+                private dialogsService: DialogsService) {
     }
 
     ngOnInit() {
@@ -63,10 +66,14 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
         this.processSchedulerService.openEditDialog(this.dashboardId, this.widget.id);
     }
 
-    delete(id: string) {
-        this.processSchedulerService.deleteSchedule(id).subscribe((resp: { status: number }) => {
-            if (resp.status === 200) {
-                this.reload();
+    delete(scheduleId: string) {
+        this.dialogsService.openDeleteDialog('schedule').afterClosed().subscribe((deleteDashboard: boolean) => {
+            if (deleteDashboard === true) {
+                this.processSchedulerService.deleteSchedule(scheduleId).subscribe((resp: { status: number }) => {
+                    if (resp.status === 200) {
+                        this.reload();
+                    }
+                });
             }
         });
     }
