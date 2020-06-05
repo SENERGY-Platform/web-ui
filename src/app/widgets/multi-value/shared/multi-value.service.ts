@@ -81,9 +81,15 @@ export class MultiValueService {
                 const array: ChartsExportRequestPayloadQueriesModel[] = [];
                 measurements.forEach((measurement: MultiValueMeasurement) => {
                     if (array.length > 0 && array[array.length - 1].id === measurement.export.id) {
-                        array[array.length - 1].fields.push({name: measurement.column.Name, math: measurement.math || ''});
+                        array[array.length - 1].fields.push({
+                            name: measurement.column.Name,
+                            math: measurement.math || ''
+                        });
                     } else {
-                        array.push({id: measurement.export.id, fields: [{name: measurement.column.Name, math: measurement.math || ''}]});
+                        array.push({
+                            id: measurement.export.id,
+                            fields: [{name: measurement.column.Name, math: measurement.math || ''}]
+                        });
                     }
                 });
                 requestPayload.queries = array;
@@ -100,7 +106,7 @@ export class MultiValueService {
                                 measurements[idIndex].data = val[columnIndex];
                             }
                         });
-                        if (measurements[idIndex].data == null) {
+                        if (measurements[idIndex].data == null && measurements[idIndex].type !== 'Boolean') {
                             measurements[idIndex].data = 'N/A';
                             /* Act like a String if no value found, prevents piping.
                              * Also remove unit because 'N/A %' is weird.
@@ -110,11 +116,15 @@ export class MultiValueService {
                             measurements[idIndex].unit = '';
                             measurements[idIndex].type = 'String';
                         }
+                        if (measurements[idIndex].type === 'Boolean' && measurements[idIndex].data == null) {
+                            measurements[idIndex].data = 'False';
+                        }
                     });
                     observer.next(widget);
                     observer.complete();
                 });
-        }});
+            }
+        });
     }
 }
 

@@ -161,7 +161,8 @@ export class MultiValueEditDialogComponent implements OnInit {
     }
 
     addMeasurement(measurement: MultiValueMeasurement) {
-        const isStringType = measurement.type === 'String' || measurement.type === '';
+        const disableNumberOperations = measurement.type === 'String' || measurement.type === '' || measurement.type === 'Boolean';
+        const disableUnit = measurement.type === 'Boolean';
         const warning_disabled = measurement.warning_enabled !== true;
         let lower: any = measurement.lowerBoundary;
         let upper: any = measurement.upperBoundary;
@@ -175,12 +176,12 @@ export class MultiValueEditDialogComponent implements OnInit {
             name: [measurement.name, Validators.required],
             export: [measurement.export, emptyObjectValidator()],
             column: [measurement.column, emptyObjectValidator()],
-            unit: [measurement.unit],
+            unit: [{value: measurement.unit, disabled: disableUnit}],
             type: [measurement.type, Validators.required],
             format: [measurement.format],
-            math: [{value: measurement.math, disabled: isStringType}, this.mathValidator],
+            math: [{value: measurement.math, disabled: disableNumberOperations}, this.mathValidator],
             warnings: this.fb.group({
-                warning_enabled: [{value: measurement.warning_enabled, disabled: isStringType}],
+                warning_enabled: [{value: measurement.warning_enabled, disabled: disableNumberOperations}],
                 lowerBoundary: [{value: lower, disabled: warning_disabled}],
                 upperBoundary: [{value: upper, disabled: warning_disabled}]
             }, {validators: [this.boundaryValidator]})
@@ -197,7 +198,11 @@ export class MultiValueEditDialogComponent implements OnInit {
         });
 
         (newGroup.get('type') as FormControl).valueChanges.subscribe(() => {
-            if ((newGroup.get('type') as FormControl).value === 'String') {
+            const type = (newGroup.get('type') as FormControl).value;
+            const disableNumberOperationsChange = type === 'String' || type === '' || type === 'Boolean';
+            const disableUnitChange = type === 'Boolean';
+
+            if (disableNumberOperationsChange) {
                 const warn_group = (newGroup.get('warnings') as FormGroup);
 
                 (warn_group.get('warning_enabled') as FormControl).setValue(false);
@@ -208,6 +213,13 @@ export class MultiValueEditDialogComponent implements OnInit {
             } else {
                 ((newGroup.get('warnings') as FormGroup).get('warning_enabled') as FormControl).enable();
                 (newGroup.get('math') as FormControl).enable();
+            }
+
+            const unitFormControl = (newGroup.get('unit') as FormControl);
+            if (disableUnitChange) {
+                unitFormControl.disable();
+            } else {
+                unitFormControl.enable();
             }
         });
 

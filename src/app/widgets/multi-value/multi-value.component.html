@@ -34,7 +34,7 @@
                     <th mat-header-cell mat-sort-header *matHeaderCellDef>{{widget.properties.valueAlias || 'Value'}}</th>
 
                     <td mat-cell *matCellDef="let m">
-                        <span *ngIf="m.type === 'String'">
+                        <span *ngIf="m.type === 'String' || m.type === 'Boolean'">
                             {{m.data}} {{m.unit}}
                         </span>
                         <span *ngIf="m.type !== 'String'"
