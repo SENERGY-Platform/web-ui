@@ -15,9 +15,7 @@
  */
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {
-    WidgetModel
-} from '../../modules/dashboard/shared/dashboard-widget.model';
+import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
 import {ProcessSchedulerService} from './shared/process-scheduler.service';
 import {ProcessSchedulerModel} from './shared/process-scheduler.model';
 import {Subscription} from 'rxjs';
@@ -28,8 +26,8 @@ import {DeploymentsPreparedModel} from '../../modules/processes/deployments/shar
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ProcessSchedulerScheduleDialogComponent} from './dialogs/process-scheduler-schedule-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {DialogsService} from '../../core/services/dialogs.service';
+import {CronModel} from './shared/cron.model';
 
 @Component({
     selector: 'senergy-process-scheduler',
@@ -126,7 +124,6 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
                 this.deploymentsService.getDeployments(schedule.process_deployment_id).subscribe((deployment: (DeploymentsPreparedModel | null)) => {
                     this.schedules.push({
                         cron: schedule.cron,
-                        cronHumanReadable: this.splitCron(schedule.cron),
                         processId: schedule.process_deployment_id,
                         scheduleId: schedule.id,
                         processName: deployment ? deployment.name : 'Invalid Deployment',
@@ -137,27 +134,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
         });
     }
 
-    private splitCron(cron: string) {
-        const daysAbbreviation = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-        const min = cron.split(' ')[0];
-        const hours = cron.split(' ')[1];
-        const days = cron.split(' ')[4].split(',');
-        const daysReadable: string[] = [];
-        days.forEach((day: string) => {
-            daysReadable.push(daysAbbreviation[parseInt(day, 10)]);
-        });
-
-        const date = new Date();
-        date.setUTCHours(parseInt(hours, 10));
-        date.setUTCMinutes(parseInt(min, 10));
-
-        let time = date.getHours() + ':';
-        if (date.getMinutes() < 10) {
-            time += '0' + date.getMinutes();
-        } else {
-            time += date.getMinutes();
-        }
-
-        return time + ' ' + daysReadable.join();
+    cronReadable(cron: string): string {
+        return new CronModel(cron).getLocalTimeAndDaysAsString();
     }
 }

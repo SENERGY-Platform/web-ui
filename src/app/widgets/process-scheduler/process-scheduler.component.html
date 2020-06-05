@@ -22,7 +22,7 @@
         <div *ngIf="ready && schedules.length != 0" fxLayout="column" fxFill>
             <mat-list>
                 <mat-list-item *ngFor="let schedule of schedules">
-                    <h4 mat-line class="drag-handler">{{schedule.cronHumanReadable}}</h4>
+                    <h4 mat-line class="drag-handler">{{cronReadable(schedule.cron)}}</h4>
                     <h4 mat-line class="drag-handler">{{'Process: ' + schedule.processName}}</h4>
                     <button mat-icon-button color="accent" matTooltip="delete schedule"
                             (click)="add(schedule)">

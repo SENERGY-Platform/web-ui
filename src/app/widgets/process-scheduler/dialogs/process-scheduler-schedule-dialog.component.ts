@@ -23,6 +23,7 @@ import {DeploymentsModel} from '../../../modules/processes/deployments/shared/de
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {ProcessModel} from '../../../modules/processes/process-repo/shared/process.model';
 import {ProcessSchedulerWidgetModel} from '../shared/process-scheduler-widget.model';
+import {CronModel} from '../shared/cron.model';
 
 
 @Component({
@@ -53,15 +54,8 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
                 private deploymentsService: DeploymentsService,
                 @Inject(MAT_DIALOG_DATA) data: (ProcessSchedulerWidgetModel | null)) {
         if (data) {
-            const time = data.cronHumanReadable.split(' ')[0];
-            const days = data.cronHumanReadable.split(' ')[1].split(',');
-            const daysAbbreviation = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-            const boolArray: boolean[] = [];
-            daysAbbreviation.forEach((day: string) => {
-                boolArray.push(days.indexOf(day) > -1);
-            });
-            this.form.controls.days.patchValue(boolArray);
-            this.form.patchValue({'id': data.scheduleId, 'time': time, 'processId': data.processId});
+            const cron = new CronModel(data.cron);
+            this.form.patchValue({'id': data.scheduleId, 'time': cron.getLocalTime(), 'processId': data.processId, 'days': cron.getDaysAsBoolArray()});
         }
 
     }

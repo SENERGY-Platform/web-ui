@@ -17,7 +17,6 @@
 export interface ProcessSchedulerWidgetModel {
     scheduleId: string;
     cron: string;
-    cronHumanReadable: string;
     processName: string;
     processId: string;
 }
