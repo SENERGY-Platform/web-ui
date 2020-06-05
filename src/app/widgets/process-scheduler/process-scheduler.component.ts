@@ -132,6 +132,13 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
         date.setUTCHours(parseInt(hours, 10));
         date.setUTCMinutes(parseInt(min, 10));
 
-        return date.getHours() + ':' + date.getMinutes() + ' ' + daysReadable.join();
+        let time = date.getHours() + ':';
+        if (date.getMinutes() < 10) {
+            time += '0' + date.getMinutes();
+        } else {
+            time += date.getMinutes();
+        }
+
+        return time + ' ' + daysReadable.join();
     }
 }
