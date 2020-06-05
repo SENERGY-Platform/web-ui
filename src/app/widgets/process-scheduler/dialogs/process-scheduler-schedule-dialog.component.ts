@@ -17,7 +17,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {FormArray, FormControl, FormGroup} from '@angular/forms';
+import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ProcessSchedulerModel} from '../shared/process-scheduler.model';
 import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
@@ -42,8 +42,8 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
             new FormControl(false),
             new FormControl(false),
         ]),
-        processId: new FormControl(''),
-        time: new FormControl('')
+        processId: new FormControl('', [Validators.required]),
+        time: new FormControl('', [Validators.required])
     });
 
     widget: WidgetModel = {} as WidgetModel;
@@ -70,6 +70,10 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
         });
     }
 
+    daySelected(): boolean {
+       return this.getDays().indexOf(true) > -1;
+    }
+
     close(): void {
         this.dialogRef.close();
     }
@@ -82,9 +86,13 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
 
         this.dialogRef.close({
             id: (this.form.get('id') as FormControl).value,
-            cron: this.cronConverterService.getCronAsString((this.form.get('time') as FormControl).value, <boolean[]>(this.form.get('days') as FormArray).value),
+            cron: this.cronConverterService.getCronAsString((this.form.get('time') as FormControl).value, this.getDays()),
             process_deployment_id: (this.form.get('processId') as FormControl).value
         } as ProcessSchedulerModel);
+    }
+
+    private getDays(): boolean[] {
+        return <boolean[]>(this.form.get('days') as FormArray).value;
     }
 
 }
