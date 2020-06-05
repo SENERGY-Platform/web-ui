@@ -32,10 +32,11 @@ export function contentVariableValidator(leafCharacteristics: DeviceTypeCharacte
                 type === 'https://schema.org/Integer' ||
                 type === 'https://schema.org/Float' ||
                 type === 'https://schema.org/Boolean' ||
-                type === 'https://schema.org/StructuredValue') {
+                type === 'https://schema.org/StructuredValue' ||
+                type === 'https://schema.org/ItemList') {
                 return null;
             } else {
-                return 'invalid Type! Use `https://schema.org/Text` or `Integer, Float, Boolean, StructuredValue`';
+                return 'invalid Type! Use `https://schema.org/Text` or `Integer, Float, Boolean, StructuredValue, ItemList`';
             }
         }
     }
