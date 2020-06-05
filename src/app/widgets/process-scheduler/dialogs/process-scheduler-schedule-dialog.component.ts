@@ -79,23 +79,11 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     }
 
     save(): void {
-        const id = (this.form.get('id') as FormControl).value;
-        const cronDays: number[] = [];
-        const days = <boolean[]>(this.form.get('days') as FormArray).value;
-        days.forEach((day: boolean, index: number) => {
-            if (day === true) {
-                cronDays.push(index);
-            }
-        });
-        const processId = (this.form.get('processId') as FormControl).value;
-        const time = (this.form.get('time') as FormControl).value;
-        const date = new Date();
-        date.setHours(time.split(':')[0]);
-        date.setMinutes(time.split(':')[1]);
+
         this.dialogRef.close({
-            id: id,
-            cron: date.getUTCMinutes() + ' ' + date.getUTCHours() + ' * * ' + cronDays.join(),
-            process_deployment_id: processId
+            id: (this.form.get('id') as FormControl).value,
+            cron: this.cronConverterService.getCronAsString((this.form.get('time') as FormControl).value, <boolean[]>(this.form.get('days') as FormArray).value),
+            process_deployment_id: (this.form.get('processId') as FormControl).value
         } as ProcessSchedulerModel);
     }
 

@@ -1,12 +1,12 @@
 /*
  * Copyright 2020 InfAI (CC SES)
- *  
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import {ErrorHandlerService} from '../../../core/services/error-handler.service'
 import {ProcessSchedulerScheduleDialogComponent} from '../dialogs/process-scheduler-schedule-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ProcessSchedulerScheduleEditDialogComponent} from '../dialogs/process-scheduler-schedule-edit-dialog.component';
+import {FormArray, FormControl} from '@angular/forms';
 
 
 @Injectable({
@@ -45,8 +46,8 @@ export class CronConverterService {
         const hours = cron.split(' ')[1];
 
         const date = new Date();
-        date.setUTCHours(parseInt(hours, 10));
-        date.setUTCMinutes(parseInt(min, 10));
+        date.setUTCHours(Number(hours));
+        date.setUTCMinutes(Number(min));
 
         let time = date.getHours() + ':';
         if (date.getMinutes() < 10) {
@@ -62,7 +63,7 @@ export class CronConverterService {
         // index[0] => sunday; index[1] => monday
         const boolArray: boolean[] = [false, false, false, false, false, false, false];
         days.forEach((day: string) => {
-            boolArray[parseInt(day, 10)] = true;
+            boolArray[Number(day)] = true;
         });
         return boolArray;
     }
@@ -77,9 +78,22 @@ export class CronConverterService {
         const daysAsString = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
         const daysResult: string[] = [];
         daysIntArray.forEach((dayInt: string) => {
-            daysResult.push(daysAsString[parseInt(dayInt, 10)]);
+            daysResult.push(daysAsString[Number(dayInt)]);
         });
         return daysResult.join();
+    }
+
+    getCronAsString(time: string, daysAsBoolArray: boolean[]): string {
+        const cronDays: number[] = [];
+        daysAsBoolArray.forEach((day: boolean, index: number) => {
+            if (day === true) {
+                cronDays.push(index);
+            }
+        });
+        const date = new Date();
+        date.setHours(Number(time.split(':')[0]));
+        date.setMinutes(Number(time.split(':')[1]));
+        return date.getUTCMinutes() + ' ' + date.getUTCHours() + ' * * ' + cronDays.join();
     }
 
 }
