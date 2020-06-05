@@ -93,6 +93,7 @@ export class DeployFlowComponent {
         this.ready = false;
         this.pipeReq.nodes.forEach((pipeReqNode: NodeModel) => {
             pipeReqNode.config = [];
+            const nodeValues = [] as NodeValue [];
             for (const entry of this.selectedValues.get(pipeReqNode.nodeId).entries()) {
                 // check if device and service are selected
                 if (entry[0] === '_config') {
@@ -110,8 +111,8 @@ export class DeployFlowComponent {
                     }
                     // parse input of form fields
                     const nodeValue = {name: entry [0], path: entry[1].path} as NodeValue;
-                    const nodeValues = [] as NodeValue [];
                     nodeValues.push(nodeValue);
+
                     // add values from input form
                     const nodeInput = {
                         deviceId: deviceIds,
