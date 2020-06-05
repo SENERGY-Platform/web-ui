@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import {Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import {ProcessSchedulerModel} from '../shared/process-scheduler.model';
 import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {ProcessModel} from '../../../modules/processes/process-repo/shared/process.model';
+import {ProcessSchedulerWidgetModel} from '../shared/process-scheduler-widget.model';
 
 
 @Component({
@@ -31,6 +32,7 @@ import {ProcessModel} from '../../../modules/processes/process-repo/shared/proce
 export class ProcessSchedulerScheduleDialogComponent implements OnInit {
 
     form = new FormGroup({
+        id: new FormControl(''),
         days: new FormArray([
             new FormControl(false),
             new FormControl(false),
@@ -40,7 +42,7 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
             new FormControl(false),
             new FormControl(false),
         ]),
-        process: new FormControl(''),
+        processId: new FormControl(''),
         time: new FormControl('')
     });
 
@@ -48,7 +50,20 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     deployments: DeploymentsModel[] = [];
 
     constructor(private dialogRef: MatDialogRef<ProcessSchedulerScheduleDialogComponent>,
-                private deploymentsService: DeploymentsService) {
+                private deploymentsService: DeploymentsService,
+                @Inject(MAT_DIALOG_DATA) data: (ProcessSchedulerWidgetModel | null)) {
+        if (data) {
+            const time = data.cronHumanReadable.split(' ')[0];
+            const days = data.cronHumanReadable.split(' ')[1].split(',');
+            const daysAbbreviation = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            const boolArray: boolean[] = [];
+            daysAbbreviation.forEach((day: string) => {
+                boolArray.push(days.indexOf(day) > -1);
+            });
+            this.form.controls.days.patchValue(boolArray);
+            this.form.patchValue({'id': data.scheduleId, 'time': time, 'processId': data.processId});
+        }
+
     }
 
     ngOnInit() {
@@ -61,7 +76,12 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
+    compare(a: DeploymentsModel, b: string): boolean {
+        return a.id === b;
+    }
+
     save(): void {
+        const id = (this.form.get('id') as FormControl).value;
         const cronDays: number[] = [];
         const days = <boolean[]>(this.form.get('days') as FormArray).value;
         days.forEach((day: boolean, index: number) => {
@@ -69,12 +89,16 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
                 cronDays.push(index);
             }
         });
-        const process = <ProcessModel>(this.form.get('process') as FormControl).value;
+        const processId = (this.form.get('processId') as FormControl).value;
         const time = (this.form.get('time') as FormControl).value;
         const date = new Date();
         date.setHours(time.split(':')[0]);
         date.setMinutes(time.split(':')[1]);
-        this.dialogRef.close({id: '', cron: date.getUTCMinutes() + ' ' + date.getUTCHours() + ' * * ' + cronDays.join(), process_deployment_id: process.id} as ProcessSchedulerModel);
+        this.dialogRef.close({
+            id: id,
+            cron: date.getUTCMinutes() + ' ' + date.getUTCHours() + ' * * ' + cronDays.join(),
+            process_deployment_id: processId
+        } as ProcessSchedulerModel);
     }
 
 }

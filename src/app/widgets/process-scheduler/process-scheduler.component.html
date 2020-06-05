@@ -24,7 +24,11 @@
                 <mat-list-item *ngFor="let schedule of schedules">
                     <h4 mat-line class="drag-handler">{{schedule.cronHumanReadable}}</h4>
                     <h4 mat-line class="drag-handler">{{'Process: ' + schedule.processName}}</h4>
-                    <button mat-icon-button class="mat-warn" matTooltip="delete schedule"
+                    <button mat-icon-button color="accent" matTooltip="delete schedule"
+                            (click)="add(schedule)">
+                        <mat-icon class="fix-position">edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="accent" matTooltip="delete schedule"
                             (click)="delete(schedule.scheduleId)">
                         <mat-icon class="fix-position">delete</mat-icon>
                     </button>
@@ -34,6 +38,6 @@
         <senergy-no-data [showIf]="ready && schedules.length === 0"></senergy-no-data>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionAdd]="true" (editEvent)="edit()"
-                           (addEvent)="add()"></senergy-widget-footer>
+                           (addEvent)="add(null)"></senergy-widget-footer>
 </mat-card>
 

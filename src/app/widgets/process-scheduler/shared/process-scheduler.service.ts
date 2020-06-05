@@ -84,5 +84,12 @@ export class ProcessSchedulerService {
         );
     }
 
+    updateSchedule(schedule: ProcessSchedulerModel): Observable<ProcessSchedulerModel | null> {
+        return this.http.put<ProcessSchedulerModel>(environment.processSchedulerUrl + '/schedules/' + schedule.id, schedule).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'updateSchedule', null))
+        );
+    }
+
 }
 

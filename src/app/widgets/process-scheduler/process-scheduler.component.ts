@@ -78,22 +78,34 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
         });
     }
 
-    add() {
+    add(item: (ProcessSchedulerWidgetModel | null)) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
+        dialogConfig.data = item ? JSON.parse(JSON.stringify(item)) : null;
         const editDialogRef = this.dialog.open(ProcessSchedulerScheduleDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((schedule: ProcessSchedulerModel) => {
             if (schedule !== undefined) {
-                this.processSchedulerService.createSchedule(schedule).subscribe((resp: (ProcessSchedulerModel | null)) => {
-                    if (resp !== null) {
-                        this.snackBar.open('Schedule saved!', undefined, {duration: 2000});
-                        this.reload();
-                    } else {
-                        this.snackBar.open('Error while saving schedule!');
-                    }
+                if (schedule.id === '') {
+                    this.processSchedulerService.createSchedule(schedule).subscribe((resp: (ProcessSchedulerModel | null)) => {
+                        if (resp !== null) {
+                            this.snackBar.open('Schedule saved!', undefined, {duration: 2000});
+                            this.reload();
+                        } else {
+                            this.snackBar.open('Error while saving schedule!');
+                        }
+                    });
+                } else {
+                    this.processSchedulerService.updateSchedule(schedule).subscribe((resp: (ProcessSchedulerModel | null)) => {
+                        if (resp !== null) {
+                            this.snackBar.open('Schedule updated!', undefined, {duration: 2000});
+                            this.reload();
+                        } else {
+                            this.snackBar.open('Error while updating schedule!');
+                        }
+                    });
+                }
 
-                });
             }
         });
     }

@@ -33,12 +33,11 @@
             <mat-checkbox class="checkbox-margin" formControlName="0">Sunday</mat-checkbox>
         </section>
 
-        <mat-form-field class="full-width" appearance="outline"  color="accent">
+        <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Deployment</mat-label>
-                <mat-select formControlName="process"
-                           required>
+            <mat-select formControlName="processId" required>
                 <mat-option *ngFor="let deployment of deployments"
-                            [value]="deployment">
+                            [value]="deployment.id">
                     {{deployment.name}}
                 </mat-option>
             </mat-select>
