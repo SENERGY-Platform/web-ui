@@ -25,6 +25,9 @@ import {DashboardService} from '../../modules/dashboard/shared/dashboard.service
 import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
 import {ProcessSchedulerWidgetModel} from './shared/process-scheduler-widget.model';
 import {DeploymentsPreparedModel} from '../../modules/processes/deployments/shared/deployments-prepared.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {ProcessSchedulerScheduleDialogComponent} from './dialogs/process-scheduler-schedule-dialog.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
     selector: 'senergy-process-scheduler',
@@ -43,7 +46,9 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
 
     constructor(private processSchedulerService: ProcessSchedulerService,
                 private dashboardService: DashboardService,
-                private deploymentsService: DeploymentsService) {
+                private deploymentsService: DeploymentsService,
+                private dialog: MatDialog,
+                private snackBar: MatSnackBar) {
     }
 
     ngOnInit() {
@@ -67,7 +72,23 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     }
 
     add() {
-        this.processSchedulerService.openScheduleDialog();
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        const editDialogRef = this.dialog.open(ProcessSchedulerScheduleDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((schedule: ProcessSchedulerModel) => {
+            if (schedule !== undefined) {
+                this.processSchedulerService.createSchedule(schedule).subscribe((resp: (ProcessSchedulerModel | null)) => {
+                    if (resp !== null) {
+                        this.snackBar.open('Schedule saved!', undefined, {duration: 2000});
+                        this.reload();
+                    } else {
+                        this.snackBar.open('Error while saving schedule!');
+                    }
+
+                });
+            }
+        });
     }
 
     private getSchedules() {

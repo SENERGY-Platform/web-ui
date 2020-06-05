@@ -61,22 +61,6 @@ export class ProcessSchedulerService {
         });
     }
 
-    openScheduleDialog(): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        const editDialogRef = this.dialog.open(ProcessSchedulerScheduleDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((schedule: ProcessSchedulerModel) => {
-            if (schedule !== undefined) {
-                this.createSchedule(schedule).subscribe((resp: (ProcessSchedulerModel | null)) => {
-                    if (resp !== null) {
-                        this.snackBar.open('Schedule saved!', undefined, {duration: 2000});
-                    }
-                });
-            }
-        });
-    }
-
     getSchedules(): Observable<ProcessSchedulerModel[]> {
         return this.http.get<ProcessSchedulerModel[]>(environment.processSchedulerUrl + '/schedules').pipe(
             map(resp => resp || []),
