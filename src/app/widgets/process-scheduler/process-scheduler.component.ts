@@ -27,7 +27,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ProcessSchedulerScheduleDialogComponent} from './dialogs/process-scheduler-schedule-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../core/services/dialogs.service';
-import {CronModel} from './shared/cron.model';
+import {CronConverterService} from './shared/cron-converter.service';
 
 @Component({
     selector: 'senergy-process-scheduler',
@@ -49,7 +49,8 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
                 private deploymentsService: DeploymentsService,
                 private dialog: MatDialog,
                 private snackBar: MatSnackBar,
-                private dialogsService: DialogsService) {
+                private dialogsService: DialogsService,
+                private cronConverterService: CronConverterService) {
     }
 
     ngOnInit() {
@@ -135,6 +136,6 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     }
 
     cronReadable(cron: string): string {
-        return new CronModel(cron).getLocalTimeAndDaysAsString();
+        return this.cronConverterService.getLocalTimeAndDaysAsString(cron);
     }
 }

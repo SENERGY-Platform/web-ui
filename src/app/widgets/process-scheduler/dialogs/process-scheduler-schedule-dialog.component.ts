@@ -21,9 +21,8 @@ import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import {ProcessSchedulerModel} from '../shared/process-scheduler.model';
 import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {ProcessModel} from '../../../modules/processes/process-repo/shared/process.model';
 import {ProcessSchedulerWidgetModel} from '../shared/process-scheduler-widget.model';
-import {CronModel} from '../shared/cron.model';
+import {CronConverterService} from '../shared/cron-converter.service';
 
 
 @Component({
@@ -52,10 +51,15 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
 
     constructor(private dialogRef: MatDialogRef<ProcessSchedulerScheduleDialogComponent>,
                 private deploymentsService: DeploymentsService,
+                private cronConverterService: CronConverterService,
                 @Inject(MAT_DIALOG_DATA) data: (ProcessSchedulerWidgetModel | null)) {
         if (data) {
-            const cron = new CronModel(data.cron);
-            this.form.patchValue({'id': data.scheduleId, 'time': cron.getLocalTime(), 'processId': data.processId, 'days': cron.getDaysAsBoolArray()});
+            this.form.patchValue({
+                'id': data.scheduleId,
+                'time': this.cronConverterService.getLocalTime(data.cron),
+                'processId': data.processId,
+                'days': this.cronConverterService.getDaysAsBoolArray(data.cron)
+            });
         }
 
     }
