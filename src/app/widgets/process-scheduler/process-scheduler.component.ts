@@ -98,12 +98,19 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     }
 
     private splitCron(cron: string) {
+        const daysAbbreviation = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
         const min = cron.split(' ')[0];
         const hours = cron.split(' ')[1];
-        const days = cron.split(' ')[4];
+        const days = cron.split(' ')[4].split(',');
+        const daysReadable: string[] = [];
+        days.forEach((day: string) => {
+            daysReadable.push(daysAbbreviation[parseInt(day, 10)]);
+        });
+
         const date = new Date();
         date.setUTCHours(parseInt(hours, 10));
         date.setUTCMinutes(parseInt(min, 10));
-        return date.getHours() + ':' + date.getMinutes() + ' ' + days;
+
+        return date.getHours() + ':' + date.getMinutes() + ' ' + daysReadable.join();
     }
 }
