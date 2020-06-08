@@ -59,10 +59,6 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.getAspects();
     }
 
-    trackByFn(index: any) {
-        return index;
-    }
-
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
@@ -71,21 +67,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         });
     }
 
-    get elements(): FormArray {
-        return this.formGroup.get('elements') as FormArray;
-    }
-
-
     addElement(element: DeviceStatusElementModel) {
-        // console.log(this.elements);
-        // console.log(this.elements);
-        // this.elements.controls.push(this.setElement(element));
-        // this.elements.push();
-        console.log(element);
-
-        const formArray = <FormArray>this.formGroup.controls['elements'];
-        formArray.push(this.setElement(element));
-
+        this.elements.controls.push(this.setElement(element));
     }
 
     close(): void {
@@ -116,5 +99,9 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             name: [element.name, Validators.required],
             aspect: [],
         });
+    }
+
+    get elements(): FormArray {
+        return this.formGroup.get('elements') as FormArray;
     }
 }
