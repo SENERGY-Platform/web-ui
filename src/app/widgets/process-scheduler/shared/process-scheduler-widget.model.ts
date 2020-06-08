@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-export enum DashboardTypesEnum {
-    Switch = 'switch',
-    Chart = 'chart',
-    DevicesState = 'devices_state',
-    ProcessState = 'process_state',
-    EventList = 'event_list',
-    RankingList = 'ranking_list',
-    ProcessModelList = 'process_model_list',
-    DeviceDowntimeList = 'device_downtime_list',
-    SingleValue = 'single_value',
-    MultiValue = 'multi_value',
-    EnergyPrediction = 'energy_prediction',
-    AirQuality = 'air_quality',
-    ProcessIncidentList = 'process_incident_list',
-    ProcessScheduler = 'process_scheduler',
+export interface ProcessSchedulerWidgetModel {
+    scheduleId: string;
+    cron: string;
+    processName: string;
+    processId: string;
 }

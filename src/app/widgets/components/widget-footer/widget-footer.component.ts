@@ -30,8 +30,10 @@ export class WidgetFooterComponent implements OnInit {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() optionZoom = false;
+    @Input() optionAdd = false;
     @Input() zoom = false;
     @Output() editEvent = new EventEmitter<boolean>();
+    @Output() addEvent = new EventEmitter<boolean>();
 
     constructor(private widgetHeaderService: WidgetFooterService,
                 private dashboardService: DashboardService) {
@@ -42,6 +44,10 @@ export class WidgetFooterComponent implements OnInit {
 
     edit() {
         this.editEvent.emit(true);
+    }
+
+    add() {
+        this.addEvent.emit(true);
     }
 
     delete() {

@@ -60,6 +60,7 @@ export class DashboardNewWidgetDialogComponent {
         {value: DashboardTypesEnum.EnergyPrediction, viewValue: 'Energy Prediction'},
         {value: DashboardTypesEnum.AirQuality, viewValue: 'Air Quality'},
         {value: DashboardTypesEnum.ProcessIncidentList, viewValue: 'Process incident list'},
+        {value: DashboardTypesEnum.ProcessScheduler, viewValue: 'Process Scheduler'},
     ];
     switchCategories: SwitchCategories[] = [
         {

@@ -1,0 +1,52 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>Schedule</h2>
+
+<mat-dialog-content>
+    <div fxLayout="column" [formGroup]="form">
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Time</mat-label>
+            <input formControlName="time" matInput type="time" required>
+        </mat-form-field>
+
+        <section formArrayName="days">
+            <mat-checkbox class="checkbox-margin" formControlName="1">Monday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="2">Tuesday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="3">Wednesday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="4">Thursday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="5">Friday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="6">Saturday</mat-checkbox>
+            <mat-checkbox class="checkbox-margin" formControlName="0">Sunday</mat-checkbox>
+        </section>
+
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Deployment</mat-label>
+            <mat-select formControlName="processId" required>
+                <mat-option *ngFor="let deployment of deployments"
+                            [value]="deployment.id">
+                    {{deployment.name}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
+    <button class="mat-raised-button mat-accent" [disabled]="this.form.invalid || !daySelected()" (click)="save()">Save</button>
+</mat-dialog-actions>
+
