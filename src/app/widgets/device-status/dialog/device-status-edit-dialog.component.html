@@ -50,6 +50,16 @@
                                 </mat-form-field>
                             </td>
                         </tr>
+                        <tr>
+                            <mat-form-field color="accent">
+                                <mat-select formControlName="aspectId" required
+                                            placeholder="Choose Export">
+                                    <mat-option *ngFor="let aspect of aspects" [value]="aspect.id">
+                                        {{aspect.name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </tr>
                     </table>
                     <!--                    <div>-->
                     <!--                    <span matTooltip="Move this measurement up or down">-->
