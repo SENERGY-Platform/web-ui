@@ -21,8 +21,6 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {DeviceStatusService} from './shared/device-status.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
-import {MultiValueMeasurement, MultiValueOrderEnum} from './shared/device-status.model';
-import {Sort} from '@angular/material/sort';
 import {MatTable} from '@angular/material/table';
 
 @Component({
@@ -35,7 +33,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     configured = false;
     destroy = new Subscription();
     dataReady = false;
-    orderedValues: MultiValueMeasurement[] = [];
+    // orderedValues: DeviceStatusMeasurement[] = [];
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -66,15 +64,15 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
         this.deviceStatusService.openEditDialog(this.dashboardId, this.widget.id);
     }
 
-    checkWarning(m: MultiValueMeasurement): boolean {
-        if (m.warning_enabled && m.data && m.lowerBoundary && (m.data < m.lowerBoundary)) {
-            return true;
-        }
-        if (m.warning_enabled && m.data && m.upperBoundary && (m.data > m. upperBoundary)) {
-            return true;
-        }
-        return false;
-    }
+    // checkWarning(m: DeviceStatusMeasurement): boolean {
+    //     // if (m.warning_enabled && m.data && m.lowerBoundary && (m.data < m.lowerBoundary)) {
+    //     //     return true;
+    //     // }
+    //     // if (m.warning_enabled && m.data && m.upperBoundary && (m.data > m. upperBoundary)) {
+    //     //     return true;
+    //     // }
+    //     return false;
+    // }
 
     private update() {
         this.setConfigured();
@@ -107,62 +105,62 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
         }
     }
 
-    private orderValues(sortId: number) {
-        const m = this.widget.properties.multivaluemeasurements || [];
-        switch (sortId) {
-            case MultiValueOrderEnum.AlphabeticallyAsc:
-                m.sort((a, b) => {
-                    return a.name.charCodeAt(0) - b.name.charCodeAt(0);
-                });
-                break;
-            case MultiValueOrderEnum.AlphabeticallyDesc:
-                m.sort((a, b) => {
-                    return b.name.charCodeAt(0) - a.name.charCodeAt(0);
-                });
-                break;
-            case MultiValueOrderEnum.ValueAsc:
-                m.sort((a, b) => {
-                    return this.parseNumber(a, true) - this.parseNumber(b, true);
-                });
-                break;
-            case MultiValueOrderEnum.ValueDesc:
-                m.sort((a, b) => {
-                    return this.parseNumber(b, false) - this.parseNumber(a, false);
-                });
-                break;
-        }
-        this.orderedValues = m;
-        if (this.table) {
-            this.table.renderRows();
-        }
-    }
+    // private orderValues(sortId: number) {
+    //     // const m = this.widget.properties.multivaluemeasurements || [];
+    //     // switch (sortId) {
+    //     //     case MultiValueOrderEnum.AlphabeticallyAsc:
+    //     //         m.sort((a, b) => {
+    //     //             return a.name.charCodeAt(0) - b.name.charCodeAt(0);
+    //     //         });
+    //     //         break;
+    //     //     case MultiValueOrderEnum.AlphabeticallyDesc:
+    //     //         m.sort((a, b) => {
+    //     //             return b.name.charCodeAt(0) - a.name.charCodeAt(0);
+    //     //         });
+    //     //         break;
+    //     //     case MultiValueOrderEnum.ValueAsc:
+    //     //         m.sort((a, b) => {
+    //     //             return this.parseNumber(a, true) - this.parseNumber(b, true);
+    //     //         });
+    //     //         break;
+    //     //     case MultiValueOrderEnum.ValueDesc:
+    //     //         m.sort((a, b) => {
+    //     //             return this.parseNumber(b, false) - this.parseNumber(a, false);
+    //     //         });
+    //     //         break;
+    //     // }
+    //     // this.orderedValues = m;
+    //     // if (this.table) {
+    //     //     this.table.renderRows();
+    //     // }
+    // }
 
-    private parseNumber(m: MultiValueMeasurement, max: boolean): number {
-        if (m.data == null || m.type === 'String') {
-            if (max) {
-                return Number.MAX_VALUE;
-            }
-            return  Number.MIN_VALUE;
-        }
-        return Number(m.data);
-    }
+    // private parseNumber(m: DeviceStatusMeasurement, max: boolean): number {
+    //     if (m.data == null || m.type === 'String') {
+    //         if (max) {
+    //             return Number.MAX_VALUE;
+    //         }
+    //         return  Number.MIN_VALUE;
+    //     }
+    //     return Number(m.data);
+    // }
 
-    matSortChange(event: Sort) {
-        switch (event.active) {
-            case 'value':
-                if (event.direction === 'asc') {
-                    this.orderValues(MultiValueOrderEnum.ValueAsc);
-                } else {
-                    this.orderValues(MultiValueOrderEnum.ValueDesc);
-                }
-                break;
-            case 'name':
-                if (event.direction === 'asc') {
-                    this.orderValues(MultiValueOrderEnum.AlphabeticallyAsc);
-                } else {
-                    this.orderValues(MultiValueOrderEnum.AlphabeticallyDesc);
-                }
-                break;
-        }
-    }
+    // matSortChange(event: Sort) {
+    //     switch (event.active) {
+    //         case 'value':
+    //             if (event.direction === 'asc') {
+    //                 this.orderValues(MultiValueOrderEnum.ValueAsc);
+    //             } else {
+    //                 this.orderValues(MultiValueOrderEnum.ValueDesc);
+    //             }
+    //             break;
+    //         case 'name':
+    //             if (event.direction === 'asc') {
+    //                 this.orderValues(MultiValueOrderEnum.AlphabeticallyAsc);
+    //             } else {
+    //                 this.orderValues(MultiValueOrderEnum.AlphabeticallyDesc);
+    //             }
+    //             break;
+    //     }
+    // }
 }

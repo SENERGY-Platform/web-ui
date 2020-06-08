@@ -23,41 +23,40 @@
         </div>
         <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
         <div *ngIf="configured && dataReady" class="table-container" fxLayout="column" fxFill>
-            <table mat-table [dataSource]="orderedValues" matSort (matSortChange)="matSortChange($event)">
-                <ng-container matColumnDef="name">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
-                    <td mat-cell *matCellDef="let m">
-                        {{m.name}}
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="value">
-                    <th mat-header-cell mat-sort-header *matHeaderCellDef>{{widget.properties.valueAlias || 'Value'}}</th>
+<!--            <table mat-table [dataSource]="orderedValues" matSort>-->
+<!--                <ng-container matColumnDef="name">-->
+<!--                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>-->
+<!--                    <td mat-cell *matCellDef="let m">-->
+<!--                        {{m.name}}-->
+<!--                    </td>-->
+<!--                </ng-container>-->
+<!--                <ng-container matColumnDef="value">-->
+<!--                    <th mat-header-cell mat-sort-header *matHeaderCellDef>{{widget.properties.valueAlias || 'Value'}}</th>-->
 
-                    <td mat-cell *matCellDef="let m">
-                        <span *ngIf="m.type === 'String' || m.type === 'Boolean'">
-                            {{m.data}} {{m.unit}}
-                        </span>
-                        <span *ngIf="m.type !== 'String'"
-                              [ngClass]="{'color-warn': checkWarning(m)}">
-                            <span *ngIf="m.type === 'Number'">
-                                {{m.data | number: m.format}}
-                            </span>
-                            <span *ngIf="m.type === 'Date'">
-                                {{m.data | date: m.format}}
-                            </span>
-                            <span *ngIf="m.type === 'Currency'">
-                                    {{m.data | currency: m.format}}
-                            </span>
-                            <span *ngIf="m.type === 'Percent'">
-                                {{m.data | percent: m.format}}
-                            </span>
-                            {{m.unit}}
-                        </span>
-                    </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="['name', 'value']; sticky: true"></tr>
-                <tr mat-row *matRowDef="let m; columns: ['name', 'value'];"></tr>
-            </table>
+<!--                    <td mat-cell *matCellDef="let m">-->
+<!--                        <span *ngIf="m.type === 'String' || m.type === 'Boolean'">-->
+<!--                            {{m.data}} {{m.unit}}-->
+<!--                        </span>-->
+<!--                        <span *ngIf="m.type !== 'String'">-->
+<!--                            <span *ngIf="m.type === 'Number'">-->
+<!--                                {{m.data | number: m.format}}-->
+<!--                            </span>-->
+<!--                            <span *ngIf="m.type === 'Date'">-->
+<!--                                {{m.data | date: m.format}}-->
+<!--                            </span>-->
+<!--                            <span *ngIf="m.type === 'Currency'">-->
+<!--                                    {{m.data | currency: m.format}}-->
+<!--                            </span>-->
+<!--                            <span *ngIf="m.type === 'Percent'">-->
+<!--                                {{m.data | percent: m.format}}-->
+<!--                            </span>-->
+<!--                            {{m.unit}}-->
+<!--                        </span>-->
+<!--                    </td>-->
+<!--                </ng-container>-->
+<!--                <tr mat-header-row *matHeaderRowDef="['name', 'value']; sticky: true"></tr>-->
+<!--                <tr mat-row *matRowDef="let m; columns: ['name', 'value'];"></tr>-->
+<!--            </table>-->
         </div>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>

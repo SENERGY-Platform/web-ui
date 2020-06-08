@@ -15,21 +15,13 @@
  */
 
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {MultiValueMeasurement} from './device-status.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {DeviceStatusEditDialogComponent} from '../dialog/device-status-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {environment} from '../../../../environments/environment';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {HttpClient} from '@angular/common/http';
-import {ChartsExportModel} from '../../charts/export/shared/charts-export.model';
-import {
-    ChartsExportRequestPayloadModel,
-    ChartsExportRequestPayloadQueriesModel
-} from '../../charts/export/shared/charts-export-request-payload.model';
 
 @Injectable({
     providedIn: 'root'

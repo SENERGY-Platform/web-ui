@@ -16,25 +16,15 @@
 
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {ExportValueModel} from '../../../modules/data/export/shared/export.model';
+import {DeviceTypeAspectModel} from '../../../modules/devices/device-types-overview/shared/device-type.model';
 
-export interface MultiValuePropertiesModel {
-    multivaluemeasurements?: MultiValueMeasurement[];
-    order?: number;
-    valueAlias?: string;
+export interface DeviceStatusPropertiesModel {
+    elements?: DeviceStatusElementModel[];
 }
 
-export interface MultiValueMeasurement {
+export interface DeviceStatusElementModel {
     name: string;
-    type: string;
-    format: string;
-    export: ChartsExportMeasurementModel;
-    column: ExportValueModel;
-    unit: string;
-    math?: string;
-    data?: (number | string);
-    lowerBoundary?: number;
-    upperBoundary?: number;
-    warning_enabled?: boolean;
+    // aspect: DeviceTypeAspectModel,
 }
 
 export enum MultiValueOrderEnum {
