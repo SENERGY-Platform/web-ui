@@ -89,6 +89,8 @@ import {MatSortModule} from '@angular/material/sort';
 import {ProcessSchedulerComponent} from './process-scheduler/process-scheduler.component';
 import {ProcessSchedulerScheduleDialogComponent} from './process-scheduler/dialogs/process-scheduler-schedule-dialog.component';
 import {ProcessSchedulerScheduleEditDialogComponent} from './process-scheduler/dialogs/process-scheduler-schedule-edit-dialog.component';
+import {DeviceStatusComponent} from './device-status/device-status.component';
+import {DeviceStatusEditDialogComponent} from './device-status/dialog/device-status-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -170,6 +172,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ProcessSchedulerComponent,
         ProcessSchedulerScheduleDialogComponent,
         ProcessSchedulerScheduleEditDialogComponent,
+        DeviceStatusComponent,
+        DeviceStatusEditDialogComponent,
     ],
     exports: [
         SwitchComponent,
@@ -204,6 +208,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ProcessIncidentListEditDialogComponent,
         ProcessSchedulerScheduleDialogComponent,
         ProcessSchedulerScheduleEditDialogComponent,
+        DeviceStatusEditDialogComponent,
     ],
     providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
 
