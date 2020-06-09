@@ -25,6 +25,10 @@ import {DeviceTypeAspectModel, DeviceTypeFunctionModel} from '../../../modules/d
 import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
 import {DeviceStatusElementModel} from '../shared/device-status-properties.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import {
+    DeploymentsPreparedModel,
+    DeploymentsPreparedSelectableModel
+} from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 
 
 @Component({
@@ -38,6 +42,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
     funcArray: DeviceTypeFunctionModel[][] = [];
+    selectablesArray: DeploymentsPreparedSelectableModel[][] = [];
 
     formGroup = this.fb.group({
         name: ['', Validators.required],
@@ -54,7 +59,6 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
-
     }
 
     ngOnInit() {
@@ -71,15 +75,44 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                     this.addElement(element);
                 });
             }
-
-
         });
-
     }
 
     loadFunctions(aspectId: string, elementIndex: number): void {
         this.deviceTypeService.getAspectsMeasuringFunctions(aspectId).subscribe((resp) => {
-                this.funcArray[elementIndex] =  resp;
+            this.funcArray[elementIndex] = resp;
+        });
+    }
+
+    loadDevices(elementIndex: number): void {
+        console.log(this.getAspectId(elementIndex));
+        console.log(this.getFunctionId(elementIndex));
+        const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+            '<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn"><bpmn:process id="Device_status" isExecutable="true"><bpmn:startEvent id="StartEvent_1"><bpmn:outgoing>SequenceFlow_1oborg2</bpmn:outgoing></bpmn:startEvent><bpmn:sequenceFlow id="SequenceFlow_1oborg2" sourceRef="StartEvent_1" targetRef="Task_0os5tro" /><bpmn:endEvent id="EndEvent_131n4r3"><bpmn:incoming>SequenceFlow_0lpgosu</bpmn:incoming></bpmn:endEvent><bpmn:sequenceFlow id="SequenceFlow_0lpgosu" sourceRef="Task_0os5tro" targetRef="EndEvent_131n4r3" /><bpmn:serviceTask id="Task_0os5tro" name="Door/Window getOnOffStateFunction" camunda:type="external" camunda:topic="pessimistic"><bpmn:extensionElements><camunda:inputOutput><camunda:inputParameter name="payload">{\n' +
+            '    "function": {\n' +
+            '        "id": "' + this.getFunctionId(elementIndex).value + '",\n' +
+            '        "name": "func",\n' +
+            '        "concept_id": "urn:infai:ses:concept:ebfeabb3-50f0-44bd-b06e-95eb52df484e",\n' +
+            '        "rdf_type": "https://senergy.infai.org/ontology/MeasuringFunction"\n' +
+            '    },\n' +
+            '    "device_class": null,\n' +
+            '    "aspect": {\n' +
+            '        "id": "' + this.getAspectId(elementIndex).value + '",\n' +
+            '        "name": "aspect",\n' +
+            '        "rdf_type": "https://senergy.infai.org/ontology/Aspect"\n' +
+            '    },\n' +
+            '    "label": "getFunction",\n' +
+            '    "input": {},\n' +
+            '    "characteristic_id": "urn:infai:ses:characteristic:7621686a-56bc-402d-b4cc-5b266d39736f",\n' +
+            '    "retries": 0\n' +
+            '}</camunda:inputParameter><camunda:outputParameter name="outputs">${result}</camunda:outputParameter></camunda:inputOutput></bpmn:extensionElements><bpmn:incoming>SequenceFlow_1oborg2</bpmn:incoming><bpmn:outgoing>SequenceFlow_0lpgosu</bpmn:outgoing></bpmn:serviceTask></bpmn:process></bpmn:definitions>';
+        this.deploymentsService.getPreparedDeploymentsByXml(xml).subscribe((resp: DeploymentsPreparedModel | null) => {
+            if (resp !== null) {
+                this.selectablesArray[elementIndex] = resp.elements[0].task.selectables;
+                console.log(resp);
+                console.log(resp.elements[0].task.selectables);
+                console.log(this.selectablesArray);
+            }
         });
     }
 
@@ -87,11 +120,17 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.elements.push(this.setElement(element));
         const index = this.elements.length - 1;
         this.loadFunctions(element.aspectId, index);
+        this.loadDevices(index);
         this.getAspectId(index).valueChanges.subscribe((aspectId) => {
-            this.getFunctionId(index).setValue('');
-            this.loadFunctions(aspectId, index);
+                this.getFunctionId(index).setValue('');
+                this.getDeviceId(index).setValue('');
+                this.loadFunctions(aspectId, index);
             }
         );
+        this.getFunctionId(index).valueChanges.subscribe(() => {
+            this.getDeviceId(index).setValue('');
+            this.loadDevices(index);
+        });
     }
 
     close(): void {
@@ -134,6 +173,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             name: [element.name, Validators.required],
             aspectId: [element.aspectId, Validators.required],
             functionId: [element.functionId, Validators.required],
+            deviceId: [element.deviceId, Validators.required],
         });
     }
 
@@ -149,5 +189,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return this.elements.at(elementIndex).get('functionId') as FormControl;
     }
 
+    private getDeviceId(elementIndex: number): FormControl {
+        return this.elements.at(elementIndex).get('deviceId') as FormControl;
+    }
 
 }

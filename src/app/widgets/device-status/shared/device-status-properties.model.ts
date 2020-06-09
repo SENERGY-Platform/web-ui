@@ -26,6 +26,7 @@ export interface DeviceStatusElementModel {
     name: string;
     aspectId: string;
     functionId: string;
+    deviceId: string;
 }
 
 export enum MultiValueOrderEnum {

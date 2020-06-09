@@ -54,7 +54,7 @@
                             <td>
                                 <mat-form-field color="accent">
                                     <mat-select formControlName="aspectId" required
-                                                placeholder="Choose Export">
+                                                placeholder="Choose Aspect">
                                         <mat-option *ngFor="let aspect of aspects" [value]="aspect.id">
                                             {{aspect.name}}
                                         </mat-option>
@@ -67,6 +67,16 @@
                                                 placeholder="Choose Function">
                                         <mat-option *ngFor="let func of funcArray[elementIndex]" [value]="func.id">
                                             {{func.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <mat-select formControlName="deviceId" required
+                                                placeholder="Choose Device">
+                                        <mat-option *ngFor="let selectables of selectablesArray[elementIndex]" [value]="selectables.device.id">
+                                            {{selectables.device.name}}
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
