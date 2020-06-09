@@ -73,28 +73,14 @@
                             </td>
                         </tr>
                     </table>
-                    <!--                    <div>-->
-                    <!--                    <span matTooltip="Move this measurement up or down">-->
-                    <!--                    <button mat-icon-button-->
-                    <!--                            [disabled]="this.getMeasurements().controls.length === 1 || index === 0"-->
-                    <!--                            (click)="moveUp(index)">-->
-                    <!--                        <mat-icon>arrow_upward</mat-icon>-->
-                    <!--                    </button>-->
-                    <!--                    <button mat-icon-button-->
-                    <!--                            [disabled]="this.getMeasurements().controls.length === 1 || index === this.getMeasurements().controls.length - 1"-->
-                    <!--                            (click)="moveDown(index)">-->
-                    <!--                        <mat-icon>arrow_downward</mat-icon>-->
-                    <!--                    </button>-->
-                    <!--                    </span>-->
-<!--                    <div>-->
-<!--                        <div fxFlex></div>-->
-<!--                        <button mat-icon-button-->
-<!--                                [disabled]="elements.length === 1"-->
-<!--                                (click)="removeTab(index)">-->
-<!--                            <mat-icon>delete</mat-icon>-->
-<!--                        </button>-->
-<!--                    </div>-->
-                    <!--                    </div>-->
+                    <div>
+                        <div fxFlex></div>
+                        <button mat-icon-button
+                                [disabled]="elements.length === 1"
+                                (click)="deleteElement(elementIndex)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
                 </ng-template>
             </mat-expansion-panel>
         </mat-accordion>

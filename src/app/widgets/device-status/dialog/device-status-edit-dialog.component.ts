@@ -98,6 +98,11 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
+    deleteElement(elementIndex: number): void {
+        this.funcArray.splice(elementIndex, 1);
+        this.elements.removeAt(elementIndex);
+    }
+
     save(): void {
         this.widget.name = (this.formGroup.get('name') as FormControl).value;
         this.widget.properties = {};
