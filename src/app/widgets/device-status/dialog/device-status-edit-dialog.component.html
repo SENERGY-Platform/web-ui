@@ -29,14 +29,14 @@
             </tr>
         </table>
         <mat-accordion formArrayName="elements">
-            <mat-expansion-panel [formGroupName]="index"
-                                 *ngFor="let deviceControl of elements.controls; let index = index">
+            <mat-expansion-panel [formGroupName]="elementIndex"
+                                 *ngFor="let elementControl of elements.controls; let elementIndex = index">
                 <mat-expansion-panel-header class="right-aligned-header">
                     <mat-panel-title>
-                        <span [ngClass]="{'color-warn': deviceControl.invalid}"> {{deviceControl.value.name}} </span>
+                        <span [ngClass]="{'color-warn': elementControl.invalid}"> {{elementControl.value.name}} </span>
                     </mat-panel-title>
                     <mat-panel-description>
-                        <span [ngClass]="{'color-warn': deviceControl.invalid}"> {{index}} </span>
+                        <span [ngClass]="{'color-warn': elementControl.invalid}"> {{elementIndex}} </span>
                     </mat-panel-description>
                 </mat-expansion-panel-header>
                 <ng-template matExpansionPanelContent>
@@ -51,14 +51,26 @@
                             </td>
                         </tr>
                         <tr>
-                            <mat-form-field color="accent">
-                                <mat-select formControlName="aspectId" required
-                                            placeholder="Choose Export">
-                                    <mat-option *ngFor="let aspect of aspects" [value]="aspect.id">
-                                        {{aspect.name}}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <mat-select formControlName="aspectId" required
+                                                placeholder="Choose Export">
+                                        <mat-option *ngFor="let aspect of aspects" [value]="aspect.id">
+                                            {{aspect.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <mat-select formControlName="functionId" required
+                                                placeholder="Choose Function">
+                                        <mat-option *ngFor="let func of funcArray[elementIndex]" [value]="func.id">
+                                            {{func.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
                         </tr>
                     </table>
                     <!--                    <div>-->
@@ -74,11 +86,14 @@
                     <!--                        <mat-icon>arrow_downward</mat-icon>-->
                     <!--                    </button>-->
                     <!--                    </span>-->
-                    <!--                        <button mat-icon-button style="float: right"-->
-                    <!--                                [disabled]="this.getMeasurements().controls.length === 1"-->
-                    <!--                                (click)="removeTab(index)">-->
-                    <!--                            <mat-icon>delete</mat-icon>-->
-                    <!--                        </button>-->
+<!--                    <div>-->
+<!--                        <div fxFlex></div>-->
+<!--                        <button mat-icon-button-->
+<!--                                [disabled]="elements.length === 1"-->
+<!--                                (click)="removeTab(index)">-->
+<!--                            <mat-icon>delete</mat-icon>-->
+<!--                        </button>-->
+<!--                    </div>-->
                     <!--                    </div>-->
                 </ng-template>
             </mat-expansion-panel>
@@ -90,7 +105,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-<!--    <span *ngIf="!formGroup.valid" class="color-warn actions-warn">Widget not configured correctly</span>-->
+    <span *ngIf="!formGroup.valid" class="color-warn actions-warn">Widget not configured correctly</span>
     <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" (click)="save()">Save</button>
+    <button class="mat-raised-button mat-accent" [disabled]="formGroup.invalid" (click)="save()">Save</button>
 </mat-dialog-actions>

@@ -21,7 +21,7 @@ import {DeploymentsService} from '../../../modules/processes/deployments/shared/
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {DeviceTypeAspectModel} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+import {DeviceTypeAspectModel, DeviceTypeFunctionModel} from '../../../modules/devices/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
 import {DeviceStatusElementModel} from '../shared/device-status-properties.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
@@ -37,12 +37,12 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
+    funcArray: DeviceTypeFunctionModel[][] = [];
 
     formGroup = this.fb.group({
         name: ['', Validators.required],
         elements: this.fb.array([]),
     });
-
 
 
     constructor(private dialogRef: MatDialogRef<DeviceStatusEditDialogComponent>,
@@ -71,11 +71,27 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                     this.addElement(element);
                 });
             }
+
+
+        });
+
+    }
+
+    loadFunctions(aspectId: string, elementIndex: number): void {
+        this.deviceTypeService.getAspectsMeasuringFunctions(aspectId).subscribe((resp) => {
+                this.funcArray[elementIndex] =  resp;
         });
     }
 
     addElement(element: DeviceStatusElementModel) {
         this.elements.push(this.setElement(element));
+        const index = this.elements.length - 1;
+        this.loadFunctions(element.aspectId, index);
+        this.getAspectId(index).valueChanges.subscribe((aspectId) => {
+            this.getFunctionId(index).setValue('');
+            this.loadFunctions(aspectId, index);
+            }
+        );
     }
 
     close(): void {
@@ -83,11 +99,9 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        console.log(this.formGroup.value);
         this.widget.name = (this.formGroup.get('name') as FormControl).value;
         this.widget.properties = {};
         this.widget.properties.elements = this.elements.value;
-        console.log(this.widget);
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widget);
@@ -114,10 +128,21 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return this.fb.group({
             name: [element.name, Validators.required],
             aspectId: [element.aspectId, Validators.required],
+            functionId: [element.functionId, Validators.required],
         });
     }
 
     get elements(): FormArray {
         return this.formGroup.get('elements') as FormArray;
     }
+
+    private getAspectId(elementIndex: number): FormControl {
+        return this.elements.at(elementIndex).get('aspectId') as FormControl;
+    }
+
+    private getFunctionId(elementIndex: number): FormControl {
+        return this.elements.at(elementIndex).get('functionId') as FormControl;
+    }
+
+
 }
