@@ -17,10 +17,12 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { DeploymentsService } from './deployments.service';
+import {HttpClientModule} from '@angular/common/http';
 
 describe('DeploymentsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [HttpClientModule],
       providers: [DeploymentsService]
     });
   });

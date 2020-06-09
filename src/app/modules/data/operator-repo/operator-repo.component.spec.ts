@@ -15,27 +15,39 @@
  */
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {DashboardComponent} from '../../dashboard/dashboard.component';
+import {OperatorRepoComponent} from './operator-repo.component';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {OperatorRepoService} from './shared/operator-repo.service';
+import {AuthorizationService} from '../../../core/services/authorization.service';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {MatDialogModule} from '@angular/material/dialog';
+
+class MockOperatorRepoService {
+}
+
+class MockAuthorizationService{
+
+}
 
 
-describe('DashboardComponent', () => {
-  let component: DashboardComponent;
-  let fixture: ComponentFixture<DashboardComponent>;
+describe('OperatorRepoComponent', () => {
+  let fixture: ComponentFixture<OperatorRepoComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DashboardComponent ]
-    })
-    .compileComponents();
+      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
+      declarations: [ OperatorRepoComponent ],
+      providers: [
+        { provide: OperatorRepoService, useClass: MockOperatorRepoService },
+        { provide: AuthorizationService, useClass: MockAuthorizationService },
+          DialogsService
+      ]
+    });
+    fixture = TestBed.createComponent(OperatorRepoComponent);
   }));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(DashboardComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(fixture).toBeTruthy();
   });
 });
