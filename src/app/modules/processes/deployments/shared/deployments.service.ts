@@ -89,12 +89,12 @@ export class DeploymentsService {
         );
     }
 
-    postDeployments(deployment: DeploymentsPreparedModel): Observable<{ status: number }> {
+    postDeployments(deployment: DeploymentsPreparedModel): Observable<{ status: number, id: string }> {
         return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments', deployment, {observe: 'response'}).pipe(
             map(resp => {
-                return {status: resp.status};
+                return {status: resp.status, id: resp.body ? resp.body.id : ''};
             }),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', {status: 500}))
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', {status: 500, id: ''}))
         );
     }
 

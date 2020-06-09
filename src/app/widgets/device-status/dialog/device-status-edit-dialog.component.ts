@@ -122,8 +122,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         pD.elements[0].task.selection.device = this.getSelectable(elementIndex).value.device;
         pD.elements[0].task.selection.service = this.getSelectable(elementIndex).value.services[0];
         console.log(pD);
-        this.deploymentsService.postDeployments(pD).subscribe((resp) => {
-            console.log(resp);
+        this.deploymentsService.postDeployments(pD).subscribe((resp: {id: string}) => {
+            this.getDeploymentId(elementIndex).setValue(resp.id);
         });
     }
 
@@ -195,6 +195,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             aspectId: [element.aspectId, Validators.required],
             function: [element.function, Validators.required],
             selectable: [element.selectable, Validators.required],
+            deploymentId: [element.deploymentId, Validators.required],
         });
     }
 
@@ -216,6 +217,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     private getSelectable(elementIndex: number): FormControl {
         return this.elements.at(elementIndex).get('selectable') as FormControl;
+    }
+
+    private getDeploymentId(elementIndex: number): FormControl {
+        return this.elements.at(elementIndex).get('deploymentId') as FormControl;
     }
 
 }

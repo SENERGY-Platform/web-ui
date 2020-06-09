@@ -28,6 +28,7 @@ export interface DeviceStatusElementModel {
     aspectId: string;
     function: DeviceTypeFunctionModel | null;
     selectable: DeploymentsPreparedSelectableModel | null;
+    deploymentId: string;
 }
 
 export enum MultiValueOrderEnum {
