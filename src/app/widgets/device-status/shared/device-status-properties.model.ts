@@ -16,7 +16,8 @@
 
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {ExportValueModel} from '../../../modules/data/export/shared/export.model';
-import {DeviceTypeAspectModel} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+import {DeviceTypeAspectModel, DeviceTypeFunctionModel} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+import {DeploymentsPreparedSelectableModel} from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 
 export interface DeviceStatusPropertiesModel {
     elements?: DeviceStatusElementModel[];
@@ -25,8 +26,8 @@ export interface DeviceStatusPropertiesModel {
 export interface DeviceStatusElementModel {
     name: string;
     aspectId: string;
-    functionId: string;
-    deviceId: string;
+    function: DeviceTypeFunctionModel | null;
+    selectable: DeploymentsPreparedSelectableModel | null;
 }
 
 export enum MultiValueOrderEnum {

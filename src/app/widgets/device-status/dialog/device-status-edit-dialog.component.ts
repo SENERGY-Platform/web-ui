@@ -43,6 +43,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     widget: WidgetModel = {} as WidgetModel;
     funcArray: DeviceTypeFunctionModel[][] = [];
     selectablesArray: DeploymentsPreparedSelectableModel[][] = [];
+    preparedDeployment: DeploymentsPreparedModel[] = [];
 
     formGroup = this.fb.group({
         name: ['', Validators.required],
@@ -79,40 +80,50 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     }
 
     loadFunctions(aspectId: string, elementIndex: number): void {
-        this.deviceTypeService.getAspectsMeasuringFunctions(aspectId).subscribe((resp) => {
+        this.deviceTypeService.getAspectsMeasuringFunctions(aspectId).subscribe((resp: DeviceTypeFunctionModel[]) => {
             this.funcArray[elementIndex] = resp;
         });
     }
 
     loadDevices(elementIndex: number): void {
-        console.log(this.getAspectId(elementIndex));
-        console.log(this.getFunctionId(elementIndex));
-        const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-            '<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn"><bpmn:process id="Device_status" isExecutable="true"><bpmn:startEvent id="StartEvent_1"><bpmn:outgoing>SequenceFlow_1oborg2</bpmn:outgoing></bpmn:startEvent><bpmn:sequenceFlow id="SequenceFlow_1oborg2" sourceRef="StartEvent_1" targetRef="Task_0os5tro" /><bpmn:endEvent id="EndEvent_131n4r3"><bpmn:incoming>SequenceFlow_0lpgosu</bpmn:incoming></bpmn:endEvent><bpmn:sequenceFlow id="SequenceFlow_0lpgosu" sourceRef="Task_0os5tro" targetRef="EndEvent_131n4r3" /><bpmn:serviceTask id="Task_0os5tro" name="Door/Window getOnOffStateFunction" camunda:type="external" camunda:topic="pessimistic"><bpmn:extensionElements><camunda:inputOutput><camunda:inputParameter name="payload">{\n' +
-            '    "function": {\n' +
-            '        "id": "' + this.getFunctionId(elementIndex).value + '",\n' +
-            '        "name": "func",\n' +
-            '        "concept_id": "urn:infai:ses:concept:ebfeabb3-50f0-44bd-b06e-95eb52df484e",\n' +
-            '        "rdf_type": "https://senergy.infai.org/ontology/MeasuringFunction"\n' +
-            '    },\n' +
-            '    "device_class": null,\n' +
-            '    "aspect": {\n' +
-            '        "id": "' + this.getAspectId(elementIndex).value + '",\n' +
-            '        "name": "aspect",\n' +
-            '        "rdf_type": "https://senergy.infai.org/ontology/Aspect"\n' +
-            '    },\n' +
-            '    "label": "getFunction",\n' +
-            '    "input": {},\n' +
-            '    "characteristic_id": "urn:infai:ses:characteristic:7621686a-56bc-402d-b4cc-5b266d39736f",\n' +
-            '    "retries": 0\n' +
-            '}</camunda:inputParameter><camunda:outputParameter name="outputs">${result}</camunda:outputParameter></camunda:inputOutput></bpmn:extensionElements><bpmn:incoming>SequenceFlow_1oborg2</bpmn:incoming><bpmn:outgoing>SequenceFlow_0lpgosu</bpmn:outgoing></bpmn:serviceTask></bpmn:process></bpmn:definitions>';
-        this.deploymentsService.getPreparedDeploymentsByXml(xml).subscribe((resp: DeploymentsPreparedModel | null) => {
-            if (resp !== null) {
-                this.selectablesArray[elementIndex] = resp.elements[0].task.selectables;
-                console.log(resp);
-                console.log(resp.elements[0].task.selectables);
-                console.log(this.selectablesArray);
-            }
+        if (this.getFunction(elementIndex) !== null) {
+        console.log(this.getFunction(elementIndex));
+            const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+                '<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn"><bpmn:process id="generatedByProcessStatusWidget" isExecutable="true"><bpmn:startEvent id="StartEvent_1"><bpmn:outgoing>SequenceFlow_1oborg2</bpmn:outgoing></bpmn:startEvent><bpmn:sequenceFlow id="SequenceFlow_1oborg2" sourceRef="StartEvent_1" targetRef="Task_0os5tro" /><bpmn:endEvent id="EndEvent_131n4r3"><bpmn:incoming>SequenceFlow_0lpgosu</bpmn:incoming></bpmn:endEvent><bpmn:sequenceFlow id="SequenceFlow_0lpgosu" sourceRef="Task_0os5tro" targetRef="EndEvent_131n4r3" /><bpmn:serviceTask id="Task_0os5tro" name="Door/Window getOnOffStateFunction" camunda:type="external" camunda:topic="pessimistic"><bpmn:extensionElements><camunda:inputOutput><camunda:inputParameter name="payload">{\n' +
+                '    "function": {\n' +
+                '        "id": "' + this.getFunction(elementIndex).id + '",\n' +
+                '        "name": "func",\n' +
+                '        "concept_id": "' + this.getFunction(elementIndex).concept_id + '",\n' +
+                '        "rdf_type": "https://senergy.infai.org/ontology/MeasuringFunction"\n' +
+                '    },\n' +
+                '    "device_class": null,\n' +
+                '    "aspect": {\n' +
+                '        "id": "' + this.getAspectId(elementIndex).value + '",\n' +
+                '        "name": "aspect",\n' +
+                '        "rdf_type": "https://senergy.infai.org/ontology/Aspect"\n' +
+                '    },\n' +
+                '    "label": "getFunction",\n' +
+                '    "input": {},\n' +
+                '    "characteristic_id": "urn:infai:ses:characteristic:7621686a-56bc-402d-b4cc-5b266d39736f",\n' +
+                '    "retries": 0\n' +
+                '}</camunda:inputParameter><camunda:outputParameter name="outputs">${result}</camunda:outputParameter></camunda:inputOutput></bpmn:extensionElements><bpmn:incoming>SequenceFlow_1oborg2</bpmn:incoming><bpmn:outgoing>SequenceFlow_0lpgosu</bpmn:outgoing></bpmn:serviceTask></bpmn:process></bpmn:definitions>';
+            this.deploymentsService.getPreparedDeploymentsByXml(xml).subscribe((resp: DeploymentsPreparedModel | null) => {
+                if (resp !== null) {
+                    this.selectablesArray[elementIndex] = resp.elements[0].task.selectables;
+                    this.preparedDeployment[elementIndex] = resp;
+                }
+            });
+        }
+    }
+
+    deploy(elementIndex: number): void {
+        const pD = this.preparedDeployment[elementIndex];
+        console.log(this.getSelectable(elementIndex));
+        pD.elements[0].task.selection.device = this.getSelectable(elementIndex).value.device;
+        pD.elements[0].task.selection.service = this.getSelectable(elementIndex).value.services[0];
+        console.log(pD);
+        this.deploymentsService.postDeployments(pD).subscribe((resp) => {
+            console.log(resp);
         });
     }
 
@@ -122,14 +133,20 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.loadFunctions(element.aspectId, index);
         this.loadDevices(index);
         this.getAspectId(index).valueChanges.subscribe((aspectId) => {
-                this.getFunctionId(index).setValue('');
-                this.getDeviceId(index).setValue('');
+                this.getFunctionControl(index).reset();
                 this.loadFunctions(aspectId, index);
             }
         );
-        this.getFunctionId(index).valueChanges.subscribe(() => {
-            this.getDeviceId(index).setValue('');
-            this.loadDevices(index);
+        this.getFunctionControl(index).valueChanges.subscribe((func) => {
+            this.getSelectable(index).reset();
+            if (func !== null) {
+                this.loadDevices(index);
+            }
+        });
+        this.getSelectable(index).valueChanges.subscribe((selectables) => {
+            if (selectables !== null) {
+                this.deploy(index);
+            }
         });
     }
 
@@ -172,8 +189,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return this.fb.group({
             name: [element.name, Validators.required],
             aspectId: [element.aspectId, Validators.required],
-            functionId: [element.functionId, Validators.required],
-            deviceId: [element.deviceId, Validators.required],
+            function: [element.function, Validators.required],
+            selectable: [element.selectable, Validators.required],
         });
     }
 
@@ -185,12 +202,16 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return this.elements.at(elementIndex).get('aspectId') as FormControl;
     }
 
-    private getFunctionId(elementIndex: number): FormControl {
-        return this.elements.at(elementIndex).get('functionId') as FormControl;
+    private getFunctionControl(elementIndex: number): FormControl {
+        return this.elements.at(elementIndex).get('function') as FormControl;
     }
 
-    private getDeviceId(elementIndex: number): FormControl {
-        return this.elements.at(elementIndex).get('deviceId') as FormControl;
+    private getFunction(elementIndex: number): DeviceTypeFunctionModel {
+        return <DeviceTypeFunctionModel>(this.getFunctionControl(elementIndex)).value;
+    }
+
+    private getSelectable(elementIndex: number): FormControl {
+        return this.elements.at(elementIndex).get('selectable') as FormControl;
     }
 
 }

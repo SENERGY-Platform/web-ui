@@ -63,9 +63,9 @@
                             </td>
                             <td>
                                 <mat-form-field color="accent">
-                                    <mat-select formControlName="functionId" required
+                                    <mat-select formControlName="function" required
                                                 placeholder="Choose Function">
-                                        <mat-option *ngFor="let func of funcArray[elementIndex]" [value]="func.id">
+                                        <mat-option *ngFor="let func of funcArray[elementIndex]" [value]="func">
                                             {{func.name}}
                                         </mat-option>
                                     </mat-select>
@@ -73,10 +73,10 @@
                             </td>
                             <td>
                                 <mat-form-field color="accent">
-                                    <mat-select formControlName="deviceId" required
+                                    <mat-select formControlName="selectable" required
                                                 placeholder="Choose Device">
-                                        <mat-option *ngFor="let selectables of selectablesArray[elementIndex]" [value]="selectables.device.id">
-                                            {{selectables.device.name}}
+                                        <mat-option *ngFor="let selectable of selectablesArray[elementIndex]" [value]="selectable">
+                                            {{selectable.device.name}}
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
