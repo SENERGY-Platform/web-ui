@@ -28,7 +28,7 @@ class MockKeycloakService {
     return {subject: 'test'} as Keycloak.KeycloakInstance;
   }
 
-  getUsername(){
+  getUsername() {
     return 'test';
   }
 }

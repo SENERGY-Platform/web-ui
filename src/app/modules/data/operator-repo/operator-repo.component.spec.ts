@@ -22,14 +22,10 @@ import {AuthorizationService} from '../../../core/services/authorization.service
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {MatDialogModule} from '@angular/material/dialog';
+import {AuthorizationServiceMock} from '../../../core/services/authorization.service.mock';
 
 class MockOperatorRepoService {
 }
-
-class MockAuthorizationService{
-
-}
-
 
 describe('OperatorRepoComponent', () => {
   let fixture: ComponentFixture<OperatorRepoComponent>;
@@ -40,7 +36,7 @@ describe('OperatorRepoComponent', () => {
       declarations: [ OperatorRepoComponent ],
       providers: [
         { provide: OperatorRepoService, useClass: MockOperatorRepoService },
-        { provide: AuthorizationService, useClass: MockAuthorizationService },
+        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
           DialogsService
       ]
     });

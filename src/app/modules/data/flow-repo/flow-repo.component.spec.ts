@@ -21,12 +21,7 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatDialogModule} from '@angular/material/dialog';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
-
-class MockAuthorizationService {
-  getUserId() {
-    return '1';
-  }
-}
+import {AuthorizationServiceMock} from '../../../core/services/authorization.service.mock';
 
 describe('FlowRepoComponent', () => {
   let component: FlowRepoComponent;
@@ -37,7 +32,7 @@ describe('FlowRepoComponent', () => {
       imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
       declarations: [ FlowRepoComponent ],
       providers: [
-        { provide: AuthorizationService, useClass: MockAuthorizationService },
+        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
         DialogsService
       ]
     })
