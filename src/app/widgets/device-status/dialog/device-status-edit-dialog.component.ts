@@ -174,8 +174,12 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.addElement({} as DeviceStatusElementModel);
     }
 
-    compare(a: any, b: any) {
-        return a.InstanceID === b.InstanceID && a.Name === b.Name && a.Path === b.Path;
+    compareFunc(a: DeviceTypeFunctionModel, b: DeviceTypeFunctionModel) {
+        return a && b && a.id === b.id;
+    }
+
+    compareSelectables(a: DeploymentsPreparedSelectableModel, b: DeploymentsPreparedSelectableModel) {
+        return a && b && a.device.id === b.device.id;
     }
 
     private getAspects(): void {

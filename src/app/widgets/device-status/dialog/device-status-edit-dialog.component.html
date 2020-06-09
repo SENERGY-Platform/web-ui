@@ -64,7 +64,7 @@
                             <td>
                                 <mat-form-field color="accent">
                                     <mat-select formControlName="function" required
-                                                placeholder="Choose Function">
+                                                placeholder="Choose Function" [compareWith]="compareFunc">
                                         <mat-option *ngFor="let func of funcArray[elementIndex]" [value]="func">
                                             {{func.name}}
                                         </mat-option>
@@ -74,7 +74,7 @@
                             <td>
                                 <mat-form-field color="accent">
                                     <mat-select formControlName="selectable" required
-                                                placeholder="Choose Device">
+                                                placeholder="Choose Device" [compareWith]="compareSelectables">
                                         <mat-option *ngFor="let selectable of selectablesArray[elementIndex]" [value]="selectable">
                                             {{selectable.device.name}}
                                         </mat-option>
