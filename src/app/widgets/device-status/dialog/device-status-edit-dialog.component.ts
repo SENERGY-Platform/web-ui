@@ -87,7 +87,6 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     loadDevices(elementIndex: number): void {
         if (this.getFunction(elementIndex) !== null) {
-        console.log(this.getFunction(elementIndex));
             const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
                 '<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn"><bpmn:process id="generatedByProcessStatusWidget" isExecutable="true"><bpmn:startEvent id="StartEvent_1"><bpmn:outgoing>SequenceFlow_1oborg2</bpmn:outgoing></bpmn:startEvent><bpmn:sequenceFlow id="SequenceFlow_1oborg2" sourceRef="StartEvent_1" targetRef="Task_0os5tro" /><bpmn:endEvent id="EndEvent_131n4r3"><bpmn:incoming>SequenceFlow_0lpgosu</bpmn:incoming></bpmn:endEvent><bpmn:sequenceFlow id="SequenceFlow_0lpgosu" sourceRef="Task_0os5tro" targetRef="EndEvent_131n4r3" /><bpmn:serviceTask id="Task_0os5tro" name="Door/Window getOnOffStateFunction" camunda:type="external" camunda:topic="pessimistic"><bpmn:extensionElements><camunda:inputOutput><camunda:inputParameter name="payload">{\n' +
                 '    "function": {\n' +
@@ -118,11 +117,9 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     deploy(elementIndex: number): void {
         const pD = this.preparedDeployment[elementIndex];
-        console.log(this.getSelectable(elementIndex));
         pD.elements[0].task.selection.device = this.getSelectable(elementIndex).value.device;
         pD.elements[0].task.selection.service = this.getSelectable(elementIndex).value.services[0];
-        console.log(pD);
-        this.deploymentsService.postDeployments(pD).subscribe((resp: {id: string}) => {
+        this.deploymentsService.postDeployments(pD).subscribe((resp: { id: string }) => {
             this.getDeploymentId(elementIndex).setValue(resp.id);
         });
     }
@@ -145,7 +142,14 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         });
         this.getSelectable(index).valueChanges.subscribe((selectables) => {
             if (selectables !== null) {
-                this.deploy(index);
+                if (this.getDeploymentId(index).value !== null) {
+                    this.deploymentsService.deleteDeployment(this.getDeploymentId(index).value).subscribe(() => {
+                        this.getDeploymentId(index).reset();
+                        this.deploy(index);
+                    });
+                } else {
+                    this.deploy(index);
+                }
             }
         });
     }
