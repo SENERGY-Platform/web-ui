@@ -104,41 +104,45 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                             });
                         }, refreshTimeInMs);
                     }
-                }
 
-                const requestPayload: ChartsExportRequestPayloadModel = {
-                    time: {
-                        last: '500000w', // arbitrary high number
-                        end: undefined,
-                        start: undefined
-                    },
-                    group: {
-                        type: undefined,
-                        time: ''
-                    },
-                    queries: [{
-                        id: 'b6cdd7c2-c7fd-470f-9391-61ec3f4bf5e5',
-                        fields: [{
-                            math: '',
-                            name: 'level',
-                        }]
-                    }],
-                    limit: 1
-                };
+                    const requestPayload: ChartsExportRequestPayloadModel = {
+                        time: {
+                            last: '500000w', // arbitrary high number
+                            end: undefined,
+                            start: undefined
+                        },
+                        group: {
+                            type: undefined,
+                            time: ''
+                        },
+                        queries: [{
+                            id: elements[0].exportId,
+                            fields: [{
+                                math: '',
+                                name: 'level',
+                            }]
+                        }],
+                        limit: 1
+                    };
 
-                this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
-                    const columns = model.results[0].series[0].columns;
-                    const values = model.results[0].series[0].values;
+                    this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
+                        const columns = model.results[0].series[0].columns;
+                        const values = model.results[0].series[0].values;
 
-                    ['b6cdd7c2-c7fd-470f-9391-61ec3f4bf5e5.level'].forEach((id) => {
-                        const columnIndex = columns.findIndex(col => col === id);
-                        values.forEach(val => {
-                            if (val[columnIndex]) {
-                                console.log(val[columnIndex]);
-                            }
+                        [elements[0].exportId + '.level'].forEach((id) => {
+                            const columnIndex = columns.findIndex(col => col === id);
+                            values.forEach(val => {
+                                if (val[columnIndex]) {
+                                    console.log(val[columnIndex]);
+                                }
+                            });
                         });
                     });
-                });
+                }
+
+
+
+
             }
         });
     }

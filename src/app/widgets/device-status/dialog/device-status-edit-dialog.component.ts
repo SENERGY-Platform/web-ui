@@ -203,8 +203,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             TimePath: 'value.openCloseState.updateTime',
             Values: [{
                 Name: 'level',
-                Type: 'value.openCloseState.level',
-                Path: 'string',
+                Type: 'string',
+                Path: 'value.openCloseState.level',
             }],
             EntityName: this.getSelectableDevice(elementIndex).name,
             Filter: this.getSelectableDevice(elementIndex).id,
