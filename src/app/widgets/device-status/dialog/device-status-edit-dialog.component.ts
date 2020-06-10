@@ -176,6 +176,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     }
 
     deleteElement(elementIndex: number): void {
+        this.exportService.stopPipeline({ID: this.getExportId(elementIndex).value} as ExportModel).subscribe(() => {
+        });
+        this.deploymentsService.deleteDeployment(this.getDeploymentId(elementIndex).value).subscribe(() => {
+        });
         this.funcArray.splice(elementIndex, 1);
         this.elements.removeAt(elementIndex);
     }
