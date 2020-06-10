@@ -130,7 +130,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.deploymentsService.postDeployments(pD).subscribe((resp: { id: string }) => {
             this.getDeploymentId(elementIndex).setValue(resp.id);
         });
-        this.createExport(elementIndex);
+
     }
 
     addElement(element: DeviceStatusElementModel) {
@@ -158,6 +158,14 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                     });
                 } else {
                     this.deploy(index);
+                }
+                if (this.getExportId(index).value !== null) {
+                    this.exportService.stopPipeline({ID: this.getExportId(index).value} as ExportModel).subscribe(() => {
+                        this.getExportId(index).reset();
+                        this.createExport(index);
+                    });
+                } else {
+                    this.createExport(index);
                 }
             }
         });
