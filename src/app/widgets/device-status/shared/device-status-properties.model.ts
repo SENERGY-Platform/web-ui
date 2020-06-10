@@ -20,6 +20,7 @@ import {DeviceTypeAspectModel, DeviceTypeFunctionModel} from '../../../modules/d
 import {DeploymentsPreparedSelectableModel} from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 
 export interface DeviceStatusPropertiesModel {
+    refreshTime?: number;
     elements?: DeviceStatusElementModel[];
 }
 

@@ -89,7 +89,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
 
                 if (elements) {
                     clearInterval(this.interval);
-                    const refreshTimeInMs = 0;
+                    const refreshTimeInMs = (this.widget.properties.refreshTime || 0) * 1000;
                     if (refreshTimeInMs > 0) {
                         this.interval = window.setInterval(() => {
                             elements.forEach((element: DeviceStatusElementModel) => {

@@ -47,6 +47,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     formGroup = this.fb.group({
         name: ['', Validators.required],
+        refreshTime: [0],
         elements: this.fb.array([]),
     });
 
@@ -71,6 +72,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
             this.formGroup.patchValue({'name': widget.name});
+            this.formGroup.patchValue({'refreshTime': widget.properties.refreshTime});
             if (widget.properties.elements) {
                 widget.properties.elements.forEach((element: DeviceStatusElementModel) => {
                     this.addElement(element);
@@ -166,6 +168,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     save(): void {
         this.widget.name = (this.formGroup.get('name') as FormControl).value;
         this.widget.properties = {};
+        this.widget.properties.refreshTime = (this.formGroup.get('refreshTime') as FormControl).value;
         this.widget.properties.elements = this.elements.value;
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
