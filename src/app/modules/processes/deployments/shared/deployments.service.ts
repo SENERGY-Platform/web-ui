@@ -77,8 +77,8 @@ export class DeploymentsService {
         );
     }
 
-    getPreparedDeploymentsByXml(xml: string): Observable<DeploymentsPreparedModel | null> {
-        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/prepared-deployments', {'xml': xml}).pipe(
+    getPreparedDeploymentsByXml(xml: string, svg: string): Observable<DeploymentsPreparedModel | null> {
+        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/prepared-deployments', {'xml': xml, 'svg': svg}).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null))
         );
     }
