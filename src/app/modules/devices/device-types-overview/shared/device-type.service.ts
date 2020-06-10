@@ -149,9 +149,9 @@ export class DeviceTypeService {
         );
     }
 
-    getAspectsMeasuringFunctions(deviceClassId: string): Observable<DeviceTypeFunctionModel[]> {
+    getAspectsMeasuringFunctions(aspectId: string): Observable<DeviceTypeFunctionModel[]> {
         return this.http.get<DeviceTypeFunctionModel[]>
-        (environment.semanticRepoUrl + '/aspects/' + deviceClassId + '/measuring-functions').pipe(
+        (environment.semanticRepoUrl + '/aspects/' + aspectId + '/measuring-functions').pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsMeasuringFunctions', []))
         );

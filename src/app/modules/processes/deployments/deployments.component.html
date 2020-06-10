@@ -61,7 +61,7 @@
                                     </button>
                                     <div fxFlex></div>
                                     <button mat-icon-button matTooltip="Run" class="color-accent"
-                                            (click)="run(item.value.definition_id)">
+                                            (click)="run(item.value.id)">
                                         <mat-icon>play_arrow</mat-icon>
                                     </button>
                                     <button mat-icon-button matTooltip="Copy Deployment" class="color-accent"
@@ -78,7 +78,7 @@
                                         <mat-icon>more_vert</mat-icon>
                                     </button>
                                     <mat-menu #deploymentMenu="matMenu" [overlapTrigger]="false">
-                                        <button mat-menu-item (click)="copyEndpoint(item.value.definition_id)">
+                                        <button mat-menu-item (click)="copyEndpoint(item.value.id)">
                                             <mat-icon>content_copy</mat-icon>
                                             <span>Copy Endpoint to Clipboard</span>
                                         </button>
