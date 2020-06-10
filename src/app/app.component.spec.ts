@@ -21,17 +21,7 @@ import {KeycloakService} from 'keycloak-angular';
 import {RouterTestingModule} from '@angular/router/testing';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {Keycloak} from 'keycloak-angular/lib/core/services/keycloak.service';
-
-class MockKeycloakService {
-  getKeycloakInstance(): Keycloak.KeycloakInstance {
-    return {subject: 'test'} as Keycloak.KeycloakInstance;
-  }
-
-  getUsername() {
-    return 'test';
-  }
-}
+import {MockKeycloakService} from './core/services/keycloak.mock';
 
 describe('AppComponent', () => {
   let component: AppComponent;

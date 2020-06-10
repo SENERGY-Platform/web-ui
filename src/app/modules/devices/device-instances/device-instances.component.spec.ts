@@ -17,6 +17,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DeviceInstancesComponent } from './device-instances.component';
+import {MatDialogModule} from '@angular/material/dialog';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {KeycloakService} from 'keycloak-angular';
+import {RouterTestingModule} from '@angular/router/testing';
+import {MockKeycloakService} from '../../../core/services/keycloak.mock';
+
+
 
 describe('DeviceInstancesComponent', () => {
   let component: DeviceInstancesComponent;
@@ -24,7 +32,9 @@ describe('DeviceInstancesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DeviceInstancesComponent ]
+      imports: [MatDialogModule, HttpClientTestingModule, MatSnackBarModule, RouterTestingModule],
+      declarations: [ DeviceInstancesComponent ],
+      providers: [{ provide: KeycloakService, useClass: MockKeycloakService }]
     })
     .compileComponents();
   }));
