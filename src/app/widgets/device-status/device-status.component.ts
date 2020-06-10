@@ -24,6 +24,11 @@ import {Subscription} from 'rxjs';
 import {MatTable} from '@angular/material/table';
 import {DeviceStatusElementModel} from './shared/device-status-properties.model';
 import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
+import {MultiValueService} from '../multi-value/shared/multi-value.service';
+import {ChartsExportModel} from '../charts/export/shared/charts-export.model';
+import {environment} from '../../../environments/environment';
+import {ChartsExportRequestPayloadModel} from '../charts/export/shared/charts-export-request-payload.model';
+import {HttpClient} from '@angular/common/http';
 
 @Component({
     selector: 'senergy-device-status',
@@ -47,7 +52,9 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                 private sanitizer: DomSanitizer,
                 private deviceStatusService: DeviceStatusService,
                 private dashboardService: DashboardService,
-                private deploymentsService: DeploymentsService) {
+                private deploymentsService: DeploymentsService,
+                private multiValueService: MultiValueService,
+                private http: HttpClient) {
     }
 
     ngOnInit() {
@@ -99,11 +106,42 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                     }
                 }
 
-                // this.multiValueService.getValues(this.widget).subscribe(result => {
-                //     this.widget = result;
-                //     this.dataReady = true;
-                //     this.orderValues(this.widget.properties.order || 0);
-                // });
+                const requestPayload: ChartsExportRequestPayloadModel = {
+                    time: {
+                        last: '500000w', // arbitrary high number
+                        end: undefined,
+                        start: undefined
+                    },
+                    group: {
+                        type: undefined,
+                        time: ''
+                    },
+                    queries: [{
+                        id: 'b6cdd7c2-c7fd-470f-9391-61ec3f4bf5e5',
+                        fields: [{
+                            math: '',
+                            name: 'level',
+                        }]
+                    }],
+                    limit: 1
+                };
+
+                this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
+                    console.log(model);
+                    const columns = model.results[0].series[0].columns;
+                    const values = model.results[0].series[0].values;
+
+                    console.log(columns);
+                    console.log(values);
+                    ['b6cdd7c2-c7fd-470f-9391-61ec3f4bf5e5.level'].forEach((id) => {
+                        const columnIndex = columns.findIndex(col => col === id);
+                        values.forEach(val => {
+                            if (val[columnIndex]) {
+                                console.log(val[columnIndex]);
+                            }
+                        });
+                    });
+                });
             }
         });
     }
