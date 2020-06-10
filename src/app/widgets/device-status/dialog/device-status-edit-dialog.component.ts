@@ -72,7 +72,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
             this.formGroup.patchValue({'name': widget.name});
-            this.formGroup.patchValue({'refreshTime': widget.properties.refreshTime});
+            this.formGroup.patchValue({'refreshTime': widget.properties.refreshTime || 0});
             if (widget.properties.elements) {
                 widget.properties.elements.forEach((element: DeviceStatusElementModel) => {
                     this.addElement(element);
