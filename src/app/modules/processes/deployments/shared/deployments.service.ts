@@ -53,8 +53,8 @@ export class DeploymentsService {
         );
     }
 
-    startDeployment(deploymentId: string): Observable<any[] | null> {
-        return this.http.get<any[]>(environment.processServiceUrl + '/process-definition/' + encodeURIComponent(deploymentId) + '/start').pipe(
+    startDeployment(deploymentId: string): Observable<any | null> {
+        return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start').pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null))
         );
     }

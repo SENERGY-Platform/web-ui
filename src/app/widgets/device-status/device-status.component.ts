@@ -22,6 +22,8 @@ import {DeviceStatusService} from './shared/device-status.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {MatTable} from '@angular/material/table';
+import {DeviceStatusElementModel} from './shared/device-status-properties.model';
+import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
 
 @Component({
     selector: 'senergy-device-status',
@@ -33,6 +35,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     configured = false;
     destroy = new Subscription();
     dataReady = false;
+    interval = 0;
     // orderedValues: DeviceStatusMeasurement[] = [];
 
     @Input() dashboardId = '';
@@ -43,7 +46,8 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     constructor(private iconRegistry: MatIconRegistry,
                 private sanitizer: DomSanitizer,
                 private deviceStatusService: DeviceStatusService,
-                private dashboardService: DashboardService) {
+                private dashboardService: DashboardService,
+                private deploymentsService: DeploymentsService) {
     }
 
     ngOnInit() {
@@ -53,6 +57,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
+        clearInterval(this.interval);
         this.destroy.unsubscribe();
     }
 
@@ -79,6 +84,21 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.dataReady = false;
+
+                const elements = this.widget.properties.elements;
+
+                if (elements) {
+                    clearInterval(this.interval);
+                    const refreshTimeInMs = 0;
+                    if (refreshTimeInMs > 0) {
+                        this.interval = window.setInterval(() => {
+                            elements.forEach((element: DeviceStatusElementModel) => {
+                                this.deploymentsService.startDeployment(element.deploymentId).subscribe();
+                            });
+                        }, refreshTimeInMs);
+                    }
+                }
+
                 // this.multiValueService.getValues(this.widget).subscribe(result => {
                 //     this.widget = result;
                 //     this.dataReady = true;
