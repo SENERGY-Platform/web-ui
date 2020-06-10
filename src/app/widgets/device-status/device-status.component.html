@@ -23,6 +23,7 @@
         </div>
         <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
         <div *ngIf="configured && dataReady" class="table-container" fxLayout="column" fxFill>
+            <div>{{items}}</div>
 <!--            <table mat-table [dataSource]="orderedValues" matSort>-->
 <!--                <ng-container matColumnDef="name">-->
 <!--                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>-->

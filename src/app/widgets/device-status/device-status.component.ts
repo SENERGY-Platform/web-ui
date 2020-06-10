@@ -27,7 +27,10 @@ import {DeploymentsService} from '../../modules/processes/deployments/shared/dep
 import {MultiValueService} from '../multi-value/shared/multi-value.service';
 import {ChartsExportModel} from '../charts/export/shared/charts-export.model';
 import {environment} from '../../../environments/environment';
-import {ChartsExportRequestPayloadModel} from '../charts/export/shared/charts-export-request-payload.model';
+import {
+    ChartsExportRequestPayloadModel,
+    ChartsExportRequestPayloadQueriesModel
+} from '../charts/export/shared/charts-export-request-payload.model';
 import {HttpClient} from '@angular/common/http';
 
 @Component({
@@ -41,6 +44,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     destroy = new Subscription();
     dataReady = false;
     interval = 0;
+    items: (string | number)[] = [];
     // orderedValues: DeviceStatusMeasurement[] = [];
 
     @Input() dashboardId = '';
@@ -105,6 +109,11 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                         }, refreshTimeInMs);
                     }
 
+                    const queries: ChartsExportRequestPayloadQueriesModel[] = [];
+                    elements.forEach((element: DeviceStatusElementModel) => {
+                        queries.push({id: element.exportId, fields: [{name: 'level', math: ''}]});
+                    });
+
                     const requestPayload: ChartsExportRequestPayloadModel = {
                         time: {
                             last: '500000w', // arbitrary high number
@@ -115,32 +124,24 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                             type: undefined,
                             time: ''
                         },
-                        queries: [{
-                            id: elements[0].exportId,
-                            fields: [{
-                                math: '',
-                                name: 'level',
-                            }]
-                        }],
+                        queries: queries,
                         limit: 1
                     };
 
                     this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
+                        this.items = [];
                         const columns = model.results[0].series[0].columns;
                         const values = model.results[0].series[0].values;
 
-                        [elements[0].exportId + '.level'].forEach((id) => {
-                            const columnIndex = columns.findIndex(col => col === id);
+                        elements.forEach((element: DeviceStatusElementModel) => {
+                            const columnIndex = columns.findIndex(col => col === (element.exportId + '.level'));
                             values.forEach(val => {
-                                if (val[columnIndex]) {
-                                    console.log(val[columnIndex]);
-                                }
+                                this.items.push(val[columnIndex]);
                             });
                         });
+                        this.dataReady = true;
                     });
                 }
-
-
 
 
             }
@@ -152,16 +153,16 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
      */
     private setConfigured() {
         this.configured = true;
-        if (this.widget.properties.multivaluemeasurements) {
-            for (const measurement of this.widget.properties.multivaluemeasurements) {
-                if (measurement.export.id === '' || measurement.column.Name === '' || measurement.type === '') {
-                    this.configured = false;
-                    return;
-                }
-            }
-        } else {
-            this.configured = false;
-        }
+        // if (this.widget.properties.multivaluemeasurements) {
+        //     for (const measurement of this.widget.properties.multivaluemeasurements) {
+        //         if (measurement.export.id === '' || measurement.column.Name === '' || measurement.type === '') {
+        //             this.configured = false;
+        //             return;
+        //         }
+        //     }
+        // } else {
+        //     this.configured = false;
+        // }
     }
 
     // private orderValues(sortId: number) {
