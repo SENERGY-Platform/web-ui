@@ -44,7 +44,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     destroy = new Subscription();
     dataReady = false;
     interval = 0;
-    items: (string | number)[] = [];
+    items: {name: string, status: (string | number)}[] = [];
     // orderedValues: DeviceStatusMeasurement[] = [];
 
     @Input() dashboardId = '';
@@ -136,7 +136,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                         elements.forEach((element: DeviceStatusElementModel) => {
                             const columnIndex = columns.findIndex(col => col === (element.exportId + '.level'));
                             values.forEach(val => {
-                                this.items.push(val[columnIndex]);
+                                this.items.push({name: element.name, status: val[columnIndex]});
                             });
                         });
                         this.dataReady = true;
