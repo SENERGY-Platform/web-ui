@@ -127,12 +127,9 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                 };
 
                 this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
-                    console.log(model);
                     const columns = model.results[0].series[0].columns;
                     const values = model.results[0].series[0].values;
 
-                    console.log(columns);
-                    console.log(values);
                     ['b6cdd7c2-c7fd-470f-9391-61ec3f4bf5e5.level'].forEach((id) => {
                         const columnIndex = columns.findIndex(col => col === id);
                         values.forEach(val => {
