@@ -21,7 +21,11 @@ import {DeploymentsService} from '../../../modules/processes/deployments/shared/
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {DeviceTypeAspectModel, DeviceTypeFunctionModel} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeFunctionModel,
+    DeviceTypeServiceModel
+} from '../../../modules/devices/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
 import {DeviceStatusElementModel} from '../shared/device-status-properties.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
@@ -29,6 +33,8 @@ import {
     DeploymentsPreparedModel,
     DeploymentsPreparedSelectableModel
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
+import {ExportModel} from '../../../modules/data/export/shared/export.model';
+import {DeviceInstancesUpdateModel} from '../../../modules/devices/device-instances/shared/device-instances-update.model';
 
 
 @Component({
@@ -119,11 +125,12 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     deploy(elementIndex: number): void {
         const pD = this.preparedDeployment[elementIndex];
-        pD.elements[0].task.selection.device = this.getSelectable(elementIndex).value.device;
-        pD.elements[0].task.selection.service = this.getSelectable(elementIndex).value.services[0];
+        pD.elements[0].task.selection.device = this.getSelectableDevice(elementIndex);
+        pD.elements[0].task.selection.service = this.getSelectableService(elementIndex);
         this.deploymentsService.postDeployments(pD).subscribe((resp: { id: string }) => {
             this.getDeploymentId(elementIndex).setValue(resp.id);
         });
+        this.createExport(elementIndex);
     }
 
     addElement(element: DeviceStatusElementModel) {
@@ -189,6 +196,28 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return a && b && a.device.id === b.device.id;
     }
 
+    private createExport(elementIndex: number): void {
+        const exp: ExportModel = {
+            Name: 'generatedByProcessStatusWidget',
+            Description: 'generatedByProcessStatusWidget',
+            TimePath: 'value.openCloseState.updateTime',
+            Values: [{
+                Name: 'level',
+                Type: 'value.openCloseState.level',
+                Path: 'string',
+            }],
+            EntityName: this.getSelectableDevice(elementIndex).name,
+            Filter: this.getSelectableDevice(elementIndex).id,
+            FilterType: 'deviceId',
+            ServiceName: this.getSelectableService(elementIndex).name,
+            Topic: this.getSelectableService(elementIndex).id.replace(/#/g, '_').replace(/:/g, '_'), // this.getSelectableService(elementIndex)
+            Offset: 'smallest'
+        } as ExportModel;
+        this.exportService.startPipeline(exp).subscribe((resp: ExportModel) => {
+            this.getExportId(elementIndex).setValue(resp.ID);
+        });
+    }
+
     private getAspects(): void {
         this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe(
             (aspects: DeviceTypeAspectModel[]) => {
@@ -203,6 +232,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             function: [element.function, Validators.required],
             selectable: [element.selectable, Validators.required],
             deploymentId: [element.deploymentId, Validators.required],
+            exportId: [element.exportId, Validators.required],
         });
     }
 
@@ -226,8 +256,20 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return this.elements.at(elementIndex).get('selectable') as FormControl;
     }
 
+    private getSelectableDevice(elementIndex: number): DeviceInstancesUpdateModel {
+        return <DeviceInstancesUpdateModel>(this.getSelectable(elementIndex).value).device;
+    }
+
+    private getSelectableService(elementIndex: number): DeviceTypeServiceModel {
+        return <DeviceTypeServiceModel>(this.getSelectable(elementIndex).value).services[0];
+    }
+
     private getDeploymentId(elementIndex: number): FormControl {
         return this.elements.at(elementIndex).get('deploymentId') as FormControl;
+    }
+
+    private getExportId(elementIndex: number): FormControl {
+        return this.elements.at(elementIndex).get('exportId') as FormControl;
     }
 
 }

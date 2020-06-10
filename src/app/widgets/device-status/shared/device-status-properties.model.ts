@@ -30,6 +30,7 @@ export interface DeviceStatusElementModel {
     function: DeviceTypeFunctionModel | null;
     selectable: DeploymentsPreparedSelectableModel | null;
     deploymentId: string;
+    exportId: string;
 }
 
 export enum MultiValueOrderEnum {
