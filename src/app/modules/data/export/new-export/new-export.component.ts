@@ -140,6 +140,7 @@ export class NewExportComponent implements OnInit {
         service.outputs.forEach((out: DeviceTypeContentModel) => {
             this.traverseDataStructure(pathString, out.content_variable);
         });
+        this.autofillValues();
     }
 
     traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel) {
@@ -223,6 +224,7 @@ export class NewExportComponent implements OnInit {
 
     resetVars() {
         this.paths.clear();
+        this.export.Values = [];
     }
 
     autofillValues() {
