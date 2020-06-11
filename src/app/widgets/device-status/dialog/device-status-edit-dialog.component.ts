@@ -85,8 +85,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         });
     }
 
-    loadFunctions(aspectId: string, elementIndex: number): void {
-        this.deviceTypeService.getAspectsMeasuringFunctions(aspectId).subscribe((resp: DeviceTypeFunctionModel[]) => {
+    loadFunctions(elementIndex: number): void {
+        this.deviceTypeService.getAspectsMeasuringFunctions(this.getAspectId(elementIndex).value).subscribe((resp: DeviceTypeFunctionModel[]) => {
             this.funcArray[elementIndex] = resp;
         });
     }
@@ -136,11 +136,13 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     addElement(element: DeviceStatusElementModel) {
         this.elementsControl.push(this.setElement(element));
         const index = this.elementsControl.length - 1;
-        this.loadFunctions(element.aspectId, index);
+        this.loadFunctions(index);
         this.loadDevices(index);
         this.getAspectId(index).valueChanges.subscribe((aspectId) => {
                 this.getFunctionControl(index).reset();
-                this.loadFunctions(aspectId, index);
+                if (aspectId !== null) {
+                    this.loadFunctions(index);
+                }
             }
         );
         this.getFunctionControl(index).valueChanges.subscribe((func) => {
