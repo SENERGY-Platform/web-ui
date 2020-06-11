@@ -36,7 +36,7 @@
         </table>
         <mat-accordion formArrayName="elements">
             <mat-expansion-panel [formGroupName]="elementIndex"
-                                 *ngFor="let elementControl of elements.controls; let elementIndex = index">
+                                 *ngFor="let elementControl of elementsControl.controls; let elementIndex = index">
                 <mat-expansion-panel-header class="right-aligned-header">
                     <mat-panel-title>
                         <span [ngClass]="{'color-warn': elementControl.invalid}"> {{elementControl.value.name}} </span>
@@ -92,7 +92,7 @@
                     <div>
                         <div fxFlex></div>
                         <button mat-icon-button
-                                [disabled]="elements.length === 1"
+                                [disabled]="elementsControl.length === 1"
                                 (click)="deleteElement(elementIndex)">
                             <mat-icon>delete</mat-icon>
                         </button>
