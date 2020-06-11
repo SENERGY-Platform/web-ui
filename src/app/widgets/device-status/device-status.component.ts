@@ -141,6 +141,8 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                         });
                         this.dataReady = true;
                     });
+                } else {
+                    this.dataReady = true;
                 }
 
 
@@ -153,16 +155,6 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
      */
     private setConfigured() {
         this.configured = true;
-        // if (this.widget.properties.multivaluemeasurements) {
-        //     for (const measurement of this.widget.properties.multivaluemeasurements) {
-        //         if (measurement.export.id === '' || measurement.column.Name === '' || measurement.type === '') {
-        //             this.configured = false;
-        //             return;
-        //         }
-        //     }
-        // } else {
-        //     this.configured = false;
-        // }
     }
 
     // private orderValues(sortId: number) {
