@@ -21,11 +21,7 @@ import {DeploymentsService} from '../../../modules/processes/deployments/shared/
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {
-    DeviceTypeAspectModel,
-    DeviceTypeFunctionModel,
-    DeviceTypeServiceModel
-} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+import {DeviceTypeAspectModel, DeviceTypeFunctionModel} from '../../../modules/devices/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
 import {DeviceStatusElementModel} from '../shared/device-status-properties.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
@@ -34,7 +30,6 @@ import {
     DeploymentsPreparedSelectableModel
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 import {ExportModel} from '../../../modules/data/export/shared/export.model';
-import {DeviceInstancesUpdateModel} from '../../../modules/devices/device-instances/shared/device-instances-update.model';
 import {forkJoin, Observable} from 'rxjs';
 
 
@@ -131,12 +126,11 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         }
     }
 
-    deploy(selectable: DeploymentsPreparedSelectableModel, index: number): Observable<{ status: number, id: string }> {
+    createdDeployment(selectable: DeploymentsPreparedSelectableModel, index: number): Observable<{ status: number, id: string }> {
         const pD = this.preparedDeployment[index];
         pD.elements[0].task.selection.device = selectable.device;
         pD.elements[0].task.selection.service = selectable.services[0];
         return this.deploymentsService.postDeployments(pD);
-
     }
 
     addElement(element: DeviceStatusElementModel) {
@@ -162,38 +156,21 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     }
 
     deleteElement(elementIndex: number): void {
-        this.exportService.stopPipeline({ID: this.getExportId(elementIndex).value} as ExportModel).subscribe(() => {
-        });
-        this.deploymentsService.deleteDeployment(this.getDeploymentId(elementIndex).value).subscribe(() => {
-        });
         this.funcArray.splice(elementIndex, 1);
+        this.selectablesArray.splice(elementIndex, 1);
         this.elementsControl.removeAt(elementIndex);
     }
 
     save(): void {
-        this.deleteOld();
+        this.deleteOldExportsAndDeployments(this.widgetOld.properties.elements);
 
-        const exportArray: Observable<ExportModel>[] = [];
-        this.elements.forEach((element: DeviceStatusElementModel) => {
-            if (element.selectable) {
-                exportArray.push(this.createExport(element.selectable));
-            }
-        });
-
-        const deploymentArray: Observable<{ status: number, id: string }>[] = [];
-        this.elements.forEach((element: DeviceStatusElementModel, index: number) => {
-            if (element.selectable) {
-                deploymentArray.push(this.deploy(element.selectable, index));
-            }
-        });
-
-        forkJoin(exportArray).subscribe((respExport: ExportModel[]) => {
+        forkJoin(this.getExportArray()).subscribe((respExport: ExportModel[]) => {
 
             respExport.forEach((exp: ExportModel, exportIndex: number) => {
                 this.getExportId(exportIndex).setValue(exp.ID);
             });
 
-            forkJoin(deploymentArray).subscribe((respDeployment: { status: number, id: string }[]) => {
+            forkJoin(this.getDeploymentArray()).subscribe((respDeployment: { status: number, id: string }[]) => {
                 respDeployment.forEach((deployment: { status: number, id: string }, deploymentIndex: number) => {
                     this.getDeploymentId(deploymentIndex).setValue(deployment.id);
                 });
@@ -215,9 +192,29 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return a && b && a.device.id === b.device.id;
     }
 
-    private deleteOld(): void {
-        if (this.widgetOld.properties.elements) {
-            this.widgetOld.properties.elements.forEach((element: DeviceStatusElementModel) => {
+    private getDeploymentArray(): Observable<{ status: number, id: string }>[] {
+        const deploymentArray: Observable<{ status: number, id: string }>[] = [];
+        this.elements.forEach((element: DeviceStatusElementModel, index: number) => {
+            if (element.selectable) {
+                deploymentArray.push(this.createdDeployment(element.selectable, index));
+            }
+        });
+        return deploymentArray;
+    }
+
+    private getExportArray(): Observable<ExportModel>[] {
+        const exportArray: Observable<ExportModel>[] = [];
+        this.elements.forEach((element: DeviceStatusElementModel) => {
+            if (element.selectable) {
+                exportArray.push(this.createExport(element.selectable));
+            }
+        });
+        return exportArray;
+    }
+
+    private deleteOldExportsAndDeployments(elements: DeviceStatusElementModel[] | undefined): void {
+        if (elements) {
+            elements.forEach((element: DeviceStatusElementModel) => {
                 if (element.exportId) {
                     this.exportService.stopPipeline({ID: element.exportId} as ExportModel).subscribe();
                 }
