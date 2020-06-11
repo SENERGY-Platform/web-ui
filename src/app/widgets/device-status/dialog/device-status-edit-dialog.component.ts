@@ -180,7 +180,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     }
 
-    addNewMeasurement() {
+    add() {
         this.addElement({} as DeviceStatusElementModel);
     }
 
