@@ -21,9 +21,13 @@ import {DeploymentsService} from '../../../modules/processes/deployments/shared/
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {DeviceTypeAspectModel, DeviceTypeFunctionModel} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectModel, DeviceTypeContentVariableModel,
+    DeviceTypeFunctionModel,
+    DeviceTypeModel, DeviceTypeServiceModel
+} from '../../../modules/devices/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
-import {DeviceStatusElementModel} from '../shared/device-status-properties.model';
+import {DeviceStatusElementModel, DeviceStatusExportValuesModel} from '../shared/device-status-properties.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {
     DeploymentsPreparedModel,
@@ -47,6 +51,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     funcArray: DeviceTypeFunctionModel[][] = [];
     selectablesArray: DeploymentsPreparedSelectableModel[][] = [];
     preparedDeployment: DeploymentsPreparedModel[] = [];
+    exportValues: DeviceStatusExportValuesModel[][] = [];
 
     formGroup = this.fb.group({
         name: ['', Validators.required],
@@ -89,6 +94,41 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.deviceTypeService.getAspectsMeasuringFunctions(this.getAspectId(elementIndex).value).subscribe((resp: DeviceTypeFunctionModel[]) => {
             this.funcArray[elementIndex] = resp;
         });
+    }
+
+
+    loadDeviceType(elementIndex: number): void {
+        if (this.getSelectable(elementIndex).value) {
+            this.deviceTypeService.getDeviceType(this.getSelectable(elementIndex).value.device.device_type_id).subscribe((deviceType: (DeviceTypeModel | null)) => {
+                if (deviceType) {
+                    deviceType.services.forEach((service: DeviceTypeServiceModel) => {
+                        if (service.id === this.getSelectable(elementIndex).value.services[0].id) {
+                            this.exportValues.push(this.traverseDataStructure('value', service.outputs[0].content_variable, []));
+                            this.traverseDataStructure('value', service.outputs[0].content_variable, []);
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel, array: DeviceStatusExportValuesModel[]): DeviceStatusExportValuesModel[] {
+        if (field.type === 'https://schema.org/StructuredValue' && field.type !== undefined && field.type !== null) {
+            pathString += '.' + field.name;
+            if (field.sub_content_variables !== undefined) {
+                field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel) => {
+                    this.traverseDataStructure(pathString, innerField, array);
+                });
+            }
+        } else {
+            array.push({
+                name: field.name || '',
+                path: pathString + '.' + field.name,
+                type: field.type || '',
+                timestamp: field.characteristic_id === 'urn:infai:ses:characteristic:6bc41b45-a9f3-4d87-9c51-dd3e11257800'
+            });
+        }
+        return array;
     }
 
     loadDevices(elementIndex: number): void {
@@ -138,6 +178,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         const index = this.elementsControl.length - 1;
         this.loadFunctions(index);
         this.loadDevices(index);
+        this.loadDeviceType(index);
         this.getAspectId(index).valueChanges.subscribe((aspectId) => {
                 this.getFunctionControl(index).reset();
                 if (aspectId !== null) {
@@ -148,6 +189,12 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.getFunctionControl(index).valueChanges.subscribe((func) => {
             this.getSelectable(index).reset();
             if (func !== null) {
+                this.loadDevices(index);
+            }
+        });
+        this.getSelectable(index).valueChanges.subscribe((selectable) => {
+            this.getExportValues(index).reset();
+            if (selectable !== null) {
                 this.loadDevices(index);
             }
         });
@@ -192,6 +239,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     compareSelectables(a: DeploymentsPreparedSelectableModel, b: DeploymentsPreparedSelectableModel) {
         return a && b && a.device.id === b.device.id;
+    }
+
+    compareValues(a: DeviceStatusExportValuesModel, b: DeviceStatusExportValuesModel) {
+        return a && b && a.name === b.name && a.path === b.path;
     }
 
     private getDeploymentArray(): Observable<{ status: number, id: string }>[] {
@@ -274,6 +325,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             selectable: [element.selectable, Validators.required],
             deploymentId: [element.deploymentId],
             exportId: [element.exportId],
+            exportValues: [element.exportValues, Validators.required],
         });
     }
 
@@ -307,6 +359,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     private getExportId(elementIndex: number): FormControl {
         return this.elementsControl.at(elementIndex).get('exportId') as FormControl;
+    }
+
+    private getExportValues(elementIndex: number): FormControl {
+        return this.elementsControl.at(elementIndex).get('exportValues') as FormControl;
     }
 
 }

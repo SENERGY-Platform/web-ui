@@ -31,6 +31,14 @@ export interface DeviceStatusElementModel {
     selectable: DeploymentsPreparedSelectableModel | null;
     deploymentId: string;
     exportId: string;
+    exportValues: DeviceStatusExportValuesModel;
+}
+
+export interface DeviceStatusExportValuesModel {
+    name: string;
+    path: string;
+    type: string;
+    timestamp: boolean;
 }
 
 export enum MultiValueOrderEnum {
