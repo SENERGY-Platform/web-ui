@@ -35,7 +35,7 @@ import {
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {forkJoin, Observable} from 'rxjs';
-import {environment} from '../../../../environments/environment.dev';
+import {environment} from '../../../../environments/environment';
 
 
 @Component({
