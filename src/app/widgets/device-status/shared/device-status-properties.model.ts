@@ -38,7 +38,7 @@ export interface DeviceStatusExportValuesModel {
     name: string;
     path: string;
     type: string;
-    timestamp: boolean;
+    characteristicId: string;
 }
 
 export enum MultiValueOrderEnum {

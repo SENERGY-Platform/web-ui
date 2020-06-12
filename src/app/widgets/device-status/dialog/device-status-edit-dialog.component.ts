@@ -35,6 +35,7 @@ import {
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {forkJoin, Observable} from 'rxjs';
+import {environment} from '../../../../environments/environment.dev';
 
 
 @Component({
@@ -52,6 +53,11 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     selectablesArray: DeploymentsPreparedSelectableModel[][] = [];
     preparedDeployment: DeploymentsPreparedModel[] = [];
     exportValues: DeviceStatusExportValuesModel[][] = [];
+
+    typeString = 'https://schema.org/Text';
+    typeInteger = 'https://schema.org/Integer';
+    typeFloat = 'https://schema.org/Float';
+    typeBoolean = 'https://schema.org/Boolean';
 
     formGroup = this.fb.group({
         name: ['', Validators.required],
@@ -103,8 +109,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 if (deviceType) {
                     deviceType.services.forEach((service: DeviceTypeServiceModel) => {
                         if (service.id === this.getSelectable(elementIndex).value.services[0].id) {
-                            this.exportValues.push(this.traverseDataStructure('value', service.outputs[0].content_variable, []));
-                            this.traverseDataStructure('value', service.outputs[0].content_variable, []);
+                            this.exportValues[elementIndex] = this.traverseDataStructure('value', service.outputs[0].content_variable, []);
                         }
                     });
                 }
@@ -125,7 +130,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 name: field.name || '',
                 path: pathString + '.' + field.name,
                 type: field.type || '',
-                timestamp: field.characteristic_id === 'urn:infai:ses:characteristic:6bc41b45-a9f3-4d87-9c51-dd3e11257800'
+                characteristicId: field.characteristic_id || '',
             });
         }
         return array;
@@ -193,9 +198,9 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             }
         });
         this.getSelectable(index).valueChanges.subscribe((selectable) => {
-            this.getExportValues(index).reset();
+            this.getExportValuesControl(index).reset();
             if (selectable !== null) {
-                this.loadDevices(index);
+                this.loadDeviceType(index);
             }
         });
     }
@@ -207,6 +212,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     deleteElement(elementIndex: number): void {
         this.funcArray.splice(elementIndex, 1);
         this.selectablesArray.splice(elementIndex, 1);
+        this.exportValues.splice(elementIndex, 1);
         this.elementsControl.removeAt(elementIndex);
     }
 
@@ -257,9 +263,9 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     private getExportArray(): Observable<ExportModel>[] {
         const exportArray: Observable<ExportModel>[] = [];
-        this.elements.forEach((element: DeviceStatusElementModel) => {
+        this.elements.forEach((element: DeviceStatusElementModel, elementIndex: number) => {
             if (element.selectable) {
-                exportArray.push(this.createExport(element.selectable));
+                exportArray.push(this.createExport(element.selectable, elementIndex));
             }
         });
         return exportArray;
@@ -290,21 +296,49 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         });
     }
 
-    private createExport(selectable: DeploymentsPreparedSelectableModel): Observable<ExportModel> {
+    private createExport(selectable: DeploymentsPreparedSelectableModel, elementIndex: number): Observable<ExportModel> {
+        let timePath = '';
+        this.exportValues[elementIndex].forEach((expVal: DeviceStatusExportValuesModel) => {
+            if (timePath === '' && expVal.characteristicId === environment.timeStampCharacteristicId) {
+                timePath = expVal.path;
+            }
+        });
+
+        if (timePath === '') {
+            console.log('kein Timepath', selectable, elementIndex);
+        }
+
+
+        let type = '';
+        switch (this.getExportValues(elementIndex).type) {
+            case this.typeString:
+                type = 'string';
+                break;
+            case this.typeFloat:
+                type = 'float';
+                break;
+            case this.typeInteger:
+                type = 'int';
+                break;
+            case this.typeBoolean:
+                type = 'bool';
+                break;
+
+        }
         const exp: ExportModel = {
             Name: 'generatedByProcessStatusWidget',
             Description: 'generatedByProcessStatusWidget',
-            TimePath: 'value.openCloseState.updateTime',
+            TimePath: timePath,
             Values: [{
-                Name: 'level',
-                Type: 'string',
-                Path: 'value.openCloseState.level',
+                Name: this.getExportValues(elementIndex).name,
+                Type: type,
+                Path: this.getExportValues(elementIndex).path,
             }],
             EntityName: selectable.device.name,
             Filter: selectable.device.id,
             FilterType: 'deviceId',
             ServiceName: selectable.services[0].name,
-            Topic: selectable.services[0].id.replace(/#/g, '_').replace(/:/g, '_'), // this.getSelectableService(elementIndex)
+            Topic: selectable.services[0].id.replace(/#/g, '_').replace(/:/g, '_'),
             Offset: 'smallest'
         } as ExportModel;
         return this.exportService.startPipeline(exp);
@@ -361,8 +395,12 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return this.elementsControl.at(elementIndex).get('exportId') as FormControl;
     }
 
-    private getExportValues(elementIndex: number): FormControl {
+    private getExportValuesControl(elementIndex: number): FormControl {
         return this.elementsControl.at(elementIndex).get('exportValues') as FormControl;
+    }
+
+    private getExportValues(elementIndex: number): DeviceStatusExportValuesModel {
+        return <DeviceStatusExportValuesModel>this.getExportValuesControl(elementIndex).value;
     }
 
 }

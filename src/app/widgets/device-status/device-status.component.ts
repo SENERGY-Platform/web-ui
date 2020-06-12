@@ -44,7 +44,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     destroy = new Subscription();
     dataReady = false;
     interval = 0;
-    items: {name: string, status: (string | number)}[] = [];
+    items: { name: string, status: (string | number) }[] = [];
     // orderedValues: DeviceStatusMeasurement[] = [];
 
     @Input() dashboardId = '';
@@ -111,7 +111,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
 
                     const queries: ChartsExportRequestPayloadQueriesModel[] = [];
                     elements.forEach((element: DeviceStatusElementModel) => {
-                        queries.push({id: element.exportId, fields: [{name: 'level', math: ''}]});
+                        queries.push({id: element.exportId, fields: [{name: element.exportValues.name, math: ''}]});
                     });
 
                     const requestPayload: ChartsExportRequestPayloadModel = {
@@ -134,9 +134,11 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                         const values = model.results[0].series[0].values;
 
                         elements.forEach((element: DeviceStatusElementModel) => {
-                            const columnIndex = columns.findIndex(col => col === (element.exportId + '.level'));
+                            const columnIndex = columns.findIndex(col => col === (element.exportId + '.' + element.exportValues.name));
                             values.forEach(val => {
-                                this.items.push({name: element.name, status: val[columnIndex]});
+                                if (val[columnIndex]  !== null) {
+                                    this.items.push({name: element.name, status: val[columnIndex]});
+                                }
                             });
                         });
                         this.dataReady = true;
