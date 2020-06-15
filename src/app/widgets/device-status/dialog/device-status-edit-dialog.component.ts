@@ -34,7 +34,7 @@ import {
     DeploymentsPreparedSelectableModel
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 import {ExportModel} from '../../../modules/data/export/shared/export.model';
-import {forkJoin, Observable} from 'rxjs';
+import {forkJoin, Observable, of} from 'rxjs';
 import {environment} from '../../../../environments/environment';
 import {DeviceStatusService} from '../shared/device-status.service';
 
@@ -193,7 +193,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     createdDeployment(selectable: DeploymentsPreparedSelectableModel, index: number): Observable<{ status: number, id: string }> {
         const pD = this.preparedDeployment[index];
         pD.elements[0].task.selection.device = selectable.device;
-        pD.elements[0].task.selection.service = this.getServiceControl(index).value;
+        pD.elements[0].task.selection.service = this.getService(index);
         return this.deploymentsService.postDeployments(pD);
     }
 
@@ -274,7 +274,11 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         const deploymentArray: Observable<{ status: number, id: string }>[] = [];
         this.elements.forEach((element: DeviceStatusElementModel, index: number) => {
             if (element.selectable) {
-                deploymentArray.push(this.createdDeployment(element.selectable, index));
+                if (this.getService(index).protocol_id === environment.mqttProtocolID) {
+                    deploymentArray.push(of({ status: 0, id: ''}));
+                } else {
+                    deploymentArray.push(this.createdDeployment(element.selectable, index));
+                }
             }
         });
         return deploymentArray;
@@ -303,7 +307,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     }
 
     private createExport(selectable: DeploymentsPreparedSelectableModel, elementIndex: number): Observable<ExportModel> {
-        const traverse = this.traverseDataStructure('value', this.getServiceControl(elementIndex).value.outputs[0].content_variable, []);
+        const traverse = this.traverseDataStructure('value', this.getService(elementIndex).outputs[0].content_variable, []);
         const timePath = this.getTimePath(traverse);
 
         let type = '';
@@ -334,8 +338,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             EntityName: selectable.device.name,
             Filter: selectable.device.id,
             FilterType: 'deviceId',
-            ServiceName: this.getServiceControl(elementIndex).value.name,
-            Topic: this.getServiceControl(elementIndex).value.id.replace(/#/g, '_').replace(/:/g, '_'),
+            ServiceName: this.getService(elementIndex).name,
+            Topic: this.getService(elementIndex).id.replace(/#/g, '_').replace(/:/g, '_'),
             Offset: 'smallest'
         } as ExportModel;
         return this.exportService.startPipeline(exp);
@@ -403,6 +407,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     private getServiceControl(elementIndex: number): FormControl {
         return this.elementsControl.at(elementIndex).get('service') as FormControl;
+    }
+
+    private getService(elementIndex: number): DeviceTypeServiceModel {
+        return <DeviceTypeServiceModel>this.getServiceControl(elementIndex).value;
     }
 
     private getExportValues(elementIndex: number): DeviceStatusExportValuesModel {
