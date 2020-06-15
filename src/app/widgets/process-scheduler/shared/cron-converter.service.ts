@@ -32,12 +32,16 @@ export class CronConverterService {
         date.setUTCHours(Number(hours));
         date.setUTCMinutes(Number(min));
 
-        let time = date.getHours() + ':';
-        if (date.getMinutes() < 10) {
-            time += '0' + date.getMinutes();
-        } else {
-            time += date.getMinutes();
+        let time = '';
+        if (date.getHours() < 10) {
+            time += '0';
         }
+        time += date.getHours();
+        time += ':';
+        if (date.getMinutes() < 10) {
+            time += '0';
+        }
+        time += date.getMinutes();
         return time;
     }
 
