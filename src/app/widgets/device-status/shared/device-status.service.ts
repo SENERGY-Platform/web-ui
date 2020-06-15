@@ -22,6 +22,10 @@ import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.mo
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {HttpClient} from '@angular/common/http';
+import {DeviceStatusElementModel} from './device-status-properties.model';
+import {ExportModel} from '../../../modules/data/export/shared/export.model';
+import {ExportService} from '../../../modules/data/export/shared/export.service';
+import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 
 @Injectable({
     providedIn: 'root'
@@ -30,8 +34,8 @@ export class DeviceStatusService {
 
     constructor(private dialog: MatDialog,
                 private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService,
-                private http: HttpClient) {
+                private exportService: ExportService,
+                private deploymentsService: DeploymentsService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -50,74 +54,18 @@ export class DeviceStatusService {
             }
         });
     }
-    //
-    //
-    //
-    // getValues(widget: WidgetModel): Observable<WidgetModel> {
-    //     return new Observable<WidgetModel>((observer) => {
-    //         if (widget.properties.multivaluemeasurements) {
-    //             const requestPayload: ChartsExportRequestPayloadModel = {
-    //                 time: {
-    //                     last: '500000w', // arbitrary high number
-    //                     end: undefined,
-    //                     start: undefined
-    //                 },
-    //                 group: {
-    //                     type: undefined,
-    //                     time: ''
-    //                 },
-    //                 queries: [],
-    //                 limit: 1
-    //             };
-    //
-    //             const measurements = widget.properties.multivaluemeasurements;
-    //             const array: ChartsExportRequestPayloadQueriesModel[] = [];
-    //             measurements.forEach((measurement: MultiValueMeasurement) => {
-    //                 if (array.length > 0 && array[array.length - 1].id === measurement.export.id) {
-    //                     array[array.length - 1].fields.push({
-    //                         name: measurement.column.Name,
-    //                         math: measurement.math || ''
-    //                     });
-    //                 } else {
-    //                     array.push({
-    //                         id: measurement.export.id,
-    //                         fields: [{name: measurement.column.Name, math: measurement.math || ''}]
-    //                     });
-    //                 }
-    //             });
-    //             requestPayload.queries = array;
-    //
-    //             const ids: string[] = [];
-    //             measurements.forEach(m => ids.push(m.export.id + '.' + m.column.Name));
-    //             this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
-    //                 const columns = model.results[0].series[0].columns;
-    //                 const values = model.results[0].series[0].values;
-    //                 ids.forEach((id, idIndex) => {
-    //                     const columnIndex = columns.findIndex(col => col === id);
-    //                     values.forEach(val => {
-    //                         if (val[columnIndex]) {
-    //                             measurements[idIndex].data = val[columnIndex];
-    //                         }
-    //                     });
-    //                     if (measurements[idIndex].data == null && measurements[idIndex].type !== 'Boolean') {
-    //                         measurements[idIndex].data = 'N/A';
-    //                         /* Act like a String if no value found, prevents piping.
-    //                          * Also remove unit because 'N/A %' is weird.
-    //                          * This doesn't change the actual configuration,
-    //                          * because the widget is never written to the dashboard service
-    //                          */
-    //                         measurements[idIndex].unit = '';
-    //                         measurements[idIndex].type = 'String';
-    //                     }
-    //                     if (measurements[idIndex].type === 'Boolean' && measurements[idIndex].data == null) {
-    //                         measurements[idIndex].data = 'False';
-    //                     }
-    //                 });
-    //                 observer.next(widget);
-    //                 observer.complete();
-    //             });
-    //         }
-    //     });
-    // }
+
+    deleteElements(elements: DeviceStatusElementModel[] | undefined): void {
+        if (elements) {
+            elements.forEach((element: DeviceStatusElementModel) => {
+                if (element.exportId) {
+                    this.exportService.stopPipeline({ID: element.exportId} as ExportModel).subscribe();
+                }
+                if (element.deploymentId) {
+                    this.deploymentsService.deleteDeployment(element.deploymentId).subscribe();
+                }
+            });
+        }
+    }
 }
 

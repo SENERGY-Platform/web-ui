@@ -36,6 +36,7 @@ import {
 import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {forkJoin, Observable} from 'rxjs';
 import {environment} from '../../../../environments/environment';
+import {DeviceStatusService} from '../shared/device-status.service';
 
 
 @Component({
@@ -72,6 +73,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 private exportService: ExportService,
                 private fb: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
+                private deviceStatusService: DeviceStatusService,
                 @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
@@ -217,7 +219,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.deleteOldExportsAndDeployments(this.widgetOld.properties.elements);
+        this.deviceStatusService.deleteElements(this.widgetOld.properties.elements);
 
         forkJoin(this.getExportArray()).subscribe((respExport: ExportModel[]) => {
 
@@ -269,19 +271,6 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             }
         });
         return exportArray;
-    }
-
-    private deleteOldExportsAndDeployments(elements: DeviceStatusElementModel[] | undefined): void {
-        if (elements) {
-            elements.forEach((element: DeviceStatusElementModel) => {
-                if (element.exportId) {
-                    this.exportService.stopPipeline({ID: element.exportId} as ExportModel).subscribe();
-                }
-                if (element.deploymentId) {
-                    this.deploymentsService.deleteDeployment(element.deploymentId).subscribe();
-                }
-            });
-        }
     }
 
     private saveWidget() {

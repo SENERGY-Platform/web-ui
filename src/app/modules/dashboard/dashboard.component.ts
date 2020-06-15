@@ -24,6 +24,8 @@ import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
 import {DisplayGrid, GridsterConfig, GridType} from 'angular-gridster2';
 import {Subscription} from 'rxjs';
+import {DashboardTypesEnum} from './shared/dashboard-types.enum';
+import {DeviceStatusService} from '../../widgets/device-status/shared/device-status.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -52,7 +54,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     dashSubscription = new Subscription;
 
     constructor(private responsiveService: ResponsiveService,
-                private dashboardService: DashboardService) {
+                private dashboardService: DashboardService,
+                private deviceStatusService: DeviceStatusService) {
     }
 
     ngOnInit() {
@@ -287,10 +290,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private deleteWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
         this.dashboards[this.activeTabIndex].widgets.forEach((widget: WidgetModel, index: number) => {
             if (widget.id === widgetManipulationModel.widgetId) {
+                this.cleanUp(widget);
                 this.dashboards[this.activeTabIndex].widgets.splice(index, 1);
                 this.reorderWidgets();
             }
         });
+    }
+
+    private cleanUp(widget: WidgetModel): void {
+        if (widget.type === DashboardTypesEnum.DeviceStatus) {
+            this.deviceStatusService.deleteElements(widget.properties.elements);
+        }
     }
 
     private addWidget(widgetManipulationModel: DashboardWidgetManipulationModel) {
