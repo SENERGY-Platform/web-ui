@@ -102,11 +102,11 @@ export class MultiValueService {
                     ids.forEach((id, idIndex) => {
                         const columnIndex = columns.findIndex(col => col === id);
                         values.forEach(val => {
-                            if (val[columnIndex]) {
+                            if (val[columnIndex] || val[columnIndex] === 0) {
                                 measurements[idIndex].data = val[columnIndex];
                             }
                         });
-                        if (measurements[idIndex].data == null && measurements[idIndex].type !== 'Boolean') {
+                        if (measurements[idIndex].data == null && measurements[idIndex].data !== 0 && measurements[idIndex].type !== 'Boolean') {
                             measurements[idIndex].data = 'N/A';
                             /* Act like a String if no value found, prevents piping.
                              * Also remove unit because 'N/A %' is weird.

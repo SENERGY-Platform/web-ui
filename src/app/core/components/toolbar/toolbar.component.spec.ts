@@ -17,6 +17,13 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {ToolbarComponent} from './toolbar.component';
+import {RouterTestingModule} from '@angular/router/testing';
+import {AuthorizationService} from '../../services/authorization.service';
+import {AuthorizationServiceMock} from '../../services/authorization.service.mock';
+import {MatDialogModule} from '@angular/material/dialog';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatMenuModule} from '@angular/material/menu';
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;
@@ -24,13 +31,18 @@ describe('ToolbarComponent', () => {
 
 
     beforeEach(async(() => {
-    }));
-
-    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule, RouterTestingModule, MatDialogModule, MatSnackBarModule, MatMenuModule],
+            declarations: [ ToolbarComponent ],
+            providers: [
+                { provide: AuthorizationService, useClass: AuthorizationServiceMock }
+            ]
+        })
+            .compileComponents();
         fixture = TestBed.createComponent(ToolbarComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-    });
+    }));
 
     it('should create', () => {
         expect(component).toBeTruthy();

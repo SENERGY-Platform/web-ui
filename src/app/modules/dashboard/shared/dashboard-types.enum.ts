@@ -29,4 +29,5 @@ export enum DashboardTypesEnum {
     AirQuality = 'air_quality',
     ProcessIncidentList = 'process_incident_list',
     ProcessScheduler = 'process_scheduler',
+    DeviceStatus = 'device_status',
 }

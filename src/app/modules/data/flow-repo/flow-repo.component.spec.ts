@@ -15,22 +15,32 @@
  */
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {DashboardComponent} from '../../dashboard/dashboard.component';
+import {FlowRepoComponent} from './flow-repo.component';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatDialogModule} from '@angular/material/dialog';
+import {AuthorizationService} from '../../../core/services/authorization.service';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {AuthorizationServiceMock} from '../../../core/services/authorization.service.mock';
 
-
-describe('DashboardComponent', () => {
-  let component: DashboardComponent;
-  let fixture: ComponentFixture<DashboardComponent>;
+describe('FlowRepoComponent', () => {
+  let component: FlowRepoComponent;
+  let fixture: ComponentFixture<FlowRepoComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DashboardComponent ]
+      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
+      declarations: [ FlowRepoComponent ],
+      providers: [
+        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+        DialogsService
+      ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DashboardComponent);
+    fixture = TestBed.createComponent(FlowRepoComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

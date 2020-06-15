@@ -105,8 +105,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
         });
     }
 
-    copyEndpoint(endpoint: string) {
-        this.clipboardService.copyFromContent(environment.processServiceUrl + '/process-definition/' + endpoint + '/start');
+    copyEndpoint(id: string) {
+        this.clipboardService.copyFromContent(environment.processServiceUrl + '/deployment/' + id + '/start');
         this.snackBar.open('URL copied to clipboard.', undefined, {duration: 2000});
     }
 

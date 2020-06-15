@@ -60,6 +60,7 @@ export const environment = {
   geonamesUrl: '${process.env.GEONAMES_URL}',
   yrUrl: '${process.env.YR_URL}',
   notificationsUrl: '${process.env.NOTIFICATION_SERVICE_URL}',
+  timeStampCharacteristicId: '${process.env.TIMESTAMP_CHARACTERISTIC_ID}',
 };
 `;
 

@@ -14,20 +14,43 @@
  * limitations under the License.
  */
 
-import { TestBed, inject } from '@angular/core/testing';
+.mat-card {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
 
-import { DeploymentsService } from './deployments.service';
-import {HttpClientModule} from '@angular/common/http';
+.value {
+    font-size: 3.5vw;
+}
 
-describe('DeploymentsService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientModule],
-      providers: [DeploymentsService]
-    });
-  });
+.content-size {
+    min-height: calc(100% - 72px);
+    height: calc(100% - 72px);
+    margin: 0px;
+}
 
-  it('should be created', inject([DeploymentsService], (service: DeploymentsService) => {
-    expect(service).toBeTruthy();
-  }));
-});
+.white {
+    color: white;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.red {
+    color: red;
+}
+
+tr.mat-header-row {
+    height: 32px;
+}
+
+tr.mat-row {
+    height: 32px;
+}
+
+.table-container {
+    height: 100%;
+    overflow:auto;
+}

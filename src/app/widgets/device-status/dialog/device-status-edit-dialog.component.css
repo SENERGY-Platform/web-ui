@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-import { TestBed, inject } from '@angular/core/testing';
+table {
+    width: 100%;
+}
 
-import { DeploymentsService } from './deployments.service';
-import {HttpClientModule} from '@angular/common/http';
+mat-dialog-actions button:not(:last-child) {
+    margin-right: 8px;
+}
 
-describe('DeploymentsService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientModule],
-      providers: [DeploymentsService]
-    });
-  });
-
-  it('should be created', inject([DeploymentsService], (service: DeploymentsService) => {
-    expect(service).toBeTruthy();
-  }));
-});
+.actions-warn {
+    margin-right: 8px;
+}

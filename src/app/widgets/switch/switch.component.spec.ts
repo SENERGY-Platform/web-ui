@@ -17,6 +17,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SwitchComponent } from './switch.component';
+import {MatDialogModule} from '@angular/material/dialog';
+import {HttpClientModule} from '@angular/common/http';
+import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 
 describe('SwitchComponent', () => {
   let component: SwitchComponent;
@@ -24,7 +27,11 @@ describe('SwitchComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SwitchComponent ]
+      imports: [MatDialogModule, HttpClientModule],
+      declarations: [ SwitchComponent ],
+      providers: [MatDialogModule,
+        { provide: DashboardService, useClass: DashboardService },
+      ]
     })
     .compileComponents();
   }));

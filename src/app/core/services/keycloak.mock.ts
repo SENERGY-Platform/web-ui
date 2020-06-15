@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-import { TestBed, inject } from '@angular/core/testing';
+import {Keycloak} from 'keycloak-angular/lib/core/services/keycloak.service';
 
-import { DeploymentsService } from './deployments.service';
-import {HttpClientModule} from '@angular/common/http';
+export class MockKeycloakService {
+    getKeycloakInstance(): Keycloak.KeycloakInstance {
+        return {subject: 'test'} as Keycloak.KeycloakInstance;
+    }
 
-describe('DeploymentsService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientModule],
-      providers: [DeploymentsService]
-    });
-  });
-
-  it('should be created', inject([DeploymentsService], (service: DeploymentsService) => {
-    expect(service).toBeTruthy();
-  }));
-});
+    getUsername() {
+        return 'test';
+    }
+}

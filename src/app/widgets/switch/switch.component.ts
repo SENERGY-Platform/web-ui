@@ -16,7 +16,7 @@
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {
-    WidgetModel
+    WidgetModel, WidgetPropertiesModels
 } from '../../modules/dashboard/shared/dashboard-widget.model';
 import {SwitchService} from './shared/switch.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
@@ -35,7 +35,7 @@ export class SwitchComponent implements OnInit, OnDestroy {
     private destroy = new Subscription();
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {} as WidgetModel;
+    @Input() widget: WidgetModel = {properties: {} as WidgetPropertiesModels} as WidgetModel;
     @Input() zoom = false;
 
     constructor(private switchService: SwitchService,

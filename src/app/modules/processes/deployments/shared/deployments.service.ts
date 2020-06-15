@@ -53,8 +53,8 @@ export class DeploymentsService {
         );
     }
 
-    startDeployment(deploymentId: string): Observable<any[] | null> {
-        return this.http.get<any[]>(environment.processServiceUrl + '/process-definition/' + encodeURIComponent(deploymentId) + '/start').pipe(
+    startDeployment(deploymentId: string): Observable<any | null> {
+        return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start').pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null))
         );
     }
@@ -77,18 +77,24 @@ export class DeploymentsService {
         );
     }
 
+    getPreparedDeploymentsByXml(xml: string, svg: string): Observable<DeploymentsPreparedModel | null> {
+        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/prepared-deployments', {'xml': xml, 'svg': svg}).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null))
+        );
+    }
+
     getDeployments(deploymentId: string): Observable<DeploymentsPreparedModel | null> {
         return this.http.get<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments/' + deploymentId).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeployments', null))
         );
     }
 
-    postDeployments(deployment: DeploymentsPreparedModel): Observable<{ status: number }> {
+    postDeployments(deployment: DeploymentsPreparedModel): Observable<{ status: number, id: string }> {
         return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments', deployment, {observe: 'response'}).pipe(
             map(resp => {
-                return {status: resp.status};
+                return {status: resp.status, id: resp.body ? resp.body.id : ''};
             }),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', {status: 500}))
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', {status: 500, id: ''}))
         );
     }
 
