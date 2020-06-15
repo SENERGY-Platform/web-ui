@@ -109,14 +109,31 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         if (this.getSelectable(elementIndex).value) {
             this.deviceTypeService.getDeviceType(this.getSelectable(elementIndex).value.device.device_type_id).subscribe((deviceType: (DeviceTypeModel | null)) => {
                 if (deviceType) {
-                    deviceType.services.forEach((service: DeviceTypeServiceModel) => {
-                        if (service.id === this.getSelectable(elementIndex).value.services[0].id) {
-                            this.exportValues[elementIndex] = this.traverseDataStructure('value', service.outputs[0].content_variable, []);
-                        }
+                    deviceType.services.forEach((deviceTypeService: DeviceTypeServiceModel) => {
+                        this.getSelectableServices(elementIndex).forEach((selectableService: DeviceTypeServiceModel) => {
+                            if (deviceTypeService.id === selectableService.id) {
+                                const traverse = this.traverseDataStructure('value', deviceTypeService.outputs[0].content_variable, []);
+                                const timePath = this.getTimePath(traverse);
+                                if (timePath !== '') {
+                                    this.getServiceControl(elementIndex).setValue(deviceTypeService);
+                                    this.exportValues[elementIndex] = traverse;
+                                }
+                            }
+                        });
                     });
                 }
             });
         }
+    }
+
+    private getTimePath(traverse: DeviceStatusExportValuesModel[]): string {
+        let timePath = '';
+        traverse.forEach((t: DeviceStatusExportValuesModel) => {
+            if (t.characteristicId === environment.timeStampCharacteristicId) {
+                timePath = t.path;
+            }
+        });
+        return timePath;
     }
 
     private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel, array: DeviceStatusExportValuesModel[]): DeviceStatusExportValuesModel[] {
@@ -176,7 +193,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     createdDeployment(selectable: DeploymentsPreparedSelectableModel, index: number): Observable<{ status: number, id: string }> {
         const pD = this.preparedDeployment[index];
         pD.elements[0].task.selection.device = selectable.device;
-        pD.elements[0].task.selection.service = selectable.services[0];
+        pD.elements[0].task.selection.service = this.getServiceControl(index).value;
         return this.deploymentsService.postDeployments(pD);
     }
 
@@ -286,17 +303,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     }
 
     private createExport(selectable: DeploymentsPreparedSelectableModel, elementIndex: number): Observable<ExportModel> {
-        let timePath = '';
-        this.exportValues[elementIndex].forEach((expVal: DeviceStatusExportValuesModel) => {
-            if (timePath === '' && expVal.characteristicId === environment.timeStampCharacteristicId) {
-                timePath = expVal.path;
-            }
-        });
-
-        if (timePath === '') {
-            console.log('kein Timepath', selectable, elementIndex);
-        }
-
+        const traverse = this.traverseDataStructure('value', this.getServiceControl(elementIndex).value.outputs[0].content_variable, []);
+        const timePath = this.getTimePath(traverse);
 
         let type = '';
         switch (this.getExportValues(elementIndex).type) {
@@ -326,8 +334,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             EntityName: selectable.device.name,
             Filter: selectable.device.id,
             FilterType: 'deviceId',
-            ServiceName: selectable.services[0].name,
-            Topic: selectable.services[0].id.replace(/#/g, '_').replace(/:/g, '_'),
+            ServiceName: this.getServiceControl(elementIndex).value.name,
+            Topic: this.getServiceControl(elementIndex).value.id.replace(/#/g, '_').replace(/:/g, '_'),
             Offset: 'smallest'
         } as ExportModel;
         return this.exportService.startPipeline(exp);
@@ -346,6 +354,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             aspectId: [element.aspectId, Validators.required],
             function: [element.function, Validators.required],
             selectable: [element.selectable, Validators.required],
+            service: [element.service, Validators.required],
             deploymentId: [element.deploymentId],
             exportId: [element.exportId],
             exportValues: [element.exportValues, Validators.required],
@@ -376,6 +385,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return this.elementsControl.at(elementIndex).get('selectable') as FormControl;
     }
 
+    private getSelectableServices(elementIndex: number): DeviceTypeServiceModel[] {
+        return this.getSelectable(elementIndex).value.services;
+    }
+
     private getDeploymentId(elementIndex: number): FormControl {
         return this.elementsControl.at(elementIndex).get('deploymentId') as FormControl;
     }
@@ -386,6 +399,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     private getExportValuesControl(elementIndex: number): FormControl {
         return this.elementsControl.at(elementIndex).get('exportValues') as FormControl;
+    }
+
+    private getServiceControl(elementIndex: number): FormControl {
+        return this.elementsControl.at(elementIndex).get('service') as FormControl;
     }
 
     private getExportValues(elementIndex: number): DeviceStatusExportValuesModel {

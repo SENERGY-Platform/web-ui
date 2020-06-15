@@ -16,7 +16,11 @@
 
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {ExportValueModel} from '../../../modules/data/export/shared/export.model';
-import {DeviceTypeAspectModel, DeviceTypeFunctionModel} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeFunctionModel,
+    DeviceTypeServiceModel
+} from '../../../modules/devices/device-types-overview/shared/device-type.model';
 import {DeploymentsPreparedSelectableModel} from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 
 export interface DeviceStatusPropertiesModel {
@@ -29,6 +33,7 @@ export interface DeviceStatusElementModel {
     aspectId: string;
     function: DeviceTypeFunctionModel | null;
     selectable: DeploymentsPreparedSelectableModel | null;
+    service: DeviceTypeServiceModel;
     deploymentId: string;
     exportId: string;
     exportValues: DeviceStatusExportValuesModel;
