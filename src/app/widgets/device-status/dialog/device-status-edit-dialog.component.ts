@@ -340,7 +340,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             FilterType: 'deviceId',
             ServiceName: this.getService(elementIndex).name,
             Topic: this.getService(elementIndex).id.replace(/#/g, '_').replace(/:/g, '_'),
-            Offset: 'smallest'
+            Offset: 'largest'
         } as ExportModel;
         return this.exportService.startPipeline(exp);
     }
