@@ -92,7 +92,6 @@ describe('DeviceStatusEditDialogComponent', () => {
                 DeviceStatusEditDialogComponent
             ],
             providers: [
-                {provide: KeycloakService, useClass: MockKeycloakService},
                 {provide: DashboardService, useValue: serviceStub},
                 {provide: DeviceTypeService, useValue: serviceStub},
                 {provide: DeploymentsService, useValue: serviceStub},
