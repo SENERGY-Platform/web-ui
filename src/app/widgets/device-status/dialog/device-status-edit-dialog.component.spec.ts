@@ -26,7 +26,7 @@ import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {of} from 'rxjs';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {FormControl} from '@angular/forms';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {DeviceStatusElementModel, DeviceStatusExportValuesModel} from '../shared/device-status-properties.model';
 import {
     DeviceTypeAspectModel,
@@ -39,6 +39,9 @@ import {
     DeploymentsPreparedSelectableModel
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
+import {MatIconModule} from '@angular/material/icon';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatInputModule} from '@angular/material/input';
 
 describe('DeviceStatusEditDialogComponent', () => {
     let component: DeviceStatusEditDialogComponent;
@@ -84,11 +87,12 @@ describe('DeviceStatusEditDialogComponent', () => {
         };
 
         TestBed.configureTestingModule({
-            imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
+            imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule, MatDialogModule, MatIconModule, MatExpansionModule, MatInputModule, ReactiveFormsModule],
             declarations: [
                 DeviceStatusEditDialogComponent
             ],
-            providers: [{provide: KeycloakService, useClass: MockKeycloakService},
+            providers: [
+                {provide: KeycloakService, useClass: MockKeycloakService},
                 {provide: DashboardService, useValue: serviceStub},
                 {provide: DeviceTypeService, useValue: serviceStub},
                 {provide: DeploymentsService, useValue: serviceStub},
