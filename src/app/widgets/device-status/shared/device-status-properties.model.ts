@@ -29,14 +29,14 @@ export interface DeviceStatusPropertiesModel {
 }
 
 export interface DeviceStatusElementModel {
-    name: string;
-    aspectId: string;
+    name: string | null;
+    aspectId: string | null;
     function: DeviceTypeFunctionModel | null;
     selectable: DeploymentsPreparedSelectableModel | null;
-    service: DeviceTypeServiceModel;
-    deploymentId: string;
-    exportId: string;
-    exportValues: DeviceStatusExportValuesModel;
+    service: DeviceTypeServiceModel | null;
+    deploymentId: string | null;
+    exportId: string | null;
+    exportValues: DeviceStatusExportValuesModel | null;
 }
 
 export interface DeviceStatusExportValuesModel {

@@ -99,9 +99,11 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     }
 
     loadFunctions(elementIndex: number): void {
-        this.deviceTypeService.getAspectsMeasuringFunctions(this.getAspectId(elementIndex).value).subscribe((resp: DeviceTypeFunctionModel[]) => {
-            this.funcArray[elementIndex] = resp;
-        });
+        if (this.getAspectId(elementIndex).value) {
+            this.deviceTypeService.getAspectsMeasuringFunctions(this.getAspectId(elementIndex).value).subscribe((resp: DeviceTypeFunctionModel[]) => {
+                this.funcArray[elementIndex] = resp;
+            });
+        }
     }
 
 
@@ -275,7 +277,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.elements.forEach((element: DeviceStatusElementModel, index: number) => {
             if (element.selectable) {
                 if (this.getService(index).protocol_id === environment.mqttProtocolID) {
-                    deploymentArray.push(of({ status: 0, id: ''}));
+                    deploymentArray.push(of({status: 0, id: ''}));
                 } else {
                     deploymentArray.push(this.createdDeployment(element.selectable, index));
                 }

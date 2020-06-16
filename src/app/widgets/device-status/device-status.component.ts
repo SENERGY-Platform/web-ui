@@ -113,7 +113,9 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
 
                     const queries: ChartsExportRequestPayloadQueriesModel[] = [];
                     elements.forEach((element: DeviceStatusElementModel) => {
-                        queries.push({id: element.exportId, fields: [{name: element.exportValues.name, math: ''}]});
+                        if (element.exportId && element.exportValues) {
+                            queries.push({id: element.exportId, fields: [{name: element.exportValues.name, math: ''}]});
+                        }
                     });
 
                     const requestPayload: ChartsExportRequestPayloadModel = {
@@ -136,10 +138,15 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                         const values = model.results[0].series[0].values;
 
                         elements.forEach((element: DeviceStatusElementModel) => {
-                            const columnIndex = columns.findIndex(col => col === (element.exportId + '.' + element.exportValues.name));
+                            const columnIndex = columns.findIndex(col => {
+                                if (element.exportValues) {
+                                    return col === (element.exportId + '.' + element.exportValues.name);
+                                }
+                                return -1;
+                            });
                             values.forEach(val => {
-                                if (val[columnIndex]  !== null) {
-                                    this.items.push({name: element.name, status: val[columnIndex]});
+                                if (val[columnIndex] !== null) {
+                                    this.items.push({name: <string>element.name, status: val[columnIndex]});
                                 }
                             });
                         });
