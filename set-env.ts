@@ -61,6 +61,7 @@ export const environment = {
   yrUrl: '${process.env.YR_URL}',
   notificationsUrl: '${process.env.NOTIFICATION_SERVICE_URL}',
   timeStampCharacteristicId: '${process.env.TIMESTAMP_CHARACTERISTIC_ID}',
+  mqttProtocolID: '${process.env.MQTT_PROTOCOL_ID}',
 };
 `;
 

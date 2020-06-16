@@ -51,7 +51,8 @@ export const environment = {
     yrUrl: 'http://localhost',
     notificationsUrl: 'http://localhost',
     /** Semantic Keys **/
-    timeStampCharacteristicId: 'urn:infai:ses:characteristic:xxxxxx-xxxx-xxxxx-xxxx'
+    timeStampCharacteristicId: 'urn:infai:ses:characteristic:xxxxxx-xxxx-xxxxx-xxxx',
+    mqttProtocolID: 'urn:infai:ses:protocol:xx-xxxx-xxxx-xxxx-xxxxx',
 };
 
 /*
