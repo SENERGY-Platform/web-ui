@@ -22,6 +22,8 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {AuthorizationServiceMock} from '../../../core/services/authorization.service.mock';
+import {CoreModule} from '../../../core/core.module';
+import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 
 describe('FlowRepoComponent', () => {
   let component: FlowRepoComponent;
@@ -29,7 +31,7 @@ describe('FlowRepoComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
+      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule],
       declarations: [ FlowRepoComponent ],
       providers: [
         { provide: AuthorizationService, useClass: AuthorizationServiceMock },
