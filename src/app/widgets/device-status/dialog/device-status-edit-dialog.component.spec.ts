@@ -20,8 +20,6 @@ import {CoreModule} from '../../../core/core.module';
 import {RouterTestingModule} from '@angular/router/testing';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {KeycloakService} from 'keycloak-angular';
-import {MockKeycloakService} from '../../../core/services/keycloak.mock';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {of} from 'rxjs';
@@ -42,6 +40,7 @@ import {DeploymentsService} from '../../../modules/processes/deployments/shared/
 import {MatIconModule} from '@angular/material/icon';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatInputModule} from '@angular/material/input';
+import {By} from '@angular/platform-browser';
 
 describe('DeviceStatusEditDialogComponent', () => {
     let component: DeviceStatusEditDialogComponent;
@@ -232,7 +231,12 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.preparedDeployment.length).toBe(1);
         expect(component.exportValues.length).toBe(1);
         expect(component.elements[0]).toEqual({
-            exportValues: {name: 'Time', characteristicId: 'urn:infai:ses:characteristic:6bc41b45-a9f3-4d87-9c51-dd3e11257800', path: 'value.struct.Time', type: 'https://schema.org/Text'} as DeviceStatusExportValuesModel,
+            exportValues: {
+                name: 'Time',
+                characteristicId: 'urn:infai:ses:characteristic:6bc41b45-a9f3-4d87-9c51-dd3e11257800',
+                path: 'value.struct.Time',
+                type: 'https://schema.org/Text'
+            } as DeviceStatusExportValuesModel,
             exportId: null,
             deploymentId: null,
             service: {
@@ -253,5 +257,27 @@ describe('DeviceStatusEditDialogComponent', () => {
             aspectId: 'aspect_1',
             name: null
         });
+    }));
+
+    it('delete element', async(() => {
+        component.addElement({} as DeviceStatusElementModel);
+        component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
+        component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
+        component.elementsControl.at(0).patchValue({'selectable': component.selectablesArray[0][0]});
+        component.elementsControl.at(0).patchValue({'exportValues': component.exportValues[0][0]});
+        component.deleteElement(0);
+        expect(component.elements.length).toBe(0);
+        expect(component.funcArray.length).toBe(0);
+        expect(component.selectablesArray.length).toBe(0);
+        expect(component.preparedDeployment.length).toBe(0);
+        expect(component.exportValues.length).toBe(0);
+        expect(component.aspects[0]).toEqual({id: 'aspect_1', name: 'Air'});
+        expect(component.dashboardId).toBe('dashboardId-1');
+        expect(component.widgetId).toBe('widgetId-1');
+    }));
+
+    it('check if header exists', async(() => {
+        const header = <HTMLHeadElement>fixture.debugElement.query(By.css('h2')).nativeElement;
+        expect(header.innerHTML).toBe('Edit Device Status');
     }));
 });

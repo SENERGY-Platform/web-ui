@@ -234,6 +234,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.funcArray.splice(elementIndex, 1);
         this.selectablesArray.splice(elementIndex, 1);
         this.exportValues.splice(elementIndex, 1);
+        this.preparedDeployment.splice(elementIndex, 1);
         this.elementsControl.removeAt(elementIndex);
     }
 
