@@ -41,14 +41,21 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatInputModule} from '@angular/material/input';
 import {By} from '@angular/platform-browser';
+import {ExportService} from '../../../modules/data/export/shared/export.service';
+import {ExportModel} from '../../../modules/data/export/shared/export.model';
+import {util} from 'jointjs';
+import uuid = util.uuid;
 
 describe('DeviceStatusEditDialogComponent', () => {
     let component: DeviceStatusEditDialogComponent;
     let fixture: ComponentFixture<DeviceStatusEditDialogComponent>;
     let serviceStub: any;
 
+    let valueServiceSpy: jasmine.SpyObj<ExportService>;
+
     beforeEach(async(() => {
 
+        const spy = jasmine.createSpyObj('ExportService', ['startPipeline']);
         serviceStub = {
             getWidget: () => of({name: 'test', properties: {}} as WidgetModel),
             getAspectsWithMeasuringFunction: () => of([{id: 'aspect_1', name: 'Air'}] as DeviceTypeAspectModel[]),
@@ -64,7 +71,11 @@ describe('DeviceStatusEditDialogComponent', () => {
                         selectables: [{
                             device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: ''},
                             services: [{id: 'service_1', name: 'service'}]
-                        }]
+                        }],
+                        selection: {
+                            device: {},
+                            service: {},
+                        }
                     }
                 }]
             } as DeploymentsPreparedModel),
@@ -83,6 +94,9 @@ describe('DeviceStatusEditDialogComponent', () => {
                     }]
                 }]
             } as DeviceTypeModel),
+            postDeployments: () => of({status: 200, id: uuid()}),
+            updateWidget: () => of({message: 'OK'}),
+            close: () => {},
         };
 
         TestBed.configureTestingModule({
@@ -94,13 +108,15 @@ describe('DeviceStatusEditDialogComponent', () => {
                 {provide: DashboardService, useValue: serviceStub},
                 {provide: DeviceTypeService, useValue: serviceStub},
                 {provide: DeploymentsService, useValue: serviceStub},
-                {provide: MatDialogRef, useValue: {}},
+                {provide: ExportService, useValue: spy},
+                {provide: MatDialogRef, useValue: serviceStub},
                 {provide: MAT_DIALOG_DATA, useValue: {widgetId: 'widgetId-1', dashboardId: 'dashboardId-1'}},
             ]
         }).compileComponents();
         fixture = TestBed.createComponent(DeviceStatusEditDialogComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
+        valueServiceSpy = TestBed.inject(ExportService) as jasmine.SpyObj<ExportService>;
     }));
 
     it('should create the app', async(() => {
@@ -274,6 +290,21 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.aspects[0]).toEqual({id: 'aspect_1', name: 'Air'});
         expect(component.dashboardId).toBe('dashboardId-1');
         expect(component.widgetId).toBe('widgetId-1');
+    }));
+
+    it('save element', async(() => {
+        valueServiceSpy.startPipeline.and.returnValue(of({ID: 'export_id_123'} as ExportModel));
+        component.addElement({} as DeviceStatusElementModel);
+        component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
+        component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
+        component.elementsControl.at(0).patchValue({'selectable': component.selectablesArray[0][0]});
+        component.elementsControl.at(0).patchValue({'exportValues': component.exportValues[0][0]});
+        expect(component.elements[0].exportId).toBeNull();
+        expect(component.elements[0].deploymentId).toBeNull();
+        component.save();
+        expect(component.elements[0].exportId).toBe('export_id_123');
+        expect(component.elements[0].deploymentId).not.toBeNull();
+        expect(valueServiceSpy.startPipeline.calls.count()).toBe(1);
     }));
 
     it('check if header exists', async(() => {
