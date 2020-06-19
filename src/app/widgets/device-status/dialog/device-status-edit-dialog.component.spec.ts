@@ -51,10 +51,12 @@ import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 describe('DeviceStatusEditDialogComponent', () => {
     let component: DeviceStatusEditDialogComponent;
     let fixture: ComponentFixture<DeviceStatusEditDialogComponent>;
-    let serviceStub: any;
 
     const exportServiceSpy: Spy<ExportService> = createSpyFromClass(ExportService);
     const deploymentsServiceSpy: Spy<DeploymentsService> = createSpyFromClass<DeploymentsService>(DeploymentsService);
+    const matDialogRefSpy: Spy<MatDialogRef<DeviceStatusEditDialogComponent>> = createSpyFromClass<MatDialogRef<DeviceStatusEditDialogComponent>>(MatDialogRef);
+    const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService);
+    const deviceTypeServiceeSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
 
     beforeEach(async(() => {
 
@@ -75,49 +77,32 @@ describe('DeviceStatusEditDialogComponent', () => {
                 }
             }]
         } as DeploymentsPreparedModel));
-        serviceStub = {
-            getWidget: () => of({name: 'test', properties: {}} as WidgetModel),
-            getAspectsWithMeasuringFunction: () => of([{id: 'aspect_1', name: 'Air'}] as DeviceTypeAspectModel[]),
-            getAspectsMeasuringFunctions: () => of([{
-                id: 'func_1',
-                concept_id: 'concept_1',
-                name: 'getOnOffFunction'
-            }] as DeviceTypeFunctionModel[]),
-            getPreparedDeploymentsByXml: () => of({
-                id: '',
-                elements: [{
-                    task: {
-                        selectables: [{
-                            device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: ''},
-                            services: [{id: 'service_1', name: 'service'}]
-                        }],
-                        selection: {
-                            device: {},
-                            service: {},
-                        }
+        dashboardServiceSpy.getWidget.and.returnValue(of({name: 'test', properties: {}} as WidgetModel));
+        dashboardServiceSpy.updateWidget.and.returnValue(of({message: 'OK'}));
+        deviceTypeServiceeSpy.getAspectsWithMeasuringFunction.and.returnValue(of([{
+            id: 'aspect_1',
+            name: 'Air'
+        }] as DeviceTypeAspectModel[]));
+        deviceTypeServiceeSpy.getAspectsMeasuringFunctions.and.returnValue(of([{
+            id: 'func_1',
+            concept_id: 'concept_1',
+            name: 'getOnOffFunction'
+        }] as DeviceTypeFunctionModel[]));
+        deviceTypeServiceeSpy.getDeviceType.and.returnValue(of({
+            services: [{
+                id: 'service_1', outputs: [{
+                    content_variable: {
+                        name: 'struct',
+                        type: 'https://schema.org/StructuredValue', sub_content_variables: [{
+                            id: 'urn:infai:ses:content-variable:4fa5515c-147d-4b0f-92fb-a667a6a9270a',
+                            name: 'Time',
+                            type: 'https://schema.org/Text',
+                            characteristic_id: 'urn:infai:ses:characteristic:6bc41b45-a9f3-4d87-9c51-dd3e11257800',
+                        }]
                     }
                 }]
-            } as DeploymentsPreparedModel),
-            getDeviceType: () => of({
-                services: [{
-                    id: 'service_1', outputs: [{
-                        content_variable: {
-                            name: 'struct',
-                            type: 'https://schema.org/StructuredValue', sub_content_variables: [{
-                                id: 'urn:infai:ses:content-variable:4fa5515c-147d-4b0f-92fb-a667a6a9270a',
-                                name: 'Time',
-                                type: 'https://schema.org/Text',
-                                characteristic_id: 'urn:infai:ses:characteristic:6bc41b45-a9f3-4d87-9c51-dd3e11257800',
-                            }]
-                        }
-                    }]
-                }]
-            } as DeviceTypeModel),
-            postDeployments: () => of({status: 200, id: uuid()}),
-            updateWidget: () => of({message: 'OK'}),
-            close: () => {},
-            startPipeline: () => of({ID: uuid()} as ExportModel),
-        };
+            }]
+        } as DeviceTypeModel));
 
         TestBed.configureTestingModule({
             imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule, MatDialogModule, MatIconModule, MatExpansionModule, MatInputModule, ReactiveFormsModule],
@@ -125,11 +110,11 @@ describe('DeviceStatusEditDialogComponent', () => {
                 DeviceStatusEditDialogComponent
             ],
             providers: [
-                {provide: DashboardService, useValue: serviceStub},
-                {provide: DeviceTypeService, useValue: serviceStub},
+                {provide: DashboardService, useValue: dashboardServiceSpy},
+                {provide: DeviceTypeService, useValue: deviceTypeServiceeSpy},
                 {provide: DeploymentsService, useValue: deploymentsServiceSpy},
                 {provide: ExportService, useValue: exportServiceSpy},
-                {provide: MatDialogRef, useValue: serviceStub},
+                {provide: MatDialogRef, useValue: matDialogRefSpy},
                 {provide: MAT_DIALOG_DATA, useValue: {widgetId: 'widgetId-1', dashboardId: 'dashboardId-1'}},
             ]
         }).compileComponents();
@@ -311,7 +296,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.widgetId).toBe('widgetId-1');
     }));
 
-    fit('save element', async(() => {
+    it('save element', async(() => {
         component.addElement({} as DeviceStatusElementModel);
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
