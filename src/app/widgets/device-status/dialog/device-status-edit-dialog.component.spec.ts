@@ -45,17 +45,36 @@ import {ExportService} from '../../../modules/data/export/shared/export.service'
 import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {util} from 'jointjs';
 import uuid = util.uuid;
+import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
+
 
 describe('DeviceStatusEditDialogComponent', () => {
     let component: DeviceStatusEditDialogComponent;
     let fixture: ComponentFixture<DeviceStatusEditDialogComponent>;
     let serviceStub: any;
 
-    let valueServiceSpy: jasmine.SpyObj<ExportService>;
+    const exportServiceSpy: Spy<ExportService> = createSpyFromClass(ExportService);
+    const deploymentsServiceSpy: Spy<DeploymentsService> = createSpyFromClass<DeploymentsService>(DeploymentsService);
 
     beforeEach(async(() => {
 
-        const spy = jasmine.createSpyObj('ExportService', ['startPipeline']);
+        exportServiceSpy.startPipeline.and.returnValue(of({ID: 'export_id_123'} as ExportModel));
+        deploymentsServiceSpy.postDeployments.and.returnValue(of({status: 200, id: uuid()}));
+        deploymentsServiceSpy.getPreparedDeploymentsByXml.and.returnValue(of({
+            id: '',
+            elements: [{
+                task: {
+                    selectables: [{
+                        device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: ''},
+                        services: [{id: 'service_1', name: 'service'}]
+                    }],
+                    selection: {
+                        device: {},
+                        service: {},
+                    }
+                }
+            }]
+        } as DeploymentsPreparedModel));
         serviceStub = {
             getWidget: () => of({name: 'test', properties: {}} as WidgetModel),
             getAspectsWithMeasuringFunction: () => of([{id: 'aspect_1', name: 'Air'}] as DeviceTypeAspectModel[]),
@@ -97,6 +116,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             postDeployments: () => of({status: 200, id: uuid()}),
             updateWidget: () => of({message: 'OK'}),
             close: () => {},
+            startPipeline: () => of({ID: uuid()} as ExportModel),
         };
 
         TestBed.configureTestingModule({
@@ -107,8 +127,8 @@ describe('DeviceStatusEditDialogComponent', () => {
             providers: [
                 {provide: DashboardService, useValue: serviceStub},
                 {provide: DeviceTypeService, useValue: serviceStub},
-                {provide: DeploymentsService, useValue: serviceStub},
-                {provide: ExportService, useValue: spy},
+                {provide: DeploymentsService, useValue: deploymentsServiceSpy},
+                {provide: ExportService, useValue: exportServiceSpy},
                 {provide: MatDialogRef, useValue: serviceStub},
                 {provide: MAT_DIALOG_DATA, useValue: {widgetId: 'widgetId-1', dashboardId: 'dashboardId-1'}},
             ]
@@ -116,7 +136,6 @@ describe('DeviceStatusEditDialogComponent', () => {
         fixture = TestBed.createComponent(DeviceStatusEditDialogComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-        valueServiceSpy = TestBed.inject(ExportService) as jasmine.SpyObj<ExportService>;
     }));
 
     it('should create the app', async(() => {
@@ -292,8 +311,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.widgetId).toBe('widgetId-1');
     }));
 
-    it('save element', async(() => {
-        valueServiceSpy.startPipeline.and.returnValue(of({ID: 'export_id_123'} as ExportModel));
+    fit('save element', async(() => {
         component.addElement({} as DeviceStatusElementModel);
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
@@ -302,9 +320,11 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.elements[0].exportId).toBeNull();
         expect(component.elements[0].deploymentId).toBeNull();
         component.save();
-        expect(component.elements[0].exportId).toBe('export_id_123');
+        expect(component.elements[0].exportId).not.toBeNull();
         expect(component.elements[0].deploymentId).not.toBeNull();
-        expect(valueServiceSpy.startPipeline.calls.count()).toBe(1);
+        expect(deploymentsServiceSpy.postDeployments.calls.count()).toBe(1);
+        expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
+        expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
     }));
 
     it('check if header exists', async(() => {
