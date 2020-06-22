@@ -39,6 +39,7 @@ import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {contentVariableValidator} from './content-variable.validator';
 import {forkJoin, Observable} from 'rxjs';
+import {DeviceTypeHelperService} from './shared/device-type-helper.service';
 
 const controllingIndex = 0;
 const measuringIndex = 1;
@@ -70,8 +71,8 @@ export class DeviceTypesComponent implements OnInit {
                 private deviceTypeService: DeviceTypeService,
                 private dialog: MatDialog,
                 private snackBar: MatSnackBar,
-                private route: ActivatedRoute) {
-        this.editable = true;
+                private route: ActivatedRoute,
+                private deviceTypeHelperService: DeviceTypeHelperService) {
         this.getRouterParams();
     }
 
@@ -592,25 +593,7 @@ export class DeviceTypesComponent implements OnInit {
     private getRouterParams(): void {
         this.id = this.route.snapshot.paramMap.get('id') || '';
         this.queryParamFunction = this.route.snapshot.queryParamMap.get('function') || '';
-
-        switch (this.queryParamFunction) {
-            case 'copy': {
-                break; // ids are deleted later
-            }
-            case 'edit': {
-                break; // do nothing special
-            }
-            case 'create': {
-                break; // do nothing special
-            }
-            case 'details': {
-                this.editable = false; // hide save tab
-                break;
-            }
-            default: {
-                this.editable = false;
-            }
-        }
+        this.editable = this.deviceTypeHelperService.isEditable(this.queryParamFunction);
     }
 
     private deleteIds(): void {
