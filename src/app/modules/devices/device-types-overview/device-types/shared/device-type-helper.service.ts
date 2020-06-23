@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import {DeviceTypeContentModel} from '../../shared/device-type.model';
 
 @Injectable({
     providedIn: 'root'
@@ -32,5 +33,14 @@ export class DeviceTypeHelperService {
             }
         }
         return editable;
+    }
+
+    checkIfContentExists(contentVariableRaw: (string | null | undefined), serialization: string | null): boolean {
+        if ((contentVariableRaw === null || contentVariableRaw === '' || contentVariableRaw === undefined) &&
+            (serialization === null || serialization === '')) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

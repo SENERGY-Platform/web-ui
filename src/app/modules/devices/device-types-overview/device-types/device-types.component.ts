@@ -148,15 +148,6 @@ export class DeviceTypesComponent implements OnInit {
         inOut.patchValue({'show': !inOut.value.show});
     }
 
-    checkIfContentExists(input: DeviceTypeContentModel): boolean {
-        if ((input.content_variable_raw === null || input.content_variable_raw === '' || input.content_variable_raw === undefined) &&
-            (input.serialization === null || input.serialization === '')) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     trackByFn(index: any) {
         return index;
     }
@@ -286,6 +277,10 @@ export class DeviceTypesComponent implements OnInit {
         return this.getServiceFormArray(serviceFormGroup, formControlName).get([index, 'content_variable_raw']) as FormControl;
     }
 
+    serviceControl(serviceIndex: number): FormGroup {
+        return <FormGroup>this.services.at(serviceIndex);
+    }
+
     private cleanUpServices() {
 
         const services = <FormArray>this.secondFormGroup.controls['services'];
@@ -295,19 +290,21 @@ export class DeviceTypesComponent implements OnInit {
             const inputs = <FormArray>formGroup.controls['inputs'];
             // loop from highest Index! Otherwise it could cause index problems
             for (let j = inputs.length - 1; j >= 0; j--) {
-                if (!this.checkIfContentExists(inputs.controls[j].value)) {
+                const content: DeviceTypeContentModel = inputs.controls[j].value;
+                if (!this.deviceTypeHelperService.checkIfContentExists(content.content_variable_raw, content.serialization)) {
                     inputs.removeAt(j);
                 } else {
-                    inputs.controls[j].patchValue({'content_variable': JSON.parse(inputs.controls[j].value.content_variable_raw)});
+                    inputs.controls[j].patchValue({'content_variable': JSON.parse(content.content_variable_raw)});
                 }
             }
             const outputs = <FormArray>formGroup.controls['outputs'];
             // loop from highest Index! Otherwise it could cause index problems
             for (let k = outputs.length - 1; k >= 0; k--) {
-                if (!this.checkIfContentExists(outputs.controls[k].value)) {
+                const content: DeviceTypeContentModel = outputs.controls[k].value;
+                if (!this.deviceTypeHelperService.checkIfContentExists(content.content_variable_raw, content.serialization)) {
                     outputs.removeAt(k);
                 } else {
-                    outputs.controls[k].patchValue({'content_variable': JSON.parse(outputs.controls[k].value.content_variable_raw)});
+                    outputs.controls[k].patchValue({'content_variable': JSON.parse(content.content_variable_raw)});
                 }
             }
         }
