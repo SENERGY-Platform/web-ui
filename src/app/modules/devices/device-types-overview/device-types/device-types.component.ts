@@ -282,7 +282,6 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private cleanUpServices() {
-
         const services = <FormArray>this.secondFormGroup.controls['services'];
 
         for (let i = 0; i < services.length; i++) {
@@ -290,21 +289,25 @@ export class DeviceTypesComponent implements OnInit {
             const inputs = <FormArray>formGroup.controls['inputs'];
             // loop from highest Index! Otherwise it could cause index problems
             for (let j = inputs.length - 1; j >= 0; j--) {
-                const content: DeviceTypeContentModel = inputs.controls[j].value;
-                if (!this.deviceTypeHelperService.checkIfContentExists(content.content_variable_raw, content.serialization)) {
+                const inputContentControl: FormGroup = <FormGroup>inputs.controls[j];
+                const inputContent: DeviceTypeContentModel = inputContentControl.value;
+                if (!this.deviceTypeHelperService.checkIfContentExists(inputContent.content_variable_raw, inputContent.serialization)) {
                     inputs.removeAt(j);
                 } else {
-                    inputs.controls[j].patchValue({'content_variable': JSON.parse(content.content_variable_raw)});
+                    inputContentControl.removeControl('content_variable');
+                    inputContentControl.addControl('content_variable', this.createContentVariableGroup(JSON.parse(inputContent.content_variable_raw)));
                 }
             }
             const outputs = <FormArray>formGroup.controls['outputs'];
             // loop from highest Index! Otherwise it could cause index problems
             for (let k = outputs.length - 1; k >= 0; k--) {
-                const content: DeviceTypeContentModel = outputs.controls[k].value;
-                if (!this.deviceTypeHelperService.checkIfContentExists(content.content_variable_raw, content.serialization)) {
+                const outputContentControl: FormGroup = <FormGroup>outputs.controls[k];
+                const outputContent: DeviceTypeContentModel = outputContentControl.value;
+                if (!this.deviceTypeHelperService.checkIfContentExists(outputContent.content_variable_raw, outputContent.serialization)) {
                     outputs.removeAt(k);
                 } else {
-                    outputs.controls[k].patchValue({'content_variable': JSON.parse(content.content_variable_raw)});
+                    outputContentControl.removeControl('content_variable');
+                    outputContentControl.addControl('content_variable', this.createContentVariableGroup(JSON.parse(outputContent.content_variable_raw)));
                 }
             }
         }
