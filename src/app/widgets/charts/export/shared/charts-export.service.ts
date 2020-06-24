@@ -170,7 +170,10 @@ export class ChartsExportService {
                 width: element.width,
                 legend: 'none',
                 curveType: widget.properties.curvedFunction ? 'function' : '',
-                vAxis: {title: widget.properties.vAxisLabel},
+                vAxis: {
+                    title: widget.properties.vAxisLabel,
+                    viewWindowMode: element.height > 200 ? 'pretty' : 'maximized',
+                },
                 explorer: {
                     actions: ['dragToZoom', 'rightClickToReset'],
                     axis: 'horizontal',
