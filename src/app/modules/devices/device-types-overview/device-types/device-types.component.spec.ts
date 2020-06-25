@@ -98,7 +98,8 @@ describe('DeviceTypesComponent', () => {
                                 characteristic_id: 'char_1',
                                 name: 'level2',
                                 type: 'https://schema.org/Float',
-                                value: 0
+                                value: 0,
+                                unit_reference: null
                             }]
                     }
                 }],
@@ -108,7 +109,7 @@ describe('DeviceTypesComponent', () => {
                         name: 'brightness',
                         type: 'https://schema.org/Float',
                     }
-                }] ,
+                }],
             }] as DeviceTypeServiceModel[]
         };
         deviceTypeServiceSpy.getDeviceType.and.returnValue(of(args));
@@ -204,7 +205,8 @@ describe('DeviceTypesComponent', () => {
                 '               "characteristic_id": "char_1",\n' +
                 '               "value": 0,\n' +
                 '               "sub_content_variables": null,\n' +
-                '               "serialization_options": null\n' +
+                '               "serialization_options": null,\n' +
+                '               "unit_reference": null\n' +
                 '          },\n' +
                 '          {\n' +
                 '               "name": "level2",\n' +
@@ -212,10 +214,12 @@ describe('DeviceTypesComponent', () => {
                 '               "characteristic_id": "char_1",\n' +
                 '               "value": 0,\n' +
                 '               "sub_content_variables": null,\n' +
-                '               "serialization_options": null\n' +
+                '               "serialization_options": null,\n' +
+                '               "unit_reference": null\n' +
                 '          }\n' +
                 '     ],\n' +
-                '     "serialization_options": null\n' +
+                '     "serialization_options": null,\n' +
+                '     "unit_reference": null\n' +
                 '}',
             content_variable: {
                 name: 'power_comsumption',
@@ -227,6 +231,7 @@ describe('DeviceTypesComponent', () => {
                     type: 'https://schema.org/Float',
                     characteristic_id: 'char_1',
                     value: 0,
+                    unit_reference: null,
                     sub_content_variables: null,
                     serialization_options: null
                 },
@@ -235,10 +240,12 @@ describe('DeviceTypesComponent', () => {
                         type: 'https://schema.org/Float',
                         characteristic_id: 'char_1',
                         value: 0,
+                        unit_reference: null,
                         sub_content_variables: null,
                         serialization_options: null
                     }],
-                serialization_options: null
+                serialization_options: null,
+                unit_reference: null
             },
             protocol_segment_id: 'protocol_segment_1',
             show: true,
@@ -271,13 +278,15 @@ describe('DeviceTypesComponent', () => {
                 '     "characteristic_id": null,\n' +
                 '     "value": null,\n' +
                 '     "sub_content_variables": null,\n' +
-                '     "serialization_options": null\n' +
+                '     "serialization_options": null,\n' +
+                '     "unit_reference": null\n' +
                 '}',
             content_variable: {
                 name: 'brightness',
                 type: 'https://schema.org/Float',
                 characteristic_id: null,
                 value: null,
+                unit_reference: null,
                 sub_content_variables: null,
                 serialization_options: null
             },
@@ -314,7 +323,8 @@ describe('DeviceTypesComponent', () => {
                         '               "characteristic_id": "char_1",\n' +
                         '               "value": 0,\n' +
                         '               "sub_content_variables": null,\n' +
-                        '               "serialization_options": null\n' +
+                        '               "serialization_options": null,\n' +
+                        '               "unit_reference": null\n' +
                         '          },\n' +
                         '          {\n' +
                         '               "name": "level2",\n' +
@@ -322,10 +332,12 @@ describe('DeviceTypesComponent', () => {
                         '               "characteristic_id": "char_1",\n' +
                         '               "value": 0,\n' +
                         '               "sub_content_variables": null,\n' +
-                        '               "serialization_options": null\n' +
+                        '               "serialization_options": null,\n' +
+                        '               "unit_reference": null\n' +
                         '          }\n' +
                         '     ],\n' +
-                        '     "serialization_options": null\n' +
+                        '     "serialization_options": null,\n' +
+                        '     "unit_reference": null\n' +
                         '}',
                     content_variable: {
                         id: null,
@@ -339,6 +351,7 @@ describe('DeviceTypesComponent', () => {
                             type: 'https://schema.org/Float',
                             characteristic_id: 'char_1',
                             value: 0,
+                            unit_reference: null,
                             sub_content_variables: null,
                             serialization_options: null
                         },
@@ -348,10 +361,12 @@ describe('DeviceTypesComponent', () => {
                                 type: 'https://schema.org/Float',
                                 characteristic_id: 'char_1',
                                 value: 0,
+                                unit_reference: null,
                                 sub_content_variables: null,
                                 serialization_options: null
                             }],
-                        serialization_options: null
+                        serialization_options: null,
+                        unit_reference: null
                     },
                     protocol_segment_id: 'protocol_segment_1',
                     show: true,
@@ -367,7 +382,8 @@ describe('DeviceTypesComponent', () => {
                     '     "characteristic_id": null,\n' +
                     '     "value": null,\n' +
                     '     "sub_content_variables": null,\n' +
-                    '     "serialization_options": null\n' +
+                    '     "serialization_options": null,\n' +
+                    '     "unit_reference": null\n' +
                     '}',
                 content_variable: {
                     id: null,
@@ -376,6 +392,7 @@ describe('DeviceTypesComponent', () => {
                     characteristic_id: null,
                     value: null,
                     sub_content_variables: null,
+                    unit_reference: null,
                     serialization_options: null
                 },
                 protocol_segment_id: 'protocol_segment_2',
@@ -442,9 +459,133 @@ describe('DeviceTypesComponent', () => {
                             type: 'https://schema.org/Float',
                             characteristic_id: 'char_1',
                             value: 0,
+                            unit_reference: null,
                             sub_content_variables: null,
                             serialization_options: null
                         }],
+                        serialization_options: null,
+                        unit_reference: null
+                    },
+                    protocol_segment_id: 'protocol_segment_1',
+                    show: true,
+                }
+            ],
+            outputs: [{
+                id: 'output_id_1',
+                name: 'data',
+                serialization: 'json',
+                content_variable_raw: '{\n' +
+                    '     "id": "content_variable_out_1",\n' +
+                    '     "name": "brightness",\n' +
+                    '     "type": "https://schema.org/Float"\n' +
+                    '}',
+                content_variable: {
+                    id: 'content_variable_out_1',
+                    name: 'brightness',
+                    type: 'https://schema.org/Float',
+                    characteristic_id: null,
+                    value: null,
+                    sub_content_variables: null,
+                    unit_reference: null,
+                    serialization_options: null
+                },
+                protocol_segment_id: 'protocol_segment_2',
+                show: true,
+            }],
+            functionType: {text: ''},
+            functions: [],
+            aspects: []
+        }]);
+
+    }));
+
+    it('check save with unit_reference', async(() => {
+        init('device_id_4711', 'edit');
+        component.inputOutputContentVariableRaw(component.services.at(0), 'inputs', 0).setValue('{\n' +
+            '     "id": "content_variable_1",\n' +
+            '     "name": "power_comsumption",\n' +
+            '     "type": "https://schema.org/StructuredValue",\n' +
+            '     "sub_content_variables": [\n' +
+            '          {\n' +
+            '               "id": "sub_content_variable_1",\n' +
+            '               "characteristic_id": "char_1",\n' +
+            '               "name": "level_neu",\n' +
+            '               "type": "https://schema.org/Float",\n' +
+            '               "value": 0\n' +
+            '          },' +
+            '          {\n' +
+            '               "id": "sub_content_variable_1_unit",\n' +
+            '               "characteristic_id": null,\n' +
+            '               "name": "level_neu_unit",\n' +
+            '               "type": "https://schema.org/Text",\n' +
+            '               "unit_reference": "level_neu",\n' +
+            '               "value": null\n' +
+            '          }' +
+            '     ]\n' +
+            '}');
+        component.save();
+        expect(component.secondFormGroup.getRawValue().services).toEqual([{
+            id: 'service_id_1',
+            local_id: 'local_id_1',
+            name: 'service1',
+            description: 'serv_desc',
+            protocol_id: 'protocol_1',
+            inputs: [
+                {
+                    id: 'input_id_1',
+                    name: 'metadata',
+                    serialization: 'json',
+                    content_variable_raw: '{\n' +
+                        '     "id": "content_variable_1",\n' +
+                        '     "name": "power_comsumption",\n' +
+                        '     "type": "https://schema.org/StructuredValue",\n' +
+                        '     "sub_content_variables": [\n' +
+                        '          {\n' +
+                        '               "id": "sub_content_variable_1",\n' +
+                        '               "characteristic_id": "char_1",\n' +
+                        '               "name": "level_neu",\n' +
+                        '               "type": "https://schema.org/Float",\n' +
+                        '               "value": 0\n' +
+                        '          },' +
+                        '          {\n' +
+                        '               "id": "sub_content_variable_1_unit",\n' +
+                        '               "characteristic_id": null,\n' +
+                        '               "name": "level_neu_unit",\n' +
+                        '               "type": "https://schema.org/Text",\n' +
+                        '               "unit_reference": "level_neu",\n' +
+                        '               "value": null\n' +
+                        '          }' +
+                        '     ]\n' +
+                        '}',
+                    content_variable: {
+                        id: 'content_variable_1',
+                        name: 'power_comsumption',
+                        type: 'https://schema.org/StructuredValue',
+                        characteristic_id: null,
+                        value: null,
+                        unit_reference: null,
+                        sub_content_variables: [
+                            {
+                                id: 'sub_content_variable_1',
+                                name: 'level_neu',
+                                type: 'https://schema.org/Float',
+                                characteristic_id: 'char_1',
+                                value: 0,
+                                unit_reference: null,
+                                sub_content_variables: null,
+                                serialization_options: null
+                            },
+                            {
+                                id: 'sub_content_variable_1_unit',
+                                characteristic_id: null,
+                                name: 'level_neu_unit',
+                                type: 'https://schema.org/Text',
+                                value: null,
+                                unit_reference: 'level_neu',
+                                sub_content_variables: null,
+                                serialization_options: null
+                            }
+                        ],
                         serialization_options: null
                     },
                     protocol_segment_id: 'protocol_segment_1',
@@ -466,6 +607,7 @@ describe('DeviceTypesComponent', () => {
                     type: 'https://schema.org/Float',
                     characteristic_id: null,
                     value: null,
+                    unit_reference: null,
                     sub_content_variables: null,
                     serialization_options: null
                 },

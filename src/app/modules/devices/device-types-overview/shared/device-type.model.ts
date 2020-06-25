@@ -64,6 +64,7 @@ export interface DeviceTypeContentVariableModel {
     value?: string | boolean | number;
     sub_content_variables?: DeviceTypeContentVariableModel[];
     serialization_options: string[];
+    unit_reference?: string;
 }
 
 export interface DeviceTypeConceptModel {
