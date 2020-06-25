@@ -46,6 +46,7 @@ import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {util} from 'jointjs';
 import uuid = util.uuid;
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
+import {environment} from '../../../../environments/environment';
 
 
 describe('DeviceStatusEditDialogComponent', () => {
@@ -97,7 +98,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                             id: 'urn:infai:ses:content-variable:4fa5515c-147d-4b0f-92fb-a667a6a9270a',
                             name: 'Time',
                             type: 'https://schema.org/Text',
-                            characteristic_id: 'urn:infai:ses:characteristic:6bc41b45-a9f3-4d87-9c51-dd3e11257800',
+                            characteristic_id: environment.timeStampCharacteristicId,
                         }]
                     }
                 }]
@@ -229,7 +230,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                             id: 'urn:infai:ses:content-variable:4fa5515c-147d-4b0f-92fb-a667a6a9270a',
                             name: 'Time',
                             type: 'https://schema.org/Text',
-                            characteristic_id: 'urn:infai:ses:characteristic:6bc41b45-a9f3-4d87-9c51-dd3e11257800',
+                            characteristic_id: environment.timeStampCharacteristicId,
                         }]
                     }
                 }]
@@ -253,7 +254,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.elements[0]).toEqual({
             exportValues: {
                 name: 'Time',
-                characteristicId: 'urn:infai:ses:characteristic:6bc41b45-a9f3-4d87-9c51-dd3e11257800',
+                characteristicId: environment.timeStampCharacteristicId,
                 path: 'value.struct.Time',
                 type: 'https://schema.org/Text'
             } as DeviceStatusExportValuesModel,
@@ -267,7 +268,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                             id: 'urn:infai:ses:content-variable:4fa5515c-147d-4b0f-92fb-a667a6a9270a',
                             name: 'Time',
                             type: 'https://schema.org/Text',
-                            characteristic_id: 'urn:infai:ses:characteristic:6bc41b45-a9f3-4d87-9c51-dd3e11257800',
+                            characteristic_id: environment.timeStampCharacteristicId,
                         }]
                     }
                 }]

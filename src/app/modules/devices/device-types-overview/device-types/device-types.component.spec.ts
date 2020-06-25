@@ -299,7 +299,6 @@ describe('DeviceTypesComponent', () => {
     it('check save with copy', async(() => {
         init('device_id_4711', 'copy');
         component.save();
-        console.log(component.secondFormGroup.getRawValue().services);
         expect(component.secondFormGroup.getRawValue().services).toEqual([{
             id: '',
             local_id: 'local_id_1',
