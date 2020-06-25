@@ -30,8 +30,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
-import {jsonValidator} from '../../../../core/validators/json.validator';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
 import {util} from 'jointjs';
 import uuid = util.uuid;
@@ -39,6 +38,7 @@ import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {contentVariableValidator} from './content-variable.validator';
 import {forkJoin, Observable} from 'rxjs';
+import {DeviceTypeHelperService} from './shared/device-type-helper.service';
 
 const controllingIndex = 0;
 const measuringIndex = 1;
@@ -70,8 +70,9 @@ export class DeviceTypesComponent implements OnInit {
                 private deviceTypeService: DeviceTypeService,
                 private dialog: MatDialog,
                 private snackBar: MatSnackBar,
-                private route: ActivatedRoute) {
-        this.editable = true;
+                private route: ActivatedRoute,
+                private deviceTypeHelperService: DeviceTypeHelperService,
+                private router: Router) {
         this.getRouterParams();
     }
 
@@ -145,15 +146,6 @@ export class DeviceTypesComponent implements OnInit {
     expand(serviceFormGroup: AbstractControl, formControlName: string, index: number): void {
         const inOut = this.inputOutput(serviceFormGroup, formControlName, index);
         inOut.patchValue({'show': !inOut.value.show});
-    }
-
-    checkIfContentExists(input: DeviceTypeContentModel): boolean {
-        if ((input.content_variable_raw === null || input.content_variable_raw === '' || input.content_variable_raw === undefined) &&
-            (input.serialization === null || input.serialization === '')) {
-            return false;
-        } else {
-            return true;
-        }
     }
 
     trackByFn(index: any) {
@@ -285,8 +277,11 @@ export class DeviceTypesComponent implements OnInit {
         return this.getServiceFormArray(serviceFormGroup, formControlName).get([index, 'content_variable_raw']) as FormControl;
     }
 
-    private cleanUpServices() {
+    serviceControl(serviceIndex: number): FormGroup {
+        return <FormGroup>this.services.at(serviceIndex);
+    }
 
+    private cleanUpServices() {
         const services = <FormArray>this.secondFormGroup.controls['services'];
 
         for (let i = 0; i < services.length; i++) {
@@ -294,19 +289,25 @@ export class DeviceTypesComponent implements OnInit {
             const inputs = <FormArray>formGroup.controls['inputs'];
             // loop from highest Index! Otherwise it could cause index problems
             for (let j = inputs.length - 1; j >= 0; j--) {
-                if (!this.checkIfContentExists(inputs.controls[j].value)) {
+                const inputContentControl: FormGroup = <FormGroup>inputs.controls[j];
+                const inputContent: DeviceTypeContentModel = inputContentControl.value;
+                if (!this.deviceTypeHelperService.checkIfContentExists(inputContent.content_variable_raw, inputContent.serialization)) {
                     inputs.removeAt(j);
                 } else {
-                    inputs.controls[j].patchValue({'content_variable': JSON.parse(inputs.controls[j].value.content_variable_raw)});
+                    inputContentControl.removeControl('content_variable');
+                    inputContentControl.addControl('content_variable', this.createContentVariableGroup(JSON.parse(inputContent.content_variable_raw)));
                 }
             }
             const outputs = <FormArray>formGroup.controls['outputs'];
             // loop from highest Index! Otherwise it could cause index problems
             for (let k = outputs.length - 1; k >= 0; k--) {
-                if (!this.checkIfContentExists(outputs.controls[k].value)) {
+                const outputContentControl: FormGroup = <FormGroup>outputs.controls[k];
+                const outputContent: DeviceTypeContentModel = outputContentControl.value;
+                if (!this.deviceTypeHelperService.checkIfContentExists(outputContent.content_variable_raw, outputContent.serialization)) {
                     outputs.removeAt(k);
                 } else {
-                    outputs.controls[k].patchValue({'content_variable': JSON.parse(outputs.controls[k].value.content_variable_raw)});
+                    outputContentControl.removeControl('content_variable');
+                    outputContentControl.addControl('content_variable', this.createContentVariableGroup(JSON.parse(outputContent.content_variable_raw)));
                 }
             }
         }
@@ -447,6 +448,7 @@ export class DeviceTypesComponent implements OnInit {
             value: [contentVariable.value],
             sub_content_variables: contentVariable.sub_content_variables ? this.createContentSubVariableArray(contentVariable.sub_content_variables) : null,
             serialization_options: [contentVariable.serialization_options],
+            unit_reference: [contentVariable.unit_reference],
         });
     }
 
@@ -528,12 +530,27 @@ export class DeviceTypesComponent implements OnInit {
         if (deviceType.id === '' || deviceType.id === undefined) {
             this.deviceTypeService.createDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
                 this.showMessage(deviceTypeSaved);
+                this.reload(deviceTypeSaved);
             });
         } else {
             this.deviceTypeService.updateDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
                 this.showMessage(deviceTypeSaved);
+                this.reload(deviceTypeSaved);
             });
         }
+    }
+
+    private reload(deviceType: DeviceTypeModel | null) {
+        if (deviceType) {
+            this.router.routeReuseStrategy.shouldReuseRoute = function () {
+                return false;
+            };
+            this.router.onSameUrlNavigation = 'reload';
+            this.router.navigate(['devices/devicetypesoverview/devicetypes/' + deviceType.id], {
+                queryParams: {function: 'edit'},
+            });
+        }
+
     }
 
     private showMessage(deviceTypeSaved: DeviceTypeModel | null) {
@@ -592,25 +609,7 @@ export class DeviceTypesComponent implements OnInit {
     private getRouterParams(): void {
         this.id = this.route.snapshot.paramMap.get('id') || '';
         this.queryParamFunction = this.route.snapshot.queryParamMap.get('function') || '';
-
-        switch (this.queryParamFunction) {
-            case 'copy': {
-                break; // ids are deleted later
-            }
-            case 'edit': {
-                break; // do nothing special
-            }
-            case 'create': {
-                break; // do nothing special
-            }
-            case 'details': {
-                this.editable = false; // hide save tab
-                break;
-            }
-            default: {
-                this.editable = false;
-            }
-        }
+        this.editable = this.deviceTypeHelperService.isEditable(this.queryParamFunction);
     }
 
     private deleteIds(): void {

@@ -43,6 +43,7 @@ export class ChartsModel {
                     min?: number;
                     max?: number;
                 };
+                viewWindowMode?: string;
             }
             hAxis?: {
                 format?: string;

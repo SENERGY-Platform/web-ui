@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - "10"
+
+addons:
+  chrome: stable
+
+cache:
+  directories:
+    - ./node_modules
+
+install:
+  - npm ci
+
+script:
+  - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI

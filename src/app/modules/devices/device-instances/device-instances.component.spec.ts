@@ -23,6 +23,10 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {KeycloakService} from 'keycloak-angular';
 import {RouterTestingModule} from '@angular/router/testing';
 import {MockKeycloakService} from '../../../core/services/keycloak.mock';
+import {CoreModule} from '../../../core/core.module';
+import {MatTabsModule} from '@angular/material/tabs';
+import {InfiniteScrollModule} from 'ngx-infinite-scroll';
+import {DevicesModule} from '../devices.module';
 
 
 
@@ -32,7 +36,7 @@ describe('DeviceInstancesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [MatDialogModule, HttpClientTestingModule, MatSnackBarModule, RouterTestingModule],
+      imports: [MatDialogModule, HttpClientTestingModule, MatSnackBarModule, RouterTestingModule, CoreModule, MatTabsModule, InfiniteScrollModule, DevicesModule],
       declarations: [ DeviceInstancesComponent ],
       providers: [{ provide: KeycloakService, useClass: MockKeycloakService }]
     })

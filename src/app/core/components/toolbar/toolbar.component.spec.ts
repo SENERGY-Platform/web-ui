@@ -24,6 +24,9 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatMenuModule} from '@angular/material/menu';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatIconModule} from '@angular/material/icon';
+import {MatToolbarModule} from '@angular/material/toolbar';
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;
@@ -32,7 +35,7 @@ describe('ToolbarComponent', () => {
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule, RouterTestingModule, MatDialogModule, MatSnackBarModule, MatMenuModule],
+            imports: [HttpClientTestingModule, RouterTestingModule, MatDialogModule, MatSnackBarModule, MatMenuModule, MatDividerModule, MatIconModule, MatToolbarModule],
             declarations: [ ToolbarComponent ],
             providers: [
                 { provide: AuthorizationService, useClass: AuthorizationServiceMock }

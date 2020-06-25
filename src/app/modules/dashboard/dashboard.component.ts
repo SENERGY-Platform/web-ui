@@ -52,6 +52,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     zoomedWidgetIndex: number | null = null;
     dashWidgetSubscription = new Subscription;
     dashSubscription = new Subscription;
+    inDragMode = false;
+    dragModeDisabled = false;
 
     constructor(private responsiveService: ResponsiveService,
                 private dashboardService: DashboardService,
@@ -114,6 +116,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
+    toggleDragMode() {
+        this.inDragMode = !this.inDragMode;
+        this.initDragAndDropOptions();
+        this.initDragAndDrop();
+    }
+
     private initDragAndDrop() {
         if (this.options.draggable) {
             this.options.draggable.stop = () => {
@@ -167,7 +175,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 ignoreContentClass: 'gridster-item-content',
                 ignoreContent: true,
                 dragHandleClass: 'drag-handler',
-                enabled: true
+                enabled: this.inDragMode
             },
             resizable: {
                 enabled: false
@@ -237,6 +245,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
             this.gridCols = grids.get(mqAlias) || 0;
             this.reorderWidgets();
+            if (this.gridCols < 2) {
+                this.inDragMode = false;
+                this.dragModeDisabled = true;
+            } else {
+                this.dragModeDisabled = false;
+            }
         });
     }
 

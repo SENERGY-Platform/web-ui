@@ -46,6 +46,11 @@
                                 [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh
                         </button>
                     </mat-menu>
+                    <button (click)="toggleDragMode()" mat-icon-button [color]="inDragMode ? 'warn' : 'accent'"
+                            [disabled]="dragModeDisabled"
+                            matTooltip="reorder widgets">
+                        <mat-icon>open_with</mat-icon>
+                    </button>
                     <button (click)="openEditDashboardDialog()" mat-icon-button color="accent"
                             matTooltip="edit dashboard">
                         <mat-icon>edit</mat-icon>
@@ -68,6 +73,7 @@
 
                 <gridster *ngIf="zoomedWidgetIndex === null" [options]="options">
                     <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets"
+                                   [ngClass]="inDragMode ? 'highlight color-sidenav' : ''"
                                    class="mat-elevation-z1">
                         <senergy-widget [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false"></senergy-widget>
                     </gridster-item>

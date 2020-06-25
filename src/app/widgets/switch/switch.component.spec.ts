@@ -20,6 +20,8 @@ import { SwitchComponent } from './switch.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import {HttpClientModule} from '@angular/common/http';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
+import {MatCardModule} from '@angular/material/card';
+import {WidgetModule} from '../widget.module';
 
 describe('SwitchComponent', () => {
   let component: SwitchComponent;
@@ -27,7 +29,7 @@ describe('SwitchComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [MatDialogModule, HttpClientModule],
+      imports: [MatDialogModule, HttpClientModule, WidgetModule, MatCardModule],
       declarations: [ SwitchComponent ],
       providers: [MatDialogModule,
         { provide: DashboardService, useClass: DashboardService },

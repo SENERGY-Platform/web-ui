@@ -23,6 +23,8 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {MatDialogModule} from '@angular/material/dialog';
 import {AuthorizationServiceMock} from '../../../core/services/authorization.service.mock';
+import {CoreModule} from '../../../core/core.module';
+import {MatIconModule} from '@angular/material/icon';
 
 class MockOperatorRepoService {
 }
@@ -32,7 +34,7 @@ describe('OperatorRepoComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
+      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, MatIconModule],
       declarations: [ OperatorRepoComponent ],
       providers: [
         { provide: OperatorRepoService, useClass: MockOperatorRepoService },
