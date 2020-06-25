@@ -293,7 +293,6 @@ export class DeviceTypesComponent implements OnInit {
                 const inputContent: DeviceTypeContentModel = inputContentControl.value;
                 if (!this.deviceTypeHelperService.checkIfContentExists(inputContent.content_variable_raw, inputContent.serialization)) {
                     inputs.removeAt(j);
-                    debugger;
                 } else {
                     inputContentControl.removeControl('content_variable');
                     inputContentControl.addControl('content_variable', this.createContentVariableGroup(JSON.parse(inputContent.content_variable_raw)));
