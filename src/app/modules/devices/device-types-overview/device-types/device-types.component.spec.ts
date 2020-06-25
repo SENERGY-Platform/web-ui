@@ -20,7 +20,7 @@ import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {DeviceTypesComponent} from './device-types.component';
 import {CoreModule} from '../../../../core/core.module';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {ActivatedRoute, convertToParamMap} from '@angular/router';
+import {ActivatedRoute, convertToParamMap, Router} from '@angular/router';
 import {MatStepperModule} from '@angular/material/stepper';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
@@ -31,8 +31,6 @@ import {DeviceTypeService} from '../shared/device-type.service';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {of} from 'rxjs';
 import {
-    DeviceTypeContentModel,
-    DeviceTypeContentVariableModel,
     DeviceTypeModel,
     DeviceTypeProtocolModel,
     DeviceTypeServiceModel
@@ -41,10 +39,13 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {FlexLayoutModule} from '@angular/flex-layout';
+import {util} from 'jointjs';
+import uuid = util.uuid;
 
 describe('DeviceTypesComponent', () => {
     let component: DeviceTypesComponent;
     let fixture: ComponentFixture<DeviceTypesComponent>;
+    const devicetypesEdit = {path: 'devices/devicetypesoverview/devicetypes/:id', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Devices' }};
 
     const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
 
@@ -117,11 +118,11 @@ describe('DeviceTypesComponent', () => {
         deviceTypeServiceSpy.getControllingFunctions.and.returnValue(of());
         deviceTypeServiceSpy.getMeasuringFunctions.and.returnValue(of());
         deviceTypeServiceSpy.getAspects.and.returnValue(of());
-        deviceTypeServiceSpy.createDeviceType.and.returnValue(of({}));
-        deviceTypeServiceSpy.updateDeviceType.and.returnValue(of({}));
+        deviceTypeServiceSpy.createDeviceType.and.returnValue(of({id: uuid()}));
+        deviceTypeServiceSpy.updateDeviceType.and.returnValue(of({id: uuid()}));
 
         TestBed.configureTestingModule({
-            imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule, MatStepperModule,
+            imports: [CoreModule, RouterTestingModule.withRoutes([devicetypesEdit]), HttpClientTestingModule, MatSnackBarModule, MatStepperModule,
                 MatFormFieldModule, MatSelectModule, MatIconModule, ReactiveFormsModule, MatInputModule, MatExpansionModule, MatTabsModule,
                 MatTooltipModule, FlexLayoutModule],
             declarations: [

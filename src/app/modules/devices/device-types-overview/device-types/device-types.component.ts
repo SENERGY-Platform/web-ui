@@ -30,7 +30,6 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
-import {jsonValidator} from '../../../../core/validators/json.validator';
 import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
 import {util} from 'jointjs';
