@@ -31,7 +31,7 @@ import {DeviceTypeService} from '../shared/device-type.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
 import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
 import {jsonValidator} from '../../../../core/validators/json.validator';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
 import {util} from 'jointjs';
 import uuid = util.uuid;
@@ -72,7 +72,8 @@ export class DeviceTypesComponent implements OnInit {
                 private dialog: MatDialog,
                 private snackBar: MatSnackBar,
                 private route: ActivatedRoute,
-                private deviceTypeHelperService: DeviceTypeHelperService) {
+                private deviceTypeHelperService: DeviceTypeHelperService,
+                private router: Router) {
         this.getRouterParams();
     }
 
@@ -530,12 +531,27 @@ export class DeviceTypesComponent implements OnInit {
         if (deviceType.id === '' || deviceType.id === undefined) {
             this.deviceTypeService.createDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
                 this.showMessage(deviceTypeSaved);
+                this.reload(deviceTypeSaved);
             });
         } else {
             this.deviceTypeService.updateDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
                 this.showMessage(deviceTypeSaved);
+                this.reload(deviceTypeSaved);
             });
         }
+    }
+
+    private reload(deviceType: DeviceTypeModel | null) {
+        if (deviceType) {
+            this.router.routeReuseStrategy.shouldReuseRoute = function () {
+                return false;
+            };
+            this.router.onSameUrlNavigation = 'reload';
+            this.router.navigate(['devices/devicetypesoverview/devicetypes/' + deviceType.id], {
+                queryParams: {function: 'edit'},
+            });
+        }
+
     }
 
     private showMessage(deviceTypeSaved: DeviceTypeModel | null) {
