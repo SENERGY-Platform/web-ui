@@ -6,7 +6,7 @@ addons:
 install:
 - npm ci
 script:
-- npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+- npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI --code-coverage --reporters=mocha,coverage-istanbul
 notifications:
   slack:
     secure: ap4FBtD9P2JNrDWqS8k2R5iWcQZtKpTintXMWJ31DmcJMEluo99i8nhqHsT1d8UzSgD8hf+IzDhB0nOZDgSok7Lvsj2hcGnv3HK6AxrPtJLKXaDSiSuueOudaoYRQY6ex4govOi3/Dicgm+5NI2R92V/eS2sRKSqI85FGE1XXtjiA+FcUt/lgNai2gDjz6TzyoBblUlScwT2taQEIdHZf76m292FV3A03oyS562dB6KQ3gjuxfQzDOuLEPdXAK9kfaHk8yWgXPHW9ImtvCUz+IEa547q3NiF/vlKgHeHBTQrmd9PRZOtNDkBMkwwXwpBSPjvXdCHZQUE7gjrWpGhvOPWxe4Xk4xu3LQH9phBc4zOjvdR5mw1M/CecdF9OcbC2TjrBxBcPBgFdnGpLX8EUz7mrbx04keuQlCVyRtu75nsZjgBl/cG8UQ3V8n/iUNLbtGl62HPOlFYqL06Mg7sJnEyLSVSsEu4ZayK10Yi8cGbrmPXgl47ja6KNhJ6lX8xmAkvxnSu2KFeX/rtwmBlFDD8tRGEHIHQf9Jy3STgAiswfMlwAX8ulgzZkj8OCltMtAtueklXoupAQxbZ0dkAjsfyuMWQkOyRGOCLvYmjawzrGvEX6I3KSJm57Xm/dnoYvNX10Tfi+qJaoM9Tzh3CbvDIkDZQR5+8ji9oB2lNnaM=
