@@ -29,7 +29,7 @@
                     <div [formGroupName]="elementIndex"
                          *ngFor="let element of elements; let elementIndex = index; trackBy:trackByFn">
                         <div formGroupName="task" *ngIf="element.task !== null">
-                            <table class="full-width" cellspacing="0">
+                            <table class="full-width">
                                 <tr>
                                     <td formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent">
@@ -74,7 +74,7 @@
                 </div>
 
                 <div formArrayName="lanes" *ngIf="lanes.length > 0">
-                    <table class="full-width" cellspacing="0">
+                    <table class="full-width">
                         <tr>
                             <td valign="top" [formGroupName]="elementLanesIndex"
                                 *ngFor="let lanesControls of lanes; let elementLanesIndex = index; trackBy:trackByFn">
@@ -98,7 +98,7 @@
                                         <div [formGroupName]="elementsIndex"
                                              *ngFor="let elements of lanesElements(elementLanesIndex); let elementsIndex = index; trackBy:trackByFn">
                                             <div formGroupName="task" *ngIf="elements.task !== null">
-                                                <table class="full-width" cellspacing="0">
+                                                <table class="full-width">
                                                     <tr>
                                                         <td>
                                                             <mat-form-field class="full-width" color="accent">

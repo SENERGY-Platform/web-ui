@@ -317,7 +317,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                 this.yrWeatherService.getYrForecast(this.widget.properties.yrPath)
                     .subscribe(model => {
                             this.widget.properties.weather = model;
-                            const mm = this.widget.properties.measurements || [];
                             if (this.widget.properties.measurements) {
                                 let index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
                                 if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {

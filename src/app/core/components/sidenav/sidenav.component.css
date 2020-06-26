@@ -63,6 +63,7 @@ mat-sidenav {
 
 .menu-toggle-list.toggled {
     height: 100%;
+    max-height: 1000px;
 }
 
 .side-menu .mat-button {
@@ -77,10 +78,6 @@ mat-sidenav {
     text-decoration: none;
     white-space: normal;
     width: 100%;
-}
-
-.menu-toggle-list.toggled {
-    max-height: 1000px;
 }
 
 .menu-toggle-list {
