@@ -38,9 +38,13 @@ import {DashboardModel} from './shared/dashboard.model';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
 import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
 import {MatMenuModule} from '@angular/material/menu';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatDividerModule} from '@angular/material/divider';
+import {GridsterModule} from 'angular-gridster2';
+import {MatButtonModule} from '@angular/material/button';
 
 
-describe('DeviceStatusEditDialogComponent', () => {
+describe('DashboardComponent', () => {
     let component: DashboardComponent;
     let fixture: ComponentFixture<DashboardComponent>;
 
@@ -69,7 +73,11 @@ describe('DeviceStatusEditDialogComponent', () => {
                 MatExpansionModule,
                 MatInputModule,
                 MatMenuModule,
-                ReactiveFormsModule
+                ReactiveFormsModule,
+                MatTabsModule,
+                MatDividerModule,
+                GridsterModule,
+                MatButtonModule,
             ],
             declarations: [
                 DashboardComponent
