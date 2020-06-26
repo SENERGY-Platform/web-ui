@@ -56,3 +56,7 @@
 .table-button-size {
     width: 40px;
 }
+
+table {
+    border-spacing: 0px;
+}

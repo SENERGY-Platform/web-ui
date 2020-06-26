@@ -30,3 +30,7 @@
 td {
     padding-right: 8px;
 }
+
+table {
+    border-spacing: 0px;
+}

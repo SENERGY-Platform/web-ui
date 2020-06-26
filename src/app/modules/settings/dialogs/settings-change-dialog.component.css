@@ -26,6 +26,7 @@
 
 table {
     width: 100%;
+    border-spacing: 0px;
 }
 
 mat-dialog-actions button:not(:last-child) {

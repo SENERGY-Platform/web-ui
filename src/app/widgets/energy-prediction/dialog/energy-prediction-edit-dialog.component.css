@@ -20,3 +20,7 @@ mat-dialog-actions button:not(:last-child) {
 mat-dialog-content {
     min-height: 300px;
 }
+
+table {
+    border-spacing: 0px;
+}

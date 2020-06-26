@@ -17,3 +17,7 @@
 .full-width {
     width: 100%;
 }
+
+table {
+    border-spacing: 0px;
+}

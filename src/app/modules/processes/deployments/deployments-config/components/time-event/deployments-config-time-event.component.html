@@ -15,7 +15,7 @@
   -->
 <div class="deployments-config-time-event-container" [formGroup]="time_event">
     <div>{{time_event.value.label}}</div>
-    <table class="full-width" cellspacing="0" formGroupName="time_raw"
+    <table class="full-width" formGroupName="time_raw"
            (change)="change()" >
         <tr>
             <td>
