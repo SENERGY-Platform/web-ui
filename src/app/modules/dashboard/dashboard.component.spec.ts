@@ -44,7 +44,7 @@ import {GridsterModule} from 'angular-gridster2';
 import {MatButtonModule} from '@angular/material/button';
 
 
-describe('DeviceStatusEditDialogComponent', () => {
+describe('DashboardComponent', () => {
     let component: DashboardComponent;
     let fixture: ComponentFixture<DashboardComponent>;
 
