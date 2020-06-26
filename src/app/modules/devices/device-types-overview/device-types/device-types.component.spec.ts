@@ -20,7 +20,7 @@ import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {DeviceTypesComponent} from './device-types.component';
 import {CoreModule} from '../../../../core/core.module';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {ActivatedRoute, convertToParamMap, Router} from '@angular/router';
+import {ActivatedRoute, convertToParamMap} from '@angular/router';
 import {MatStepperModule} from '@angular/material/stepper';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';

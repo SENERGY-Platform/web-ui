@@ -21,13 +21,11 @@ import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.mo
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {Observable} from 'rxjs';
 import {ProcessSchedulerModel} from './process-scheduler.model';
-import {ProcessModel} from '../../../modules/processes/process-repo/shared/process.model';
 import {ProcessRepoService} from '../../../modules/processes/process-repo/shared/process-repo.service';
 import {environment} from '../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {HttpClient, HttpResponseBase} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {ProcessSchedulerScheduleDialogComponent} from '../dialogs/process-scheduler-schedule-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ProcessSchedulerScheduleEditDialogComponent} from '../dialogs/process-scheduler-schedule-edit-dialog.component';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component} from '@angular/core';
 import {dia, shapes, util} from 'jointjs';
 import * as $ from 'jquery';
 import {DiagramModel} from './shared/diagram.model';
@@ -206,7 +206,7 @@ export class DiagramEditorComponent implements AfterViewInit {
             });
     }
 
-    onResize({}) {
+    onResize() {
         this.setPaperWidth();
         this.paper.setDimensions(this.paperWidth, 700);
     }

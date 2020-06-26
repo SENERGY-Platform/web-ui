@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpResponse, HttpResponseBase} from '@angular/common/http';
+import {HttpClient, HttpResponseBase} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';

@@ -19,7 +19,6 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {
     DeviceTypeCharacteristicsModel,
-    DeviceTypeConceptModel,
 } from '../../device-types-overview/shared/device-type.model';
 import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';

@@ -17,12 +17,10 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {DeviceTypeConceptModel, DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
+import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
 import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
-import {ProcessModel} from '../../../processes/process-repo/shared/process.model';
-import {ProcessRepoConditionsModel} from '../../../processes/process-repo/shared/process-repo-conditions.model';
 import {ConceptsPermSearchModel} from './concepts-perm-search.model';
 import {ConceptsCharacteristicsModel} from './concepts-characteristics.model';
 

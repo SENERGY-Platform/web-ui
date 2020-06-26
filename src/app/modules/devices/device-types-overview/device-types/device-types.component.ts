@@ -25,7 +25,7 @@ import {
     DeviceTypeProtocolSegmentModel,
     DeviceTypeServiceModel, functionTypes,
 } from '../shared/device-type.model';
-import {AbstractControl, FormArray, FormArrayName, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';

@@ -76,11 +76,7 @@ export class ElementSizeService {
                     if (width < 1100) {
                         percentage = 82;
                     } else {
-                        if (width < 1400) {
-                            percentage = 85;
-                        } else {
-                            percentage = 85;
-                        }
+                        percentage = 85;
                     }
                 }
             }
