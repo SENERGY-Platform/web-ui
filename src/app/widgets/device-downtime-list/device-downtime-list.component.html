@@ -22,7 +22,7 @@
             <mat-list fxFlex>
                 <mat-list-item *ngFor="let device of devices; let i = index">
                     <mat-icon [ngClass]="device.color" mat-list-icon>{{device.icon}}</mat-icon>
-                    <h4 mat-line>{{i + 1 + '. ' + device.name}}</h4>
+                    <h4 mat-line [matTooltip]="device.name">{{i + 1 + '. ' + device.name}}</h4>
                     <p mat-line>{{device.timeDisconnectedInMin}} min / {{device.failureRate}} time(s)</p>
                 </mat-list-item>
             </mat-list>
