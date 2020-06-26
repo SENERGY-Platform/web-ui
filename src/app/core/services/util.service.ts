@@ -15,7 +15,6 @@
  */
 
 import {Injectable} from '@angular/core';
-import * as X2JS from 'x2js';
 
 @Injectable({
     providedIn: 'root'

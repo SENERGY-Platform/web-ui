@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';

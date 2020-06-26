@@ -21,7 +21,6 @@ import {
 import {ProcessModelListService} from './shared/process-model-list.service';
 import {ProcessModelListModel} from './shared/process-model-list.model';
 import {Subscription} from 'rxjs';
-import {ChartsModel} from '../charts/shared/charts.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 
 @Component({

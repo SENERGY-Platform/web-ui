@@ -18,8 +18,6 @@ import {Injectable} from '@angular/core';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {YrWeatherModel} from './yr-weather.model';
 import {environment} from '../../../../environments/environment';
 import {Geoname} from './geonames.model';

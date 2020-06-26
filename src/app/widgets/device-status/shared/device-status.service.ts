@@ -20,8 +20,6 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 import {DeviceStatusEditDialogComponent} from '../dialog/device-status-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {HttpClient} from '@angular/common/http';
 import {DeviceStatusElementModel} from './device-status-properties.model';
 import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {ExportService} from '../../../modules/data/export/shared/export.service';

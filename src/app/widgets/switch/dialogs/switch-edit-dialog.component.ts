@@ -23,7 +23,6 @@ import {DeploymentsService} from '../../../modules/processes/deployments/shared/
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {DeploymentsDefinitionModel} from '../../../modules/processes/deployments/shared/deployments-definition.model';
 import {SwitchPropertiesDeploymentsModel} from '../shared/switch-properties.model';
 import {MatTable} from '@angular/material/table';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';

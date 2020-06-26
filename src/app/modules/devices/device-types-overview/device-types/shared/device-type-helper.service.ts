@@ -1,5 +1,4 @@
 import {Injectable} from '@angular/core';
-import {DeviceTypeContentModel} from '../../shared/device-type.model';
 
 @Injectable({
     providedIn: 'root'

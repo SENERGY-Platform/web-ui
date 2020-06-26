@@ -29,8 +29,8 @@ import {
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {DeviceTypeFunctionType, DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
+import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import * as moment from 'moment';
 import {MatSnackBar} from '@angular/material/snack-bar';

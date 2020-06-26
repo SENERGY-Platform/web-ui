@@ -17,7 +17,7 @@
 import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import {MatSidenav} from '@angular/material/sidenav';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
-import {filter, map, mergeMap, take} from 'rxjs/internal/operators';
+import {filter, map, mergeMap} from 'rxjs/internal/operators';
 
 import {SidenavService} from './shared/sidenav.service';
 import {SidenavSectionModel} from './shared/sidenav-section.model';
