@@ -38,7 +38,7 @@ const grids = new Map([
 @Component({
     selector: 'senergy-dashboard',
     templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.scss'],
+    styleUrls: ['./dashboard.component.css'],
 })
 
 export class DashboardComponent implements OnInit, OnDestroy {
