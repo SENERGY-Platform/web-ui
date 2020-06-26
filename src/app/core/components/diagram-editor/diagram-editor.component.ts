@@ -206,7 +206,7 @@ export class DiagramEditorComponent implements AfterViewInit {
             });
     }
 
-    onResize({}) {
+    onResize() {
         this.setPaperWidth();
         this.paper.setDimensions(this.paperWidth, 700);
     }
