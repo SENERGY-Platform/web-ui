@@ -25,11 +25,7 @@ import {AuthorizationProfileModel} from '../components/authorization/authorizati
 export class AuthorizationServiceMock {
 
     getUserId(): string | Error {
-        if (true) {
-            return 'test';
-        } else {
-            return Error('Could not load sub');
-        }
+        return 'test';
     }
 
     getUserName(): string {
