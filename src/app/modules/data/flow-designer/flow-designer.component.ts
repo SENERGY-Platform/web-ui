@@ -94,9 +94,6 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                     this.diagram.newLocalNode(
                         operator.name, operator.image, operator.inputs, operator.outputs, operator.config_values, operator._id);
                     break;
-                default:
-                    this.diagram.newCloudNode(
-                        operator.name, operator.image, operator.inputs, operator.outputs, operator.config_values, operator._id);
             }
         }
     }
