@@ -226,7 +226,10 @@ export class MultiValueEditDialogComponent implements OnInit {
 
 
         ((newGroup.get('warnings') as FormGroup).get('warning_enabled') as FormControl).valueChanges.subscribe(() => {
-            const warn_group = newGroup.get('warnings') as FormGroup;
+            const warn_group = newGroup.get('warnings');
+            if (warn_group === null) {
+                return;
+            }
             const warning_enabled = (warn_group.get('warning_enabled') as FormControl).value === true;
 
             if (!warning_enabled) {
