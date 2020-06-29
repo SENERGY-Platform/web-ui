@@ -76,7 +76,7 @@
                 <div formArrayName="lanes" *ngIf="lanes.length > 0">
                     <table class="full-width">
                         <tr>
-                            <td valign="top" [formGroupName]="elementLanesIndex"
+                            <td [formGroupName]="elementLanesIndex"
                                 *ngFor="let lanesControls of lanes; let elementLanesIndex = index; trackBy:trackByFn">
                                 <div formGroupName="lane" *ngIf="lanesControls.lane !== null">
                                     <div>{{lanesControls.lane.label}}</div>

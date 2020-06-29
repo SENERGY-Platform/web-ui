@@ -42,7 +42,6 @@ import {DesignerHelperService} from './shared/designer-helper.service';
 import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
 import {ActivatedRoute} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {MatDialog} from '@angular/material/dialog';
 import {DesignerErrorModel} from './shared/designer-error.model';
 import {DesignerSnackBarComponent} from './snack-bar/designer-snack-bar.component';
 import {defaultIfEmpty} from 'rxjs/operators';
@@ -67,14 +66,12 @@ export class ProcessDesignerComponent implements OnInit {
         protected designerService: DesignerHelperService,
         protected processRepoService: ProcessRepoService,
         private snackBar: MatSnackBar,
-        private dialog: MatDialog,
     ) {
     }
 
     ngOnInit() {
         // TODO: find better solution for appear / fade-in problem
         setTimeout(() => {
-            const userId = this.auth.getUserId();
             const that = this;
             this.id = this.route.snapshot.paramMap.get('id') || '';
 

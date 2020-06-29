@@ -31,7 +31,7 @@ import {YrWeatherService} from '../shared/yr-weather.service';
 import {GeonamesService} from '../shared/geonames.service';
 import {Geoname} from '../shared/geonames.model';
 import {FormControl} from '@angular/forms';
-import {debounceTime, map, startWith} from 'rxjs/operators';
+import {debounceTime, map} from 'rxjs/operators';
 import {from, Observable} from 'rxjs';
 import {NameValuePair} from '../shared/dwd-pollen.model';
 
@@ -511,7 +511,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.ubaStations.forEach(station =>
             station.distance = this.latLongDistance(station.station_latitude, station.station_longitude,
                 this.location.latitude, this.location.longitude));
-        this.ubaStations = this.ubaStations.sort((a, b) => {
+        this.ubaStations.sort((a, b) => {
             if (!a.distance || !b.distance) {
                 return 0;
             }

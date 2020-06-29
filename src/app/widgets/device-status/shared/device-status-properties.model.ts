@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
-import {ExportValueModel} from '../../../modules/data/export/shared/export.model';
 import {
-    DeviceTypeAspectModel,
     DeviceTypeFunctionModel,
     DeviceTypeServiceModel
 } from '../../../modules/devices/device-types-overview/shared/device-type.model';

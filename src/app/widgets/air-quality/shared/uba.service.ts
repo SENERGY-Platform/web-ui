@@ -55,7 +55,7 @@ export class UBAService {
                     const ssname = response.indices.indexOf('station setting name');
                     const sssname = response.indices.indexOf('station setting short name');
                     const stname = response.indices.indexOf('station type name');
-                    Object.keys(response.data).map(key => {
+                    Object.keys(response.data).forEach(key => {
                         // @ts-ignore
                         const sub = response.data ? <string[]>response.data[key] : <string[]>[];
 
@@ -114,7 +114,7 @@ export class UBAService {
                 ).subscribe(response => {
                 const arr: UBAComponent[] = [];
                 if (response.components !== undefined) {
-                    Object.keys(response.components).map(key => {
+                    Object.keys(response.components).forEach(key => {
                         // @ts-ignore
                         const sub = response.components ? <string[]>response.components[key] : <string[]>[];
                         const component: UBAComponent = {

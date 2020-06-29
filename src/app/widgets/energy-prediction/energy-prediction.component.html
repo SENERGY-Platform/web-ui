@@ -30,7 +30,10 @@
                     <mat-icon class="mat-32">trending_up</mat-icon>
                 </div>
                 <div fxFill fxFlex="60" fxLayout="column">
-                    <div class="kpi-header-1-3" [matTooltip]="'Consumption within this period'">RELATIVE ESTIMATION</div>
+                    <div class="kpi-header-1-3" fxLayout="row">
+                        <div fxFlex="85">CONSUMPTION</div>
+                        <mat-icon [matTooltip]="getConsumptionTooltip()">help_outline</mat-icon>
+                    </div>
                     <div fxLayout="row">
                         <div [ngClass]="{'color-warn': thresholdActive && widget.properties.thresholdOption === 'Consumption'}"
                              [matTooltip]="thresholdActive && widget.properties.thresholdOption === 'Consumption' ? 'Estimation above threshold!' : undefined" >
@@ -45,7 +48,10 @@
                     <mat-icon class="mat-32">trending_flat</mat-icon>
                 </div>
                 <div fxFill fxFlex="60" fxLayout="column">
-                    <div class="kpi-header-1-3" [matTooltip]="'Total consumption at the end of this period'">TOTAL ESTIMATION</div>
+                    <div class="kpi-header-1-3" fxLayout="row">
+                        <div fxFlex="85">METER READING</div>
+                        <mat-icon [matTooltip]="getMeterReadingTooltip()">help_outline</mat-icon>
+                    </div>
                     <div fxLayout="row">
                         <div>
                             <div class="values kpi-1-3">{{predictionModel.predictionTotal| number: widget.properties.format || '1.3-3'}} {{widget.properties.unit || 'kWh'}}</div>
@@ -71,7 +77,10 @@
                     <mat-icon class="mat-32">euro_symbol</mat-icon>
                 </div>
                 <div fxFill fxFlex="60" fxLayout="column">
-                    <div class="kpi-header-1-3" [matTooltip]="'Cost within this period'">PRICE</div>
+                    <div class="kpi-header-1-3" fxLayout="row">
+                        <div fxFlex="85">PRICE</div>
+                        <mat-icon [matTooltip]="getPriceTooltip()">help_outline</mat-icon>
+                    </div>
                     <div fxLayout="row">
                         <div [ngClass]="{'color-warn': thresholdActive && widget.properties.thresholdOption === 'Price' }"
                              [matTooltip]="thresholdActive && widget.properties.thresholdOption === 'Price' ? 'Estimation above threshold!' : undefined" >

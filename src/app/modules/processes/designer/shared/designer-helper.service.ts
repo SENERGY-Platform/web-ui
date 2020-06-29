@@ -106,7 +106,7 @@ export class DesignerHelperService {
                 if (newMeta) {
 
                     if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/ControllingFunction') {
-                        if (!meta && newMeta) {
+                        if (!meta) {
                             meta = newMeta;
                         }
                         if (this.checkDeviceClasses(meta, newMeta)) {

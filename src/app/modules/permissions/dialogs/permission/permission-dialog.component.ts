@@ -95,8 +95,8 @@ export class PermissionDialogComponent implements OnInit {
         if (userExists) {
             this.formControl.setErrors({'userExists': true});
         } else {
-            this.permissionsService.getUserByName(this.formControl.value).subscribe((userPermission: PermissionsUserModel | undefined) => {
-                if (userPermission !== undefined) {
+            this.permissionsService.getUserByName(this.formControl.value).subscribe((userPermission: PermissionsUserModel | null) => {
+                if (userPermission !== null) {
                     this.permissions.push({
                         userId: userPermission.id, userName: userPermission.username, userRights: {
                             administrate: false, execute: false, write: false, read: false

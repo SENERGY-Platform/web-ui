@@ -111,7 +111,7 @@ export class DWDPollenService {
         const areaForecast = pollenForecastResponse['content'].find(region => region['partregion_name'] === partregion_name);
         const pollen = areaForecast['Pollen'];
         const arr: DWDSinglePollenForecast[] = [];
-        Object.keys(pollen).map(key => {
+        Object.keys(pollen).forEach(key => {
            const singlePollenForecast: DWDSinglePollenForecast = {
                name: key,
                today: pollen[key]['today'],

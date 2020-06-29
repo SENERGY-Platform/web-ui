@@ -81,8 +81,6 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     }
 
     private setConfigured() {
-        this.configured = !(
-          this.widget.properties.measurement === undefined
-        );
+        this.configured = this.widget.properties.measurement !== undefined;
     }
 }
