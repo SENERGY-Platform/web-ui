@@ -31,7 +31,7 @@ import {YrWeatherService} from '../shared/yr-weather.service';
 import {GeonamesService} from '../shared/geonames.service';
 import {Geoname} from '../shared/geonames.model';
 import {FormControl} from '@angular/forms';
-import {debounceTime, map, startWith} from 'rxjs/operators';
+import {debounceTime, map} from 'rxjs/operators';
 import {from, Observable} from 'rxjs';
 import {NameValuePair} from '../shared/dwd-pollen.model';
 
