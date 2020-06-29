@@ -48,9 +48,9 @@ export class PermissionsService {
         );
     }
 
-    getUserByName(userName: string): Observable<PermissionsUserModel | undefined> {
+    getUserByName(userName: string): Observable<PermissionsUserModel | null> {
         return this.http.get<PermissionsUserModel>(environment.usersServiceUrl + '/user/name/' + userName).pipe(
-            catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getUserByName', undefined)));
+            catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getUserByName', null)));
     }
 
     removeUserRight(user: string, kind: string, resourceId: string): Observable<PermissionsResponseModel> {
