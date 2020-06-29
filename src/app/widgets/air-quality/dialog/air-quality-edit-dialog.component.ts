@@ -511,7 +511,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.ubaStations.forEach(station =>
             station.distance = this.latLongDistance(station.station_latitude, station.station_longitude,
                 this.location.latitude, this.location.longitude));
-        this.ubaStations = this.ubaStations.sort((a, b) => {
+        this.ubaStations.sort((a, b) => {
             if (!a.distance || !b.distance) {
                 return 0;
             }
