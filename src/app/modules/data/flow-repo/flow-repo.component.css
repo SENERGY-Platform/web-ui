@@ -18,12 +18,6 @@
     margin: 8px;
 }
 
-mat-grid-tile-footer {
-    background-color: white !important;
-    height: 68px !important;
-    color: black !important;
-}
-
 .truncate {
     white-space: nowrap;
     overflow: hidden;
