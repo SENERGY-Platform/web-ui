@@ -50,7 +50,6 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.update();
-        this.registerIcons();
         this.setConfigured();
     }
 
@@ -58,12 +57,20 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
         this.destroy.unsubscribe();
     }
 
-    registerIcons() {
-
-    }
-
     edit() {
         this.predictionService.openEditDialog(this.dashboardId, this.widget.id);
+    }
+
+    getConsumptionTooltip() {
+        return  'Estimated consumption within one ' + this.widget.properties.selectedOption?.toLowerCase();
+    }
+
+    getMeterReadingTooltip() {
+        return 'Estimated meter reading at the date below';
+    }
+
+    getPriceTooltip() {
+        return 'Consumption associated cost within one ' + this.widget.properties.selectedOption?.toLowerCase();
     }
 
     private update() {
