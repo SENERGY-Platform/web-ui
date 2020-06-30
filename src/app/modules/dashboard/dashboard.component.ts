@@ -69,6 +69,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.dashWidgetSubscription.unsubscribe();
         this.dashSubscription.unsubscribe();
+        clearInterval(this.interval);
     }
 
     initAllWidgets() {
