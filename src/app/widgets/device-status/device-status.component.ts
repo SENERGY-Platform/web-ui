@@ -18,7 +18,6 @@ import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
 import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
-import {DeviceStatusService} from './shared/device-status.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {MatTable} from '@angular/material/table';
@@ -32,6 +31,7 @@ import {
     ChartsExportRequestPayloadQueriesModel
 } from '../charts/export/shared/charts-export-request-payload.model';
 import {HttpClient} from '@angular/common/http';
+import {DeviceStatusDialogService} from './shared/device-status-dialog.service';
 
 @Component({
     selector: 'senergy-device-status',
@@ -54,7 +54,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
 
     constructor(private iconRegistry: MatIconRegistry,
                 private sanitizer: DomSanitizer,
-                private deviceStatusService: DeviceStatusService,
+                private deviceStatusDialogService: DeviceStatusDialogService,
                 private dashboardService: DashboardService,
                 private deploymentsService: DeploymentsService,
                 private multiValueService: MultiValueService,
@@ -77,7 +77,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        this.deviceStatusService.openEditDialog(this.dashboardId, this.widget.id);
+        this.deviceStatusDialogService.openEditDialog(this.dashboardId, this.widget.id);
     }
 
     // checkWarning(m: DeviceStatusMeasurement): boolean {

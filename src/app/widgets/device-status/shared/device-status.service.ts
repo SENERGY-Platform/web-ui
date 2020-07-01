@@ -15,11 +15,8 @@
  */
 
 import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {DeviceStatusEditDialogComponent} from '../dialog/device-status-edit-dialog.component';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {DeviceStatusElementModel} from './device-status-properties.model';
 import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
@@ -36,24 +33,7 @@ export class DeviceStatusService {
                 private deploymentsService: DeploymentsService) {
     }
 
-    openEditDialog(dashboardId: string, widgetId: string): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
-        };
-        dialogConfig.minWidth = '675px';
-        const editDialogRef = this.dialog.open(DeviceStatusEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
-        });
-    }
-
-    deleteElements(elements: DeviceStatusElementModel[] | undefined): void {
+      deleteElements(elements: DeviceStatusElementModel[] | undefined): void {
         if (elements) {
             elements.forEach((element: DeviceStatusElementModel) => {
                 if (element.exportId) {
