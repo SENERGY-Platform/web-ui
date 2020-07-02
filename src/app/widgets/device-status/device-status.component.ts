@@ -21,17 +21,10 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {MatTable} from '@angular/material/table';
-import {DeviceStatusElementModel} from './shared/device-status-properties.model';
+import {DeviceStatusElementModel, MeasurementColumnNamePairModel} from './shared/device-status-properties.model';
 import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
-import {MultiValueService} from '../multi-value/shared/multi-value.service';
-import {ChartsExportModel} from '../charts/export/shared/charts-export.model';
-import {environment} from '../../../environments/environment';
-import {
-    ChartsExportRequestPayloadModel,
-    ChartsExportRequestPayloadQueriesModel
-} from '../charts/export/shared/charts-export-request-payload.model';
-import {HttpClient} from '@angular/common/http';
 import {DeviceStatusDialogService} from './shared/device-status-dialog.service';
+import {DeviceStatusService} from './shared/device-status.service';
 
 @Component({
     selector: 'senergy-device-status',
@@ -56,8 +49,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                 private deviceStatusDialogService: DeviceStatusDialogService,
                 private dashboardService: DashboardService,
                 private deploymentsService: DeploymentsService,
-                private multiValueService: MultiValueService,
-                private http: HttpClient) {
+                private deviceStatusService: DeviceStatusService) {
     }
 
     ngOnInit() {
@@ -95,44 +87,20 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                         }, refreshTimeInMs);
                     }
 
-                    const queries: ChartsExportRequestPayloadQueriesModel[] = [];
+                    const queries: MeasurementColumnNamePairModel[] = [];
                     elements.forEach((element: DeviceStatusElementModel) => {
                         if (element.exportId && element.exportValues) {
-                            queries.push({id: element.exportId, fields: [{name: element.exportValues.name, math: ''}]});
+                            queries.push({measurement: element.exportId, columnName: element.exportValues.name});
                         }
                     });
 
-                    const requestPayload: ChartsExportRequestPayloadModel = {
-                        time: {
-                            last: '500000w', // arbitrary high number
-                            end: undefined,
-                            start: undefined
-                        },
-                        group: {
-                            type: undefined,
-                            time: ''
-                        },
-                        queries: queries,
-                        limit: 1
-                    };
-
-                    this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
-                        this.items = [];
-                        const columns = model.results[0].series[0].columns;
-                        const values = model.results[0].series[0].values;
-
-                        elements.forEach((element: DeviceStatusElementModel) => {
-                            const columnIndex = columns.findIndex(col => {
-                                if (element.exportValues) {
-                                    return col === (element.exportId + '.' + element.exportValues.name);
-                                }
-                                return -1;
-                            });
-                            values.forEach(val => {
-                                if (val[columnIndex] !== null) {
-                                    this.items.push({name: <string>element.name, status: val[columnIndex]});
-                                }
-                            });
+                    this.deviceStatusService.getLastValues(queries).subscribe(res => {
+                        res.forEach((pair, index) => {
+                            let v = pair.value;
+                            if (v === true || v === false) {
+                                v = v as unknown as string;
+                            }
+                            this.items.push({name: <string>elements[index].name, status: v});
                         });
                         this.dataReady = true;
                     });

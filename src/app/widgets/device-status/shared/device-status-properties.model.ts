@@ -50,3 +50,13 @@ export enum MultiValueOrderEnum {
     ValueAsc,
     ValueDesc
 }
+
+export interface TimeValuePairModel {
+    time: string;
+    value: string | number | boolean;
+}
+
+export interface MeasurementColumnNamePairModel {
+    measurement: string;
+    columnName: string;
+}
