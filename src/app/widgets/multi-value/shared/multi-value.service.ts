@@ -22,14 +22,9 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 import {MultiValueEditDialogComponent} from '../dialog/multi-value-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {environment} from '../../../../environments/environment';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {HttpClient} from '@angular/common/http';
-import {ChartsExportModel} from '../../charts/export/shared/charts-export.model';
-import {
-    ChartsExportRequestPayloadModel,
-    ChartsExportRequestPayloadQueriesModel
-} from '../../charts/export/shared/charts-export-request-payload.model';
+import {LastValuesRequestElementModel} from '../../shared/export-data.model';
+import {ExportDataService} from '../../shared/export-data.service';
 
 @Injectable({
     providedIn: 'root'
@@ -39,7 +34,7 @@ export class MultiValueService {
     constructor(private dialog: MatDialog,
                 private dashboardService: DashboardService,
                 private errorHandlerService: ErrorHandlerService,
-                private http: HttpClient) {
+                private exportDataService: ExportDataService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -63,61 +58,30 @@ export class MultiValueService {
     getValues(widget: WidgetModel): Observable<WidgetModel> {
         return new Observable<WidgetModel>((observer) => {
             if (widget.properties.multivaluemeasurements) {
-                const requestPayload: ChartsExportRequestPayloadModel = {
-                    time: {
-                        last: '500000w', // arbitrary high number
-                        end: undefined,
-                        start: undefined
-                    },
-                    group: {
-                        type: undefined,
-                        time: ''
-                    },
-                    queries: [],
-                    limit: 1
-                };
-
+                const requestPayload: LastValuesRequestElementModel[] = [];
                 const measurements = widget.properties.multivaluemeasurements;
-                const array: ChartsExportRequestPayloadQueriesModel[] = [];
                 measurements.forEach((measurement: MultiValueMeasurement) => {
-                    if (array.length > 0 && array[array.length - 1].id === measurement.export.id) {
-                        array[array.length - 1].fields.push({
-                            name: measurement.column.Name,
-                            math: measurement.math || ''
-                        });
-                    } else {
-                        array.push({
-                            id: measurement.export.id,
-                            fields: [{name: measurement.column.Name, math: measurement.math || ''}]
-                        });
-                    }
+                    requestPayload.push({
+                        measurement: measurement.export.id,
+                        columnName: measurement.column.Name,
+                        math: measurement.math
+                    });
                 });
-                requestPayload.queries = array;
-
-                const ids: string[] = [];
-                measurements.forEach(m => ids.push(m.export.id + '.' + m.column.Name));
-                this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
-                    const columns = model.results[0].series[0].columns;
-                    const values = model.results[0].series[0].values;
-                    ids.forEach((id, idIndex) => {
-                        const columnIndex = columns.findIndex(col => col === id);
-                        values.forEach(val => {
-                            if (val[columnIndex] || val[columnIndex] === 0) {
-                                measurements[idIndex].data = val[columnIndex];
-                            }
-                        });
-                        if (measurements[idIndex].data == null && measurements[idIndex].data !== 0 && measurements[idIndex].type !== 'Boolean') {
-                            measurements[idIndex].data = 'N/A';
+                this.exportDataService.getLastValues(requestPayload).subscribe(pairs => {
+                    measurements.forEach((_, i) => {
+                        measurements[i].data = pairs[i].value;
+                        if (measurements[i].data == null && measurements[i].data !== 0 && measurements[i].type !== 'Boolean') {
+                            measurements[i].data = 'N/A';
                             /* Act like a String if no value found, prevents piping.
                              * Also remove unit because 'N/A %' is weird.
                              * This doesn't change the actual configuration,
                              * because the widget is never written to the dashboard service
                              */
-                            measurements[idIndex].unit = '';
-                            measurements[idIndex].type = 'String';
+                            measurements[i].unit = '';
+                            measurements[i].type = 'String';
                         }
-                        if (measurements[idIndex].type === 'Boolean' && measurements[idIndex].data == null) {
-                            measurements[idIndex].data = 'False';
+                        if (measurements[i].type === 'Boolean' && measurements[i].data == null) {
+                            measurements[i].data = 'False';
                         }
                     });
                     observer.next(widget);
