@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {NestedTreeControl} from '@angular/cdk/tree';
+import {MatTreeNestedDataSource} from '@angular/material/tree';
+
 export interface DeviceTypeModel {
     id: string;
     name: string;
@@ -55,11 +58,15 @@ export interface DeviceTypeContentModel {
     name?: string;
 }
 
+export interface DeviceTypeContentTreeModel extends DeviceTypeContentModel {
+    dataSource: MatTreeNestedDataSource<DeviceTypeContentVariableModel>;
+    tree: NestedTreeControl<DeviceTypeContentVariableModel>;
+}
+
 export interface DeviceTypeContentVariableModel {
     id?: string;
     name?: string;
     type?: string;
-    rdf_type: string;
     characteristic_id?: string;
     value?: string | boolean | number;
     sub_content_variables?: DeviceTypeContentVariableModel[];
@@ -70,7 +77,7 @@ export interface DeviceTypeContentVariableModel {
 export interface DeviceTypeConceptModel {
     id: string;
     name: string;
-    base_characteristic_id: string,
+    base_characteristic_id: string;
     characteristic_ids: string[];
 }
 

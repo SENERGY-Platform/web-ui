@@ -1,0 +1,76 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>Content Variable</h2>
+
+<mat-dialog-content>
+    <mat-radio-group [formControl]="typeOptionsControl">
+        <mat-radio-button value="primitive">primitive</mat-radio-button>
+        <mat-radio-button value="non-primitive">non-primitive</mat-radio-button>
+    </mat-radio-group>
+    <form [formGroup]="firstFormGroup" class="form">
+        <mat-form-field class="full-width" color="accent">
+            <input matInput placeholder="Id" formControlName="id">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
+            <input matInput placeholder="Name" formControlName="name" required>
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType()">
+            <mat-select placeholder="Type"
+                        formControlName="type" required>
+                <mat-option *ngFor="let primitive of primitiveTypes"
+                            [value]="primitive.type">
+                    {{primitive.typeShort}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent" *ngIf="!isPrimitiveType()">
+            <mat-select placeholder="Type"
+                        formControlName="type" required>
+                <mat-option *ngFor="let nonPrimitive of nonPrimitiveTypes"
+                            [value]="nonPrimitive.type">
+                    {{nonPrimitive.typeShort}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType()">
+            <mat-label>Characteristic</mat-label>
+            <mat-select formControlName="characteristic_id">
+                <mat-option>-- None --</mat-option>
+                <mat-option [value]="timeStampCharacteristicId">timestamp</mat-option>
+                <mat-optgroup *ngFor="let concept of concepts" [label]="concept.name">
+                    <mat-option *ngFor="let characteristic of concept.characteristics" [value]="characteristic.id">
+                        {{characteristic.name}}
+                    </mat-option>
+                </mat-optgroup>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType()">
+            <input matInput placeholder="Serialization Options" formControlName="serialization_options">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent"*ngIf="isPrimitiveType()">
+            <input matInput placeholder="Unit reference" formControlName="unit_reference">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType()">
+            <input matInput placeholder="Value" formControlName="value">
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button class="mat-raised-button color-accent" (click)="close()">Close</button>
+    <button class="mat-raised-button mat-accent" [disabled]="firstFormGroup.invalid" (click)="save()">Save</button>
+</mat-dialog-actions>

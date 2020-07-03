@@ -17,7 +17,7 @@
 import {Component, OnInit} from '@angular/core';
 import {
     DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
-    DeviceTypeContentModel, DeviceTypeContentVariableModel,
+    DeviceTypeContentModel, DeviceTypeContentTreeModel, DeviceTypeContentVariableModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel, DeviceTypeFunctionType,
     DeviceTypeModel,
@@ -39,6 +39,9 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {contentVariableValidator} from './content-variable.validator';
 import {forkJoin, Observable} from 'rxjs';
 import {DeviceTypeHelperService} from './shared/device-type-helper.service';
+import {NestedTreeControl} from '@angular/cdk/tree';
+import {MatTreeNestedDataSource} from '@angular/material/tree';
+import {DeviceTypesContentVariableDialogComponent} from './dialogs/device-types-content-variable-dialog.component';
 
 const controllingIndex = 0;
 const measuringIndex = 1;
@@ -81,23 +84,26 @@ export class DeviceTypesComponent implements OnInit {
         this.loadData();
     }
 
+    hasChild = (_: number, node: DeviceTypeContentVariableModel) => !!node.sub_content_variables;
+
     close(): void {
     }
 
     save(): void {
+        console.log(this.secondFormGroup);
 
-        this.cleanUpServices();
-
-        const newDeviceType: DeviceTypeModel = {
-            id: this.firstFormGroup.getRawValue().id, // use getRawValue because control is disabled
-            name: this.firstFormGroup.value.name,
-            description: this.firstFormGroup.value.description,
-            image: this.firstFormGroup.value.image,
-            services: this.secondFormGroup.getRawValue().services,
-            device_class: this.firstFormGroup.value.device_class,
-        };
-
-        this.saveDeviceType(newDeviceType);
+        // this.cleanUpServices();
+        //
+        // const newDeviceType: DeviceTypeModel = {
+        //     id: this.firstFormGroup.getRawValue().id, // use getRawValue because control is disabled
+        //     name: this.firstFormGroup.value.name,
+        //     description: this.firstFormGroup.value.description,
+        //     image: this.firstFormGroup.value.image,
+        //     services: this.secondFormGroup.getRawValue().services,
+        //     device_class: this.firstFormGroup.value.device_class,
+        // };
+        //
+        // this.saveDeviceType(newDeviceType);
 
     }
 
@@ -115,6 +121,58 @@ export class DeviceTypesComponent implements OnInit {
 
             formGroup.controls['functions'].setValue([]);
         });
+    }
+
+    addContentVariable(functions: DeviceTypeFunctionModel[], inOut: DeviceTypeContentTreeModel): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            contentVariable: {} as DeviceTypeContentVariableModel,
+            functions: functions
+        };
+        this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
+            (resp: DeviceTypeContentVariableModel | undefined) => {
+                if (resp) {
+                    console.log(resp);
+                    // inOut.dataSource.data = [resp];
+                    if (inOut.dataSource.data.length === 0) {
+                        inOut.dataSource.data = [resp];
+
+                    } else {
+                        inOut.dataSource.data.push(resp);
+                        // TODO: rerender???
+                        // inOut.dataSource.data = inOut.dataSource.data.slice();
+                    }
+                }
+            });
+    }
+
+    editContent(node: DeviceTypeContentVariableModel, functions: DeviceTypeFunctionModel[], inOut: DeviceTypeContentTreeModel): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            contentVariable: node,
+            functions: functions
+        };
+        this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
+            (resp: DeviceTypeContentVariableModel | undefined) => {
+                if (resp) {
+                    console.log(resp);
+                    console.log(inOut.dataSource);
+                    console.log(typeof node);
+                    console.log(node);
+                    // node = resp;
+                    // inOut.dataSource.collapseAll();
+                    // if (inOut.dataSource.data[0]) {
+                    //     const x = this.inputOutputArray(serviceFormGroup, formControlName);
+                    //     console.log(x);
+                    //     node.name = 'xxxx';
+                    //     // @ts-ignore
+                    //     // inOut.dataSource.data[0].sub_content_variables[0].name = 'asdsad';
+                    // }
+                    // inOut.dataSource.data[0].name = 'change';
+                }
+            });
     }
 
     getErrorMessage(field: any): string {
@@ -265,7 +323,7 @@ export class DeviceTypesComponent implements OnInit {
         return this.getServiceFormControl(serviceFormGroup, 'aspects').value;
     }
 
-    inputOutputArray(serviceFormGroup: AbstractControl, formControlName: string): DeviceTypeContentModel[] {
+    inputOutputArray(serviceFormGroup: AbstractControl, formControlName: string): DeviceTypeContentTreeModel[] {
         return this.getServiceFormArray(serviceFormGroup, formControlName).value;
     }
 
@@ -428,6 +486,10 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private createContentGroup(content: DeviceTypeContentModel, protocolSegment: DeviceTypeProtocolSegmentModel): FormGroup {
+        const dataSource = new MatTreeNestedDataSource<DeviceTypeContentVariableModel>();
+        if (content.content_variable) {
+            dataSource.data = [content.content_variable];
+        }
         return this._formBuilder.group({
             id: [content.id],
             name: [protocolSegment.name],
@@ -436,6 +498,8 @@ export class DeviceTypesComponent implements OnInit {
             content_variable: content.content_variable ? this.createContentVariableGroup(content.content_variable) : '',
             protocol_segment_id: [protocolSegment.id],
             show: [content.protocol_segment_id ? true : false],
+            dataSource: dataSource,
+            tree: new NestedTreeControl<DeviceTypeContentVariableModel>(node => node.sub_content_variables),
         });
     }
 
@@ -647,6 +711,7 @@ export class DeviceTypesComponent implements OnInit {
             }
         }
     }
+
     get services(): FormArray {
         return this.secondFormGroup.get('services') as FormArray;
     }
