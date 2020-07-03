@@ -25,6 +25,8 @@ import {MatRadioModule} from '@angular/material/radio';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatSelectModule} from '@angular/material/select';
 import {MatInputModule} from '@angular/material/input';
+import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
+import {of} from 'rxjs';
 
 fdescribe('DeviceTypesContentVariableDialog', () => {
     let component: DeviceTypesContentVariableDialogComponent;
@@ -33,7 +35,7 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
     const matDialogRefSpy: Spy<MatDialogRef<DeviceTypesContentVariableDialogComponent>> = createSpyFromClass<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
     const conceptServiceSpy: Spy<ConceptsService> = createSpyFromClass(ConceptsService);
 
-    function init(contentVariable: DeviceTypeContentVariableModel) {
+    function init(contentVariable: DeviceTypeContentVariableModel, functions: DeviceTypeFunctionModel[]) {
         TestBed.configureTestingModule({
             imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatSelectModule, MatInputModule],
             declarations: [
@@ -44,7 +46,7 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
                 {provide: ConceptsService, useValue: conceptServiceSpy},
                 {
                     provide: MAT_DIALOG_DATA,
-                    useValue: {contentVariable: contentVariable, functions: [] as DeviceTypeFunctionModel[]}
+                    useValue: {contentVariable: contentVariable, functions: functions}
                 },
             ]
         }).compileComponents();
@@ -58,12 +60,12 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
 
     it('should create the app', async(() => {
         const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
-        init(contentVariable);
+        init(contentVariable, []);
         expect(component).toBeTruthy();
     }));
 
     it('create primitive Type', async(() => {
-        init({} as DeviceTypeContentVariableModel);
+        init({} as DeviceTypeContentVariableModel, []);
         expect(component.isPrimitiveType()).toBe(true);
         expect(component.firstFormGroup.invalid).toBe(true);
         component.firstFormGroup.patchValue({
@@ -101,7 +103,7 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
             unit_reference: 'unit_reference',
             value: 'value',
         } as DeviceTypeContentVariableModel;
-        init(contentVariable);
+        init(contentVariable, []);
         expect(component.typeOptionsControl.disabled).toBe(true);
         expect(component.firstFormGroup.getRawValue()).toEqual({
             id: 'id1',
@@ -117,7 +119,7 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
 
     it('create non-primitive Type', async(() => {
         const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
-        init(contentVariable);
+        init(contentVariable, []);
         component.typeOptionsControl.setValue('non-primitive');
         expect(component.isPrimitiveType()).toBe(false);
         expect(component.firstFormGroup.invalid).toBe(true);
@@ -149,7 +151,7 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
                 type: 'https://schema.org/Float'
             }] as DeviceTypeContentVariableModel[],
         } as DeviceTypeContentVariableModel;
-        init(contentVariable);
+        init(contentVariable, []);
         expect(component.typeOptionsControl.disabled).toBe(true);
         expect(component.firstFormGroup.getRawValue()).toEqual({
             id: 'id2',
@@ -167,6 +169,27 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
             ],
             value: null,
         });
+    }));
+
+    it('init concepts and characteristics', async(() => {
+        conceptServiceSpy.getConceptWithCharacteristics.and.returnValue(of({
+            id: '1',
+        } as  ConceptsCharacteristicsModel));
+        const functions: DeviceTypeFunctionModel[] = [{
+            id: 'func_id_1',
+            name: 'without_concept_id',
+            rdf_type: 'rdf_type',
+            concept_id: ''
+        },
+            {
+                id: 'func_id_2',
+                name: 'with_concept_id',
+                rdf_type: 'rdf_type',
+                concept_id: 'concept_id_1'
+            }];
+        init({} as DeviceTypeContentVariableModel, functions);
+        expect(component.functions).toEqual(functions);
+        expect(component.concepts.length).toBe(1);
     }));
 
 
