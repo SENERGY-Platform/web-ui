@@ -31,7 +31,7 @@ export interface MultiValueMeasurement {
     column: ExportValueModel;
     unit: string;
     math?: string;
-    data?: (number | string);
+    data?: (number | string | boolean);
     lowerBoundary?: number;
     upperBoundary?: number;
     warning_enabled?: boolean;

@@ -18,20 +18,14 @@ import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
 import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
-import {DeviceStatusService} from './shared/device-status.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {MatTable} from '@angular/material/table';
 import {DeviceStatusElementModel} from './shared/device-status-properties.model';
 import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
-import {MultiValueService} from '../multi-value/shared/multi-value.service';
-import {ChartsExportModel} from '../charts/export/shared/charts-export.model';
-import {environment} from '../../../environments/environment';
-import {
-    ChartsExportRequestPayloadModel,
-    ChartsExportRequestPayloadQueriesModel
-} from '../charts/export/shared/charts-export-request-payload.model';
-import {HttpClient} from '@angular/common/http';
+import {DeviceStatusDialogService} from './shared/device-status-dialog.service';
+import {LastValuesRequestElementModel} from '../shared/export-data.model';
+import {ExportDataService} from '../shared/export-data.service';
 
 @Component({
     selector: 'senergy-device-status',
@@ -45,7 +39,6 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     dataReady = false;
     interval = 0;
     items: { name: string, status: (string | number) }[] = [];
-    // orderedValues: DeviceStatusMeasurement[] = [];
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -54,16 +47,14 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
 
     constructor(private iconRegistry: MatIconRegistry,
                 private sanitizer: DomSanitizer,
-                private deviceStatusService: DeviceStatusService,
+                private deviceStatusDialogService: DeviceStatusDialogService,
                 private dashboardService: DashboardService,
                 private deploymentsService: DeploymentsService,
-                private multiValueService: MultiValueService,
-                private http: HttpClient) {
+                private exportDataService: ExportDataService) {
     }
 
     ngOnInit() {
         this.update();
-        this.registerIcons();
         this.setConfigured();
     }
 
@@ -72,23 +63,9 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
         this.destroy.unsubscribe();
     }
 
-    registerIcons() {
-        // this.iconRegistry.addSvgIcon('online', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/connect_white.svg'));
-    }
-
     edit() {
-        this.deviceStatusService.openEditDialog(this.dashboardId, this.widget.id);
+        this.deviceStatusDialogService.openEditDialog(this.dashboardId, this.widget.id);
     }
-
-    // checkWarning(m: DeviceStatusMeasurement): boolean {
-    //     // if (m.warning_enabled && m.data && m.lowerBoundary && (m.data < m.lowerBoundary)) {
-    //     //     return true;
-    //     // }
-    //     // if (m.warning_enabled && m.data && m.upperBoundary && (m.data > m. upperBoundary)) {
-    //     //     return true;
-    //     // }
-    //     return false;
-    // }
 
     private update() {
         this.setConfigured();
@@ -111,44 +88,20 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                         }, refreshTimeInMs);
                     }
 
-                    const queries: ChartsExportRequestPayloadQueriesModel[] = [];
+                    const queries: LastValuesRequestElementModel[] = [];
                     elements.forEach((element: DeviceStatusElementModel) => {
                         if (element.exportId && element.exportValues) {
-                            queries.push({id: element.exportId, fields: [{name: element.exportValues.name, math: ''}]});
+                            queries.push({measurement: element.exportId, columnName: element.exportValues.name});
                         }
                     });
 
-                    const requestPayload: ChartsExportRequestPayloadModel = {
-                        time: {
-                            last: '500000w', // arbitrary high number
-                            end: undefined,
-                            start: undefined
-                        },
-                        group: {
-                            type: undefined,
-                            time: ''
-                        },
-                        queries: queries,
-                        limit: 1
-                    };
-
-                    this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
-                        this.items = [];
-                        const columns = model.results[0].series[0].columns;
-                        const values = model.results[0].series[0].values;
-
-                        elements.forEach((element: DeviceStatusElementModel) => {
-                            const columnIndex = columns.findIndex(col => {
-                                if (element.exportValues) {
-                                    return col === (element.exportId + '.' + element.exportValues.name);
-                                }
-                                return -1;
-                            });
-                            values.forEach(val => {
-                                if (val[columnIndex] !== null) {
-                                    this.items.push({name: <string>element.name, status: val[columnIndex]});
-                                }
-                            });
+                    this.exportDataService.getLastValues(queries).subscribe(res => {
+                        res.forEach((pair, index) => {
+                            let v = pair.value;
+                            if (v === true || v === false) {
+                                v = v as unknown as string;
+                            }
+                            this.items.push({name: <string>elements[index].name, status: v});
                         });
                         this.dataReady = true;
                     });
@@ -168,62 +121,4 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
         this.configured = true;
     }
 
-    // private orderValues(sortId: number) {
-    //     // const m = this.widget.properties.multivaluemeasurements || [];
-    //     // switch (sortId) {
-    //     //     case MultiValueOrderEnum.AlphabeticallyAsc:
-    //     //         m.sort((a, b) => {
-    //     //             return a.name.charCodeAt(0) - b.name.charCodeAt(0);
-    //     //         });
-    //     //         break;
-    //     //     case MultiValueOrderEnum.AlphabeticallyDesc:
-    //     //         m.sort((a, b) => {
-    //     //             return b.name.charCodeAt(0) - a.name.charCodeAt(0);
-    //     //         });
-    //     //         break;
-    //     //     case MultiValueOrderEnum.ValueAsc:
-    //     //         m.sort((a, b) => {
-    //     //             return this.parseNumber(a, true) - this.parseNumber(b, true);
-    //     //         });
-    //     //         break;
-    //     //     case MultiValueOrderEnum.ValueDesc:
-    //     //         m.sort((a, b) => {
-    //     //             return this.parseNumber(b, false) - this.parseNumber(a, false);
-    //     //         });
-    //     //         break;
-    //     // }
-    //     // this.orderedValues = m;
-    //     // if (this.table) {
-    //     //     this.table.renderRows();
-    //     // }
-    // }
-
-    // private parseNumber(m: DeviceStatusMeasurement, max: boolean): number {
-    //     if (m.data == null || m.type === 'String') {
-    //         if (max) {
-    //             return Number.MAX_VALUE;
-    //         }
-    //         return  Number.MIN_VALUE;
-    //     }
-    //     return Number(m.data);
-    // }
-
-    // matSortChange(event: Sort) {
-    //     switch (event.active) {
-    //         case 'value':
-    //             if (event.direction === 'asc') {
-    //                 this.orderValues(MultiValueOrderEnum.ValueAsc);
-    //             } else {
-    //                 this.orderValues(MultiValueOrderEnum.ValueDesc);
-    //             }
-    //             break;
-    //         case 'name':
-    //             if (event.direction === 'asc') {
-    //                 this.orderValues(MultiValueOrderEnum.AlphabeticallyAsc);
-    //             } else {
-    //                 this.orderValues(MultiValueOrderEnum.AlphabeticallyDesc);
-    //             }
-    //             break;
-    //     }
-    // }
 }

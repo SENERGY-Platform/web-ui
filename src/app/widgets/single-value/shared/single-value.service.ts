@@ -21,12 +21,9 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 import {SingleValueEditDialogComponent} from '../dialog/single-value-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {environment} from '../../../../environments/environment';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {HttpClient} from '@angular/common/http';
-import {ChartsExportModel} from '../../charts/export/shared/charts-export.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ChartsExportRequestPayloadModel} from '../../charts/export/shared/charts-export-request-payload.model';
+import {ExportDataService} from '../../shared/export-data.service';
 
 @Injectable({
     providedIn: 'root'
@@ -36,7 +33,7 @@ export class SingleValueService {
     constructor(private dialog: MatDialog,
                 private dashboardService: DashboardService,
                 private errorHandlerService: ErrorHandlerService,
-                private http: HttpClient) {
+                private exportDataService: ExportDataService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -60,29 +57,16 @@ export class SingleValueService {
             const m = widget.properties.measurement;
             const name = widget.properties.vAxis ? widget.properties.vAxis.Name : '';
             if (m) {
-                const requestPayload: ChartsExportRequestPayloadModel = {
-                    time: {
-                        last: '500000w', // arbitrary high number
-                        end: undefined,
-                        start: undefined
-                    },
-                    group: {
-                        type: undefined,
-                        time: ''
-                    },
-                    queries: [{id: m.id, fields: [{name: name, math: widget.properties.math || ''}]}],
-                    limit: 1
-                };
-
-                this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
-                    const values = model.results[0].series[0].values;
+                this.exportDataService.getLastValues(
+                    [{measurement: m.id, columnName: name, math: widget.properties.math}]
+                ).subscribe(pairs => {
                     let value: any = '';
                     let type = widget.properties.type || '';
-                    if (values.length === 0) {
+                    if (pairs.length === 0) {
                         type = 'String';
                         value = 'N/A';
                     } else {
-                        value = values[0][1];
+                        value = pairs[0].value;
                     }
                     const svm: SingleValueModel = {
                         type: type,
