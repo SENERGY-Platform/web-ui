@@ -28,7 +28,7 @@ import {MatInputModule} from '@angular/material/input';
 import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
 import {of} from 'rxjs';
 
-fdescribe('DeviceTypesContentVariableDialog', () => {
+describe('DeviceTypesContentVariableDialog', () => {
     let component: DeviceTypesContentVariableDialogComponent;
     let fixture: ComponentFixture<DeviceTypesContentVariableDialogComponent>;
 
