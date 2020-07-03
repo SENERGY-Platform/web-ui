@@ -86,12 +86,12 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         if (operator.name !== undefined && operator.inputs !== undefined && operator.outputs !== undefined
             && operator.image !== undefined && operator.config_values !== undefined && operator._id !== undefined) {
             switch (operator.deploymentType) {
-                case 'cloud':
-                    this.diagram.newCloudNode(
-                        operator.name, operator.image, operator.inputs, operator.outputs, operator.config_values, operator._id);
-                    break;
                 case 'local':
                     this.diagram.newLocalNode(
+                        operator.name, operator.image, operator.inputs, operator.outputs, operator.config_values, operator._id);
+                    break;
+                default:
+                    this.diagram.newCloudNode(
                         operator.name, operator.image, operator.inputs, operator.outputs, operator.config_values, operator._id);
                     break;
             }
