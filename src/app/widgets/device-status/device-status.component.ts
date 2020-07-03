@@ -24,7 +24,7 @@ import {MatTable} from '@angular/material/table';
 import {DeviceStatusElementModel} from './shared/device-status-properties.model';
 import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
 import {DeviceStatusDialogService} from './shared/device-status-dialog.service';
-import {MeasurementColumnNamePairModel} from '../shared/export-data.model';
+import {LastValuesRequestElementModel} from '../shared/export-data.model';
 import {ExportDataService} from '../shared/export-data.service';
 
 @Component({
@@ -88,7 +88,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                         }, refreshTimeInMs);
                     }
 
-                    const queries: MeasurementColumnNamePairModel[] = [];
+                    const queries: LastValuesRequestElementModel[] = [];
                     elements.forEach((element: DeviceStatusElementModel) => {
                         if (element.exportId && element.exportValues) {
                             queries.push({measurement: element.exportId, columnName: element.exportValues.name});

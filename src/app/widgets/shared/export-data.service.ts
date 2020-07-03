@@ -17,7 +17,7 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
-import {MeasurementColumnNamePairModel, TimeValuePairModel} from './export-data.model';
+import {LastValuesRequestElementModel, TimeValuePairModel} from './export-data.model';
 import {HttpClient} from '@angular/common/http';
 
 @Injectable({
@@ -28,7 +28,7 @@ export class ExportDataService {
     constructor(private http: HttpClient) {
     }
 
-    getLastValues(measuremetColumnPairs: MeasurementColumnNamePairModel[]): Observable<TimeValuePairModel[]> {
+    getLastValues(measuremetColumnPairs: LastValuesRequestElementModel[]): Observable<TimeValuePairModel[]> {
         return this.http.post<TimeValuePairModel[]>(environment.influxAPIURL + '/v2/last-values', measuremetColumnPairs);
     }
 }

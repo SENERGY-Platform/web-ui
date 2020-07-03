@@ -20,7 +20,8 @@ export interface TimeValuePairModel {
     value: string | number | boolean;
 }
 
-export interface MeasurementColumnNamePairModel {
+export interface LastValuesRequestElementModel {
     measurement: string;
     columnName: string;
+    math?: string;
 }
