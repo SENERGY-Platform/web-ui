@@ -18,15 +18,11 @@ import {Injectable} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {
-    DeviceStatusElementModel,
-    MeasurementColumnNamePairModel,
-    TimeValuePairModel
+    DeviceStatusElementModel
 } from './device-status-properties.model';
 import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {Observable} from 'rxjs';
-import {environment} from '../../../../environments/environment';
 import {HttpClient} from '@angular/common/http';
 
 @Injectable({
@@ -52,10 +48,6 @@ export class DeviceStatusService {
                 }
             });
         }
-    }
-
-    getLastValues(measuremetColumnPairs: MeasurementColumnNamePairModel[]): Observable<TimeValuePairModel[]> {
-        return this.http.post<TimeValuePairModel[]>(environment.influxAPIURL + '/v2/last-values', measuremetColumnPairs);
     }
 }
 

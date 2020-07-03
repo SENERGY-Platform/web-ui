@@ -21,10 +21,11 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {MatTable} from '@angular/material/table';
-import {DeviceStatusElementModel, MeasurementColumnNamePairModel} from './shared/device-status-properties.model';
+import {DeviceStatusElementModel} from './shared/device-status-properties.model';
 import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
 import {DeviceStatusDialogService} from './shared/device-status-dialog.service';
-import {DeviceStatusService} from './shared/device-status.service';
+import {MeasurementColumnNamePairModel} from '../shared/export-data.model';
+import {ExportDataService} from '../shared/export-data.service';
 
 @Component({
     selector: 'senergy-device-status',
@@ -49,7 +50,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                 private deviceStatusDialogService: DeviceStatusDialogService,
                 private dashboardService: DashboardService,
                 private deploymentsService: DeploymentsService,
-                private deviceStatusService: DeviceStatusService) {
+                private exportDataService: ExportDataService) {
     }
 
     ngOnInit() {
@@ -94,7 +95,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                         }
                     });
 
-                    this.deviceStatusService.getLastValues(queries).subscribe(res => {
+                    this.exportDataService.getLastValues(queries).subscribe(res => {
                         res.forEach((pair, index) => {
                             let v = pair.value;
                             if (v === true || v === false) {
