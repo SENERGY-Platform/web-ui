@@ -28,7 +28,7 @@ export class ExportDataService {
     constructor(private http: HttpClient) {
     }
 
-    getLastValues(measuremetColumnPairs: LastValuesRequestElementModel[]): Observable<TimeValuePairModel[]> {
-        return this.http.post<TimeValuePairModel[]>(environment.influxAPIURL + '/v2/last-values', measuremetColumnPairs);
+    getLastValues(requestElements: LastValuesRequestElementModel[]): Observable<TimeValuePairModel[]> {
+        return this.http.post<TimeValuePairModel[]>(environment.influxAPIURL + '/v2/last-values', requestElements);
     }
 }
