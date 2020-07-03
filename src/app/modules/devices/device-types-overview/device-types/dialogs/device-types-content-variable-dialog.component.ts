@@ -31,7 +31,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     contentVariable: DeviceTypeContentVariableModel;
     functions: DeviceTypeFunctionModel[];
     firstFormGroup!: FormGroup;
-    typeOptionsControl: FormControl = new FormControl('primitive');
+    typeOptionsControl: FormControl = new FormControl();
     primitiveTypes: { type: string, typeShort: string }[] = [];
     nonPrimitiveTypes: { type: string, typeShort: string }[] = [];
     concepts: ConceptsCharacteristicsModel[] = [];
@@ -61,17 +61,18 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     }
 
     isPrimitiveType(): boolean {
-        return this.typeOption === 'primitive';
+        return this.typeOptionsControl.value === 'primitive';
     }
 
     private initTypeOptionControl() {
         if (this.contentVariable.type) {
             this.typeOptionsControl.disable();
         }
-        if (this.isPrimitiveType()) {
-            this.typeOptionsControl.setValue('primitive');
-        } else {
+
+        if (this.nonPrimitiveTypes.find(x => x.type === this.contentVariable.type)) {
             this.typeOptionsControl.setValue('non-primitive');
+        } else {
+            this.typeOptionsControl.setValue('primitive');
         }
 
         this.typeOptionsControl.valueChanges.subscribe(() => {
@@ -119,9 +120,5 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
         this.nonPrimitiveTypes.push({type: 'https://schema.org/StructuredValue', typeShort: 'Structure'});
         this.nonPrimitiveTypes.push({type: 'https://schema.org/ItemList', typeShort: 'List'});
-    }
-
-    get typeOption(): string {
-        return this.typeOptionsControl.value;
     }
 }

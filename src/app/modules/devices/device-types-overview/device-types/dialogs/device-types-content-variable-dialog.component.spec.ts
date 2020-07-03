@@ -67,6 +67,7 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
     it('create primitive Type', async(() => {
         init({} as DeviceTypeContentVariableModel, []);
         expect(component.isPrimitiveType()).toBe(true);
+        expect(component.typeOptionsControl.value).toBe('primitive');
         expect(component.firstFormGroup.invalid).toBe(true);
         component.firstFormGroup.patchValue({
             name: 'testName',
@@ -104,6 +105,7 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
             value: 'value',
         } as DeviceTypeContentVariableModel;
         init(contentVariable, []);
+        expect(component.typeOptionsControl.value).toBe('primitive');
         expect(component.typeOptionsControl.disabled).toBe(true);
         expect(component.firstFormGroup.getRawValue()).toEqual({
             id: 'id1',
@@ -121,6 +123,7 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
         const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
         init(contentVariable, []);
         component.typeOptionsControl.setValue('non-primitive');
+        expect(component.typeOptionsControl.value).toBe('non-primitive');
         expect(component.isPrimitiveType()).toBe(false);
         expect(component.firstFormGroup.invalid).toBe(true);
         component.firstFormGroup.patchValue({
@@ -152,6 +155,7 @@ fdescribe('DeviceTypesContentVariableDialog', () => {
             }] as DeviceTypeContentVariableModel[],
         } as DeviceTypeContentVariableModel;
         init(contentVariable, []);
+        expect(component.typeOptionsControl.value).toBe('non-primitive');
         expect(component.typeOptionsControl.disabled).toBe(true);
         expect(component.firstFormGroup.getRawValue()).toEqual({
             id: 'id2',
