@@ -45,41 +45,41 @@ export class DeviceTypeHelperService {
     }
 
 
-    addTreeData(oldData: DeviceTypeContentVariableModel[], newData: DeviceTypeContentVariableModel, level: number): DeviceTypeContentVariableModel[] {
+    addTreeData(oldData: DeviceTypeContentVariableModel[], newData: DeviceTypeContentVariableModel, indices: number[]): DeviceTypeContentVariableModel[] {
         const dataDeepCopy: DeviceTypeContentVariableModel[] = JSON.parse(JSON.stringify(oldData));
-        this.manipulateElement(dataDeepCopy, newData, 'add', level, -1);
+        this.manipulateElement(dataDeepCopy, newData, 'add', indices);
         return dataDeepCopy;
     }
 
-    deleteTreeData(oldData: DeviceTypeContentVariableModel[], level: number, index: number): DeviceTypeContentVariableModel[] {
+    deleteTreeData(oldData: DeviceTypeContentVariableModel[], indices: number[]): DeviceTypeContentVariableModel[] {
         const dataDeepCopy: DeviceTypeContentVariableModel[] = JSON.parse(JSON.stringify(oldData));
-        this.manipulateElement(dataDeepCopy, {} as DeviceTypeContentVariableModel, 'delete', level, index);
+        this.manipulateElement(dataDeepCopy, {} as DeviceTypeContentVariableModel, 'delete', indices);
         return dataDeepCopy;
     }
 
-    updateTreeData(oldData: DeviceTypeContentVariableModel[], newData: DeviceTypeContentVariableModel, level: number, index: number): DeviceTypeContentVariableModel[] {
+    updateTreeData(oldData: DeviceTypeContentVariableModel[], newData: DeviceTypeContentVariableModel, indices: number[]): DeviceTypeContentVariableModel[] {
         const dataDeepCopy: DeviceTypeContentVariableModel[] = JSON.parse(JSON.stringify(oldData));
-        this.manipulateElement(dataDeepCopy, newData, 'update', level, index);
+        this.manipulateElement(dataDeepCopy, newData, 'update', indices);
         return dataDeepCopy;
     }
 
-    private manipulateElement(element: DeviceTypeContentVariableModel[], newData: DeviceTypeContentVariableModel, option: string, level: number, index: number): void {
-        if (level === 0) {
+    private manipulateElement(element: DeviceTypeContentVariableModel[], newData: DeviceTypeContentVariableModel, option: string, indices: number[]): void {
+        if (indices.length === 1) {
             switch (option) {
                 case 'add': {
                     element.push(newData || {} as DeviceTypeContentVariableModel);
                     break;
                 }
                 case 'update': {
-                    element[index] = newData;
+                    element[indices[0]] = newData;
                     break;
                 }
                 case 'delete': {
-                    element.splice(index, 1);
+                    element.splice(indices[0], 1);
                 }
             }
         } else {
-            this.manipulateElement(element[0].sub_content_variables || [], newData, option, level - 1, index);
+            this.manipulateElement(element[indices[0]].sub_content_variables || [], newData, option, indices.slice(1));
         }
 
     }

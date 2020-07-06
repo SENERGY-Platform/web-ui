@@ -3,13 +3,21 @@ import {TestBed} from '@angular/core/testing';
 import {DeviceTypeHelperService} from './device-type-helper.service';
 import {DeviceTypeContentVariableModel} from '../../shared/device-type.model';
 
-describe('DeviceTypeHelperService', () => {
+fdescribe('DeviceTypeHelperService', () => {
     let service: DeviceTypeHelperService;
     const struct1 = getStruct('struct1');
     const struct2 = getStruct('struct2');
     const struct3 = getStruct('struct3');
+    const struct4 = getStruct('struct4');
+    const struct5 = getStruct('struct5');
     const struct1WithSubStruct2: DeviceTypeContentVariableModel = JSON.parse(JSON.stringify(struct1));
     struct1WithSubStruct2.sub_content_variables = [struct2];
+    const struct1WithTwoSubStructs: DeviceTypeContentVariableModel = JSON.parse(JSON.stringify(struct1));
+    struct1WithTwoSubStructs.sub_content_variables = [struct2, struct3];
+    const struct1WithTwoSubStructsWithSub: DeviceTypeContentVariableModel = JSON.parse(JSON.stringify(struct1WithTwoSubStructs));
+    if (struct1WithTwoSubStructsWithSub.sub_content_variables !== undefined) {
+        struct1WithTwoSubStructsWithSub.sub_content_variables[1].sub_content_variables = [struct4];
+    }
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
@@ -39,11 +47,11 @@ describe('DeviceTypeHelperService', () => {
         expect(service.checkIfContentExists('x', 'x')).toBe(true);
     });
 
-    fit('test updateTreeData add', () => {
-        expect(service.addTreeData([], struct1, 0)).toEqual([struct1]);
-        expect(service.addTreeData([struct1], struct2, 0)).toEqual([struct1, struct2]);
-        expect(service.addTreeData([struct1], struct2, 1)).toEqual([struct1WithSubStruct2]);
-        expect(service.addTreeData([struct1WithSubStruct2], struct3, 2)).toEqual([({
+    it('test updateTreeData add', () => {
+        expect(service.addTreeData([], struct1, [0])).toEqual([struct1]);
+        expect(service.addTreeData([struct1], struct2, [0])).toEqual([struct1, struct2]);
+        expect(service.addTreeData([struct1], struct2, [0, 0])).toEqual([struct1WithSubStruct2]);
+        expect(service.addTreeData([struct1WithSubStruct2], struct3, [0, 0, 0])).toEqual([({
             name: 'struct1',
             type: 'struct',
             sub_content_variables: [({
@@ -54,10 +62,10 @@ describe('DeviceTypeHelperService', () => {
         } as DeviceTypeContentVariableModel)]);
     });
 
-    fit('test updateTreeData update', () => {
-        expect(service.updateTreeData([struct1], struct2, 0, 0)).toEqual([struct2]);
-        expect(service.updateTreeData([struct1, struct2], struct3, 0, 1)).toEqual([struct1, struct3]);
-        expect(service.updateTreeData([struct1WithSubStruct2], struct3, 1, 0)).toEqual([({
+    it('test updateTreeData update', () => {
+        expect(service.updateTreeData([struct1], struct2, [0])).toEqual([struct2]);
+        expect(service.updateTreeData([struct1, struct2], struct3, [1])).toEqual([struct1, struct3]);
+        expect(service.updateTreeData([struct1WithSubStruct2], struct3, [0, 0])).toEqual([({
             name: 'struct1',
             type: 'struct',
             sub_content_variables: [({
@@ -66,12 +74,49 @@ describe('DeviceTypeHelperService', () => {
                 sub_content_variables: [] as DeviceTypeContentVariableModel[],
             } as DeviceTypeContentVariableModel)]
         } as DeviceTypeContentVariableModel)]);
+        console.log(service.updateTreeData([struct1WithTwoSubStructs], struct4, [0, 1]));
+        console.log(struct1WithTwoSubStructs);
+        expect(service.updateTreeData([struct1WithTwoSubStructs], struct4, [0, 1])).toEqual([({
+            name: 'struct1',
+            type: 'struct',
+            sub_content_variables: [({
+                name: 'struct2',
+                type: 'struct',
+                sub_content_variables: [] as DeviceTypeContentVariableModel[],
+            } as DeviceTypeContentVariableModel),
+                ({
+                    name: 'struct4',
+                    type: 'struct',
+                    sub_content_variables: [] as DeviceTypeContentVariableModel[],
+                } as DeviceTypeContentVariableModel),
+            ]
+        } as DeviceTypeContentVariableModel)]);
+        expect(service.updateTreeData([struct1WithTwoSubStructsWithSub], struct5, [0, 1, 0])).toEqual([({
+            name: 'struct1',
+            type: 'struct',
+            sub_content_variables: [({
+                name: 'struct2',
+                type: 'struct',
+                sub_content_variables: [] as DeviceTypeContentVariableModel[],
+            } as DeviceTypeContentVariableModel),
+                ({
+                    name: 'struct3',
+                    type: 'struct',
+                    sub_content_variables: [{
+                        name: 'struct5',
+                        type: 'struct',
+                        sub_content_variables: [] as DeviceTypeContentVariableModel[]
+                    }] as DeviceTypeContentVariableModel[],
+                } as DeviceTypeContentVariableModel),
+            ]
+        } as DeviceTypeContentVariableModel)]);
     });
 
-    fit('test updateTreeData delete', () => {
-        expect(service.deleteTreeData([struct1], 0, 0)).toEqual([]);
-        expect(service.deleteTreeData([struct1WithSubStruct2], 0, 0)).toEqual([]);
-        expect(service.deleteTreeData([struct1WithSubStruct2], 1, 0)).toEqual([struct1]);
+
+    it('test updateTreeData delete', () => {
+        expect(service.deleteTreeData([struct1], [0])).toEqual([]);
+        expect(service.deleteTreeData([struct1WithSubStruct2], [0])).toEqual([]);
+        expect(service.deleteTreeData([struct1WithSubStruct2], [0, 0])).toEqual([struct1]);
     });
 
     function getStruct(name: string): DeviceTypeContentVariableModel {
