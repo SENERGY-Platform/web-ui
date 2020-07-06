@@ -96,6 +96,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                     });
 
                     this.exportDataService.getLastValues(queries).subscribe(res => {
+                        this.items = [];
                         res.forEach((pair, index) => {
                             let v = pair.value;
                             if (v === true || v === false) {
