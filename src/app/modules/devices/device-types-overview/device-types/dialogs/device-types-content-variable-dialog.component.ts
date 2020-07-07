@@ -100,6 +100,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
     private initFormGroup() {
         this.firstFormGroup = this._formBuilder.group({
+                indices: [this.contentVariable.indices],
                 id: [{value: this.contentVariable.id || null, disabled: true}],
                 name: [this.contentVariable.name],
                 type: [this.contentVariable.type],

@@ -195,7 +195,7 @@
                                             </mat-form-field>
                                             <div>
                                                 <button mat-raised-button color="accent"
-                                                        (click)="addContentVariable(service.value.functions, inOut)">
+                                                        (click)="addContentVariable(service.value.functions, inOut, [])">
                                                     ADD ContentVariable
                                                 </button>
                                             </div>
@@ -235,7 +235,7 @@
                                                                 <button mat-icon-button>
                                                                     <mat-icon>delete_outline</mat-icon>
                                                                 </button>
-                                                                <button mat-icon-button>
+                                                                <button mat-icon-button (click)="addContentVariable(service.value.functions, inOut, node.indices)">
                                                                     <mat-icon>add</mat-icon>
                                                                 </button>
                                                             </div>

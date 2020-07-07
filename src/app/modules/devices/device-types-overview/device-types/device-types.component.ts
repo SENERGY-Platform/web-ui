@@ -123,7 +123,7 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    addContentVariable(functions: DeviceTypeFunctionModel[], inOut: DeviceTypeContentTreeModel): void {
+    addContentVariable(functions: DeviceTypeFunctionModel[], inOut: DeviceTypeContentTreeModel, indices: number[]): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
@@ -133,16 +133,9 @@ export class DeviceTypesComponent implements OnInit {
         this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
             (resp: DeviceTypeContentVariableModel | undefined) => {
                 if (resp) {
-                    console.log(resp);
-                    // inOut.dataSource.data = [resp];
-                    if (inOut.dataSource.data.length === 0) {
-                        inOut.dataSource.data = [resp];
-
-                    } else {
-                        inOut.dataSource.data.push(resp);
-                        // TODO: rerender???
-                        // inOut.dataSource.data = inOut.dataSource.data.slice();
-                    }
+                    inOut.dataSource.data = this.deviceTypeHelperService.addTreeData(inOut.dataSource.data, resp, indices);
+                    inOut.tree.dataNodes = inOut.dataSource.data;
+                    inOut.tree.expandAll();
                 }
             });
     }
@@ -157,20 +150,10 @@ export class DeviceTypesComponent implements OnInit {
         this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
             (resp: DeviceTypeContentVariableModel | undefined) => {
                 if (resp) {
-                    console.log(resp);
-                    console.log(inOut.dataSource);
-                    console.log(typeof node);
-                    console.log(node);
-                    // node = resp;
-                    // inOut.dataSource.collapseAll();
-                    // if (inOut.dataSource.data[0]) {
-                    //     const x = this.inputOutputArray(serviceFormGroup, formControlName);
-                    //     console.log(x);
-                    //     node.name = 'xxxx';
-                    //     // @ts-ignore
-                    //     // inOut.dataSource.data[0].sub_content_variables[0].name = 'asdsad';
-                    // }
-                    // inOut.dataSource.data[0].name = 'change';
+                    inOut.dataSource.data = this.deviceTypeHelperService.updateTreeData(inOut.dataSource.data, resp, resp.indices);
+                    inOut.tree.dataNodes = inOut.dataSource.data;
+                    inOut.tree.expandAll();
+
                 }
             });
     }
@@ -488,7 +471,7 @@ export class DeviceTypesComponent implements OnInit {
     private createContentGroup(content: DeviceTypeContentModel, protocolSegment: DeviceTypeProtocolSegmentModel): FormGroup {
         const dataSource = new MatTreeNestedDataSource<DeviceTypeContentVariableModel>();
         if (content.content_variable) {
-            dataSource.data = [content.content_variable];
+            dataSource.data = [this.createContentVariableGroup(content.content_variable).value];
         }
         return this._formBuilder.group({
             id: [content.id],
@@ -503,24 +486,27 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    private createContentVariableGroup(contentVariable: DeviceTypeContentVariableModel): FormGroup {
+    private createContentVariableGroup(contentVariable: DeviceTypeContentVariableModel, indices: number[] = [0]): FormGroup {
         return this._formBuilder.group({
+            indices: [indices],
             id: [contentVariable.id],
             name: [contentVariable.name],
             type: [contentVariable.type],
             characteristic_id: [contentVariable.characteristic_id],
             value: [contentVariable.value],
-            sub_content_variables: contentVariable.sub_content_variables ? this.createContentSubVariableArray(contentVariable.sub_content_variables) : null,
+            sub_content_variables: contentVariable.sub_content_variables ? this.createContentSubVariableArray(contentVariable.sub_content_variables, indices) : null,
             serialization_options: [contentVariable.serialization_options],
             unit_reference: [contentVariable.unit_reference],
         });
     }
 
-    private createContentSubVariableArray(subContentVariables: DeviceTypeContentVariableModel[]): FormArray {
+    private createContentSubVariableArray(subContentVariables: DeviceTypeContentVariableModel[], indicesIn: number[]): FormArray {
         const array: FormGroup[] = [];
 
-        subContentVariables.forEach((subContentVariable: DeviceTypeContentVariableModel) => {
-            array.push(this.createContentVariableGroup(subContentVariable));
+        subContentVariables.forEach((subContentVariable: DeviceTypeContentVariableModel, index: number) => {
+            const arrayTemp = indicesIn.slice();
+            arrayTemp.push(index);
+            array.push(this.createContentVariableGroup(subContentVariable, arrayTemp));
         });
 
         return this._formBuilder.array(array);

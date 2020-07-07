@@ -64,6 +64,7 @@ export interface DeviceTypeContentTreeModel extends DeviceTypeContentModel {
 }
 
 export interface DeviceTypeContentVariableModel {
+    indices: number[];
     id?: string;
     name?: string;
     type?: string;

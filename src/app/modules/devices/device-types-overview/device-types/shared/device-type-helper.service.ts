@@ -64,10 +64,17 @@ export class DeviceTypeHelperService {
     }
 
     private manipulateElement(element: DeviceTypeContentVariableModel[], newData: DeviceTypeContentVariableModel, option: string, indices: number[]): void {
-        if (indices.length === 1) {
+        if (indices.length <= 1) {
             switch (option) {
                 case 'add': {
-                    element.push(newData || {} as DeviceTypeContentVariableModel);
+                    if (indices.length === 0) {
+                        element.push(newData || {} as DeviceTypeContentVariableModel);
+                    } else {
+                        const subContentVariables = element[indices[0]].sub_content_variables;
+                        if (subContentVariables) {
+                            subContentVariables.push(newData || {} as DeviceTypeContentVariableModel);
+                        }
+                    }
                     break;
                 }
                 case 'update': {
