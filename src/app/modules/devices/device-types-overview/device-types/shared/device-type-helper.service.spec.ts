@@ -125,6 +125,38 @@ describe('DeviceTypeHelperService', () => {
         } as DeviceTypeContentVariableModel;
     }
 
+    it('test set indices', () => {
+        expect(service.setIndices(undefined)).toBe(undefined);
+        expect(service.setIndices([])).toBe(undefined);
+        expect(service.setIndices({
+            name: 'struct1',
+            sub_content_variables: [{name: 'struct2a', sub_content_variables: [{name: 'struct3a', id: 'id47'}, {name: 'struct3b', id: 'id48'}]},
+                {name: 'struct2b'}]
+        } as DeviceTypeContentVariableModel)).toEqual({
+            name: 'struct1', indices: [0], sub_content_variables: [{
+                name: 'struct2a',
+                indices: [0, 0],
+                sub_content_variables: [
+                    {
+                        name: 'struct3a',
+                        id: 'id47',
+                        indices: [0, 0, 0]
+                    },
+                    {
+                        name: 'struct3b',
+                        id: 'id48',
+                        indices: [0, 0, 1]
+                    }
+                ]
+
+            },
+                {
+                    name: 'struct2b',
+                    indices: [0, 1]
+                }]
+        } as DeviceTypeContentVariableModel);
+    });
+
 
 });
 

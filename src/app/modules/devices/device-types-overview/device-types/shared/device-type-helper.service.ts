@@ -63,6 +63,21 @@ export class DeviceTypeHelperService {
         return dataDeepCopy;
     }
 
+
+    setIndices(contentVariable: DeviceTypeContentVariableModel | undefined, indexIn: number[] = [0]): DeviceTypeContentVariableModel | undefined {
+        if (contentVariable) {
+            contentVariable.indices = indexIn;
+            if (contentVariable.sub_content_variables) {
+                contentVariable.sub_content_variables.forEach((sub: DeviceTypeContentVariableModel, index: number) => {
+                    const array = indexIn.slice();
+                    array.push(index);
+                    this.setIndices(sub, array);
+                });
+            }
+        }
+        return contentVariable;
+    }
+
     private manipulateElement(element: DeviceTypeContentVariableModel[], newData: DeviceTypeContentVariableModel, option: string, indices: number[]): void {
         if (indices.length <= 1) {
             switch (option) {
@@ -83,6 +98,7 @@ export class DeviceTypeHelperService {
                 }
                 case 'delete': {
                     element.splice(indices[0], 1);
+                    break;
                 }
             }
         } else {

@@ -92,7 +92,7 @@ export class DeviceTypesComponent implements OnInit {
     save(): void {
         console.log(this.secondFormGroup);
 
-        // this.cleanUpServices();
+        this.cleanUpServices();
         //
         // const newDeviceType: DeviceTypeModel = {
         //     id: this.firstFormGroup.getRawValue().id, // use getRawValue because control is disabled
@@ -133,11 +133,14 @@ export class DeviceTypesComponent implements OnInit {
         this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
             (resp: DeviceTypeContentVariableModel | undefined) => {
                 if (resp) {
-                    inOut.dataSource.data = this.deviceTypeHelperService.addTreeData(inOut.dataSource.data, resp, indices);
-                    inOut.tree.dataNodes = inOut.dataSource.data;
-                    inOut.tree.expandAll();
+                    this.refreshTree(inOut, this.deviceTypeHelperService.addTreeData(inOut.dataSource.data, resp, indices));
                 }
-            });
+            }
+        );
+    }
+
+    deleteContentVariable(inOut: DeviceTypeContentTreeModel, indices: number[]): void {
+        this.refreshTree(inOut, this.deviceTypeHelperService.deleteTreeData(inOut.dataSource.data, indices));
     }
 
     editContent(node: DeviceTypeContentVariableModel, functions: DeviceTypeFunctionModel[], inOut: DeviceTypeContentTreeModel): void {
@@ -150,10 +153,7 @@ export class DeviceTypesComponent implements OnInit {
         this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
             (resp: DeviceTypeContentVariableModel | undefined) => {
                 if (resp) {
-                    inOut.dataSource.data = this.deviceTypeHelperService.updateTreeData(inOut.dataSource.data, resp, resp.indices);
-                    inOut.tree.dataNodes = inOut.dataSource.data;
-                    inOut.tree.expandAll();
-
+                    this.refreshTree(inOut, this.deviceTypeHelperService.updateTreeData(inOut.dataSource.data, resp, resp.indices));
                 }
             });
     }
@@ -470,8 +470,9 @@ export class DeviceTypesComponent implements OnInit {
 
     private createContentGroup(content: DeviceTypeContentModel, protocolSegment: DeviceTypeProtocolSegmentModel): FormGroup {
         const dataSource = new MatTreeNestedDataSource<DeviceTypeContentVariableModel>();
-        if (content.content_variable) {
-            dataSource.data = [this.createContentVariableGroup(content.content_variable).value];
+        const contentVariableWithIndices = this.deviceTypeHelperService.setIndices(content.content_variable);
+        if (contentVariableWithIndices) {
+            dataSource.data = [contentVariableWithIndices];
         }
         return this._formBuilder.group({
             id: [content.id],
@@ -695,6 +696,17 @@ export class DeviceTypesComponent implements OnInit {
                     clearContentVariable(<FormArray>subContentVariableFormGroup.get('sub_content_variables'));
                 });
             }
+        }
+    }
+
+    private refreshTree(inOut: DeviceTypeContentTreeModel, contentVariable: DeviceTypeContentVariableModel[]): void {
+        const contentVariableWithIndices = this.deviceTypeHelperService.setIndices(contentVariable[0]);
+        if (contentVariableWithIndices) {
+            inOut.dataSource.data = [contentVariableWithIndices];
+            inOut.tree.dataNodes = inOut.dataSource.data;
+            inOut.tree.expandAll();
+        } else {
+            inOut.dataSource.data = [];
         }
     }
 
