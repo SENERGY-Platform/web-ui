@@ -124,13 +124,31 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
         this.configured = true;
     }
 
-    private convert(status: string | number): { icon: string, color: string } {
+    private convert(status: string | number | boolean): { icon: string, color: string } {
         const convertRules: DeviceStatusConfigConvertRuleModel[] | undefined = this.widget.properties.convertRules;
         if (convertRules) {
             for (let i = 0; i < convertRules.length; i++) {
-                if (status === convertRules[i].status) {
-                    return {icon: convertRules[i].icon, color: convertRules[i].color};
+                switch (typeof status) {
+                    case 'string': {
+                        if (status === convertRules[i].status) {
+                            return {icon: convertRules[i].icon, color: convertRules[i].color};
+                        }
+                        break;
+                    }
+                    case 'boolean': {
+                        if (status === JSON.parse(convertRules[i].status)) {
+                            return {icon: convertRules[i].icon, color: convertRules[i].color};
+                        }
+                        break;
+                    }
+                    case 'number': {
+                        if (status === parseInt(convertRules[i].status, 10)) {
+                            return {icon: convertRules[i].icon, color: convertRules[i].color};
+                        }
+                        break;
+                    }
                 }
+
             }
         }
         return {icon: '', color: ''};
