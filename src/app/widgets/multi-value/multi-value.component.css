@@ -54,3 +54,7 @@ tr.mat-row {
     height: 100%;
     overflow:auto;
 }
+
+table {
+    width: 100%;
+}
