@@ -195,11 +195,11 @@
                                             </mat-form-field>
                                             <div>
                                                 <button mat-raised-button color="accent"
-                                                        (click)="addContentVariable(service.value.functions, inOut, [])">
+                                                        (click)="addContentVariable(service.value.functions, inOut, [])"
+                                                        [disabled]="inOut.dataSource.data.length === 1">
                                                     ADD ContentVariable
                                                 </button>
                                             </div>
-                                            <div>{{inOut.dataSource.data | json}}</div>
                                             <div>
                                                 <mat-tree [dataSource]="inOut.dataSource" [treeControl]="inOut.tree"
                                                           class="example-tree">
@@ -212,7 +212,8 @@
                                                                     (click)="editContent(node, service.value.functions, inOut)">
                                                                 {{node.name}}
                                                             </button>
-                                                            <button mat-icon-button (click)="deleteContentVariable(inOut, node.indices)">
+                                                            <button mat-icon-button
+                                                                    (click)="deleteContentVariable(inOut, node.indices)">
                                                                 <mat-icon>delete_outline</mat-icon>
                                                             </button>
 
@@ -232,10 +233,12 @@
                                                                         (click)="editContent(node, service.value.functions, inOut)">
                                                                     {{node.name}}
                                                                 </button>
-                                                                <button mat-icon-button (click)="deleteContentVariable(inOut, node.indices)">
+                                                                <button mat-icon-button
+                                                                        (click)="deleteContentVariable(inOut, node.indices)">
                                                                     <mat-icon>delete_outline</mat-icon>
                                                                 </button>
-                                                                <button mat-icon-button (click)="addContentVariable(service.value.functions, inOut, node.indices)">
+                                                                <button mat-icon-button
+                                                                        (click)="addContentVariable(service.value.functions, inOut, node.indices)">
                                                                     <mat-icon>add</mat-icon>
                                                                 </button>
                                                             </div>
