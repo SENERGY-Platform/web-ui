@@ -23,6 +23,7 @@ import {DeploymentsPreparedSelectableModel} from '../../../modules/processes/dep
 export interface DeviceStatusPropertiesModel {
     refreshTime?: number;
     elements?: DeviceStatusElementModel[];
+    convertRules?: DeviceStatusConfigConvertRuleModel[];
 }
 
 export interface DeviceStatusElementModel {
@@ -43,10 +44,8 @@ export interface DeviceStatusExportValuesModel {
     characteristicId: string;
 }
 
-export enum MultiValueOrderEnum {
-    Default,
-    AlphabeticallyAsc,
-    AlphabeticallyDesc,
-    ValueAsc,
-    ValueDesc
+export interface DeviceStatusConfigConvertRuleModel {
+    status: string;
+    icon: string;
+    color: string;
 }

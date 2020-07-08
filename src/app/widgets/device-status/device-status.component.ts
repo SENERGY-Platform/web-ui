@@ -21,11 +21,12 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {MatTable} from '@angular/material/table';
-import {DeviceStatusElementModel} from './shared/device-status-properties.model';
+import {DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel} from './shared/device-status-properties.model';
 import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
 import {DeviceStatusDialogService} from './shared/device-status-dialog.service';
 import {LastValuesRequestElementModel} from '../shared/export-data.model';
 import {ExportDataService} from '../shared/export-data.service';
+import {DeviceStatusItemModel} from './shared/device-status-item.model';
 
 @Component({
     selector: 'senergy-device-status',
@@ -38,7 +39,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     destroy = new Subscription();
     dataReady = false;
     interval = 0;
-    items: { name: string, status: (string | number) }[] = [];
+    items: DeviceStatusItemModel[] = [];
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -102,7 +103,8 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                             if (v === true || v === false) {
                                 v = v as unknown as string;
                             }
-                            this.items.push({name: <string>elements[index].name, status: v});
+                            const convert = this.convert(v);
+                            this.items.push({name: <string>elements[index].name, status: v, icon: convert.icon, color: convert.color});
                         });
                         this.dataReady = true;
                     });
@@ -120,6 +122,18 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
      */
     private setConfigured() {
         this.configured = true;
+    }
+
+    private convert(status: string | number): { icon: string, color: string } {
+        const convertRules: DeviceStatusConfigConvertRuleModel[] | undefined = this.widget.properties.convertRules;
+        if (convertRules) {
+            for (let i = 0; i < convertRules.length; i++) {
+                if (status === convertRules[i].status) {
+                    return {icon: convertRules[i].icon, color: convertRules[i].color};
+                }
+            }
+        }
+        return {icon: '', color: ''};
     }
 
 }
