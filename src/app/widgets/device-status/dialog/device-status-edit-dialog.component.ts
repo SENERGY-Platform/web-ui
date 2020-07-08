@@ -27,7 +27,11 @@ import {
     DeviceTypeModel, DeviceTypeServiceModel
 } from '../../../modules/devices/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
-import {DeviceStatusElementModel, DeviceStatusExportValuesModel} from '../shared/device-status-properties.model';
+import {
+    DeviceStatusConfigConvertRuleModel,
+    DeviceStatusElementModel,
+    DeviceStatusExportValuesModel
+} from '../shared/device-status-properties.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {
     DeploymentsPreparedModel,
@@ -46,6 +50,9 @@ import {DeviceStatusService} from '../shared/device-status.service';
 export class DeviceStatusEditDialogComponent implements OnInit {
 
     aspects: DeviceTypeAspectModel[] = [];
+    icons: string[] = [
+        'power', 'power_off', 'toggle_on', 'toggle_off', 'sensor_door', 'meeting_room', 'tv', 'tv_off', 'flash_on', 'flash_off', 'emoji_objects', 'check_circle_outline', 'highlight_off'
+    ];
     dashboardId: string;
     widgetId: string;
     widgetNew: WidgetModel = {} as WidgetModel;
@@ -64,6 +71,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         name: ['', Validators.required],
         refreshTime: [0],
         elements: this.fb.array([]),
+        convertRules: this.fb.array([]),
     });
 
 
@@ -90,6 +98,11 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             this.widgetNew = widget;
             this.formGroup.patchValue({'name': widget.name});
             this.formGroup.patchValue({'refreshTime': widget.properties.refreshTime || 0});
+            if (widget.properties.convertRules) {
+                widget.properties.convertRules.forEach((convertRule: DeviceStatusConfigConvertRuleModel) => {
+                    this.addConvertRule(convertRule);
+                });
+            }
             if (widget.properties.elements) {
                 widget.properties.elements.forEach((element: DeviceStatusElementModel) => {
                     this.addElement(element);
@@ -199,6 +212,14 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return this.deploymentsService.postDeployments(pD);
     }
 
+    getIcon(index: number): string {
+        return this.convertRulesControl.at(index).value.icon;
+    }
+
+    getColor(index: number): string {
+        return this.convertRulesControl.at(index).value.color;
+    }
+
     addElement(element: DeviceStatusElementModel) {
         this.elementsControl.push(this.setElement(element));
         const index = this.elementsControl.length - 1;
@@ -238,6 +259,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.elementsControl.removeAt(elementIndex);
     }
 
+    deleteConvertRule(index: number): void {
+        this.convertRulesControl.removeAt(index);
+    }
+
     save(): void {
         this.deviceStatusService.deleteElements(this.widgetOld.properties.elements);
 
@@ -273,6 +298,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return a && b && a.name === b.name && a.path === b.path;
     }
 
+    addConvertRule(convertRule: DeviceStatusConfigConvertRuleModel = {} as DeviceStatusConfigConvertRuleModel) {
+        this.convertRulesControl.push(this.setConvertRule(convertRule));
+    }
+
     private getDeploymentArray(): Observable<{ status: number, id: string }>[] {
         const deploymentArray: Observable<{ status: number, id: string }>[] = [];
         this.elements.forEach((element: DeviceStatusElementModel, index: number) => {
@@ -302,6 +331,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.widgetNew.properties = {};
         this.widgetNew.properties.refreshTime = (this.formGroup.get('refreshTime') as FormControl).value;
         this.widgetNew.properties.elements = this.elements;
+        this.widgetNew.properties.convertRules = this.convertRulesControl.value;
         this.dashboardService.updateWidget(this.dashboardId, this.widgetNew).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widgetNew);
@@ -368,8 +398,20 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         });
     }
 
+    private setConvertRule(convertRule: DeviceStatusConfigConvertRuleModel): FormGroup {
+        return this.fb.group({
+            status: [convertRule.status],
+            icon: [convertRule.icon],
+            color: [convertRule.color],
+        });
+    }
+
     get elementsControl(): FormArray {
         return this.formGroup.get('elements') as FormArray;
+    }
+
+    get convertRulesControl(): FormArray {
+        return this.formGroup.get('convertRules') as FormArray;
     }
 
     get elements(): DeviceStatusElementModel[] {

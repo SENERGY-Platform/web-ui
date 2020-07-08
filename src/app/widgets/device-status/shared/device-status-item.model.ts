@@ -14,22 +14,9 @@
  * limitations under the License.
  */
 
-table {
-    width: 100%;
-}
-
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}
-
-.actions-warn {
-    margin-right: 8px;
-}
-
-.convert-input {
-    height: 32px
-}
-
-.margin-add-convert-button {
-    margin: 8px
+export interface DeviceStatusItemModel {
+    name: string;
+    status: (string | number);
+    icon: string;
+    color: string;
 }
