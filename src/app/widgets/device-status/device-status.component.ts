@@ -24,7 +24,7 @@ import {MatTable} from '@angular/material/table';
 import {DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel} from './shared/device-status-properties.model';
 import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
 import {DeviceStatusDialogService} from './shared/device-status-dialog.service';
-import {LastValuesRequestElementModel} from '../shared/export-data.model';
+import {LastValuesRequestElementModel, TimeValuePairModel} from '../shared/export-data.model';
 import {ExportDataService} from '../shared/export-data.service';
 import {DeviceStatusItemModel} from './shared/device-status-item.model';
 
@@ -98,13 +98,13 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
 
                     this.exportDataService.getLastValues(queries).subscribe(res => {
                         this.items = [];
-                        res.forEach((pair, index) => {
+                        res.forEach((pair: TimeValuePairModel, index: number) => {
                             let v = pair.value;
                             if (v === true || v === false) {
                                 v = v as unknown as string;
                             }
                             const convert = this.convert(v);
-                            this.items.push({name: <string>elements[index].name, status: v, icon: convert.icon, color: convert.color});
+                            this.items.push({name: <string>elements[index].name, status: v, icon: convert.icon, color: convert.color, time: pair.time});
                         });
                         this.dataReady = true;
                     });
