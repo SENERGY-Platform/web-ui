@@ -82,3 +82,7 @@ mat-grid-list {
     width: 100%;
     background-color: whitesmoke;
 }
+
+.filter-margin {
+    margin-top: 12px
+}

@@ -33,8 +33,15 @@ export class DeploymentsService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getAll(query: string, limit: number, offset: number, feature: string, order: string): Observable<DeploymentsModel[]> {
-        return this.http.get<DeploymentsModel[]>(environment.apiAggregatorUrl + '/processes?sortBy=' + feature + '&sortOrder=' + order + '&maxResults=' + limit + '&firstResult=' + offset + (query ? '&nameLike=' + encodeURIComponent('%' + query + '%') : '')).pipe(
+    getAll(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]> {
+        let url = environment.apiAggregatorUrl + '/processes?sortBy=' + feature + '&sortOrder=' + order + '&maxResults=' + limit + '&firstResult=' + offset
+        if (query) {
+            url += '&nameLike=' + encodeURIComponent('%' + query + '%');
+        }
+        if (source) {
+            url += '&source=' + encodeURIComponent(source);
+        }
+        return this.http.get<DeploymentsModel[]>(url).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getAll', []))
         );
