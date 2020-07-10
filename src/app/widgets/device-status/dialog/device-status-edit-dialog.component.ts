@@ -209,7 +209,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         const pD = this.preparedDeployment[index];
         pD.elements[0].task.selection.device = selectable.device;
         pD.elements[0].task.selection.service = this.getService(index);
-        return this.deploymentsService.postDeployments(pD);
+        return this.deploymentsService.postDeployments(pD, 'generated');
     }
 
     getIcon(index: number): string {

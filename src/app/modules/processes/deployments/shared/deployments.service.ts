@@ -89,8 +89,8 @@ export class DeploymentsService {
         );
     }
 
-    postDeployments(deployment: DeploymentsPreparedModel): Observable<{ status: number, id: string }> {
-        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments', deployment, {observe: 'response'}).pipe(
+    postDeployments(deployment: DeploymentsPreparedModel, source: string = 'sepl'): Observable<{ status: number, id: string }> {
+        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments?source=' + source, deployment, {observe: 'response'}).pipe(
             map(resp => {
                 return {status: resp.status, id: resp.body ? resp.body.id : ''};
             }),
