@@ -89,10 +89,9 @@ export class UBAService {
     }
 
     private makeUBAStationsRequest(): Observable<UBAStationResponse> {
-        const date = new Date();
-        const dateString = date.getFullYear() + '-' + date.getMonth() + '-' + date.getDay();
         return this.http.get<UBAStationResponse>(
-            environment.ubaUrl + '/air_data/v2/stations/json?date_from=' + dateString + '&time_from=1&date_to=' + dateString
+            environment.ubaUrl + '/air_data/v2/stations/json?date_from=' + this.getDateString()
+            + '&time_from=1&date_to=' + this.getDateString()
             + '&lang=de&time_to=24')
             .pipe(map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBAStationResponse))
@@ -101,13 +100,10 @@ export class UBAService {
 
 
     getUBAComponents(): Observable<UBAComponent[]> {
-        const date = new Date();
-        const dateString = date.getFullYear() + '-'
-            + (date.getMonth() < 10 ? ('0' + date.getMonth()) : date.getMonth())
-            + '-' + (date.getDate() < 10 ? ('0' + date.getDate()) : date.getDate());
         return new Observable<UBAComponent[]>(obs => {
             this.http.get<UBAMetaResponse>(
-                environment.ubaUrl + '/air_data/v2/meta/json?use=airquality&date_from=' + dateString + '&time_from=1&date_to=' + dateString
+                environment.ubaUrl + '/air_data/v2/meta/json?use=airquality&date_from=' + this.getDateString()
+                + '&time_from=1&date_to=' + this.getDateString()
                 + '&lang=de&time_to=24')
                 .pipe(map(resp => resp || []),
                     catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBAMetaResponse))
@@ -135,14 +131,12 @@ export class UBAService {
     }
 
     getUBAData(station_id: number, ubaComponents: UBAComponent[]): Observable<UBAData[]> {
+        const date = new Date();
         return new Observable<UBAData[]>(obs => {
-            const date = new Date();
-            const dateString = date.getFullYear() + '-'
-                + (date.getMonth() < 10 ? ('0' + date.getMonth()) : date.getMonth())
-                + '-' + (date.getDate() < 10 ? ('0' + date.getDate()) : date.getDate());
             this.http.get<UBADataResponse>(
-                environment.ubaUrl + '/air_data/v2/airquality/json?date_from=' + dateString + '&date_to=' + dateString
-                + '&lang=de&time_to=' + date.getHours() + '&time_from=' + (date.getHours() - 3 < 0 ? 0 : (date.getHours() - 3))
+                environment.ubaUrl + '/air_data/v2/airquality/json?date_from=' + this.getDateString() + '&date_to=' + this.getDateString()
+                + '&lang=de&time_to=' + date.getHours()
+                + '&time_from=' + (date.getHours() - 3 < 0 ? 0 : (date.getHours() - 3))
                 + '&station=' + station_id)
                 .pipe(map(resp => resp || []),
                     catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBADataResponse))
@@ -185,6 +179,14 @@ export class UBAService {
                 });
             });
         });
+    }
+
+    private getDateString(): string {
+        const date = new Date();
+        const month = date.getMonth() + 1; // Jan = 0
+        return date.getFullYear() + '-'
+            + (month < 10 ? ('0' + month) : month)
+            + '-' + (date.getDate() < 10 ? ('0' + date.getDate()) : date.getDate());
     }
 }
 

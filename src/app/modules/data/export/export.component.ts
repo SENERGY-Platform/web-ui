@@ -46,7 +46,7 @@ export class ExportComponent implements OnInit, OnDestroy {
     ready = false;
     url = environment.influxAPIURL;
     gridCols = 0;
-    sortAttributes = [new SortModel('Name', 'name', 'asc')];
+    sortAttributes = [new SortModel('Name', 'name', 'asc'), new SortModel('Erstellungsdatum', 'created_at', 'asc')];
 
     private searchText = '';
     private limitInit = 54;
