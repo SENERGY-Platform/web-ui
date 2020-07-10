@@ -3,7 +3,7 @@ import {TestBed} from '@angular/core/testing';
 import {DeviceTypeHelperService} from './device-type-helper.service';
 import {DeviceTypeContentVariableModel} from '../../shared/device-type.model';
 
-describe('DeviceTypeHelperService', () => {
+fdescribe('DeviceTypeHelperService', () => {
     let service: DeviceTypeHelperService;
     const struct1 = getStruct('struct1');
     const struct2 = getStruct('struct2');
@@ -39,12 +39,12 @@ describe('DeviceTypeHelperService', () => {
 
     it('test checkIfContentExists', () => {
         expect(service.checkIfContentExists(undefined, null)).toBe(false);
-        expect(service.checkIfContentExists('', null)).toBe(false);
+        expect(service.checkIfContentExists([], null)).toBe(false);
         expect(service.checkIfContentExists(null, null)).toBe(false);
         expect(service.checkIfContentExists(undefined, '')).toBe(false);
-        expect(service.checkIfContentExists('', '')).toBe(false);
+        expect(service.checkIfContentExists([], '')).toBe(false);
         expect(service.checkIfContentExists(null, '')).toBe(false);
-        expect(service.checkIfContentExists('x', 'x')).toBe(true);
+        expect(service.checkIfContentExists([{} as DeviceTypeContentVariableModel], 'x')).toBe(true);
     });
 
     it('test updateTreeData add', () => {
@@ -126,13 +126,22 @@ describe('DeviceTypeHelperService', () => {
     }
 
     it('test set indices', () => {
-        expect(service.setIndices(undefined)).toBe(undefined);
-        expect(service.setIndices([])).toBe(undefined);
-        expect(service.setIndices({
+        const input1 = undefined;
+        const input2 = {} as DeviceTypeContentVariableModel;
+        const input3 = {
             name: 'struct1',
-            sub_content_variables: [{name: 'struct2a', sub_content_variables: [{name: 'struct3a', id: 'id47'}, {name: 'struct3b', id: 'id48'}]},
+            sub_content_variables: [{
+                name: 'struct2a',
+                sub_content_variables: [{name: 'struct3a', id: 'id47'}, {name: 'struct3b', id: 'id48'}]
+            },
                 {name: 'struct2b'}]
-        } as DeviceTypeContentVariableModel)).toEqual({
+        } as DeviceTypeContentVariableModel;
+        service.setIndices(input1);
+        expect(service.setIndices(input1)).toBe(undefined);
+        service.setIndices(input2);
+        expect(input2).toEqual({indices: [0]} as DeviceTypeContentVariableModel);
+        service.setIndices(input3);
+        expect(input3).toEqual({
             name: 'struct1', indices: [0], sub_content_variables: [{
                 name: 'struct2a',
                 indices: [0, 0],
@@ -148,13 +157,48 @@ describe('DeviceTypeHelperService', () => {
                         indices: [0, 0, 1]
                     }
                 ]
-
             },
                 {
                     name: 'struct2b',
                     indices: [0, 1]
                 }]
         } as DeviceTypeContentVariableModel);
+    });
+
+    it('test remove indices', () => {
+        const withIndices = {
+            name: 'struct1', indices: [0], sub_content_variables: [{
+                name: 'struct2a',
+                indices: [0, 0],
+                sub_content_variables: [
+                    {
+                        name: 'struct3a',
+                        id: 'id47',
+                        indices: [0, 0, 0]
+                    },
+                    {
+                        name: 'struct3b',
+                        id: 'id48',
+                        indices: [0, 0, 1]
+                    }
+                ]
+            },
+                {
+                    name: 'struct2b',
+                    indices: [0, 1]
+                }]
+        } as DeviceTypeContentVariableModel;
+        const withoutIndices = {
+            name: 'struct1',
+            sub_content_variables: [{
+                name: 'struct2a',
+                sub_content_variables: [{name: 'struct3a', id: 'id47'}, {name: 'struct3b', id: 'id48'}]
+            },
+                {name: 'struct2b'}]
+        } as DeviceTypeContentVariableModel;
+        service.removeField(withIndices);
+        console.log(withIndices);
+        expect(withIndices).toEqual(withoutIndices);
     });
 
 

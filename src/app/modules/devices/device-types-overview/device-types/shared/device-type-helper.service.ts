@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {DeviceTypeContentVariableModel} from '../../shared/device-type.model';
+import * as _ from 'lodash';
 
 @Injectable({
     providedIn: 'root'
@@ -35,8 +36,8 @@ export class DeviceTypeHelperService {
         return editable;
     }
 
-    checkIfContentExists(contentVariableRaw: (string | null | undefined), serialization: string | null): boolean {
-        if ((contentVariableRaw === null || contentVariableRaw === '' || contentVariableRaw === undefined) &&
+    checkIfContentExists(contentVariable: DeviceTypeContentVariableModel[] | null | undefined, serialization: string | null): boolean {
+        if ((contentVariable === undefined || contentVariable ===  null || contentVariable.length === 0) &&
             (serialization === null || serialization === '')) {
             return false;
         } else {
@@ -64,7 +65,7 @@ export class DeviceTypeHelperService {
     }
 
 
-    setIndices(contentVariable: DeviceTypeContentVariableModel | undefined, indexIn: number[] = [0]): DeviceTypeContentVariableModel | undefined {
+    setIndices(contentVariable: DeviceTypeContentVariableModel | undefined, indexIn: number[] = [0]): void {
         if (contentVariable) {
             contentVariable.indices = indexIn;
             if (contentVariable.sub_content_variables) {
@@ -75,7 +76,16 @@ export class DeviceTypeHelperService {
                 });
             }
         }
-        return contentVariable;
+    }
+
+    removeField(contentVariable: DeviceTypeContentVariableModel): void {
+        delete contentVariable['indices'];
+        console.log(contentVariable);
+        if (contentVariable.sub_content_variables) {
+            for (let i = 0; i < contentVariable.sub_content_variables.length; i++) {
+                this.removeField(contentVariable.sub_content_variables[i]);
+            }
+        }
     }
 
     private manipulateElement(element: DeviceTypeContentVariableModel[], newData: DeviceTypeContentVariableModel, option: string, indices: number[]): void {
