@@ -62,6 +62,12 @@ describe('DeviceStatusEditDialogComponent', () => {
     beforeEach(async(() => {
 
         exportServiceSpy.startPipeline.and.returnValue(of({ID: 'export_id_123'} as ExportModel));
+        const exampleExport: ExportModel = {
+            Name: 'device_service_1',
+            Values: [] as any[],
+            TimePath: 'struct.path',
+        } as ExportModel;
+        exportServiceSpy.prepareDeviceServiceExport.and.returnValue([exampleExport]);
         deploymentsServiceSpy.postDeployments.and.returnValue(of({status: 200, id: uuid()}));
         deploymentsServiceSpy.getPreparedDeploymentsByXml.and.returnValue(of({
             id: '',
