@@ -62,6 +62,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSortModule} from '@angular/material/sort';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {FunctionsComponent} from './functions/functions.component';
+import {DeviceInstancesExportDialogComponent} from './device-instances/dialogs/device-instances-export-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -118,6 +119,7 @@ const functions = {path: 'devices/functions', pathMatch: 'full', component: Func
         DeviceInstancesEditDialogComponent,
         NetworksClearDialogComponent,
         DeviceInstancesGridComponent,
+        DeviceInstancesExportDialogComponent,
         ConceptsComponent,
         ConceptsNewDialogComponent,
         CharacteristicsComponent,

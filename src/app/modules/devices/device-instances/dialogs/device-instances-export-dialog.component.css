@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-export interface DeviceTypePermSearchModel {
-    creator: string;
-    description: string;
-    device_class: string;
-    id: string;
-    image: string;
-    name: string;
-    service: string[] | string;
-    permissions: {
-        a: boolean;
-        x: boolean;
-        r: boolean;
-        w: boolean;
-    };
+.form {
+    min-width: 150px;
+    max-width: 500px;
+    width: 100%;
+}
+
+.full-width {
+    width: 100%;
+}
+
+mat-dialog-actions button:not(:last-child) {
+    margin-right: 8px;
 }

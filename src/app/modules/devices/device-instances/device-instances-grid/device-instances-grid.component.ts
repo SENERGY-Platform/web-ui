@@ -23,6 +23,12 @@ import {DialogsService} from '../../../../core/services/dialogs.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesUpdateModel} from '../shared/device-instances-update.model';
 import {KeycloakService} from 'keycloak-angular';
+import {DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../device-types-overview/shared/device-type.service';
+import {ExportService} from '../../../data/export/shared/export.service';
+import {ExportModel} from '../../../data/export/shared/export.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DeviceInstancesExportDialogComponent} from '../dialogs/device-instances-export-dialog.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -40,7 +46,6 @@ const grids = new Map([
 export class DeviceInstancesGridComponent implements OnInit {
 
 
-
     @Input() deviceInstances: DeviceInstancesModel[] = [];
     @Input() ready = false;
     @Output() tag =  new EventEmitter<{tag: string, tagType: string}>();
@@ -53,7 +58,10 @@ export class DeviceInstancesGridComponent implements OnInit {
                 private keycloakService: KeycloakService,
                 private permissionsDialogService: PermissionsDialogService,
                 private dialogsService: DialogsService,
-                private snackBar: MatSnackBar) {
+                private deviceTypeService: DeviceTypeService,
+                private exportService: ExportService,
+                private snackBar: MatSnackBar,
+                private dialog: MatDialog) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
 
@@ -95,6 +103,31 @@ export class DeviceInstancesGridComponent implements OnInit {
 
     emitItemDeleted() {
         this.itemDeleted.emit(true);
+    }
+
+    export(device: DeviceInstancesModel) {
+        this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((deviceType: DeviceTypeModel | null) => {
+            if (deviceType !== null) {
+                const exports: ExportModel[] = [];
+                deviceType.services.forEach(service => {
+                    const newExports = this.exportService.prepareDeviceServiceExport(device, service);
+                    newExports.forEach(singleExport => singleExport.Description = 'Created at device overview');
+                    exports.push(...newExports);
+                });
+                if (exports.length > 0) {
+                    const dialogConfig = new MatDialogConfig();
+                    dialogConfig.minWidth = '375px';
+                    dialogConfig.data = {
+                        exports: exports,
+                    };
+                    this.dialog.open(DeviceInstancesExportDialogComponent, dialogConfig);
+                } else {
+                    this.snackBar.open('Device type has no output services!', '', {duration: 2000});
+                }
+            } else {
+                this.snackBar.open('Could not read device type!', '', {duration: 2000});
+            }
+        });
     }
 
     private initGridCols(): void {
