@@ -28,7 +28,7 @@ import {
     DeviceTypeServiceModel
 } from '../../../modules/devices/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
-import {DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel,} from '../shared/device-status-properties.model';
+import {DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel} from '../shared/device-status-properties.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {
     DeploymentsPreparedModel,
