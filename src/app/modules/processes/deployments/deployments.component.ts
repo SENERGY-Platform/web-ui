@@ -29,7 +29,7 @@ import {environment} from '../../../../environments/environment';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deployments-missing-dependencies-dialog.component';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
 const grids = new Map([
@@ -48,6 +48,7 @@ const grids = new Map([
 
 export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     formGroup: FormGroup = new FormGroup({repoItems: new FormArray([])});
+    filterControl = new FormGroup({generated: new FormControl(false)});
     gridCols = 0;
     sortAttributes = [new SortModel('Date', 'deploymentTime', 'desc'), new SortModel('Name', 'name', 'asc')];
     ready = false;
@@ -59,6 +60,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
+    private source = 'sepl';
     selectedItems: DeploymentsModel[] = [];
 
     constructor(private sanitizer: DomSanitizer,
@@ -75,6 +77,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.initFilter();
         this.initGridCols();
         this.initSearchAndGetDevices();
     }
@@ -192,6 +195,17 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
         });
     }
 
+    private initFilter(): void {
+        (this.filterControl.get('generated') as FormControl).valueChanges.subscribe((resp: boolean) => {
+            if (resp) {
+                this.source = '';
+            } else {
+                this.source = 'sepl';
+            }
+            this.getRepoItems(true);
+        });
+    }
+
     private initSearchAndGetDevices() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
@@ -206,7 +220,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
         }
 
         this.deploymentsService.getAll(
-            this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+            this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.source).subscribe(
             (repoItems: DeploymentsModel[]) => {
                 if (repoItems.length !== this.limit) {
                     this.allDataLoaded = true;

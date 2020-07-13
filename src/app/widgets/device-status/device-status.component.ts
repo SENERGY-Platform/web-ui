@@ -92,7 +92,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                     const queries: LastValuesRequestElementModel[] = [];
                     elements.forEach((element: DeviceStatusElementModel) => {
                         if (element.exportId && element.exportValues) {
-                            queries.push({measurement: element.exportId, columnName: element.exportValues.name});
+                            queries.push({measurement: element.exportId, columnName: element.exportValues.Name});
                         }
                     });
 

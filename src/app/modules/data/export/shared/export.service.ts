@@ -20,13 +20,25 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
-import {ExportModel} from './export.model';
+import {ExportModel, ExportValueCharacteristicModel, ExportValueModel} from './export.model';
+import {
+    DeviceTypeContentVariableModel,
+    DeviceTypeServiceModel
+} from '../../../devices/device-types-overview/shared/device-type.model';
+import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
+import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 
 @Injectable({
     providedIn: 'root'
 })
 
 export class ExportService {
+
+    typeString = 'https://schema.org/Text';
+    typeInteger = 'https://schema.org/Integer';
+    typeFloat = 'https://schema.org/Float';
+    typeBoolean = 'https://schema.org/Boolean';
+    typeStructure = 'https://schema.org/StructuredValue';
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
@@ -40,7 +52,7 @@ export class ExportService {
         );
 
     }
-    
+
     getExport(id: string): Observable<ExportModel | null> {
         return this.http.get<ExportModel>
         (environment.exportService + '/instance/' + id).pipe(
@@ -61,4 +73,90 @@ export class ExportService {
             catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipeline: Error', {}))
         );
     }
+
+    prepareDeviceServiceExport(deviceInstancesModel: DeviceInstancesModel | DeviceInstancesUpdateModel, service: DeviceTypeServiceModel): ExportModel[] {
+        const exports: ExportModel[] = [];
+        service.outputs.forEach((output, index) => {
+            const traverse = this.addCharacteristicToDeviceTypeContentVariable(output.content_variable);
+            const timePath = this.getTimePath(traverse);
+
+            const exportValues: ExportValueModel[] = [];
+
+            traverse.forEach(trav => {
+                if (trav.Path !== timePath) {
+                    let type = '';
+                    switch (trav.Type) {
+                        case this.typeString:
+                            type = 'string';
+                            break;
+                        case this.typeFloat:
+                            type = 'float';
+                            break;
+                        case this.typeInteger:
+                            type = 'int';
+                            break;
+                        case this.typeBoolean:
+                            type = 'bool';
+                            break;
+
+                    }
+                    exportValues.push({
+                        Name: trav.Path, // trav.Name would not be unique
+                        Type: type,
+                        Path: trav.Path,
+                    } as ExportValueModel);
+                }
+            });
+
+            exports.push({
+                Name: deviceInstancesModel.name + '_' + service.name + (service.outputs.length > 1 ? '_' + index : ''),
+                TimePath: timePath,
+                Values: exportValues,
+                EntityName: deviceInstancesModel.name,
+                Filter: deviceInstancesModel.id,
+                FilterType: 'deviceId',
+                ServiceName: service.name,
+                Topic: service.id.replace(/#/g, '_').replace(/:/g, '_'),
+                Offset: 'largest'
+            } as ExportModel);
+        });
+        return exports;
+    }
+
+    addCharacteristicToDeviceTypeContentVariable(field: DeviceTypeContentVariableModel): ExportValueCharacteristicModel[] {
+        return this.addCharacteristicToDeviceTypeContentVariableRecursion('value', field, []);
+    }
+
+    private addCharacteristicToDeviceTypeContentVariableRecursion(pathString: string,
+                                          field: DeviceTypeContentVariableModel,
+                                          array: ExportValueCharacteristicModel[]): ExportValueCharacteristicModel[] {
+        if (field.type === this.typeStructure && field.type !== undefined && field.type !== null) {
+            pathString += '.' + field.name;
+            if (field.sub_content_variables !== undefined) {
+                field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel) => {
+                    this.addCharacteristicToDeviceTypeContentVariableRecursion(pathString, innerField, array);
+                });
+            }
+        } else {
+            array.push({
+                Name: field.name || '',
+                Path: pathString + '.' + field.name,
+                Type: field.type || '',
+                characteristicId: field.characteristic_id || '',
+            });
+        }
+        return array;
+    }
+
+    getTimePath(traverse: ExportValueCharacteristicModel[]): string {
+        let timePath = '';
+        traverse.forEach((t: ExportValueCharacteristicModel) => {
+            if (t.characteristicId === environment.timeStampCharacteristicId) {
+                timePath = t.Path;
+            }
+        });
+        return timePath;
+    }
+
+
 }

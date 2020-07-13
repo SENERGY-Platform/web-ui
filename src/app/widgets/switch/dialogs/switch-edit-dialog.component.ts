@@ -80,7 +80,7 @@ export class SwitchEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc').subscribe((deployments: DeploymentsModel[]) => {
+        this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc', '').subscribe((deployments: DeploymentsModel[]) => {
             this.deployments = deployments;
             this.filteredDeployments = this.formControl.valueChanges
                 .pipe(
