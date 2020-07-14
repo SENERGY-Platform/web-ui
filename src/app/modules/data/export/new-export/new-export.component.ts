@@ -31,6 +31,7 @@ import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-r
 import {Router} from '@angular/router';
 import {IOModel, OperatorModel} from '../../operator-repo/shared/operator.model';
 import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
+import {environment} from '../../../../../environments/environment';
 
 
 @Component({
@@ -54,7 +55,7 @@ export class NewExportComponent implements OnInit {
     paths = new Map<string, string | undefined>();
     allMessages = true;
 
-    timeSuggest = ['time'];
+    timeSuggest = '';
 
     dropdown = [
         'float',
@@ -152,7 +153,12 @@ export class NewExportComponent implements OnInit {
                 });
             }
         } else {
-            this.paths.set(pathString + '.' + field.name, field.type);
+            const path = pathString + '.' + field.name;
+            this.paths.set(path, field.type);
+            if (field.characteristic_id === environment.timeStampCharacteristicId) {
+                this.timeSuggest = path;
+                console.log(path);
+            }
         }
     }
 
@@ -168,6 +174,8 @@ export class NewExportComponent implements OnInit {
                     this.paths.set('analytics.' + out.name,  out.type);
                 });
             }
+            this.paths.set('time', 'string');
+            this.autofillValues();
         });
     }
 
@@ -228,8 +236,16 @@ export class NewExportComponent implements OnInit {
     }
 
     autofillValues() {
+        console.log(this.selector);
+        if (this.selector === 'pipe') {
+            this.export.TimePath = 'time';
+        } else if (this.selector === 'device') {
+            this.export.TimePath = this.timeSuggest;
+        }
+
         this.export.Values = [];
         this.paths.forEach((_type, path) => {
+            console.log(path);
             if (this.export.TimePath !== path) { // don't add path if it's selected as time
                 this.addValue();
                 const index = this.export.Values.length - 1;
@@ -238,10 +254,12 @@ export class NewExportComponent implements OnInit {
                 this.pathChanged(index);
             }
         });
-        if (this.selector === 'pipe' && this.timeSuggest.length === 1) {
-            this.export.TimePath = this.timeSuggest[0];
-        } else if (this.selector === 'device' && this.paths.size === 0) {
-            this.export.TimePath = this.paths.keys().next().value;
+    }
+
+    ensureTimeNotTwice() {
+        const i = this.export.Values.findIndex(v => v.Path === this.export.TimePath);
+        if (i !== -1) {
+            this.export.Values.splice(i, 1);
         }
     }
 }
