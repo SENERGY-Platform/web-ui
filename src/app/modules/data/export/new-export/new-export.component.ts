@@ -243,13 +243,14 @@ export class NewExportComponent implements OnInit {
             this.export.TimePath = this.timeSuggest;
         }
 
+        const hasAmbiguousNames = this.hasAmbiguousNames();
         this.export.Values = [];
         this.paths.forEach((_type, path) => {
             console.log(path);
             if (this.export.TimePath !== path) { // don't add path if it's selected as time
                 this.addValue();
                 const index = this.export.Values.length - 1;
-                this.export.Values[index].Name = path.slice(path.lastIndexOf('.') + 1);
+                this.export.Values[index].Name = hasAmbiguousNames ? path : path.slice(path.lastIndexOf('.') + 1);
                 this.export.Values[index].Path = path;
                 this.pathChanged(index);
             }
@@ -261,5 +262,18 @@ export class NewExportComponent implements OnInit {
         if (i !== -1) {
             this.export.Values.splice(i, 1);
         }
+    }
+
+    private hasAmbiguousNames(): boolean {
+        const map = new Map<String, null>();
+        for (const path of this.paths.keys()) {
+            const name = path.slice(path.lastIndexOf('.') + 1);
+            if (map.has(name)) {
+                return true;
+            }
+            map.set(name, null);
+        }
+
+        return false;
     }
 }
