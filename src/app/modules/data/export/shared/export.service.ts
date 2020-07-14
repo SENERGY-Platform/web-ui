@@ -20,7 +20,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
-import {ExportModel, ExportValueCharacteristicModel, ExportValueModel} from './export.model';
+import {ExportModel, ExportValueBaseModel, ExportValueCharacteristicModel, ExportValueModel} from './export.model';
 import {
     DeviceTypeContentVariableModel,
     DeviceTypeServiceModel
@@ -79,6 +79,7 @@ export class ExportService {
         service.outputs.forEach((output, index) => {
             const traverse = this.addCharacteristicToDeviceTypeContentVariable(output.content_variable);
             const timePath = this.getTimePath(traverse);
+            const hasAmbiguousNames = this.hasAmbiguousNames(traverse);
 
             const exportValues: ExportValueModel[] = [];
 
@@ -101,7 +102,7 @@ export class ExportService {
 
                     }
                     exportValues.push({
-                        Name: trav.Path, // trav.Name would not be unique
+                        Name: hasAmbiguousNames ? trav.Path : trav.Name,
                         Type: type,
                         Path: trav.Path,
                     } as ExportValueModel);
@@ -146,6 +147,17 @@ export class ExportService {
             });
         }
         return array;
+    }
+
+    hasAmbiguousNames(values: ExportValueBaseModel[]): boolean {
+        const nameMap = new Map<String, null>();
+        for (const value of values) {
+            if (nameMap.has(value.Name)) {
+                return true;
+            }
+            nameMap.set(value.Name, null);
+        }
+        return false;
     }
 
     getTimePath(traverse: ExportValueCharacteristicModel[]): string {
