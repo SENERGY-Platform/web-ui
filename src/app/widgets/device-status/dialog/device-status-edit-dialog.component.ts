@@ -320,6 +320,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         } else {
             console.error('Did not find relevant index while preparing export.');
         }
+        exportModel.Name = 'generatedByProcessStatusWidget';
+        exportModel.Description = 'generatedByProcessStatusWidget';
     }
 
     private getAspects(): void {
