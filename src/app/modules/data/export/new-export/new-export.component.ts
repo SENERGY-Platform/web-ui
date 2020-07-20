@@ -157,7 +157,6 @@ export class NewExportComponent implements OnInit {
             this.paths.set(path, field.type);
             if (field.characteristic_id === environment.timeStampCharacteristicId) {
                 this.timeSuggest = path;
-                console.log(path);
             }
         }
     }
@@ -236,7 +235,6 @@ export class NewExportComponent implements OnInit {
     }
 
     autofillValues() {
-        console.log(this.selector);
         if (this.selector === 'pipe') {
             this.export.TimePath = 'time';
         } else if (this.selector === 'device') {
@@ -246,7 +244,6 @@ export class NewExportComponent implements OnInit {
         const hasAmbiguousNames = this.hasAmbiguousNames();
         this.export.Values = [];
         this.paths.forEach((_type, path) => {
-            console.log(path);
             if (this.export.TimePath !== path) { // don't add path if it's selected as time
                 this.addValue();
                 const index = this.export.Values.length - 1;
