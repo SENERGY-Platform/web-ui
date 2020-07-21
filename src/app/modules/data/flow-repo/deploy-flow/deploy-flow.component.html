@@ -35,7 +35,7 @@
                 </div>
             </mat-card-content>
         </mat-card>
-        <mat-card *ngFor="let input of inputs; let key = index" style="margin-bottom:10px;">
+        <mat-card *ngFor="let input of inputs; let operatorKey = index" style="margin-bottom:10px;">
             <mat-card-header>
                 <div mat-card-avatar>
                     <mat-icon>poll</mat-icon>
@@ -44,31 +44,34 @@
                 <mat-card-subtitle>{{input.id}}</mat-card-subtitle>
             </mat-card-header>
             <mat-card-content>
-                <div fxLayout="column" *ngFor="let port of input.inPorts">
+                <div fxLayout="column" *ngFor="let port of input.inPorts, let deviceKey = index">
                     <h4>{{ port }}</h4>
                     <div fxLayout="row" fxFlex="">
-                            <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-select (ngModelChange)="deviceChanged($event, input.id, port)" placeholder="Device"
-                                            [(ngModel)]="selectedValues.get(input.id).get(port).device[0]">
-                                    <mat-option *ngFor="let device of devices" [value]="device">
-                                        {{device.name}}
-                                    </mat-option>
-                                </mat-select>
-                                <button mat-icon-button  matSuffix (click)="addAdditionalDevice()">
-                                    <mat-icon>add</mat-icon>
-                                </button>
-                            </mat-form-field>
-
-                    </div>
-                    <div *ngFor="let i of Arr(additionalDevices.length), let key = index">
                         <mat-form-field fxFlex color="accent" appearance="outline">
-                            <mat-select (ngModelChange)="deviceChanged($event, input.id, port)" placeholder="Device"
-                                        [(ngModel)]="selectedValues.get(input.id).get(port).device[key+1]">
-                                <mat-option *ngFor="let device of filteredDevices" [value]="device">
+                            <mat-select (ngModelChange)="deviceChanged($event, input.id, port, operatorKey, deviceKey)"
+                                        placeholder="Device"
+                                        [(ngModel)]="selectedValues.get(input.id).get(port).device[0]">
+                                <mat-option *ngFor="let device of devices" [value]="device">
                                     {{device.name}}
                                 </mat-option>
                             </mat-select>
-                            <button mat-icon-button  matSuffix (click)="removeAdditionalDevice(input, port, key)">
+                            <button mat-icon-button matSuffix (click)="addAdditionalDevice(operatorKey, deviceKey)">
+                                <mat-icon>add</mat-icon>
+                            </button>
+                        </mat-form-field>
+
+                    </div>
+                    <div *ngFor="let i of Arr(additionalDevices[operatorKey][deviceKey].length), let key = index">
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-select (ngModelChange)="deviceChanged($event, input.id, port, operatorKey, deviceKey)"
+                                        placeholder="Device"
+                                        [(ngModel)]="selectedValues.get(input.id).get(port).device[key+1]">
+                                <mat-option *ngFor="let device of filteredDevices[operatorKey][deviceKey]"
+                                            [value]="device">
+                                    {{device.name}}
+                                </mat-option>
+                            </mat-select>
+                            <button mat-icon-button matSuffix (click)="removeAdditionalDevice(input, port, key)">
                                 <mat-icon>remove</mat-icon>
                             </button>
                         </mat-form-field>
