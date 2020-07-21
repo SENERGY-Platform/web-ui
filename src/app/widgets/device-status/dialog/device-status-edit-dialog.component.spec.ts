@@ -64,7 +64,14 @@ describe('DeviceStatusEditDialogComponent', () => {
         exportServiceSpy.startPipeline.and.returnValue(of({ID: 'export_id_123'} as ExportModel));
         const exampleExport: ExportModel = {
             Name: 'device_service_1',
-            Values: [] as any[],
+            Values: [
+                {
+                    Name: 'Time',
+                    Path: 'value.struct.Time',
+                    Type: 'string',
+                    InstanceID: '0'
+                }
+            ],
             TimePath: 'struct.path',
         } as ExportModel;
         exportServiceSpy.prepareDeviceServiceExport.and.returnValue([exampleExport]);
