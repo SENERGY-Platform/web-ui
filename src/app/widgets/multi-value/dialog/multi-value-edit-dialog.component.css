@@ -25,3 +25,7 @@ mat-dialog-actions button:not(:last-child) {
 .actions-warn {
     margin-right: 8px;
 }
+
+::ng-deep .mat-select-panel {
+   min-width: fit-content !important;
+}

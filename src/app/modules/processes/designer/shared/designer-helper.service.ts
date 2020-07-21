@@ -130,7 +130,7 @@ export class DesignerHelperService {
         return new Observable<DesignerErrorModel>((observer) => {
             if (response.error === false && filterArray.length > 0) {
                 this.deviceTypeService.getDeviceTypeFiltered(filterArray).subscribe(
-                    (resp: DeviceTypeModel | null) => {
+                    (resp: DeviceTypeModel[] | null) => {
                         if (resp === null) {
                             response.error = true;
                             response.errorType = 'deviceType';
