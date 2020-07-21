@@ -20,7 +20,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
 import {DeviceInstancesModel} from './device-instances.model';
-import {Observable} from 'rxjs';
+import {forkJoin, Observable, of} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
@@ -30,6 +30,8 @@ import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-ed
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {DeviceTypePermSearchModel} from '../../device-types-overview/shared/device-type-perm-search.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {flatMap} from 'rxjs/operators';
+import {flatten} from '@angular/compiler';
 
 ​
 
@@ -111,6 +113,36 @@ export class DeviceInstancesService {
         );
     }
 
+    getDeviceInstancesByDeviceType(id: string, limit: number, offset: number, orderfeature: string, direction: 'asc' | 'desc'): Observable<DeviceInstancesModel[]> {
+        return this.http.get<DeviceInstancesModel[]>(
+            environment.permissionSearchUrl + '/jwt/select/devices/device_type_id/' + id + '/r/'
+            + limit + '/' + offset + '/' + orderfeature + '/' + direction
+        ).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByDeviceType', []))
+        );
+    }
+
+    /**
+     * Gets devices that match at least one of the provided device types. Array elements are already unique
+     * @param ids device type ids
+     * @param limit limit of devices per type. maximum devices = limit * ids.length
+     */
+    getDeviceInstancesByDeviceTypes(ids: string[], limit: number): Observable<DeviceInstancesModel[]> {
+        const deviceInstancesObservables = ids.map(id => this.getDeviceInstancesByDeviceType(id, limit, 0, 'name', 'asc'));
+        return forkJoin(deviceInstancesObservables)
+            .pipe(flatMap(deviceInstances => {
+                let flatDeviceInstances = flatten(deviceInstances);
+                // make unique
+                flatDeviceInstances = [
+                    ...new Map(
+                        flatDeviceInstances.map(x => [x.id, x])
+                    ).values()
+                ];
+                return of(flatDeviceInstances);
+            }));
+
+    }
 
     getDeviceHistory7d(): Observable<DeviceInstancesHistoryModel[]> {
         if (this.getDeviceHistoryObservable7d === null) {
