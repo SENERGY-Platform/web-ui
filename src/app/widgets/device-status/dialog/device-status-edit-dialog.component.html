@@ -133,9 +133,19 @@
                         <tr>
                             <td>
                                 <mat-form-field color="accent">
+                                    <mat-select formControlName="service" required
+                                                placeholder="Choose Service" [compareWith]="compareServices">
+                                        <mat-option *ngFor="let item of serviceExportValueArray[elementIndex]" [value]="item.service">
+                                            {{item.service.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
                                     <mat-select formControlName="exportValues" required
                                                 placeholder="Choose Value" [compareWith]="compareValues">
-                                        <mat-option *ngFor="let exportValue of exportValues[elementIndex]" [value]="exportValue">
+                                        <mat-option *ngFor="let exportValue of getServiceExportValues(elementIndex)" [value]="exportValue">
                                             {{exportValue.Name}}
                                         </mat-option>
                                     </mat-select>

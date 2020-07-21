@@ -57,7 +57,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     funcArray: DeviceTypeFunctionModel[][] = [];
     selectablesArray: DeploymentsPreparedSelectableModel[][] = [];
     preparedDeployment: DeploymentsPreparedModel[] = [];
-    exportValues: ExportValueCharacteristicModel[][] = [];
+    serviceExportValueArray: { service: DeviceTypeServiceModel, exportValues: ExportValueCharacteristicModel[] }[][] = [];
 
 
     formGroup = this.fb.group({
@@ -117,18 +117,22 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         if (this.getSelectable(elementIndex).value) {
             this.deviceTypeService.getDeviceType(this.getSelectable(elementIndex).value.device.device_type_id).subscribe((deviceType: (DeviceTypeModel | null)) => {
                 if (deviceType) {
+                    const servicesArray: { service: DeviceTypeServiceModel, exportValues: ExportValueCharacteristicModel[] }[] = [];
                     deviceType.services.forEach((deviceTypeService: DeviceTypeServiceModel) => {
                         this.getSelectableServices(elementIndex).forEach((selectableService: DeviceTypeServiceModel) => {
                             if (deviceTypeService.id === selectableService.id) {
                                 const traverse = this.exportService.addCharacteristicToDeviceTypeContentVariable(deviceTypeService.outputs[0].content_variable);
                                 const timePath = this.exportService.getTimePath(traverse);
                                 if (timePath !== '') {
-                                    this.getServiceControl(elementIndex).setValue(deviceTypeService);
-                                    this.exportValues[elementIndex] = traverse;
+                                    servicesArray.push({service: deviceTypeService, exportValues: traverse});
                                 }
                             }
                         });
                     });
+                    this.serviceExportValueArray[elementIndex] = servicesArray;
+                    if (servicesArray.length === 1) {
+                        this.getServiceControl(elementIndex).setValue(servicesArray[0].service);
+                    }
                 }
             });
         }
@@ -171,7 +175,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     createdDeployment(selectable: DeploymentsPreparedSelectableModel, index: number, name: string | null | undefined): Observable<{ status: number, id: string }> {
         const pD = this.preparedDeployment[index];
-        if ( name ) {
+        if (name) {
             pD.name = name;
         }
         pD.elements[0].task.selection.device = selectable.device;
@@ -185,6 +189,18 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     getColor(index: number): string {
         return this.convertRulesControl.at(index).value.color;
+    }
+
+    getServiceExportValues(elementIndex: number): ExportValueCharacteristicModel[] {
+        const serviceId = this.getService(elementIndex) ? this.getService(elementIndex).id : null;
+        if (serviceId) {
+            for (let i = 0; i < this.serviceExportValueArray[elementIndex].length; i++) {
+                if (this.serviceExportValueArray[elementIndex][i].service.id === serviceId) {
+                    return this.serviceExportValueArray[elementIndex][i].exportValues;
+                }
+            }
+        }
+        return [];
     }
 
     addElement(element: DeviceStatusElementModel) {
@@ -207,6 +223,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             }
         });
         this.getSelectable(index).valueChanges.subscribe((selectable) => {
+            this.getServiceControl(index).reset();
             this.getExportValuesControl(index).reset();
             if (selectable !== null) {
                 this.loadDeviceType(index);
@@ -221,7 +238,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     deleteElement(elementIndex: number): void {
         this.funcArray.splice(elementIndex, 1);
         this.selectablesArray.splice(elementIndex, 1);
-        this.exportValues.splice(elementIndex, 1);
+        this.serviceExportValueArray.splice(elementIndex, 1);
         this.preparedDeployment.splice(elementIndex, 1);
         this.elementsControl.removeAt(elementIndex);
     }
@@ -263,6 +280,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     compareValues(a: ExportValueCharacteristicModel, b: ExportValueCharacteristicModel) {
         return a && b && a.Name === b.Name && a.Path === b.Path;
+    }
+
+    compareServices(a: DeviceTypeServiceModel, b: DeviceTypeServiceModel) {
+        return a && b && a.id === b.id;
     }
 
     addConvertRule(convertRule: DeviceStatusConfigConvertRuleModel = {} as DeviceStatusConfigConvertRuleModel) {
