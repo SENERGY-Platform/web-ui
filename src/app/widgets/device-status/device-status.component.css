@@ -58,3 +58,7 @@ tr.mat-row {
 table {
     width: 100%;
 }
+
+.mat-cell, th.mat-header-cell {
+    padding: 0px 8px;
+}
