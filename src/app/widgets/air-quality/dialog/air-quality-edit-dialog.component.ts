@@ -350,8 +350,6 @@ export class AirQualityEditDialogComponent implements OnInit {
             this.ubaStationSelected = widget.properties.ubaStation ? widget.properties.ubaStation : this.ubaStationSelected;
             this.dwd_partregion_name = widget.properties.dwd_partregion_name ? widget.properties.dwd_partregion_name : ' ';
             this.yrPath = widget.properties.yrPath ? widget.properties.yrPath : this.yrPath;
-
-            console.log(widget); //TODO
         });
     }
 

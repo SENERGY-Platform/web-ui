@@ -81,7 +81,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             Type: 'https://schema.org/Text',
             characteristicId: environment.timeStampCharacteristicId,
         };
-        exportServiceSpy.addCharacteristicToDeviceTypeContentVariable.and.returnValue([exampleExportValueCharacteristicModel]); // TODO
+        exportServiceSpy.addCharacteristicToDeviceTypeContentVariable.and.returnValue([exampleExportValueCharacteristicModel]);
         deploymentsServiceSpy.postDeployments.and.returnValue(of({status: 200, id: uuid()}));
         deploymentsServiceSpy.getPreparedDeploymentsByXml.and.returnValue(of({
             id: '',
