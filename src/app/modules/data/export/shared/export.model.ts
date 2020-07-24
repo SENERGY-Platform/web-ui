@@ -33,9 +33,16 @@ export interface ExportModel {
     UpdatedAt: string;
 }
 
-export interface ExportValueModel {
-    InstanceID: string;
+export interface ExportValueBaseModel {
     Name: string;
     Path: string;
     Type: string;
+}
+
+export interface ExportValueModel extends ExportValueBaseModel{
+    InstanceID: string;
+}
+
+export interface ExportValueCharacteristicModel extends ExportValueBaseModel {
+    characteristicId: string;
 }

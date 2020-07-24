@@ -89,7 +89,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                 this.updateMeasurements();
                 this.updateUbaData();
                 this.updateDWDData();
-                this.updateYrData();
+                this.checkYrUpdate();
                 while (!this.isReady()) {
                     await this.delay(100);
                 }
@@ -306,40 +306,57 @@ export class AirQualityComponent implements OnInit, OnDestroy {
         }
     }
 
-    private updateYrData() {
-        if ((this.widget.properties.location && !this.widget.properties.weather) ||
-            (this.widget.properties.location && this.widget.properties.weather &&
-                this.widget.properties.weather.cacheUntil &&
-                this.widget.properties.weather.cacheUntil < new Date())
-        ) {
-            this.readyNeeded++;
-            if (this.widget.properties.yrPath) {
-                this.yrWeatherService.getYrForecast(this.widget.properties.yrPath)
-                    .subscribe(model => {
-                            this.widget.properties.weather = model;
-                            if (this.widget.properties.measurements) {
-                                let index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
-                                if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
-                                    this.widget.properties.measurements[index].outsideData.value =
-                                        Number(model.weatherdata.forecast.tabular.time[0].temperature._value);
-                                }
-                                index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Pressure');
-                                if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
-                                    this.widget.properties.measurements[index].outsideData.value =
-                                        Number(model.weatherdata.forecast.tabular.time[0].pressure._value);
-                                }
-                            }
-                            this.numReady++;
-                        },
-                        error => {
-                            console.error('Air Quality Widget: Could not load Yr data', error);
-                            this.numReady++;
-                        });
+    private checkYrUpdate() {
+        if (this.widget.properties.location && !this.widget.properties.weather) {
+            this.updateYrData();
+            return;
+        }
+        if (this.widget.properties.location && this.widget.properties.weather &&
+            this.widget.properties.weather.cacheUntil) {
+            const cacheDateString = (this.widget.properties.weather || {cacheUntil: ''}).cacheUntil;
+            let cacheDate: Date = new Date();
+            if (typeof cacheDateString === 'string') {
+                cacheDate = new Date(cacheDate);
+            }
+            if (cacheDate <= new Date()) {
+                this.updateYrData();
+                return;
             } else {
-                this.numReady++;
+                return;
             }
         }
     }
+
+    private updateYrData() {
+        this.readyNeeded++;
+        if (this.widget.properties.yrPath) {
+            this.yrWeatherService.getYrForecast(this.widget.properties.yrPath)
+                .subscribe(model => {
+                        this.widget.properties.weather = model;
+                        if (this.widget.properties.measurements) {
+                            let index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
+                            if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
+                                this.widget.properties.measurements[index].outsideData.value =
+                                    Number(model.weatherdata.forecast.tabular.time[0].temperature._value);
+                            }
+                            index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Pressure');
+                            if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
+                                this.widget.properties.measurements[index].outsideData.value =
+                                    Number(model.weatherdata.forecast.tabular.time[0].pressure._value);
+                            }
+                        }
+                        this.numReady++;
+                    },
+                    error => {
+                        console.error('Air Quality Widget: Could not load Yr data', error);
+                        this.numReady++;
+                    });
+        } else {
+            console.log('no yr path set', this.widget.properties);
+            this.numReady++;
+        }
+    }
+
 
     private delay(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));

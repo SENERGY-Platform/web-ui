@@ -19,10 +19,12 @@ import {
     DeviceTypeServiceModel
 } from '../../../modules/devices/device-types-overview/shared/device-type.model';
 import {DeploymentsPreparedSelectableModel} from '../../../modules/processes/deployments/shared/deployments-prepared.model';
+import {ExportValueCharacteristicModel} from '../../../modules/data/export/shared/export.model';
 
 export interface DeviceStatusPropertiesModel {
     refreshTime?: number;
     elements?: DeviceStatusElementModel[];
+    convertRules?: DeviceStatusConfigConvertRuleModel[];
 }
 
 export interface DeviceStatusElementModel {
@@ -33,20 +35,12 @@ export interface DeviceStatusElementModel {
     service: DeviceTypeServiceModel | null;
     deploymentId: string | null;
     exportId: string | null;
-    exportValues: DeviceStatusExportValuesModel | null;
+    exportValues: ExportValueCharacteristicModel | null;
 }
 
-export interface DeviceStatusExportValuesModel {
-    name: string;
-    path: string;
-    type: string;
-    characteristicId: string;
-}
 
-export enum MultiValueOrderEnum {
-    Default,
-    AlphabeticallyAsc,
-    AlphabeticallyDesc,
-    ValueAsc,
-    ValueDesc
+export interface DeviceStatusConfigConvertRuleModel {
+    status: string;
+    icon: string;
+    color: string;
 }

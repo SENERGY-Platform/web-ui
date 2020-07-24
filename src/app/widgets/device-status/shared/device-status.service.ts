@@ -17,10 +17,13 @@
 import {Injectable} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {DeviceStatusElementModel} from './device-status-properties.model';
+import {
+    DeviceStatusElementModel
+} from './device-status-properties.model';
 import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable({
     providedIn: 'root'
@@ -30,10 +33,11 @@ export class DeviceStatusService {
     constructor(private dialog: MatDialog,
                 private dashboardService: DashboardService,
                 private exportService: ExportService,
-                private deploymentsService: DeploymentsService) {
+                private deploymentsService: DeploymentsService,
+                private http: HttpClient) {
     }
 
-      deleteElements(elements: DeviceStatusElementModel[] | undefined): void {
+    deleteElements(elements: DeviceStatusElementModel[] | undefined): void {
         if (elements) {
             elements.forEach((element: DeviceStatusElementModel) => {
                 if (element.exportId) {

@@ -25,3 +25,11 @@ mat-dialog-actions button:not(:last-child) {
 .actions-warn {
     margin-right: 8px;
 }
+
+.convert-input {
+    height: 32px
+}
+
+.margin-add-convert-button {
+    margin: 8px
+}

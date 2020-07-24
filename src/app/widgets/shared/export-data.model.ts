@@ -14,44 +14,14 @@
  * limitations under the License.
  */
 
-.center {
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    width: 80%;
-    padding: 10px;
+
+export interface TimeValuePairModel {
+    time: string;
+    value: string | number | boolean;
 }
 
-.text-inside-grid {
-    position: absolute;
-    left: 5px;
-}
-
-.boundary-input-field {
-    width: 15%;
-}
-
-.unit {
-    margin-left: 1%;
-    margin-right: 5%;
-}
-
-.help-text {
-    font-size: smaller;
-}
-
-.small-error-text {
-    font-size: smaller;
-}
-
-.searchbox {
-    min-width: 50%;
-}
-
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}
-
-::ng-deep .mat-select-panel {
-    min-width: fit-content !important;
+export interface LastValuesRequestElementModel {
+    measurement: string;
+    columnName: string;
+    math?: string;
 }

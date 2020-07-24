@@ -34,6 +34,48 @@
                 </td>
             </tr>
         </table>
+        <div class="margin-add-convert-button">
+            <button mat-stroked-button color="accent" (click)="addConvertRule()">add Convert Rule</button>
+        </div>
+        <table formArrayName="convertRules">
+            <tr [formGroupName]="convertRuleIndex"
+                *ngFor="let convertRule of convertRulesControl.controls; let convertRuleIndex = index">
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Status</mat-label>
+                        <input class="convert-input" type="text" matInput placeholder="Status" formControlName="status">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-select formControlName="icon"
+                                    placeholder="Choose Icon" class="convert-input">
+                            <mat-select-trigger>
+                                <mat-icon [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
+                            </mat-select-trigger>
+                            <mat-option>-- None --</mat-option>
+                            <mat-option *ngFor="let icon of icons" [value]="icon">
+                                <mat-icon>{{icon}}</mat-icon>
+                                {{icon}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Color</mat-label>
+                        <input class="convert-input" type="text" matInput placeholder="Icon" formControlName="color">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <button mat-icon-button
+                            (click)="deleteConvertRule(convertRuleIndex)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
+            </tr>
+        </table>
+
         <mat-accordion formArrayName="elements">
             <mat-expansion-panel [formGroupName]="elementIndex"
                                  *ngFor="let elementControl of elementsControl.controls; let elementIndex = index">
@@ -91,10 +133,20 @@
                         <tr>
                             <td>
                                 <mat-form-field color="accent">
+                                    <mat-select formControlName="service" required
+                                                placeholder="Choose Service" [compareWith]="compareServices">
+                                        <mat-option *ngFor="let item of serviceExportValueArray[elementIndex]" [value]="item.service">
+                                            {{item.service.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
                                     <mat-select formControlName="exportValues" required
                                                 placeholder="Choose Value" [compareWith]="compareValues">
-                                        <mat-option *ngFor="let exportValue of exportValues[elementIndex]" [value]="exportValue">
-                                            {{exportValue.name}}
+                                        <mat-option *ngFor="let exportValue of getServiceExportValues(elementIndex)" [value]="exportValue">
+                                            {{exportValue.Name}}
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>

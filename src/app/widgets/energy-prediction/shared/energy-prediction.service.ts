@@ -29,6 +29,8 @@ import {ErrorHandlerService} from '../../../core/services/error-handler.service'
 import {HttpClient} from '@angular/common/http';
 import {ChartsExportModel} from '../../charts/export/shared/charts-export.model';
 import {ChartsExportRequestPayloadModel} from '../../charts/export/shared/charts-export-request-payload.model';
+import {ExportDataService} from '../../shared/export-data.service';
+import {LastValuesRequestElementModel} from '../../shared/export-data.model';
 
 @Injectable({
     providedIn: 'root'
@@ -38,7 +40,7 @@ export class EnergyPredictionService {
     constructor(private dialog: MatDialog,
                 private dashboardService: DashboardService,
                 private errorHandlerService: ErrorHandlerService,
-                private http: HttpClient) {
+                private exportDataService: ExportDataService) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -63,82 +65,36 @@ export class EnergyPredictionService {
             const m = widget.properties.measurement;
             const columns = widget.properties.columns || {} as EnergyPredictionColumnModel;
             if (m) {
-                const requestPayload: ChartsExportRequestPayloadModel = {
-                    time: {
-                        last: '500000w', // arbitrary high number
-                        end: undefined,
-                        start: undefined
-                    },
-                    group: {
-                        type: undefined,
-                        time: ''
-                    },
-                    queries: [{id: m.id, fields: []}],
-                    limit: 1
-                };
+                const requestPayload: LastValuesRequestElementModel[] = [];
 
-                const fields = [];
-                if (columns.prediction) {
-                    fields.push({name: columns.prediction, math: widget.properties.math || ''});
-                }
-                if (columns.predictionTotal) {
-                    fields.push({name: columns.predictionTotal, math: widget.properties.math || ''});
-                }
-                if (columns.timestamp) {
-                    fields.push({name: columns.timestamp, math: ''});
-                }
+                requestPayload.push({
+                    measurement: m.id,
+                    columnName: columns.prediction,
+                    math: widget.properties.math,
+                });
+                requestPayload.push({
+                    measurement: m.id,
+                    columnName: columns.predictionTotal,
+                    math: widget.properties.math,
+                });
+                requestPayload.push({measurement: m.id, columnName: columns.timestamp});
 
-                requestPayload.queries[0].fields = fields;
-
-                this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(data => {
-                    observer.next(this.extractData(data, widget));
+                this.exportDataService.getLastValues(requestPayload).subscribe(pairs => {
+                    if (pairs.length !== 3) {
+                        observer.error('incomplete result');
+                        observer.complete();
+                        return;
+                    }
+                    const model: EnergyPredictionModel = {
+                        prediction: Number(pairs[0].value),
+                        predictionTotal: Number(pairs[1].value),
+                        timestamp: pairs[2].value as string,
+                    };
+                    observer.next(model);
                     observer.complete();
                 });
             }
         });
     }
-
-    private extractData(data: ChartsExportModel, widget: WidgetModel): EnergyPredictionModel {
-        const model: EnergyPredictionModel = {prediction: 0, predictionTotal: 0, timestamp: ''};
-        if (data === undefined || data.results === undefined || data.results.length === 0
-            || data.results[0].series === undefined || data.results[0].series.length === 0) {
-            console.log('Got empty results for EnergyPrediction');
-            return model;
-        }
-        const series = data.results[0].series[0];
-        const id = widget.properties.measurement ? widget.properties.measurement.id : '';
-        try {
-            const valueName = id + '.' + (widget.properties.columns ? widget.properties.columns.prediction : '');
-            const predictionIndex = series.columns.indexOf(valueName);
-            model.prediction = series.values[0][predictionIndex] as number;
-        } catch (e) {
-            console.error('Could not extract Prediction value: ' + e);
-        }
-
-        try {
-            const valueName = id + '.' + (widget.properties.columns ? widget.properties.columns.predictionTotal : '');
-            const predictionIndex = series.columns.indexOf(valueName);
-            model.predictionTotal = series.values[0][predictionIndex] as number;
-        } catch (e) {
-            console.error('Could not extract total prediction value: ' + e);
-        }
-
-        try {
-            const timestampName = id + '.' + (widget.properties.columns ? widget.properties.columns.timestamp : '');
-            const timestampIndex = series.columns.indexOf(timestampName);
-            model.timestamp = series.values[0][timestampIndex] as string;
-        } catch (e) {
-            console.error('Could not extract Timestamp value: ' + e);
-        }
-        return model;
-    }
-
-    private getData(id: string): Observable<ChartsExportModel> {
-        return this.http.get<ChartsExportModel>(environment.influxAPIURL + '/measurement/' + id + '?limit=1').pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as ChartsExportModel))
-        );
-    }
-
 }
 

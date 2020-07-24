@@ -65,7 +65,7 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc').subscribe((deployments: DeploymentsModel[]) => {
+        this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc', '').subscribe((deployments: DeploymentsModel[]) => {
             this.deployments = deployments;
         });
     }

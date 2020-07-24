@@ -57,14 +57,9 @@
 
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>JSON time path</mat-label>
-            <mat-select #input *ngIf="selector==='device'"  [(ngModel)]="export.TimePath" placeholder="JSON time path">
+            <mat-select #input [(ngModel)]="export.TimePath" placeholder="JSON time path" (selectionChange)="ensureTimeNotTwice()">
                 <mat-option *ngFor="let path of paths | keyvalue" [value]="path.key">
                     {{path.key}}
-                </mat-option>
-            </mat-select>
-            <mat-select #input *ngIf="selector==='pipe'"  [(ngModel)]="export.TimePath" placeholder="JSON time path">
-                <mat-option *ngFor="let path of timeSuggest" [value]="path">
-                    {{path}}
                 </mat-option>
             </mat-select>
         </mat-form-field>

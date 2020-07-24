@@ -31,7 +31,8 @@ export interface MultiValueMeasurement {
     column: ExportValueModel;
     unit: string;
     math?: string;
-    data?: (number | string);
+    data?: (number | string | boolean);
+    time?: string;
     lowerBoundary?: number;
     upperBoundary?: number;
     warning_enabled?: boolean;
@@ -42,5 +43,7 @@ export enum MultiValueOrderEnum {
     AlphabeticallyAsc,
     AlphabeticallyDesc,
     ValueAsc,
-    ValueDesc
+    ValueDesc,
+    TimeAsc,
+    TimeDesc,
 }

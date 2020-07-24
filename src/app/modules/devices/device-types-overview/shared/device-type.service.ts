@@ -19,15 +19,20 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
-import {Observable} from 'rxjs';
+import {forkJoin, Observable, of} from 'rxjs';
 import {
-    DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
-    DeviceTypeDeviceClassModel, DeviceTypeFunctionModel,
-    DeviceTypeModel, DeviceTypeProtocolModel,
+    DeviceTypeAspectModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeDeviceClassModel,
+    DeviceTypeFunctionModel,
+    DeviceTypeModel,
+    DeviceTypeProtocolModel,
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
 import {MatDialog} from '@angular/material/dialog';
+import {flatMap} from 'rxjs/operators';
+import {flatten} from '@angular/compiler';
 
 @Injectable({
     providedIn: 'root'
@@ -44,11 +49,28 @@ export class DeviceTypeService {
         );
     }
 
-    getDeviceTypeFiltered(filter: {function_id: string, device_class_id: string, aspect_id: string}[]): Observable<DeviceTypeModel | null> {
-        return this.http.get<DeviceTypeModel>
+    getDeviceTypeFiltered(filter: { function_id: string, device_class_id: string, aspect_id: string }[]): Observable<DeviceTypeModel[]> {
+        return this.http.get<DeviceTypeModel[]>
         (environment.semanticRepoUrl + '/device-types?filter=' + JSON.stringify(filter)).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null))
-        );
+        ).pipe(map(res => res || []));
+    }
+
+    /**
+     * Joins filters with an OR condition and returns an array with unique device types
+     */
+    getDeviceTypeFilteredOr(filters: { function_id: string, device_class_id: string, aspect_id: string }[]): Observable<DeviceTypeModel[]> {
+        const deviceTypesObservables = filters.map(f => this.getDeviceTypeFiltered([f]));
+        return forkJoin(deviceTypesObservables)
+            .pipe(flatMap(deviceTypes => {
+                let flatDeviceTypes = flatten(deviceTypes);
+                flatDeviceTypes = [
+                    ...new Map(
+                        flatDeviceTypes.map(x => [x.id, x])
+                    ).values()
+                ];
+                return of(flatDeviceTypes);
+            }));
     }
 
     getDeviceTypes(searchText: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypePermSearchModel[]> {

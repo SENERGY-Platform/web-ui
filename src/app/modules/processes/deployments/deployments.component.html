@@ -23,6 +23,9 @@
                     *ngIf="selectedItems.length > 0 && ready">
                 <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn">delete</mat-icon>
             </button>
+            <form class="filter-margin" [formGroup]="filterControl">
+                <mat-checkbox formControlName="generated">show generated</mat-checkbox>
+            </form>
             <senergy-sort [sortAttributes]="sortAttributes"
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         </div>

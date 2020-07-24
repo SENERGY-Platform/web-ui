@@ -22,18 +22,19 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {
-    DeviceTypeAspectModel, DeviceTypeContentVariableModel,
+    DeviceTypeAspectModel,
     DeviceTypeFunctionModel,
-    DeviceTypeModel, DeviceTypeServiceModel
+    DeviceTypeModel,
+    DeviceTypeServiceModel
 } from '../../../modules/devices/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
-import {DeviceStatusElementModel, DeviceStatusExportValuesModel} from '../shared/device-status-properties.model';
+import {DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel} from '../shared/device-status-properties.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {
     DeploymentsPreparedModel,
     DeploymentsPreparedSelectableModel
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
-import {ExportModel} from '../../../modules/data/export/shared/export.model';
+import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/data/export/shared/export.model';
 import {forkJoin, Observable, of} from 'rxjs';
 import {environment} from '../../../../environments/environment';
 import {DeviceStatusService} from '../shared/device-status.service';
@@ -46,6 +47,9 @@ import {DeviceStatusService} from '../shared/device-status.service';
 export class DeviceStatusEditDialogComponent implements OnInit {
 
     aspects: DeviceTypeAspectModel[] = [];
+    icons: string[] = [
+        'power', 'power_off', 'toggle_on', 'toggle_off', 'sensor_door', 'meeting_room', 'tv', 'tv_off', 'flash_on', 'flash_off', 'emoji_objects', 'check_circle_outline', 'highlight_off'
+    ];
     dashboardId: string;
     widgetId: string;
     widgetNew: WidgetModel = {} as WidgetModel;
@@ -53,17 +57,14 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     funcArray: DeviceTypeFunctionModel[][] = [];
     selectablesArray: DeploymentsPreparedSelectableModel[][] = [];
     preparedDeployment: DeploymentsPreparedModel[] = [];
-    exportValues: DeviceStatusExportValuesModel[][] = [];
+    serviceExportValueArray: { service: DeviceTypeServiceModel, exportValues: ExportValueCharacteristicModel[] }[][] = [];
 
-    typeString = 'https://schema.org/Text';
-    typeInteger = 'https://schema.org/Integer';
-    typeFloat = 'https://schema.org/Float';
-    typeBoolean = 'https://schema.org/Boolean';
 
     formGroup = this.fb.group({
         name: ['', Validators.required],
         refreshTime: [0],
         elements: this.fb.array([]),
+        convertRules: this.fb.array([]),
     });
 
 
@@ -90,6 +91,11 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             this.widgetNew = widget;
             this.formGroup.patchValue({'name': widget.name});
             this.formGroup.patchValue({'refreshTime': widget.properties.refreshTime || 0});
+            if (widget.properties.convertRules) {
+                widget.properties.convertRules.forEach((convertRule: DeviceStatusConfigConvertRuleModel) => {
+                    this.addConvertRule(convertRule);
+                });
+            }
             if (widget.properties.elements) {
                 widget.properties.elements.forEach((element: DeviceStatusElementModel) => {
                     this.addElement(element);
@@ -111,50 +117,25 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         if (this.getSelectable(elementIndex).value) {
             this.deviceTypeService.getDeviceType(this.getSelectable(elementIndex).value.device.device_type_id).subscribe((deviceType: (DeviceTypeModel | null)) => {
                 if (deviceType) {
+                    const servicesArray: { service: DeviceTypeServiceModel, exportValues: ExportValueCharacteristicModel[] }[] = [];
                     deviceType.services.forEach((deviceTypeService: DeviceTypeServiceModel) => {
                         this.getSelectableServices(elementIndex).forEach((selectableService: DeviceTypeServiceModel) => {
                             if (deviceTypeService.id === selectableService.id) {
-                                const traverse = this.traverseDataStructure('value', deviceTypeService.outputs[0].content_variable, []);
-                                const timePath = this.getTimePath(traverse);
+                                const traverse = this.exportService.addCharacteristicToDeviceTypeContentVariable(deviceTypeService.outputs[0].content_variable);
+                                const timePath = this.exportService.getTimePath(traverse);
                                 if (timePath !== '') {
-                                    this.getServiceControl(elementIndex).setValue(deviceTypeService);
-                                    this.exportValues[elementIndex] = traverse;
+                                    servicesArray.push({service: deviceTypeService, exportValues: traverse});
                                 }
                             }
                         });
                     });
+                    this.serviceExportValueArray[elementIndex] = servicesArray;
+                    if (servicesArray.length === 1) {
+                        this.getServiceControl(elementIndex).setValue(servicesArray[0].service);
+                    }
                 }
             });
         }
-    }
-
-    private getTimePath(traverse: DeviceStatusExportValuesModel[]): string {
-        let timePath = '';
-        traverse.forEach((t: DeviceStatusExportValuesModel) => {
-            if (t.characteristicId === environment.timeStampCharacteristicId) {
-                timePath = t.path;
-            }
-        });
-        return timePath;
-    }
-
-    private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel, array: DeviceStatusExportValuesModel[]): DeviceStatusExportValuesModel[] {
-        if (field.type === 'https://schema.org/StructuredValue' && field.type !== undefined && field.type !== null) {
-            pathString += '.' + field.name;
-            if (field.sub_content_variables !== undefined) {
-                field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel) => {
-                    this.traverseDataStructure(pathString, innerField, array);
-                });
-            }
-        } else {
-            array.push({
-                name: field.name || '',
-                path: pathString + '.' + field.name,
-                type: field.type || '',
-                characteristicId: field.characteristic_id || '',
-            });
-        }
-        return array;
     }
 
     loadDevices(elementIndex: number): void {
@@ -192,11 +173,34 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         }
     }
 
-    createdDeployment(selectable: DeploymentsPreparedSelectableModel, index: number): Observable<{ status: number, id: string }> {
+    createdDeployment(selectable: DeploymentsPreparedSelectableModel, index: number, name: string | null | undefined): Observable<{ status: number, id: string }> {
         const pD = this.preparedDeployment[index];
+        if (name) {
+            pD.name = name;
+        }
         pD.elements[0].task.selection.device = selectable.device;
         pD.elements[0].task.selection.service = this.getService(index);
-        return this.deploymentsService.postDeployments(pD);
+        return this.deploymentsService.postDeployments(pD, 'generated');
+    }
+
+    getIcon(index: number): string {
+        return this.convertRulesControl.at(index).value.icon;
+    }
+
+    getColor(index: number): string {
+        return this.convertRulesControl.at(index).value.color;
+    }
+
+    getServiceExportValues(elementIndex: number): ExportValueCharacteristicModel[] {
+        const serviceId = this.getService(elementIndex) ? this.getService(elementIndex).id : null;
+        if (serviceId) {
+            for (let i = 0; i < this.serviceExportValueArray[elementIndex].length; i++) {
+                if (this.serviceExportValueArray[elementIndex][i].service.id === serviceId) {
+                    return this.serviceExportValueArray[elementIndex][i].exportValues;
+                }
+            }
+        }
+        return [];
     }
 
     addElement(element: DeviceStatusElementModel) {
@@ -219,6 +223,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             }
         });
         this.getSelectable(index).valueChanges.subscribe((selectable) => {
+            this.getServiceControl(index).reset();
             this.getExportValuesControl(index).reset();
             if (selectable !== null) {
                 this.loadDeviceType(index);
@@ -233,9 +238,13 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     deleteElement(elementIndex: number): void {
         this.funcArray.splice(elementIndex, 1);
         this.selectablesArray.splice(elementIndex, 1);
-        this.exportValues.splice(elementIndex, 1);
+        this.serviceExportValueArray.splice(elementIndex, 1);
         this.preparedDeployment.splice(elementIndex, 1);
         this.elementsControl.removeAt(elementIndex);
+    }
+
+    deleteConvertRule(index: number): void {
+        this.convertRulesControl.removeAt(index);
     }
 
     save(): void {
@@ -269,8 +278,16 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return a && b && a.device.id === b.device.id;
     }
 
-    compareValues(a: DeviceStatusExportValuesModel, b: DeviceStatusExportValuesModel) {
-        return a && b && a.name === b.name && a.path === b.path;
+    compareValues(a: ExportValueCharacteristicModel, b: ExportValueCharacteristicModel) {
+        return a && b && a.Name === b.Name && a.Path === b.Path;
+    }
+
+    compareServices(a: DeviceTypeServiceModel, b: DeviceTypeServiceModel) {
+        return a && b && a.id === b.id;
+    }
+
+    addConvertRule(convertRule: DeviceStatusConfigConvertRuleModel = {} as DeviceStatusConfigConvertRuleModel) {
+        this.convertRulesControl.push(this.setConvertRule(convertRule));
     }
 
     private getDeploymentArray(): Observable<{ status: number, id: string }>[] {
@@ -280,7 +297,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 if (this.getService(index).protocol_id === environment.mqttProtocolID) {
                     deploymentArray.push(of({status: 0, id: ''}));
                 } else {
-                    deploymentArray.push(this.createdDeployment(element.selectable, index));
+                    deploymentArray.push(this.createdDeployment(element.selectable, index, 'generated by widget ' + this.widgetName + ' ' + element.name));
                 }
             }
         });
@@ -290,18 +307,25 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     private getExportArray(): Observable<ExportModel>[] {
         const exportArray: Observable<ExportModel>[] = [];
         this.elements.forEach((element: DeviceStatusElementModel, elementIndex: number) => {
-            if (element.selectable) {
-                exportArray.push(this.createExport(element.selectable, elementIndex));
+            if (element.selectable && element.service) {
+                const exports = this.exportService.prepareDeviceServiceExport(element.selectable.device, element.service);
+                if (exports.length !== 1) {
+                    console.error('Unexpectedly got more than one export');
+                    return;
+                }
+                this.cleanExportModel(exports[0], this.getExportValues(elementIndex));
+                exportArray.push(this.exportService.startPipeline(exports[0]));
             }
         });
         return exportArray;
     }
 
     private saveWidget() {
-        this.widgetNew.name = (this.formGroup.get('name') as FormControl).value;
+        this.widgetNew.name = this.widgetName;
         this.widgetNew.properties = {};
         this.widgetNew.properties.refreshTime = (this.formGroup.get('refreshTime') as FormControl).value;
         this.widgetNew.properties.elements = this.elements;
+        this.widgetNew.properties.convertRules = this.convertRulesControl.value;
         this.dashboardService.updateWidget(this.dashboardId, this.widgetNew).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widgetNew);
@@ -309,43 +333,16 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         });
     }
 
-    private createExport(selectable: DeploymentsPreparedSelectableModel, elementIndex: number): Observable<ExportModel> {
-        const traverse = this.traverseDataStructure('value', this.getService(elementIndex).outputs[0].content_variable, []);
-        const timePath = this.getTimePath(traverse);
-
-        let type = '';
-        switch (this.getExportValues(elementIndex).type) {
-            case this.typeString:
-                type = 'string';
-                break;
-            case this.typeFloat:
-                type = 'float';
-                break;
-            case this.typeInteger:
-                type = 'int';
-                break;
-            case this.typeBoolean:
-                type = 'bool';
-                break;
-
+    private cleanExportModel(exportModel: ExportModel, exportValue: ExportValueCharacteristicModel) {
+        const relevantIndex = exportModel.Values.findIndex(value => value.Path === exportValue.Path);
+        if (relevantIndex !== -1) {
+            exportModel.Values = [exportModel.Values[relevantIndex]];
+            exportModel.Values[0].Name = exportValue.Name; // only one value per export --> name is unique
+        } else {
+            console.error('Did not find relevant index while preparing export.');
         }
-        const exp: ExportModel = {
-            Name: 'generatedByProcessStatusWidget',
-            Description: 'generatedByProcessStatusWidget',
-            TimePath: timePath,
-            Values: [{
-                Name: this.getExportValues(elementIndex).name,
-                Type: type,
-                Path: this.getExportValues(elementIndex).path,
-            }],
-            EntityName: selectable.device.name,
-            Filter: selectable.device.id,
-            FilterType: 'deviceId',
-            ServiceName: this.getService(elementIndex).name,
-            Topic: this.getService(elementIndex).id.replace(/#/g, '_').replace(/:/g, '_'),
-            Offset: 'largest'
-        } as ExportModel;
-        return this.exportService.startPipeline(exp);
+        exportModel.Name = 'generatedByProcessStatusWidget';
+        exportModel.Description = 'generatedByProcessStatusWidget';
     }
 
     private getAspects(): void {
@@ -368,12 +365,28 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         });
     }
 
+    private setConvertRule(convertRule: DeviceStatusConfigConvertRuleModel): FormGroup {
+        return this.fb.group({
+            status: [convertRule.status],
+            icon: [convertRule.icon],
+            color: [convertRule.color],
+        });
+    }
+
     get elementsControl(): FormArray {
         return this.formGroup.get('elements') as FormArray;
     }
 
+    get convertRulesControl(): FormArray {
+        return this.formGroup.get('convertRules') as FormArray;
+    }
+
     get elements(): DeviceStatusElementModel[] {
         return <DeviceStatusElementModel[]>this.elementsControl.value;
+    }
+
+    get widgetName(): string {
+        return (this.formGroup.get('name') as FormControl).value;
     }
 
     private getAspectId(elementIndex: number): FormControl {
@@ -416,8 +429,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return <DeviceTypeServiceModel>this.getServiceControl(elementIndex).value;
     }
 
-    private getExportValues(elementIndex: number): DeviceStatusExportValuesModel {
-        return <DeviceStatusExportValuesModel>this.getExportValuesControl(elementIndex).value;
+    private getExportValues(elementIndex: number): ExportValueCharacteristicModel {
+        return <ExportValueCharacteristicModel>this.getExportValuesControl(elementIndex).value;
     }
 
 }

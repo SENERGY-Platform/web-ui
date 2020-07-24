@@ -25,7 +25,7 @@ import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.mo
 import {of} from 'rxjs';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import {DeviceStatusElementModel, DeviceStatusExportValuesModel} from '../shared/device-status-properties.model';
+import {DeviceStatusElementModel} from '../shared/device-status-properties.model';
 import {
     DeviceTypeAspectModel,
     DeviceTypeFunctionModel,
@@ -42,7 +42,7 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatInputModule} from '@angular/material/input';
 import {By} from '@angular/platform-browser';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
-import {ExportModel} from '../../../modules/data/export/shared/export.model';
+import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/data/export/shared/export.model';
 import {util} from 'jointjs';
 import uuid = util.uuid;
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
@@ -62,6 +62,26 @@ describe('DeviceStatusEditDialogComponent', () => {
     beforeEach(async(() => {
 
         exportServiceSpy.startPipeline.and.returnValue(of({ID: 'export_id_123'} as ExportModel));
+        const exampleExport: ExportModel = {
+            Name: 'device_service_1',
+            Values: [
+                {
+                    Name: 'Time',
+                    Path: 'value.struct.Time',
+                    Type: 'string',
+                    InstanceID: '0'
+                }
+            ],
+            TimePath: 'struct.path',
+        } as ExportModel;
+        exportServiceSpy.prepareDeviceServiceExport.and.returnValue([exampleExport]);
+        const exampleExportValueCharacteristicModel: ExportValueCharacteristicModel = {
+            Name: 'Time',
+            Path: 'value.struct.Time',
+            Type: 'https://schema.org/Text',
+            characteristicId: environment.timeStampCharacteristicId,
+        };
+        exportServiceSpy.addCharacteristicToDeviceTypeContentVariable.and.returnValue([exampleExportValueCharacteristicModel]);
         deploymentsServiceSpy.postDeployments.and.returnValue(of({status: 200, id: uuid()}));
         deploymentsServiceSpy.getPreparedDeploymentsByXml.and.returnValue(of({
             id: '',
@@ -137,7 +157,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.funcArray.length).toBe(0);
         expect(component.selectablesArray.length).toBe(0);
         expect(component.preparedDeployment.length).toBe(0);
-        expect(component.exportValues.length).toBe(0);
+        expect(component.serviceExportValueArray.length).toBe(0);
         expect(component.aspects.length).toBe(1);
         expect(component.aspects[0]).toEqual({id: 'aspect_1', name: 'Air'});
         expect(component.dashboardId).toBe('dashboardId-1');
@@ -160,7 +180,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.funcArray.length).toBe(0);
         expect(component.selectablesArray.length).toBe(0);
         expect(component.preparedDeployment.length).toBe(0);
-        expect(component.exportValues.length).toBe(0);
+        expect(component.serviceExportValueArray.length).toBe(0);
     }));
 
     it('select aspect', async(() => {
@@ -174,7 +194,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         } as DeviceTypeFunctionModel]);
         expect(component.selectablesArray.length).toBe(0);
         expect(component.preparedDeployment.length).toBe(0);
-        expect(component.exportValues.length).toBe(0);
+        expect(component.serviceExportValueArray.length).toBe(0);
         expect(component.elements[0]).toEqual({
             exportValues: null,
             exportId: null,
@@ -197,7 +217,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             services: [{id: 'service_1', name: 'service'}]
         }] as DeploymentsPreparedSelectableModel[]);
         expect(component.preparedDeployment.length).toBe(1);
-        expect(component.exportValues.length).toBe(0);
+        expect(component.serviceExportValueArray.length).toBe(0);
         expect(component.elements[0]).toEqual({
             exportValues: null,
             exportId: null,
@@ -217,7 +237,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         component.elementsControl.at(0).patchValue({'selectable': component.selectablesArray[0][0]});
 
         expect(component.preparedDeployment.length).toBe(1);
-        expect(component.exportValues.length).toBe(1);
+        expect(component.serviceExportValueArray.length).toBe(1);
         expect(component.elements[0]).toEqual({
             exportValues: null,
             exportId: null,
@@ -247,17 +267,18 @@ describe('DeviceStatusEditDialogComponent', () => {
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
         component.elementsControl.at(0).patchValue({'selectable': component.selectablesArray[0][0]});
-        component.elementsControl.at(0).patchValue({'exportValues': component.exportValues[0][0]});
+        component.elementsControl.at(0).patchValue({'service': component.serviceExportValueArray[0][0].service});
+        component.elementsControl.at(0).patchValue({'exportValues': component.serviceExportValueArray[0][0].exportValues[0]});
 
         expect(component.preparedDeployment.length).toBe(1);
-        expect(component.exportValues.length).toBe(1);
+        expect(component.serviceExportValueArray.length).toBe(1);
         expect(component.elements[0]).toEqual({
             exportValues: {
-                name: 'Time',
+                Name: 'Time',
                 characteristicId: environment.timeStampCharacteristicId,
-                path: 'value.struct.Time',
-                type: 'https://schema.org/Text'
-            } as DeviceStatusExportValuesModel,
+                Path: 'value.struct.Time',
+                Type: 'https://schema.org/Text'
+            } as ExportValueCharacteristicModel,
             exportId: null,
             deploymentId: null,
             service: {
@@ -285,13 +306,14 @@ describe('DeviceStatusEditDialogComponent', () => {
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
         component.elementsControl.at(0).patchValue({'selectable': component.selectablesArray[0][0]});
-        component.elementsControl.at(0).patchValue({'exportValues': component.exportValues[0][0]});
+        component.elementsControl.at(0).patchValue({'service': component.serviceExportValueArray[0][0].service});
+        component.elementsControl.at(0).patchValue({'exportValues': component.serviceExportValueArray[0][0].exportValues[0]});
         component.deleteElement(0);
         expect(component.elements.length).toBe(0);
         expect(component.funcArray.length).toBe(0);
         expect(component.selectablesArray.length).toBe(0);
         expect(component.preparedDeployment.length).toBe(0);
-        expect(component.exportValues.length).toBe(0);
+        expect(component.serviceExportValueArray.length).toBe(0);
         expect(component.aspects[0]).toEqual({id: 'aspect_1', name: 'Air'});
         expect(component.dashboardId).toBe('dashboardId-1');
         expect(component.widgetId).toBe('widgetId-1');
@@ -302,7 +324,8 @@ describe('DeviceStatusEditDialogComponent', () => {
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
         component.elementsControl.at(0).patchValue({'selectable': component.selectablesArray[0][0]});
-        component.elementsControl.at(0).patchValue({'exportValues': component.exportValues[0][0]});
+        component.elementsControl.at(0).patchValue({'service': component.serviceExportValueArray[0][0].service});
+        component.elementsControl.at(0).patchValue({'exportValues': component.serviceExportValueArray[0][0].exportValues[0]});
         expect(component.elements[0].exportId).toBeNull();
         expect(component.elements[0].deploymentId).toBeNull();
         component.save();
