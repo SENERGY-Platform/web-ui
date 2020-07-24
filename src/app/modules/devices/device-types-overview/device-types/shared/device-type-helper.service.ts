@@ -37,7 +37,7 @@ export class DeviceTypeHelperService {
     }
 
     checkIfContentExists(contentVariable: DeviceTypeContentVariableModel[] | null | undefined, serialization: string | null): boolean {
-        if ((contentVariable === undefined || contentVariable ===  null || contentVariable.length === 0) &&
+        if ((contentVariable === undefined || contentVariable === null || contentVariable.length === 0) &&
             (serialization === null || serialization === '')) {
             return false;
         } else {
@@ -78,12 +78,21 @@ export class DeviceTypeHelperService {
         }
     }
 
-    removeField(contentVariable: DeviceTypeContentVariableModel): void {
-        delete contentVariable['indices'];
-        console.log(contentVariable);
+    removeField(contentVariable: DeviceTypeContentVariableModel, field: string): void {
+        switch (field) {
+            case 'indices': {
+                delete contentVariable['indices'];
+                break;
+            }
+            case 'id': {
+                delete contentVariable['id'];
+                break;
+            }
+        }
+
         if (contentVariable.sub_content_variables) {
             for (let i = 0; i < contentVariable.sub_content_variables.length; i++) {
-                this.removeField(contentVariable.sub_content_variables[i]);
+                this.removeField(contentVariable.sub_content_variables[i], field);
             }
         }
     }

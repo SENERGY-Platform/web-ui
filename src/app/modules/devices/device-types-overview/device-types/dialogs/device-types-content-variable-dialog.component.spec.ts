@@ -83,6 +83,7 @@ describe('DeviceTypesContentVariableDialog', () => {
             value: 'value',
         });
         expect(component.firstFormGroup.getRawValue()).toEqual({
+            indices: null,
             id: null,
             name: 'testName',
             type: component.primitiveTypes[0].type,
@@ -96,6 +97,7 @@ describe('DeviceTypesContentVariableDialog', () => {
 
     it('edit primitive Type', async(() => {
         const contentVariable: DeviceTypeContentVariableModel = {
+            indices: [0, 1, 0],
             id: 'id1',
             name: 'testName',
             type: 'https://schema.org/Text',
@@ -108,6 +110,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         expect(component.typeOptionsControl.value).toBe('primitive');
         expect(component.typeOptionsControl.disabled).toBe(true);
         expect(component.firstFormGroup.getRawValue()).toEqual({
+            indices: [0, 1, 0],
             id: 'id1',
             name: 'testName',
             type: component.primitiveTypes[0].type,
@@ -132,6 +135,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         });
         expect(component.firstFormGroup.valid).toBe(true);
         expect(component.firstFormGroup.getRawValue()).toEqual({
+            indices: null,
             id: null,
             name: 'testStruct',
             type: component.nonPrimitiveTypes[0].type,
@@ -158,6 +162,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         expect(component.typeOptionsControl.value).toBe('non-primitive');
         expect(component.typeOptionsControl.disabled).toBe(true);
         expect(component.firstFormGroup.getRawValue()).toEqual({
+            indices: null,
             id: 'id2',
             name: 'testStruct',
             type: 'https://schema.org/StructuredValue',

@@ -16,14 +16,19 @@
 
 import {Component, OnInit} from '@angular/core';
 import {
-    DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
-    DeviceTypeContentModel, DeviceTypeContentTreeModel, DeviceTypeContentVariableModel,
+    DeviceTypeAspectModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeContentModel,
+    DeviceTypeContentTreeModel,
+    DeviceTypeContentVariableModel,
     DeviceTypeDeviceClassModel,
-    DeviceTypeFunctionModel, DeviceTypeFunctionType,
+    DeviceTypeFunctionModel,
+    DeviceTypeFunctionType,
     DeviceTypeModel,
     DeviceTypeProtocolModel,
     DeviceTypeProtocolSegmentModel,
-    DeviceTypeServiceModel, functionTypes,
+    DeviceTypeServiceModel,
+    functionTypes,
 } from '../shared/device-type.model';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -33,15 +38,14 @@ import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-
 import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
 import {util} from 'jointjs';
-import uuid = util.uuid;
 import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {contentVariableValidator} from './content-variable.validator';
 import {forkJoin, Observable} from 'rxjs';
 import {DeviceTypeHelperService} from './shared/device-type-helper.service';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
 import {DeviceTypesContentVariableDialogComponent} from './dialogs/device-types-content-variable-dialog.component';
+import uuid = util.uuid;
 
 const controllingIndex = 0;
 const measuringIndex = 1;
@@ -90,10 +94,9 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     save(): void {
-        console.log(this.secondFormGroup);
 
         this.cleanUpServices();
-        //
+
         const newDeviceType: DeviceTypeModel = {
             id: this.firstFormGroup.getRawValue().id, // use getRawValue because control is disabled
             name: this.firstFormGroup.value.name,
@@ -103,8 +106,6 @@ export class DeviceTypesComponent implements OnInit {
             device_class: this.firstFormGroup.value.device_class,
         };
 
-        console.log(newDeviceType);
-        //
         this.saveDeviceType(newDeviceType);
 
     }
@@ -159,14 +160,6 @@ export class DeviceTypesComponent implements OnInit {
                 }
             });
     }
-
-    // getErrorMessage(field: any): string {
-    //     if (field.errors) {
-    //         return field.errors.errorMsg;
-    //     } else {
-    //         return '';
-    //     }
-    // }
 
     deleteService(deviceTypeService: DeviceTypeServiceModel) {
         const control = <FormArray>this.secondFormGroup.controls['services'];
@@ -316,53 +309,36 @@ export class DeviceTypesComponent implements OnInit {
         return this.getServiceFormArray(serviceFormGroup, formControlName).get([index]) as FormControl;
     }
 
-    inputOutputContentVariableRaw(serviceFormGroup: AbstractControl, formControlName: string, index: number): FormControl {
-        return this.getServiceFormArray(serviceFormGroup, formControlName).get([index, 'content_variable_raw']) as FormControl;
-    }
-
     serviceControl(serviceIndex: number): FormGroup {
         return <FormGroup>this.services.at(serviceIndex);
     }
 
     private cleanUpServices() {
-        console.log('cleanUpServices');
         const services = <FormArray>this.secondFormGroup.controls['services'];
 
         for (let i = 0; i < services.length; i++) {
             const formGroup = <FormGroup>services.controls[i];
-            const inputs = <FormArray>formGroup.controls['inputs'];
-            // loop from highest Index! Otherwise it could cause index problems
-            for (let j = inputs.length - 1; j >= 0; j--) {
-                const inputContentControl: FormGroup = <FormGroup>inputs.controls[j];
-                const inputContent: DeviceTypeContentTreeModel = inputContentControl.value;
-                if (!this.deviceTypeHelperService.checkIfContentExists(inputContent.dataSource.data, inputContent.serialization)) {
-                    inputs.removeAt(j);
-                } else {
-                    inputContentControl.removeControl('content_variable');
-                    this.deviceTypeHelperService.removeField(inputContent.dataSource.data[0]);
-                    inputContentControl.addControl('content_variable', new FormControl(inputContent.dataSource.data[0]));
-                    // inputContentControl.removeControl('dataSource');
-                    // inputContentControl.removeControl('tree');
-                }
-            }
-            const outputs = <FormArray>formGroup.controls['outputs'];
-            // loop from highest Index! Otherwise it could cause index problems
-            for (let k = outputs.length - 1; k >= 0; k--) {
-                const outputContentControl: FormGroup = <FormGroup>outputs.controls[k];
-                const outputContent: DeviceTypeContentTreeModel = outputContentControl.value;
-                if (!this.deviceTypeHelperService.checkIfContentExists(outputContent.dataSource.data, outputContent.serialization)) {
-                    outputs.removeAt(k);
-                } else {
-                    outputContentControl.removeControl('content_variable');
-                    this.deviceTypeHelperService.removeField(outputContent.dataSource.data[0]);
-                    outputContentControl.addControl('content_variable', new FormControl(outputContent.dataSource.data[0]));
-                    // outputContentControl.removeControl('dataSource');
-                    // outputContentControl.removeControl('tree');
-                }
-            }
+            this.cleanUpInputOutputs(<FormArray>formGroup.controls['inputs']);
+            this.cleanUpInputOutputs(<FormArray>formGroup.controls['outputs']);
         }
     }
 
+
+    private cleanUpInputOutputs(formArray: FormArray) {
+        // loop from highest Index! Otherwise it could cause index problems
+        for (let j = formArray.length - 1; j >= 0; j--) {
+            const inOutControl: FormGroup = <FormGroup>formArray.controls[j];
+            const inOutContent: DeviceTypeContentTreeModel = inOutControl.value;
+            if (!this.deviceTypeHelperService.checkIfContentExists(inOutContent.dataSource.data, inOutContent.serialization)) {
+                formArray.removeAt(j);
+            } else {
+                this.deviceTypeHelperService.removeField(inOutContent.dataSource.data[0], 'indices');
+                inOutControl.addControl('content_variable', new FormControl(inOutContent.dataSource.data[0]));
+                inOutControl.removeControl('dataSource');
+                inOutControl.removeControl('tree');
+            }
+        }
+    }
 
     private initFormControls() {
         this.initFirstFormGroup({} as DeviceTypeModel);
@@ -479,50 +455,21 @@ export class DeviceTypesComponent implements OnInit {
 
     private createContentGroup(content: DeviceTypeContentModel, protocolSegment: DeviceTypeProtocolSegmentModel): FormGroup {
         const dataSource = new MatTreeNestedDataSource<DeviceTypeContentVariableModel>();
-        // todo!! after refactoring function
+
         if (content.content_variable) {
             this.deviceTypeHelperService.setIndices(content.content_variable);
             dataSource.data = [content.content_variable];
         }
-        // console.log(content.content_variable, contentVariableWithIndices);
         return this._formBuilder.group({
             id: [content.id],
             name: [protocolSegment.name],
             serialization: [content.serialization],
-            // content_variable_raw: [JSON.stringify(content.content_variable, null, 5), contentVariableValidator(this.leafCharacteristics)],
-            content_variable: content.content_variable,
             protocol_segment_id: [protocolSegment.id],
             show: [content.protocol_segment_id ? true : false],
             dataSource: dataSource,
             tree: new NestedTreeControl<DeviceTypeContentVariableModel>(node => node.sub_content_variables),
         });
     }
-
-    // private createContentVariableGroup(contentVariable: DeviceTypeContentVariableModel, indices: number[] = [0]): FormGroup {
-    //     return this._formBuilder.group({
-    //         indices: [indices],
-    //         id: [contentVariable.id],
-    //         name: [contentVariable.name],
-    //         type: [contentVariable.type],
-    //         characteristic_id: [contentVariable.characteristic_id],
-    //         value: [contentVariable.value],
-    //         sub_content_variables: contentVariable.sub_content_variables ? this.createContentSubVariableArray(contentVariable.sub_content_variables, indices) : null,
-    //         serialization_options: [contentVariable.serialization_options],
-    //         unit_reference: [contentVariable.unit_reference],
-    //     });
-    // }
-
-    // private createContentSubVariableArray(subContentVariables: DeviceTypeContentVariableModel[], indicesIn: number[]): FormArray {
-    //     const array: FormGroup[] = [];
-    //
-    //     subContentVariables.forEach((subContentVariable: DeviceTypeContentVariableModel, index: number) => {
-    //         const arrayTemp = indicesIn.slice();
-    //         arrayTemp.push(index);
-    //         array.push(this.createContentVariableGroup(subContentVariable, arrayTemp));
-    //     });
-    //
-    //     return this._formBuilder.array(array);
-    // }
 
     private checkIfDeviceClassNameExists(name: string): number {
         let index = -1;
@@ -677,40 +624,28 @@ export class DeviceTypesComponent implements OnInit {
     private deleteIds(): void {
         const emptyId = {'id': ''};
         this.firstFormGroup.patchValue(emptyId);
-        console.log(this.secondFormGroup);
         const services = <FormArray>this.secondFormGroup.controls['services'];
         services.controls.forEach((service) => {
             service.patchValue(emptyId);
-            clearContent(<FormArray>service.get('inputs'));
-            clearContent(<FormArray>service.get('outputs'));
+            const outputs = <FormArray>service.get('outputs');
+            const inputs = <FormArray>service.get('inputs');
+            this.clearContent(inputs);
+            this.clearContent(outputs);
         });
+    }
 
-        function clearContent(contents: FormArray) {
-            if (contents) {
-                contents.controls.forEach(content => {
-                    const contentFormGroup = <FormGroup>content;
-                    contentFormGroup.patchValue(emptyId);
-                    const contentVariable = <FormControl>contentFormGroup.get('content_variable');
-                    console.log(contentVariable);
-                    // todo remove ids!
-                    // todo removeIndices generischer machen
-                    // if (contentVariable.value !== '' && contentVariable.controls['id']) {
-                    //     contentVariable.removeControl('id');
-                    //     clearContentVariable(<FormArray>contentVariable.get('sub_content_variables'));
-                    //     contentFormGroup.patchValue({'content_variable_raw': JSON.stringify(contentVariable.value, null, 5)});
-                    // }
-                });
-            }
-        }
-
-        function clearContentVariable(subContentVariables: FormArray) {
-            if (subContentVariables.length > 0) {
-                subContentVariables.controls.forEach((subContentVariable: AbstractControl) => {
-                    const subContentVariableFormGroup = <FormGroup>subContentVariable;
-                    subContentVariableFormGroup.removeControl('id');
-                    clearContentVariable(<FormArray>subContentVariableFormGroup.get('sub_content_variables'));
-                });
-            }
+    private clearContent(contents: FormArray) {
+        if (contents) {
+            contents.controls.forEach(content => {
+                const contentFormGroup = <FormGroup>content;
+                contentFormGroup.patchValue({'id': ''});
+                const dataSourceControl = <FormControl>contentFormGroup.get('dataSource');
+                if (dataSourceControl) {
+                    if (dataSourceControl.value && dataSourceControl.value.data.length === 1) {
+                        this.deviceTypeHelperService.removeField(dataSourceControl.value.data[0], 'id');
+                    }
+                }
+            });
         }
     }
 

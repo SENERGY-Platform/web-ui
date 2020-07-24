@@ -193,14 +193,14 @@
                                                     </mat-option>
                                                 </mat-select>
                                             </mat-form-field>
-                                            <div>
+                                            <div *ngIf="inOut.dataSource">
                                                 <button mat-raised-button color="accent"
                                                         (click)="addContentVariable(service.value.functions, inOut, [])"
                                                         [disabled]="inOut.dataSource.data.length === 1">
                                                     ADD ContentVariable
                                                 </button>
                                             </div>
-                                            <div>
+                                            <div *ngIf="inOut.dataSource && inOut.tree">
                                                 <mat-tree [dataSource]="inOut.dataSource" [treeControl]="inOut.tree"
                                                           class="example-tree">
                                                     <!-- This is the tree node template for leaf nodes -->
@@ -249,14 +249,6 @@
                                                     </mat-nested-tree-node>
                                                 </mat-tree>
                                             </div>
-<!--                                            <mat-form-field class="full-width" color="accent">-->
-<!--                                            <textarea formControlName="content_variable_raw" matInput-->
-<!--                                                      placeholder="Insert data structure in json format"-->
-<!--                                                      rows="20"></textarea>-->
-<!--                                                <mat-error>-->
-<!--                                                    {{getErrorMessage(inputOutputContentVariableRaw(service, tab.formArrayName, i))}}-->
-<!--                                                </mat-error>-->
-<!--                                            </mat-form-field>-->
                                         </div>
                                     </div>
                                 </div>

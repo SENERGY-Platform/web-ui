@@ -3,7 +3,7 @@ import {TestBed} from '@angular/core/testing';
 import {DeviceTypeHelperService} from './device-type-helper.service';
 import {DeviceTypeContentVariableModel} from '../../shared/device-type.model';
 
-fdescribe('DeviceTypeHelperService', () => {
+describe('DeviceTypeHelperService', () => {
     let service: DeviceTypeHelperService;
     const struct1 = getStruct('struct1');
     const struct2 = getStruct('struct2');
@@ -188,6 +188,7 @@ fdescribe('DeviceTypeHelperService', () => {
                     indices: [0, 1]
                 }]
         } as DeviceTypeContentVariableModel;
+
         const withoutIndices = {
             name: 'struct1',
             sub_content_variables: [{
@@ -196,8 +197,7 @@ fdescribe('DeviceTypeHelperService', () => {
             },
                 {name: 'struct2b'}]
         } as DeviceTypeContentVariableModel;
-        service.removeField(withIndices);
-        console.log(withIndices);
+        service.removeField(withIndices, 'indices');
         expect(withIndices).toEqual(withoutIndices);
     });
 
