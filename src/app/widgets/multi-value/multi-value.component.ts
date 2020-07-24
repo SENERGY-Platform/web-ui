@@ -130,6 +130,16 @@ export class MultiValueComponent implements OnInit, OnDestroy {
                     return this.parseNumber(b, false) - this.parseNumber(a, false);
                 });
                 break;
+            case MultiValueOrderEnum.TimeDesc:
+                m.sort((a, b) => {
+                    return new Date(b.time || '').valueOf() - new Date(a.time || '').valueOf();
+                });
+                break;
+            case MultiValueOrderEnum.TimeAsc:
+                m.sort((a, b) => {
+                    return new Date(a.time || '').valueOf() - new Date(b.time || '').valueOf();
+                });
+                break;
         }
         this.orderedValues = m;
         if (this.table) {
