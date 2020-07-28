@@ -22,8 +22,9 @@
             <mat-label>Type</mat-label>
             <mat-select #select (selectionChange)="activateCategory()" placeholder="Type" [(ngModel)]="selectedType"
                         name="type">
-                <mat-option *ngFor="let type of types" [value]="type">
-                    {{type.viewValue}}
+                <mat-option *ngFor="let type of types" [value]="type" [disabled]="type.disabled">
+                    <span fxFlex>{{type.viewValue}}</span>
+                    <mat-icon *ngIf="type.disabled && type.tooltip !== ''" matTooltip="{{type.tooltip}}" inline>help_outlined</mat-icon>
                 </mat-option>
             </mat-select>
         </mat-form-field>
@@ -32,8 +33,9 @@
             <mat-label>Category</mat-label>
             <mat-select [disabled]="categoryDisabled" placeholder="Category" [(ngModel)]="selectedCategory"
                         name="category">
-                <mat-option *ngFor="let category of categories" [value]="category">
-                    {{category.viewValue}}
+                <mat-option *ngFor="let category of categories" [value]="category" [disabled]="category.disabled">
+                    <span fxFlex>{{category.viewValue}}</span>
+                    <mat-icon *ngIf="category.disabled && category.tooltip !== ''" matTooltip="{{category.tooltip}}" inline>help_outlined</mat-icon>
                 </mat-option>
             </mat-select>
         </mat-form-field>

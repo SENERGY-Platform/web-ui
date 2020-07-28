@@ -63,7 +63,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         };
     }
 
-    private static exportHasRequiredValues(values: ExportValueModel[]): boolean {
+    public static exportHasRequiredValues(values: ExportValueModel[]): boolean {
         return values !== undefined && values.filter(val => val.Name === 'DayPrediction').length === 1
             && values.filter(val => val.Name === 'MonthPrediction').length === 1
             && values.filter(val => val.Name === 'YearPrediction').length === 1
