@@ -43,7 +43,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
     groupTypes = ['mean', 'sum', 'count', 'median'];
 
-    displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'color', 'math'];
+    displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'color', 'math', 'filterType', 'filterValue'];
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
     selection = new SelectionModel<ChartsExportVAxesModel>(true, []);
 
@@ -123,6 +123,10 @@ export class ChartsExportEditDialogComponent implements OnInit {
         return a && b && a.id === b.id && a.name === b.name;
     }
 
+    compareFilterTypes(a: string, b: string): boolean {
+        return a === b;
+    }
+
     close(): void {
         this.dialogRef.close();
     }
@@ -177,6 +181,13 @@ export class ChartsExportEditDialogComponent implements OnInit {
         this.dataSource.data = newData;
         this.selection.clear();
         newSelection.forEach(row => this.selection.select(row));
+    }
+
+
+    filerTypeSelected(element: ChartsExportVAxesModel) {
+        if (element.filterType === undefined) {
+            element.filterValue = undefined;
+        }
     }
 
     private setDefaultValues(widget: WidgetModel): void {
