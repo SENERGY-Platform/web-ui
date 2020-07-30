@@ -142,13 +142,16 @@ export class ChartsExportService {
      * Only if no filters are involved true will be returned.
      */
     private canAppendField(array: ChartsExportRequestPayloadQueriesModel[], vAxis: ChartsExportVAxesModel, appender: ChartsExportRequestPayloadQueriesFieldsModel): boolean {
-        if (appender.filterValue !== undefined || appender.filterType !== undefined) {
+        if ((appender.filterValue !== undefined && appender.filterValue !== null && !isNaN(<number>appender.filterValue))
+            || (appender.filterType !== undefined && appender.filterType !== null)) {
             return false;
         }
         if (array.length > 0 && array[array.length - 1].id === vAxis.instanceId) {
             let hasFilteredField = false;
             array[array.length - 1].fields
-                .forEach(field => hasFilteredField = field.filterValue === undefined && field.filterType === undefined ?
+                .forEach(field => hasFilteredField =
+                    (field.filterValue === undefined || field.filterValue === null || isNaN(<number>appender.filterValue))
+                    && (field.filterType === undefined  ||  field.filterType === null) ?
                     hasFilteredField : true);
             return !hasFilteredField;
         }

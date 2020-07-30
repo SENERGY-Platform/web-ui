@@ -221,6 +221,18 @@
             </td>
         </ng-container>
 
+        <ng-container matColumnDef="duplicate-delete">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let element, let i = index">
+                <button mat-icon-button *ngIf="element.isDuplicate === false || element.isDuplicate === undefined" (click)="duplicate(element, i)">
+                    <mat-icon>content_copy</mat-icon>
+                </button>
+                <button mat-icon-button *ngIf="element.isDuplicate === true" (click)="deleteDuplicate(element, i)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </td>
+        </ng-container>
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;">
         </tr>
