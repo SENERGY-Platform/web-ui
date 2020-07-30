@@ -49,5 +49,8 @@ export interface ChartsExportVAxesModel {
     valueType: string;
     math: string;
     color: string;
+    filterType?:  '=' | '<>' | '!=' | '>' | '>=' | '<' | '<=';
+    filterValue?: number | string;
+    isDuplicate?: boolean;
 }
 

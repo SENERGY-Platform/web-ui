@@ -75,17 +75,17 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                 this.dataReady = false;
 
                 const elements = this.widget.properties.elements;
-
                 if (elements) {
                     clearInterval(this.interval);
-                    const refreshTimeInMs = (this.widget.properties.refreshTime || 0) * 1000;
+                    const refreshTimeInMs = (this.widget.properties.refreshTime || 0) * 1000 / elements.length;
+                    let refreshIndex = 0;
                     if (refreshTimeInMs > 0) {
                         this.interval = window.setInterval(() => {
-                            elements.forEach((element: DeviceStatusElementModel) => {
-                                if (element.deploymentId) {
-                                    this.deploymentsService.startDeployment(element.deploymentId).subscribe();
-                                }
-                            });
+                            const element = elements[refreshIndex];
+                            if (element.deploymentId) {
+                                this.deploymentsService.startDeployment(element.deploymentId).subscribe();
+                            }
+                            refreshIndex = (refreshIndex + 1) % elements.length;
                         }, refreshTimeInMs);
                     }
 

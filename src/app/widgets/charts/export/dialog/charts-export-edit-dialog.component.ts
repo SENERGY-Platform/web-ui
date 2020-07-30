@@ -43,7 +43,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
     groupTypes = ['mean', 'sum', 'count', 'median'];
 
-    displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'color', 'math'];
+    displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'color', 'math', 'filterType', 'filterValue', 'duplicate-delete'];
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
     selection = new SelectionModel<ChartsExportVAxesModel>(true, []);
 
@@ -123,6 +123,10 @@ export class ChartsExportEditDialogComponent implements OnInit {
         return a && b && a.id === b.id && a.name === b.name;
     }
 
+    compareFilterTypes(a: string, b: string): boolean {
+        return a === b;
+    }
+
     close(): void {
         this.dialogRef.close();
     }
@@ -172,11 +176,43 @@ export class ChartsExportEditDialogComponent implements OnInit {
                     newSelection.push(this.selection.selected[index]);
                     newData.push(this.selection.selected[index]);
                 }
+                // Add duplicates of this export value
+                const duplicates = this.selection.selected.filter(item => item.isDuplicate && item.instanceId === newVAxis.instanceId &&
+                        item.exportName === newVAxis.exportName &&
+                        item.valueName === newVAxis.valueName &&
+                        item.valueType === newVAxis.valueType);
+                newSelection.push(...duplicates);
+                newData.push(...duplicates);
             });
         });
         this.dataSource.data = newData;
         this.selection.clear();
         newSelection.forEach(row => this.selection.select(row));
+    }
+
+
+    filerTypeSelected(element: ChartsExportVAxesModel) {
+        if (element.filterType === undefined) {
+            element.filterValue = undefined;
+        }
+    }
+
+
+    duplicate(element: ChartsExportVAxesModel, index: number) {
+        const newElement = JSON.parse(JSON.stringify(element)) as ChartsExportVAxesModel;
+        newElement.isDuplicate = true;
+        this.dataSource.data.splice(index + 1, 0, newElement);
+        this.reloadTable();
+    }
+
+    deleteDuplicate(element: ChartsExportVAxesModel, index: number) {
+        this.selection.deselect(element);
+        this.dataSource.data.splice(index, 1);
+        this.reloadTable();
+    }
+
+    private reloadTable() {
+        this.dataSource._updateChangeSubscription();
     }
 
     private setDefaultValues(widget: WidgetModel): void {

@@ -91,7 +91,7 @@ export class AirQualityService {
                     if (measurement.is_enabled) {
                         const id = (measurement.export ? measurement.export.id : '');
                         const column = measurement.data.column ? measurement.data.column.Name : '';
-                        const key = id + '.' + column;
+                        const key = id + '.' + column + (measurement.math ? measurement.math : '');
                         if (ids.has(key)) {
                             console.error('AirQualityService: Can\'t use the same combination of export + column twice');
                         }
@@ -102,12 +102,12 @@ export class AirQualityService {
                     if (measurement.has_outside) {
                         const id = (measurement.outsideExport ? measurement.outsideExport.id : '');
                         const column = measurement.outsideData.column ? measurement.outsideData.column.Name : '';
-                        const key = id + '.' + column;
+                        const key = id + '.' + column + (measurement.outsideMath ? measurement.outsideMath.trim() : '');
                         if (ids.has(key)) {
                             console.error('AirQualityService:  Can\'t use the same combination of export + column twice');
                         }
                         array.push({id: id, fields: [{name: column, math: measurement.outsideMath || ''}]});
-                        ids.set(id + '.' + column, index);
+                        ids.set(key, index);
                     }
                 });
                 requestPayload.queries = array;
@@ -124,13 +124,13 @@ export class AirQualityService {
                                 // Found the correct row for the column, but need to check if it belongs to inside or outside export
                                 const m = myMeasurements[idIndex];
                                 const value = Math.round(Number(val[columnIndex]) * 100) / 100; // two digits
-                                const insideId = (m.export ? m.export.id : '') + '.' + (m.data.column ? m.data.column.Name : '');
+                                const insideId = (m.export ? m.export.id : '') + '.' + (m.data.column ? m.data.column.Name : '') + (m.math ? m.math.trim() : '');
 
                                 if (insideId === id) {
                                     myMeasurements[idIndex].data.value = value;
                                 } else {
                                     const outsideId = (m.outsideExport ? m.outsideExport.id : '') + '.'
-                                        + (m.outsideData.column ? m.outsideData.column.Name : '');
+                                        + (m.outsideData.column ? m.outsideData.column.Name : '') + (m.outsideMath ? m.outsideMath.trim() : '');
                                     if (outsideId === id) {
                                         myMeasurements[idIndex].outsideData.value = value;
                                     }

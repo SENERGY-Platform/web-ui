@@ -33,7 +33,7 @@ import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/da
 import {ErrorModel} from '../../../../core/model/error.model';
 import {ChartsExportPropertiesModel, ChartsExportVAxesModel} from './charts-export-properties.model';
 import {
-    ChartsExportRequestPayloadModel,
+    ChartsExportRequestPayloadModel, ChartsExportRequestPayloadQueriesFieldsModel,
     ChartsExportRequestPayloadQueriesModel, ChartsExportRequestPayloadTimeModel,
 } from './charts-export-request-payload.model';
 import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
@@ -96,10 +96,13 @@ export class ChartsExportService {
             const array: ChartsExportRequestPayloadQueriesModel[] = [];
             widgetProperties.vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
 
-                if (array.length > 0 && array[array.length - 1].id === vAxis.instanceId) {
-                    array[array.length - 1].fields.push({name: vAxis.valueName, math: vAxis.math});
+                const newField: ChartsExportRequestPayloadQueriesFieldsModel = {name: vAxis.valueName, math: vAxis.math, filterType: vAxis.filterType};
+                newField.filterValue = vAxis.valueType === 'string' ? vAxis.filterValue : Number(vAxis.filterValue);
+
+                if (this.canAppendField(array, vAxis, newField)) {
+                    array[array.length - 1].fields.push(newField);
                 } else {
-                    array.push({id: vAxis.instanceId, fields: [{name: vAxis.valueName, math: vAxis.math}]});
+                    array.push({id: vAxis.instanceId, fields: [newField]});
                 }
 
             });
@@ -133,12 +136,34 @@ export class ChartsExportService {
         });
     }
 
+    /**
+     * Multiple filters are AND connected. To avoid applying mutliple filters, canAppendField checks
+     * if the current query already has a filter definition or if this field has a filter definition.
+     * Only if no filters are involved true will be returned.
+     */
+    private canAppendField(array: ChartsExportRequestPayloadQueriesModel[], vAxis: ChartsExportVAxesModel, appender: ChartsExportRequestPayloadQueriesFieldsModel): boolean {
+        if ((appender.filterValue !== undefined && appender.filterValue !== null && !isNaN(<number>appender.filterValue))
+            || (appender.filterType !== undefined && appender.filterType !== null)) {
+            return false;
+        }
+        if (array.length > 0 && array[array.length - 1].id === vAxis.instanceId) {
+            let hasFilteredField = false;
+            array[array.length - 1].fields
+                .forEach(field => hasFilteredField =
+                    (field.filterValue === undefined || field.filterValue === null || isNaN(<number>appender.filterValue))
+                    && (field.filterType === undefined  ||  field.filterType === null) ?
+                    hasFilteredField : true);
+            return !hasFilteredField;
+        }
+        return false;
+    }
+
     private setData(series: ChartsExportColumnsModel, vAxes: ChartsExportVAxesModel[]): ChartDataTableModel {
         const indices: { index: number, math: string }[] = [];
         const header: string[] = ['time'];
         if (vAxes) {
             vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
-                indices.push({index: series.columns.indexOf(vAxis.instanceId + '.' + vAxis.valueName), math: vAxis.math});
+                indices.push({index: series.columns.indexOf(vAxis.instanceId + '.' + vAxis.valueName + vAxis.math.trim() + (vAxis.filterType || '') + (vAxis.filterValue || '')), math: vAxis.math});
                 header.push(vAxis.valueName);
             });
         }
