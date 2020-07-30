@@ -163,7 +163,7 @@ export class ChartsExportService {
         const header: string[] = ['time'];
         if (vAxes) {
             vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
-                indices.push({index: series.columns.indexOf(vAxis.instanceId + '.' + vAxis.valueName + (vAxis.filterType || '') + (vAxis.filterValue || '')), math: vAxis.math});
+                indices.push({index: series.columns.indexOf(vAxis.instanceId + '.' + vAxis.valueName + vAxis.math.trim() + (vAxis.filterType || '') + (vAxis.filterValue || '')), math: vAxis.math});
                 header.push(vAxis.valueName);
             });
         }
