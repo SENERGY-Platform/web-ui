@@ -19,6 +19,7 @@ import {Injectable} from '@angular/core';
 import {map} from 'rxjs/operators';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {EnergyPredictionEditDialogComponent} from '../dialog/energy-prediction-edit-dialog.component';
+import {ExportValueModel} from "../../../modules/data/export/shared/export.model";
 
 
 @Injectable({
@@ -32,6 +33,17 @@ export class EnergyPredictionRequirementsService {
     }
 
     static requirement = 'Needs an estimation export';
+    public static exportHasRequiredValues(values: ExportValueModel[]): boolean {
+        return values !== undefined && values.filter(val => val.Name === 'DayPrediction').length === 1
+            && values.filter(val => val.Name === 'MonthPrediction').length === 1
+            && values.filter(val => val.Name === 'YearPrediction').length === 1
+            && values.filter(val => val.Name === 'DayTimestamp').length === 1
+            && values.filter(val => val.Name === 'MonthTimestamp').length === 1
+            && values.filter(val => val.Name === 'YearTimestamp').length === 1
+            && values.filter(val => val.Name === 'DayPrediction').length === 1
+            && values.filter(val => val.Name === 'MonthPrediction').length === 1
+            && values.filter(val => val.Name === 'YearPrediction').length === 1;
+    }
 
     requirementsFulfilled(): Observable<boolean> {
         return defer(async () => {
@@ -52,7 +64,7 @@ export class EnergyPredictionRequirementsService {
                 }
 
                 return {
-                    found: r.filter(ex => EnergyPredictionEditDialogComponent.exportHasRequiredValues(ex.Values)).length !== 0,
+                    found: r.filter(ex => EnergyPredictionRequirementsService.exportHasRequiredValues(ex.Values)).length !== 0,
                     hasMore: r.length === pageSize,
                 };
             })).toPromise();

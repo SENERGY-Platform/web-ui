@@ -27,6 +27,7 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {chartsExportMeasurementModelValidator} from '../../charts/export/shared/chartsExportMeasurementModel.validator';
+import {EnergyPredictionRequirementsService} from '../shared/energy-prediction-requirements.service';
 
 
 @Component({
@@ -58,21 +59,9 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     private static estimationExportValidator(): ValidatorFn {
         return (control: AbstractControl): { [key: string]: any } | null => {
             const values: ExportValueModel[] = control.value.values;
-            return EnergyPredictionEditDialogComponent.exportHasRequiredValues(values) ?
+            return EnergyPredictionRequirementsService.exportHasRequiredValues(values) ?
                 null : {'isEstimationExport': {value: control.value}};
         };
-    }
-
-    public static exportHasRequiredValues(values: ExportValueModel[]): boolean {
-        return values !== undefined && values.filter(val => val.Name === 'DayPrediction').length === 1
-            && values.filter(val => val.Name === 'MonthPrediction').length === 1
-            && values.filter(val => val.Name === 'YearPrediction').length === 1
-            && values.filter(val => val.Name === 'DayTimestamp').length === 1
-            && values.filter(val => val.Name === 'MonthTimestamp').length === 1
-            && values.filter(val => val.Name === 'YearTimestamp').length === 1
-            && values.filter(val => val.Name === 'DayPrediction').length === 1
-            && values.filter(val => val.Name === 'MonthPrediction').length === 1
-            && values.filter(val => val.Name === 'YearPrediction').length === 1;
     }
 
     constructor(private dialogRef: MatDialogRef<EnergyPredictionEditDialogComponent>,
@@ -113,7 +102,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
             if (exports !== null) {
                 exports.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined
-                        && EnergyPredictionEditDialogComponent.exportHasRequiredValues(exportModel.Values)) {
+                        && EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)) {
                         this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
                     }
                 });
