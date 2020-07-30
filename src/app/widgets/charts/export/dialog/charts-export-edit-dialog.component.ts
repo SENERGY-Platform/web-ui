@@ -202,6 +202,9 @@ export class ChartsExportEditDialogComponent implements OnInit {
         const newElement = JSON.parse(JSON.stringify(element)) as ChartsExportVAxesModel;
         newElement.isDuplicate = true;
         this.dataSource.data.splice(index + 1, 0, newElement);
+        if (this.selection.isSelected(element)) {
+            this.selection.select(newElement);
+        }
         this.reloadTable();
     }
 
