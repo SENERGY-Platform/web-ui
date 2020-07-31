@@ -5,7 +5,7 @@ WORKDIR /tmp/workspace
 # install dependencies
 ADD package.json .
 ADD package-lock.json .
-RUN npm ci
+RUN npm ci --unsafe-perm
 
 # install properties-provider
 ARG branch=master
