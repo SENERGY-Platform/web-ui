@@ -163,20 +163,6 @@ const processDesigner = {
         NotificationConfigDialogComponent,
         DesignerSnackBarComponent
     ],
-    entryComponents: [
-        EditOutputDialogComponent,
-        EditInputDialogComponent,
-        CycleDialogComponent,
-        DateTimeDialogComponent,
-        DurationDialogComponent,
-        HistoricDataConfigDialogComponent,
-        MonitorDetailsDialogComponent,
-        EmailConfigDialogComponent,
-        DeploymentsMissingDependenciesDialogComponent,
-        TaskConfigDialogComponent,
-        NotificationConfigDialogComponent,
-        DesignerSnackBarComponent
-    ]
 })
 
 export class ProcessesModule {

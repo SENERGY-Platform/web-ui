@@ -65,9 +65,6 @@ import {MatTooltipModule} from '@angular/material/tooltip';
         DashboardNewWidgetDialogComponent,
         DashboardEditDialogComponent,
     ],
-    entryComponents: [DashboardNewDialogComponent,
-        DashboardNewWidgetDialogComponent,
-        DashboardEditDialogComponent]
 })
 export class DashboardModule {
 }
