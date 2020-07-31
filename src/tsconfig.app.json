@@ -8,6 +8,8 @@
     "karma.conf.js",
     "test.ts",
     "**/*.spec.ts",
-    "**/*.mock.ts"
+    "**/*.mock.ts",
+    "environments/environment.dev.ts",
+    "environments/environment.prod.ts"
   ]
 }
