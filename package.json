@@ -40,6 +40,8 @@
     "dotenv": "^8.2.0",
     "file-saver": "^2.0.2",
     "jointjs": "^3.2.0",
+    "angular-fittext": "^2.1.1",
+    "ng2-google-charts": "^6.1.0",
     "jquery": "^3.5.1",
     "keycloak-angular": "^7.2.0",
     "keycloak-js": "9.0.0",
