@@ -175,7 +175,8 @@ describe('DeviceStatusEditDialogComponent', () => {
             selectable: null,
             function: null,
             aspectId: null,
-            name: null
+            name: null,
+            requestDevice: false,
         });
         expect(component.funcArray.length).toBe(0);
         expect(component.selectablesArray.length).toBe(0);
@@ -203,7 +204,8 @@ describe('DeviceStatusEditDialogComponent', () => {
             selectable: null,
             function: null,
             aspectId: 'aspect_1',
-            name: null
+            name: null,
+            requestDevice: false,
         });
     }));
 
@@ -226,7 +228,8 @@ describe('DeviceStatusEditDialogComponent', () => {
             selectable: null,
             function: component.funcArray[0][0],
             aspectId: 'aspect_1',
-            name: null
+            name: null,
+            requestDevice: false,
         });
     }));
 
@@ -258,7 +261,8 @@ describe('DeviceStatusEditDialogComponent', () => {
             selectable: component.selectablesArray[0][0],
             function: component.funcArray[0][0],
             aspectId: 'aspect_1',
-            name: null
+            name: null,
+            requestDevice: false,
         });
     }));
 
@@ -297,7 +301,8 @@ describe('DeviceStatusEditDialogComponent', () => {
             selectable: component.selectablesArray[0][0],
             function: component.funcArray[0][0],
             aspectId: 'aspect_1',
-            name: null
+            name: null,
+            requestDevice: false,
         });
     }));
 
@@ -326,12 +331,37 @@ describe('DeviceStatusEditDialogComponent', () => {
         component.elementsControl.at(0).patchValue({'selectable': component.selectablesArray[0][0]});
         component.elementsControl.at(0).patchValue({'service': component.serviceExportValueArray[0][0].service});
         component.elementsControl.at(0).patchValue({'exportValues': component.serviceExportValueArray[0][0].exportValues[0]});
+        component.elementsControl.at(0).patchValue({'requestDevice': true});
         expect(component.elements[0].exportId).toBeNull();
         expect(component.elements[0].deploymentId).toBeNull();
+        exportServiceSpy.startPipeline.calls.reset();
+        exportServiceSpy.stopPipeline.calls.reset();
+        deploymentsServiceSpy.postDeployments.calls.reset();
         component.save();
         expect(component.elements[0].exportId).not.toBeNull();
         expect(component.elements[0].deploymentId).not.toBeNull();
         expect(deploymentsServiceSpy.postDeployments.calls.count()).toBe(1);
+        expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
+        expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
+    }));
+
+    it('save element without process deployment', async(() => {
+        component.addElement({} as DeviceStatusElementModel);
+        component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
+        component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
+        component.elementsControl.at(0).patchValue({'selectable': component.selectablesArray[0][0]});
+        component.elementsControl.at(0).patchValue({'service': component.serviceExportValueArray[0][0].service});
+        component.elementsControl.at(0).patchValue({'exportValues': component.serviceExportValueArray[0][0].exportValues[0]});
+        component.elementsControl.at(0).patchValue({'requestDevice': false});
+        expect(component.elements[0].exportId).toBeNull();
+        expect(component.elements[0].deploymentId).toBeNull();
+        exportServiceSpy.startPipeline.calls.reset();
+        exportServiceSpy.stopPipeline.calls.reset();
+        deploymentsServiceSpy.postDeployments.calls.reset();
+        component.save();
+        expect(component.elements[0].exportId).not.toBeNull();
+        expect(component.elements[0].deploymentId).not.toBeNull();
+        expect(deploymentsServiceSpy.postDeployments.calls.count()).toBe(0);
         expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
         expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
     }));
