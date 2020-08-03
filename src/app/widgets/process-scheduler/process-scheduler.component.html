@@ -17,16 +17,16 @@
 <mat-card>
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="mat-card-image content-size">
-        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+        <senergy-widget-spinner [show]="!ready()"></senergy-widget-spinner>
 
-        <div *ngIf="ready && schedules.length != 0" fxLayout="column" fxFill>
+        <div *ngIf="ready() && schedules.length != 0" fxLayout="column" fxFill>
             <mat-list>
                 <mat-list-item *ngFor="let schedule of schedules">
                     <h4 mat-line class="drag-handler">
                         <mat-icon>schedule</mat-icon>
                         {{cronReadable(schedule.cron)}}</h4>
                     <h4 mat-line class="drag-handler">
-                        {{schedule.processName}}</h4>
+                        {{schedule.processAlias || schedule.processName}}</h4>
                     <button mat-icon-button color="accent" matTooltip="delete schedule"
                             (click)="add(schedule)">
                         <mat-icon class="fix-position">edit</mat-icon>
