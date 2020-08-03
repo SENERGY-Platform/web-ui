@@ -68,6 +68,7 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {MatChipsModule} from '@angular/material/chips';
 import {DesignerSnackBarComponent} from './designer/snack-bar/designer-snack-bar.component';
 import {MatBadgeModule} from '@angular/material/badge';
+import {FilterCriteriaDialogComponent} from './designer/dialogs/filter-criteria-dialog/filter-criteria-dialog.component';
 
 const processRepo = {
     path: 'processes/repository',
@@ -160,6 +161,7 @@ const processDesigner = {
         EmailConfigDialogComponent,
         DeploymentsMissingDependenciesDialogComponent,
         TaskConfigDialogComponent,
+        FilterCriteriaDialogComponent,
         NotificationConfigDialogComponent,
         DesignerSnackBarComponent
     ],
