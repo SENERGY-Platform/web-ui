@@ -103,10 +103,6 @@ import {MatDialogModule} from '@angular/material/dialog';
         ShortInputVariableValuePipe,
         WidgetNoDataComponent,
     ],
-    entryComponents: [
-        DeleteDialogComponent,
-        NotificationDialogComponent,
-    ]
 })
 
 export class CoreModule {

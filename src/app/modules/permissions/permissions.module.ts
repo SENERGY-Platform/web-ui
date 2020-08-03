@@ -45,8 +45,6 @@ import {MatInputModule} from '@angular/material/input';
     declarations: [
         PermissionDialogComponent,
     ],
-    entryComponents: [PermissionDialogComponent,
-    ]
 })
 export class PermissionsModule {
 

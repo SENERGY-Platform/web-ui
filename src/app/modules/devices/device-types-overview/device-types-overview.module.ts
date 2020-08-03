@@ -95,12 +95,6 @@ const devicetypesEdit = {path: 'devices/devicetypesoverview/devicetypes/:id', pa
         DeviceTypesNewAspectDialogComponent,
         DeviceTypesShowConceptDialogComponent,
     ],
-    entryComponents: [
-        DeviceTypesNewDeviceClassDialogComponent,
-        DeviceTypesNewFunctionDialogComponent,
-        DeviceTypesNewAspectDialogComponent,
-        DeviceTypesShowConceptDialogComponent,
-    ]
 })
 export class DeviceTypesOverviewModule {
 }

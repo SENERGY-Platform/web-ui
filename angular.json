@@ -38,6 +38,19 @@
             ],
             "scripts": [
               "node_modules/@webcomponents/custom-elements/src/native-shim.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "keycloak-js",
+              "js-sha256",
+              "rxjs",
+              "x2js",
+              "bpmn-js-properties-panel",
+              "jointjs",
+              "senergy-properties-provider",
+              "file-saver",
+              "jquery",
+              "backbone",
+              "lodash"
             ]
           },
           "configurations": {

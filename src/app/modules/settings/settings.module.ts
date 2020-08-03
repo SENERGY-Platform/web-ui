@@ -45,8 +45,6 @@ import {MatInputModule} from '@angular/material/input';
     declarations: [
         SettingsChangeDialogComponent,
     ],
-    entryComponents: [SettingsChangeDialogComponent,
-    ]
 })
 export class SettingsModule {
 

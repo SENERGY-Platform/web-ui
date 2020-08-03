@@ -22,6 +22,7 @@ export interface DashboardModel {
     user_id: string;
     refresh_time: number;
     widgets: WidgetModel[];
+    index: number;
 }
 
 

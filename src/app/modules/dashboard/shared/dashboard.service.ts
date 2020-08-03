@@ -62,8 +62,8 @@ export class DashboardService {
             catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [])));
     }
 
-    createDashboard(dashboardName: string): Observable<DashboardModel> {
-        const dash: DashboardModel = {name: dashboardName, id: '', user_id: '', widgets: [], refresh_time: 0};
+    createDashboard(dashboardName: string, index: number): Observable<DashboardModel> {
+        const dash: DashboardModel = {name: dashboardName, id: '', user_id: '', widgets: [], refresh_time: 0, index: index};
         return this.http.put<DashboardModel>(environment.dashboardServiceUrl + '/dashboard', dash).pipe(
             catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {} as DashboardModel)));
     }
@@ -101,14 +101,14 @@ export class DashboardService {
 
     /** Dialog Services */
 
-    openNewDashboardDialog(): void {
+    openNewDashboardDialog(nextIndex: number): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(DashboardNewDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((dashboardName: string) => {
             if (dashboardName !== undefined) {
-                this.createDashboard(dashboardName).subscribe((dashboard: DashboardModel) => {
+                this.createDashboard(dashboardName, nextIndex).subscribe((dashboard: DashboardModel) => {
                     this.manipulateDashboard(DashboardManipulationEnum.Create, dashboard.id, dashboard);
                 });
             }
