@@ -19,6 +19,11 @@
 <mat-dialog-content>
     <div fxLayout="column" [formGroup]="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Alias</mat-label>
+            <input formControlName="process_alias" matInput type="text">
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Time</mat-label>
             <input formControlName="time" matInput type="time" required>
         </mat-form-field>
@@ -33,9 +38,9 @@
             <mat-checkbox class="checkbox-margin" formControlName="0">Sunday</mat-checkbox>
         </section>
 
-        <mat-form-field class="full-width" appearance="outline" color="accent">
+        <mat-form-field class="full-width deployment" appearance="outline" color="accent">
             <mat-label>Deployment</mat-label>
-            <mat-select formControlName="processId" required>
+            <mat-select formControlName="processId" required [compareWith]="compare">
                 <mat-option *ngFor="let deployment of deployments"
                             [value]="deployment.id">
                     {{deployment.name}}

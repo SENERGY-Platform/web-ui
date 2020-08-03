@@ -18,4 +18,5 @@ export interface ProcessSchedulerModel {
     id: string;
     cron: string;
     process_deployment_id: string;
+    process_alias?: string;
 }
