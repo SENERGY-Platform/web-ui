@@ -46,6 +46,16 @@
                                 [ngClass]="{'color-accent': dashboard.refresh_time === 0}">no refresh
                         </button>
                     </mat-menu>
+                    <button (click)="moveDashboard(true)" mat-icon-button color="accent"
+                            [disabled]="activeTabIndex === 0"
+                            matTooltip="move dashboard left">
+                        <mat-icon>keyboard_arrow_left</mat-icon>
+                    </button>
+                    <button (click)="moveDashboard(false)" mat-icon-button color="accent"
+                            [disabled]="activeTabIndex === dashboards.length - 1"
+                            matTooltip="move dashboard right">
+                        <mat-icon>keyboard_arrow_right</mat-icon>
+                    </button>
                     <button (click)="toggleDragMode()" mat-icon-button [color]="inDragMode ? 'warn' : 'accent'"
                             [disabled]="dragModeDisabled"
                             matTooltip="reorder widgets">
