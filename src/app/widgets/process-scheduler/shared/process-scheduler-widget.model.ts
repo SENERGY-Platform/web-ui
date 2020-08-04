@@ -20,4 +20,5 @@ export interface ProcessSchedulerWidgetModel {
     processName: string;
     processId: string;
     processAlias?: string;
+    disabled?: boolean;
 }

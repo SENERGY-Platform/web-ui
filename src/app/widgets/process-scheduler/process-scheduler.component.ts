@@ -132,6 +132,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
                     cron: schedule.cron,
                     processId: schedule.process_deployment_id,
                     scheduleId: schedule.id,
+                    disabled: schedule.disabled,
                 } as ProcessSchedulerWidgetModel;
 
                 if (schedule.process_alias !== undefined && schedule.process_alias !== '') {

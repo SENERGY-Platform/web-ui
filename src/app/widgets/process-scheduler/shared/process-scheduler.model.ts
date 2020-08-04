@@ -19,4 +19,5 @@ export interface ProcessSchedulerModel {
     cron: string;
     process_deployment_id: string;
     process_alias?: string;
+    disabled?: boolean;
 }
