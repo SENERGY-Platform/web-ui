@@ -19,7 +19,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {Observable} from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 import {ProcessSchedulerModel} from './process-scheduler.model';
 import {ProcessRepoService} from '../../../modules/processes/process-repo/shared/process-repo.service';
 import {environment} from '../../../../environments/environment';
@@ -60,7 +60,7 @@ export class ProcessSchedulerService {
         });
     }
 
-    getSchedules(createdBy: string|null): Observable<ProcessSchedulerModel[]> {
+    getSchedules(createdBy: string | null): Observable<ProcessSchedulerModel[]> {
         let path = '/schedules';
         if (createdBy !== null && createdBy !== '') {
             path += '?created_by=' + createdBy;
@@ -71,7 +71,7 @@ export class ProcessSchedulerService {
         );
     }
 
-    deleteSchedule(scheduleId: string): Observable<{status: number}> {
+    deleteSchedule(scheduleId: string): Observable<{ status: number }> {
         return this.http.delete<HttpResponseBase>(environment.processSchedulerUrl + '/schedules/' + scheduleId, {observe: 'response'}).pipe(
             map(resp => {
                 return {status: resp.status};
@@ -94,5 +94,17 @@ export class ProcessSchedulerService {
         );
     }
 
+    deleteSchedulesByWidget(widgetId: string): Observable<{status: number}[]> {
+        return new Observable<{ status: number }[]>(obs => {
+            this.getSchedules(widgetId).subscribe(schedules => {
+                const observables: Observable<{ status: number }>[] = [];
+                schedules.forEach(schedule => observables.push(this.deleteSchedule(schedule.id)));
+                forkJoin(observables).subscribe(states => {
+                    obs.next(states);
+                    obs.complete();
+                });
+            });
+        });
+    }
 }
 
