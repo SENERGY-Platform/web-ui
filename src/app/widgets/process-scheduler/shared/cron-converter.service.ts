@@ -15,6 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
+import cronstrue from 'cronstrue';
 
 @Injectable({
     providedIn: 'root'
@@ -28,6 +29,10 @@ export class CronConverterService {
         const min = cron.split(' ')[0];
         const hours = cron.split(' ')[1];
 
+        return this.getLocalTimeFromMinHours(min, hours);
+    }
+
+    getLocalTimeFromMinHours(min: string, hours: string): string {
         const date = new Date();
         date.setUTCHours(Number(hours));
         date.setUTCMinutes(Number(min));
@@ -83,5 +88,31 @@ export class CronConverterService {
         return date.getUTCMinutes() + ' ' + date.getUTCHours() + ' * * ' + cronDays.join();
     }
 
+    hasSecondsField(cron: string): boolean {
+        const matches = cron.trim().match(/\S+/g);
+        return matches !== null && matches.length > 5;
+    }
+
+    getHumanReadableString(cron: string): string {
+        let str = cronstrue.toString(cron, {use24HourTimeFormat: true})
+            // abbrev. days
+            .replace('Monday', 'Mo')
+            .replace('Tuesday', 'Tu')
+            .replace('Wednesday', 'We')
+            .replace('Thursday', 'Th')
+            .replace('Friday', 'Fr')
+            .replace('Saturday', 'Sa')
+            .replace('Sunday', 'Su')
+            .replace('only ', '');
+        // localize time
+        const times = str.match(/\d\d:\d\d/);
+        if (times !== null && times.length === 1) {
+            const timeparts = times[0].match(/\d+/g);
+            if (timeparts !== null && timeparts.length === 2) {
+                str = str.replace(times[0], this.getLocalTimeFromMinHours(timeparts[1], timeparts[0]));
+            }
+        }
+        return str;
+    }
 }
 

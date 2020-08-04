@@ -154,6 +154,10 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     }
 
     cronReadable(cron: string): string {
-        return this.cronConverterService.getLocalTimeAndDaysAsString(cron);
+        return this.cronConverterService.getHumanReadableString(cron);
+    }
+
+    canEdit(schedule: ProcessSchedulerWidgetModel) {
+        return !this.cronConverterService.hasSecondsField(schedule.cron);
     }
 }
