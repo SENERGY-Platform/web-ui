@@ -1,12 +1,12 @@
 /*
  * Copyright 2020 InfAI (CC SES)
- *  
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,6 +46,7 @@ export class ProcessSchedulerService {
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
+        dialogConfig.minHeight = '235px';
         dialogConfig.data = {
             widgetId: widgetId,
             dashboardId: dashboardId,
@@ -59,8 +60,12 @@ export class ProcessSchedulerService {
         });
     }
 
-    getSchedules(): Observable<ProcessSchedulerModel[]> {
-        return this.http.get<ProcessSchedulerModel[]>(environment.processSchedulerUrl + '/schedules').pipe(
+    getSchedules(createdBy: string|null): Observable<ProcessSchedulerModel[]> {
+        let path = '/schedules';
+        if (createdBy !== null && createdBy !== '') {
+            path += '?created_by=' + createdBy;
+        }
+        return this.http.get<ProcessSchedulerModel[]>(environment.processSchedulerUrl + path).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getSchedules()', []))
         );
