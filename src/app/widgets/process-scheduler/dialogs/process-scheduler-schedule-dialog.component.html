@@ -18,6 +18,8 @@
 
 <mat-dialog-content>
     <div fxLayout="column" [formGroup]="form">
+        <mat-slide-toggle color="accent" class="toggle-padding" formControlName="enable">Enable</mat-slide-toggle>
+
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Alias</mat-label>
             <input formControlName="process_alias" matInput type="text">

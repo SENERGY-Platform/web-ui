@@ -25,3 +25,8 @@ mat-dialog-actions button:not(:last-child) {
 .deployment {
     padding-top: 18px;
 }
+
+.toggle-padding {
+    padding-bottom: 12px;
+    padding-top: 8px;
+}

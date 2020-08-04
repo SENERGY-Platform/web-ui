@@ -31,6 +31,8 @@ import {
 } from '../../../devices/device-types-overview/shared/device-type-selection.model';
 import {TaskConfigDialogComponent} from '../dialogs/task-config-dialog/task-config-dialog.component';
 import {NotificationConfigDialogComponent} from '../dialogs/notification-config-dialog/notification-config-dialog.component';
+import {FilterCriteriaDialogResultModel} from './designer-dialog.model';
+import {FilterCriteriaDialogComponent} from '../dialogs/filter-criteria-dialog/filter-criteria-dialog.component';
 
 @Injectable({
     providedIn: 'root'
@@ -134,4 +136,10 @@ export class DesignerDialogService {
     }
 
 
+    openFilterCriteriaDialog(aspect: string, iotFunction: string, characteristic: string): Observable<FilterCriteriaDialogResultModel> {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {aspect: aspect, iotfunction: iotFunction, characteristic: characteristic};
+        return this.dialog.open(FilterCriteriaDialogComponent, dialogConfig).afterClosed();
+    }
 }

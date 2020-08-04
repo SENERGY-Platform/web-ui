@@ -45,6 +45,7 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
         processId: new FormControl('', [Validators.required]),
         time: new FormControl('', [Validators.required]),
         process_alias: new FormControl(''),
+        enable: new FormControl(true),
     });
 
     widget: WidgetModel = {} as WidgetModel;
@@ -61,6 +62,7 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
                 'processId': data.processId,
                 'days': this.cronConverterService.getDaysAsBoolArray(data.cron),
                 'process_alias': data.processAlias,
+                'enable': !data.disabled,
             });
         }
 
@@ -91,6 +93,7 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
             cron: this.cronConverterService.getCronAsString((this.form.get('time') as FormControl).value, this.getDays()),
             process_deployment_id: (this.form.get('processId') as FormControl).value,
             process_alias: (this.form.get('process_alias') as FormControl).value,
+            disabled: (this.form.get('enable') as FormControl).value === false
         } as ProcessSchedulerModel);
     }
 
