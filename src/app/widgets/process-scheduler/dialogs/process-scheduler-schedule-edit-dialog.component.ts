@@ -31,6 +31,7 @@ export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
+    readAll = false;
 
     constructor(private dialogRef: MatDialogRef<ProcessSchedulerScheduleEditDialogComponent>,
                 private deploymentsService: DeploymentsService,
@@ -47,6 +48,7 @@ export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
+            this.readAll = this.widget.properties.readAll === true;
         });
     }
 
@@ -55,6 +57,7 @@ export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
     }
 
     save(): void {
+        this.widget.properties.readAll = this.readAll;
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widget);
