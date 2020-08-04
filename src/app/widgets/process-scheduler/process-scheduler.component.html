@@ -28,7 +28,7 @@
                     <h4 mat-line class="drag-handler">
                         {{schedule.processAlias || schedule.processName}}</h4>
                     <button mat-icon-button color="accent" matTooltip="edit schedule"
-                            (click)="add(schedule)">
+                            (click)="add(schedule)" [disabled]="!canEdit(schedule)">
                         <mat-icon class="fix-position">edit</mat-icon>
                     </button>
                     <button mat-icon-button color="accent" matTooltip="delete schedule"

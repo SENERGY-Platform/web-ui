@@ -38,6 +38,8 @@ import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/data
 import {forkJoin, Observable, of} from 'rxjs';
 import {environment} from '../../../../environments/environment';
 import {DeviceStatusService} from '../shared/device-status.service';
+import {ProcessSchedulerService} from '../../process-scheduler/shared/process-scheduler.service';
+import {ProcessSchedulerModel} from '../../process-scheduler/shared/process-scheduler.model';
 
 
 @Component({
@@ -75,6 +77,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 private fb: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
                 private deviceStatusService: DeviceStatusService,
+                private processSchedulerService: ProcessSchedulerService,
                 @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
@@ -260,7 +263,12 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 respDeployment.forEach((deployment: { status: number, id: string }, deploymentIndex: number) => {
                     this.getDeploymentId(deploymentIndex).setValue(deployment.id);
                 });
-                this.saveWidget();
+                forkJoin(this.getScheduleArray()).subscribe(schedules => {
+                    schedules.forEach((schedule, index) => {
+                        this.getScheduleId(index).setValue(schedule !== null ? schedule.id : null);
+                    });
+                    this.saveWidget();
+                });
             });
         });
 
@@ -320,6 +328,36 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return exportArray;
     }
 
+    private getScheduleArray(): Observable<ProcessSchedulerModel | null>[] {
+        const scheduleArray: Observable<ProcessSchedulerModel | null>[] = [];
+        if ((this.formGroup.get('refreshTime') as FormControl).value === 0) {
+            this.elements.forEach(() => scheduleArray.push(of(null)));
+            return scheduleArray;
+        }
+
+        const refreshTime = (this.formGroup.get('refreshTime') as FormControl).value === 1
+            ? '*' : (this.formGroup.get('refreshTime') as FormControl).value;
+        this.elements.forEach((element: DeviceStatusElementModel, index: number) => {
+            if (element.selectable) {
+                if (!element.requestDevice || this.getService(index).protocol_id === environment.mqttProtocolID) {
+                    scheduleArray.push(of(null));
+                } else if (element.deploymentId !== null) {
+                    // spread process starts
+                    let cron = refreshTime === '*' ? refreshTime
+                        : Math.round(((refreshTime / this.elements.length) * index)) as unknown as string + '/' + refreshTime;
+                    cron += ' * * * * *';
+                    scheduleArray.push(this.processSchedulerService.createSchedule({
+                        created_by: this.widgetId,
+                        process_deployment_id: element.deploymentId,
+                        cron,
+                        id: '',
+                    }));
+                }
+            }
+        });
+        return scheduleArray;
+    }
+
     private saveWidget() {
         this.widgetNew.name = this.widgetName;
         this.widgetNew.properties = {};
@@ -363,6 +401,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             exportId: [element.exportId],
             exportValues: [element.exportValues, Validators.required],
             requestDevice: [element.requestDevice || false],
+            scheduleId: [element.scheduleId],
         });
     }
 
@@ -432,6 +471,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     private getExportValues(elementIndex: number): ExportValueCharacteristicModel {
         return <ExportValueCharacteristicModel>this.getExportValuesControl(elementIndex).value;
+    }
+
+    private getScheduleId(elementIndex: number): FormControl {
+        return this.elementsControl.at(elementIndex).get('scheduleId') as FormControl;
     }
 
 }

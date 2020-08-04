@@ -177,6 +177,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             aspectId: null,
             name: null,
             requestDevice: false,
+            scheduleId: null,
         });
         expect(component.funcArray.length).toBe(0);
         expect(component.selectablesArray.length).toBe(0);
@@ -206,6 +207,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             aspectId: 'aspect_1',
             name: null,
             requestDevice: false,
+            scheduleId: null,
         });
     }));
 
@@ -230,6 +232,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             aspectId: 'aspect_1',
             name: null,
             requestDevice: false,
+            scheduleId: null,
         });
     }));
 
@@ -263,6 +266,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             aspectId: 'aspect_1',
             name: null,
             requestDevice: false,
+            scheduleId: null,
         });
     }));
 
@@ -303,6 +307,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             aspectId: 'aspect_1',
             name: null,
             requestDevice: false,
+            scheduleId: null,
         });
     }));
 

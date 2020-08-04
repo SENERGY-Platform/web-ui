@@ -37,6 +37,7 @@ export interface DeviceStatusElementModel {
     exportId: string | null;
     exportValues: ExportValueCharacteristicModel | null;
     requestDevice: boolean;
+    scheduleId: string | null;
 }
 
 

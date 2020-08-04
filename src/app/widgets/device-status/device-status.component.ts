@@ -38,7 +38,6 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     configured = false;
     destroy = new Subscription();
     dataReady = false;
-    interval = 0;
     items: DeviceStatusItemModel[] = [];
 
     @Input() dashboardId = '';
@@ -60,7 +59,6 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        clearInterval(this.interval);
         this.destroy.unsubscribe();
     }
 
@@ -76,19 +74,6 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
 
                 const elements = this.widget.properties.elements;
                 if (elements) {
-                    clearInterval(this.interval);
-                    const refreshTimeInMs = (this.widget.properties.refreshTime || 0) * 1000 / elements.length;
-                    let refreshIndex = 0;
-                    if (refreshTimeInMs > 0) {
-                        this.interval = window.setInterval(() => {
-                            const element = elements[refreshIndex];
-                            if (element.deploymentId) {
-                                this.deploymentsService.startDeployment(element.deploymentId).subscribe();
-                            }
-                            refreshIndex = (refreshIndex + 1) % elements.length;
-                        }, refreshTimeInMs);
-                    }
-
                     const queries: LastValuesRequestElementModel[] = [];
                     elements.forEach((element: DeviceStatusElementModel) => {
                         if (element.exportId && element.exportValues) {

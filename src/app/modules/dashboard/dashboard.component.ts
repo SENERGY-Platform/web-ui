@@ -27,6 +27,8 @@ import {forkJoin, Observable, Subscription} from 'rxjs';
 import {DashboardTypesEnum} from './shared/dashboard-types.enum';
 import {DeviceStatusService} from '../../widgets/device-status/shared/device-status.service';
 import {moveItemInArray} from '@angular/cdk/drag-drop';
+import {DialogsService} from '../../core/services/dialogs.service';
+import {ProcessSchedulerService} from '../../widgets/process-scheduler/shared/process-scheduler.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -58,6 +60,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     constructor(private responsiveService: ResponsiveService,
                 private dashboardService: DashboardService,
+                private dialogsService: DialogsService,
+                private processSchedulerService: ProcessSchedulerService,
                 private deviceStatusService: DeviceStatusService) {
     }
 
@@ -343,8 +347,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     private cleanUp(widget: WidgetModel): void {
-        if (widget.type === DashboardTypesEnum.DeviceStatus) {
-            this.deviceStatusService.deleteElements(widget.properties.elements);
+        switch (widget.type) {
+            case DashboardTypesEnum.DeviceStatus:
+                this.deviceStatusService.deleteElements(widget.properties.elements);
+                break;
+            case DashboardTypesEnum.ProcessScheduler:
+                this.dialogsService.openDeleteDialog('schedules created by this widget').afterClosed().subscribe(yes => {
+                    if (yes === true) {
+                        this.processSchedulerService.deleteSchedulesByWidget(widget.id).subscribe(() => null);
+                    }
+                });
+                break;
         }
     }
 
