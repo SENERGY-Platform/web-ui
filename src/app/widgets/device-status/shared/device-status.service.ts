@@ -24,6 +24,7 @@ import {ExportModel} from '../../../modules/data/export/shared/export.model';
 import {ExportService} from '../../../modules/data/export/shared/export.service';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {HttpClient} from '@angular/common/http';
+import {ProcessSchedulerService} from '../../process-scheduler/shared/process-scheduler.service';
 
 @Injectable({
     providedIn: 'root'
@@ -34,6 +35,7 @@ export class DeviceStatusService {
                 private dashboardService: DashboardService,
                 private exportService: ExportService,
                 private deploymentsService: DeploymentsService,
+                private processSchedulerService: ProcessSchedulerService,
                 private http: HttpClient) {
     }
 
@@ -45,6 +47,9 @@ export class DeviceStatusService {
                 }
                 if (element.deploymentId) {
                     this.deploymentsService.deleteDeployment(element.deploymentId).subscribe();
+                }
+                if (element.scheduleId) {
+                    this.processSchedulerService.deleteSchedule(element.scheduleId).subscribe();
                 }
             });
         }

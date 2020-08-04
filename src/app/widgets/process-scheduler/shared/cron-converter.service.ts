@@ -103,7 +103,8 @@ export class CronConverterService {
             .replace('Friday', 'Fr')
             .replace('Saturday', 'Sa')
             .replace('Sunday', 'Su')
-            .replace('only ', '');
+            .replace('only ', '')
+            .replace(' past the minute', '');
         // localize time
         const times = str.match(/\d\d:\d\d/);
         if (times !== null && times.length === 1) {
