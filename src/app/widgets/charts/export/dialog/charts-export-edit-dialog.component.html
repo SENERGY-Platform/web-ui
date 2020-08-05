@@ -161,22 +161,32 @@
         </ng-container>
 
         <ng-container matColumnDef="exportName">
-            <th mat-header-cell *matHeaderCellDef>Export Name</th>
+            <th mat-header-cell *matHeaderCellDef>Export</th>
             <td mat-cell *matCellDef="let element" matTooltip="{{element.exportName}}" matTooltipPosition="right">
                 {{element.exportName}}
             </td>
         </ng-container>
 
         <ng-container matColumnDef="valueName">
-            <th mat-header-cell *matHeaderCellDef>Value Name</th>
+            <th mat-header-cell *matHeaderCellDef>Value</th>
             <td mat-cell *matCellDef="let element" matTooltip="{{element.valueName}}" matTooltipPosition="right">
                 {{element.valueName}}
             </td>
         </ng-container>
 
         <ng-container matColumnDef="valueType">
-            <th mat-header-cell *matHeaderCellDef>Value Type</th>
+            <th mat-header-cell *matHeaderCellDef>Type</th>
             <td mat-cell *matCellDef="let element"> {{element.valueType}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="valueAlias">
+            <th mat-header-cell *matHeaderCellDef>Alias</th>
+            <td mat-cell *matCellDef="let element">
+                <mat-form-field color="accent" appearance="standard">
+                    <input type="text" matInput
+                           [(ngModel)]="element.valueAlias">
+                </mat-form-field>
+            </td>
         </ng-container>
 
         <ng-container matColumnDef="color">
