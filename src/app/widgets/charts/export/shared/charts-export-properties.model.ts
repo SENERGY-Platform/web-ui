@@ -46,6 +46,7 @@ export interface ChartsExportVAxesModel {
     instanceId: string;
     exportName: string;
     valueName: string;
+    valueAlias?: string;
     valueType: string;
     math: string;
     color: string;
