@@ -244,6 +244,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             if (this.activeTabIndex > (this.dashboards.length - 2)) {
                 this.activeTabIndex = this.dashboards.length - 2;
             }
+            this.dashboards[deletionIndex].widgets.forEach(widget => this.cleanUp(widget));
             const oldIndex = this.dashboards[deletionIndex].index;
             this.dashboards.splice(deletionIndex, 1);
             this.dashboards.forEach((dashboard: DashboardModel) => {
@@ -352,7 +353,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.deviceStatusService.deleteElements(widget.properties.elements);
                 break;
             case DashboardTypesEnum.ProcessScheduler:
-                this.dialogsService.openDeleteDialog('schedules created by this widget').afterClosed().subscribe(yes => {
+                this.dialogsService.openDeleteDialog('schedules created by the widget ' + widget.name).afterClosed().subscribe(yes => {
                     if (yes === true) {
                         this.processSchedulerService.deleteSchedulesByWidget(widget.id).subscribe(() => null);
                     }
