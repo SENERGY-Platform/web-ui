@@ -102,9 +102,13 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceInstancesByHubId(limit: number, offset: number, value: string, order: string, id: string): Observable<DeviceInstancesModel[]> {
-        return this.http.get<DeviceInstancesModel[]>
-        (environment.apiAggregatorUrl + '/hubs/' + encodeURIComponent(id) + '/devices?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order).pipe(
+    getDeviceInstancesByHubId(limit: number, offset: number, value: string, order: string, id: string,
+                              state: null | 'connected' | 'disconnected' | 'unknown'): Observable<DeviceInstancesModel[]> {
+        let url = environment.apiAggregatorUrl + '/hubs/' + encodeURIComponent(id) + '/devices?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order;
+        if (state != null) {
+            url += '&state=' + state;
+        }
+        return this.http.get<DeviceInstancesModel[]>(url).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByHubId', []))
         );

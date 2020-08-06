@@ -141,7 +141,6 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     setIndex(event: number) {
         this.activeIndex = event;
         this.animationDone = false;
-        this.routerNetwork = null;
         this.searchText = '';
         this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
         this.sortAttribute = this.sortAttributes[0];
@@ -181,7 +180,8 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             this.selectedTag = this.routerNetwork.name;
             this.selectedTagTransformed = this.routerNetwork.name;
             this.deviceInstancesService.getDeviceInstancesByHubId(this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order,
-                this.routerNetwork.id).subscribe((deviceInstances: DeviceInstancesModel[]) => {
+                this.routerNetwork.id, this.activeIndex === 0 ? null : tabs[this.activeIndex - 1].state as 'connected' | 'disconnected' | 'unknown')
+                .subscribe((deviceInstances: DeviceInstancesModel[]) => {
                 this.setDevices(deviceInstances);
             });
         } else if (this.routerDeviceType !== null) {
