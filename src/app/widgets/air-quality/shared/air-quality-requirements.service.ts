@@ -18,7 +18,7 @@ import {DeviceTypeService} from '../../../modules/devices/device-types-overview/
 import {Observable} from 'rxjs';
 import {Injectable} from '@angular/core';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
-import {map, mergeAll} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {environment} from '../../../../environments/environment';
 
 
@@ -41,11 +41,16 @@ export class AirQualityRequirementsService {
         filter.push({function_id: environment.getCo2FunctionId, device_class_id: '', aspect_id: environment.aspectAirId});
 
 
-        return this.deviceTypeService.getDeviceTypeFilteredOr(filter).pipe(map(deviceTypes => {
-            const ids = deviceTypes.map(d => d.id);
-            return this.deviceInstancesService.getDeviceInstancesByDeviceTypes(ids, 1);
-        })).pipe(mergeAll(), map(deviceInstances => {
-            return deviceInstances.length > 0;
-        }));
+        return new Observable<boolean>(obs => {
+            this.deviceTypeService.getDeviceTypeFilteredOr(filter).pipe(
+                map(deviceTypes => deviceTypes.map(d => d.id)),
+                map(ids => this.deviceInstancesService.getDeviceInstancesByDeviceTypes(ids, null))
+            ).subscribe(o => {
+                o.subscribe(deviceInstances => {
+                    obs.next(deviceInstances.length > 0);
+                    obs.complete();
+                });
+            });
+        });
     }
 }
