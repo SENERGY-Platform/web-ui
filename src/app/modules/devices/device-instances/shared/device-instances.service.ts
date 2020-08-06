@@ -115,7 +115,7 @@ export class DeviceInstancesService {
         let url = environment.apiAggregatorUrl + '/device-types/' + id + '/devices?sort=' + orderfeature + '.' + direction
             + '&limit=' + limit + '&offset=' + offset;
         if (state != null) {
-            url += '&state' + state;
+            url += '&state=' + state;
         }
         return this.http.get<DeviceInstancesModel[]>(url).pipe(
             map(resp => resp || []),
@@ -127,7 +127,7 @@ export class DeviceInstancesService {
         : Observable<DeviceInstancesModel[]> {
         let url = environment.apiAggregatorUrl + '/device-types-devices';
         if (state != null) {
-            url += '?state' + state;
+            url += '?state=' + state;
         }
         return this.http.post<DeviceInstancesModel[]>(url, {ids: ids}).pipe(
             map(resp => resp || []),
