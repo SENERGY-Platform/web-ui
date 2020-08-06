@@ -25,14 +25,18 @@ export interface DeviceInstancesBaseModel {
     name: string;
 }
 
-export interface DeviceInstancesModel extends DeviceInstancesBaseModel {
+export interface DeviceInstancesIntermediateModel extends DeviceInstancesBaseModel {
     creator: string;
-    device_type: DeviceTypePermSearchModel;
-    id: string;
-    local_id: string;
-    log_state: boolean;
-    name: string;
     permissions: PermissionsModel;
     shared: boolean;
+}
+
+export interface DeviceInstancesPermSearchModel extends DeviceInstancesIntermediateModel {
+    device_type_id: string;
+}
+
+export interface DeviceInstancesModel extends DeviceInstancesIntermediateModel {
+    device_type: DeviceTypePermSearchModel;
+    log_state: boolean;
 }
 

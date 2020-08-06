@@ -19,7 +19,7 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
-import {DeviceInstancesModel} from './device-instances.model';
+import {DeviceInstancesModel, DeviceInstancesPermSearchModel} from './device-instances.model';
 import {forkJoin, Observable, of} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -113,8 +113,8 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceInstancesByDeviceType(id: string, limit: number, offset: number, orderfeature: string, direction: 'asc' | 'desc'): Observable<DeviceInstancesModel[]> {
-        return this.http.get<DeviceInstancesModel[]>(
+    getDeviceInstancesByDeviceType(id: string, limit: number, offset: number, orderfeature: string, direction: 'asc' | 'desc'): Observable<DeviceInstancesPermSearchModel[]> {
+        return this.http.get<DeviceInstancesPermSearchModel[]>(
             environment.permissionSearchUrl + '/jwt/select/devices/device_type_id/' + id + '/r/'
             + limit + '/' + offset + '/' + orderfeature + '/' + direction
         ).pipe(
@@ -128,7 +128,7 @@ export class DeviceInstancesService {
      * @param ids device type ids
      * @param limit limit of devices per type. maximum devices = limit * ids.length
      */
-    getDeviceInstancesByDeviceTypes(ids: string[], limit: number): Observable<DeviceInstancesModel[]> {
+    getDeviceInstancesByDeviceTypes(ids: string[], limit: number): Observable<DeviceInstancesPermSearchModel[]> {
         const deviceInstancesObservables = ids.map(id => this.getDeviceInstancesByDeviceType(id, limit, 0, 'name', 'asc'));
         return forkJoin(deviceInstancesObservables)
             .pipe(flatMap(deviceInstances => {
