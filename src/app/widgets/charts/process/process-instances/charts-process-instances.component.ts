@@ -22,6 +22,7 @@ import {ChartsModel} from '../../shared/charts.model';
 import {ElementSizeService} from '../../../../core/services/element-size.service';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
+import {ChartsService} from "../../shared/charts.service";
 
 @Component({
     selector: 'senergy-charts-process-instances',
@@ -51,7 +52,8 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(private chartsProcessInstancesService: ChartsProcessInstancesService,
+    constructor(private chartsService: ChartsService,
+                private chartsProcessInstancesService: ChartsProcessInstancesService,
                 private elementSizeService: ElementSizeService,
                 private dashboardService: DashboardService) {
     }
@@ -62,6 +64,7 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
+        this.chartsService.releaseResources(this.processInstancesStatusChart);
     }
 
     edit() {
@@ -72,6 +75,7 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
+                this.chartsService.releaseResources(this.processInstancesStatusChart);
                 this.chartsProcessInstancesService.getProcessInstancesStatus(this.widget.id).subscribe((processInstancesStatus: ChartsModel) => {
                     this.processInstancesStatus = processInstancesStatus;
                     this.ready = true;
@@ -79,8 +83,6 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
             }
         });
     }
-
-
 
 
     private resizeProcessInstancesStatusChart() {
@@ -92,7 +94,7 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
                 this.processInstancesStatus.options.chartArea.height = element.heightPercentage;
                 this.processInstancesStatus.options.chartArea.width = element.widthPercentage;
             }
-            if (this.processInstancesStatus.dataTable[0].length > 0 ) {
+            if (this.processInstancesStatus.dataTable[0].length > 0) {
                 this.processInstancesStatusChart.draw();
             }
         }

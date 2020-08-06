@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewChecked, Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {
     WidgetModel
 } from '../../modules/dashboard/shared/dashboard-widget.model';
@@ -28,7 +28,7 @@ import {DashboardService} from '../../modules/dashboard/shared/dashboard.service
     templateUrl: './device-downtime-list.component.html',
     styleUrls: ['./device-downtime-list.component.css'],
 })
-export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
+export class DeviceDowntimeListComponent implements OnInit, OnDestroy{
 
     devices: DeviceDowntimeListModel[] = [];
     ready = false;
