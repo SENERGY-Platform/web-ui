@@ -22,6 +22,7 @@ import {ElementSizeService} from '../../../../core/services/element-size.service
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {DeviceDowntimeGatewayService} from './shared/device-downtime-gateway.service';
+import {ChartsService} from "../../shared/charts.service";
 
 @Component({
     selector: 'senergy-device-downtime-gateway',
@@ -51,7 +52,8 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(private deviceDowntimeGatewayService: DeviceDowntimeGatewayService,
+    constructor(private chartsService: ChartsService,
+                private deviceDowntimeGatewayService: DeviceDowntimeGatewayService,
                 private elementSizeService: ElementSizeService,
                 private dashboardService: DashboardService) {
     }
@@ -62,6 +64,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
+        this.chartsService.releaseResources(this.deviceDowntimeGatewayChart);
     }
 
     edit() {
@@ -72,11 +75,12 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
+                this.chartsService.releaseResources(this.deviceDowntimeGatewayChart);
                 this.deviceDowntimeGatewayService.getDevicesDowntimePerGateway(this.widget).subscribe(
                     (processDeploymentsHistory: ChartsModel) => {
-                    this.deviceDowntimeGateway = processDeploymentsHistory;
-                    this.ready = true;
-                });
+                        this.deviceDowntimeGateway = processDeploymentsHistory;
+                        this.ready = true;
+                    });
             }
         });
     }
@@ -91,7 +95,7 @@ export class DeviceDowntimeGatewayComponent implements OnInit, OnDestroy {
                 this.deviceDowntimeGateway.options.chartArea.height = element.heightPercentage;
                 this.deviceDowntimeGateway.options.chartArea.width = element.widthPercentage;
             }
-            if (this.deviceDowntimeGateway.dataTable[0].length > 0 ) {
+            if (this.deviceDowntimeGateway.dataTable[0].length > 0) {
                 this.deviceDowntimeGatewayChart.draw();
             }
         }

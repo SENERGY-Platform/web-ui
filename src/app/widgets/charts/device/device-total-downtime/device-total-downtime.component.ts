@@ -22,6 +22,7 @@ import {ElementSizeService} from '../../../../core/services/element-size.service
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {DeviceTotalDowntimeService} from './shared/device-total-downtime.service';
+import {ChartsService} from "../../shared/charts.service";
 
 @Component({
     selector: 'senergy-device-total-downtime',
@@ -51,7 +52,8 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(private deviceDowntimeGatewayService: DeviceTotalDowntimeService,
+    constructor(private chartsService: ChartsService,
+                private deviceDowntimeGatewayService: DeviceTotalDowntimeService,
                 private elementSizeService: ElementSizeService,
                 private dashboardService: DashboardService) {
     }
@@ -62,6 +64,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
+        this.chartsService.releaseResources(this.deviceTotalDowntimeChart);
     }
 
     edit() {
@@ -72,11 +75,12 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
+                this.chartsService.releaseResources(this.deviceTotalDowntimeChart);
                 this.deviceDowntimeGatewayService.getTotalDowntime(this.widget.id).subscribe(
                     (processDeploymentsHistory: ChartsModel) => {
-                    this.deviceTotalDowntime = processDeploymentsHistory;
-                    this.ready = true;
-                });
+                        this.deviceTotalDowntime = processDeploymentsHistory;
+                        this.ready = true;
+                    });
             }
         });
     }
@@ -91,7 +95,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
                 this.deviceTotalDowntime.options.chartArea.height = element.heightPercentage;
                 this.deviceTotalDowntime.options.chartArea.width = element.widthPercentage;
             }
-            if (this.deviceTotalDowntime.dataTable[0].length > 0 ) {
+            if (this.deviceTotalDowntime.dataTable[0].length > 0) {
                 this.deviceTotalDowntimeChart.draw();
             }
         }

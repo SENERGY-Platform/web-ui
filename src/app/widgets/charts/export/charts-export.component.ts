@@ -24,6 +24,7 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 import {Subscription} from 'rxjs';
 import {ErrorModel} from '../../../core/model/error.model';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
+import {ChartsService} from "../shared/charts.service";
 
 @Component({
     selector: 'senergy-charts-export',
@@ -56,7 +57,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(private chartsExportService: ChartsExportService,
+    constructor(private chartsService: ChartsService,
+                private chartsExportService: ChartsExportService,
                 private elementSizeService: ElementSizeService,
                 private dashboardService: DashboardService,
                 private errorHandlerService: ErrorHandlerService) {
@@ -68,6 +70,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
+        this.chartsService.releaseResources(this.chartExport);
     }
 
     edit() {
@@ -78,6 +81,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
+                this.chartsService.releaseResources(this.chartExport);
                 this.checkConfiguration();
                 if (this.configureWidget === false) {
                     this.chartsExportService.getChartData(this.widget).subscribe((resp: (ChartsModel | ErrorModel)) => {
@@ -121,7 +125,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                 this.chartExportData.options.chartArea.height = element.heightPercentage;
                 this.chartExportData.options.chartArea.width = element.widthPercentage;
             }
-            if (this.chartExportData.dataTable[0].length > 0 ) {
+            if (this.chartExportData.dataTable[0].length > 0) {
                 this.chartExport.draw();
             }
         }

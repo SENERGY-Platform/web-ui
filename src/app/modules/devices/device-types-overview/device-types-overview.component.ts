@@ -25,6 +25,10 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {Router} from '@angular/router';
+import {
+    DeviceInstancesRouterState,
+    DeviceInstancesRouterStateTypesEnum
+} from '../device-instances/device-instances.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -129,6 +133,12 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
 
     newInstance(deviceType: DeviceTypePermSearchModel): void {
         this.deviceInstancesService.openDeviceCreateDialog(deviceType);
+    }
+
+    showDevices(deviceType: DeviceTypePermSearchModel) {
+        this.router.navigate(['devices/deviceinstances'], {
+            state: {type: DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE, value: deviceType} as DeviceInstancesRouterState,
+        });
     }
 
     private initSearchAndGetDeviceTypes() {

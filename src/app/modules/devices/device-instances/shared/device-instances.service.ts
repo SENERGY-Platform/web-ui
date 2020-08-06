@@ -19,8 +19,8 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
-import {DeviceInstancesModel} from './device-instances.model';
-import {forkJoin, Observable, of} from 'rxjs';
+import {DeviceInstancesModel, DeviceFilterCriteriaModel, DeviceSelectablesModel} from './device-instances.model';
+import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
@@ -30,19 +30,16 @@ import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-ed
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {DeviceTypePermSearchModel} from '../../device-types-overview/shared/device-type-perm-search.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {flatMap} from 'rxjs/operators';
-import {flatten} from '@angular/compiler';
 
-​
 
 @Injectable({
     providedIn: 'root'
 })
 export class DeviceInstancesService {
-​
+
     private getDeviceHistoryObservable7d: Observable<DeviceInstancesHistoryModel[]> | null = null;
     private getDeviceHistoryObservable1h: Observable<DeviceInstancesHistoryModel[]> | null = null;
-​
+
 
     constructor(private dialog: MatDialog,
                 private http: HttpClient,
@@ -105,43 +102,57 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceInstancesByHubId(limit: number, offset: number, value: string, order: string, id: string): Observable<DeviceInstancesModel[]> {
-        return this.http.get<DeviceInstancesModel[]>
-        (environment.apiAggregatorUrl + '/hubs/' + encodeURIComponent(id) + '/devices?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order).pipe(
+    getDeviceInstancesByHubId(limit: number, offset: number, value: string, order: string, id: string,
+                              state: null | 'connected' | 'disconnected' | 'unknown'): Observable<DeviceInstancesModel[]> {
+        let url = environment.apiAggregatorUrl + '/hubs/' + encodeURIComponent(id) + '/devices?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order;
+        if (state != null) {
+            url += '&state=' + state;
+        }
+        return this.http.get<DeviceInstancesModel[]>(url).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByHubId', []))
         );
     }
 
-    getDeviceInstancesByDeviceType(id: string, limit: number, offset: number, orderfeature: string, direction: 'asc' | 'desc'): Observable<DeviceInstancesModel[]> {
-        return this.http.get<DeviceInstancesModel[]>(
-            environment.permissionSearchUrl + '/jwt/select/devices/device_type_id/' + id + '/r/'
-            + limit + '/' + offset + '/' + orderfeature + '/' + direction
-        ).pipe(
+    getDeviceInstancesByDeviceType(id: string, limit: number, offset: number, orderfeature: string, direction: 'asc' | 'desc',
+                                   state: null | 'connected' | 'disconnected' | 'unknown'): Observable<DeviceInstancesModel[]> {
+        let url = environment.apiAggregatorUrl + '/device-types/' + id + '/devices?sort=' + orderfeature + '.' + direction
+            + '&limit=' + limit + '&offset=' + offset;
+        if (state != null) {
+            url += '&state=' + state;
+        }
+        return this.http.get<DeviceInstancesModel[]>(url).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByDeviceType', []))
         );
     }
 
-    /**
-     * Gets devices that match at least one of the provided device types. Array elements are already unique
-     * @param ids device type ids
-     * @param limit limit of devices per type. maximum devices = limit * ids.length
-     */
-    getDeviceInstancesByDeviceTypes(ids: string[], limit: number): Observable<DeviceInstancesModel[]> {
-        const deviceInstancesObservables = ids.map(id => this.getDeviceInstancesByDeviceType(id, limit, 0, 'name', 'asc'));
-        return forkJoin(deviceInstancesObservables)
-            .pipe(flatMap(deviceInstances => {
-                let flatDeviceInstances = flatten(deviceInstances);
-                // make unique
-                flatDeviceInstances = [
-                    ...new Map(
-                        flatDeviceInstances.map(x => [x.id, x])
-                    ).values()
-                ];
-                return of(flatDeviceInstances);
-            }));
+    getDeviceInstancesByDeviceTypes(ids: string[], state: null | 'connected' | 'disconnected' | 'unknown')
+        : Observable<DeviceInstancesModel[]> {
+        let url = environment.apiAggregatorUrl + '/device-types-devices';
+        if (state != null) {
+            url += '?state=' + state;
+        }
+        return this.http.post<DeviceInstancesModel[]>(url, {ids: ids}).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByDeviceType', []))
+        );
+    }
 
+    getDeviceSelections(criteria: DeviceFilterCriteriaModel[], protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined): Observable<DeviceSelectablesModel[]> {
+        let path = '/selectables?json=' + encodeURIComponent(JSON.stringify(criteria));
+        if (protocolBlocklist) {
+            path = path + '&filter_protocols=' + encodeURIComponent(protocolBlocklist.join(','));
+        }
+        if (interactionFilter) {
+            path = path + '&filter_interaction=' + encodeURIComponent(interactionFilter);
+        }
+        return this.http.get<DeviceSelectablesModel[]>(
+            environment.deviceSelectionUrl + path
+        ).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceSelections', []))
+        );
     }
 
     getDeviceHistory7d(): Observable<DeviceInstancesHistoryModel[]> {

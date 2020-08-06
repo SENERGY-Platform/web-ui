@@ -22,6 +22,7 @@ import {ElementSizeService} from '../../../../core/services/element-size.service
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {ChartsProcessDeploymentsService} from './shared/charts-process-deployments.service';
+import {ChartsService} from "../../shared/charts.service";
 
 @Component({
     selector: 'senergy-charts-process-deployments',
@@ -51,7 +52,8 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(private chartsProcessDeploymentsService: ChartsProcessDeploymentsService,
+    constructor(private chartsService: ChartsService,
+                private chartsProcessDeploymentsService: ChartsProcessDeploymentsService,
                 private elementSizeService: ElementSizeService,
                 private dashboardService: DashboardService) {
     }
@@ -62,6 +64,7 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
+        this.chartsService.releaseResources(this.processDeploymentsHistoryChart);
     }
 
     edit() {
@@ -72,11 +75,12 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
+                this.chartsService.releaseResources(this.processDeploymentsHistoryChart);
                 this.chartsProcessDeploymentsService.getProcessDeploymentHistory(this.widget.id).subscribe(
                     (processDeploymentsHistory: ChartsModel) => {
-                    this.processDeploymentsHistory = processDeploymentsHistory;
-                    this.ready = true;
-                });
+                        this.processDeploymentsHistory = processDeploymentsHistory;
+                        this.ready = true;
+                    });
             }
         });
     }
@@ -91,7 +95,7 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
                 this.processDeploymentsHistory.options.chartArea.height = element.heightPercentage;
                 this.processDeploymentsHistory.options.chartArea.width = element.widthPercentage;
             }
-            if (this.processDeploymentsHistory.dataTable[0].length > 0 ) {
+            if (this.processDeploymentsHistory.dataTable[0].length > 0) {
                 this.processDeploymentsHistoryChart.draw();
             }
         }
