@@ -19,7 +19,7 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
-import {DeviceInstancesModel} from './device-instances.model';
+import {DeviceInstancesModel, DeviceFilterCriteriaModel, DeviceSelectablesModel} from './device-instances.model';
 import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -132,6 +132,22 @@ export class DeviceInstancesService {
         return this.http.post<DeviceInstancesModel[]>(url, {ids: ids}).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByDeviceType', []))
+        );
+    }
+
+    getDeviceSelections(criteria: DeviceFilterCriteriaModel[], protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined): Observable<DeviceSelectablesModel[]> {
+        let path = '/selectables?json=' + encodeURIComponent(JSON.stringify(criteria));
+        if (protocolBlocklist) {
+            path = path + '&filter_protocols=' + encodeURIComponent(protocolBlocklist.join(','));
+        }
+        if (interactionFilter) {
+            path = path + '&filter_interaction=' + encodeURIComponent(interactionFilter);
+        }
+        return this.http.get<DeviceSelectablesModel[]>(
+            environment.deviceSelectionUrl + path
+        ).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceSelections', []))
         );
     }
 

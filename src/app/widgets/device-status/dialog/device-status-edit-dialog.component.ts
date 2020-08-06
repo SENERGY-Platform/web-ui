@@ -40,6 +40,8 @@ import {environment} from '../../../../environments/environment';
 import {DeviceStatusService} from '../shared/device-status.service';
 import {ProcessSchedulerService} from '../../process-scheduler/shared/process-scheduler.service';
 import {ProcessSchedulerModel} from '../../process-scheduler/shared/process-scheduler.model';
+import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
+import {DeviceSelectablesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
 
 
 @Component({
@@ -78,6 +80,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 private deviceTypeService: DeviceTypeService,
                 private deviceStatusService: DeviceStatusService,
                 private processSchedulerService: ProcessSchedulerService,
+                private deviceInstanceService: DeviceInstancesService,
                 @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
@@ -169,8 +172,14 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="112" height="92" viewBox="254 74 112 92" version="1.1"><defs><marker id="sequenceflow-end-white-black-8shwih7rrgzkmm4pwfqg6rb2a" viewBox="0 0 20 20" refX="11" refY="10" markerWidth="10" markerHeight="10" orient="auto"><path d="M 1 5 L 11 10 L 1 15 Z" style="fill: black; stroke-width: 1px; stroke-linecap: round; stroke-dasharray: 10000, 1; stroke: black;"/></marker></defs><g class="djs-group"><g class="djs-element djs-shape" data-element-id="Task_10z5wf9" style="display: block;" transform="matrix(1 0 0 1 260 80)"><g class="djs-visual"><rect x="0" y="0" width="100" height="80" rx="10" ry="10" style="stroke: black; stroke-width: 2px; fill: white; fill-opacity: 0.95;"/><text lineHeight="1.2" class="djs-label" style="font-family: Arial, sans-serif; font-size: 12px; font-weight: normal; fill: black;"><tspan x="11.4375" y="43.599999999999994">GENERATED!</tspan></text></g><rect x="0" y="0" width="100" height="80" class="djs-hit" style="fill: none; stroke-opacity: 0; stroke: white; stroke-width: 15px;"/><rect x="-6" y="-6" width="112" height="92" class="djs-outline" style="fill: none;"/></g></g></svg>';
             this.deploymentsService.getPreparedDeploymentsByXml(xml, svg).subscribe((resp: DeploymentsPreparedModel | null) => {
                 if (resp !== null) {
-                    this.selectablesArray[elementIndex] = resp.elements[0].task.selectables;
                     this.preparedDeployment[elementIndex] = resp;
+                }
+            });
+
+            const filter = [{function_id: this.getFunction(elementIndex).id, aspect_id: this.getAspectId(elementIndex).value}];
+            this.deviceInstanceService.getDeviceSelections(filter).subscribe((resp: DeviceSelectablesModel[] | null) => {
+                if (resp !== null) {
+                    this.selectablesArray[elementIndex] = resp;
                 }
             });
         }
