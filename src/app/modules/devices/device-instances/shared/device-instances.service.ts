@@ -33,16 +33,16 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {flatMap} from 'rxjs/operators';
 import {flatten} from '@angular/compiler';
 
-​
+
 
 @Injectable({
     providedIn: 'root'
 })
 export class DeviceInstancesService {
-​
+
     private getDeviceHistoryObservable7d: Observable<DeviceInstancesHistoryModel[]> | null = null;
     private getDeviceHistoryObservable1h: Observable<DeviceInstancesHistoryModel[]> | null = null;
-​
+
 
     constructor(private dialog: MatDialog,
                 private http: HttpClient,

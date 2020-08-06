@@ -31,13 +31,8 @@ export interface DeviceTypeSelectionRefModel {
     retries: number;
 }
 
-export interface DeviceTypeSelectionResultModel {
-    aspect: DeviceTypeAspectModel;
-    function: DeviceTypeFunctionModel;
-    device_class: DeviceTypeDeviceClassModel;
+export interface DeviceTypeSelectionResultModel extends DeviceTypeSelectionRefModel {
     characteristic: DeviceTypeCharacteristicsModel;
-    completionStrategy: string;
-    retries: number;
 }
 
 export interface DeviceTypeInfoModel {

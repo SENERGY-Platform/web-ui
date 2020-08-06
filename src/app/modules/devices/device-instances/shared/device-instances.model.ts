@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-import {DeviceTypePermSearchModel} from '../../device-types-overview/shared/device-type-perm-search.model';
+import {
+    DeviceTypePermSearchModel,
+    PermissionsModel
+} from '../../device-types-overview/shared/device-type-perm-search.model';
 
-export interface DeviceInstancesModel {
+export interface DeviceInstancesBaseModel {
+    id: string;
+    local_id: string;
+    name: string;
+}
+
+export interface DeviceInstancesModel extends DeviceInstancesBaseModel {
     creator: string;
     device_type: DeviceTypePermSearchModel;
     id: string;
     local_id: string;
     log_state: boolean;
     name: string;
-    permissions: {
-        a: boolean;
-        x: boolean;
-        r: boolean;
-        w: boolean;
-    };
+    permissions: PermissionsModel;
     shared: boolean;
 }
 
