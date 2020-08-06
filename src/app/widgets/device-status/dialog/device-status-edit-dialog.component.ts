@@ -59,7 +59,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     widgetNew: WidgetModel = {} as WidgetModel;
     widgetOld: WidgetModel = {} as WidgetModel;
     funcArray: DeviceTypeFunctionModel[][] = [];
-    selectablesArray: DeploymentsPreparedSelectableModel[][] = [];
+    selectablesArray: DeviceSelectablesModel[][] = [];
     preparedDeployment: DeploymentsPreparedModel[] = [];
     serviceExportValueArray: { service: DeviceTypeServiceModel, exportValues: ExportValueCharacteristicModel[] }[][] = [];
 

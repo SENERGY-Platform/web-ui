@@ -47,6 +47,8 @@ import {util} from 'jointjs';
 import uuid = util.uuid;
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {environment} from '../../../../environments/environment';
+import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
+import {DeviceSelectablesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
 
 
 describe('DeviceStatusEditDialogComponent', () => {
@@ -55,6 +57,7 @@ describe('DeviceStatusEditDialogComponent', () => {
 
     const exportServiceSpy: Spy<ExportService> = createSpyFromClass(ExportService);
     const deploymentsServiceSpy: Spy<DeploymentsService> = createSpyFromClass<DeploymentsService>(DeploymentsService);
+    const deviceInstanceServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass<DeviceInstancesService>(DeviceInstancesService);
     const matDialogRefSpy: Spy<MatDialogRef<DeviceStatusEditDialogComponent>> = createSpyFromClass<MatDialogRef<DeviceStatusEditDialogComponent>>(MatDialogRef);
     const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService);
     const deviceTypeServiceeSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
@@ -98,6 +101,12 @@ describe('DeviceStatusEditDialogComponent', () => {
                 }
             }]
         } as DeploymentsPreparedModel));
+
+        deviceInstanceServiceSpy.getDeviceSelections.and.returnValue(of([{
+            device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: '', permissions: {r: true, w: false, x: true, a: false}},
+            services: [{id: 'service_1', name: 'service'}]
+        }] as DeviceSelectablesModel[]));
+
         dashboardServiceSpy.getWidget.and.returnValue(of({name: 'test', properties: {}} as WidgetModel));
         dashboardServiceSpy.updateWidget.and.returnValue(of({message: 'OK'}));
         deviceTypeServiceeSpy.getAspectsWithMeasuringFunction.and.returnValue(of([{
@@ -131,6 +140,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 DeviceStatusEditDialogComponent
             ],
             providers: [
+                {provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy},
                 {provide: DashboardService, useValue: dashboardServiceSpy},
                 {provide: DeviceTypeService, useValue: deviceTypeServiceeSpy},
                 {provide: DeploymentsService, useValue: deploymentsServiceSpy},
@@ -217,9 +227,9 @@ describe('DeviceStatusEditDialogComponent', () => {
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
         expect(component.selectablesArray.length).toBe(1);
         expect(component.selectablesArray[0]).toEqual([{
-            device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: ''},
+            device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: '', permissions: {r: true, w: false, x: true, a: false}},
             services: [{id: 'service_1', name: 'service'}]
-        }] as DeploymentsPreparedSelectableModel[]);
+        }] as DeviceSelectablesModel[]);
         expect(component.preparedDeployment.length).toBe(1);
         expect(component.serviceExportValueArray.length).toBe(0);
         expect(component.elements[0]).toEqual({
