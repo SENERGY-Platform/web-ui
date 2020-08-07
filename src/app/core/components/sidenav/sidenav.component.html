@@ -29,7 +29,7 @@
                         (click)="toggleSection(section)"
                         [ngClass]="{'background-color-sidenav': isSectionOpen(section)}"
                         class="md-button-toggle">
-                    <div fxLayout="row" fxLayoutAlign=" center">
+                    <div fxLayout="row" fxLayoutAlign="none center">
                         <mat-icon>{{section.icon}}</mat-icon>
                         <div fxFlexOffset="5px">{{section.name | uppercase}}</div>
                         <mat-icon class="md-toggle-icon"

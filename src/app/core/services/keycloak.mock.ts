@@ -24,4 +24,8 @@ export class MockKeycloakService {
     getUsername() {
         return 'test';
     }
+
+    loadUserProfile(): Promise<Keycloak.KeycloakProfile> {
+        return new Promise<Keycloak.KeycloakProfile>(resolve => resolve({} as Keycloak.KeycloakProfile));
+    }
 }

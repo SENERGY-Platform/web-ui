@@ -45,8 +45,12 @@ export class AuthorizationService {
         }
     }
 
-    getUserName(): string {
-        return this.keycloakService.getUsername();
+    getUserName(): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            this.keycloakService.loadUserProfile()
+                .then(() => resolve(this.keycloakService.getUsername()))
+                .catch(() => reject(undefined));
+        });
     }
 
     getProfile(): AuthorizationProfileModel {
