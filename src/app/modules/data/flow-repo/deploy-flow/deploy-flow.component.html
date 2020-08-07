@@ -20,7 +20,7 @@
             <mat-expansion-panel expanded>
                 <mat-expansion-panel-header>
                     <mat-panel-title>
-                        <div fxLayout="row" fxLayoutAlign="center">
+                        <div fxLayout="row" fxLayoutAlign="none center">
                             <mat-icon>folder</mat-icon>
                             <div fxFlexOffset="5px">General</div>
                         </div>
@@ -44,7 +44,7 @@
             <mat-expansion-panel *ngFor="let input of inputs; let operatorKey = index">
                 <mat-expansion-panel-header>
                     <mat-panel-title>
-                        <div fxLayout="row" fxLayoutAlign="center">
+                        <div fxLayout="row" fxLayoutAlign="none center">
                             <mat-icon>poll</mat-icon>
                             <div fxFlexOffset="5px">{{input.name}}</div>
                         </div>
@@ -127,7 +127,7 @@
             <mat-expansion-panel>
                 <mat-expansion-panel-header>
                     <mat-panel-title>
-                        <div fxLayout="row" fxLayoutAlign="center">
+                        <div fxLayout="row" fxLayoutAlign="none center">
                             <mat-icon>settings</mat-icon>
                             <div fxFlexOffset="5px">Global Settings</div>
                         </div>
