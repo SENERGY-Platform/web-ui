@@ -24,3 +24,7 @@ mat-dialog-content {
 table {
     border-spacing: 0px;
 }
+
+::ng-deep .mat-autocomplete-panel {
+    min-width: fit-content !important;
+}

@@ -55,6 +55,7 @@ export const environment = {
   deviceRepoUrl: '${process.env.DEVICE_REPO_URL}',
   deviceManagerUrl: '${process.env.DEVICE_MANAGER_URL}',
   semanticRepoUrl: '${process.env.SEMANTIC_REPO_URL}',
+  deviceSelectionUrl: '${process.env.DEVICE_SELECTION_URL}',
   ubaUrl: '${process.env.UBA_URL}',
   dwdOpenUrl: '${process.env.DWD_OPEN_URL}',
   geonamesUrl: '${process.env.GEONAMES_URL}',
@@ -62,6 +63,14 @@ export const environment = {
   notificationsUrl: '${process.env.NOTIFICATION_SERVICE_URL}',
   timeStampCharacteristicId: '${process.env.TIMESTAMP_CHARACTERISTIC_ID}',
   mqttProtocolID: '${process.env.MQTT_PROTOCOL_ID}',
+  getPm1FunctionId: '${process.env.GET_PM1_FUNCTION_ID}',
+  getPm10FunctionId: '${process.env.GET_PM10_FUNCTION_ID}',
+  getPm25FunctionId: '${process.env.GET_PM25_FUNCTION_ID}',
+  getHumidityFunctionId: '${process.env.GET_HUMIDITY_FUNCTION_ID}',
+  getTemperatureFunctionId: '${process.env.GET_TEMPERATURE_FUNCTION_ID}',
+  getPressureFunctionId: '${process.env.GET_PRESSURE_FUNCTION_ID}',
+  getCo2FunctionId: '${process.env.GET_C02_FUNCTION_ID}',
+  aspectAirId: '${process.env.ASPECT_AIR_ID}',
 };
 `;
 

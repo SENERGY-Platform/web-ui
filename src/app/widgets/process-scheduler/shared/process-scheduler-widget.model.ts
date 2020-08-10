@@ -19,4 +19,6 @@ export interface ProcessSchedulerWidgetModel {
     cron: string;
     processName: string;
     processId: string;
+    processAlias?: string;
+    disabled?: boolean;
 }

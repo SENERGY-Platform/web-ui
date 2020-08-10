@@ -18,21 +18,21 @@ import {Component} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {WidgetModel} from '../shared/dashboard-widget.model';
 import {DashboardTypesEnum} from '../shared/dashboard-types.enum';
+import {Observable} from 'rxjs';
+import {SingleValueRequirementsService} from '../../../widgets/single-value/shared/single-value-requirements.service';
+import {AirQualityRequirementsService} from '../../../widgets/air-quality/shared/air-quality-requirements.service';
+import {EnergyPredictionRequirementsService} from '../../../widgets/energy-prediction/shared/energy-prediction-requirements.service';
 
 export interface Types {
     value: string;
     viewValue: string;
+    requirementsService?: { requirementsFulfilled(): Observable<boolean> };
+    disabled: boolean;
+    tooltip: string;
 }
 
-export interface SwitchCategories {
-    value: string;
-    viewValue: string;
+export interface SwitchCategories extends Types {
     imgUrl: string;
-}
-
-export interface ChartCategories {
-    value: string;
-    viewValue: string;
 }
 
 @Component({
@@ -42,54 +42,93 @@ export interface ChartCategories {
 
 export class DashboardNewWidgetDialogComponent {
 
-    selectedType: Types = {value: '', viewValue: ''};
+    selectedType: Types = {value: '', viewValue: '', tooltip: '', disabled: false};
     selectedCategory: any = null;
-    categories: any[] = [];
+    categories: Types[] | SwitchCategories[] = [];
     categoryDisabled = true;
     types: Types[] = [
-        {value: DashboardTypesEnum.Switch, viewValue: 'Switch'},
-        {value: DashboardTypesEnum.Chart, viewValue: 'Chart'},
-        {value: DashboardTypesEnum.DevicesState, viewValue: 'Devices state'},
-        {value: DashboardTypesEnum.ProcessState, viewValue: 'Process state'},
-        {value: DashboardTypesEnum.EventList, viewValue: 'Event list'},
-        {value: DashboardTypesEnum.RankingList, viewValue: 'Ranking list'},
-        {value: DashboardTypesEnum.ProcessModelList, viewValue: 'Process model list'},
-        {value: DashboardTypesEnum.DeviceDowntimeList, viewValue: 'Device downtime list'},
-        {value: DashboardTypesEnum.SingleValue, viewValue: 'Single Value'},
-        {value: DashboardTypesEnum.MultiValue, viewValue: 'Multi Value'},
-        {value: DashboardTypesEnum.EnergyPrediction, viewValue: 'Energy Prediction'},
-        {value: DashboardTypesEnum.AirQuality, viewValue: 'Air Quality'},
-        {value: DashboardTypesEnum.ProcessIncidentList, viewValue: 'Process incident list'},
-        {value: DashboardTypesEnum.ProcessScheduler, viewValue: 'Process Scheduler'},
-        {value: DashboardTypesEnum.DeviceStatus, viewValue: 'Device Status'},
+        {value: DashboardTypesEnum.Switch, viewValue: 'Switch', disabled: false, tooltip: ''},
+        {value: DashboardTypesEnum.Chart, viewValue: 'Chart', disabled: false, tooltip: ''},
+        {value: DashboardTypesEnum.DevicesState, viewValue: 'Devices state', disabled: false, tooltip: ''},
+        {value: DashboardTypesEnum.ProcessState, viewValue: 'Process state', disabled: false, tooltip: ''},
+        {value: DashboardTypesEnum.EventList, viewValue: 'Event list', disabled: false, tooltip: ''},
+        {value: DashboardTypesEnum.RankingList, viewValue: 'Ranking list', disabled: false, tooltip: ''},
+        {value: DashboardTypesEnum.ProcessModelList, viewValue: 'Process model list', disabled: false, tooltip: ''},
+        {value: DashboardTypesEnum.DeviceDowntimeList, viewValue: 'Device downtime list', disabled: false, tooltip: ''},
+        {
+            value: DashboardTypesEnum.SingleValue,
+            viewValue: 'Single Value',
+            requirementsService: this.singleValueRequirementsService,
+            disabled: false,
+            tooltip: SingleValueRequirementsService.requirement
+        },
+        {value: DashboardTypesEnum.MultiValue, viewValue: 'Multi Value', disabled: false, tooltip: ''},
+        {
+            value: DashboardTypesEnum.EnergyPrediction,
+            viewValue: 'Energy Prediction',
+            disabled: false,
+            tooltip: EnergyPredictionRequirementsService.requirement,
+            requirementsService: this.energyPredictionRequirementsService,
+        },
+        {
+            value: DashboardTypesEnum.AirQuality,
+            viewValue: 'Air Quality',
+            requirementsService: this.airQualityRequirementsService,
+            disabled: false,
+            tooltip: '',
+        },
+        {
+            value: DashboardTypesEnum.ProcessIncidentList,
+            viewValue: 'Process incident list',
+            disabled: false,
+            tooltip: '',
+        },
+        {value: DashboardTypesEnum.ProcessScheduler, viewValue: 'Process Scheduler', disabled: false, tooltip: ''},
+        {value: DashboardTypesEnum.DeviceStatus, viewValue: 'Device Status', disabled: false, tooltip: ''},
     ];
     switchCategories: SwitchCategories[] = [
         {
             value: 'default',
             viewValue: 'Default',
-            imgUrl: 'https://images.pexels.com/photos/927546/pexels-photo-927546.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260'
+            imgUrl: 'https://images.pexels.com/photos/927546/pexels-photo-927546.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
+            disabled: false,
+            tooltip: '',
         },
         {
             value: 'security',
             viewValue: 'Security',
-            imgUrl: 'https://images.pexels.com/photos/277574/pexels-photo-277574.jpeg?auto=compress&cs=tinysrgb&h=350'
+            imgUrl: 'https://images.pexels.com/photos/277574/pexels-photo-277574.jpeg?auto=compress&cs=tinysrgb&h=350',
+            disabled: false,
+            tooltip: '',
         },
         {
             value: 'monitoring',
             viewValue: 'Monitoring',
-            imgUrl: 'https://images.pexels.com/photos/1001752/pexels-photo-1001752.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260'
+            imgUrl: 'https://images.pexels.com/photos/1001752/pexels-photo-1001752.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
+            disabled: false,
+            tooltip: '',
         },
     ];
-    chartCategories: ChartCategories[] = [
-        {value: 'charts_export', viewValue: 'Export'},
-        {value: 'charts_process_instances', viewValue: 'Process instances'},
-        {value: 'charts_process_deployments', viewValue: 'Process deployments'},
-        {value: 'charts_device_total_downtime', viewValue: 'Device total downtime'},
-        {value: 'charts_device_downtime_rate_per_gateway', viewValue: 'Downtime rate per gateway'},
-        {value: 'charts_device_per_gateway', viewValue: 'Device per gateway'},
+    chartCategories: Types[] = [
+        {value: 'charts_export', viewValue: 'Export', disabled: false, tooltip: ''},
+        {value: 'charts_process_instances', viewValue: 'Process instances', disabled: false, tooltip: ''},
+        {value: 'charts_process_deployments', viewValue: 'Process deployments', disabled: false, tooltip: ''},
+        {value: 'charts_device_total_downtime', viewValue: 'Device total downtime', disabled: false, tooltip: ''},
+        {
+            value: 'charts_device_downtime_rate_per_gateway',
+            viewValue: 'Downtime rate per gateway',
+            disabled: false,
+            tooltip: '',
+        },
+        {value: 'charts_device_per_gateway', viewValue: 'Device per gateway', disabled: false, tooltip: ''},
     ];
 
-    constructor(private dialogRef: MatDialogRef<DashboardNewWidgetDialogComponent>) {
+    constructor(private dialogRef: MatDialogRef<DashboardNewWidgetDialogComponent>,
+                private singleValueRequirementsService: SingleValueRequirementsService,
+                private airQualityRequirementsService: AirQualityRequirementsService,
+                private energyPredictionRequirementsService: EnergyPredictionRequirementsService,
+    ) {
+        this.types.forEach(t => this.checkRequirements(t));
     }
 
     activateCategory(): void {
@@ -109,6 +148,7 @@ export class DashboardNewWidgetDialogComponent {
                 this.categoryDisabled = true;
             }
         }
+        this.categories.forEach(t => this.checkRequirements(t));
     }
 
     close(): void {
@@ -116,7 +156,16 @@ export class DashboardNewWidgetDialogComponent {
     }
 
     create(inputName: string): void {
-        const widget: WidgetModel = {id: '', name: inputName, type: this.selectedType.value, properties: {}, x: -1, y: -1, cols: -1, rows: -1};
+        const widget: WidgetModel = {
+            id: '',
+            name: inputName,
+            type: this.selectedType.value,
+            properties: {},
+            x: -1,
+            y: -1,
+            cols: -1,
+            rows: -1
+        };
         switch (this.selectedType.value) {
             case DashboardTypesEnum.Switch: {
                 widget.properties = {
@@ -135,6 +184,14 @@ export class DashboardNewWidgetDialogComponent {
             }
         }
         this.dialogRef.close(widget);
+    }
+
+    private checkRequirements(t: Types) {
+        if (t.requirementsService !== undefined) {
+            t.requirementsService.requirementsFulfilled().subscribe(b => {
+                t.disabled = !b;
+            });
+        }
     }
 
 }

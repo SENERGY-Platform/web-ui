@@ -62,6 +62,10 @@
                                                 <mat-icon>add_box</mat-icon>
                                                 <span>New instance</span>
                                             </button>
+                                            <button mat-menu-item (click)="showDevices(deviceType)">
+                                                <mat-icon>important_devices</mat-icon>
+                                                <span>Show Devices</span>
+                                            </button>
                                             <button mat-menu-item (click)="detailsDeviceType(deviceType.id)">
                                                 <mat-icon>info</mat-icon>
                                                 <span>Details</span>

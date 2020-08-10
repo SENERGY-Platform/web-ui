@@ -17,7 +17,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
-import {DeviceInstancesModel} from './shared/device-instances.model';
+import {DeviceInstancesIntermediateModel, DeviceInstancesModel} from './shared/device-instances.model';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
@@ -28,10 +28,24 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Navigation, Router} from '@angular/router';
 import {NetworksModel} from '../networks/shared/networks.model';
+import {DeviceTypePermSearchModel} from '../device-types-overview/shared/device-type-perm-search.model';
 
 
-const tabs = [{label: 'Online', state: 'connected'}, {label: 'Offline', state: 'disconnected'}, {label: 'Unknown', state: 'unknown'}];
+const tabs = [{label: 'Online', state: 'connected'}, {label: 'Offline', state: 'disconnected'}, {
+    label: 'Unknown',
+    state: 'unknown'
+}];
 const sortingAttributes = [new SortModel('Name', 'name', 'asc')];
+
+export interface DeviceInstancesRouterState {
+    type: DeviceInstancesRouterStateTypesEnum;
+    value: any;
+}
+
+export enum DeviceInstancesRouterStateTypesEnum {
+    NETWORK,
+    DEVICE_TYPE,
+}
 
 @Component({
     selector: 'senergy-device-instances',
@@ -48,6 +62,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     selectedTagTransformed = '';
     selectedTagType = '';
     routerNetwork: NetworksModel | null = null;
+    routerDeviceType: DeviceTypePermSearchModel | null = null;
     activeIndex = 0;
     animationDone = true;
     tabs: { label: string, state: string }[] = tabs;
@@ -94,12 +109,14 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
 
     tagRemoved(): void {
         this.routerNetwork = null;
+        this.routerDeviceType = null;
         this.resetTag();
         this.getDeviceInstances(true);
     }
 
     getDevicesByTag(event: { tag: string, tagType: string }) {
         this.routerNetwork = null;
+        this.routerDeviceType = null;
         this.searchText = '';
         if (event.tagType === 'tag') {
             this.selectedTagTransformed = new TagValuePipe().transform(event.tag, '');
@@ -124,7 +141,6 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     setIndex(event: number) {
         this.activeIndex = event;
         this.animationDone = false;
-        this.routerNetwork = null;
         this.searchText = '';
         this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
         this.sortAttribute = this.sortAttributes[0];
@@ -141,8 +157,15 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         const navigation: Navigation | null = this.router.getCurrentNavigation();
         if (navigation !== null) {
             if (navigation.extras.state !== undefined) {
-                const network = navigation.extras.state as NetworksModel;
-                this.routerNetwork = network;
+                const state = navigation.extras.state as DeviceInstancesRouterState;
+                switch (state.type) {
+                    case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
+                        this.routerDeviceType = state.value as DeviceTypePermSearchModel;
+                        break;
+                    case DeviceInstancesRouterStateTypesEnum.NETWORK:
+                        this.routerNetwork = state.value as NetworksModel;
+                        break;
+                }
             }
         }
     }
@@ -157,8 +180,18 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             this.selectedTag = this.routerNetwork.name;
             this.selectedTagTransformed = this.routerNetwork.name;
             this.deviceInstancesService.getDeviceInstancesByHubId(this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order,
-                this.routerNetwork.id).subscribe((deviceInstances: DeviceInstancesModel[]) => {
+                this.routerNetwork.id, this.activeIndex === 0 ? null : tabs[this.activeIndex - 1].state as 'connected' | 'disconnected' | 'unknown')
+                .subscribe((deviceInstances: DeviceInstancesModel[]) => {
                 this.setDevices(deviceInstances);
+            });
+        } else if (this.routerDeviceType !== null) {
+            this.selectedTag = this.routerDeviceType.name;
+            this.selectedTagTransformed = this.routerDeviceType.name;
+            this.deviceInstancesService.getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.limit, this.offset,
+                this.sortAttribute.value, this.sortAttribute.order,
+                this.activeIndex === 0 ? null : tabs[this.activeIndex - 1].state as 'connected' | 'disconnected' | 'unknown')
+                .subscribe(deviceInstances => {
+                    this.setDevices(deviceInstances);
             });
         } else {
             if (this.selectedTag === '') {
@@ -207,6 +240,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             this.searchInitialized = true;
             if (searchText) {
                 this.routerNetwork = null;
+                this.routerDeviceType = null;
             }
             this.resetTag();
             this.searchText = searchText;

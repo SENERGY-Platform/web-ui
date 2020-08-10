@@ -154,10 +154,10 @@ export class DeployFlowComponent {
         this.additionalDevices[operatorKey][deviceKey].push(true);
     }
 
-    removeAdditionalDevice(input: ParseModel, port: string, key: number) {
+    removeAdditionalDevice(input: ParseModel, port: string, key: number, operatorKey: number, deviceKey: number) {
         if (key > -1) {
             this.selectedValues.get(input.id).get(port).device.splice(key + 1, 1);
-            this.additionalDevices.splice(key, 1);
+            this.additionalDevices[operatorKey][deviceKey].splice(key, 1);
         }
     }
 

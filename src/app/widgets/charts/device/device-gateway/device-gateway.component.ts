@@ -22,6 +22,7 @@ import {ElementSizeService} from '../../../../core/services/element-size.service
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {DeviceGatewayService} from './shared/device-gateway.service';
+import {ChartsService} from "../../shared/charts.service";
 
 @Component({
     selector: 'senergy-device-gateway',
@@ -51,7 +52,8 @@ export class DeviceGatewayComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(private deviceGatewayService: DeviceGatewayService,
+    constructor(private chartsService: ChartsService,
+                private deviceGatewayService: DeviceGatewayService,
                 private elementSizeService: ElementSizeService,
                 private dashboardService: DashboardService) {
     }
@@ -62,21 +64,23 @@ export class DeviceGatewayComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
+        this.chartsService.releaseResources(this.deviceGatewayChart);
     }
 
     edit() {
-      this.deviceGatewayService.openEditDialog(this.dashboardId, this.widget.id);
+        this.deviceGatewayService.openEditDialog(this.dashboardId, this.widget.id);
     }
 
     private getProcessInstances() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
+                this.chartsService.releaseResources(this.deviceGatewayChart);
                 this.deviceGatewayService.getDevicesPerGateway(this.widget.id).subscribe(
                     (processDeploymentsHistory: ChartsModel) => {
-                    this.deviceGateway = processDeploymentsHistory;
-                    this.ready = true;
-                });
+                        this.deviceGateway = processDeploymentsHistory;
+                        this.ready = true;
+                    });
             }
         });
     }
@@ -91,7 +95,7 @@ export class DeviceGatewayComponent implements OnInit, OnDestroy {
                 this.deviceGateway.options.chartArea.height = element.heightPercentage;
                 this.deviceGateway.options.chartArea.width = element.widthPercentage;
             }
-            if (this.deviceGateway.dataTable[0].length > 0 ) {
+            if (this.deviceGateway.dataTable[0].length > 0) {
                 this.deviceGatewayChart.draw();
             }
         }

@@ -45,6 +45,7 @@ export const environment = {
     deviceRepoUrl: 'http://localhost',
     deviceManagerUrl: 'https://localhost',
     semanticRepoUrl: 'https://localhost',
+    deviceSelectionUrl: 'http://localhost',
     ubaUrl: 'http://localhost',
     dwdOpenUrl: 'http://localhost',
     geonamesUrl: 'http://localhost',
@@ -53,6 +54,14 @@ export const environment = {
     /** Semantic Keys **/
     timeStampCharacteristicId: 'urn:infai:ses:characteristic:xxxxxx-xxxx-xxxxx-xxxx',
     mqttProtocolID: 'urn:infai:ses:protocol:xx-xxxx-xxxx-xxxx-xxxxx',
+    getPm1FunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getPm10FunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getPm25FunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getHumidityFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getTemperatureFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getPressureFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getCo2FunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    aspectAirId: 'urn:infai:ses:aspect:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
 };
 
 /*

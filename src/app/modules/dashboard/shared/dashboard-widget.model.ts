@@ -23,6 +23,7 @@ import {SingleValuePropertiesModel} from '../../../widgets/single-value/shared/s
 import {MultiValuePropertiesModel} from '../../../widgets/multi-value/shared/multi-value.model';
 import {ProcessIncidentPropertiesModel} from '../../../widgets/process-incident-list/shared/process-incident-properties.model';
 import {DeviceStatusPropertiesModel} from '../../../widgets/device-status/shared/device-status-properties.model';
+import {ProcessSchedulerPropertiesModel} from '../../../widgets/process-scheduler/shared/process-scheduler.model';
 
 export interface WidgetModel {
     id: string;
@@ -35,6 +36,14 @@ export interface WidgetModel {
     rows: number;
 }
 
-export interface WidgetPropertiesModels extends SwitchPropertiesModel, ChartsExportPropertiesModel, DeviceDowntimeGatewayPropertiesModel,
-    EnergyPredictionPropertiesModel, AirQualityPropertiesModel, SingleValuePropertiesModel, MultiValuePropertiesModel, ProcessIncidentPropertiesModel, DeviceStatusPropertiesModel {
+export interface WidgetPropertiesModels extends SwitchPropertiesModel,
+    ChartsExportPropertiesModel,
+    DeviceDowntimeGatewayPropertiesModel,
+    EnergyPredictionPropertiesModel,
+    AirQualityPropertiesModel,
+    SingleValuePropertiesModel,
+    MultiValuePropertiesModel,
+    ProcessIncidentPropertiesModel,
+    ProcessSchedulerPropertiesModel,
+    DeviceStatusPropertiesModel {
 }

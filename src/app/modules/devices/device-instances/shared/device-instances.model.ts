@@ -14,21 +14,41 @@
  * limitations under the License.
  */
 
-import {DeviceTypePermSearchModel} from '../../device-types-overview/shared/device-type-perm-search.model';
+import {
+    DeviceTypePermSearchModel,
+    PermissionsModel
+} from '../../device-types-overview/shared/device-type-perm-search.model';
+import {DeviceInstancesUpdateModel} from './device-instances-update.model';
+import {DeviceTypeServiceModel} from '../../device-types-overview/shared/device-type.model';
 
-export interface DeviceInstancesModel {
-    creator: string;
-    device_type: DeviceTypePermSearchModel;
+export interface DeviceInstancesBaseModel {
     id: string;
     local_id: string;
-    log_state: boolean;
     name: string;
-    permissions: {
-        a: boolean;
-        x: boolean;
-        r: boolean;
-        w: boolean;
-    };
+}
+
+export interface DeviceInstancesIntermediateModel extends DeviceInstancesBaseModel {
+    creator: string;
+    permissions: PermissionsModel;
     shared: boolean;
 }
 
+export interface DeviceInstancesPermSearchModel extends DeviceInstancesIntermediateModel {
+    device_type_id: string;
+}
+
+export interface DeviceInstancesModel extends DeviceInstancesIntermediateModel {
+    device_type: DeviceTypePermSearchModel;
+    log_state: boolean;
+}
+
+export interface DeviceFilterCriteriaModel {
+    function_id ?: string;
+    device_class_id ?: string;
+    aspect_id ?: string;
+}
+
+export interface DeviceSelectablesModel {
+    device: DeviceInstancesPermSearchModel;
+    services: DeviceTypeServiceModel[];
+}

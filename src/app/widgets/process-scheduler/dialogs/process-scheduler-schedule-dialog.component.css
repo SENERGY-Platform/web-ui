@@ -21,3 +21,12 @@ mat-dialog-actions button:not(:last-child) {
 .checkbox-margin {
     margin: 0 10px;
 }
+
+.deployment {
+    padding-top: 18px;
+}
+
+.toggle-padding {
+    padding-bottom: 12px;
+    padding-top: 8px;
+}

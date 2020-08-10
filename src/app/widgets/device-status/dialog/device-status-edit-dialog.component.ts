@@ -38,6 +38,10 @@ import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/data
 import {forkJoin, Observable, of} from 'rxjs';
 import {environment} from '../../../../environments/environment';
 import {DeviceStatusService} from '../shared/device-status.service';
+import {ProcessSchedulerService} from '../../process-scheduler/shared/process-scheduler.service';
+import {ProcessSchedulerModel} from '../../process-scheduler/shared/process-scheduler.model';
+import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
+import {DeviceSelectablesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
 
 
 @Component({
@@ -55,7 +59,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     widgetNew: WidgetModel = {} as WidgetModel;
     widgetOld: WidgetModel = {} as WidgetModel;
     funcArray: DeviceTypeFunctionModel[][] = [];
-    selectablesArray: DeploymentsPreparedSelectableModel[][] = [];
+    selectablesArray: DeviceSelectablesModel[][] = [];
     preparedDeployment: DeploymentsPreparedModel[] = [];
     serviceExportValueArray: { service: DeviceTypeServiceModel, exportValues: ExportValueCharacteristicModel[] }[][] = [];
 
@@ -75,6 +79,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 private fb: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
                 private deviceStatusService: DeviceStatusService,
+                private processSchedulerService: ProcessSchedulerService,
+                private deviceInstanceService: DeviceInstancesService,
                 @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
@@ -166,8 +172,14 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="112" height="92" viewBox="254 74 112 92" version="1.1"><defs><marker id="sequenceflow-end-white-black-8shwih7rrgzkmm4pwfqg6rb2a" viewBox="0 0 20 20" refX="11" refY="10" markerWidth="10" markerHeight="10" orient="auto"><path d="M 1 5 L 11 10 L 1 15 Z" style="fill: black; stroke-width: 1px; stroke-linecap: round; stroke-dasharray: 10000, 1; stroke: black;"/></marker></defs><g class="djs-group"><g class="djs-element djs-shape" data-element-id="Task_10z5wf9" style="display: block;" transform="matrix(1 0 0 1 260 80)"><g class="djs-visual"><rect x="0" y="0" width="100" height="80" rx="10" ry="10" style="stroke: black; stroke-width: 2px; fill: white; fill-opacity: 0.95;"/><text lineHeight="1.2" class="djs-label" style="font-family: Arial, sans-serif; font-size: 12px; font-weight: normal; fill: black;"><tspan x="11.4375" y="43.599999999999994">GENERATED!</tspan></text></g><rect x="0" y="0" width="100" height="80" class="djs-hit" style="fill: none; stroke-opacity: 0; stroke: white; stroke-width: 15px;"/><rect x="-6" y="-6" width="112" height="92" class="djs-outline" style="fill: none;"/></g></g></svg>';
             this.deploymentsService.getPreparedDeploymentsByXml(xml, svg).subscribe((resp: DeploymentsPreparedModel | null) => {
                 if (resp !== null) {
-                    this.selectablesArray[elementIndex] = resp.elements[0].task.selectables;
                     this.preparedDeployment[elementIndex] = resp;
+                }
+            });
+
+            const filter = [{function_id: this.getFunction(elementIndex).id, aspect_id: this.getAspectId(elementIndex).value}];
+            this.deviceInstanceService.getDeviceSelections(filter).subscribe((resp: DeviceSelectablesModel[] | null) => {
+                if (resp !== null) {
+                    this.selectablesArray[elementIndex] = resp;
                 }
             });
         }
@@ -260,7 +272,12 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 respDeployment.forEach((deployment: { status: number, id: string }, deploymentIndex: number) => {
                     this.getDeploymentId(deploymentIndex).setValue(deployment.id);
                 });
-                this.saveWidget();
+                forkJoin(this.getScheduleArray()).subscribe(schedules => {
+                    schedules.forEach((schedule, index) => {
+                        this.getScheduleId(index).setValue(schedule !== null ? schedule.id : null);
+                    });
+                    this.saveWidget();
+                });
             });
         });
 
@@ -294,7 +311,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         const deploymentArray: Observable<{ status: number, id: string }>[] = [];
         this.elements.forEach((element: DeviceStatusElementModel, index: number) => {
             if (element.selectable) {
-                if (this.getService(index).protocol_id === environment.mqttProtocolID) {
+                if (!element.requestDevice || this.getService(index).protocol_id === environment.mqttProtocolID) {
                     deploymentArray.push(of({status: 0, id: ''}));
                 } else {
                     deploymentArray.push(this.createdDeployment(element.selectable, index, 'generated by widget ' + this.widgetName + ' ' + element.name));
@@ -318,6 +335,36 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             }
         });
         return exportArray;
+    }
+
+    private getScheduleArray(): Observable<ProcessSchedulerModel | null>[] {
+        const scheduleArray: Observable<ProcessSchedulerModel | null>[] = [];
+        if ((this.formGroup.get('refreshTime') as FormControl).value === 0) {
+            this.elements.forEach(() => scheduleArray.push(of(null)));
+            return scheduleArray;
+        }
+
+        const refreshTime = (this.formGroup.get('refreshTime') as FormControl).value === 1
+            ? '*' : (this.formGroup.get('refreshTime') as FormControl).value;
+        this.elements.forEach((element: DeviceStatusElementModel, index: number) => {
+            if (element.selectable) {
+                if (!element.requestDevice || this.getService(index).protocol_id === environment.mqttProtocolID) {
+                    scheduleArray.push(of(null));
+                } else if (element.deploymentId !== null) {
+                    // spread process starts
+                    let cron = refreshTime === '*' ? refreshTime
+                        : Math.round(((refreshTime / this.elements.length) * index)) as unknown as string + '/' + refreshTime;
+                    cron += ' * * * * *';
+                    scheduleArray.push(this.processSchedulerService.createSchedule({
+                        created_by: this.widgetId,
+                        process_deployment_id: element.deploymentId,
+                        cron,
+                        id: '',
+                    }));
+                }
+            }
+        });
+        return scheduleArray;
     }
 
     private saveWidget() {
@@ -362,6 +409,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             deploymentId: [element.deploymentId],
             exportId: [element.exportId],
             exportValues: [element.exportValues, Validators.required],
+            requestDevice: [element.requestDevice || false],
+            scheduleId: [element.scheduleId],
         });
     }
 
@@ -431,6 +480,10 @@ export class DeviceStatusEditDialogComponent implements OnInit {
 
     private getExportValues(elementIndex: number): ExportValueCharacteristicModel {
         return <ExportValueCharacteristicModel>this.getExportValuesControl(elementIndex).value;
+    }
+
+    private getScheduleId(elementIndex: number): FormControl {
+        return this.elementsControl.at(elementIndex).get('scheduleId') as FormControl;
     }
 
 }

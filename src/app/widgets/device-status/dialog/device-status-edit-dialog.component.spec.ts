@@ -47,6 +47,8 @@ import {util} from 'jointjs';
 import uuid = util.uuid;
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {environment} from '../../../../environments/environment';
+import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
+import {DeviceSelectablesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
 
 
 describe('DeviceStatusEditDialogComponent', () => {
@@ -55,6 +57,7 @@ describe('DeviceStatusEditDialogComponent', () => {
 
     const exportServiceSpy: Spy<ExportService> = createSpyFromClass(ExportService);
     const deploymentsServiceSpy: Spy<DeploymentsService> = createSpyFromClass<DeploymentsService>(DeploymentsService);
+    const deviceInstanceServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass<DeviceInstancesService>(DeviceInstancesService);
     const matDialogRefSpy: Spy<MatDialogRef<DeviceStatusEditDialogComponent>> = createSpyFromClass<MatDialogRef<DeviceStatusEditDialogComponent>>(MatDialogRef);
     const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService);
     const deviceTypeServiceeSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
@@ -98,6 +101,12 @@ describe('DeviceStatusEditDialogComponent', () => {
                 }
             }]
         } as DeploymentsPreparedModel));
+
+        deviceInstanceServiceSpy.getDeviceSelections.and.returnValue(of([{
+            device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: '', permissions: {r: true, w: false, x: true, a: false}},
+            services: [{id: 'service_1', name: 'service'}]
+        }] as DeviceSelectablesModel[]));
+
         dashboardServiceSpy.getWidget.and.returnValue(of({name: 'test', properties: {}} as WidgetModel));
         dashboardServiceSpy.updateWidget.and.returnValue(of({message: 'OK'}));
         deviceTypeServiceeSpy.getAspectsWithMeasuringFunction.and.returnValue(of([{
@@ -131,6 +140,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 DeviceStatusEditDialogComponent
             ],
             providers: [
+                {provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy},
                 {provide: DashboardService, useValue: dashboardServiceSpy},
                 {provide: DeviceTypeService, useValue: deviceTypeServiceeSpy},
                 {provide: DeploymentsService, useValue: deploymentsServiceSpy},
@@ -175,7 +185,9 @@ describe('DeviceStatusEditDialogComponent', () => {
             selectable: null,
             function: null,
             aspectId: null,
-            name: null
+            name: null,
+            requestDevice: false,
+            scheduleId: null,
         });
         expect(component.funcArray.length).toBe(0);
         expect(component.selectablesArray.length).toBe(0);
@@ -203,7 +215,9 @@ describe('DeviceStatusEditDialogComponent', () => {
             selectable: null,
             function: null,
             aspectId: 'aspect_1',
-            name: null
+            name: null,
+            requestDevice: false,
+            scheduleId: null,
         });
     }));
 
@@ -213,9 +227,9 @@ describe('DeviceStatusEditDialogComponent', () => {
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
         expect(component.selectablesArray.length).toBe(1);
         expect(component.selectablesArray[0]).toEqual([{
-            device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: ''},
+            device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: '', permissions: {r: true, w: false, x: true, a: false}},
             services: [{id: 'service_1', name: 'service'}]
-        }] as DeploymentsPreparedSelectableModel[]);
+        }] as DeviceSelectablesModel[]);
         expect(component.preparedDeployment.length).toBe(1);
         expect(component.serviceExportValueArray.length).toBe(0);
         expect(component.elements[0]).toEqual({
@@ -226,7 +240,9 @@ describe('DeviceStatusEditDialogComponent', () => {
             selectable: null,
             function: component.funcArray[0][0],
             aspectId: 'aspect_1',
-            name: null
+            name: null,
+            requestDevice: false,
+            scheduleId: null,
         });
     }));
 
@@ -258,7 +274,9 @@ describe('DeviceStatusEditDialogComponent', () => {
             selectable: component.selectablesArray[0][0],
             function: component.funcArray[0][0],
             aspectId: 'aspect_1',
-            name: null
+            name: null,
+            requestDevice: false,
+            scheduleId: null,
         });
     }));
 
@@ -297,7 +315,9 @@ describe('DeviceStatusEditDialogComponent', () => {
             selectable: component.selectablesArray[0][0],
             function: component.funcArray[0][0],
             aspectId: 'aspect_1',
-            name: null
+            name: null,
+            requestDevice: false,
+            scheduleId: null,
         });
     }));
 
@@ -326,12 +346,37 @@ describe('DeviceStatusEditDialogComponent', () => {
         component.elementsControl.at(0).patchValue({'selectable': component.selectablesArray[0][0]});
         component.elementsControl.at(0).patchValue({'service': component.serviceExportValueArray[0][0].service});
         component.elementsControl.at(0).patchValue({'exportValues': component.serviceExportValueArray[0][0].exportValues[0]});
+        component.elementsControl.at(0).patchValue({'requestDevice': true});
         expect(component.elements[0].exportId).toBeNull();
         expect(component.elements[0].deploymentId).toBeNull();
+        exportServiceSpy.startPipeline.calls.reset();
+        exportServiceSpy.stopPipeline.calls.reset();
+        deploymentsServiceSpy.postDeployments.calls.reset();
         component.save();
         expect(component.elements[0].exportId).not.toBeNull();
         expect(component.elements[0].deploymentId).not.toBeNull();
         expect(deploymentsServiceSpy.postDeployments.calls.count()).toBe(1);
+        expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
+        expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
+    }));
+
+    it('save element without process deployment', async(() => {
+        component.addElement({} as DeviceStatusElementModel);
+        component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
+        component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
+        component.elementsControl.at(0).patchValue({'selectable': component.selectablesArray[0][0]});
+        component.elementsControl.at(0).patchValue({'service': component.serviceExportValueArray[0][0].service});
+        component.elementsControl.at(0).patchValue({'exportValues': component.serviceExportValueArray[0][0].exportValues[0]});
+        component.elementsControl.at(0).patchValue({'requestDevice': false});
+        expect(component.elements[0].exportId).toBeNull();
+        expect(component.elements[0].deploymentId).toBeNull();
+        exportServiceSpy.startPipeline.calls.reset();
+        exportServiceSpy.stopPipeline.calls.reset();
+        deploymentsServiceSpy.postDeployments.calls.reset();
+        component.save();
+        expect(component.elements[0].exportId).not.toBeNull();
+        expect(component.elements[0].deploymentId).not.toBeNull();
+        expect(deploymentsServiceSpy.postDeployments.calls.count()).toBe(0);
         expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
         expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
     }));

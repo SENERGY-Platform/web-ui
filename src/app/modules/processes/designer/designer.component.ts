@@ -45,6 +45,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {DesignerErrorModel} from './shared/designer-error.model';
 import {DesignerSnackBarComponent} from './snack-bar/designer-snack-bar.component';
 import {defaultIfEmpty} from 'rxjs/operators';
+import {FilterCriteriaDialogResultModel} from './shared/designer-dialog.model';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -109,6 +110,14 @@ export class ProcessDesignerComponent implements OnInit {
             });
 
             this.modeler.designerCallbacks = {
+                selectIotFilterCriteria: (aspect: string, iotFunction: string, characteristic: string, callback: (criteria: FilterCriteriaDialogResultModel) => void) => {
+                    that.designerDialogService.openFilterCriteriaDialog(aspect, iotFunction, characteristic).subscribe((result: FilterCriteriaDialogResultModel) => {
+                            if (result) {
+                                callback(result);
+                            }
+                        }
+                    );
+                },
                 durationDialog: (initial: string): Promise<DurationResult> => {
                     return new Promise((resolve, reject) => {
                         that.designerDialogService.openDurationDialog(initial).toPromise().then(value => {

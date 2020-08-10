@@ -28,8 +28,8 @@ export class AuthorizationServiceMock {
         return 'test';
     }
 
-    getUserName(): string {
-        return 'test';
+    getUserName(): Promise<string> {
+        return new Promise<string>(resolve => resolve('test'));
     }
 
     getProfile(): AuthorizationProfileModel {

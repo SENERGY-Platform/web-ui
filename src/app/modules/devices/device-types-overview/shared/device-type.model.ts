@@ -17,11 +17,14 @@
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
 
-export interface DeviceTypeModel {
+export interface DeviceTypeBaseModel {
     id: string;
     name: string;
     description: string;
     image: string;
+}
+
+export interface DeviceTypeModel extends DeviceTypeBaseModel {
     services: DeviceTypeServiceModel[];
     device_class: DeviceTypeDeviceClassModel;
 }

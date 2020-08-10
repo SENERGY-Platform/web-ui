@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-export interface DeviceInstancesUpdateModel {
-    id: string;
-    local_id: string;
-    name: string;
+import {DeviceInstancesBaseModel} from './device-instances.model';
+
+export interface DeviceInstancesUpdateModel extends DeviceInstancesBaseModel {
     device_type_id: string;
 }
 

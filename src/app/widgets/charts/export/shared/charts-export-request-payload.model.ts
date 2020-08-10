@@ -40,4 +40,6 @@ export interface ChartsExportRequestPayloadQueriesModel {
 export interface ChartsExportRequestPayloadQueriesFieldsModel {
     name: string;
     math: string;
+    filterType?: '=' | '<>' | '!=' | '>' | '>=' | '<' | '<=';
+    filterValue?: string | number;
 }

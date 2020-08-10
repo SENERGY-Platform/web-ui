@@ -27,6 +27,8 @@
 }
 
 mat-card-title {
+    height: 24px;
+    margin-bottom: 8px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

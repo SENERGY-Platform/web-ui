@@ -23,9 +23,12 @@ import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipu
 import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
 import {DisplayGrid, GridsterConfig, GridType} from 'angular-gridster2';
-import {Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription} from 'rxjs';
 import {DashboardTypesEnum} from './shared/dashboard-types.enum';
 import {DeviceStatusService} from '../../widgets/device-status/shared/device-status.service';
+import {moveItemInArray} from '@angular/cdk/drag-drop';
+import {DialogsService} from '../../core/services/dialogs.service';
+import {ProcessSchedulerService} from '../../widgets/process-scheduler/shared/process-scheduler.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -57,6 +60,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     constructor(private responsiveService: ResponsiveService,
                 private dashboardService: DashboardService,
+                private dialogsService: DialogsService,
+                private processSchedulerService: ProcessSchedulerService,
                 private deviceStatusService: DeviceStatusService) {
     }
 
@@ -79,14 +84,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     refreshAllWidgets() {
         clearInterval(this.interval);
-        const refreshTimeInMs = this.dashboards[this.activeTabIndex].refresh_time * 1000;
+        const refreshTimeInMs = this.dashboards[this.activeTabIndex]?.refresh_time * 1000;
         if (refreshTimeInMs > 0) {
             this.interval = window.setInterval(() => this.dashboardService.reloadAllWidgets(), refreshTimeInMs);
         }
     }
 
     openAddDashboardDialog() {
-        this.dashboardService.openNewDashboardDialog();
+        this.dashboardService.openNewDashboardDialog(this.dashboards.length);
     }
 
     openDeleteDashboardDialog() {
@@ -121,6 +126,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.inDragMode = !this.inDragMode;
         this.initDragAndDropOptions();
         this.initDragAndDrop();
+    }
+
+    /**
+     * Swaps dashboard position with left or right neighbor and updates indices of both dashboards
+     * @param moveLeft true -> swap with left neighbor, false -> swap with right neighbor
+     */
+    moveDashboard(moveLeft: boolean) {
+        const newIndex = moveLeft ? this.activeTabIndex - 1 : this.activeTabIndex + 1;
+        if (newIndex < 0 || newIndex > this.dashboards.length - 1) {
+            console.error('Cant move dashboard to position ' + newIndex);
+            return;
+        }
+        const observables: Observable<DashboardModel>[] = [];
+        let dashboard = this.dashboards[this.activeTabIndex];
+        dashboard.index = newIndex;
+        observables.push(this.dashboardService.updateDashboard(dashboard));
+        dashboard = this.dashboards[newIndex];
+        dashboard.index = this.activeTabIndex;
+        observables.push(this.dashboardService.updateDashboard(dashboard));
+        forkJoin(observables).subscribe(() => {
+            moveItemInArray(this.dashboards, this.activeTabIndex, newIndex);
+            this.setTabIndex(newIndex);
+        });
     }
 
     private initDragAndDrop() {
@@ -211,14 +239,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     private deleteDashboard(dashboardManipulationModel: DashboardManipulationModel) {
-        this.dashboards.forEach((dashboard: DashboardModel, index: number) => {
-            if (dashboard.id === dashboardManipulationModel.dashboardId) {
-                if (this.activeTabIndex > (this.dashboards.length - 2)) {
-                    this.activeTabIndex = this.dashboards.length - 2;
-                }
-                this.dashboards.splice(index, 1);
+        const deletionIndex = this.dashboards.findIndex(dashboard => dashboard.id === dashboardManipulationModel.dashboardId);
+        if (deletionIndex !== -1) {
+            if (this.activeTabIndex > (this.dashboards.length - 2)) {
+                this.activeTabIndex = this.dashboards.length - 2;
             }
-        });
+            this.dashboards[deletionIndex].widgets.forEach(widget => this.cleanUp(widget));
+            const oldIndex = this.dashboards[deletionIndex].index;
+            this.dashboards.splice(deletionIndex, 1);
+            this.dashboards.forEach((dashboard: DashboardModel) => {
+                if (dashboard.index > oldIndex) {
+                    dashboard.index--;
+                    // No update to backend needed, logic handled in backend too
+                }
+            });
+        }
     }
 
     private addDashboard(dashboardManipulationModel: DashboardManipulationModel) {
@@ -313,8 +348,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     private cleanUp(widget: WidgetModel): void {
-        if (widget.type === DashboardTypesEnum.DeviceStatus) {
-            this.deviceStatusService.deleteElements(widget.properties.elements);
+        switch (widget.type) {
+            case DashboardTypesEnum.DeviceStatus:
+                this.deviceStatusService.deleteElements(widget.properties.elements);
+                break;
+            case DashboardTypesEnum.ProcessScheduler:
+                this.dialogsService.openDeleteDialog('schedules created by the widget ' + widget.name).afterClosed().subscribe(yes => {
+                    if (yes === true) {
+                        this.processSchedulerService.deleteSchedulesByWidget(widget.id).subscribe(() => null);
+                    }
+                });
+                break;
         }
     }
 

@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-import {Keycloak} from 'keycloak-angular/lib/core/services/keycloak.service';
+import {Injectable} from '@angular/core';
+import {ExportService} from '../../../modules/data/export/shared/export.service';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
-export class MockKeycloakService {
-    getKeycloakInstance(): Keycloak.KeycloakInstance {
-        return {subject: 'test'} as Keycloak.KeycloakInstance;
+
+@Injectable({
+    providedIn: 'root'
+})
+export class SingleValueRequirementsService {
+
+    constructor(
+                private exportService: ExportService, ) {
     }
 
-    getUsername() {
-        return 'test';
-    }
+    static requirement = 'Needs an export';
 
-    loadUserProfile(): Promise<Keycloak.KeycloakProfile> {
-        return new Promise<Keycloak.KeycloakProfile>(resolve => resolve({} as Keycloak.KeycloakProfile));
+    requirementsFulfilled(): Observable<boolean> {
+        return this.exportService.getExports('', 1, 0, 'name', 'asc').pipe(map(r => {
+            return r !== null && r.length !== 0;
+        }));
     }
 }

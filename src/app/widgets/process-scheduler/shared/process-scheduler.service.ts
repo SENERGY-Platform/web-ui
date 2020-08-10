@@ -1,12 +1,12 @@
 /*
  * Copyright 2020 InfAI (CC SES)
- *  
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {Observable} from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 import {ProcessSchedulerModel} from './process-scheduler.model';
 import {ProcessRepoService} from '../../../modules/processes/process-repo/shared/process-repo.service';
 import {environment} from '../../../../environments/environment';
@@ -46,6 +46,7 @@ export class ProcessSchedulerService {
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
+        dialogConfig.minHeight = '235px';
         dialogConfig.data = {
             widgetId: widgetId,
             dashboardId: dashboardId,
@@ -59,14 +60,18 @@ export class ProcessSchedulerService {
         });
     }
 
-    getSchedules(): Observable<ProcessSchedulerModel[]> {
-        return this.http.get<ProcessSchedulerModel[]>(environment.processSchedulerUrl + '/schedules').pipe(
+    getSchedules(createdBy: string | null): Observable<ProcessSchedulerModel[]> {
+        let path = '/schedules';
+        if (createdBy !== null && createdBy !== '') {
+            path += '?created_by=' + createdBy;
+        }
+        return this.http.get<ProcessSchedulerModel[]>(environment.processSchedulerUrl + path).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getSchedules()', []))
         );
     }
 
-    deleteSchedule(scheduleId: string): Observable<{status: number}> {
+    deleteSchedule(scheduleId: string): Observable<{ status: number }> {
         return this.http.delete<HttpResponseBase>(environment.processSchedulerUrl + '/schedules/' + scheduleId, {observe: 'response'}).pipe(
             map(resp => {
                 return {status: resp.status};
@@ -89,5 +94,17 @@ export class ProcessSchedulerService {
         );
     }
 
+    deleteSchedulesByWidget(widgetId: string): Observable<{status: number}[]> {
+        return new Observable<{ status: number }[]>(obs => {
+            this.getSchedules(widgetId).subscribe(schedules => {
+                const observables: Observable<{ status: number }>[] = [];
+                schedules.forEach(schedule => observables.push(this.deleteSchedule(schedule.id)));
+                forkJoin(observables).subscribe(states => {
+                    obs.next(states);
+                    obs.complete();
+                });
+            });
+        });
+    }
 }
 

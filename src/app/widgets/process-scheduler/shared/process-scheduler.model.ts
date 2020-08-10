@@ -18,4 +18,11 @@ export interface ProcessSchedulerModel {
     id: string;
     cron: string;
     process_deployment_id: string;
+    process_alias?: string;
+    disabled?: boolean;
+    created_by?: string;
+}
+
+export interface ProcessSchedulerPropertiesModel {
+    readAll?: boolean;
 }

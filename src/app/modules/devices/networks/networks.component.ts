@@ -25,6 +25,10 @@ import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {
+    DeviceInstancesRouterState,
+    DeviceInstancesRouterStateTypesEnum
+} from '../device-instances/device-instances.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -88,7 +92,8 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     showDevices(network: NetworksModel) {
-        this.router.navigateByUrl('/devices/deviceinstances', {state: network});
+        this.router.navigateByUrl('/devices/deviceinstances',
+            {state: {type: DeviceInstancesRouterStateTypesEnum.NETWORK, value: network} as DeviceInstancesRouterState});
     }
 
     clear(network: NetworksModel) {

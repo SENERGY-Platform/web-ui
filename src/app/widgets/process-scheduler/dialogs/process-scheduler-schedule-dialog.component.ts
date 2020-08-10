@@ -43,7 +43,9 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
             new FormControl(false),
         ]),
         processId: new FormControl('', [Validators.required]),
-        time: new FormControl('', [Validators.required])
+        time: new FormControl('', [Validators.required]),
+        process_alias: new FormControl(''),
+        enable: new FormControl(true),
     });
 
     widget: WidgetModel = {} as WidgetModel;
@@ -58,7 +60,9 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
                 'id': data.scheduleId,
                 'time': this.cronConverterService.getLocalTime(data.cron),
                 'processId': data.processId,
-                'days': this.cronConverterService.getDaysAsBoolArray(data.cron)
+                'days': this.cronConverterService.getDaysAsBoolArray(data.cron),
+                'process_alias': data.processAlias,
+                'enable': !data.disabled,
             });
         }
 
@@ -78,8 +82,8 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    compare(a: DeploymentsModel, b: string): boolean {
-        return a.id === b;
+    compare(a: string, b: string): boolean {
+        return a === b;
     }
 
     save(): void {
@@ -87,7 +91,9 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
         this.dialogRef.close({
             id: (this.form.get('id') as FormControl).value,
             cron: this.cronConverterService.getCronAsString((this.form.get('time') as FormControl).value, this.getDays()),
-            process_deployment_id: (this.form.get('processId') as FormControl).value
+            process_deployment_id: (this.form.get('processId') as FormControl).value,
+            process_alias: (this.form.get('process_alias') as FormControl).value,
+            disabled: (this.form.get('enable') as FormControl).value === false
         } as ProcessSchedulerModel);
     }
 

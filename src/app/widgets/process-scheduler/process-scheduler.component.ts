@@ -37,7 +37,8 @@ import {CronConverterService} from './shared/cron-converter.service';
 export class ProcessSchedulerComponent implements OnInit, OnDestroy {
 
     schedules: ProcessSchedulerWidgetModel[] = [];
-    ready = false;
+    numReady = -1;
+    numReadyNeeded = 0;
     destroy = new Subscription();
 
     @Input() dashboardId = '';
@@ -84,6 +85,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
         const editDialogRef = this.dialog.open(ProcessSchedulerScheduleDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((schedule: ProcessSchedulerModel) => {
+            schedule.created_by = this.widget.id;
             if (schedule !== undefined) {
                 if (schedule.id === '') {
                     this.processSchedulerService.createSchedule(schedule).subscribe((resp: (ProcessSchedulerModel | null)) => {
@@ -109,6 +111,10 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
         });
     }
 
+    ready(): boolean {
+        return this.numReady === this.numReadyNeeded;
+    }
+
     private getSchedules() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
@@ -118,24 +124,40 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     }
 
     private reload() {
-        this.ready = false;
-        this.processSchedulerService.getSchedules().subscribe((schedules: ProcessSchedulerModel[]) => {
-            this.schedules = [];
-            schedules.forEach((schedule: ProcessSchedulerModel) => {
-                this.deploymentsService.getDeployments(schedule.process_deployment_id).subscribe((deployment: (DeploymentsPreparedModel | null)) => {
-                    this.schedules.push({
+        this.numReady = 0;
+        this.processSchedulerService.getSchedules(this.widget.properties.readAll === true ? null : this.widget.id)
+            .subscribe((schedules: ProcessSchedulerModel[]) => {
+                this.numReadyNeeded = schedules.length;
+                this.schedules = [];
+                schedules.forEach((schedule: ProcessSchedulerModel) => {
+                    const newSchedule: ProcessSchedulerWidgetModel = {
                         cron: schedule.cron,
                         processId: schedule.process_deployment_id,
                         scheduleId: schedule.id,
-                        processName: deployment ? deployment.name : 'Invalid Deployment',
-                    });
+                        disabled: schedule.disabled,
+                    } as ProcessSchedulerWidgetModel;
+
+                    if (schedule.process_alias !== undefined && schedule.process_alias !== '') {
+                        newSchedule.processAlias = schedule.process_alias;
+                        this.schedules.push(newSchedule);
+                        this.numReady++;
+                    } else { // No alias set, use actual process name
+                        this.deploymentsService.getDeployments(schedule.process_deployment_id)
+                            .subscribe((deployment: (DeploymentsPreparedModel | null)) => {
+                                newSchedule.processName = deployment ? deployment.name : 'Invalid Deployment';
+                                this.schedules.push(newSchedule);
+                                this.numReady++;
+                            });
+                    }
                 });
             });
-            this.ready = true;
-        });
     }
 
     cronReadable(cron: string): string {
-        return this.cronConverterService.getLocalTimeAndDaysAsString(cron);
+        return this.cronConverterService.getHumanReadableString(cron);
+    }
+
+    canEdit(schedule: ProcessSchedulerWidgetModel) {
+        return !this.cronConverterService.hasSecondsField(schedule.cron);
     }
 }

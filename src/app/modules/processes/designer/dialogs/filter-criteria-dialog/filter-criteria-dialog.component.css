@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
+.form {
+    min-width: 150px;
+    max-width: 500px;
+    width: 100%;
 }
 
-.checkbox-padding {
-    padding-bottom: 12px
+.form-field {
+    width: 100%;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.radio-button {
+    margin: 5px;
+}
+
+mat-dialog-actions button:not(:last-child) {
+    margin-right: 8px;
 }

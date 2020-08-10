@@ -128,17 +128,6 @@ const functions = {path: 'devices/functions', pathMatch: 'full', component: Func
         CharacteristicsEditDialogComponent,
         FunctionsComponent,
     ],
-    entryComponents: [
-        NetworksEditDialogComponent,
-        DeviceInstancesServiceDialogComponent,
-        DeviceInstancesEditDialogComponent,
-        NetworksClearDialogComponent,
-        DeviceInstancesGridComponent,
-        ConceptsNewDialogComponent,
-        CharacteristicsNewDialogComponent,
-        ConceptsEditDialogComponent,
-        CharacteristicsEditDialogComponent,
-    ]
 })
 
 export class DevicesModule {
