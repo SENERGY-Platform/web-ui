@@ -50,6 +50,8 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSortModule} from '@angular/material/sort';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatRadioModule} from '@angular/material/radio';
+import {MatTreeModule} from '@angular/material/tree';
+import {DeviceTypesContentVariableDialogComponent} from './device-types/dialogs/device-types-content-variable-dialog.component';
 
 const devicetypes = {path: 'devices/devicetypesoverview/devicetypes', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Devices' }};
 const devicetypesEdit = {path: 'devices/devicetypesoverview/devicetypes/:id', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Devices' }};
@@ -87,6 +89,7 @@ const devicetypesEdit = {path: 'devices/devicetypesoverview/devicetypes/:id', pa
         MatProgressSpinnerModule,
         MatRadioModule,
         RouterModule.forChild([devicetypes, devicetypesEdit]),
+        MatTreeModule,
     ],
     declarations: [
         DeviceTypesComponent,
@@ -94,7 +97,15 @@ const devicetypesEdit = {path: 'devices/devicetypesoverview/devicetypes/:id', pa
         DeviceTypesNewFunctionDialogComponent,
         DeviceTypesNewAspectDialogComponent,
         DeviceTypesShowConceptDialogComponent,
+        DeviceTypesContentVariableDialogComponent,
     ],
+    entryComponents: [
+        DeviceTypesNewDeviceClassDialogComponent,
+        DeviceTypesNewFunctionDialogComponent,
+        DeviceTypesNewAspectDialogComponent,
+        DeviceTypesShowConceptDialogComponent,
+        DeviceTypesContentVariableDialogComponent,
+    ]
 })
 export class DeviceTypesOverviewModule {
 }

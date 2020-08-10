@@ -30,34 +30,36 @@ export class ChartsService {
         if (chartComponent) {
             let chart = chartComponent.wrapper.getChart();
 
-            try {
-                chart.clearChart();
+            if (chart) {
+                try {
+                    chart.clearChart();
 
-                chart.hv = {};
-                chart.iv = {};
-                chart.jv = {};
+                    chart.hv = {};
+                    chart.iv = {};
+                    chart.jv = {};
 
-                Object.keys(chart).forEach(function (key) {
-                    delete chart[key];
-                });
-            } catch (e) {
-                console.log('Error releasing resources: ' + e);
-            }
+                    Object.keys(chart).forEach(function (key) {
+                        delete chart[key];
+                    });
+                } catch (e) {
+                    console.log('Error releasing resources: ' + e);
+                }
 
-            try {
-                delete chartComponent.data.component;
-            } catch (e) {
-                console.log('Error releasing resources: ' + e);
-            }
+                try {
+                    delete chartComponent.data.component;
+                } catch (e) {
+                    console.log('Error releasing resources: ' + e);
+                }
 
-            try {
-                Object.keys(chartComponent.wrapper).forEach(function (key) {
-                    delete chartComponent.wrapper[key];
-                });
+                try {
+                    Object.keys(chartComponent.wrapper).forEach(function (key) {
+                        delete chartComponent.wrapper[key];
+                    });
 
-                delete chartComponent.wrapper;
-            } catch (e) {
-                console.log('Error releasing resources: ' + e);
+                    delete chartComponent.wrapper;
+                } catch (e) {
+                    console.log('Error releasing resources: ' + e);
+                }
             }
         }
     }

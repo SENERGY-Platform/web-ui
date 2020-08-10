@@ -41,11 +41,17 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {util} from 'jointjs';
 import uuid = util.uuid;
+import {MatTreeModule} from '@angular/material/tree';
 
 describe('DeviceTypesComponent', () => {
     let component: DeviceTypesComponent;
     let fixture: ComponentFixture<DeviceTypesComponent>;
-    const devicetypesEdit = {path: 'devices/devicetypesoverview/devicetypes/:id', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Devices' }};
+    const devicetypesEdit = {
+        path: 'devices/devicetypesoverview/devicetypes/:id',
+        pathMatch: 'full',
+        component: DeviceTypesComponent,
+        data: {header: 'Devices'}
+    };
 
     const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
 
@@ -100,7 +106,6 @@ describe('DeviceTypesComponent', () => {
                                 name: 'level2',
                                 type: 'https://schema.org/Float',
                                 value: 0,
-                                unit_reference: null
                             }]
                     }
                 }],
@@ -124,7 +129,7 @@ describe('DeviceTypesComponent', () => {
         TestBed.configureTestingModule({
             imports: [CoreModule, RouterTestingModule.withRoutes([devicetypesEdit]), HttpClientTestingModule, MatSnackBarModule, MatStepperModule,
                 MatFormFieldModule, MatSelectModule, MatIconModule, ReactiveFormsModule, MatInputModule, MatExpansionModule, MatTabsModule,
-                MatTooltipModule, FlexLayoutModule],
+                MatTooltipModule, FlexLayoutModule, MatTreeModule],
             declarations: [
                 DeviceTypesComponent
             ],
@@ -190,110 +195,56 @@ describe('DeviceTypesComponent', () => {
         expect(component.serviceControl(0).value.name).toBe('service1');
         expect(component.serviceControl(0).value.description).toBe('serv_desc');
         expect(component.serviceControl(0).value.protocol_id).toBe('protocol_1');
-        expect(component.inputOutput(component.serviceControl(0), 'inputs', 0).value).toEqual({
-            id: '',
-            name: 'metadata',
-            serialization: 'json',
-            content_variable_raw: '{\n' +
-                '     "name": "power_comsumption",\n' +
-                '     "type": "https://schema.org/StructuredValue",\n' +
-                '     "characteristic_id": null,\n' +
-                '     "value": null,\n' +
-                '     "sub_content_variables": [\n' +
-                '          {\n' +
-                '               "name": "level",\n' +
-                '               "type": "https://schema.org/Float",\n' +
-                '               "characteristic_id": "char_1",\n' +
-                '               "value": 0,\n' +
-                '               "sub_content_variables": null,\n' +
-                '               "serialization_options": null,\n' +
-                '               "unit_reference": null\n' +
-                '          },\n' +
-                '          {\n' +
-                '               "name": "level2",\n' +
-                '               "type": "https://schema.org/Float",\n' +
-                '               "characteristic_id": "char_1",\n' +
-                '               "value": 0,\n' +
-                '               "sub_content_variables": null,\n' +
-                '               "serialization_options": null,\n' +
-                '               "unit_reference": null\n' +
-                '          }\n' +
-                '     ],\n' +
-                '     "serialization_options": null,\n' +
-                '     "unit_reference": null\n' +
-                '}',
-            content_variable: {
-                name: 'power_comsumption',
-                type: 'https://schema.org/StructuredValue',
-                characteristic_id: null,
-                value: null,
-                sub_content_variables: [{
-                    name: 'level',
+        // input index 0
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 0).value.id).toBe('');
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 0).value.name).toBe('metadata');
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 0).value.serialization).toBe('json');
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 0).value.protocol_segment_id).toBe('protocol_segment_1');
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 0).value.show).toBe(true);
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 0).value.dataSource.data).toEqual([{
+            indices: [0],
+            name: 'power_comsumption',
+            type: 'https://schema.org/StructuredValue',
+            sub_content_variables: [{
+                indices: [0, 0],
+                name: 'level',
+                type: 'https://schema.org/Float',
+                characteristic_id: 'char_1',
+                value: 0,
+            },
+                {
+                    indices: [0, 1],
+                    name: 'level2',
                     type: 'https://schema.org/Float',
                     characteristic_id: 'char_1',
                     value: 0,
-                    unit_reference: null,
-                    sub_content_variables: null,
-                    serialization_options: null
-                },
-                    {
-                        name: 'level2',
-                        type: 'https://schema.org/Float',
-                        characteristic_id: 'char_1',
-                        value: 0,
-                        unit_reference: null,
-                        sub_content_variables: null,
-                        serialization_options: null
-                    }],
-                serialization_options: null,
-                unit_reference: null
-            },
-            protocol_segment_id: 'protocol_segment_1',
-            show: true,
-        });
-        expect(component.inputOutput(component.serviceControl(0), 'inputs', 1).value).toEqual({
-            id: '',
-            name: 'data',
-            serialization: null,
-            content_variable_raw: null,
-            content_variable: '',
-            protocol_segment_id: 'protocol_segment_2',
-            show: false,
-        });
-        expect(component.inputOutput(component.serviceControl(0), 'outputs', 0).value).toEqual({
-            id: '',
-            name: 'metadata',
-            serialization: null,
-            content_variable_raw: null,
-            content_variable: '',
-            protocol_segment_id: 'protocol_segment_1',
-            show: false,
-        });
-        expect(component.inputOutput(component.serviceControl(0), 'outputs', 1).value).toEqual({
-            id: '',
-            name: 'data',
-            serialization: 'json',
-            content_variable_raw: '{\n' +
-                '     "name": "brightness",\n' +
-                '     "type": "https://schema.org/Float",\n' +
-                '     "characteristic_id": null,\n' +
-                '     "value": null,\n' +
-                '     "sub_content_variables": null,\n' +
-                '     "serialization_options": null,\n' +
-                '     "unit_reference": null\n' +
-                '}',
-            content_variable: {
-                name: 'brightness',
-                type: 'https://schema.org/Float',
-                characteristic_id: null,
-                value: null,
-                unit_reference: null,
-                sub_content_variables: null,
-                serialization_options: null
-            },
-            protocol_segment_id: 'protocol_segment_2',
-            show: true,
-        });
+                }],
+        }]);
+        // input index 1
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 1).value.id).toBe('');
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 1).value.name).toBe('data');
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 1).value.serialization).toBe(null);
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 1).value.protocol_segment_id).toBe('protocol_segment_2');
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 1).value.show).toBe(false);
+        expect(component.inputOutput(component.serviceControl(0), 'inputs', 1).value.dataSource.data.length).toBe(0);
+        // output index 0
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 0).value.id).toBe('');
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 0).value.name).toBe('metadata');
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 0).value.serialization).toBe(null);
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 0).value.protocol_segment_id).toBe('protocol_segment_1');
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 0).value.show).toBe(false);
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 0).value.dataSource.data.length).toBe(0);
+        // output index 1
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 1).value.id).toBe('');
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 1).value.name).toBe('data');
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 1).value.serialization).toBe('json');
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 1).value.protocol_segment_id).toBe('protocol_segment_2');
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 1).value.show).toBe(true);
+        expect(component.inputOutput(component.serviceControl(0), 'outputs', 1).value.dataSource.data).toEqual([{
+            indices: [0],
+            name: 'brightness',
+            type: 'https://schema.org/Float',
+        }]);
         expect(component.services.length).toBe(1);
     }));
 
@@ -311,62 +262,21 @@ describe('DeviceTypesComponent', () => {
                     id: '',
                     name: 'metadata',
                     serialization: 'json',
-                    content_variable_raw: '{\n' +
-                        '     "name": "power_comsumption",\n' +
-                        '     "type": "https://schema.org/StructuredValue",\n' +
-                        '     "characteristic_id": null,\n' +
-                        '     "value": null,\n' +
-                        '     "sub_content_variables": [\n' +
-                        '          {\n' +
-                        '               "name": "level",\n' +
-                        '               "type": "https://schema.org/Float",\n' +
-                        '               "characteristic_id": "char_1",\n' +
-                        '               "value": 0,\n' +
-                        '               "sub_content_variables": null,\n' +
-                        '               "serialization_options": null,\n' +
-                        '               "unit_reference": null\n' +
-                        '          },\n' +
-                        '          {\n' +
-                        '               "name": "level2",\n' +
-                        '               "type": "https://schema.org/Float",\n' +
-                        '               "characteristic_id": "char_1",\n' +
-                        '               "value": 0,\n' +
-                        '               "sub_content_variables": null,\n' +
-                        '               "serialization_options": null,\n' +
-                        '               "unit_reference": null\n' +
-                        '          }\n' +
-                        '     ],\n' +
-                        '     "serialization_options": null,\n' +
-                        '     "unit_reference": null\n' +
-                        '}',
                     content_variable: {
-                        id: null,
                         name: 'power_comsumption',
                         type: 'https://schema.org/StructuredValue',
-                        characteristic_id: null,
-                        value: null,
                         sub_content_variables: [{
-                            id: null,
                             name: 'level',
                             type: 'https://schema.org/Float',
                             characteristic_id: 'char_1',
                             value: 0,
-                            unit_reference: null,
-                            sub_content_variables: null,
-                            serialization_options: null
                         },
                             {
-                                id: null,
                                 name: 'level2',
                                 type: 'https://schema.org/Float',
                                 characteristic_id: 'char_1',
                                 value: 0,
-                                unit_reference: null,
-                                sub_content_variables: null,
-                                serialization_options: null
                             }],
-                        serialization_options: null,
-                        unit_reference: null
                     },
                     protocol_segment_id: 'protocol_segment_1',
                     show: true,
@@ -376,24 +286,9 @@ describe('DeviceTypesComponent', () => {
                 id: '',
                 name: 'data',
                 serialization: 'json',
-                content_variable_raw: '{\n' +
-                    '     "name": "brightness",\n' +
-                    '     "type": "https://schema.org/Float",\n' +
-                    '     "characteristic_id": null,\n' +
-                    '     "value": null,\n' +
-                    '     "sub_content_variables": null,\n' +
-                    '     "serialization_options": null,\n' +
-                    '     "unit_reference": null\n' +
-                    '}',
                 content_variable: {
-                    id: null,
                     name: 'brightness',
                     type: 'https://schema.org/Float',
-                    characteristic_id: null,
-                    value: null,
-                    sub_content_variables: null,
-                    unit_reference: null,
-                    serialization_options: null
                 },
                 protocol_segment_id: 'protocol_segment_2',
                 show: true,
@@ -407,20 +302,9 @@ describe('DeviceTypesComponent', () => {
 
     it('check save with edit', async(() => {
         init('device_id_4711', 'edit');
-        component.inputOutputContentVariableRaw(component.services.at(0), 'inputs', 0).setValue('{\n' +
-            '     "id": "content_variable_1",\n' +
-            '     "name": "power_comsumption",\n' +
-            '     "type": "https://schema.org/StructuredValue",\n' +
-            '     "sub_content_variables": [\n' +
-            '          {\n' +
-            '               "id": "sub_content_variable_1",\n' +
-            '               "characteristic_id": "char_1",\n' +
-            '               "name": "level_neu",\n' +
-            '               "type": "https://schema.org/Float",\n' +
-            '               "value": 0\n' +
-            '          }' +
-            '     ]\n' +
-            '}');
+        const inputs =  component.inputOutputArray(component.services.controls[0], 'inputs');
+        component.deleteContentVariable(inputs[0], [0, 1])
+
         component.save();
         expect(component.secondFormGroup.getRawValue().services).toEqual([{
             id: 'service_id_1',
@@ -433,38 +317,17 @@ describe('DeviceTypesComponent', () => {
                     id: 'input_id_1',
                     name: 'metadata',
                     serialization: 'json',
-                    content_variable_raw: '{\n' +
-                        '     "id": "content_variable_1",\n' +
-                        '     "name": "power_comsumption",\n' +
-                        '     "type": "https://schema.org/StructuredValue",\n' +
-                        '     "sub_content_variables": [\n' +
-                        '          {\n' +
-                        '               "id": "sub_content_variable_1",\n' +
-                        '               "characteristic_id": "char_1",\n' +
-                        '               "name": "level_neu",\n' +
-                        '               "type": "https://schema.org/Float",\n' +
-                        '               "value": 0\n' +
-                        '          }' +
-                        '     ]\n' +
-                        '}',
                     content_variable: {
                         id: 'content_variable_1',
                         name: 'power_comsumption',
                         type: 'https://schema.org/StructuredValue',
-                        characteristic_id: null,
-                        value: null,
                         sub_content_variables: [{
                             id: 'sub_content_variable_1',
-                            name: 'level_neu',
+                            name: 'level',
                             type: 'https://schema.org/Float',
                             characteristic_id: 'char_1',
                             value: 0,
-                            unit_reference: null,
-                            sub_content_variables: null,
-                            serialization_options: null
                         }],
-                        serialization_options: null,
-                        unit_reference: null
                     },
                     protocol_segment_id: 'protocol_segment_1',
                     show: true,
@@ -474,20 +337,10 @@ describe('DeviceTypesComponent', () => {
                 id: 'output_id_1',
                 name: 'data',
                 serialization: 'json',
-                content_variable_raw: '{\n' +
-                    '     "id": "content_variable_out_1",\n' +
-                    '     "name": "brightness",\n' +
-                    '     "type": "https://schema.org/Float"\n' +
-                    '}',
                 content_variable: {
                     id: 'content_variable_out_1',
                     name: 'brightness',
                     type: 'https://schema.org/Float',
-                    characteristic_id: null,
-                    value: null,
-                    sub_content_variables: null,
-                    unit_reference: null,
-                    serialization_options: null
                 },
                 protocol_segment_id: 'protocol_segment_2',
                 show: true,
@@ -498,128 +351,5 @@ describe('DeviceTypesComponent', () => {
         }]);
 
     }));
-
-    it('check save with unit_reference', async(() => {
-        init('device_id_4711', 'edit');
-        component.inputOutputContentVariableRaw(component.services.at(0), 'inputs', 0).setValue('{\n' +
-            '     "id": "content_variable_1",\n' +
-            '     "name": "power_comsumption",\n' +
-            '     "type": "https://schema.org/StructuredValue",\n' +
-            '     "sub_content_variables": [\n' +
-            '          {\n' +
-            '               "id": "sub_content_variable_1",\n' +
-            '               "characteristic_id": "char_1",\n' +
-            '               "name": "level_neu",\n' +
-            '               "type": "https://schema.org/Float",\n' +
-            '               "value": 0\n' +
-            '          },' +
-            '          {\n' +
-            '               "id": "sub_content_variable_1_unit",\n' +
-            '               "characteristic_id": null,\n' +
-            '               "name": "level_neu_unit",\n' +
-            '               "type": "https://schema.org/Text",\n' +
-            '               "unit_reference": "level_neu",\n' +
-            '               "value": null\n' +
-            '          }' +
-            '     ]\n' +
-            '}');
-        component.save();
-        expect(component.secondFormGroup.getRawValue().services).toEqual([{
-            id: 'service_id_1',
-            local_id: 'local_id_1',
-            name: 'service1',
-            description: 'serv_desc',
-            protocol_id: 'protocol_1',
-            inputs: [
-                {
-                    id: 'input_id_1',
-                    name: 'metadata',
-                    serialization: 'json',
-                    content_variable_raw: '{\n' +
-                        '     "id": "content_variable_1",\n' +
-                        '     "name": "power_comsumption",\n' +
-                        '     "type": "https://schema.org/StructuredValue",\n' +
-                        '     "sub_content_variables": [\n' +
-                        '          {\n' +
-                        '               "id": "sub_content_variable_1",\n' +
-                        '               "characteristic_id": "char_1",\n' +
-                        '               "name": "level_neu",\n' +
-                        '               "type": "https://schema.org/Float",\n' +
-                        '               "value": 0\n' +
-                        '          },' +
-                        '          {\n' +
-                        '               "id": "sub_content_variable_1_unit",\n' +
-                        '               "characteristic_id": null,\n' +
-                        '               "name": "level_neu_unit",\n' +
-                        '               "type": "https://schema.org/Text",\n' +
-                        '               "unit_reference": "level_neu",\n' +
-                        '               "value": null\n' +
-                        '          }' +
-                        '     ]\n' +
-                        '}',
-                    content_variable: {
-                        id: 'content_variable_1',
-                        name: 'power_comsumption',
-                        type: 'https://schema.org/StructuredValue',
-                        characteristic_id: null,
-                        value: null,
-                        unit_reference: null,
-                        sub_content_variables: [
-                            {
-                                id: 'sub_content_variable_1',
-                                name: 'level_neu',
-                                type: 'https://schema.org/Float',
-                                characteristic_id: 'char_1',
-                                value: 0,
-                                unit_reference: null,
-                                sub_content_variables: null,
-                                serialization_options: null
-                            },
-                            {
-                                id: 'sub_content_variable_1_unit',
-                                characteristic_id: null,
-                                name: 'level_neu_unit',
-                                type: 'https://schema.org/Text',
-                                value: null,
-                                unit_reference: 'level_neu',
-                                sub_content_variables: null,
-                                serialization_options: null
-                            }
-                        ],
-                        serialization_options: null
-                    },
-                    protocol_segment_id: 'protocol_segment_1',
-                    show: true,
-                }
-            ],
-            outputs: [{
-                id: 'output_id_1',
-                name: 'data',
-                serialization: 'json',
-                content_variable_raw: '{\n' +
-                    '     "id": "content_variable_out_1",\n' +
-                    '     "name": "brightness",\n' +
-                    '     "type": "https://schema.org/Float"\n' +
-                    '}',
-                content_variable: {
-                    id: 'content_variable_out_1',
-                    name: 'brightness',
-                    type: 'https://schema.org/Float',
-                    characteristic_id: null,
-                    value: null,
-                    unit_reference: null,
-                    sub_content_variables: null,
-                    serialization_options: null
-                },
-                protocol_segment_id: 'protocol_segment_2',
-                show: true,
-            }],
-            functionType: {text: ''},
-            functions: [],
-            aspects: []
-        }]);
-
-    }));
-
 
 });

@@ -16,14 +16,19 @@
 
 import {Component, OnInit} from '@angular/core';
 import {
-    DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
-    DeviceTypeContentModel, DeviceTypeContentVariableModel,
+    DeviceTypeAspectModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeContentModel,
+    DeviceTypeContentTreeModel,
+    DeviceTypeContentVariableModel,
     DeviceTypeDeviceClassModel,
-    DeviceTypeFunctionModel, DeviceTypeFunctionType,
+    DeviceTypeFunctionModel,
+    DeviceTypeFunctionType,
     DeviceTypeModel,
     DeviceTypeProtocolModel,
     DeviceTypeProtocolSegmentModel,
-    DeviceTypeServiceModel, functionTypes,
+    DeviceTypeServiceModel,
+    functionTypes,
 } from '../shared/device-type.model';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -33,12 +38,14 @@ import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-
 import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
 import {util} from 'jointjs';
-import uuid = util.uuid;
 import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {contentVariableValidator} from './content-variable.validator';
 import {forkJoin, Observable} from 'rxjs';
 import {DeviceTypeHelperService} from './shared/device-type-helper.service';
+import {NestedTreeControl} from '@angular/cdk/tree';
+import {MatTreeNestedDataSource} from '@angular/material/tree';
+import {DeviceTypesContentVariableDialogComponent} from './dialogs/device-types-content-variable-dialog.component';
+import uuid = util.uuid;
 
 const controllingIndex = 0;
 const measuringIndex = 1;
@@ -81,6 +88,8 @@ export class DeviceTypesComponent implements OnInit {
         this.loadData();
     }
 
+    hasChild = (_: number, node: DeviceTypeContentVariableModel) => !!node.sub_content_variables;
+
     close(): void {
     }
 
@@ -117,12 +126,39 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    getErrorMessage(field: any): string {
-        if (field.errors) {
-            return field.errors.errorMsg;
-        } else {
-            return '';
-        }
+    addContentVariable(functions: DeviceTypeFunctionModel[], inOut: DeviceTypeContentTreeModel, indices: number[]): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            contentVariable: {} as DeviceTypeContentVariableModel,
+            functions: functions
+        };
+        this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
+            (resp: DeviceTypeContentVariableModel | undefined) => {
+                if (resp) {
+                    this.refreshTree(inOut, this.deviceTypeHelperService.addTreeData(inOut.dataSource.data, resp, indices));
+                }
+            }
+        );
+    }
+
+    deleteContentVariable(inOut: DeviceTypeContentTreeModel, indices: number[]): void {
+        this.refreshTree(inOut, this.deviceTypeHelperService.deleteTreeData(inOut.dataSource.data, indices));
+    }
+
+    editContent(node: DeviceTypeContentVariableModel, functions: DeviceTypeFunctionModel[], inOut: DeviceTypeContentTreeModel): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            contentVariable: node,
+            functions: functions
+        };
+        this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
+            (resp: DeviceTypeContentVariableModel | undefined) => {
+                if (resp && resp.indices) {
+                    this.refreshTree(inOut, this.deviceTypeHelperService.updateTreeData(inOut.dataSource.data, resp, resp.indices));
+                }
+            });
     }
 
     deleteService(deviceTypeService: DeviceTypeServiceModel) {
@@ -265,16 +301,12 @@ export class DeviceTypesComponent implements OnInit {
         return this.getServiceFormControl(serviceFormGroup, 'aspects').value;
     }
 
-    inputOutputArray(serviceFormGroup: AbstractControl, formControlName: string): DeviceTypeContentModel[] {
+    inputOutputArray(serviceFormGroup: AbstractControl, formControlName: string): DeviceTypeContentTreeModel[] {
         return this.getServiceFormArray(serviceFormGroup, formControlName).value;
     }
 
     inputOutput(serviceFormGroup: AbstractControl, formControlName: string, index: number): FormControl {
         return this.getServiceFormArray(serviceFormGroup, formControlName).get([index]) as FormControl;
-    }
-
-    inputOutputContentVariableRaw(serviceFormGroup: AbstractControl, formControlName: string, index: number): FormControl {
-        return this.getServiceFormArray(serviceFormGroup, formControlName).get([index, 'content_variable_raw']) as FormControl;
     }
 
     serviceControl(serviceIndex: number): FormGroup {
@@ -286,33 +318,27 @@ export class DeviceTypesComponent implements OnInit {
 
         for (let i = 0; i < services.length; i++) {
             const formGroup = <FormGroup>services.controls[i];
-            const inputs = <FormArray>formGroup.controls['inputs'];
-            // loop from highest Index! Otherwise it could cause index problems
-            for (let j = inputs.length - 1; j >= 0; j--) {
-                const inputContentControl: FormGroup = <FormGroup>inputs.controls[j];
-                const inputContent: DeviceTypeContentModel = inputContentControl.value;
-                if (!this.deviceTypeHelperService.checkIfContentExists(inputContent.content_variable_raw, inputContent.serialization)) {
-                    inputs.removeAt(j);
-                } else {
-                    inputContentControl.removeControl('content_variable');
-                    inputContentControl.addControl('content_variable', this.createContentVariableGroup(JSON.parse(inputContent.content_variable_raw)));
-                }
-            }
-            const outputs = <FormArray>formGroup.controls['outputs'];
-            // loop from highest Index! Otherwise it could cause index problems
-            for (let k = outputs.length - 1; k >= 0; k--) {
-                const outputContentControl: FormGroup = <FormGroup>outputs.controls[k];
-                const outputContent: DeviceTypeContentModel = outputContentControl.value;
-                if (!this.deviceTypeHelperService.checkIfContentExists(outputContent.content_variable_raw, outputContent.serialization)) {
-                    outputs.removeAt(k);
-                } else {
-                    outputContentControl.removeControl('content_variable');
-                    outputContentControl.addControl('content_variable', this.createContentVariableGroup(JSON.parse(outputContent.content_variable_raw)));
-                }
-            }
+            this.cleanUpInputOutputs(<FormArray>formGroup.controls['inputs']);
+            this.cleanUpInputOutputs(<FormArray>formGroup.controls['outputs']);
         }
     }
 
+
+    private cleanUpInputOutputs(formArray: FormArray) {
+        // loop from highest Index! Otherwise it could cause index problems
+        for (let j = formArray.length - 1; j >= 0; j--) {
+            const inOutControl: FormGroup = <FormGroup>formArray.controls[j];
+            const inOutContent: DeviceTypeContentTreeModel = inOutControl.value;
+            if (!this.deviceTypeHelperService.checkIfContentExists(inOutContent.dataSource.data, inOutContent.serialization)) {
+                formArray.removeAt(j);
+            } else {
+                this.deviceTypeHelperService.removeField(inOutContent.dataSource.data[0], 'indices');
+                inOutControl.addControl('content_variable', new FormControl(inOutContent.dataSource.data[0]));
+                inOutControl.removeControl('dataSource');
+                inOutControl.removeControl('tree');
+            }
+        }
+    }
 
     private initFormControls() {
         this.initFirstFormGroup({} as DeviceTypeModel);
@@ -428,38 +454,21 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private createContentGroup(content: DeviceTypeContentModel, protocolSegment: DeviceTypeProtocolSegmentModel): FormGroup {
+        const dataSource = new MatTreeNestedDataSource<DeviceTypeContentVariableModel>();
+
+        if (content.content_variable) {
+            this.deviceTypeHelperService.setIndices(content.content_variable);
+            dataSource.data = [content.content_variable];
+        }
         return this._formBuilder.group({
             id: [content.id],
             name: [protocolSegment.name],
             serialization: [content.serialization],
-            content_variable_raw: [JSON.stringify(content.content_variable, null, 5), contentVariableValidator(this.leafCharacteristics)],
-            content_variable: content.content_variable ? this.createContentVariableGroup(content.content_variable) : '',
             protocol_segment_id: [protocolSegment.id],
             show: [content.protocol_segment_id ? true : false],
+            dataSource: dataSource,
+            tree: new NestedTreeControl<DeviceTypeContentVariableModel>(node => node.sub_content_variables),
         });
-    }
-
-    private createContentVariableGroup(contentVariable: DeviceTypeContentVariableModel): FormGroup {
-        return this._formBuilder.group({
-            id: [contentVariable.id],
-            name: [contentVariable.name],
-            type: [contentVariable.type],
-            characteristic_id: [contentVariable.characteristic_id],
-            value: [contentVariable.value],
-            sub_content_variables: contentVariable.sub_content_variables ? this.createContentSubVariableArray(contentVariable.sub_content_variables) : null,
-            serialization_options: [contentVariable.serialization_options],
-            unit_reference: [contentVariable.unit_reference],
-        });
-    }
-
-    private createContentSubVariableArray(subContentVariables: DeviceTypeContentVariableModel[]): FormArray {
-        const array: FormGroup[] = [];
-
-        subContentVariables.forEach((subContentVariable: DeviceTypeContentVariableModel) => {
-            array.push(this.createContentVariableGroup(subContentVariable));
-        });
-
-        return this._formBuilder.array(array);
     }
 
     private checkIfDeviceClassNameExists(name: string): number {
@@ -618,35 +627,39 @@ export class DeviceTypesComponent implements OnInit {
         const services = <FormArray>this.secondFormGroup.controls['services'];
         services.controls.forEach((service) => {
             service.patchValue(emptyId);
-            clearContent(<FormArray>service.get('inputs'));
-            clearContent(<FormArray>service.get('outputs'));
+            const outputs = <FormArray>service.get('outputs');
+            const inputs = <FormArray>service.get('inputs');
+            this.clearContent(inputs);
+            this.clearContent(outputs);
         });
+    }
 
-        function clearContent(contents: FormArray) {
-            if (contents) {
-                contents.controls.forEach(content => {
-                    const contentFormGroup = <FormGroup>content;
-                    contentFormGroup.patchValue(emptyId);
-                    const contentVariable = <FormGroup>contentFormGroup.get('content_variable');
-                    if (contentVariable.value !== '' && contentVariable.controls['id']) {
-                        contentVariable.removeControl('id');
-                        clearContentVariable(<FormArray>contentVariable.get('sub_content_variables'));
-                        contentFormGroup.patchValue({'content_variable_raw': JSON.stringify(contentVariable.value, null, 5)});
+    private clearContent(contents: FormArray) {
+        if (contents) {
+            contents.controls.forEach(content => {
+                const contentFormGroup = <FormGroup>content;
+                contentFormGroup.patchValue({'id': ''});
+                const dataSourceControl = <FormControl>contentFormGroup.get('dataSource');
+                if (dataSourceControl) {
+                    if (dataSourceControl.value && dataSourceControl.value.data.length === 1) {
+                        this.deviceTypeHelperService.removeField(dataSourceControl.value.data[0], 'id');
                     }
-                });
-            }
-        }
-
-        function clearContentVariable(subContentVariables: FormArray) {
-            if (subContentVariables.length > 0) {
-                subContentVariables.controls.forEach((subContentVariable: AbstractControl) => {
-                    const subContentVariableFormGroup = <FormGroup>subContentVariable;
-                    subContentVariableFormGroup.removeControl('id');
-                    clearContentVariable(<FormArray>subContentVariableFormGroup.get('sub_content_variables'));
-                });
-            }
+                }
+            });
         }
     }
+
+    private refreshTree(inOut: DeviceTypeContentTreeModel, contentVariable: DeviceTypeContentVariableModel[]): void {
+        if (contentVariable[0]) {
+            this.deviceTypeHelperService.setIndices(contentVariable[0]);
+            inOut.dataSource.data = [contentVariable[0]];
+            inOut.tree.dataNodes = inOut.dataSource.data;
+            inOut.tree.expandAll();
+        } else {
+            inOut.dataSource.data = [];
+        }
+    }
+
     get services(): FormArray {
         return this.secondFormGroup.get('services') as FormArray;
     }
