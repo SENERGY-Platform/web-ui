@@ -88,6 +88,7 @@ describe('DeviceTypesComponent', () => {
                 name: 'service1',
                 description: 'serv_desc',
                 protocol_id: 'protocol_1',
+                interaction: 'event',
                 inputs: [{
                     id: 'input_id_1', protocol_segment_id: 'protocol_segment_1', serialization: 'json', content_variable: {
                         id: 'content_variable_1',
@@ -257,6 +258,7 @@ describe('DeviceTypesComponent', () => {
             name: 'service1',
             description: 'serv_desc',
             protocol_id: 'protocol_1',
+            interaction: 'event',
             inputs: [
                 {
                     id: '',
@@ -312,6 +314,7 @@ describe('DeviceTypesComponent', () => {
             name: 'service1',
             description: 'serv_desc',
             protocol_id: 'protocol_1',
+            interaction: 'event',
             inputs: [
                 {
                     id: 'input_id_1',

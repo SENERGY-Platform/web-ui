@@ -165,6 +165,17 @@
                                             </mat-option>
                                         </mat-select>
                                     </mat-form-field>
+                                    <mat-form-field class="full-width" color="accent">
+                                        <mat-select placeholder="Interaction"
+                                                    formControlName="interaction"
+                                                    required>
+                                            <mat-option
+                                                    *ngFor="let item of interactionList"
+                                                    [value]="item">
+                                                {{item}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
                                 </div>
                             </mat-tab>
 

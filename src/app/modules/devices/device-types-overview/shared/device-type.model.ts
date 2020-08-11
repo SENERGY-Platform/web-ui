@@ -41,6 +41,7 @@ export interface DeviceTypeServiceModel {
     description: string;
     aspects: DeviceTypeAspectModel[];
     protocol_id: string;
+    interaction: DeviceTypeInteractionEnum | null;
     inputs: DeviceTypeContentModel[];
     outputs: DeviceTypeContentModel[];
     functions: DeviceTypeFunctionModel[];
@@ -125,5 +126,11 @@ export interface DeviceTypeProtocolModel {
 export interface DeviceTypeProtocolSegmentModel {
     id: string;
     name: string;
+}
+
+export enum DeviceTypeInteractionEnum {
+  Event = 'event',
+  Request = 'request',
+  EventAndRequest = 'event+request',
 }
 
