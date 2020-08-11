@@ -44,7 +44,7 @@
 
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-    <button class="mat-raised-button mat-accent" [disabled]="functionFormControl.value === ''" (click)="save()">Select</button>
+    <button mat-raised-button color="accent" (click)="close()">Cancel</button>
+    <button mat-raised-button color="accent" [disabled]="functionFormControl.value === ''" (click)="save()">Select</button>
 </mat-dialog-actions>
 

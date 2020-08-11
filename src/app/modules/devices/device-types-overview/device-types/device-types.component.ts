@@ -23,7 +23,7 @@ import {
     DeviceTypeContentVariableModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
-    DeviceTypeFunctionType,
+    DeviceTypeFunctionType, DeviceTypeInteractionEnum,
     DeviceTypeModel,
     DeviceTypeProtocolModel,
     DeviceTypeProtocolSegmentModel,
@@ -59,11 +59,11 @@ export class DeviceTypesComponent implements OnInit {
 
     deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];
     protocols: DeviceTypeProtocolModel[] = [];
+    interactionList: string[] = Object.values(DeviceTypeInteractionEnum);
 
     firstFormGroup!: FormGroup;
     secondFormGroup: FormGroup = new FormGroup({services: new FormArray([])});
     editable = false;
-    keys = Object.keys;
     deviceTypeFunctionType = functionTypes;
     measuringFunctions: DeviceTypeFunctionModel[] = [];
     controllingFunctions: DeviceTypeFunctionModel[] = [];
@@ -403,6 +403,7 @@ export class DeviceTypesComponent implements OnInit {
             name: [deviceTypeService.name, Validators.required],
             description: [deviceTypeService.description],
             protocol_id: [deviceTypeService.protocol_id, Validators.required],
+            interaction: [deviceTypeService.interaction, Validators.required],
             inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : this._formBuilder.array([]),
             outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : this._formBuilder.array([]),
             functionType: [deviceTypeService.functions ? this.getFunctionType(deviceTypeService.functions[0].rdf_type) : {text: ''}, Validators.required],

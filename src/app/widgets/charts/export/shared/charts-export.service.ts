@@ -163,8 +163,11 @@ export class ChartsExportService {
         const header: string[] = ['time'];
         if (vAxes) {
             vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
-                indices.push({index: series.columns.indexOf(vAxis.instanceId + '.' + vAxis.valueName + vAxis.math.trim() + (vAxis.filterType || '') + (vAxis.filterValue || '')), math: vAxis.math});
-                header.push(vAxis.valueAlias || vAxis.valueName);
+                const index = series.columns.indexOf(vAxis.instanceId + '.' + vAxis.valueName + vAxis.math.trim() + (vAxis.filterType || '') + (vAxis.filterValue || ''));
+                if (index !== -1) {
+                    indices.push({index: index, math: vAxis.math});
+                    header.push(vAxis.valueAlias || vAxis.valueName);
+                }
             });
         }
         const dataTable = new ChartDataTableModel([header]);
@@ -184,12 +187,25 @@ export class ChartsExportService {
 
         const element = this.elementSizeService.getHeightAndWidthByElementId(widget.id, 5);
 
+        // Remove all elements from color array that are missing in the dataTable
+        const colors = this.getColorArray(widget.properties.vAxes || []);
+        if (widget.properties.vAxes && dataTable.data.length > 0) {
+            const deleteColorIndices: number[] = [];
+            widget.properties.vAxes.forEach((vAxes, index) => {
+                if (dataTable.data[0].indexOf(vAxes.valueAlias || vAxes.valueName) === -1) {
+                    deleteColorIndices.push(index);
+                }
+            });
+            for (let i = deleteColorIndices.length - 1; i >= 0; i--) { // reverse transition ensures valid indices
+                colors.splice(deleteColorIndices[i], 1);
+            }
+        }
         return new ChartsModel(
             (widget.properties.chartType === undefined || widget.properties.chartType === '') ? 'LineChart' : widget.properties.chartType,
             dataTable.data,
             {
                 chartArea: {width: element.widthPercentage, height: element.heightPercentage},
-                colors: this.getColorArray(widget.properties.vAxes || []),
+                colors,
                 hAxis: {title: widget.properties.hAxisLabel, gridlines: {count: -1}},
                 height: element.height,
                 width: element.width,
