@@ -54,12 +54,16 @@ export class PipelineDetailsComponent implements OnInit {
                                         topic.name = service.name;
                                     }
                                 });
-                                this.deviceInstanceService.getDeviceInstance(topic.filterValue).
-                                subscribe((device: DeviceInstancesBaseModel | null) => {
-                                    if (device !== null) {
-                                        topic.filterValue = device.name;
-                                    }
-                                });
+                                const devices = topic.filterValue.split(',');
+                                for (const [i, value] of devices.entries()) {
+                                    this.deviceInstanceService.getDeviceInstance(value).
+                                    subscribe((device: DeviceInstancesBaseModel | null) => {
+                                        if (device !== null) {
+                                            devices[i] = device.name;
+                                        }
+                                        topic.filterValue = devices.join(', ');
+                                    });
+                                }
                             }
                         });
                     });
