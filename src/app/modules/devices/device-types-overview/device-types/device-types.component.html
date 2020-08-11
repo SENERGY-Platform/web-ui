@@ -269,7 +269,7 @@
                     </mat-expansion-panel>
                 </mat-accordion>
                 <div class="button-margin" fxLayoutAlign="center center" *ngIf="editable">
-                    <button class="mat-raised-button color-accent" (click)="addService()">ADD Service</button>
+                    <button mat-raised-button color="accent" (click)="addService()">ADD Service</button>
                 </div>
             </form>
         </mat-step>
@@ -281,8 +281,8 @@
             <div *ngIf="secondFormGroup.invalid">Error in section "2 Service". You need at least one service.</div>
             <div class="buttons">
                 <div fxFlex></div>
-                <button class="mat-raised-button color-accent" (click)="close()">Cancel</button>
-                <button class="mat-raised-button mat-accent"
+                <button mat-raised-button color="accent" (click)="close()">Cancel</button>
+                <button mat-raised-button color="accent"
                         [disabled]="firstFormGroup.invalid || secondFormGroup.invalid"
                         (click)="save()">Save
                 </button>
