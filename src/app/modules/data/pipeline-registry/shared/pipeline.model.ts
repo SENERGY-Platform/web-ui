@@ -32,4 +32,18 @@ export interface PipelineOperatorModel {
     imageId: string;
     operatorId: string;
     name: string;
+    deploymentType: string;
+    inputTopics: OperatorInputTopic [];
+}
+
+export interface OperatorInputTopic {
+    name: string;
+    filterType: string;
+    filterValue: string;
+    mappings: InputTopicsMapping [];
+}
+
+export interface InputTopicsMapping {
+    dest: string;
+    source: string;
 }

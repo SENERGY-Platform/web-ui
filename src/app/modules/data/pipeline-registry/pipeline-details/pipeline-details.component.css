@@ -22,6 +22,17 @@ table {
     width: 100%;
 }
 
+.v-align-middle {
+    vertical-align: middle;
+}
+
+.pipe-operator {
+    padding-left: 30px;
+}
+
+.operator-mapping {
+    padding-left: 60px;
+}
 
 mat-grid-tile-footer {
     background-color: white !important;
