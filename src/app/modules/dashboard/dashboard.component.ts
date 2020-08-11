@@ -244,7 +244,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             if (this.activeTabIndex > (this.dashboards.length - 2)) {
                 this.activeTabIndex = this.dashboards.length - 2;
             }
-            this.dashboards[deletionIndex].widgets.forEach(widget => this.cleanUp(widget));
+            if (this.dashboards[deletionIndex].widgets !== undefined) {
+                this.dashboards[deletionIndex].widgets.forEach(widget => this.cleanUp(widget));
+            }
             const oldIndex = this.dashboards[deletionIndex].index;
             this.dashboards.splice(deletionIndex, 1);
             this.dashboards.forEach((dashboard: DashboardModel) => {
