@@ -26,13 +26,14 @@ import {
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
-    DeviceTypeProtocolModel,
+    DeviceTypeProtocolModel, DeviceTypeServiceModel,
 } from './device-type.model';
 import {DeviceTypePermSearchModel} from './device-type-perm-search.model';
 import {BpmnSkeletonModel} from './device-type-selection.model';
 import {MatDialog} from '@angular/material/dialog';
 import {flatMap} from 'rxjs/operators';
 import {flatten} from '@angular/compiler';
+import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
 
 @Injectable({
     providedIn: 'root'
@@ -47,6 +48,15 @@ export class DeviceTypeService {
         (environment.deviceManagerUrl + '/device-types/' + encodeURIComponent(id)).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null))
         );
+    }
+
+    getDeviceService(id: string): Observable< DeviceTypeServiceModel| null> {
+        return this.http.get<DeviceTypeServiceModel>
+        (environment.deviceRepoUrl + '/services/' + id).pipe(
+            map(resp => resp),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceService', null))
+        );
+
     }
 
     getDeviceTypeFiltered(filter: { function_id: string, device_class_id: string, aspect_id: string }[]): Observable<DeviceTypeModel[]> {

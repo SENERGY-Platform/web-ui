@@ -19,7 +19,7 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
-import {DeviceInstancesModel, DeviceFilterCriteriaModel, DeviceSelectablesModel} from './device-instances.model';
+import {DeviceInstancesModel, DeviceFilterCriteriaModel, DeviceSelectablesModel, DeviceInstancesBaseModel} from './device-instances.model';
 import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -30,6 +30,7 @@ import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-ed
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {DeviceTypePermSearchModel} from '../../device-types-overview/shared/device-type-perm-search.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {FlowModel} from '../../../data/flow-repo/shared/flow.model';
 
 
 @Injectable({
@@ -55,6 +56,15 @@ export class DeviceInstancesService {
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances', []))
         );
+    }
+
+    getDeviceInstance(id: string): Observable< DeviceInstancesBaseModel| null> {
+        return this.http.get<DeviceInstancesBaseModel>
+        (environment.deviceManagerUrl + '/devices/' + id).pipe(
+            map(resp => resp),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstance', null))
+        );
+
     }
 
     getDeviceInstancesByState(searchText: string, state: string, value: string, order: string): Observable<DeviceInstancesModel[]> {
