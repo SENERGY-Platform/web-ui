@@ -23,11 +23,11 @@
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         </div>
     </div>
-    <div class="main-panel">
+    <div class="device-type-overview-scroll">
         <div infiniteScroll
              [infiniteScrollDistance]="1"
              [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.main-panel'"
+             [infiniteScrollContainer]="'.device-type-overview-scroll'"
              [fromRoot]="true"
              (scrolled)="onScroll()">
             <div class="layout-margin" fxLayout="column">

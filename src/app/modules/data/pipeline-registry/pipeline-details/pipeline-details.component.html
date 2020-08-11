@@ -42,7 +42,7 @@
                         <div class="pipe-operator" *ngFor="let topic of operator.inputTopics">
                             <h4><mat-icon class="v-align-middle material-icons-outlined"  *ngIf="topic.filterType=='OperatorId' || topic.filterType=='PipeId'">poll</mat-icon>
                             <mat-icon class="v-align-middle material-icons-outlined"  *ngIf="topic.filterType=='DeviceId'">devices</mat-icon>
-                                {{topic.filterValue}}
+                                {{topic.filterValue}} - {{topic.name}}
                             </h4>
                             <div class="operator-mapping" *ngFor="let mapping of topic.mappings">
                                 <h4>

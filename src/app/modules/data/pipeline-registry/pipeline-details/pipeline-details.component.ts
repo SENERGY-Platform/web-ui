@@ -19,6 +19,10 @@ import {PipelineRegistryService} from '../shared/pipeline-registry.service';
 import {PipelineModel} from '../shared/pipeline.model';
 import {ActivatedRoute} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
+import {DeviceTypeService} from '../../../devices/device-types-overview/shared/device-type.service';
+import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
+import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
+import {DeviceInstancesBaseModel} from '../../../devices/device-instances/shared/device-instances.model';
 
 @Component({
     selector: 'senergy-pipeline-details',
@@ -31,7 +35,8 @@ export class PipelineDetailsComponent implements OnInit {
     ready = false;
     pipe = {} as PipelineModel;
 
-    constructor(private route: ActivatedRoute, private pipelineRegistryService: PipelineRegistryService, private sanitizer: DomSanitizer) {
+    constructor(private route: ActivatedRoute, private pipelineRegistryService: PipelineRegistryService, private sanitizer: DomSanitizer,
+                private deviceTypeService: DeviceTypeService, private deviceInstanceService: DeviceInstancesService) {
     }
 
     ngOnInit() {
@@ -40,6 +45,24 @@ export class PipelineDetailsComponent implements OnInit {
             this.pipelineRegistryService.getPipeline(id).subscribe((resp: PipelineModel | null) => {
                 if (resp !== null) {
                     this.pipe = resp;
+                    this.pipe.operators.forEach(operator => {
+                        operator.inputTopics.forEach(topic => {
+                            if (topic.filterType === 'DeviceId') {
+                                this.deviceTypeService.getDeviceService(topic.name.replace(/_/g, ':')).
+                                subscribe((service: DeviceTypeServiceModel | null) => {
+                                    if (service !== null) {
+                                        topic.name = service.name;
+                                    }
+                                });
+                                this.deviceInstanceService.getDeviceInstance(topic.filterValue).
+                                subscribe((device: DeviceInstancesBaseModel | null) => {
+                                    if (device !== null) {
+                                        topic.filterValue = device.name;
+                                    }
+                                });
+                            }
+                        });
+                    });
                     if (typeof this.pipe.image === 'string') {
                         const parser = new DOMParser();
                         const svg = parser.parseFromString(this.pipe.image, 'image/svg+xml').getElementsByTagName('svg')[0];

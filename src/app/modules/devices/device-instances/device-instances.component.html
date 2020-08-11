@@ -33,12 +33,12 @@
                                   (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
                 </div>
             </div>
-            <div class="main-panel">
+            <div class="device-instances-scroll">
 
                 <div infiniteScroll
                      [infiniteScrollDistance]="1"
                      [infiniteScrollThrottle]="50"
-                     [infiniteScrollContainer]="'.main-panel'"
+                     [infiniteScrollContainer]="'.device-instances-scroll'"
                      [fromRoot]="true"
                      (scrolled)="onScroll()">
                     <div *ngIf="activeIndex === 0 && animationDone">
