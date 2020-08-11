@@ -45,7 +45,7 @@ mat-grid-tile {
     overflow-y: hidden;
 }
 
-.main-panel {
+.concepts-scroll {
     height: calc(100% - 106px);
     overflow-y: auto;
 }

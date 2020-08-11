@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-.main-panel {
+.device-instances-scroll {
     height: calc(100% - 106px);
     overflow-y: auto;
 }

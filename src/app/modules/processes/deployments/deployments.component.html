@@ -30,11 +30,11 @@
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         </div>
     </div>
-    <div class="main-panel">
+    <div class="deployments-scroll">
         <div infiniteScroll
              [infiniteScrollDistance]="1"
              [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.main-panel'"
+             [infiniteScrollContainer]="'.deployments-scroll'"
              [fromRoot]="true"
              (scrolled)="onScroll()">
             <div class="layout-margin" fxLayout="column" [formGroup]="formGroup">
