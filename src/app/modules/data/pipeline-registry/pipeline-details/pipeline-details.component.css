@@ -30,8 +30,12 @@ table {
     padding-left: 30px;
 }
 
-.operator-mapping {
+.operator-input {
     padding-left: 60px;
+}
+
+.operator-mapping {
+    padding-left: 90px;
 }
 
 mat-grid-tile-footer {

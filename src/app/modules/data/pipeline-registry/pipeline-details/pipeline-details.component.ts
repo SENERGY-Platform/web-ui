@@ -34,6 +34,7 @@ export class PipelineDetailsComponent implements OnInit {
 
     ready = false;
     pipe = {} as PipelineModel;
+    showAll = false;
 
     constructor(private route: ActivatedRoute, private pipelineRegistryService: PipelineRegistryService, private sanitizer: DomSanitizer,
                 private deviceTypeService: DeviceTypeService, private deviceInstanceService: DeviceInstancesService) {
@@ -61,7 +62,7 @@ export class PipelineDetailsComponent implements OnInit {
                                         if (device !== null) {
                                             devices[i] = device.name;
                                         }
-                                        topic.filterValue = devices.join(', ');
+                                        topic.devices = devices;
                                     });
                                 }
                             }

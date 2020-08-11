@@ -25,6 +25,8 @@ import {MatCardModule} from '@angular/material/card';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatListModule} from '@angular/material/list';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {FormsModule} from '@angular/forms';
 
 
 const details = {path: 'data/pipelines/details/:id', pathMatch: 'full', component: PipelineDetailsComponent, data: { header: 'Analytics' }};
@@ -38,7 +40,9 @@ const details = {path: 'data/pipelines/details/:id', pathMatch: 'full', componen
         MatCardModule,
         MatIconModule,
         MatButtonModule,
-        MatListModule
+        MatListModule,
+        MatCheckboxModule,
+        FormsModule
     ],
     declarations: [
         PipelineDetailsComponent

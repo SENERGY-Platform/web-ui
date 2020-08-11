@@ -40,6 +40,7 @@ export interface OperatorInputTopic {
     name: string;
     filterType: string;
     filterValue: string;
+    devices: string [];
     mappings: InputTopicsMapping [];
 }
 
