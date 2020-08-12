@@ -18,23 +18,17 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Navigation, Router} from '@angular/router';
 import {
     DeploymentsPreparedElementModel,
-    DeploymentsPreparedLaneElementModel,
-    DeploymentsPreparedLaneModel,
-    DeploymentsPreparedLaneSubElementModel, DeploymentsPreparedLaneTaskElementModel,
     DeploymentsPreparedModel,
-    DeploymentsPreparedSelectableModel,
-    DeploymentsPreparedSelectionModel,
-    DeploymentsPreparedTaskModel, DeploymentsPreparedTimeEventModel
 } from '../shared/deployments-prepared.model';
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
-import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
 import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
-import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
-import * as moment from 'moment';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
+import {DeploymentsConfigInitializerService} from './shared/deployments-config-initializer.service';
+import {V2DeploymentsPreparedModel} from '../shared/deployments-prepared-v2.model';
 
 
 @Component({
@@ -49,7 +43,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     processId = '';
     deploymentId = '';
-    deployment: DeploymentsPreparedModel | null = null;
+    deployment: V2DeploymentsPreparedModel | null = null;
     deploymentFormGroup!: FormGroup;
     ready = false;
 
@@ -59,31 +53,33 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 private utilService: UtilService,
                 private deploymentsService: DeploymentsService,
                 private snackBar: MatSnackBar,
-                private router: Router) {
+                private router: Router,
+                private deploymentsConfigInitializerService: DeploymentsConfigInitializerService) {
         this.getRouterParams();
     }
 
     ngOnInit() {
         if (this.processId !== '') {
-            this.deploymentsService.getPreparedDeployments(this.processId).subscribe((deployment: DeploymentsPreparedModel | null) => {
+            this.deploymentsService.getPreparedDeployments(this.processId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
                 this.initFormGroup(deployment);
             });
         } else {
             if (this.deploymentId !== '') {
-                this.deploymentsService.getDeployments(this.deploymentId).subscribe((deployment: DeploymentsPreparedModel | null) => {
-                    if (deployment) {
-                        deployment.id = '';
-                    }
-                    this.initFormGroup(deployment);
-                });
+                // todo copy or edit function
+                // this.deploymentsService.getDeployments(this.deploymentId).subscribe((deployment: DeploymentsPreparedModel | null) => {
+                //     if (deployment) {
+                //         deployment.id = '';
+                //     }
+                //     this.initFormGroup(deployment);
+                // });
             }
         }
     }
 
-    initFormGroup(deployment: DeploymentsPreparedModel | null): void {
+    initFormGroup(deployment: V2DeploymentsPreparedModel | null): void {
         if (deployment !== null) {
             this.deployment = deployment;
-            this.initElementsFormArray();
+            this.deploymentFormGroup = this.deploymentsConfigInitializerService.initFormGroup(this.deployment);
             this.ready = true;
         }
     }
@@ -92,166 +88,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         return a && b && a.id === b.id;
     }
 
-    initElementsFormArray(): void {
-
-        if (this.deployment !== null) {
-
-            this.deploymentFormGroup = this._formBuilder.group({
-                elements: this.initElementsArray(this.deployment.elements),
-                id: this.deployment.id,
-                lanes: this.initLanesArray(this.deployment.lanes),
-                name: this.deployment.name,
-                svg: this.deployment.svg,
-                xml: this.deployment.xml,
-                xml_raw: this.deployment.xml_raw,
-                description: [{value: this.deployment.description || 'no description', disabled: true}],
-            });
-
-        }
-    }
-
-    initElementsArray(elements: DeploymentsPreparedElementModel[]): FormArray {
-        const array = new FormArray([]);
-        if (elements) {
-            elements.forEach((el: DeploymentsPreparedElementModel) => {
-                array.push(this.initElementFormGroup(el));
-            });
-        }
-        return array;
-    }
-
-    initLanesArray(elements: DeploymentsPreparedLaneElementModel[]): FormArray {
-        const array = new FormArray([]);
-        if (elements) {
-            elements.forEach((el: DeploymentsPreparedLaneElementModel) => {
-                array.push(this.initLaneFormGroup(el));
-            });
-        }
-        return array;
-    }
-
-    initElementFormGroup(element: DeploymentsPreparedElementModel): FormGroup {
-        return this._formBuilder.group({
-            order: [element.order],
-            task: element.task ? this.initTaskFormGroup(element.task) : null,
-            time_event: element.time_event ? this.initTimeEventFormGroup(element.time_event) : null
-        });
-    }
-
-    initLaneFormGroup(laneElement: DeploymentsPreparedLaneElementModel): FormGroup {
-        return this._formBuilder.group({
-            order: [laneElement.order],
-            lane: laneElement.lane ? this.initLaneGroup(laneElement.lane) : null,
-        });
-    }
-
-    initLaneGroup(lane: DeploymentsPreparedLaneModel): FormGroup {
-        return this._formBuilder.group({
-            label: [lane.label],
-            bpmn_element_id: [lane.bpmn_element_id],
-            device_description: [lane.device_descriptions],
-            selectables: this.initSelectablesFormArray(lane.selectables),
-            selection: this.initLaneSelectionFormGroup(lane.selection ? lane.selection : {} as DeviceInstancesUpdateModel),
-            elements: this.initLaneElementFormArray(lane.elements),
-        });
-    }
-
-    initTaskFormGroup(task: DeploymentsPreparedTaskModel): FormGroup {
-        return this._formBuilder.group({
-            label: [task.label],
-            device_description: [task.device_description],
-            bpmn_element_id: [task.bpmn_element_id],
-            input: [task.input],
-            selectables: this.initSelectablesFormArray(task.selectables),
-            selection: this.initSelectionFormGroup(task.selection),
-            selectableIndex: [task.selectableIndex],
-            parameter: this.initParameterFormGroup(task.parameter),
-            retries: [task.retries]
-        });
-    }
-
-    initLaneTaskFormGroup(laneTask: DeploymentsPreparedLaneTaskElementModel): FormGroup {
-        return this._formBuilder.group({
-            label: [laneTask.label],
-            retries: [laneTask.retries],
-            device_description: [laneTask.device_description],
-            input: [laneTask.input],
-            bpmn_element_id: [laneTask.bpmn_element_id],
-            multi_task: [laneTask.multi_task],
-            selected_service: laneTask.selected_service,
-            parameter: this.initParameterFormGroup(laneTask.parameter),
-        });
-    }
-
-    initTimeEventFormGroup(timeEvent: DeploymentsPreparedTimeEventModel): FormGroup {
-        return this._formBuilder.group({
-            bpmn_element_id: [timeEvent.bpmn_element_id],
-            kind: [timeEvent.kind],
-            label: [timeEvent.label],
-            time: [timeEvent.time],
-            time_raw: this.initTimeRawFormGroup(timeEvent.time)
-        });
-    }
-
-    private initTimeRawFormGroup(timeEvent: string): FormGroup {
-        return this._formBuilder.group({
-            years: [moment.duration(timeEvent).years()],
-            months: [moment.duration(timeEvent).months()],
-            days: [moment.duration(timeEvent).days()],
-            hours: [moment.duration(timeEvent).hours()],
-            minutes: [moment.duration(timeEvent).minutes()],
-            seconds: [moment.duration(timeEvent).seconds()],
-        });
-    }
-
-    initSelectionFormGroup(selection: DeploymentsPreparedSelectionModel): FormGroup {
-        return this._formBuilder.group({
-            device: [selection.device],
-            service: [{value: selection.service, disabled: false}],
-            show: [{value: false}]
-        });
-    }
-
-    initLaneSelectionFormGroup(selection: DeviceInstancesUpdateModel): FormGroup {
-        return this._formBuilder.group({
-            id: [selection.id],
-            device_type_id: [selection.device_type_id],
-            local_id: [selection.local_id],
-            name: [selection.name],
-        });
-    }
-
-    initParameterFormGroup(parameter: any): FormGroup {
-        const fbGroup = this._formBuilder.group({});
-        for (const [key, value] of Object.entries(parameter)) {
-            fbGroup.addControl(key, new FormControl(value));
-        }
-        return fbGroup;
-    }
-
-    initSelectablesFormArray(selectables: DeploymentsPreparedSelectableModel[]): FormArray {
-        const array: FormGroup[] = [];
-
-        if (selectables !== null) {
-            selectables.forEach((selectable: DeploymentsPreparedSelectableModel) => {
-                array.push(this.initDeviceServicesGroup(selectable));
-            });
-        }
-
-        return this._formBuilder.array(array);
-    }
-
     trackByFn(index: any) {
         return index;
     }
-
-    initDeviceServicesGroup(selectable: DeploymentsPreparedSelectableModel): FormGroup {
-        return this._formBuilder.group({
-            device: [selectable.device],
-            services: this._formBuilder.array(selectable.services)
-        });
-    }
-
 
     save(): void {
         this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: { status: number }) => {
@@ -310,30 +149,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         return this.deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements', elementsIndex, 'time_event']) as FormGroup;
     }
 
-    lanesElements(elementLanesIndex: number): DeploymentsPreparedLaneSubElementModel[] {
-        const elements = this.deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements']) as FormArray;
-        return elements.value;
-    }
-
-    private initLaneElementFormArray(elements: DeploymentsPreparedLaneSubElementModel[]): FormArray {
-        const array: FormGroup[] = [];
-        if (elements !== null) {
-            elements.forEach((element: DeploymentsPreparedLaneSubElementModel) => {
-                array.push(this.initLaneElementGroup(element));
-            });
-        }
-        return this._formBuilder.array(array);
-    }
-
-    private initLaneElementGroup(element: DeploymentsPreparedLaneSubElementModel): FormGroup {
-        return this._formBuilder.group({
-            order: [element.order],
-            task: element.task ? this.initLaneTaskFormGroup(element.task) : null,
-            msg_event: [element.msg_event],
-            receive_task_event: [element.receive_task_event],
-            time_event: element.time_event ? this.initTimeEventFormGroup(element.time_event) : null,
-        });
-    }
 
     private getRouterParams(): void {
         const navigation: Navigation | null = this.router.getCurrentNavigation();
@@ -346,13 +161,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
     }
 
+
     get elements(): DeploymentsPreparedElementModel[] {
         const elements = this.deploymentFormGroup.get(['elements']) as FormArray;
         return elements.value;
     }
 
-    get lanes(): DeploymentsPreparedLaneElementModel[] {
-        const elements = this.deploymentFormGroup.get(['lanes']) as FormArray;
-        return elements.value;
-    }
 }

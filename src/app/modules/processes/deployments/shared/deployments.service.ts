@@ -24,6 +24,7 @@ import {DeploymentsModel} from './deployments.model';
 import {DeploymentsDefinitionModel} from './deployments-definition.model';
 import {DeploymentsMissingDependenciesModel} from './deployments-missing-dependencies.model';
 import {DeploymentsPreparedModel} from './deployments-prepared.model';
+import {V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
 
 @Injectable({
     providedIn: 'root'
@@ -78,8 +79,8 @@ export class DeploymentsService {
         );
     }
 
-    getPreparedDeployments(processId: string): Observable<DeploymentsPreparedModel | null> {
-        return this.http.get<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/prepared-deployments/' + processId).pipe(
+    getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null> {
+        return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/prepared-deployments/' + processId).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null))
         );
     }
