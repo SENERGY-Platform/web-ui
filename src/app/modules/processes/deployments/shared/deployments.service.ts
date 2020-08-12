@@ -97,6 +97,12 @@ export class DeploymentsService {
         );
     }
 
+    v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null> {
+        return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/deployments/' + deploymentId).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeployments', null))
+        );
+    }
+
     postDeployments(deployment: DeploymentsPreparedModel, source: string = 'sepl'): Observable<{ status: number, id: string }> {
         return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments?source=' + source, deployment, {observe: 'response'}).pipe(
             map(resp => {

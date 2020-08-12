@@ -61,13 +61,16 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             });
         } else {
             if (this.deploymentId !== '') {
-                // todo copy or edit function
-                // this.deploymentsService.getDeployments(this.deploymentId).subscribe((deployment: DeploymentsPreparedModel | null) => {
-                //     if (deployment) {
-                //         deployment.id = '';
-                //     }
-                //     this.initFormGroup(deployment);
-                // });
+                this.deploymentsService.v2getDeployments(this.deploymentId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
+                    console.log(deployment);
+                    if (deployment) {
+                        deployment.id = '';
+                        this.initFormGroup(deployment);
+                    } else {
+                        this.snackBar.open('Error while copying the deployment! Probably old version', undefined, {duration: 2000});
+                    }
+
+                });
             }
         }
     }
