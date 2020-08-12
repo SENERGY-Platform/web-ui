@@ -48,7 +48,7 @@
                                                 <mat-icon *ngIf="item.FilterType === 'deviceId'" mat-list-icon>
                                                     router
                                                 </mat-icon>
-                                                <mat-icon *ngIf="item.FilterType === 'pipeId'" mat-list-icon>
+                                                <mat-icon *ngIf="item.FilterType === 'pipeId' || item.FilterType === 'operatorId'" mat-list-icon>
                                                     timeline
                                                 </mat-icon>
                                                 <h3 mat-line matTooltip="{{item.EntityName}}">{{item.EntityName}}</h3>
