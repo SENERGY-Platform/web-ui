@@ -47,12 +47,28 @@ export class DiagramEditorComponent implements AfterViewInit {
                 '.': {
                     magnet: false
                 },
-                body: {
+                header: {
                     refWidth: '100%',
-                    refHeight: '100%',
+                    refHeight: '20%',
                     strokeWidth: 2,
                     stroke: 'black',
                     fill: 'white'
+                },
+                body: {
+                    refY: '20%',
+                    refWidth: '100%',
+                    refHeight: '80%',
+                    strokeWidth: 2,
+                    stroke: 'black',
+                    fill: 'white'
+                },
+                headerlabel: {
+                    textVerticalAnchor: 'middle',
+                    textAnchor: 'middle',
+                    refX: '50%',
+                    refY: '10%',
+                    fontSize: 10,
+                    fill: 'black'
                 },
                 label: {
                     textVerticalAnchor: 'middle',
@@ -131,19 +147,26 @@ export class DiagramEditorComponent implements AfterViewInit {
                 }
             }
         }, {
-            markup: [{
-                tagName: 'rect',
-                selector: 'body',
-            }, {
-                tagName: 'text',
-                selector: 'label'
-            }, {
-                tagName: 'rect',
-                selector: 'button'
-            }, {
-                tagName: 'text',
-                selector: 'buttonLabel'
-            }],
+            markup: [
+                {
+                    tagName: 'rect',
+                    selector: 'header',
+                }, {
+                    tagName: 'rect',
+                    selector: 'body',
+                }, {
+                    tagName: 'text',
+                    selector: 'headerlabel'
+                }, {
+                    tagName: 'text',
+                    selector: 'label'
+                }, {
+                    tagName: 'rect',
+                    selector: 'button'
+                }, {
+                    tagName: 'text',
+                    selector: 'buttonLabel'
+                }],
             portMarkup: [{
                 tagName: 'circle',
                 selector: 'portBody',
@@ -197,13 +220,13 @@ export class DiagramEditorComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-            this.setPaperWidth();
-            this.reinitializePaper();
-            this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
-                evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
-                const model = elementView.model;
-                model.remove();
-            });
+        this.setPaperWidth();
+        this.reinitializePaper();
+        this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
+            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
+            const model = elementView.model;
+            model.remove();
+        });
     }
 
     onResize() {
@@ -220,13 +243,14 @@ export class DiagramEditorComponent implements AfterViewInit {
     }
 
     reinitializePaper() {
-        const { standard, devs } = shapes;
+        const {standard, devs} = shapes;
         this.graph = new dia.Graph({}, {
             cellNamespace: {
                 standard,
                 devs,
-                senergy: { NodeElement: this.NodeElement }
-            } });
+                senergy: {NodeElement: this.NodeElement}
+            }
+        });
         this.paper = new dia.Paper({
             el: $('#' + this.idGenerated),
             model: this.graph,
@@ -318,9 +342,11 @@ export class DiagramEditorComponent implements AfterViewInit {
         node.position(150, 50);
         node.attr({
             label: {
-                pointerEvents: 'none',
                 visibility: 'visible',
                 text: name
+            },
+            headerlabel: {
+                text: operatorId
             },
             body: {
                 cursor: 'default',
