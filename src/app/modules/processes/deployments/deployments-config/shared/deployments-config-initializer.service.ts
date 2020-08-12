@@ -102,6 +102,7 @@ export class DeploymentsConfigInitializerService {
         return this._formBuilder.group({
             filter_criteria: selection.filter_criteria,
             selection_options: this.initSelectionFormArray(selection.selection_options),
+            selection_options_index: selection.selection_options_index,
             selected_device_id: selection.selected_device_id,
             selected_service_id: selection.selected_service_id,
             show: [{value: false}]

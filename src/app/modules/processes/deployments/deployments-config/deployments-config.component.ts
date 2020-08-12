@@ -16,19 +16,15 @@
 
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Navigation, Router} from '@angular/router';
-import {
-    DeploymentsPreparedElementModel,
-    DeploymentsPreparedModel,
-} from '../shared/deployments-prepared.model';
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
 import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
-import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import {DeploymentsConfigInitializerService} from './shared/deployments-config-initializer.service';
-import {V2DeploymentsPreparedModel} from '../shared/deployments-prepared-v2.model';
+import {V2DeploymentsPreparedElementModel, V2DeploymentsPreparedModel} from '../shared/deployments-prepared-v2.model';
+import {DeploymentsPreparedModel} from '../shared/deployments-prepared.model';
 
 
 @Component({
@@ -93,7 +89,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     save(): void {
-        this.deploymentsService.postDeployments(this.deploymentFormGroup.value).subscribe((resp: { status: number }) => {
+        this.deploymentsService.v2postDeployments(this.deploymentFormGroup.value).subscribe((resp: { status: number }) => {
             if (resp.status === 200) {
                 this.snackBar.open('Deployment stored successfully.', undefined, {duration: 2000});
             } else {
@@ -102,53 +98,22 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         });
     }
 
-    changeTaskSelectables(elementIndex: number, selectableIndex: number): void {
-        const task = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'task']);
+    changeTaskSelectionOption(elementIndex: number, selectionOptionIndex: number): void {
         const selection = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selection']);
-        const services = <FormArray>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selectables', selectableIndex, 'services']);
-        task.patchValue({'selectableIndex': selectableIndex});
+        const services = <FormArray>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selection', 'selection_options', selectionOptionIndex, 'services']);
+        selection.patchValue({'selection_options_index': selectionOptionIndex});
         if (services.value.length <= 1) {
-            selection.patchValue({'service': services.value[0]});
+            selection.patchValue({'selected_service_id': services.value[0].id});
             selection.patchValue({'show': false});
         } else {
-            selection.patchValue({'service': []});
+            selection.patchValue({'selected_service_id': null});
             selection.patchValue({'show': true});
-        }
-    }
-
-    changeLaneSelectables(lanesIndex: number, selectableIndex: number): void {
-        const selectables = <FormGroup>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'selectables', selectableIndex]);
-        const selectableServices = <FormArray>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'selectables', selectableIndex, 'services']);
-        const selection = <FormGroup>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'selection']);
-        selection.setValue(selectables.value.device);
-        const elements = <FormArray>this.deploymentFormGroup.get(['lanes', lanesIndex, 'lane', 'elements']);
-        for (let i = 0; i < elements.length; i++) {
-            const element = <FormGroup>elements.controls[i];
-            const task = <FormGroup>element.controls['task'];
-            if (task.value) {
-                const deviceDescription = task.controls['device_description'];
-                const selectedService = task.controls['selected_service'];
-                for (let k = 0; k < selectableServices.length; k++) {
-                    const selectableService = <DeviceTypeServiceModel>selectableServices.controls[k].value;
-                    if (selectableService.functions.length > 1) {
-                        console.log('todo Error: Multiple Functions');
-                    }
-                    if (selectableService.functions[0].id === deviceDescription.value.function.id) {
-                        selectedService.setValue(selectableService);
-                    }
-                }
-            }
         }
     }
 
     elementsTimeEvent(elementIndex: number): FormGroup {
         return this.deploymentFormGroup.get(['elements', elementIndex, 'time_event']) as FormGroup;
     }
-
-    lanesTimeEvent(elementLanesIndex: number, elementsIndex: number): FormGroup {
-        return this.deploymentFormGroup.get(['lanes', elementLanesIndex, 'lane', 'elements', elementsIndex, 'time_event']) as FormGroup;
-    }
-
 
     private getRouterParams(): void {
         const navigation: Navigation | null = this.router.getCurrentNavigation();
@@ -162,7 +127,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
 
-    get elements(): DeploymentsPreparedElementModel[] {
+    get elements(): V2DeploymentsPreparedElementModel[] {
         const elements = this.deploymentFormGroup.get(['elements']) as FormArray;
         return elements.value;
     }

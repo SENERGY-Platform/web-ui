@@ -106,6 +106,15 @@ export class DeploymentsService {
         );
     }
 
+    v2postDeployments(deployment: V2DeploymentsPreparedModel, source: string = 'sepl'): Observable<{ status: number, id: string }> {
+        return this.http.post<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/deployments?source=' + source, deployment, {observe: 'response'}).pipe(
+            map(resp => {
+                return {status: resp.status, id: resp.body ? resp.body.id : ''};
+            }),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', {status: 500, id: ''}))
+        );
+    }
+
     checkForDeletedDeploymentWithRetries(id: string, maxRetries: number, intervalInMs: number): Observable<boolean> {
         return this.http.get<boolean>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(id) + '/exists').pipe(
             map(data => {

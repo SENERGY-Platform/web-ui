@@ -79,6 +79,7 @@ export interface V2DeploymentsPreparedMsgEventModel {
 export interface V2DeploymentsPreparedSelectionModel {
     filter_criteria: V2DeploymentsPreparedFilterCriteriaModel;
     selection_options: V2DeploymentsPreparedSelectionOptionModel[];
+    selection_options_index: number;
     selected_device_id: string;
     selected_service_id: string;
     show: boolean;
