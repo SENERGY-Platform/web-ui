@@ -85,7 +85,7 @@
                             </ng-container>
                             <ng-container matColumnDef="LastTimeStamp">
                                 <th mat-header-cell *matHeaderCellDef> LastTimeStamp</th>
-                                <td mat-cell *matCellDef="let element"> {{element.LastTimeStamp}} </td>
+                                <td mat-cell *matCellDef="let element"> {{element.LastTimeStamp |  date:'dd.MM.yyyy - HH:mm:ss' }} </td>
                             </ng-container>
                             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
