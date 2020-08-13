@@ -35,7 +35,6 @@ export class DeploymentsConfigInitializerService {
     constructor(private _formBuilder: FormBuilder) {
     }
 
-
     initFormGroup(deployment: V2DeploymentsPreparedModel): FormGroup {
         return this._formBuilder.group({
             id: deployment.id,
@@ -48,16 +47,18 @@ export class DeploymentsConfigInitializerService {
     }
 
     private initElementsArray(elements: V2DeploymentsPreparedElementModel[]): FormArray {
+        const groups: string[] = [];
         const array = new FormArray([]);
         if (elements) {
             elements.forEach((el: V2DeploymentsPreparedElementModel) => {
-                array.push(this.initElementFormGroup(el));
+                array.push(this.initElementFormGroup(el, groups));
             });
         }
         return array;
     }
 
-    private initElementFormGroup(element: V2DeploymentsPreparedElementModel): FormGroup {
+    private initElementFormGroup(element: V2DeploymentsPreparedElementModel, groups: string[]): FormGroup {
+        const disable = this.checkIfGroupExistedBefore(groups, element.group);
         return this._formBuilder.group({
             bpmn_id: element.bpmn_id,
             group: element.group,
@@ -66,7 +67,7 @@ export class DeploymentsConfigInitializerService {
             time_event: element.time_event ? this.initTimeEventFormGroup(element.time_event) : null,
             message_event: element.message_event,
             notification: element.notification,
-            task: element.task ? this.initTaskFormGroup(element.task) : null,
+            task: element.task ? this.initTaskFormGroup(element.task, disable) : null,
         });
     }
 
@@ -74,15 +75,27 @@ export class DeploymentsConfigInitializerService {
         return this._formBuilder.group({
             type: timeEvent.type,
             time: timeEvent.time,
-            time_raw: this.initTimeRawFormGroup(timeEvent.time)
+            timeUnits: this.initTimeRawFormGroup(timeEvent.time)
         });
     }
 
-    private initTaskFormGroup(task: V2DeploymentsPreparedTaskModel): FormGroup {
+    private checkIfGroupExistedBefore(groups: string[], group: string): boolean {
+        if (group) {
+            if (groups.includes(group)) {
+                return true;
+            } else {
+                groups.push(group);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private initTaskFormGroup(task: V2DeploymentsPreparedTaskModel, disable: boolean): FormGroup {
         return this._formBuilder.group({
             retries: task.retries,
             parameter: this.initParameterFormGroup(task.parameter),
-            selection: this.initSelectionFormGroup(task.selection),
+            selection: this.initSelectionFormGroup(task.selection, disable),
             configurables: task.configurables,
         });
     }
@@ -98,14 +111,14 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    private initSelectionFormGroup(selection: V2DeploymentsPreparedSelectionModel): FormGroup {
+    private initSelectionFormGroup(selection: V2DeploymentsPreparedSelectionModel, disable: boolean): FormGroup {
         return this._formBuilder.group({
             filter_criteria: selection.filter_criteria,
             selection_options: this.initSelectionFormArray(selection.selection_options),
-            selection_options_index: selection.selection_options_index,
-            selected_device_id: selection.selected_device_id,
-            selected_service_id: selection.selected_service_id,
-            show: [{value: false}]
+            selection_options_index: selection.selection_options_index === undefined ? -1 : selection.selection_options_index,
+            selected_device_id: [{value: selection.selected_device_id, disabled: disable}],
+            selected_service_id: [{value: selection.selected_service_id, disabled: disable}],
+            show: false
         });
     }
 

@@ -33,8 +33,8 @@ export class DeploymentsConfigTimeEventComponent {
     }
 
     change(): void {
-        const time_raw = <FormGroup>this.time_event.get('time_raw');
-        this.time_event.patchValue({time: moment.duration(JSON.parse(JSON.stringify(time_raw.value))).toISOString()});
+        const timeUnits = <FormGroup>this.time_event.get('timeUnits');
+        this.time_event.patchValue({time: moment.duration(JSON.parse(JSON.stringify(timeUnits.value))).toISOString()});
     }
 
 }

@@ -34,10 +34,10 @@ export interface V2DeploymentsPreparedElementModel {
     group: string;
     name: string;
     order: number;
-    time_event: V2DeploymentsPreparedTimeEventModel;
-    message_event: V2DeploymentsPreparedMsgEventModel;
-    task: V2DeploymentsPreparedTaskModel;
-    notification: V2DeploymentsPreparedNotificationModel;
+    time_event: V2DeploymentsPreparedTimeEventModel | null;
+    message_event: V2DeploymentsPreparedMsgEventModel | null;
+    task: V2DeploymentsPreparedTaskModel | null;
+    notification: V2DeploymentsPreparedNotificationModel | null;
 }
 
 export interface V2DeploymentsPreparedNotificationModel {
@@ -49,7 +49,7 @@ export interface V2DeploymentsPreparedTaskModel {
     retries: number;
     parameter: any;
     selection: V2DeploymentsPreparedSelectionModel;
-    configurables: V2DeploymentsPreparedConfigurableModel[];
+    configurables: V2DeploymentsPreparedConfigurableModel[] | null;
 }
 
 export interface V2DeploymentsPreparedConfigurableModel {
@@ -67,6 +67,16 @@ export interface V2DeploymentsPreparedConfigurableValueModel {
 export interface V2DeploymentsPreparedTimeEventModel {
     time: string;
     type: string;
+    timeUnits?: V2DeploymentsPreparedTimeUnitsModel;
+}
+
+export interface V2DeploymentsPreparedTimeUnitsModel {
+    years: number;
+    months: number;
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
 }
 
 export interface V2DeploymentsPreparedMsgEventModel {
@@ -79,10 +89,10 @@ export interface V2DeploymentsPreparedMsgEventModel {
 export interface V2DeploymentsPreparedSelectionModel {
     filter_criteria: V2DeploymentsPreparedFilterCriteriaModel;
     selection_options: V2DeploymentsPreparedSelectionOptionModel[];
-    selection_options_index: number;
+    selection_options_index?: number;
     selected_device_id: string;
     selected_service_id: string;
-    show: boolean;
+    show?: boolean;
 }
 
 export interface V2DeploymentsPreparedSelectionOptionModel {
@@ -101,9 +111,9 @@ export interface V2DeploymentsPreparedDeviceModel {
 }
 
 export interface V2DeploymentsPreparedFilterCriteriaModel {
-    characteristic_id: string;
-    function_id: string;
-    device_class_id: string;
-    aspect_id: string;
+    characteristic_id: string | null;
+    function_id: string | null;
+    device_class_id: string | null;
+    aspect_id: string | null;
 }
 

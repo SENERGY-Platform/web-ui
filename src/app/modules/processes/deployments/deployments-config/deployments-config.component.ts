@@ -19,12 +19,11 @@ import {ActivatedRoute, Navigation, Router} from '@angular/router';
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormGroup} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import {DeploymentsConfigInitializerService} from './shared/deployments-config-initializer.service';
 import {V2DeploymentsPreparedElementModel, V2DeploymentsPreparedModel} from '../shared/deployments-prepared-v2.model';
-import {DeploymentsPreparedModel} from '../shared/deployments-prepared.model';
 
 
 @Component({
@@ -62,7 +61,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         } else {
             if (this.deploymentId !== '') {
                 this.deploymentsService.v2getDeployments(this.deploymentId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
-                    console.log(deployment);
                     if (deployment) {
                         deployment.id = '';
                         this.initFormGroup(deployment);
@@ -92,7 +90,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     save(): void {
-        this.deploymentsService.v2postDeployments(this.deploymentFormGroup.value).subscribe((resp: { status: number }) => {
+        this.deploymentsService.v2postDeployments(this.deploymentFormGroup.getRawValue()).subscribe((resp: { status: number }) => {
             if (resp.status === 200) {
                 this.snackBar.open('Deployment stored successfully.', undefined, {duration: 2000});
             } else {
@@ -102,6 +100,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     changeTaskSelectionOption(elementIndex: number, selectionOptionIndex: number): void {
+
+
         const selection = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selection']);
         const services = <FormArray>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selection', 'selection_options', selectionOptionIndex, 'services']);
         selection.patchValue({'selection_options_index': selectionOptionIndex});
@@ -112,6 +112,28 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             selection.patchValue({'selected_service_id': null});
             selection.patchValue({'show': true});
         }
+
+        const elementClicked = this.getElement(elementIndex);
+
+        if (elementClicked.group) {
+            this.elements.forEach((element: V2DeploymentsPreparedElementModel, index: number) => {
+                if (element.task !== null && elementClicked.bpmn_id !== element.bpmn_id) {
+                    if (elementClicked.group === (this.getElement(index).group)) {
+                        const selectedDeviceId = this.elementsFormArray.at(index).get('task.selection.selected_device_id');
+                        if (selectedDeviceId) {
+                            if (elementClicked.task) {
+                                selectedDeviceId.patchValue(elementClicked.task.selection.selected_device_id);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+    }
+
+    getElement(elementIndex: number): V2DeploymentsPreparedElementModel {
+        return this.elements[elementIndex];
     }
 
     elementsTimeEvent(elementIndex: number): FormGroup {
@@ -134,5 +156,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         const elements = this.deploymentFormGroup.get(['elements']) as FormArray;
         return elements.value;
     }
+
+    get elementsFormArray(): FormArray {
+        return this.deploymentFormGroup.get(['elements']) as FormArray;
+    }
+
 
 }
