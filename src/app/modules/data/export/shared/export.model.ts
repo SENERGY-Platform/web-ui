@@ -39,8 +39,10 @@ export interface ExportValueBaseModel {
     Type: string;
 }
 
-export interface ExportValueModel extends ExportValueBaseModel{
+export interface ExportValueModel extends ExportValueBaseModel {
     InstanceID: string;
+    LastValue?: any;
+    LastTimeStamp?: string;
 }
 
 export interface ExportValueCharacteristicModel extends ExportValueBaseModel {

@@ -37,6 +37,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatCardModule} from '@angular/material/card';
+import {MatTableModule} from '@angular/material/table';
 
 
 const exp = {path: 'data/export/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'Analytics' }};
@@ -62,7 +63,8 @@ const details = {path: 'data/export/details/:id', pathMatch: 'full', component: 
         MatSelectModule,
         MatRadioModule,
         MatAutocompleteModule,
-        MatCardModule
+        MatCardModule,
+        MatTableModule
     ],
     declarations: [
         NewExportComponent,

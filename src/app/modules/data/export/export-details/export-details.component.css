@@ -18,6 +18,10 @@
     margin: 8px;
 }
 
+table {
+    width: 100%;
+}
+
 mat-grid-tile-footer {
     background-color: white !important;
     height: 68px !important;

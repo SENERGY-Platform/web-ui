@@ -18,7 +18,8 @@ import {Component, OnInit} from '@angular/core';
 import {ExportModel} from '../shared/export.model';
 import {ActivatedRoute} from '@angular/router';
 import {ExportService} from '../shared/export.service';
-
+import {ExportDataService} from '../../../../widgets/shared/export-data.service';
+import {LastValuesRequestElementModel} from '../../../../widgets/shared/export-data.model';
 
 
 @Component({
@@ -27,23 +28,42 @@ import {ExportService} from '../shared/export.service';
     styleUrls: ['./export-details.component.css']
 })
 
-export class ExportDetailsComponent implements OnInit{
+export class ExportDetailsComponent implements OnInit {
 
     ready = false;
     export = {} as ExportModel;
+    displayedColumns: string[] = ['Name', 'Path', 'Type', 'LastValue', 'LastTimeStamp'];
 
-    constructor(private route: ActivatedRoute, private exportService: ExportService) {
+    constructor(private route: ActivatedRoute, private exportService: ExportService, private exportDataService: ExportDataService) {
     }
 
     ngOnInit() {
         const id = this.route.snapshot.paramMap.get('id');
         if (id !== null) {
-        this.exportService.getExport(id).subscribe((resp: ExportModel | null) => {
-            if (resp !== null) {
-                this.export = resp;
-            }
-            this.ready = true;
-        });
+            this.exportService.getExport(id).subscribe((resp: ExportModel | null) => {
+                if (resp !== null) {
+                    this.export = resp;
+                }
+                const requestPayload: LastValuesRequestElementModel[] = [];
+
+                resp?.Values.forEach(value => {
+                        if (resp?.Measurement !== undefined) {
+                            requestPayload.push({
+                                measurement: resp?.Measurement,
+                                columnName: value.Name,
+                                math: undefined
+                            });
+                        }
+                    }
+                );
+                this.exportDataService.getLastValues(requestPayload).subscribe(pairs => {
+                    this.export.Values.forEach((_, index) => {
+                        this.export.Values[index].LastValue = pairs[index].value;
+                        this.export.Values[index].LastTimeStamp = pairs[index].time;
+                    });
+                });
+                this.ready = true;
+            });
         }
     }
 }

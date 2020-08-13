@@ -19,7 +19,7 @@
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-bottom:8px;">
             <button mat-raised-button color="accent" routerLink="/data/export">back</button>
         </div>
-        <mat-card *ngIf="ready">
+        <mat-card *ngIf="ready" style="margin-bottom:8px;">
             <mat-card-header>
                 <mat-card-title>{{export.Name}}</mat-card-title>
                 <mat-card-subtitle>{{export.Description}}</mat-card-subtitle>
@@ -56,14 +56,42 @@
                         <p mat-line>{{export.CreatedAt | date:'dd.MM.yyyy - HH:mm' }}</p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
-                    <mat-list-item>
-                        <mat-icon mat-list-icon>code</mat-icon>
-                        <h4 mat-line>Values</h4>
-                        <p mat-line *ngFor="let val of export.Values">
-                            {{ val.Name }} | {{ val.Path }} | {{ val.Type }}
-                        </p>
-                    </mat-list-item>
                 </mat-list>
+            </mat-card-content>
+        </mat-card>
+        <mat-card *ngIf="ready">
+            <mat-card-header>
+                <mat-card-title>Values</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div fxLayout="column">
+                    <div fxLayout="row">
+                        <table mat-table [dataSource]="export.Values">
+                            <ng-container matColumnDef="Name">
+                                <th mat-header-cell *matHeaderCellDef> Name</th>
+                                <td mat-cell *matCellDef="let element"> {{element.Name}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="Path">
+                                <th mat-header-cell *matHeaderCellDef> Path</th>
+                                <td mat-cell *matCellDef="let element"> {{element.Path}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="Type">
+                                <th mat-header-cell *matHeaderCellDef> Type</th>
+                                <td mat-cell *matCellDef="let element"> {{element.Type}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="LastValue">
+                                <th mat-header-cell *matHeaderCellDef> LastValue</th>
+                                <td mat-cell *matCellDef="let element"> {{element.LastValue}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="LastTimeStamp">
+                                <th mat-header-cell *matHeaderCellDef> LastTimeStamp</th>
+                                <td mat-cell *matCellDef="let element"> {{element.LastTimeStamp}} </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                        </table>
+                    </div>
+                </div>
             </mat-card-content>
         </mat-card>
         <senergy-spinner [elementCount]="1" [show]="!ready"></senergy-spinner>
