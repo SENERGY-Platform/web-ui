@@ -17,6 +17,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DeviceInstancesModel} from '../shared/device-instances.model';
+import {DeviceInstancesService} from '../shared/device-instances.service';
 
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
@@ -26,11 +27,16 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     device: DeviceInstancesModel;
 
     constructor(private dialogRef: MatDialogRef<DeviceInstancesEditDialogComponent>,
+                private deviceInstancesService: DeviceInstancesService,
                 @Inject(MAT_DIALOG_DATA) private data: { device: DeviceInstancesModel }) {
         this.device = data.device;
     }
 
     ngOnInit() {
+    }
+
+    getShortId(id: string): string {
+        return this.deviceInstancesService.convertToShortId(id);
     }
 
     close(): void {

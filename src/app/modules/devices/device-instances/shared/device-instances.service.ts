@@ -30,7 +30,7 @@ import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-ed
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {DeviceTypePermSearchModel} from '../../device-types-overview/shared/device-type-perm-search.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {FlowModel} from '../../../data/flow-repo/shared/flow.model';
+import {UtilService} from '../../../../core/services/util.service';
 
 
 @Injectable({
@@ -46,7 +46,8 @@ export class DeviceInstancesService {
                 private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService,
                 private deviceTypeService: DeviceTypeService,
-                private snackBar: MatSnackBar) {
+                private snackBar: MatSnackBar,
+                private utilService: UtilService) {
     }
 
     getDeviceInstances(searchText: string, limit: number, offset: number, value: string, order: string): Observable<DeviceInstancesModel[]> {
@@ -248,6 +249,21 @@ export class DeviceInstancesService {
                     });
             }
         });
+    }
+
+    convertToShortId(id: string): string {
+        if (id === '') {
+            return '';
+        }
+        if (id.startsWith('urn:infai:ses:device:')) {
+            const parts = id.split(':');
+            const uuidStr = parts[parts.length - 1];
+            const uuidHexStr = uuidStr.replace(new RegExp('-', 'g'), '');
+            const byteArray = this.utilService.stringToByteArray(uuidHexStr);
+            return this.utilService.convertByteArrayToBase64(byteArray);
+        } else {
+            throw new Error('expected urn:infai:ses:device as prefix');
+        }
     }
 
     private convertDeviceInstance(deviceOut: DeviceInstancesModel): DeviceInstancesUpdateModel {

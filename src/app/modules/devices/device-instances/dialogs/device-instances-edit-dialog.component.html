@@ -22,6 +22,9 @@
             <input matInput placeholder="ID" disabled value="{{device.id}}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
+            <input matInput placeholder="ShortID" disabled value="{{getShortId(device.id)}}">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="Devicetype ID" disabled value="{{device.device_type.id}}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
