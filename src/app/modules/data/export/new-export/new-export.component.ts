@@ -96,7 +96,7 @@ export class NewExportComponent implements OnInit {
             this.export.Topic = this.service.id.replace(/#/g, '_').replace(/:/g, '_');
         } else if (this.selector === 'pipe') {
             this.export.EntityName = this.operator.id;
-            this.export.Filter = this.operator.id;
+            this.export.Filter = this.pipeline.id + ':' + this.operator.id;
             this.export.FilterType = 'operatorId';
             this.export.ServiceName = this.operator.name;
             this.export.Topic = 'analytics-' + this.operator.name;
