@@ -25,6 +25,7 @@ export interface ExportModel {
     Measurement: string | undefined;
     Database: string | undefined;
     TimePath: string | undefined;
+    TimePrecision?: string;
     RancherServiceId: string;
     ServiceName: string;
     Offset: string;

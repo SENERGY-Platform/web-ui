@@ -62,6 +62,8 @@ export const environment = {
   yrUrl: '${process.env.YR_URL}',
   notificationsUrl: '${process.env.NOTIFICATION_SERVICE_URL}',
   timeStampCharacteristicId: '${process.env.TIMESTAMP_CHARACTERISTIC_ID}',
+  timeStampCharacteristicUnixSecondsId: '${process.env.TIMESTAMP_CHARACTERISTIC_UNIX_SECONDS_ID}',
+  timeStampCharacteristicUnixNanoSecondsId: '${process.env.TIMESTAMP_CHARACTERISTIC_UNIX_NANO_SECONDS_ID}',
   mqttProtocolID: '${process.env.MQTT_PROTOCOL_ID}',
   getPm1FunctionId: '${process.env.GET_PM1_FUNCTION_ID}',
   getPm10FunctionId: '${process.env.GET_PM10_FUNCTION_ID}',

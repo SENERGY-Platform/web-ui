@@ -70,7 +70,6 @@ export class NewExportComponent implements OnInit {
     typeBoolean = 'https://schema.org/Boolean';
 
 
-
     constructor(private pipelineRegistryService: PipelineRegistryService,
                 private deviceInstanceService: DeviceInstancesService,
                 private deviceTypeService: DeviceTypeService,
@@ -87,7 +86,7 @@ export class NewExportComponent implements OnInit {
     }
 
     startExport() {
-        const self =  this;
+        const self = this;
         if (this.selector === 'device') {
             this.export.EntityName = this.device.name;
             this.export.Filter = this.device.id;
@@ -170,7 +169,7 @@ export class NewExportComponent implements OnInit {
         this.operatorRepoService.getOperator(operator.operatorId).subscribe((resp: OperatorModel | null) => {
             if (resp !== null && resp.outputs !== undefined) {
                 resp.outputs.forEach((out: IOModel) => {
-                    this.paths.set('analytics.' + out.name,  out.type);
+                    this.paths.set('analytics.' + out.name, out.type);
                 });
             }
             this.paths.set('time', 'string');
@@ -254,10 +253,23 @@ export class NewExportComponent implements OnInit {
         });
     }
 
-    ensureTimeNotTwice() {
+    onTimePathSelected(path: string) {
+        // ensure value not also exported
         const i = this.export.Values.findIndex(v => v.Path === this.export.TimePath);
         if (i !== -1) {
             this.export.Values.splice(i, 1);
+        }
+
+        if (this.selector === 'device' && this.paths.has(path) && this.service.outputs.length === 1) {
+            const values = this.exportService.addCharacteristicToDeviceTypeContentVariable(this.service.outputs[0].content_variable);
+            const selectedValue = values.find(v => v.Path === path);
+            if (selectedValue !== undefined && selectedValue.characteristicId === environment.timeStampCharacteristicUnixSecondsId) {
+                this.export.TimePrecision = 's';
+            } else {
+                this.export.TimePrecision = undefined; //  No precision for iso string, nanos or unknown
+            }
+        } else {
+            this.export.TimePrecision = undefined; //  No precision for or unknown or pipeline
         }
     }
 

@@ -84,7 +84,7 @@ export class ExportService {
             const exportValues: ExportValueModel[] = [];
 
             traverse.forEach(trav => {
-                if (trav.Path !== timePath) {
+                if (trav.Path !== timePath.path) {
                     let type = '';
                     switch (trav.Type) {
                         case this.typeString:
@@ -111,7 +111,8 @@ export class ExportService {
 
             exports.push({
                 Name: deviceInstancesModel.name + '_' + service.name + (service.outputs.length > 1 ? '_' + index : ''),
-                TimePath: timePath,
+                TimePath: timePath.path,
+                TimePrecision: timePath.precision,
                 Values: exportValues,
                 EntityName: deviceInstancesModel.name,
                 Filter: deviceInstancesModel.id,
@@ -160,14 +161,20 @@ export class ExportService {
         return false;
     }
 
-    getTimePath(traverse: ExportValueCharacteristicModel[]): string {
-        let timePath = '';
+    getTimePath(traverse: ExportValueCharacteristicModel[]): {path: string, precision: string | undefined} {
+        let path = '';
+        let precision: string | undefined;
         traverse.forEach((t: ExportValueCharacteristicModel) => {
-            if (t.characteristicId === environment.timeStampCharacteristicId) {
-                timePath = t.Path;
+            if (t.characteristicId === environment.timeStampCharacteristicId
+            || t.characteristicId === environment.timeStampCharacteristicUnixNanoSecondsId) {
+                path = t.Path;
+                precision = undefined; // No precision for iso string or nanos
+            } else if (t.characteristicId === environment.timeStampCharacteristicUnixSecondsId) {
+                path = t.Path;
+                precision = 's';
             }
         });
-        return timePath;
+        return {path, precision};
     }
 
 

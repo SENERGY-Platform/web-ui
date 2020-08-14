@@ -129,7 +129,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                             if (deviceTypeService.id === selectableService.id) {
                                 const traverse = this.exportService.addCharacteristicToDeviceTypeContentVariable(deviceTypeService.outputs[0].content_variable);
                                 const timePath = this.exportService.getTimePath(traverse);
-                                if (timePath !== '') {
+                                if (timePath.path !== '') {
                                     servicesArray.push({service: deviceTypeService, exportValues: traverse});
                                 }
                             }

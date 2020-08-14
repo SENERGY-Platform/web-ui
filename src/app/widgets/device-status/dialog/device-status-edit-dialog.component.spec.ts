@@ -85,6 +85,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             characteristicId: environment.timeStampCharacteristicId,
         };
         exportServiceSpy.addCharacteristicToDeviceTypeContentVariable.and.returnValue([exampleExportValueCharacteristicModel]);
+        exportServiceSpy.getTimePath.and.returnValue({path: 'value.struct.time'});
         deploymentsServiceSpy.postDeployments.and.returnValue(of({status: 200, id: uuid()}));
         deploymentsServiceSpy.getPreparedDeploymentsByXml.and.returnValue(of({
             id: '',

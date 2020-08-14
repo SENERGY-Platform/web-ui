@@ -57,7 +57,7 @@
 
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>JSON time path</mat-label>
-            <mat-select #input [(ngModel)]="export.TimePath" placeholder="JSON time path" (selectionChange)="ensureTimeNotTwice()">
+            <mat-select #input [(ngModel)]="export.TimePath" placeholder="JSON time path" (selectionChange)="onTimePathSelected($event.value)">
                 <mat-option *ngFor="let path of paths | keyvalue" [value]="path.key">
                     {{path.key}}
                 </mat-option>
