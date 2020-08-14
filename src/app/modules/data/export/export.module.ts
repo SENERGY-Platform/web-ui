@@ -39,13 +39,13 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatCardModule} from '@angular/material/card';
 import {MatTableModule} from '@angular/material/table';
 
-
 const exp = {path: 'data/export/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'Analytics' }};
+const exportEdit = {path: 'data/export/edit/:id', pathMatch: 'full', component: NewExportComponent, data: { header: 'Analytics' }};
 const details = {path: 'data/export/details/:id', pathMatch: 'full', component: ExportDetailsComponent, data: { header: 'Analytics' }};
 
 @NgModule({
     imports: [
-        RouterModule.forChild([exp, details]),
+        RouterModule.forChild([exp, exportEdit, details]),
         CoreModule,
         CommonModule,
         MatGridListModule,

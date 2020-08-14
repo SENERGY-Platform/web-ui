@@ -65,6 +65,11 @@
                                 </mat-card-content>
                                 <mat-card-actions>
                                     <div fxFlex></div>
+                                    <button mat-icon-button routerLink="/data/export/edit/{{item.ID}}">
+                                        <mat-icon  color="accent">
+                                            edit
+                                        </mat-icon>
+                                    </button>
                                     <button mat-icon-button color="accent" routerLink="/data/export/details/{{item.ID}}"
                                             matTooltip="access the details of the export">
                                         <mat-icon>info</mat-icon>

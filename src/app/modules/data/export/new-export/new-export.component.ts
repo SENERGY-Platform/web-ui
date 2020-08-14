@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {DeviceTypeService} from '../../../devices/device-types-overview/shared/device-type.service';
@@ -28,10 +28,13 @@ import {ExportService} from '../shared/export.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shared/pipeline.model';
 import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {IOModel, OperatorModel} from '../../operator-repo/shared/operator.model';
 import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
 import {environment} from '../../../../../environments/environment';
+import {FlowModel, FlowShareModel} from '../../flow-repo/shared/flow.model';
+import {forkJoin, Observable} from 'rxjs';
+import {catchError} from 'rxjs/operators';
 
 
 @Component({
@@ -40,7 +43,7 @@ import {environment} from '../../../../../environments/environment';
     styleUrls: ['./new-export.component.css']
 })
 
-export class NewExportComponent implements OnInit {
+export class NewExportComponent implements AfterViewInit {
 
     ready = false;
     export = {} as ExportModel;
@@ -70,19 +73,90 @@ export class NewExportComponent implements OnInit {
     typeBoolean = 'https://schema.org/Boolean';
 
 
-    constructor(private pipelineRegistryService: PipelineRegistryService,
-                private deviceInstanceService: DeviceInstancesService,
-                private deviceTypeService: DeviceTypeService,
-                private exportService: ExportService,
-                private operatorRepoService: OperatorRepoService,
-                private router: Router,
-                public snackBar: MatSnackBar) {
+    constructor(
+        private route: ActivatedRoute,
+        private pipelineRegistryService: PipelineRegistryService,
+        private deviceInstanceService: DeviceInstancesService,
+        private deviceTypeService: DeviceTypeService,
+        private exportService: ExportService,
+        private operatorRepoService: OperatorRepoService,
+        private router: Router,
+        public snackBar: MatSnackBar) {
 
     }
 
-    ngOnInit() {
-        this.loadDevices();
-        this.loadPipelines();
+    ngAfterViewInit() {
+        const array: Observable<(DeviceInstancesModel[] | PipelineModel[])>[] = [];
+
+        this.pipelineRegistryService.getPipelines().subscribe((resp: PipelineModel[]) => {
+            this.pipelines = resp;
+        });
+
+        array.push(this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc'));
+        array.push(this.pipelineRegistryService.getPipelines());
+
+        forkJoin(array).subscribe(response => {
+           console.log(response);
+           this.devices = response [0] as DeviceInstancesModel[] ;
+           this.pipelines = response [1] as PipelineModel[];
+            setTimeout(() => {
+                const id = this.route.snapshot.paramMap.get('id');
+                if (id !== null) {
+                    this.exportService.getExport(id).subscribe((exp: ExportModel | null) => {
+                        if (exp !== null) {
+                            if (exp.FilterType === 'deviceId') {
+                                this.selector = 'device';
+                                setTimeout(() => {
+                                    this.devices.forEach(device => {
+                                        if (device.id === exp.Filter) {
+                                            this.device = device;
+                                            this.deviceTypeService.getDeviceType(device.device_type.id)
+                                                .subscribe((resp: DeviceTypeModel | null) => {
+                                                    if (resp !== null) {
+                                                        this.deviceType = resp;
+                                                        this.deviceType.services.forEach(service => {
+                                                            // @ts-ignore
+                                                            if (service.id === exp.Topic.replace(/_/g, ':')) {
+                                                                this.service = service;
+                                                                service.outputs.forEach((out: DeviceTypeContentModel) => {
+                                                                    const pathString = 'value';
+                                                                    this.traverseDataStructure(pathString, out.content_variable);
+                                                                });
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                        }
+                                    });
+                                });
+                            } else {
+                                this.selector = 'pipe';
+                                this.pipelines.forEach(pipeline => {
+                                    if (pipeline.id === exp.Filter.split(':')[0]) {
+                                        this.pipeline = pipeline;
+                                        this.pipeline.operators.forEach(operator => {
+                                            if (operator.id === exp.Filter.split(':')[1]) {
+                                                this.operator = operator;
+                                                this.operatorRepoService.getOperator(operator.operatorId)
+                                                    .subscribe((resp: OperatorModel | null) => {
+                                                        if (resp !== null && resp.outputs !== undefined) {
+                                                            resp.outputs.forEach((out: IOModel) => {
+                                                                this.paths.set('analytics.' + out.name, out.type);
+                                                            });
+                                                        }
+                                                        this.paths.set('time', 'string');
+                                                    });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                            this.export = exp;
+                        }
+                    });
+                }
+            }, 0);
+        });
     }
 
     startExport() {
@@ -105,12 +179,23 @@ export class NewExportComponent implements OnInit {
         } else {
             this.export.Offset = 'largest';
         }
-        this.exportService.startPipeline(this.export).subscribe(function () {
-            self.router.navigate(['/data/export']);
-            self.snackBar.open('Export created', undefined, {
-                duration: 2000,
+        if (this.route.snapshot.paramMap.get('id') !== null) {
+            this.exportService.stopPipeline(this.export).subscribe(() => {
+                this.exportService.startPipeline(this.export).subscribe(function () {
+                    self.router.navigate(['/data/export']);
+                    self.snackBar.open('Export updated', undefined, {
+                        duration: 2000,
+                    });
+                });
             });
-        });
+        } else {
+            this.exportService.startPipeline(this.export).subscribe(function () {
+                self.router.navigate(['/data/export']);
+                self.snackBar.open('Export created', undefined, {
+                    duration: 2000,
+                });
+            });
+        }
     }
 
     exportTypeChanged() {
@@ -214,18 +299,6 @@ export class NewExportComponent implements OnInit {
             // @ts-ignore
             this.export.Values[id].Type = type;
         }
-    }
-
-    loadPipelines() {
-        this.pipelineRegistryService.getPipelines().subscribe((resp: PipelineModel[]) => {
-            this.pipelines = resp;
-        });
-    }
-
-    loadDevices() {
-        this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc').subscribe((resp: DeviceInstancesModel []) => {
-            this.devices = resp;
-        });
     }
 
     resetVars() {
