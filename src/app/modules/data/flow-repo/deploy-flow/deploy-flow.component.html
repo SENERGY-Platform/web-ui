@@ -62,33 +62,12 @@
                                 <mat-select
                                         (ngModelChange)="deviceChanged($event, input.id, port, operatorKey, deviceKey)"
                                         placeholder="Device"
-                                        [(ngModel)]="selectedValues.get(input.id).get(port).device[0]">
-                                    <mat-option *ngFor="let device of devices" [value]="device">
+                                        [(ngModel)]="selectedValues.get(input.id).get(port).device" multiple>
+                                    <mat-option *ngFor="let device of devices[operatorKey][deviceKey]" [value]="device">
                                         {{device.name}}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
-                            <button mat-icon-button matSuffix (click)="addAdditionalDevice(operatorKey, deviceKey)">
-                                <mat-icon>add</mat-icon>
-                            </button>
-                        </div>
-                        <div *ngFor="let i of Arr(additionalDevices[operatorKey][deviceKey].length), let key = index">
-                            <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-label>Device</mat-label>
-                                <mat-select
-                                        (ngModelChange)="deviceChanged($event, input.id, port, operatorKey, deviceKey)"
-                                        placeholder="Device"
-                                        [(ngModel)]="selectedValues.get(input.id).get(port).device[key+1]">
-                                    <mat-option *ngFor="let device of filteredDevices[operatorKey][deviceKey]"
-                                                [value]="device">
-                                        {{device.name}}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                            <button mat-icon-button matSuffix
-                                    (click)="removeAdditionalDevice(input, port, key, operatorKey, deviceKey)">
-                                <mat-icon>remove</mat-icon>
-                            </button>
                         </div>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Service</mat-label>

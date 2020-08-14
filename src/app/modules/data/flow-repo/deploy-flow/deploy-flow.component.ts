@@ -46,11 +46,11 @@ export class DeployFlowComponent {
 
     deviceTypes = [] as any;
     paths = [] as any;
-    devices: DeviceInstancesModel [] = [];
-    filteredDevices: DeviceInstancesModel [][][] = [[[]]];
+
+    allDevices: DeviceInstancesModel [] = [];
+    devices: DeviceInstancesModel[][][] = [[[]]];
 
     Arr = Array;
-    additionalDevices = [[[]]] as any;
 
     selectedValues = new Map();
 
@@ -76,7 +76,6 @@ export class DeployFlowComponent {
         if (id !== null) {
             this.id = id;
         }
-        this.loadDevices();
 
         this.pipeReq = {
             id: this.id, name: '', description: '', nodes: [], windowTime: this.windowTime, metrics: this.metrics,
@@ -85,6 +84,16 @@ export class DeployFlowComponent {
 
         this.parserService.getInputs(this.id).subscribe((resp: ParseModel []) => {
             this.inputs = resp;
+            this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc')
+                .subscribe((devices: DeviceInstancesModel []) => {
+                    this.allDevices = devices;
+                    this.inputs.forEach((input, operatorKey) => {
+                        this.devices[operatorKey] = [];
+                        input.inPorts.forEach((_, deviceKey) => {
+                            this.devices[operatorKey][deviceKey] = devices;
+                        });
+                    });
+                });
             this.createMappingVars();
             this.ready = true;
         });
@@ -150,25 +159,16 @@ export class DeployFlowComponent {
         });
     }
 
-    addAdditionalDevice(operatorKey: number, deviceKey: number) {
-        this.additionalDevices[operatorKey][deviceKey].push(true);
-    }
-
-    removeAdditionalDevice(input: ParseModel, port: string, key: number, operatorKey: number, deviceKey: number) {
-        if (key > -1) {
-            this.selectedValues.get(input.id).get(port).device.splice(key + 1, 1);
-            this.additionalDevices[operatorKey][deviceKey].splice(key, 1);
-        }
-    }
-
-    deviceChanged(device: DeviceInstancesModel, inputId: string, port: string, operatorKey: number, deviceKey: number) {
-        if (this.selectedValues.get(inputId).get(port).device !== device) {
-            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((resp: DeviceTypeModel | null) => {
+    deviceChanged(device: DeviceInstancesModel[], inputId: string, port: string, operatorKey: number, deviceKey: number) {
+        if (device.length === 0) {
+            this.devices[operatorKey][deviceKey] = this.allDevices;
+        } else {
+            this.deviceTypeService.getDeviceType(device[0].device_type.id).subscribe((resp: DeviceTypeModel | null) => {
                 if (resp !== null) {
                     this.deviceTypes[inputId][port] = resp;
                     this.paths[inputId][port] = [];
-                    this.filteredDevices[operatorKey][deviceKey] = this.devices.filter(function (dev) {
-                            return dev.device_type.id === device.device_type.id;
+                    this.devices [operatorKey][deviceKey] = this.devices[operatorKey][deviceKey].filter(function (dev) {
+                            return dev.device_type.id === device[0].device_type.id;
                         }
                     );
                 }
@@ -195,19 +195,13 @@ export class DeployFlowComponent {
 
     private createMappingVars() {
         this.inputs.map((parseModel: ParseModel, key) => {
-            // init helpers #1
-            this.additionalDevices[key] = [];
-            this.filteredDevices[key] = [];
             this.pipeReq.nodes[key] = {
                 nodeId: parseModel.id, inputs: undefined,
                 config: undefined, deploymentType: parseModel.deploymentType
             } as NodeModel;
             // create map for inputs
             if (parseModel.inPorts !== undefined) {
-                parseModel.inPorts.map((port: string, portKey) => {
-                    // init helpers #2
-                    this.additionalDevices[key][portKey] = [];
-                    this.filteredDevices[key][portKey] = [] as DeviceInstancesModel [];
+                parseModel.inPorts.map((port: string, _) => {
                     if (!this.selectedValues.has(parseModel.id)) {
                         this.selectedValues.set(parseModel.id, new Map());
                     }
@@ -264,12 +258,6 @@ export class DeployFlowComponent {
                 pipeReqNode.inputs.push(nodeInput);
             }
         }
-    }
-
-    private loadDevices() {
-        this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc').subscribe((resp: DeviceInstancesModel []) => {
-            this.devices = resp;
-        });
     }
 
     private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel) {
