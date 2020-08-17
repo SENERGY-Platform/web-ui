@@ -251,8 +251,8 @@ export class DeviceInstancesService {
         });
     }
 
-    convertToShortId(id: string): string {
-        if (id === '') {
+    convertToShortId(id: string | undefined): string {
+        if (id === undefined || id === '') {
             return '';
         }
         if (id.startsWith('urn:infai:ses:device:')) {

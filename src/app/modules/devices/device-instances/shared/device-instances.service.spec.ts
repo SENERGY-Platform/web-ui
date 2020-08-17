@@ -42,6 +42,7 @@ describe('DeviceInstancesService', () => {
             service.convertToShortId('6bd07b75-d7cc-4a1a-88db-ac93f61aa7b3');
         }).toThrowError('expected urn:infai:ses:device as prefix');
         expect(service.convertToShortId('')).toBe('');
+        expect(service.convertToShortId(undefined)).toBe('');
     });
 
 });
