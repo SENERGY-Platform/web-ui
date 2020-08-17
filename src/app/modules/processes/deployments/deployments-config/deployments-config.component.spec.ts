@@ -36,7 +36,7 @@ import {FlexLayoutModule} from '@angular/flex-layout';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 
-fdescribe('ProcessDeploymentsConfigComponent', () => {
+describe('ProcessDeploymentsConfigComponent', () => {
     let component: ProcessDeploymentsConfigComponent;
     let fixture: ComponentFixture<ProcessDeploymentsConfigComponent>;
 
