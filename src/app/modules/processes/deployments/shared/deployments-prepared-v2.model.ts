@@ -31,7 +31,7 @@ export interface V2DeploymentsPreparedDiagramModel {
 
 export interface V2DeploymentsPreparedElementModel {
     bpmn_id: string;
-    group: string;
+    group: string | null;
     name: string;
     order: number;
     time_event: V2DeploymentsPreparedTimeEventModel | null;

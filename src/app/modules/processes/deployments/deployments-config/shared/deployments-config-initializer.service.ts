@@ -79,7 +79,7 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    private checkIfGroupExistedBefore(groups: string[], group: string): boolean {
+    private checkIfGroupExistedBefore(groups: string[], group: string | null): boolean {
         if (group) {
             if (groups.includes(group)) {
                 return true;
