@@ -123,10 +123,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         return this.elements[elementIndex];
     }
 
-    getSelectionFormGroup(elementIndex: number): FormGroup {
-      return <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selection']);
-    }
-
     elementsTimeEvent(elementIndex: number): FormGroup {
         return this.deploymentFormGroup.get(['elements', elementIndex, 'time_event']) as FormGroup;
     }
