@@ -16,11 +16,17 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {DeviceTypeContentVariableModel, DeviceTypeFunctionModel} from '../../shared/device-type.model';
+import {
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeContentVariableModel,
+    DeviceTypeFunctionModel
+} from '../../shared/device-type.model';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
 import {ConceptsService} from '../../../concepts/shared/concepts.service';
-import {environment} from '../../../../../../environments/environment';
+import {DeviceTypeHelperService} from '../shared/device-type-helper.service';
+import {ConceptsPermSearchModel} from '../../../concepts/shared/concepts-perm-search.model';
+import {forkJoin, Observable} from 'rxjs';
 
 @Component({
     templateUrl: './device-types-content-variable-dialog.component.html',
@@ -29,20 +35,24 @@ import {environment} from '../../../../../../environments/environment';
 export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
     contentVariable: DeviceTypeContentVariableModel;
-    functions: DeviceTypeFunctionModel[];
+    functionConceptIds: string[] = [];
     firstFormGroup!: FormGroup;
     typeOptionsControl: FormControl = new FormControl();
     primitiveTypes: { type: string, typeShort: string }[] = [];
     nonPrimitiveTypes: { type: string, typeShort: string }[] = [];
-    concepts: ConceptsCharacteristicsModel[] = [];
-    timeStampCharacteristicId: string = environment.timeStampCharacteristicId;
+    conceptList: { conceptName: string, colored: boolean, characteristicList: { id: string, name: string}[] }[] = [];
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesContentVariableDialogComponent>,
                 private _formBuilder: FormBuilder,
                 private conceptsService: ConceptsService,
+                private deviceTypeHelperService: DeviceTypeHelperService,
                 @Inject(MAT_DIALOG_DATA) data: { contentVariable: DeviceTypeContentVariableModel, functions: DeviceTypeFunctionModel[] }) {
         this.contentVariable = data.contentVariable;
-        this.functions = data.functions;
+        data.functions.forEach((func: DeviceTypeFunctionModel) => {
+            if (func.concept_id !== '') {
+                this.functionConceptIds.push(func.concept_id);
+            }
+        });
     }
 
     ngOnInit(): void {
@@ -84,18 +94,19 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     }
 
     private loadConcepts() {
-        if (this.functions) {
-            this.functions.forEach(
-                (func: DeviceTypeFunctionModel) => {
-                    if (func.concept_id !== '') {
-                        this.conceptsService.getConceptWithCharacteristics(func.concept_id).subscribe((concept: ConceptsCharacteristicsModel | null) => {
-                            if (concept) {
-                                this.concepts.push(concept);
-                            }
-                        });
+        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((conceptsPermSearch: ConceptsPermSearchModel[]) => {
+            const observables: Observable<ConceptsCharacteristicsModel | null>[] = [];
+            conceptsPermSearch.forEach((concept: ConceptsPermSearchModel) => {
+                observables.push(this.conceptsService.getConceptWithCharacteristics(concept.id));
+            });
+            forkJoin(observables).subscribe((concepts: (ConceptsCharacteristicsModel | null)[]) => {
+                concepts.forEach((concept: (ConceptsCharacteristicsModel | null)) => {
+                    if (concept) {
+                        this.initConceptList(concept);
                     }
                 });
-        }
+            });
+        });
     }
 
     private initFormGroup() {
@@ -121,5 +132,17 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
         this.nonPrimitiveTypes.push({type: 'https://schema.org/StructuredValue', typeShort: 'Structure'});
         this.nonPrimitiveTypes.push({type: 'https://schema.org/ItemList', typeShort: 'List'});
+    }
+
+    private initConceptList(concepts: ConceptsCharacteristicsModel): void {
+        const characteristicsList: { id: string, name: string }[] = [];
+        concepts.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
+            characteristicsList.push(...this.deviceTypeHelperService.characteristicsFlatten(characteristic));
+        });
+        this.conceptList.push({
+            conceptName: concepts.name,
+            colored: this.functionConceptIds.includes(concepts.id),
+            characteristicList: characteristicsList
+        });
     }
 }

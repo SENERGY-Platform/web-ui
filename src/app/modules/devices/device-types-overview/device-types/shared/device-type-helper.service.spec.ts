@@ -1,7 +1,7 @@
 import {TestBed} from '@angular/core/testing';
 
 import {DeviceTypeHelperService} from './device-type-helper.service';
-import {DeviceTypeContentVariableModel} from '../../shared/device-type.model';
+import {DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel} from '../../shared/device-type.model';
 
 describe('DeviceTypeHelperService', () => {
     let service: DeviceTypeHelperService;
@@ -199,6 +199,87 @@ describe('DeviceTypeHelperService', () => {
         } as DeviceTypeContentVariableModel;
         service.removeField(withIndices, 'indices');
         expect(withIndices).toEqual(withoutIndices);
+    });
+
+    it('test characteristicIdsFlatten', () => {
+        expect(service.characteristicsFlatten({
+            id: 'urn:infai:ses:characteristic:64928e9f-98ca-42bb-a1e5-adf2a760a2f9',
+            name: 'HSB',
+            type: 'https://schema.org/StructuredValue',
+            sub_characteristics: [
+                {
+                    id: 'urn:infai:ses:characteristic:d840607c-c8f9-45d6-b9bd-2c2d444e2899',
+                    name: 'b',
+                    type: 'https://schema.org/Integer',
+                    min_value: 0,
+                    max_value: 100,
+                    rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+                },
+                {
+                    id: 'urn:infai:ses:characteristic:a66dc568-c0e0-420f-b513-18e8df405538',
+                    name: 's',
+                    type: 'https://schema.org/Integer',
+                    min_value: 0,
+                    max_value: 100,
+                    rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+                },
+                {
+                    id: 'urn:infai:ses:characteristic:6ec70e99-8c6a-4909-8d5a-7cc12af76b9a',
+                    name: 'h',
+                    type: 'https://schema.org/Integer',
+                    min_value: 0,
+                    max_value: 360,
+                    rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+                }
+            ],
+            rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
+        } as DeviceTypeCharacteristicsModel)).toEqual([
+            {
+                id: 'urn:infai:ses:characteristic:d840607c-c8f9-45d6-b9bd-2c2d444e2899',
+                name: 'HSB.b'
+            },
+            {
+                id: 'urn:infai:ses:characteristic:a66dc568-c0e0-420f-b513-18e8df405538',
+                name: 'HSB.s'
+            },
+            {
+                id: 'urn:infai:ses:characteristic:6ec70e99-8c6a-4909-8d5a-7cc12af76b9a',
+                name: 'HSB.h'
+            }]);
+        expect(service.characteristicsFlatten(
+            {
+                id: 'urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8',
+                name: 'hex',
+                type: 'https://schema.org/Text',
+                rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+            },
+        )).toEqual([{
+            id: 'urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8',
+            name: 'hex'
+        }]);
+        expect(service.characteristicsFlatten(
+            {
+                id: 'id:1',
+                name: 'ebene1',
+                type: 'https://schema.org/StructuredValue',
+                rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
+                sub_characteristics: [{
+                    id: 'id:2',
+                    name: 'ebene2',
+                    type: 'https://schema.org/StructuredValue',
+                    rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
+                    sub_characteristics: [{
+                        id: 'id3',
+                        name: 'field',
+                        type: 'https://schema.org/Float',
+                        rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+                    }]
+                }]
+            },
+        )).toEqual([{
+            id: 'id3',
+            name: 'ebene1.ebene2.field'
+        }]);
     });
 
 

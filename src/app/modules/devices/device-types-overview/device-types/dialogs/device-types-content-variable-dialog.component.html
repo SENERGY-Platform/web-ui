@@ -50,9 +50,9 @@
             <mat-label>Characteristic</mat-label>
             <mat-select formControlName="characteristic_id">
                 <mat-option>-- None --</mat-option>
-                <mat-option [value]="timeStampCharacteristicId">timestamp</mat-option>
-                <mat-optgroup *ngFor="let concept of concepts" [label]="concept.name">
-                    <mat-option *ngFor="let characteristic of concept.characteristics" [value]="characteristic.id">
+                <mat-optgroup *ngFor="let item of conceptList" [label]="item.conceptName">
+                    <mat-option *ngFor="let characteristic of item.characteristicList" [value]="characteristic.id"
+                                [ngClass]="{'color-accent': item.colored}">
                         {{characteristic.name}}
                     </mat-option>
                 </mat-optgroup>

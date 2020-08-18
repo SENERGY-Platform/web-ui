@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
-import {DeviceTypeContentVariableModel} from '../../shared/device-type.model';
+import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel, DeviceTypeContentVariableModel} from '../../shared/device-type.model';
 import * as _ from 'lodash';
+import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
 
 @Injectable({
     providedIn: 'root'
@@ -94,6 +95,19 @@ export class DeviceTypeHelperService {
             for (let i = 0; i < contentVariable.sub_content_variables.length; i++) {
                 this.removeField(contentVariable.sub_content_variables[i], field);
             }
+        }
+    }
+
+    characteristicsFlatten(characteristics: DeviceTypeCharacteristicsModel, parentName: string = ''): { id: string, name: string }[] {
+        if (characteristics.sub_characteristics === undefined || characteristics.sub_characteristics === null) {
+            return [{id: characteristics.id, name: parentName + characteristics.name}];
+        } else {
+            let array: { id: string, name: string }[] = [];
+            parentName += characteristics.name + '.';
+            characteristics.sub_characteristics.forEach((subCharacteristic: DeviceTypeCharacteristicsModel) => {
+                array = array.concat(this.characteristicsFlatten(subCharacteristic, parentName));
+            });
+            return array;
         }
     }
 

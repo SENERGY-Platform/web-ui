@@ -35,6 +35,44 @@ describe('DeviceTypesContentVariableDialog', () => {
     const matDialogRefSpy: Spy<MatDialogRef<DeviceTypesContentVariableDialogComponent>> = createSpyFromClass<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
     const conceptServiceSpy: Spy<ConceptsService> = createSpyFromClass(ConceptsService);
 
+    conceptServiceSpy.getConcepts.and.returnValue(of([{
+        creator: 'd',
+        id: 'concept:id:4711',
+        name: 'binary state'
+    }]));
+
+    conceptServiceSpy.getConceptWithCharacteristics.and.returnValue(of({
+        id: 'urn:infai:ses:concept:ebfeabb3',
+        name: 'binary state',
+        base_characteristic_id: 'urn:infai:ses:characteristic:7621686a',
+        characteristics: [
+            {
+                id: 'urn:infai:ses:characteristic:7621686a',
+                name: 'on_off',
+                type: 'https://schema.org/Text',
+                sub_characteristics: null,
+                rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+            },
+            {
+                id: 'urn:infai:ses:characteristic:c0353532',
+                name: 'binary status code',
+                type: 'https://schema.org/Integer',
+                min_value: 0,
+                max_value: 1,
+                sub_characteristics: null,
+                rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+            },
+            {
+                id: 'urn:infai:ses:characteristic:7dc1bb7e',
+                name: 'boolean',
+                type: 'https://schema.org/Boolean',
+                sub_characteristics: null,
+                rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+            }
+        ],
+        rdf_type: 'https://senergy.infai.org/ontology/Concept'
+    }));
+
     function init(contentVariable: DeviceTypeContentVariableModel, functions: DeviceTypeFunctionModel[]) {
         TestBed.configureTestingModule({
             imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatSelectModule, MatInputModule],
@@ -181,9 +219,6 @@ describe('DeviceTypesContentVariableDialog', () => {
     }));
 
     it('init concepts and characteristics', async(() => {
-        conceptServiceSpy.getConceptWithCharacteristics.and.returnValue(of({
-            id: '1',
-        } as  ConceptsCharacteristicsModel));
         const functions: DeviceTypeFunctionModel[] = [{
             id: 'func_id_1',
             name: 'without_concept_id',
@@ -194,14 +229,28 @@ describe('DeviceTypesContentVariableDialog', () => {
                 id: 'func_id_2',
                 name: 'with_concept_id',
                 rdf_type: 'rdf_type',
-                concept_id: 'concept_id_1'
+                concept_id: 'urn:infai:ses:concept:ebfeabb3'
             }];
         init({} as DeviceTypeContentVariableModel, functions);
-        expect(component.functions).toEqual(functions);
-        expect(component.concepts.length).toBe(1);
+        expect(component.functionConceptIds).toEqual(['urn:infai:ses:concept:ebfeabb3']);
+        expect(component.conceptList).toEqual([{
+            conceptName: 'binary state',
+            colored: true,
+            characteristicList: [
+                {
+                    id: 'urn:infai:ses:characteristic:7621686a',
+                    name: 'on_off',
+                },
+                {
+                    id: 'urn:infai:ses:characteristic:c0353532',
+                    name: 'binary status code',
+                },
+                {
+                    id: 'urn:infai:ses:characteristic:7dc1bb7e',
+                    name: 'boolean',
+                }]
+        }]);
     }));
-
-
 
 
 });

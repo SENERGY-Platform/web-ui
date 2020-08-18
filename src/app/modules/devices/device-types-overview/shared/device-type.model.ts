@@ -94,7 +94,7 @@ export interface DeviceTypeCharacteristicsModel {
     min_value?: number;
     max_value?: number;
     value?: string | boolean | number;
-    sub_characteristics?: DeviceTypeCharacteristicsModel[];
+    sub_characteristics?: DeviceTypeCharacteristicsModel[] | null;
 }
 
 export interface DeviceTypeFunctionModel {
