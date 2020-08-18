@@ -31,10 +31,11 @@ import {V2DeploymentsPreparedModel} from '../shared/deployments-prepared-v2.mode
 import {DeploymentsService} from '../shared/deployments.service';
 import {of} from 'rxjs';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
+import {ProcessesModule} from '../../processes.module';
 
 describe('ProcessDeploymentsConfigComponent', () => {
     let component: ProcessDeploymentsConfigComponent;
@@ -355,6 +356,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 FlexLayoutModule,
                 MatInputModule,
                 MatSelectModule,
+                ProcessesModule,
             ],
             declarations: [ProcessDeploymentsConfigComponent],
             providers: [{provide: KeycloakService, useClass: MockKeycloakService},
