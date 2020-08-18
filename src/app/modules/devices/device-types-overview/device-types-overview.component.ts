@@ -29,6 +29,7 @@ import {
     DeviceInstancesRouterState,
     DeviceInstancesRouterStateTypesEnum
 } from '../device-instances/device-instances.component';
+import {DeviceInstancesDialogService} from '../device-instances/shared/device-instances-dialog.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -64,7 +65,8 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
                 private snackBar: MatSnackBar,
                 private deviceInstancesService: DeviceInstancesService,
                 private dialogsService: DialogsService,
-                private router: Router) {
+                private router: Router,
+                private deviceInstancesDialogService: DeviceInstancesDialogService) {
     }
 
     ngOnInit() {
@@ -132,7 +134,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     newInstance(deviceType: DeviceTypePermSearchModel): void {
-        this.deviceInstancesService.openDeviceCreateDialog(deviceType);
+        this.deviceInstancesDialogService.openDeviceCreateDialog(deviceType);
     }
 
     showDevices(deviceType: DeviceTypePermSearchModel) {

@@ -22,13 +22,9 @@ import {catchError, map, share} from 'rxjs/internal/operators';
 import {DeviceInstancesModel, DeviceFilterCriteriaModel, DeviceSelectablesModel, DeviceInstancesBaseModel} from './device-instances.model';
 import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
-import {DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
+import {MatDialog} from '@angular/material/dialog';
 import {DeviceTypeService} from '../../device-types-overview/shared/device-type.service';
-import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
-import {DeviceTypePermSearchModel} from '../../device-types-overview/shared/device-type-perm-search.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {UtilService} from '../../../../core/services/util.service';
 
@@ -188,69 +184,6 @@ export class DeviceInstancesService {
         return this.getDeviceHistoryObservable1h;
     }
 
-    openDeviceServiceDialog(deviceTypeId: string): void {
-
-        this.deviceTypeService.getDeviceType(deviceTypeId).subscribe((deviceType: DeviceTypeModel | null) => {
-            const dialogConfig = new MatDialogConfig();
-            dialogConfig.disableClose = false;
-            if (deviceType) {
-                dialogConfig.data = {
-                    services: deviceType.services,
-                };
-            }
-            this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
-        });
-    }
-
-     openDeviceEditDialog(device: DeviceInstancesModel): void {
-
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
-            device: JSON.parse(JSON.stringify(device))         // create copy of object
-        };
-
-        const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstancesModel) => {
-            if (deviceOut !== undefined) {
-                this.updateDeviceInstance(this.convertDeviceInstance(deviceOut)).subscribe(
-                    (deviceResp: DeviceInstancesUpdateModel | null) => {
-                        if (deviceResp === null) {
-                            this.snackBar.open('Error while updating the device instance!', undefined, {duration: 2000});
-                        } else {
-                            Object.assign(device, deviceOut);
-                            this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
-                        }
-                    });
-            }
-        });
-    }
-
-    openDeviceCreateDialog(deviceType: DeviceTypePermSearchModel): void {
-
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
-            device: {device_type: JSON.parse(JSON.stringify(deviceType))} as DeviceInstancesModel
-        };
-
-        const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((deviceOut: DeviceInstancesModel) => {
-            if (deviceOut !== undefined) {
-                this.saveDeviceInstance(this.convertDeviceInstance(deviceOut)).subscribe(
-                    (deviceResp: DeviceInstancesUpdateModel | null) => {
-                        if (deviceResp === null) {
-                            this.snackBar.open('Error while saving the device instance!', undefined, {duration: 2000});
-                        } else {
-                            this.snackBar.open('Device instance saved successfully.', undefined, {duration: 2000});
-                        }
-                    });
-            }
-        });
-    }
-
     convertToShortId(id: string | undefined): string {
         if (id === undefined || id === '') {
             return '';
@@ -264,14 +197,5 @@ export class DeviceInstancesService {
         } else {
             throw new Error('expected urn:infai:ses:device as prefix');
         }
-    }
-
-    private convertDeviceInstance(deviceOut: DeviceInstancesModel): DeviceInstancesUpdateModel {
-        return {
-            id: deviceOut.id,
-            local_id: deviceOut.local_id,
-            name: deviceOut.name,
-            device_type_id: deviceOut.device_type.id,
-        };
     }
 }

@@ -29,6 +29,7 @@ import {ExportService} from '../../../data/export/shared/export.service';
 import {ExportModel} from '../../../data/export/shared/export.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceInstancesExportDialogComponent} from '../dialogs/device-instances-export-dialog.component';
+import {DeviceInstancesDialogService} from '../shared/device-instances-dialog.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -61,7 +62,8 @@ export class DeviceInstancesGridComponent implements OnInit {
                 private deviceTypeService: DeviceTypeService,
                 private exportService: ExportService,
                 private snackBar: MatSnackBar,
-                private dialog: MatDialog) {
+                private dialog: MatDialog,
+                private deviceInstancesDialogService: DeviceInstancesDialogService) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
 
@@ -70,11 +72,11 @@ export class DeviceInstancesGridComponent implements OnInit {
     }
 
     service(deviceTypeId: string): void {
-        this.deviceInstancesService.openDeviceServiceDialog(deviceTypeId);
+        this.deviceInstancesDialogService.openDeviceServiceDialog(deviceTypeId);
     }
 
     edit(device: DeviceInstancesModel): void {
-        this.deviceInstancesService.openDeviceEditDialog(device);
+        this.deviceInstancesDialogService.openDeviceEditDialog(device);
     }
 
     delete(device: DeviceInstancesModel): void {
