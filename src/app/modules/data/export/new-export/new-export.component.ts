@@ -72,6 +72,8 @@ export class NewExportComponent implements AfterViewInit {
     typeFloat = 'https://schema.org/Float';
     typeBoolean = 'https://schema.org/Boolean';
 
+    id = null as any;
+
 
     constructor(
         private route: ActivatedRoute,
@@ -82,7 +84,7 @@ export class NewExportComponent implements AfterViewInit {
         private operatorRepoService: OperatorRepoService,
         private router: Router,
         public snackBar: MatSnackBar) {
-
+        this.id = this.route.snapshot.paramMap.get('id');
     }
 
     ngAfterViewInit() {
@@ -96,7 +98,6 @@ export class NewExportComponent implements AfterViewInit {
         array.push(this.pipelineRegistryService.getPipelines());
 
         forkJoin(array).subscribe(response => {
-           console.log(response);
            this.devices = response [0] as DeviceInstancesModel[] ;
            this.pipelines = response [1] as PipelineModel[];
             setTimeout(() => {
@@ -180,12 +181,10 @@ export class NewExportComponent implements AfterViewInit {
             this.export.Offset = 'largest';
         }
         if (this.route.snapshot.paramMap.get('id') !== null) {
-            this.exportService.stopPipeline(this.export).subscribe(() => {
-                this.exportService.startPipeline(this.export).subscribe(function () {
-                    self.router.navigate(['/data/export']);
-                    self.snackBar.open('Export updated', undefined, {
-                        duration: 2000,
-                    });
+            this.exportService.editExport(this.id, this.export).subscribe(() => {
+                self.router.navigate(['/data/export']);
+                self.snackBar.open('Export updated', undefined, {
+                    duration: 2000,
                 });
             });
         } else {

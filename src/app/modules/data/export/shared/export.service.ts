@@ -68,13 +68,20 @@ export class ExportService {
         );
     }
 
+    editExport(id: string, exp: ExportModel): Observable<ExportModel> {
+        return this.http.put<ExportModel>(environment.exportService + '/instance/' + id, exp).pipe(
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'editExport: Error', {} as ExportModel))
+        );
+    }
+
     stopPipeline(exp: ExportModel): Observable<{}> {
         return this.http.delete<{}>(environment.exportService + '/instance/' + exp.ID).pipe(
             catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipeline: Error', {}))
         );
     }
 
-    prepareDeviceServiceExport(deviceInstancesModel: DeviceInstancesModel | DeviceInstancesUpdateModel, service: DeviceTypeServiceModel): ExportModel[] {
+    prepareDeviceServiceExport(deviceInstancesModel: DeviceInstancesModel | DeviceInstancesUpdateModel,
+                               service: DeviceTypeServiceModel): ExportModel[] {
         const exports: ExportModel[] = [];
         service.outputs.forEach((output, index) => {
             const traverse = this.addCharacteristicToDeviceTypeContentVariable(output.content_variable);

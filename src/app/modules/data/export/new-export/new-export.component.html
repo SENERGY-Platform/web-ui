@@ -100,7 +100,8 @@
                 <button mat-raised-button color="accent" (click)="autofillValues()" disabled="{{paths.size === 0}}">Autofill Export Values</button>
             </div>
             <div fxLayout="column" fxFlex fxLayoutAlign="center end">
-                <button mat-raised-button color="accent" (click)="startExport()">Start Export</button>
+                <button *ngIf="id === null"  mat-raised-button color="accent" (click)="startExport()">Start Export</button>
+                <button *ngIf="id !== null"  mat-raised-button color="accent" (click)="startExport()">Edit Export</button>
             </div>
         </div>
     </div>
