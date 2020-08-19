@@ -88,18 +88,25 @@ export class ExportComponent implements OnInit, OnDestroy {
     deleteExport(exp: ExportModel) {
         this.dialogsService.openDeleteDialog('export').afterClosed().subscribe((deleteExport: boolean) => {
             if (deleteExport) {
-                const index = this.exports.indexOf(exp);
-                if (index > -1) {
-                    this.exports.splice(index, 1);
-                }
-                this.exportService.stopPipeline(exp).subscribe(() => {
-                    this.snackBar.open('Export deleted', undefined, {
-                        duration: 2000,
-                    });
-                    this.setRepoItemsParams(1);
-                    this.getExports(false);
+                this.ready = false;
+                this.exportService.stopPipeline(exp).subscribe((response) => {
+                    if (response.status === 204) {
+                        this.snackBar.open('Export deleted', undefined, {
+                            duration: 2000,
+                        });
+                        const index = this.exports.indexOf(exp);
+                        if (index > -1) {
+                            this.exports.splice(index, 1);
+                        }
+                        this.setRepoItemsParams(1);
+                        this.getExports(false);
+                    } else {
+                        this.snackBar.open('Export could not be deleted', undefined, {
+                            duration: 2000,
+                        });
+                    }
+                    this.ready = true;
                 });
-
             }
         });
     }
@@ -116,7 +123,8 @@ export class ExportComponent implements OnInit, OnDestroy {
             this.setRepoItemsParams(this.limitInit);
             this.reset();
         }
-        this.exportService.getExports(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+        this.exportService.getExports(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .subscribe(
             (resp: ExportModel [] | null) => {
                 if (resp !== null) {
                     if (resp.length !== this.limit) {
