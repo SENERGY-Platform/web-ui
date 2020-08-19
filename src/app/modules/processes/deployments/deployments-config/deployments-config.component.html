@@ -62,6 +62,21 @@
                                                    [formControlName]="item.key">
                                         </mat-form-field>
                                     </td>
+                                    <td formArrayName="configurables"
+                                        *ngFor="let configurable of element.task.configurables; let configurableIndex = index; trackBy:trackByFn">
+                                        <div [formGroupName]="configurableIndex">
+                                            <div formArrayName="values"
+                                                 *ngFor="let value of configurable.values; let configurableValueIndex = index; trackBy:trackByFn">
+                                                <div [formGroupName]="configurableValueIndex">
+                                                    <mat-form-field class="full-width" color="accent">
+                                                        <input type="text" matInput placeholder="{{value.label}}"
+                                                               formControlName="value">
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </td>
                                 </tr>
                             </table>
                         </div>

@@ -18,6 +18,7 @@ import {Injectable} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import * as moment from 'moment';
 import {
+    V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedConfigurableValueModel,
     V2DeploymentsPreparedElementModel,
     V2DeploymentsPreparedModel,
     V2DeploymentsPreparedSelectionModel,
@@ -44,6 +45,16 @@ export class DeploymentsConfigInitializerService {
             elements: this.initElementsArray(deployment.elements),
             executable: deployment.executable,
         });
+    }
+
+    initConfigurablesArray(configurables: V2DeploymentsPreparedConfigurableModel[] | null): FormArray {
+        const array = new FormArray([]);
+        if (configurables) {
+            configurables.forEach((configurable: V2DeploymentsPreparedConfigurableModel) => {
+                array.push(this.initConfigurableGroup(configurable));
+            });
+        }
+        return array;
     }
 
     private initElementsArray(elements: V2DeploymentsPreparedElementModel[]): FormArray {
@@ -96,7 +107,7 @@ export class DeploymentsConfigInitializerService {
             retries: task.retries,
             parameter: this.initParameterFormGroup(task.parameter),
             selection: this.initSelectionFormGroup(task.selection, disable),
-            configurables: task.configurables,
+            configurables: this.initConfigurablesArray(task.configurables),
         });
     }
 
@@ -147,6 +158,31 @@ export class DeploymentsConfigInitializerService {
         return this._formBuilder.group({
             device: [selectionOption.device],
             services: this._formBuilder.array(selectionOption.services)
+        });
+    }
+
+    private initConfigurableGroup(configurable: V2DeploymentsPreparedConfigurableModel): FormGroup {
+        return this._formBuilder.group({
+            characteristic_id: configurable.characteristic_id,
+            values: this.initConfigurableValueArray(configurable.values),
+        });
+    }
+
+    private initConfigurableValueArray(configurables: V2DeploymentsPreparedConfigurableValueModel[]): FormArray {
+        const array = new FormArray([]);
+        if (configurables) {
+            configurables.forEach((configurable: V2DeploymentsPreparedConfigurableValueModel) => {
+                array.push(this.initConfigurableValueGroup(configurable));
+            });
+        }
+        return array;
+    }
+
+    private initConfigurableValueGroup(configurableValue: V2DeploymentsPreparedConfigurableValueModel): FormGroup {
+        return this._formBuilder.group({
+            label: configurableValue.label,
+            path: configurableValue.path,
+            value: configurableValue.value,
         });
     }
 
