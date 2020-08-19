@@ -74,9 +74,12 @@ export class ExportService {
         );
     }
 
-    stopPipeline(exp: ExportModel): Observable<{}> {
-        return this.http.delete<{}>(environment.exportService + '/instance/' + exp.ID).pipe(
-            catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipeline: Error', {}))
+    stopPipeline(exp: ExportModel): Observable<{status: number}> {
+        return this.http.delete(environment.exportService + '/instance/' + exp.ID,{responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipeline: Error', {status: 404}))
         );
     }
 
