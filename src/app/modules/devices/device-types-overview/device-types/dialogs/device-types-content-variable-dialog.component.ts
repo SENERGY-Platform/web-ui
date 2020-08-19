@@ -40,7 +40,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     typeOptionsControl: FormControl = new FormControl();
     primitiveTypes: { type: string, typeShort: string }[] = [];
     nonPrimitiveTypes: { type: string, typeShort: string }[] = [];
-    conceptList: { conceptName: string, colored: boolean, characteristicList: { id: string, name: string}[] }[] = [];
+    conceptList: { conceptName: string, colored: boolean, characteristicList: { id: string, name: string }[] }[] = [];
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesContentVariableDialogComponent>,
                 private _formBuilder: FormBuilder,
@@ -48,11 +48,13 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 private deviceTypeHelperService: DeviceTypeHelperService,
                 @Inject(MAT_DIALOG_DATA) data: { contentVariable: DeviceTypeContentVariableModel, functions: DeviceTypeFunctionModel[] }) {
         this.contentVariable = data.contentVariable;
-        data.functions.forEach((func: DeviceTypeFunctionModel) => {
-            if (func.concept_id !== '') {
-                this.functionConceptIds.push(func.concept_id);
-            }
-        });
+        if (data.functions) {
+            data.functions.forEach((func: DeviceTypeFunctionModel) => {
+                if (func.concept_id !== '') {
+                    this.functionConceptIds.push(func.concept_id);
+                }
+            });
+        }
     }
 
     ngOnInit(): void {

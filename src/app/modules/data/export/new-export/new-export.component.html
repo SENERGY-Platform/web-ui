@@ -15,7 +15,7 @@
   -->
 
 <div class="main-panel">
-    <div fxLayout="column" class="layout-margin">
+    <div fxLayout="column" class="layout-margin" *ngIf="ready">
         <mat-radio-group [(ngModel)]="selector" (ngModelChange)="exportTypeChanged()" class="radio-group">
             <mat-radio-button class="radio-button" value="device">Gerät</mat-radio-button>
             <mat-radio-button class="radio-button" value="pipe">Analyse</mat-radio-button>
@@ -105,4 +105,5 @@
             </div>
         </div>
     </div>
+    <senergy-spinner [show]="!ready"></senergy-spinner>
 </div>
