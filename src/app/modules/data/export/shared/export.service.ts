@@ -63,7 +63,7 @@ export class ExportService {
     }
 
     startPipeline(exp: ExportModel): Observable<ExportModel> {
-        return this.http.put<ExportModel>(environment.exportService + '/instance', exp).pipe(
+        return this.http.post<ExportModel>(environment.exportService + '/instance', exp).pipe(
             catchError(this.errorHandlerService.handleError(ExportService.name, 'startPipeline: Error', {} as ExportModel))
         );
     }
