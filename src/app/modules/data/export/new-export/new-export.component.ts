@@ -158,6 +158,7 @@ export class NewExportComponent implements AfterViewInit {
                 }
             }, 0);
         });
+        this.ready = true;
     }
 
     startExport() {
@@ -181,11 +182,19 @@ export class NewExportComponent implements AfterViewInit {
             this.export.Offset = 'largest';
         }
         if (this.route.snapshot.paramMap.get('id') !== null) {
-            this.exportService.editExport(this.id, this.export).subscribe(() => {
-                self.router.navigate(['/data/export']);
-                self.snackBar.open('Export updated', undefined, {
-                    duration: 2000,
-                });
+            this.ready = false;
+            this.exportService.editExport(this.id, this.export).subscribe((response) => {
+                if (response.status === 200) {
+                    self.router.navigate(['/data/export']);
+                    self.snackBar.open('Export updated', undefined, {
+                        duration: 2000,
+                    });
+                } else {
+                    this.snackBar.open('Export could not be updated', undefined, {
+                        duration: 2000,
+                    });
+                }
+                this.ready = true;
             });
         } else {
             this.exportService.startPipeline(this.export).subscribe(function () {

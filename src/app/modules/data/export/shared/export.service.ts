@@ -68,14 +68,17 @@ export class ExportService {
         );
     }
 
-    editExport(id: string, exp: ExportModel): Observable<ExportModel> {
-        return this.http.put<ExportModel>(environment.exportService + '/instance/' + id, exp).pipe(
-            catchError(this.errorHandlerService.handleError(ExportService.name, 'editExport: Error', {} as ExportModel))
+    editExport(id: string, exp: ExportModel): Observable<{status: number}> {
+        return this.http.put(environment.exportService + '/instance/' + id, exp, {responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'editExport: Error', {status: 400}))
         );
     }
 
     stopPipeline(exp: ExportModel): Observable<{status: number}> {
-        return this.http.delete(environment.exportService + '/instance/' + exp.ID,{responseType: 'text', observe: 'response'}).pipe(
+        return this.http.delete(environment.exportService + '/instance/' + exp.ID, {responseType: 'text', observe: 'response'}).pipe(
             map( resp => {
                 return {status: resp.status};
             }),
