@@ -284,7 +284,7 @@ describe('DeploymentsConfigInitializerService', () => {
                     'task': {
                         'retries': 0,
                         'parameter': {},
-                        'configurables': null,
+                        'configurables': [],
                         'selection': {
                             'filter_criteria': {
                                 'characteristic_id': '',
@@ -366,7 +366,7 @@ describe('DeploymentsConfigInitializerService', () => {
                             'inputs.g': '0',
                             'inputs.r': '0'
                         },
-                        'configurables': null,
+                        'configurables': [],
                         'selection': {
                             'filter_criteria': {
                                 'characteristic_id': 'urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43',
@@ -444,7 +444,7 @@ describe('DeploymentsConfigInitializerService', () => {
                     'task': {
                         'retries': 0,
                         'parameter': {},
-                        'configurables': null,
+                        'configurables': [],
                         'selection': {
                             'filter_criteria': {
                                 'characteristic_id': '',

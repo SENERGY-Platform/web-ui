@@ -19,12 +19,14 @@ import {Navigation, Router} from '@angular/router';
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import {DeploymentsConfigInitializerService} from './shared/deployments-config-initializer.service';
 import {
+    V2DeploymentsPreparedConfigurableModel,
     V2DeploymentsPreparedElementModel,
+    V2DeploymentsPreparedFilterCriteriaModel,
     V2DeploymentsPreparedModel,
     V2DeploymentsPreparedSelectionOptionModel
 } from '../shared/deployments-prepared-v2.model';
@@ -79,6 +81,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         if (deployment !== null) {
             this.deployment = deployment;
             this.deploymentFormGroup = this.deploymentsConfigInitializerService.initFormGroup(this.deployment);
+            this.selectedServiceIdchangeListener();
             this.ready = true;
         }
     }
@@ -93,6 +96,31 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 this.snackBar.open('Deployment stored successfully.', undefined, {duration: 2000});
             } else {
                 this.snackBar.open('Error while storing the deployment!', undefined, {duration: 2000});
+            }
+        });
+    }
+
+    selectedServiceIdchangeListener(): void {
+        this.elementsFormArray.controls.forEach((element: AbstractControl) => {
+
+            const filterCriteriaFormControl = <FormGroup>element.get(['task', 'selection', 'filter_criteria']);
+            if (filterCriteriaFormControl) {
+                const filterCriteria = <V2DeploymentsPreparedFilterCriteriaModel>filterCriteriaFormControl.value;
+                if (filterCriteria.characteristic_id !== null && filterCriteria.characteristic_id !== '') {
+                    if (filterCriteria.function_id !== null) {
+                        if (filterCriteria.function_id.startsWith('urn:infai:ses:controlling-function:')) {
+                            const selectedServiceFormControl = <FormControl>element.get(['task', 'selection', 'selected_service_id']);
+                            selectedServiceFormControl.valueChanges.subscribe((selectedServiceId: string) => {
+                                this.deploymentsService.getConfigurables(<string>filterCriteria.characteristic_id, selectedServiceId).subscribe(
+                                    (configurables: (V2DeploymentsPreparedConfigurableModel[] | null)) => {
+                                        const taskFormGroup = <FormGroup>element.get(['task']);
+                                            const configurablesFormArray = this.deploymentsConfigInitializerService.initConfigurablesArray(configurables);
+                                            taskFormGroup.setControl('configurables', configurablesFormArray);
+                                    });
+                            });
+                        }
+                    }
+                }
             }
         });
     }

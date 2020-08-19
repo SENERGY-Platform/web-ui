@@ -60,8 +60,7 @@ export interface V2DeploymentsPreparedConfigurableModel {
 export interface V2DeploymentsPreparedConfigurableValueModel {
     label: string;
     path: string;
-    value: any;
-    value_type: string;
+    value: string;
 }
 
 export interface V2DeploymentsPreparedTimeEventModel {
