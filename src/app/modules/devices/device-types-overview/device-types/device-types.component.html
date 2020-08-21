@@ -196,7 +196,7 @@
                                         <div fxFlex>
                                             <mat-form-field class="full-width" color="accent">
                                                 <mat-select placeholder="Serialization"
-                                                            formControlName="serialization">
+                                                            formControlName="serialization" [required]="inOut.dataSource && inOut.dataSource.data.length > 0">
                                                     <mat-option>-- None --</mat-option>
                                                     <mat-option *ngFor="let serialization of serializations"
                                                                 [value]="serialization">
