@@ -36,7 +36,12 @@
                                        *ngIf="exports.length > 0">
                             <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of exports">
                                 <mat-card>
-                                    <div class="truncate header-text" matTooltip="{{item.Name}}">{{item.Name}}</div>
+                                    <div fxLayout="row" fxLayoutAlign="none center">
+                                    <mat-icon class="warning-icon" *ngIf="item.FilterType === 'pipeId'" matTooltip="Outdated export version - Please redeploy the export" mat-list-icon>
+                                            warning
+                                        </mat-icon>
+                                        <div class="truncate header-text" matTooltip="{{item.Name}}">{{item.Name}}</div>
+                                    </div>
                                     <mat-card-content>
                                         <mat-list fxLayoutAlign="center center">
                                             <div fxFill fxLayout="column">

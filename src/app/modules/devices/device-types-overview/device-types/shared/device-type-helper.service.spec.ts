@@ -45,6 +45,8 @@ describe('DeviceTypeHelperService', () => {
         expect(service.checkIfContentExists([], '')).toBe(false);
         expect(service.checkIfContentExists(null, '')).toBe(false);
         expect(service.checkIfContentExists([{} as DeviceTypeContentVariableModel], 'x')).toBe(true);
+        expect(service.checkIfContentExists(null, 'x')).toBe(false);
+        expect(service.checkIfContentExists([{} as DeviceTypeContentVariableModel], null)).toBe(false);
     });
 
     it('test updateTreeData add', () => {

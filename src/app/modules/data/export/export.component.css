@@ -42,7 +42,14 @@ mat-grid-tile {
     max-height: 24px;
     font-size: 20px;
     font-weight: 500;
-    margin-bottom: 8px;
+}
+
+.warning-icon {
+    color: orangered;
+}
+/* Note: If you're using an SVG icon, you should make the class target the `<svg>` element */
+.warning-icon svg {
+    fill: orangered;
 }
 
 .fab {

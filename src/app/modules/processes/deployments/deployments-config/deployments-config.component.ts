@@ -30,6 +30,8 @@ import {
     V2DeploymentsPreparedModel,
     V2DeploymentsPreparedSelectionOptionModel
 } from '../shared/deployments-prepared-v2.model';
+import {FlowRepoService} from '../../../data/flow-repo/shared/flow-repo.service';
+import {FlowModel} from '../../../data/flow-repo/shared/flow.model';
 
 
 @Component({
@@ -46,6 +48,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     deploymentId = '';
     deployment: V2DeploymentsPreparedModel | null = null;
     deploymentFormGroup!: FormGroup;
+    flowList: FlowModel[] = [];
     ready = false;
 
     constructor(private _formBuilder: FormBuilder,
@@ -54,8 +57,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 private deploymentsService: DeploymentsService,
                 private snackBar: MatSnackBar,
                 private router: Router,
-                private deploymentsConfigInitializerService: DeploymentsConfigInitializerService) {
+                private deploymentsConfigInitializerService: DeploymentsConfigInitializerService,
+                private flowRepoService: FlowRepoService) {
         this.getRouterParams();
+        this.getFlows();
     }
 
     ngOnInit() {
@@ -114,8 +119,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                                 this.deploymentsService.getConfigurables(<string>filterCriteria.characteristic_id, selectedServiceId).subscribe(
                                     (configurables: (V2DeploymentsPreparedConfigurableModel[] | null)) => {
                                         const taskFormGroup = <FormGroup>element.get(['task']);
-                                            const configurablesFormArray = this.deploymentsConfigInitializerService.initConfigurablesArray(configurables);
-                                            taskFormGroup.setControl('configurables', configurablesFormArray);
+                                        const configurablesFormArray = this.deploymentsConfigInitializerService.initConfigurablesArray(configurables);
+                                        taskFormGroup.setControl('configurables', configurablesFormArray);
                                     });
                             });
                         }
@@ -127,7 +132,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     changeTaskSelectionOption(selectedElementIndex: number, selectionOptionIndex: number): void {
 
-        this.setSelectedServiceId(selectedElementIndex, selectionOptionIndex);
+        this.setSelectedServiceId(selectedElementIndex, selectionOptionIndex, 'task');
 
         const elementClicked = this.getElement(selectedElementIndex);
         if (elementClicked.group) {
@@ -138,7 +143,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                         if (selectedDeviceId) {
                             if (elementClicked.task) {
                                 selectedDeviceId.patchValue(elementClicked.task.selection.selected_device_id);
-                                this.setSelectedServiceId(elementIndex, this.getSelectionOptionIndex(selectedElementIndex, elementClicked.task.selection.selected_device_id));
+                                this.setSelectedServiceId(elementIndex, this.getSelectionOptionIndex(selectedElementIndex, elementClicked.task.selection.selected_device_id), 'task');
                             }
                         }
                     }
@@ -153,6 +158,19 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     elementsTimeEvent(elementIndex: number): FormGroup {
         return this.deploymentFormGroup.get(['elements', elementIndex, 'time_event']) as FormGroup;
+    }
+
+    setSelectedServiceId(elementIndex: number, selectionOptionIndex: number, elementType: string): void {
+        const selection = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, elementType, 'selection']);
+        const services = <FormArray>this.deploymentFormGroup.get(['elements', elementIndex, elementType, 'selection', 'selection_options', selectionOptionIndex, 'services']);
+        selection.patchValue({'selection_options_index': selectionOptionIndex});
+        if (services.value.length <= 1) {
+            selection.patchValue({'selected_service_id': services.value[0].id});
+            selection.patchValue({'show': false});
+        } else {
+            selection.patchValue({'selected_service_id': ''});
+            selection.patchValue({'show': true});
+        }
     }
 
     private getRouterParams(): void {
@@ -177,19 +195,11 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         return index;
     }
 
-    private setSelectedServiceId(elementIndex: number, selectionOptionIndex: number): void {
-        const selection = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selection']);
-        const services = <FormArray>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selection', 'selection_options', selectionOptionIndex, 'services']);
-        selection.patchValue({'selection_options_index': selectionOptionIndex});
-        if (services.value.length <= 1) {
-            selection.patchValue({'selected_service_id': services.value[0].id});
-            selection.patchValue({'show': false});
-        } else {
-            selection.patchValue({'selected_service_id': ''});
-            selection.patchValue({'show': true});
-        }
+    private getFlows(): void {
+        this.flowRepoService.getFlows('', 9999, 0, 'name', 'asc').subscribe((resp: { flows: FlowModel[] }) => {
+            this.flowList = resp.flows;
+        });
     }
-
 
     get elements(): V2DeploymentsPreparedElementModel[] {
         const elements = this.deploymentFormGroup.get(['elements']) as FormArray;

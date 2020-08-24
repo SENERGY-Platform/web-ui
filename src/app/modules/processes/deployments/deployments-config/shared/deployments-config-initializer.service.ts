@@ -20,7 +20,7 @@ import * as moment from 'moment';
 import {
     V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedConfigurableValueModel,
     V2DeploymentsPreparedElementModel,
-    V2DeploymentsPreparedModel,
+    V2DeploymentsPreparedModel, V2DeploymentsPreparedMsgEventModel,
     V2DeploymentsPreparedSelectionModel,
     V2DeploymentsPreparedSelectionOptionModel,
     V2DeploymentsPreparedTaskModel,
@@ -76,7 +76,7 @@ export class DeploymentsConfigInitializerService {
             name: element.name,
             order: element.order,
             time_event: element.time_event ? this.initTimeEventFormGroup(element.time_event) : null,
-            message_event: element.message_event,
+            message_event: element.message_event ? this.initMessageEventFormGroup(element.message_event) : null,
             notification: element.notification,
             task: element.task ? this.initTaskFormGroup(element.task, disable) : null,
         });
@@ -108,6 +108,15 @@ export class DeploymentsConfigInitializerService {
             parameter: this.initParameterFormGroup(task.parameter),
             selection: this.initSelectionFormGroup(task.selection, disable),
             configurables: this.initConfigurablesArray(task.configurables),
+        });
+    }
+
+    private initMessageEventFormGroup(messageEvent: V2DeploymentsPreparedMsgEventModel): FormGroup {
+        return this._formBuilder.group({
+            value: messageEvent.value,
+            flow_id: messageEvent.flow_id,
+            event_id: messageEvent.event_id,
+            selection: this.initSelectionFormGroup(messageEvent.selection, false)
         });
     }
 

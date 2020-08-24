@@ -38,7 +38,7 @@ export class DeviceTypeHelperService {
     }
 
     checkIfContentExists(contentVariable: DeviceTypeContentVariableModel[] | null | undefined, serialization: string | null): boolean {
-        if ((contentVariable === undefined || contentVariable === null || contentVariable.length === 0) &&
+        if ((contentVariable === undefined || contentVariable === null || contentVariable.length === 0) ||
             (serialization === null || serialization === '')) {
             return false;
         } else {
