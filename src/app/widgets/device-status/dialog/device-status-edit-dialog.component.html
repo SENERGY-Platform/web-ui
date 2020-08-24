@@ -175,6 +175,6 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <span *ngIf="!formGroup.valid" class="color-warn actions-warn">Widget not configured correctly</span>
-    <button mat-raised-button color="accent" (click)="close()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" [disabled]="formGroup.invalid" (click)="save()">Save</button>
 </mat-dialog-actions>
