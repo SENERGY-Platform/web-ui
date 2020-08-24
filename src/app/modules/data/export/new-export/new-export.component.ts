@@ -94,8 +94,8 @@ export class NewExportComponent implements AfterViewInit {
         array.push(this.pipelineRegistryService.getPipelines());
 
         forkJoin(array).subscribe(response => {
-           this.devices = response [0] as DeviceInstancesModel[] ;
-           this.pipelines = response [1] as PipelineModel[];
+            this.devices = response [0] as DeviceInstancesModel[];
+            this.pipelines = response [1] as PipelineModel[];
             setTimeout(() => {
                 const id = this.route.snapshot.paramMap.get('id');
                 if (id !== null) {
@@ -126,7 +126,7 @@ export class NewExportComponent implements AfterViewInit {
                                         }
                                     });
                                 });
-                            } else {
+                            } else if (exp.FilterType === 'operatorId') {
                                 this.selector = 'pipe';
                                 this.pipelines.forEach(pipeline => {
                                     if (pipeline.id === exp.Filter.split(':')[0]) {
@@ -145,6 +145,29 @@ export class NewExportComponent implements AfterViewInit {
                                                     });
                                             }
                                         });
+                                    }
+                                });
+                            } else if (exp.FilterType === 'pipeId') {
+                                this.snackBar.open('Outdated export version - Please reconfigure and redeploy the export', undefined, {
+                                    duration: 5000,
+                                    verticalPosition: 'top',
+                                });
+                                this.selector = 'pipe';
+                                this.pipelines.forEach(pipeline => {
+                                    if (pipeline.id === exp.Filter) {
+                                        this.pipeline = pipeline;
+                                        if (this.pipeline.operators.length === 1) {
+                                            this.operator = pipeline.operators[0];
+                                            this.operatorRepoService.getOperator(this.operator.operatorId)
+                                                .subscribe((resp: OperatorModel | null) => {
+                                                    if (resp !== null && resp.outputs !== undefined) {
+                                                        resp.outputs.forEach((out: IOModel) => {
+                                                            this.paths.set('analytics.' + out.name, out.type);
+                                                        });
+                                                    }
+                                                    this.paths.set('time', 'string');
+                                                });
+                                        }
                                     }
                                 });
                             }
