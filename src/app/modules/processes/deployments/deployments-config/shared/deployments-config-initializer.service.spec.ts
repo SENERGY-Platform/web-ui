@@ -510,4 +510,110 @@ describe('DeploymentsConfigInitializerService', () => {
         expect((<FormControl>formGroup.get(['elements', 4, 'task', 'selection', 'selected_device_id'])).disabled).toBe(true);
         expect((<FormControl>formGroup.get(['elements', 4, 'task', 'selection', 'selected_service_id'])).disabled).toBe(true);
     }));
+
+    it('init FormControl with MessageEvent', inject([DeploymentsConfigInitializerService], (service: DeploymentsConfigInitializerService) => {
+        const deployment: V2DeploymentsPreparedModel = {
+            id: '',
+            name: 'message_event',
+            description: 'test_description',
+            diagram: {
+                svg: 'svg',
+                xml_deployed: '',
+                xml_raw: 'xml_raw'
+            },
+            elements: [
+                {
+                    bpmn_id: 'StartEvent_1',
+                    group: null,
+                    name: 'getOnOffStateFunction on_off',
+                    order: 0,
+                    time_event: null,
+                    notification: null,
+                    message_event: {
+                        event_id: '',
+                        flow_id: '',
+                        value: '',
+                        selection: {
+                            filter_criteria: {
+                                aspect_id: 'urn:infai:ses:aspect:a7470d73-dde3-41fc-92bd-f16bb28f2da6',
+                                characteristic_id: 'urn:infai:ses:characteristic:7621686a-56bc-402d-b4cc-5b266d39736f',
+                                device_class_id: null,
+                                function_id: 'urn:infai:ses:measuring-function:20d3c1d3-77d7-4181-a9f3-b487add58cd0'
+                            },
+                            selected_device_id: '',
+                            selected_service_id: '',
+                            selection_options: [
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:7fbd37f6-ff3b-46ae-8805-3ca89766893b',
+                                        name: 'LIFX Color Bulb 1'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
+                                            name: 'setOnService'
+                                        }]
+                                }]
+                        }
+                    },
+                    task: null
+                }
+            ],
+            executable: true,
+        };
+        const initValues: V2DeploymentsPreparedModel = {
+            id: '',
+            name: 'message_event',
+            description: 'test_description',
+            diagram: {
+                svg: 'svg',
+                xml_deployed: '',
+                xml_raw: 'xml_raw'
+            },
+            elements: [
+                {
+                    bpmn_id: 'StartEvent_1',
+                    group: null,
+                    name: 'getOnOffStateFunction on_off',
+                    order: 0,
+                    time_event: null,
+                    notification: null,
+                    message_event: {
+                        event_id: '',
+                        flow_id: '',
+                        value: '',
+                        selection: {
+                            selection_options_index: -1,
+                            show: false,
+                            filter_criteria: {
+                                aspect_id: 'urn:infai:ses:aspect:a7470d73-dde3-41fc-92bd-f16bb28f2da6',
+                                characteristic_id: 'urn:infai:ses:characteristic:7621686a-56bc-402d-b4cc-5b266d39736f',
+                                device_class_id: null,
+                                function_id: 'urn:infai:ses:measuring-function:20d3c1d3-77d7-4181-a9f3-b487add58cd0'
+                            },
+                            selected_device_id: '',
+                            selected_service_id: '',
+                            selection_options: [
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:7fbd37f6-ff3b-46ae-8805-3ca89766893b',
+                                        name: 'LIFX Color Bulb 1'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
+                                            name: 'setOnService'
+                                        }]
+                                }]
+                        }
+                    },
+                    task: null
+                }
+            ],
+            executable: true,
+        };
+        const formGroup = service.initFormGroup(deployment);
+        expect(formGroup.getRawValue()).toEqual(initValues);
+        expect((<FormControl>formGroup.get('description')).disabled).toBe(true);
+    }));
 });
