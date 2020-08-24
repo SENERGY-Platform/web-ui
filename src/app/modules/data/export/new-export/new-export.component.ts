@@ -90,10 +90,6 @@ export class NewExportComponent implements AfterViewInit {
     ngAfterViewInit() {
         const array: Observable<(DeviceInstancesModel[] | PipelineModel[])>[] = [];
 
-        this.pipelineRegistryService.getPipelines().subscribe((resp: PipelineModel[]) => {
-            this.pipelines = resp;
-        });
-
         array.push(this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc'));
         array.push(this.pipelineRegistryService.getPipelines());
 
