@@ -75,8 +75,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
             if (widget.properties.vAxes) {
                 widget.properties.vAxes.forEach(row => this.selection.select(row));
             }
-            this.selectionChange(widget.properties.exports || []);
-            this.initDeployments();
+            this.initDeployments(widget);
             this.initFormGroup(widget);
         });
     }
@@ -107,7 +106,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         });
     }
 
-    initDeployments() {
+    initDeployments(widget: WidgetModel) {
         this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: (ExportModel[] | null)) => {
             if (exports !== null) {
                 exports.forEach((exportModel: ExportModel) => {
@@ -115,6 +114,12 @@ export class ChartsExportEditDialogComponent implements OnInit {
                         this.exportList.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
                     }
                 });
+                // remove deleted exports
+                if (widget.properties.exports !== undefined) {
+                    widget.properties.exports = widget.properties.exports
+                        .filter(selected => exports.findIndex(existing => existing.ID === selected.id) !== -1);
+                }
+                this.selectionChange(widget.properties.exports || []);
             }
         });
     }
