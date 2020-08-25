@@ -30,7 +30,7 @@
              [fromRoot]="true"
              (scrolled)="onScroll()">
             <div class="layout-margin" fxLayout="column">
-                <div *ngIf="ready">
+                <div *ngIf="!deleteInProgress">
                     <div class="layout-margin" fxLayout="column">
                         <mat-grid-list cols="{{gridCols}}" rowHeight="352px" gutterSize="16px"
                                        *ngIf="exports.length > 0">
@@ -98,7 +98,7 @@
                     </button>
                     <div *ngIf="exports.length === 0 && ready">No export instances found.</div>
                 </div>
-                <senergy-spinner [elementCount]="exports.length" [show]="!ready"></senergy-spinner>
+                <senergy-spinner [elementCount]="exports.length" [show]="!ready || deleteInProgress"></senergy-spinner>
             </div>
         </div>
     </div>

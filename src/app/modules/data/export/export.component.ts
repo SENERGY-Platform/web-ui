@@ -44,6 +44,7 @@ export class ExportComponent implements OnInit, OnDestroy {
 
     exports: ExportModel[] = [];
     ready = false;
+    deleteInProgress = false;
     url = environment.influxAPIURL;
     gridCols = 0;
     sortAttributes = [new SortModel('Name', 'name', 'asc'), new SortModel('Erstellungsdatum', 'created_at', 'asc')];
@@ -89,6 +90,7 @@ export class ExportComponent implements OnInit, OnDestroy {
         this.dialogsService.openDeleteDialog('export').afterClosed().subscribe((deleteExport: boolean) => {
             if (deleteExport) {
                 this.ready = false;
+                this.deleteInProgress = true;
                 this.exportService.stopPipeline(exp).subscribe((response) => {
                     if (response.status === 204) {
                         this.snackBar.open('Export deleted', undefined, {
@@ -106,6 +108,7 @@ export class ExportComponent implements OnInit, OnDestroy {
                         });
                     }
                     this.ready = true;
+                    this.deleteInProgress = false;
                 });
             }
         });
