@@ -43,12 +43,15 @@ export class ExportService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getExports(search: string, limit: number, offset: number, sort: string, order: string): Observable<ExportModel[] | null> {
+    getExports(search: string, limit: number, offset: number, sort: string, order: string, generated?: boolean):
+        Observable<ExportModel[] | null> {
         return this.http.get<ExportModel[]>
         (environment.exportService + '/instance?limit=' + limit + '&offset=' + offset + '&order=' + sort +
-            ':' + order + (search ? ('&search=' + search) : '')).pipe(
-            map((resp: ExportModel[]) => resp || []),
-            catchError(this.errorHandlerService.handleError(ExportService.name, 'getExports: Error', null))
+            ':' + order + (search ? ('&search=' + search) : '') + (generated !== undefined ? ('&generated=' + generated.valueOf()) : ''))
+            .pipe(
+                map((resp: ExportModel[]) => resp || []),
+                catchError(this.errorHandlerService.handleError(ExportService.name, 'getExports: Error', null)
+                )
         );
 
     }
@@ -132,7 +135,8 @@ export class ExportService {
                 FilterType: 'deviceId',
                 ServiceName: service.name,
                 Topic: service.id.replace(/#/g, '_').replace(/:/g, '_'),
-                Offset: 'largest'
+                Offset: 'largest',
+                Generated: true
             } as ExportModel);
         });
         return exports;

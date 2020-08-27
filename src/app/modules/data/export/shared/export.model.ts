@@ -29,6 +29,7 @@ export interface ExportModel {
     RancherServiceId: string;
     ServiceName: string;
     Offset: string;
+    Generated: boolean;
     Values: ExportValueModel [];
     CreatedAt: string;
     UpdatedAt: string;
