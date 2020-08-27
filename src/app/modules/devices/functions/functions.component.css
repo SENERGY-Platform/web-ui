@@ -15,4 +15,59 @@
  */
 
 
+.layout-margin {
+    margin: 8px;
+}
+
+mat-grid-tile-footer {
+    height: 68px !important;
+    background-color: white !important;
+    color: black !important;
+    padding: 8px !important;
+}
+
+mat-grid-list {
+    margin-bottom: 100px;
+}
+
+mat-grid-tile {
+    border-radius: 4px;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.functions-container {
+    height: calc(100% - 64px);
+    overflow-y: hidden;
+}
+
+.functions-scroll {
+    height: calc(100% - 106px);
+    overflow-y: auto;
+}
+
+.background {
+    width: 100%;
+    height: 198px;
+}
+
+.footer-item-header {
+    min-height: 20px;
+    padding: 5px;
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.footer-buttons {
+    max-height: 30px;
+}
+
+.offset {
+    margin-top: 4px;
+}
 
