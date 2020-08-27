@@ -118,6 +118,15 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 if (widget.properties.exports !== undefined) {
                     widget.properties.exports = widget.properties.exports
                         .filter(selected => exports.findIndex(existing => existing.ID === selected.id) !== -1);
+
+                    // exports values or names might have changed
+                    widget.properties.exports.forEach(selected => {
+                        const latestExisting = exports.find(existing => existing.ID === selected.id);
+                        if (latestExisting !== undefined && latestExisting.Name !== undefined && latestExisting.ID !== undefined) {
+                            selected.values = latestExisting.Values;
+                            selected.name = latestExisting.Name;
+                        }
+                    });
                 }
                 this.selectionChange(widget.properties.exports || []);
             }
