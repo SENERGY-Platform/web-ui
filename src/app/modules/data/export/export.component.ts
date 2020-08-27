@@ -43,6 +43,7 @@ const grids = new Map([
 export class ExportComponent implements OnInit, OnDestroy {
 
     exports: ExportModel[] = [];
+    showGenerated = false;
     ready = false;
     deleteInProgress = false;
     url = environment.influxAPIURL;
@@ -121,12 +122,21 @@ export class ExportComponent implements OnInit, OnDestroy {
         });
     }
 
+    showGeneratedChanged() {
+        this.getExports(true);
+    }
+
     private getExports(reset: boolean) {
         if (reset) {
             this.setRepoItemsParams(this.limitInit);
             this.reset();
         }
-        this.exportService.getExports(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+        this.exportService.getExports(
+            this.searchText,
+            this.limit, this.offset,
+            this.sortAttribute.value,
+            this.sortAttribute.order,
+            (this.showGenerated ? undefined : false) )
             .subscribe(
             (resp: ExportModel [] | null) => {
                 if (resp !== null) {

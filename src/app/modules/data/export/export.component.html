@@ -18,6 +18,9 @@
         <senergy-searchbar fxFlex></senergy-searchbar>
         <div fxLayout="row">
             <div fxFlex></div>
+            <div class="layout-margin" fxLayout="column">
+                <mat-checkbox [(ngModel)]="showGenerated" (ngModelChange)="showGeneratedChanged()">Show generated exports</mat-checkbox>
+            </div>
             <senergy-sort [sortAttributes]="sortAttributes"
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         </div>
@@ -29,7 +32,7 @@
              [infiniteScrollContainer]="'.export-scroll'"
              [fromRoot]="true"
              (scrolled)="onScroll()">
-            <div class="layout-margin" fxLayout="column">
+            <div fxLayout="column">
                 <div *ngIf="!deleteInProgress">
                     <div class="layout-margin" fxLayout="column">
                         <mat-grid-list cols="{{gridCols}}" rowHeight="352px" gutterSize="16px"
@@ -39,6 +42,9 @@
                                     <div fxLayout="row" fxLayoutAlign="none center">
                                     <mat-icon class="warning-icon" *ngIf="item.FilterType === 'pipeId'" matTooltip="Outdated export version - Please redeploy the export" mat-list-icon>
                                             warning
+                                        </mat-icon>
+                                        <mat-icon *ngIf="item.Generated === true" matTooltip="generated export" mat-list-icon>
+                                            autorenew
                                         </mat-icon>
                                         <div class="truncate header-text" matTooltip="{{item.Name}}">{{item.Name}}</div>
                                     </div>
