@@ -15,20 +15,17 @@
  */
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {CharacteristicsPermSearchModel} from '../characteristics/shared/characteristics-perm-search.model';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {Subscription} from 'rxjs';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ResponsiveService} from '../../../core/services/responsive.service';
-import {CharacteristicsService} from '../characteristics/shared/characteristics.service';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {FunctionsPermSearchModel} from './shared/functions-perm-search.model';
 import {FunctionsService} from './shared/functions.service';
-import {CharacteristicsEditDialogComponent} from '../characteristics/dialogs/characteristics-edit-dialog.component';
-import {DeviceTypeCharacteristicsModel, DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
+import {DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
 import {FunctionsEditDialogComponent} from './dialog/functions-edit-dialog.component';
 
 const grids = new Map([
@@ -115,6 +112,23 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         });
     }
 
+    deleteFunction(func: FunctionsPermSearchModel): void {
+        this.dialogsService.openDeleteDialog('function ' + func.name).afterClosed().subscribe((deleteFunction: boolean) => {
+            if (deleteFunction) {
+                this.functionsService.deleteFunction(func.id).subscribe((resp: boolean) => {
+                    if (resp === true) {
+                        this.functions.splice(this.functions.indexOf(func), 1);
+                        this.snackBar.open('Function deleted successfully.', undefined, {duration: 2000});
+                        this.setLimitOffset(1);
+                        this.reloadFunctions(false);
+                    } else {
+                        this.snackBar.open('Error while deleting the function!', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
+    }
+
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
@@ -157,6 +171,12 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         setTimeout(() => {
             this.getFunctions(reset);
         }, 1500);
+    }
+
+    private setLimitOffset(limit: number) {
+        this.ready = false;
+        this.limit = limit;
+        this.offset = this.functions.length;
     }
 
 }

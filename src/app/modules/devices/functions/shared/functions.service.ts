@@ -54,4 +54,10 @@ export class FunctionsService {
         );
     }
 
+    deleteFunction(functionId: string): Observable<boolean> {
+        return this.http.delete<boolean>(environment.deviceManagerUrl + '/functions/' + functionId).pipe(
+            catchError(this.errorHandlerService.handleError(FunctionsService.name, 'deleteFunction', false))
+        );
+    }
+
 }
