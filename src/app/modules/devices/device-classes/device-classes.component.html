@@ -1,0 +1,73 @@
+<!--
+  ~
+  ~   Copyright 2020 InfAI (CC SES)
+  ~
+  ~   Licensed under the Apache License, Version 2.0 (the "License");
+  ~   you may not use this file except in compliance with the License.
+  ~   You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~   Unless required by applicable law or agreed to in writing, software
+  ~   distributed under the License is distributed on an "AS IS" BASIS,
+  ~   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~   See the License for the specific language governing permissions and
+  ~   limitations under the License.
+  ~
+  -->
+
+
+<div class="device-classes-container">
+    <div fxLayout="column">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <div fxLayout="row">
+            <div fxFlex></div>
+            <senergy-sort [sortAttributes]="sortAttributes"
+                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        </div>
+    </div>
+    <div class="device-classes-scroll">
+        <div infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [infiniteScrollContainer]="'.device-classes-scroll'"
+             [fromRoot]="true"
+             (scrolled)="onScroll()">
+            <div class="layout-margin" fxLayout="column">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+                               *ngIf="deviceClasses.length > 0">
+                    <mat-grid-tile class="mat-elevation-z1"
+                                   *ngFor="let deviceClass of deviceClasses; let i = index">
+                        <div fxFill>
+<!--                            <img class="background" src="src/img/functions.jpg">-->
+                        </div>
+                        <mat-grid-tile-footer>
+                            <div fxLayout="column" fxFill>
+                                <div class="truncate footer-item-header" matTooltip="{{deviceClass.name}}">
+                                    {{deviceClass.name}}
+                                </div>
+                                <form fxLayout="row" class="footer-buttons">
+                                    <div fxFlex></div>
+                                    <div [fxLayoutAlign]="'start center'">
+                                        <button (click)="editDeviceClass(deviceClass)"
+                                                mat-icon-button class="color-accent" matTooltip="Edit">
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+                                        <button (click)="deleteDeviceClass(deviceClass)"
+                                                mat-icon-button
+                                                class="color-accent"
+                                                matTooltip="Delete">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </mat-grid-tile-footer>
+                    </mat-grid-tile>
+                </mat-grid-list>
+                <div *ngIf="deviceClasses.length === 0 && ready">No device class found.</div>
+                <senergy-spinner [elementCount]="deviceClasses.length" [show]="!ready"></senergy-spinner>
+            </div>
+        </div>
+    </div>
+</div>

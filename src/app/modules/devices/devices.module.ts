@@ -66,6 +66,8 @@ import {DeviceInstancesExportDialogComponent} from './device-instances/dialogs/d
 import {FunctionsEditDialogComponent} from './functions/dialog/functions-edit-dialog.component';
 import {AspectsComponent} from './aspects/aspects.component';
 import {AspectsEditDialogComponent} from './aspects/dialog/aspects-edit-dialog.component';
+import {DeviceClassesComponent} from './device-classes/device-classes.component';
+import {DeviceClassesEditDialogComponent} from './device-classes/dialog/device-classes-edit-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -79,6 +81,7 @@ const concepts = {path: 'devices/concepts', pathMatch: 'full', component: Concep
 const characteristics = {path: 'devices/characteristics', pathMatch: 'full', component: CharacteristicsComponent, data: {header: 'Devices'}};
 const functions = {path: 'devices/functions', pathMatch: 'full', component: FunctionsComponent, data: {header: 'Devices'}};
 const aspects = {path: 'devices/aspects', pathMatch: 'full', component: AspectsComponent, data: {header: 'Devices'}};
+const deviceClasses = {path: 'devices/deviceclasses', pathMatch: 'full', component: DeviceClassesComponent, data: {header: 'Devices'}};
 
 @NgModule({
     imports: [MatGridListModule,
@@ -113,7 +116,7 @@ const aspects = {path: 'devices/aspects', pathMatch: 'full', component: AspectsC
         MatSortModule,
         MatProgressSpinnerModule,
         DeviceTypesOverviewModule,
-        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics, functions, aspects])],
+        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics, functions, aspects, deviceClasses])],
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,
@@ -134,6 +137,8 @@ const aspects = {path: 'devices/aspects', pathMatch: 'full', component: AspectsC
         FunctionsEditDialogComponent,
         AspectsComponent,
         AspectsEditDialogComponent,
+        DeviceClassesComponent,
+        DeviceClassesEditDialogComponent,
     ],
 })
 
