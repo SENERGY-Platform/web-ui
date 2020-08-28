@@ -67,7 +67,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initGridCols();
-        this.initSearchAndGetCharacteristics();
+        this.initSearchAndGetFunctions();
     }
 
     ngOnDestroy() {
@@ -136,7 +136,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         });
     }
 
-    private initSearchAndGetCharacteristics() {
+    private initSearchAndGetFunctions() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
             this.getFunctions(true);
