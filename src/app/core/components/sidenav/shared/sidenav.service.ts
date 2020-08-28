@@ -71,7 +71,8 @@ export class SidenavService {
             new SidenavPageModel('Device Types', 'link', 'devices_other', '/devices/devicetypesoverview'),
             new SidenavPageModel('Concepts', 'link', 'category', '/devices/concepts'),
             new SidenavPageModel('Characteristics', 'link', 'palette', '/devices/characteristics'),
-            new SidenavPageModel('Functions', 'link', 'functions', '/devices/functions')
+            new SidenavPageModel('Functions', 'link', 'functions', '/devices/functions'),
+            new SidenavPageModel('Aspects', 'link', 'wallpaper', '/devices/aspects')
         ]));
 
         return sections;
