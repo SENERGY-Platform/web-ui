@@ -20,7 +20,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
-import {DeviceTypeDeviceClassModel} from '../../device-types-overview/shared/device-type.model';
+import {DeviceTypeAspectModel, DeviceTypeDeviceClassModel} from '../../device-types-overview/shared/device-type.model';
 import {DeviceClassesPermSearchModel} from './device-classes-perm-search.model';
 
 @Injectable({
@@ -57,6 +57,12 @@ export class DeviceClassesService {
     deleteDeviceClasses(deviceClassId: string): Observable<boolean> {
         return this.http.delete<boolean>(environment.deviceManagerUrl + '/device-classes/' + deviceClassId).pipe(
             catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'deleteDeviceClasses', false))
+        );
+    }
+
+    createDeviceClass(deviceClass: DeviceTypeDeviceClassModel): Observable<DeviceTypeDeviceClassModel | null> {
+        return this.http.post<DeviceTypeDeviceClassModel>(environment.deviceManagerUrl + '/device-classes', deviceClass).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'createDeviceClass', null))
         );
     }
 

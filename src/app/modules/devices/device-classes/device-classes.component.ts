@@ -26,7 +26,10 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeviceClassesPermSearchModel} from './shared/device-classes-perm-search.model';
 import {DeviceClassesService} from './shared/device-classes.service';
 import {DeviceClassesEditDialogComponent} from './dialog/device-classes-edit-dialog.component';
-import {DeviceTypeDeviceClassModel} from '../device-types-overview/shared/device-type.model';
+import {DeviceTypeAspectModel, DeviceTypeDeviceClassModel} from '../device-types-overview/shared/device-type.model';
+import {AspectsEditDialogComponent} from '../aspects/dialog/aspects-edit-dialog.component';
+import uuid = util.uuid;
+import {util} from 'jointjs';
 
 const grids = new Map([
     ['xs', 1],
@@ -42,6 +45,7 @@ const grids = new Map([
     styleUrls: ['./device-classes.component.css']
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy {
+    readonly limitInit = 54;
 
     deviceClasses: DeviceClassesPermSearchModel[] = [];
     gridCols = 0;
@@ -49,7 +53,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
     private searchText = '';
-    private limit = 54;
+    private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
@@ -100,13 +104,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
             if (newDeviceClass !== undefined) {
                 this.reset();
                 this.deviceClassesService.updateDeviceClasses(newDeviceClass).subscribe((deviceClass: (DeviceTypeDeviceClassModel | null)) => {
-                    if (deviceClass === null) {
-                        this.snackBar.open('Error while updating the device class!', undefined, {duration: 2000});
-                        this.getDeviceClasses(true);
-                    } else {
-                        this.snackBar.open('Device class updated successfully.', undefined, {duration: 2000});
-                        this.reloadDeviceClasses(true);
-                    }
+                    this.reloadAndShowSnackbar(deviceClass, 'updat');
                 });
             }
         });
@@ -124,6 +122,29 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
                     } else {
                         this.snackBar.open('Error while deleting the device class!', undefined, {duration: 2000});
                     }
+                });
+            }
+        });
+    }
+
+    newDeviceClass(): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            deviceClass: {
+                id: 'urn:infai:ses:device-class' + uuid(),
+                image: '',
+                name: '',
+            }   as DeviceTypeDeviceClassModel
+        };
+
+        const editDialogRef = this.dialog.open(DeviceClassesEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((newDeviceClass: DeviceTypeDeviceClassModel) => {
+            if (newDeviceClass !== undefined) {
+                this.reset();
+                this.deviceClassesService.createDeviceClass(newDeviceClass).subscribe((deviceClass: (DeviceTypeDeviceClassModel | null)) => {
+                    this.reloadAndShowSnackbar(deviceClass, 'sav');
                 });
             }
         });
@@ -162,6 +183,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
     private reset() {
         this.deviceClasses = [];
+        this.limit = this.limitInit;
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
@@ -177,6 +199,16 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.limit = limit;
         this.offset = this.deviceClasses.length;
+    }
+
+    private reloadAndShowSnackbar(deviceClass: DeviceTypeDeviceClassModel | null, text: string) {
+        if (deviceClass === null) {
+            this.snackBar.open('Error while ' + text + 'ing the device class!', undefined, {duration: 2000});
+            this.getDeviceClasses(true);
+        } else {
+            this.snackBar.open('Device class ' + text + 'ed successfully.', undefined, {duration: 2000});
+            this.reloadDeviceClasses(true);
+        }
     }
 
 }
