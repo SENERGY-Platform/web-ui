@@ -23,7 +23,7 @@ import {DialogsService} from '../../../../core/services/dialogs.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesUpdateModel} from '../shared/device-instances-update.model';
 import {KeycloakService} from 'keycloak-angular';
-import {DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
+import {DeviceTypeDeviceClassModel, DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../device-types-overview/shared/device-type.service';
 import {ExportService} from '../../../data/export/shared/export.service';
 import {ExportModel} from '../../../data/export/shared/export.model';
@@ -46,13 +46,13 @@ const grids = new Map([
 })
 export class DeviceInstancesGridComponent implements OnInit {
 
-
     @Input() deviceInstances: DeviceInstancesModel[] = [];
     @Input() ready = false;
     @Output() tag =  new EventEmitter<{tag: string, tagType: string}>();
     @Output() itemDeleted =  new EventEmitter<boolean>();
     gridCols = 0;
     userID: string;
+    deviceClasses: DeviceTypeDeviceClassModel[] = [];
 
     constructor(private responsiveService: ResponsiveService,
                 private deviceInstancesService: DeviceInstancesService,
@@ -68,6 +68,7 @@ export class DeviceInstancesGridComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.loadDeviceClasses();
         this.initGridCols();
     }
 
@@ -132,11 +133,28 @@ export class DeviceInstancesGridComponent implements OnInit {
         });
     }
 
+    getImage(deviceClassId: string): string {
+        let image = '';
+        this.deviceClasses.forEach((deviceClass: DeviceTypeDeviceClassModel) => {
+            if (deviceClass.id === deviceClassId) {
+                image = deviceClass.image;
+            }
+        });
+        return image;
+    }
+
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
             this.gridCols = grids.get(mqAlias) || 0;
         });
+    }
+
+    private loadDeviceClasses(): void {
+        this.deviceTypeService.getDeviceClasses().subscribe(
+            (deviceClasses: DeviceTypeDeviceClassModel[]) => {
+                this.deviceClasses = deviceClasses;
+            });
     }
 
 }

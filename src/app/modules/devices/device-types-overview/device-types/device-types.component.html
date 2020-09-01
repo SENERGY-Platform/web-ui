@@ -28,27 +28,18 @@
                     <mat-form-field class="full-width" color="accent">
                         <input matInput placeholder="Description" formControlName="description">
                     </mat-form-field>
-                    <mat-form-field class="full-width" color="accent">
-                        <input matInput placeholder="Image" formControlName="image">
-                    </mat-form-field>
                     <table class="full-width">
                         <tr>
                             <td>
                                 <mat-form-field class="full-width" color="accent">
-                                    <mat-select placeholder="Device class" [compareWith]="compare"
-                                                formControlName="device_class" required>
+                                    <mat-select placeholder="Device class"
+                                                formControlName="device_class_id" required>
                                         <mat-option *ngFor="let deviceTypeClass of deviceTypeDeviceClasses"
-                                                    [value]="deviceTypeClass">
+                                                    [value]="deviceTypeClass.id">
                                             {{deviceTypeClass.name}}
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
-                            </td>
-                            <td class="table-button-size">
-                                <button mat-icon-button class="mat-accent" (click)="newDeviceClass()"
-                                        [disabled]="!editable">
-                                    <mat-icon matTooltip="Create Device Class">playlist_add</mat-icon>
-                                </button>
                             </td>
                     </table>
                 </div>
@@ -88,30 +79,18 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-label>{{functionType(service).text === '' ? 'Function' : functionType(service).text + ' Function'}}</mat-label>
-                                                    <mat-select formControlName="functions" multiple required
-                                                                [compareWith]="compare">
+                                                    <mat-select formControlName="function_ids" multiple required>
                                                         <mat-select-trigger>
-                                                            {{functions(service).length > 0 ? functions(service)[0].name : '' }}
-                                                            <span *ngIf="functions(service).length > 1"
-                                                                  class="example-additional-selection">
-                                                                {{'(+' + (functions(service).length - 1) + (functions(service).length === 2 ? ' other)' : ' others)')}}
+                                                            {{functionIds(service).length > 0 ? getFunctionName(functionIds(service)[0], functionType(service).text) : '' }}
+                                                            <span *ngIf="functionIds(service).length > 1">
+                                                                {{'(+' + (functionIds(service).length - 1) + (functionIds(service).length === 2 ? ' other)' : ' others)')}}
                                                                       </span>
                                                         </mat-select-trigger>
                                                         <mat-option
                                                                 *ngFor="let func of functionType(service).text === 'Measuring' ? measuringFunctions : controllingFunctions"
-                                                                [value]="func">{{func.name}}</mat-option>
+                                                                [value]="func.id">{{func.name}}</mat-option>
                                                     </mat-select>
                                                 </mat-form-field>
-                                            </td>
-                                            <td class="table-button-size">
-                                                <button mat-icon-button class="mat-accent"
-                                                        (click)="openCreateFunctionDialog(i)"
-                                                        [disabled]="functionType(service).text === ''">
-                                                    <mat-icon
-                                                            matTooltip="{{functionType(service).text === '' ? 'Create Function' : 'Create ' + functionType(service).text + ' Function'}}">
-                                                        playlist_add
-                                                    </mat-icon>
-                                                </button>
                                             </td>
                                         </tr>
                                     </table>
@@ -129,28 +108,17 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-label>Aspects</mat-label>
-                                                    <mat-select formControlName="aspects" multiple required
-                                                                [compareWith]="compare">
+                                                    <mat-select formControlName="aspect_ids" multiple required>
                                                         <mat-select-trigger>
-                                                            {{aspects(service).length > 0 ? aspects(service)[0].name : ''}}
-                                                            <span *ngIf="aspects(service).length > 1"
-                                                                  class="example-additional-selection">
-                                                                {{'(+' + (aspects(service).length - 1) + (aspects(service).length === 2 ? ' other)' : ' others)')}}
+                                                            {{aspectIds(service).length > 0 ? getAspectName(aspectIds(service)[0]) : ''}}
+                                                            <span *ngIf="aspectIds(service).length > 1">
+                                                                {{'(+' + (aspectIds(service).length - 1) + (aspectIds(service).length === 2 ? ' other)' : ' others)')}}
                                                                       </span>
                                                         </mat-select-trigger>
                                                         <mat-option *ngFor="let aspect of aspectList"
-                                                                    [value]="aspect">{{aspect.name}}</mat-option>
+                                                                    [value]="aspect.id">{{aspect.name}}</mat-option>
                                                     </mat-select>
                                                 </mat-form-field>
-                                            </td>
-                                            <td class="table-button-size">
-                                                <button mat-icon-button class="mat-accent"
-                                                        (click)="newAspect(i)">
-                                                    <mat-icon
-                                                            matTooltip="Create Aspect">
-                                                        playlist_add
-                                                    </mat-icon>
-                                                </button>
                                             </td>
                                         </tr>
                                     </table>
@@ -206,7 +174,7 @@
                                             </mat-form-field>
                                             <div *ngIf="inOut.dataSource">
                                                 <button mat-raised-button color="accent"
-                                                        (click)="addContentVariable(service.value.functions, inOut, [])"
+                                                        (click)="addContentVariable(service.value.function_ids, inOut, [])"
                                                         [disabled]="inOut.dataSource.data.length === 1">
                                                     ADD ContentVariable
                                                 </button>
@@ -220,7 +188,7 @@
                                                             <!-- use a disabled button to provide padding for tree leaf -->
                                                             <button mat-icon-button disabled></button>
                                                             <button mat-stroked-button
-                                                                    (click)="editContent(node, service.value.functions, inOut)">
+                                                                    (click)="editContent(node, service.value.function_ids, inOut)">
                                                                 {{node.name}}
                                                             </button>
                                                             <button mat-icon-button
@@ -241,7 +209,7 @@
                                                                     </mat-icon>
                                                                 </button>
                                                                 <button mat-stroked-button
-                                                                        (click)="editContent(node, service.value.functions, inOut)">
+                                                                        (click)="editContent(node, service.value.function_ids, inOut)">
                                                                     {{node.name}}
                                                                 </button>
                                                                 <button mat-icon-button
@@ -249,7 +217,7 @@
                                                                     <mat-icon>delete_outline</mat-icon>
                                                                 </button>
                                                                 <button mat-icon-button
-                                                                        (click)="addContentVariable(service.value.functions, inOut, node.indices)">
+                                                                        (click)="addContentVariable(service.value.function_ids, inOut, node.indices)">
                                                                     <mat-icon>add</mat-icon>
                                                                 </button>
                                                             </div>
@@ -267,10 +235,6 @@
 
                         </mat-tab-group>
                         <div fxLayoutAlign="end center">
-                            <button (click)="showConcepts(service.value.functions)" mat-icon-button class="mat-accent"
-                                    matTooltip="show related concepts">
-                                <mat-icon>info</mat-icon>
-                            </button>
                             <button (click)="deleteService(service.value)" mat-icon-button class="mat-accent"
                                     matTooltip="delete service" [disabled]="!editable">
                                 <mat-icon>delete</mat-icon>

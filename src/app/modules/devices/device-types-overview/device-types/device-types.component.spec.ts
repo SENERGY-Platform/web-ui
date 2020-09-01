@@ -2,7 +2,7 @@
  * Copyright 2020 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may not use this fi8le except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -77,11 +77,7 @@ describe('DeviceTypesComponent', () => {
             id: 'device_id_4711',
             name: 'device_type_name',
             description: 'desc',
-            image: 'img',
-            device_class: {
-                id: 'device_class_1',
-                name: 'device_class_name'
-            },
+            device_class_id: 'device_class_1',
             services: [{
                 id: 'service_id_1',
                 local_id: 'local_id_1',
@@ -168,8 +164,7 @@ describe('DeviceTypesComponent', () => {
             id: undefined,
             name: null,
             description: null,
-            image: null,
-            device_class: null
+            device_class_id: null
         });
         expect(component.services.length).toBe(0);
     }));
@@ -185,11 +180,7 @@ describe('DeviceTypesComponent', () => {
             id: '', // id must be empty, cause its deleted
             name: 'device_type_name',
             description: 'desc',
-            image: 'img',
-            device_class: {
-                id: 'device_class_1',
-                name: 'device_class_name'
-            }
+            device_class_id: 'device_class_1',
         });
         expect(component.serviceControl(0).getRawValue().id).toBe('');
         expect(component.serviceControl(0).value.local_id).toBe('local_id_1');
@@ -296,8 +287,8 @@ describe('DeviceTypesComponent', () => {
                 show: true,
             }],
             functionType: {text: ''},
-            functions: [],
-            aspects: []
+            function_ids: [],
+            aspect_ids: []
         }]);
 
     }));
@@ -349,8 +340,8 @@ describe('DeviceTypesComponent', () => {
                 show: true,
             }],
             functionType: {text: ''},
-            functions: [],
-            aspects: []
+            function_ids: [],
+            aspect_ids: []
         }]);
 
     }));

@@ -30,6 +30,7 @@ import {
     DeviceInstancesRouterStateTypesEnum
 } from '../device-instances/device-instances.component';
 import {DeviceInstancesDialogService} from '../device-instances/shared/device-instances-dialog.service';
+import {DeviceTypeDeviceClassModel} from './shared/device-type.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -48,6 +49,7 @@ const grids = new Map([
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
 
     deviceTypes: DeviceTypePermSearchModel[] = [];
+    deviceClasses: DeviceTypeDeviceClassModel[] = [];
     gridCols = 0;
     ready = false;
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
@@ -70,6 +72,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.loadDeviceClasses();
         this.initGridCols();
         this.initSearchAndGetDeviceTypes();
     }
@@ -143,6 +146,16 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         });
     }
 
+    getImage(deviceClassId: string): string {
+        let image = '';
+        this.deviceClasses.forEach((deviceClass: DeviceTypeDeviceClassModel) => {
+            if (deviceClass.id === deviceClassId) {
+                image = deviceClass.image;
+            }
+        });
+        return image;
+    }
+
     private initSearchAndGetDeviceTypes() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.reset();
@@ -175,6 +188,13 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+    }
+
+    private loadDeviceClasses(): void {
+        this.deviceTypeService.getDeviceClasses().subscribe(
+            (deviceClasses: DeviceTypeDeviceClassModel[]) => {
+                this.deviceClasses = deviceClasses;
+            });
     }
 
 }

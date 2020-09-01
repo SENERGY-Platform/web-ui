@@ -35,7 +35,7 @@
                                *ngIf="deviceTypes.length > 0">
                     <mat-grid-tile class="mat-elevation-z1" *ngFor="let deviceType of deviceTypes; let i = index">
                         <div class="background">
-                            <img class="device-icon" src="{{deviceType.image}}">
+                            <img class="device-icon" src="{{getImage(deviceType.device_class_id)}}">
                         </div>
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>

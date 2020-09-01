@@ -48,6 +48,12 @@ export class FunctionsService {
         }
     }
 
+    getFunction(functionId: string): Observable<DeviceTypeFunctionModel | null> {
+        return this.http.get<DeviceTypeFunctionModel>(environment.semanticRepoUrl + '/functions/' + functionId).pipe(
+            catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunction', null))
+        );
+    }
+
     updateFunction(func: DeviceTypeFunctionModel): Observable<DeviceTypeFunctionModel | null> {
         return this.http.put<DeviceTypeFunctionModel>(environment.deviceManagerUrl + '/functions/' + func.id, func).pipe(
             catchError(this.errorHandlerService.handleError(FunctionsService.name, 'updateFunction', null))

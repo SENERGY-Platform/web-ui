@@ -18,7 +18,7 @@ import {DeviceTypeBaseModel} from './device-type.model';
 
 export interface DeviceTypePermSearchModel extends DeviceTypeBaseModel {
     creator: string;
-    device_class: string;
+    device_class_id: string;
     service: string[] | string;
     permissions: PermissionsModel;
 }

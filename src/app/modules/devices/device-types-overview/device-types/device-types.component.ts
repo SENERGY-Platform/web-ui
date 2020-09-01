@@ -33,22 +33,13 @@ import {
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeService} from '../shared/device-type.service';
-import {DeviceTypesNewDeviceClassDialogComponent} from './dialogs/device-types-new-device-class-dialog.component';
-import {DeviceTypesNewFunctionDialogComponent} from './dialogs/device-types-new-function-dialog.component';
 import {ActivatedRoute, Router} from '@angular/router';
-import {DeviceTypesNewAspectDialogComponent} from './dialogs/device-types-new-aspect-dialog.component';
-import {util} from 'jointjs';
-import {DeviceTypesShowConceptDialogComponent} from './dialogs/device-types-show-concept-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {forkJoin, Observable} from 'rxjs';
 import {DeviceTypeHelperService} from './shared/device-type-helper.service';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
 import {DeviceTypesContentVariableDialogComponent} from './dialogs/device-types-content-variable-dialog.component';
-import uuid = util.uuid;
-
-const controllingIndex = 0;
-const measuringIndex = 1;
 
 @Component({
     selector: 'senergy-device-types',
@@ -101,9 +92,8 @@ export class DeviceTypesComponent implements OnInit {
             id: this.firstFormGroup.getRawValue().id, // use getRawValue because control is disabled
             name: this.firstFormGroup.value.name,
             description: this.firstFormGroup.value.description,
-            image: this.firstFormGroup.value.image,
             services: this.secondFormGroup.getRawValue().services,
-            device_class: this.firstFormGroup.value.device_class,
+            device_class_id: this.firstFormGroup.value.device_class_id,
         };
 
         this.saveDeviceType(newDeviceType);
@@ -117,21 +107,21 @@ export class DeviceTypesComponent implements OnInit {
         this.initProtocolIdChangeListener(formGroup);
         formGroup.controls['functionType'].valueChanges.subscribe(() => {
             if (formGroup.controls['functionType'].invalid) {
-                formGroup.controls['functions'].disable();
+                formGroup.controls['function_ids'].disable();
             } else {
-                formGroup.controls['functions'].enable();
+                formGroup.controls['function_ids'].enable();
             }
 
-            formGroup.controls['functions'].setValue([]);
+            formGroup.controls['function_ids'].setValue([]);
         });
     }
 
-    addContentVariable(functions: DeviceTypeFunctionModel[], inOut: DeviceTypeContentTreeModel, indices: number[]): void {
+    addContentVariable(functionIds: string[], inOut: DeviceTypeContentTreeModel, indices: number[]): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: {} as DeviceTypeContentVariableModel,
-            functions: functions
+            functionIds: functionIds
         };
         this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
             (resp: DeviceTypeContentVariableModel | undefined) => {
@@ -146,12 +136,12 @@ export class DeviceTypesComponent implements OnInit {
         this.refreshTree(inOut, this.deviceTypeHelperService.deleteTreeData(inOut.dataSource.data, indices));
     }
 
-    editContent(node: DeviceTypeContentVariableModel, functions: DeviceTypeFunctionModel[], inOut: DeviceTypeContentTreeModel): void {
+    editContent(node: DeviceTypeContentVariableModel, functionIds: string[], inOut: DeviceTypeContentTreeModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: node,
-            functions: functions
+            functionIds: functionIds
         };
         this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
             (resp: DeviceTypeContentVariableModel | undefined) => {
@@ -164,15 +154,6 @@ export class DeviceTypesComponent implements OnInit {
     deleteService(deviceTypeService: DeviceTypeServiceModel) {
         const control = <FormArray>this.secondFormGroup.controls['services'];
         control.removeAt(this.secondFormGroup.value.services.indexOf(deviceTypeService));
-    }
-
-    showConcepts(functions: DeviceTypeFunctionModel[]) {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        dialogConfig.data = {
-            functions: functions,
-        };
-        this.dialog.open(DeviceTypesShowConceptDialogComponent, dialogConfig);
     }
 
     compare(a: any, b: any): boolean {
@@ -188,117 +169,16 @@ export class DeviceTypesComponent implements OnInit {
         return index;
     }
 
-    newDeviceClass() {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        const editDialogRef = this.dialog.open(DeviceTypesNewDeviceClassDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((name: string) => {
-            if (name !== undefined) {
-                const index = this.checkIfDeviceClassNameExists(name);
-                if (index === -1) {
-                    const newDeviceClass: DeviceTypeDeviceClassModel = {id: '', name: name, image: ''};
-                    this.firstFormGroup.patchValue({'device_class': newDeviceClass});
-                    this.deviceTypeDeviceClasses.push(newDeviceClass);
-                } else {
-                    this.snackbarAlreadyExists('Device Class');
-                    this.firstFormGroup.patchValue({'device_class': this.deviceTypeDeviceClasses[index]});
-                }
-            }
-        });
-    }
-
-    newAspect(serviceIndex: number) {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        const editDialogRef = this.dialog.open(DeviceTypesNewAspectDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((name: string) => {
-            if (name !== undefined) {
-                const aspectIndex = this.checkIfAspectNameExists(name);
-                const formArray = <FormArray>this.secondFormGroup.controls['services'];
-                const formGroup = <FormGroup>formArray.controls[serviceIndex];
-                const aspects = formGroup.controls['aspects'];
-                if (aspectIndex === -1) {
-                    const newAspect: DeviceTypeAspectModel = {id: this.generateUUID('aspect'), name: name};
-                    aspects.value.push(newAspect);
-                    this.aspectList.push(newAspect);
-                } else {
-                    const index = aspects.value.indexOf(this.aspectList[aspectIndex]);
-                    if (index === -1) {
-                        this.snackbarAlreadyExists('Aspect');
-                        const array = formGroup.controls['aspects'].value;
-                        formGroup.controls['aspects'].setValue([...array, this.aspectList[aspectIndex]]);
-                    } else {
-                        this.snackbarAlreadySelected('Aspect');
-                    }
-                }
-                aspects.updateValueAndValidity();
-            }
-        });
-    }
-
-    openCreateFunctionDialog(serviceIndex: number) {
-        const formArray = <FormArray>this.secondFormGroup.controls['services'];
-        const formGroup = <FormGroup>formArray.controls[serviceIndex];
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        dialogConfig.data = {
-            functionType: formGroup.controls['functionType'].value,
-        };
-        const editDialogRef = this.dialog.open(DeviceTypesNewFunctionDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((func: DeviceTypeFunctionModel) => {
-            if (func !== undefined) {
-                if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[measuringIndex]) {
-                    const measureFuncIndex = this.checkIfMeasuringFunctionNameExists(func.name);
-                    if (measureFuncIndex === -1) {
-                        formGroup.controls['functions'].value.push(func);
-                        this.measuringFunctions.push(func);
-                    } else {
-                        const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
-                        const measureFuncFormGroupIndex = this.checkIfMeasuringFunctionIsSelected(functionsFormGroup.value, measureFuncIndex);
-                        if (measureFuncFormGroupIndex === -1) {
-                            this.snackbarAlreadyExists('Measuring Function');
-                            const array = formGroup.controls['functions'].value;
-                            formGroup.controls['functions'].setValue([...array, this.measuringFunctions[measureFuncIndex]]);
-                        } else {
-                            this.snackbarAlreadySelected('Measuring Function');
-                        }
-                    }
-                }
-                if (formGroup.controls['functionType'].value === this.deviceTypeFunctionType[controllingIndex]) {
-                    const controllFuncIndex = this.checkIfControllingFunctionNameExists(func.name);
-                    if (controllFuncIndex === -1) {
-                        formGroup.controls['functions'].value.push(func);
-                        this.controllingFunctions.push(func);
-                    } else {
-                        const functionsFormGroup = <FormGroup>formGroup.controls['functions'];
-                        const controllFuncFormGroupIndex = this.checkIfControllingFunctionIsSelected(functionsFormGroup.value, controllFuncIndex);
-                        if (controllFuncFormGroupIndex === -1) {
-                            this.snackbarAlreadyExists('Controlling Function');
-                            const array = formGroup.controls['functions'].value;
-                            formGroup.controls['functions'].setValue([...array, this.controllingFunctions[controllFuncIndex]]);
-                        } else {
-                            this.snackbarAlreadySelected('Controlling Function');
-                        }
-                    }
-                }
-                formGroup.controls['functions'].updateValueAndValidity();
-            }
-        });
-    }
-
     functionType(serviceFormGroup: AbstractControl): DeviceTypeFunctionType {
         return this.getServiceFormControl(serviceFormGroup, 'functionType').value;
     }
 
-    functions(serviceFormGroup: AbstractControl): DeviceTypeFunctionModel[] {
-        return this.getServiceFormControl(serviceFormGroup, 'functions').value;
+    functionIds(serviceFormGroup: AbstractControl): string[] {
+        return this.getServiceFormControl(serviceFormGroup, 'function_ids').value;
     }
 
-    aspects(serviceFormGroup: AbstractControl): DeviceTypeFunctionModel[] {
-        return this.getServiceFormControl(serviceFormGroup, 'aspects').value;
+    aspectIds(serviceFormGroup: AbstractControl): string[] {
+        return this.getServiceFormControl(serviceFormGroup, 'aspect_ids').value;
     }
 
     inputOutputArray(serviceFormGroup: AbstractControl, formControlName: string): DeviceTypeContentTreeModel[] {
@@ -311,6 +191,35 @@ export class DeviceTypesComponent implements OnInit {
 
     serviceControl(serviceIndex: number): FormGroup {
         return <FormGroup>this.services.at(serviceIndex);
+    }
+
+    getFunctionName(functionId: string, functionTypeText: string): string {
+        let funcName = '';
+        if (functionTypeText === 'Controlling') {
+            this.controllingFunctions.forEach((controllFunc: DeviceTypeFunctionModel) => {
+                if (controllFunc.id === functionId) {
+                    funcName = controllFunc.name;
+                }
+            });
+        }
+        if (functionTypeText === 'Measuring') {
+            this.measuringFunctions.forEach((measuringFunc: DeviceTypeFunctionModel) => {
+                if (measuringFunc.id === functionId) {
+                    funcName = measuringFunc.name;
+                }
+            });
+        }
+        return funcName;
+    }
+
+    getAspectName(aspectId: string): string {
+        let aspectName = '';
+        this.aspectList.forEach((aspect: DeviceTypeAspectModel) => {
+            if (aspect.id === aspectId) {
+                aspectName = aspect.name;
+            }
+        });
+        return aspectName;
     }
 
     private cleanUpServices() {
@@ -381,7 +290,7 @@ export class DeviceTypesComponent implements OnInit {
             const formGroup = <FormGroup>control;
             this.initProtocolIdChangeListener(formGroup);
             formGroup.controls['functionType'].valueChanges.subscribe(() => {
-                formGroup.controls['functions'].setValue([]);
+                formGroup.controls['function_ids'].setValue([]);
             });
         });
     }
@@ -391,8 +300,7 @@ export class DeviceTypesComponent implements OnInit {
             id: [{value: deviceType.id, disabled: true}],
             name: [deviceType.name, Validators.required],
             description: [deviceType.description],
-            image: [deviceType.image],
-            device_class: [deviceType.device_class, Validators.required],
+            device_class_id: [deviceType.device_class_id, Validators.required],
         });
     }
 
@@ -406,23 +314,21 @@ export class DeviceTypesComponent implements OnInit {
             interaction: [deviceTypeService.interaction, Validators.required],
             inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : this._formBuilder.array([]),
             outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : this._formBuilder.array([]),
-            functionType: [deviceTypeService.functions ? this.getFunctionType(deviceTypeService.functions[0].rdf_type) : {text: ''}, Validators.required],
-            functions: [{
-                value: deviceTypeService.functions ? deviceTypeService.functions : [],
-                disabled: deviceTypeService.functions ? false : true
+            functionType: [deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? this.getFunctionType(deviceTypeService.function_ids[0]) : {text: ''}, Validators.required],
+            function_ids: [{
+                value: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? deviceTypeService.function_ids : [],
+                disabled: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true
             }, Validators.required],
-            aspects: [deviceTypeService.aspects ? deviceTypeService.aspects : [], Validators.required],
+            aspect_ids: [deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : [], Validators.required],
         });
     }
 
-    private getFunctionType(rdfType: string): DeviceTypeFunctionType {
-        let index = -1;
-        this.deviceTypeFunctionType.forEach((deviceType: DeviceTypeFunctionType, i: number) => {
-            if (deviceType.rdf_type === rdfType) {
-                index = i;
-            }
-        });
-        return this.deviceTypeFunctionType[index];
+    private getFunctionType(functionId: string): DeviceTypeFunctionType {
+        if (functionId.startsWith('urn:infai:ses:controlling-function')) {
+            return this.deviceTypeFunctionType[0];
+        } else {
+            return this.deviceTypeFunctionType[1];
+        }
     }
 
     private createContent(protocolId: string, content: (DeviceTypeContentModel[] | undefined)): FormArray {
@@ -472,70 +378,6 @@ export class DeviceTypesComponent implements OnInit {
         });
     }
 
-    private checkIfDeviceClassNameExists(name: string): number {
-        let index = -1;
-        this.deviceTypeDeviceClasses.forEach((deviceClass: DeviceTypeDeviceClassModel, i: number) => {
-            if (deviceClass.name === name) {
-                index = i;
-            }
-        });
-        return index;
-    }
-
-    private checkIfAspectNameExists(name: string): number {
-        let index = -1;
-        this.aspectList.forEach((aspect: DeviceTypeAspectModel, i: number) => {
-            if (aspect.name === name) {
-                index = i;
-            }
-        });
-        return index;
-    }
-
-    private checkIfMeasuringFunctionNameExists(name: string): number {
-        let index = -1;
-        this.measuringFunctions.forEach((func: DeviceTypeFunctionModel, i: number) => {
-            if (func.name === name) {
-                index = i;
-            }
-        });
-        return index;
-    }
-
-    private checkIfControllingFunctionNameExists(name: string): number {
-        let index = -1;
-        this.controllingFunctions.forEach((func: DeviceTypeFunctionModel, i: number) => {
-            if (func.name === name) {
-                index = i;
-            }
-        });
-        return index;
-    }
-
-    private checkIfControllingFunctionIsSelected(functions: DeviceTypeFunctionModel[], inputIndex: number): number {
-        let index = -1;
-        functions.forEach((func: DeviceTypeFunctionModel, i: number) => {
-            if (func.id === this.controllingFunctions[inputIndex].id &&
-                func.rdf_type === this.controllingFunctions[inputIndex].rdf_type &&
-                func.name === this.controllingFunctions[inputIndex].name) {
-                index = i;
-            }
-        });
-        return index;
-    }
-
-    private checkIfMeasuringFunctionIsSelected(functions: DeviceTypeFunctionModel[], inputIndex: number): number {
-        let index = -1;
-        functions.forEach((func: DeviceTypeFunctionModel, i: number) => {
-            if (func.id === this.measuringFunctions[inputIndex].id &&
-                func.rdf_type === this.measuringFunctions[inputIndex].rdf_type &&
-                func.name === this.measuringFunctions[inputIndex].name) {
-                index = i;
-            }
-        });
-        return index;
-    }
-
     private saveDeviceType(deviceType: DeviceTypeModel) {
         if (deviceType.id === '' || deviceType.id === undefined) {
             this.deviceTypeService.createDeviceType(deviceType).subscribe((deviceTypeSaved: DeviceTypeModel | null) => {
@@ -571,15 +413,6 @@ export class DeviceTypesComponent implements OnInit {
         }
     }
 
-    private snackbarAlreadyExists(type: string) {
-        this.snackBar.open(type + ' already exists! ' + type + ' auto selected!', undefined, {duration: 4000});
-    }
-
-
-    private snackbarAlreadySelected(type: string) {
-        this.snackBar.open(type + ' already selected!', undefined, {duration: 4000});
-    }
-
     private loadData(): void {
         const array: Observable<DeviceTypeCharacteristicsModel[] | DeviceTypeProtocolModel[]>[] = [];
         array.push(this.deviceTypeService.getLeafCharacteristics());
@@ -610,10 +443,6 @@ export class DeviceTypesComponent implements OnInit {
             (aspects: DeviceTypeAspectModel[]) => {
                 this.aspectList = aspects;
             });
-    }
-
-    private generateUUID(type: string): string {
-        return 'urn:infai:ses:' + type + ':' + uuid();
     }
 
     private getRouterParams(): void {
