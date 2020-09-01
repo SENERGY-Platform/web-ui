@@ -17,6 +17,7 @@
 export interface DeviceClassesPermSearchModel {
     creator: string;
     id: string;
+    image: string;
     name: string;
     permissions: {
         a: boolean;

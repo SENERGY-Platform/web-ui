@@ -31,6 +31,7 @@ export interface DeviceTypeModel extends DeviceTypeBaseModel {
 
 export interface DeviceTypeDeviceClassModel {
     id: string;
+    image: string;
     name: string;
 }
 

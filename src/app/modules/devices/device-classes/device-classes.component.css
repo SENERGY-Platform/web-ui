@@ -51,8 +51,21 @@ mat-grid-tile {
 }
 
 .background {
+    background-image: url('/src/img/background_deviceTypes.png');
+    background-size: contain;
+    float: left;
     width: 100%;
     height: 198px;
+    margin-bottom: 84px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.device-class-image {
+    max-width: 70%;
+    max-height: 70%;
 }
 
 .footer-item-header {

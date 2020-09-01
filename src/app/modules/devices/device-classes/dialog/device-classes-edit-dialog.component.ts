@@ -54,6 +54,7 @@ export class DeviceClassesEditDialogComponent implements OnInit {
         this.deviceClassFormGroup = this._formBuilder.group({
             id: [{value: deviceClass.id, disabled: true}],
             name: [deviceClass.name, Validators.required],
+            image: deviceClass.image,
         });
     }
 

@@ -197,7 +197,7 @@ export class DeviceTypesComponent implements OnInit {
             if (name !== undefined) {
                 const index = this.checkIfDeviceClassNameExists(name);
                 if (index === -1) {
-                    const newDeviceClass: DeviceTypeDeviceClassModel = {id: '', name: name};
+                    const newDeviceClass: DeviceTypeDeviceClassModel = {id: '', name: name, image: ''};
                     this.firstFormGroup.patchValue({'device_class': newDeviceClass});
                     this.deviceTypeDeviceClasses.push(newDeviceClass);
                 } else {

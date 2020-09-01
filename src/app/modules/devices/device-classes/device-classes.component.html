@@ -38,8 +38,8 @@
                                *ngIf="deviceClasses.length > 0">
                     <mat-grid-tile class="mat-elevation-z1"
                                    *ngFor="let deviceClass of deviceClasses; let i = index">
-                        <div fxFill>
-<!--                            <img class="background" src="src/img/functions.jpg">-->
+                        <div fxFill class="background">
+                            <img class="device-class-image" src="{{deviceClass.image}}">
                         </div>
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>
