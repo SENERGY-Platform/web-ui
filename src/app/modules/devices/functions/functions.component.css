@@ -71,3 +71,9 @@ mat-grid-tile {
     margin-top: 4px;
 }
 
+.fab {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    z-index: 100;
+}

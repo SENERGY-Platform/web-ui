@@ -25,8 +25,9 @@ import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {FunctionsPermSearchModel} from './shared/functions-perm-search.model';
 import {FunctionsService} from './shared/functions.service';
-import {DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
+import {DeviceTypeDeviceClassModel, DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
 import {FunctionsEditDialogComponent} from './dialog/functions-edit-dialog.component';
+import {FunctionsCreateDialogComponent} from './dialog/functions-create-dialog.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -42,6 +43,7 @@ const grids = new Map([
     styleUrls: ['./functions.component.css']
 })
 export class FunctionsComponent implements OnInit, OnDestroy {
+    readonly limitInit = 54;
 
     functions: FunctionsPermSearchModel[] = [];
     gridCols = 0;
@@ -49,7 +51,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
     private searchText = '';
-    private limit = 54;
+    private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
@@ -100,13 +102,24 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             if (newFunction !== undefined) {
                 this.reset();
                 this.functionsService.updateFunction(newFunction).subscribe((func: (DeviceTypeFunctionModel | null)) => {
-                    if (func === null) {
-                        this.snackBar.open('Error while updating the function!', undefined, {duration: 2000});
-                        this.getFunctions(true);
-                    } else {
-                        this.snackBar.open('Function updated successfully.', undefined, {duration: 2000});
-                        this.reloadFunctions(true);
-                    }
+                    this.reloadAndShowSnackbar(func, 'updat');
+                });
+            }
+        });
+    }
+
+    newFunction(): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+
+        const editDialogRef = this.dialog.open(FunctionsCreateDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((newFunction: DeviceTypeFunctionModel) => {
+            console.log(newFunction);
+            if (newFunction !== undefined) {
+                this.reset();
+                this.functionsService.createFunction(newFunction).subscribe((func: (DeviceTypeFunctionModel | null)) => {
+                    this.reloadAndShowSnackbar(func, 'sav');
                 });
             }
         });
@@ -162,6 +175,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     private reset() {
         this.functions = [];
+        this.limit = this.limitInit;
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
@@ -177,6 +191,16 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.limit = limit;
         this.offset = this.functions.length;
+    }
+
+    private reloadAndShowSnackbar(func: DeviceTypeFunctionModel | null, text: string) {
+        if (func === null) {
+            this.snackBar.open('Error while ' + text + 'ing the function!', undefined, {duration: 2000});
+            this.getFunctions(true);
+        } else {
+            this.snackBar.open('Function ' + text + 'ed successfully.', undefined, {duration: 2000});
+            this.reloadFunctions(true);
+        }
     }
 
 }

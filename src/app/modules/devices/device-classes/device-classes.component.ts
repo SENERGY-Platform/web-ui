@@ -26,8 +26,7 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeviceClassesPermSearchModel} from './shared/device-classes-perm-search.model';
 import {DeviceClassesService} from './shared/device-classes.service';
 import {DeviceClassesEditDialogComponent} from './dialog/device-classes-edit-dialog.component';
-import {DeviceTypeAspectModel, DeviceTypeDeviceClassModel} from '../device-types-overview/shared/device-type.model';
-import {AspectsEditDialogComponent} from '../aspects/dialog/aspects-edit-dialog.component';
+import {DeviceTypeDeviceClassModel} from '../device-types-overview/shared/device-type.model';
 import uuid = util.uuid;
 import {util} from 'jointjs';
 

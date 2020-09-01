@@ -66,4 +66,10 @@ export class FunctionsService {
         );
     }
 
+    createFunction(func: DeviceTypeFunctionModel): Observable<DeviceTypeFunctionModel | null> {
+        return this.http.post<DeviceTypeFunctionModel>(environment.deviceManagerUrl + '/functions', func).pipe(
+            catchError(this.errorHandlerService.handleError(FunctionsService.name, 'createFunction', null))
+        );
+    }
+
 }

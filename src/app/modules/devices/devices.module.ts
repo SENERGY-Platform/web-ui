@@ -68,6 +68,7 @@ import {AspectsComponent} from './aspects/aspects.component';
 import {AspectsEditDialogComponent} from './aspects/dialog/aspects-edit-dialog.component';
 import {DeviceClassesComponent} from './device-classes/device-classes.component';
 import {DeviceClassesEditDialogComponent} from './device-classes/dialog/device-classes-edit-dialog.component';
+import {FunctionsCreateDialogComponent} from './functions/dialog/functions-create-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -135,6 +136,7 @@ const deviceClasses = {path: 'devices/deviceclasses', pathMatch: 'full', compone
         CharacteristicsEditDialogComponent,
         FunctionsComponent,
         FunctionsEditDialogComponent,
+        FunctionsCreateDialogComponent,
         AspectsComponent,
         AspectsEditDialogComponent,
         DeviceClassesComponent,
