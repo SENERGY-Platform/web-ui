@@ -27,6 +27,8 @@ import {AspectsPermSearchModel} from './shared/aspects-perm-search.model';
 import {AspectsService} from './shared/aspects.service';
 import {AspectsEditDialogComponent} from './dialog/aspects-edit-dialog.component';
 import {DeviceTypeAspectModel} from '../device-types-overview/shared/device-type.model';
+import uuid = util.uuid;
+import {util} from 'jointjs';
 
 const grids = new Map([
     ['xs', 1],
@@ -43,13 +45,14 @@ const grids = new Map([
 })
 export class AspectsComponent implements OnInit, OnDestroy {
 
+    readonly limitInit = 54;
     aspects: AspectsPermSearchModel[] = [];
     gridCols = 0;
     ready = false;
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
     private searchText = '';
-    private limit = 54;
+    private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
@@ -100,13 +103,7 @@ export class AspectsComponent implements OnInit, OnDestroy {
             if (newAspect !== undefined) {
                 this.reset();
                 this.aspectsService.updateAspects(newAspect).subscribe((aspect: (DeviceTypeAspectModel | null)) => {
-                    if (aspect === null) {
-                        this.snackBar.open('Error while updating the aspect!', undefined, {duration: 2000});
-                        this.getAspects(true);
-                    } else {
-                        this.snackBar.open('Aspect updated successfully.', undefined, {duration: 2000});
-                        this.reloadAspects(true);
-                    }
+                    this.reloadAndShowSnackbar(aspect, 'updat', );
                 });
             }
         });
@@ -127,6 +124,38 @@ export class AspectsComponent implements OnInit, OnDestroy {
                 });
             }
         });
+    }
+
+    newAspect(): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            aspect: {
+                id: 'urn:infai:ses:aspect' + uuid(),
+                name: '',
+            }   as DeviceTypeAspectModel
+        };
+
+        const editDialogRef = this.dialog.open(AspectsEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((newAspect: DeviceTypeAspectModel) => {
+            if (newAspect !== undefined) {
+                this.reset();
+                this.aspectsService.createAspect(newAspect).subscribe((aspect: (DeviceTypeAspectModel | null)) => {
+                    this.reloadAndShowSnackbar(aspect, 'sav');
+                });
+            }
+        });
+    }
+
+    private reloadAndShowSnackbar(aspect: DeviceTypeAspectModel | null, text: string) {
+        if (aspect === null) {
+            this.snackBar.open('Error while ' + text + 'ing the aspect!', undefined, {duration: 2000});
+            this.getAspects(true);
+        } else {
+            this.snackBar.open('Aspect ' + text + 'ed successfully.', undefined, {duration: 2000});
+            this.reloadAspects(true);
+        }
     }
 
     private initGridCols(): void {
@@ -162,6 +191,7 @@ export class AspectsComponent implements OnInit, OnDestroy {
 
     private reset() {
         this.aspects = [];
+        this.limit = this.limitInit;
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;

@@ -20,7 +20,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
-import {DeviceTypeAspectModel} from '../../device-types-overview/shared/device-type.model';
+import {DeviceTypeAspectModel, DeviceTypeCharacteristicsModel} from '../../device-types-overview/shared/device-type.model';
 import {AspectsPermSearchModel} from './aspects-perm-search.model';
 
 @Injectable({
@@ -57,6 +57,12 @@ export class AspectsService {
     deleteAspects(aspectId: string): Observable<boolean> {
         return this.http.delete<boolean>(environment.deviceManagerUrl + '/aspects/' + aspectId).pipe(
             catchError(this.errorHandlerService.handleError(AspectsService.name, 'deleteAspects', false))
+        );
+    }
+
+    createAspect(aspect: DeviceTypeAspectModel): Observable<DeviceTypeAspectModel | null> {
+        return this.http.post<DeviceTypeAspectModel>(environment.deviceManagerUrl + '/aspects', aspect).pipe(
+            catchError(this.errorHandlerService.handleError(AspectsService.name, 'createAspect', null))
         );
     }
 
