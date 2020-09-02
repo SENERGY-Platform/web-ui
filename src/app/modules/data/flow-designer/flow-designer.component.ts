@@ -63,7 +63,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                         if (this.flow.share === null) {
                             this.flow.share = {} as FlowShareModel;
                         }
-                        if (this.flow.share.write === true || this.flow.userId === this.authService.getUserId()){
+                        if (this.flow.share.write === true || this.flow.userId === this.authService.getUserId()) {
                             this.write = true;
                         }
                         for (const cell of this.flow.model.cells) {
@@ -99,7 +99,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     }
 
     public saveModel() {
-        const svg = this.diagram.paper.svg;
+        const svg = this.diagram.paper.svg.cloneNode(true) as HTMLObjectElement;
         this.flow.image = this.createSVGFromModel(svg);
         this.flow.model = this.diagram.getGraph();
         if (this.flow.model.cells !== undefined) {
@@ -117,72 +117,104 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         });
     }
 
-    createSVGFromModel(svg: any): string {
+    createSVGFromModel(svg: HTMLObjectElement): string {
         let source = '';
-        if (svg !== null) {
-            const serializer = new XMLSerializer();
-            const nodes = svg.getElementsByClassName('joint-type-senergy');
-            const viewbox = [null, null, 0, 0];
-            for (const node of nodes) {
-                let startOffset = 0;
-                let endOffset = 0;
-                const ports = node.getElementsByClassName('joint-port-label');
-                for (const port of ports) {
-                    if (port.getAttribute('text-anchor') === 'end' && endOffset < port.getBBox().width) {
-                        endOffset = port.getBBox().width;
-                    }
-                    if (port.getAttribute('text-anchor') === 'start' && startOffset < port.getBBox().width) {
-                        startOffset = port.getBBox().width;
-                    }
+        const serializer = new XMLSerializer();
+        const nodes = svg.getElementsByClassName('joint-type-senergy');
+        const viewbox = [null, null, 0, 0];
+        // @ts-ignore
+        for (const node of nodes) {
+            let startOffset = 0;
+            let endOffset = 0;
+            const ports = node.getElementsByClassName('joint-port-label');
+            for (const port of ports) {
+                if (port.getAttribute('text-anchor') === 'end' && endOffset < port.getBBox().width) {
+                    endOffset = port.getBBox().width;
                 }
-                const coords = node.attributes.transform.value.replace('translate(', '')
-                    .replace(')', '').split(',');
-                // x
-                if (viewbox[0] === null) {
-                    viewbox[0] = +coords[0] - startOffset;
-                }
-                // @ts-ignore
-                if (coords[0] < viewbox[0]) {
-                    viewbox[0] = +coords[0] - startOffset;
-                }
-                // y
-                if (viewbox[1] === null) {
-                    viewbox[1] = +coords[1] - 20;
-                }
-                // @ts-ignore
-                if (coords[1] < viewbox[1]) {
-                    viewbox[1] = +coords[1] - 20;
-                }
-                // x width
-                // @ts-ignore
-                if (coords[0] > viewbox [2]) {
-                    // @ts-ignore
-                    viewbox[2] = +coords[0] + 150 - viewbox[0] + endOffset;
-                }
-                // y height
-                // @ts-ignore
-                if (coords[1] > viewbox [3]) {
-                    // @ts-ignore
-                    viewbox[3] = +coords[1] + 120 - viewbox[1] + 20;
+                if (port.getAttribute('text-anchor') === 'start' && startOffset < port.getBBox().width) {
+                    startOffset = port.getBBox().width;
                 }
             }
-            source = serializer.serializeToString(svg);
-            if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-                source = source.replace(/^<svg/,
-                    '<svg xmlns="http://www.w3.org/2000/svg" viewbox="'
-                    + viewbox[0] + ' ' + viewbox[1] + ' ' + viewbox[2] + ' ' + viewbox[3] + '"');
-            } else {
-                source = source.replace(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/,
-                    '<svg xmlns="http://www.w3.org/2000/svg" viewbox="'
-                    + viewbox[0] + ' ' + viewbox[1] + ' ' + viewbox[2] + ' ' + viewbox[3] + '"');
+            const coords = node.attributes.transform.value.replace('translate(', '')
+                .replace(')', '').split(',');
+            // x
+            if (viewbox[0] === null) {
+                viewbox[0] = +coords[0] - startOffset;
             }
-            source = source.replace( 'class="connection-wrap"', 'style="display:none;"');
-            source = source.replace( 'class="marker-vertices"', 'style="display:none;"');
-            source = source.replace( 'class="marker-arrowheads"', 'style="display:none;"');
-            source = source.replace( 'class="link-tools"', 'style="display:none;"');
-            source = source.replace( 'class="joint-port-body"', 'class=""');
-            source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+            // @ts-ignore
+            if (coords[0] < viewbox[0]) {
+                viewbox[0] = +coords[0] - startOffset;
+            }
+            // y
+            if (viewbox[1] === null) {
+                viewbox[1] = +coords[1] - 20;
+            }
+            // @ts-ignore
+            if (coords[1] < viewbox[1]) {
+                viewbox[1] = +coords[1] - 20;
+            }
+            // x width
+            // @ts-ignore
+            if (coords[0] > viewbox [2]) {
+                // @ts-ignore
+                viewbox[2] = +coords[0] + 150 - viewbox[0] + endOffset;
+            }
+            // y height
+            // @ts-ignore
+            if (coords[1] > viewbox [3]) {
+                // @ts-ignore
+                viewbox[3] = +coords[1] + 120 - viewbox[1] + 20;
+            }
         }
+        const elements = svg.getElementsByTagName('defs');
+        // @ts-ignore
+        for (const element of elements) {
+            element.remove();
+        }
+        const tags = ['text', 'g', 'circle', 'text', 'rect', 'tspan', 'path'];
+        const classes = ['link-tools', 'joint-tools-layer', 'marker-vertices', 'marker-arrowheads'];
+        this.removeSVGNodesByClassNames(svg, tags, classes);
+        this.removeSVGAttributesByTagNames(svg, tags);
+        source = serializer.serializeToString(svg);
+        if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+            source = source.replace(/^<svg/,
+                '<svg xmlns="http://www.w3.org/2000/svg" viewbox="'
+                + viewbox[0] + ' ' + viewbox[1] + ' ' + viewbox[2] + ' ' + viewbox[3] + '"');
+        } else {
+            source = source.replace(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/,
+                '<svg xmlns="http://www.w3.org/2000/svg" viewbox="'
+                + viewbox[0] + ' ' + viewbox[1] + ' ' + viewbox[2] + ' ' + viewbox[3] + '"');
+        }
+        source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
         return source;
+    }
+
+    private removeSVGNodesByClassNames(svg: HTMLObjectElement, tags: string[], classes: string []) {
+        tags.forEach(tag => {
+            const elements = svg.getElementsByTagName(tag);
+            // @ts-ignore
+            for (const element of elements) {
+                classes.forEach((cl: string) => {
+                    if (element.classList.contains(cl)) {
+                        element.remove();
+                    }
+                });
+            }
+        });
+    }
+
+    private removeSVGAttributesByTagNames(svg: HTMLObjectElement, tags: string[]) {
+        tags.forEach(tag => {
+            const elements  = svg.getElementsByTagName(tag) as HTMLCollectionOf<any>;
+            // @ts-ignore
+            for (const element of elements) {
+                element.removeAttribute('magnet');
+                element.removeAttribute('cursor');
+                element.removeAttribute('event');
+                element.removeAttribute('pointer-events');
+                element.removeAttribute('port');
+                element.removeAttribute('port-group');
+            }
+        });
     }
 }
