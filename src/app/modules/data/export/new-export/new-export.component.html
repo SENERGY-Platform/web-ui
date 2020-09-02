@@ -35,7 +35,7 @@
                     {{device.name}}
                 </mat-option>
             </mat-select>
-            <mat-select *ngIf="selector==='pipe'" (ngModelChange)="pipelineChanged()" placeholder="Pipeline" [(ngModel)]="pipeline">
+            <mat-select *ngIf="selector==='pipe'" (ngModelChange)="pipelineChanged($event)" placeholder="Pipeline" [(ngModel)]="pipeline">
                 <mat-option *ngFor="let pipe of pipelines" [value]="pipe">
                     {{pipe.name}}
                 </mat-option>
@@ -48,12 +48,16 @@
                     {{service.name}}
                 </mat-option>
             </mat-select>
-            <mat-select *ngIf="selector==='pipe'"  (ngModelChange)="operatorChanged($event)"  placeholder="Operator" [(ngModel)]="operator">
-                <mat-option *ngFor="let operator of pipeline.operators" [value]="operator">
+            <mat-select *ngIf="selector==='pipe'"  (openedChange)="operatorSelectChanged($event)" (ngModelChange)="operatorChanged($event)"  placeholder="Operator" [(ngModel)]="operator">
+                <mat-option (mouseenter)="enterOperatorOption(operator.id)" *ngFor="let operator of pipeline.operators" [value]="operator">
                     {{operator.name}} - {{operator.id}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
+        <mat-card *ngIf="selector==='pipe' && showImage"  style="margin-bottom: 10px;">
+            <div class="widget-image" [innerHtml]="image">
+            </div>
+        </mat-card>
 
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>JSON time path</mat-label>
