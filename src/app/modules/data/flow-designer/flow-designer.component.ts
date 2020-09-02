@@ -99,7 +99,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     }
 
     public saveModel() {
-        const svg = this.diagram.paper.svg.cloneNode(true) as HTMLObjectElement;
+        const svg = this.diagram.paper.svg.cloneNode(true) as SVGElement;
         this.flow.image = this.createSVGFromModel(svg);
         this.flow.model = this.diagram.getGraph();
         if (this.flow.model.cells !== undefined) {
@@ -117,7 +117,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         });
     }
 
-    createSVGFromModel(svg: HTMLObjectElement): string {
+    createSVGFromModel(svg: SVGElement): string {
         let source = '';
         const serializer = new XMLSerializer();
         const nodes = svg.getElementsByClassName('joint-type-senergy');
@@ -166,15 +166,28 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 viewbox[3] = +coords[1] + 120 - viewbox[1] + 20;
             }
         }
-        const elements = svg.getElementsByTagName('defs');
+        let elements: HTMLCollectionOf<Element> = svg.getElementsByTagName('defs');
         // @ts-ignore
         for (const element of elements) {
             element.remove();
         }
-        const tags = ['text', 'g', 'circle', 'text', 'rect', 'tspan', 'path'];
-        const classes = ['link-tools', 'joint-tools-layer', 'marker-vertices', 'marker-arrowheads'];
+        elements = svg.getElementsByClassName('joint-tools-layer');
+        // @ts-ignore
+        for (const element of elements) {
+            element.remove();
+        }
+        const tags = ['text', 'g', 'circle', 'rect', 'tspan', 'path'];
+        const classes = [
+            'link-tools',
+            'marker-vertices',
+            'marker-arrowhead',
+            'marker-arrowhead-group-target',
+            'marker-arrowhead-group',
+            'marker-arrowheads'
+        ];
         this.removeSVGNodesByClassNames(svg, tags, classes);
         this.removeSVGAttributesByTagNames(svg, tags);
+        console.log(svg);
         source = serializer.serializeToString(svg);
         if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
             source = source.replace(/^<svg/,
@@ -189,7 +202,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         return source;
     }
 
-    private removeSVGNodesByClassNames(svg: HTMLObjectElement, tags: string[], classes: string []) {
+    private removeSVGNodesByClassNames(svg: SVGElement, tags: string[], classes: string []) {
         tags.forEach(tag => {
             const elements = svg.getElementsByTagName(tag);
             // @ts-ignore
@@ -203,7 +216,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         });
     }
 
-    private removeSVGAttributesByTagNames(svg: HTMLObjectElement, tags: string[]) {
+    private removeSVGAttributesByTagNames(svg: SVGElement, tags: string[]) {
         tags.forEach(tag => {
             const elements  = svg.getElementsByTagName(tag) as HTMLCollectionOf<any>;
             // @ts-ignore
@@ -214,6 +227,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 element.removeAttribute('pointer-events');
                 element.removeAttribute('port');
                 element.removeAttribute('port-group');
+                element.removeAttribute('joint-selector');
             }
         });
     }
