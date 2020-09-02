@@ -21,16 +21,16 @@ export interface DeviceTypeBaseModel {
     id: string;
     name: string;
     description: string;
-    image: string;
 }
 
 export interface DeviceTypeModel extends DeviceTypeBaseModel {
     services: DeviceTypeServiceModel[];
-    device_class: DeviceTypeDeviceClassModel;
+    device_class_id: string;
 }
 
 export interface DeviceTypeDeviceClassModel {
     id: string;
+    image: string;
     name: string;
 }
 
@@ -39,12 +39,12 @@ export interface DeviceTypeServiceModel {
     local_id: string;
     name: string;
     description: string;
-    aspects: DeviceTypeAspectModel[];
+    aspect_ids: string[];
     protocol_id: string;
     interaction: DeviceTypeInteractionEnum | null;
     inputs: DeviceTypeContentModel[];
     outputs: DeviceTypeContentModel[];
-    functions: DeviceTypeFunctionModel[];
+    function_ids: string[];
 }
 
 export interface DeviceTypeAspectModel {

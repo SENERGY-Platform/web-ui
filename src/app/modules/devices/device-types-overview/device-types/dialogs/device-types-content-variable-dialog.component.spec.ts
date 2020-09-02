@@ -27,6 +27,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatInputModule} from '@angular/material/input';
 import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
 import {of} from 'rxjs';
+import {FunctionsService} from '../../../functions/shared/functions.service';
 
 describe('DeviceTypesContentVariableDialog', () => {
     let component: DeviceTypesContentVariableDialogComponent;
@@ -34,6 +35,19 @@ describe('DeviceTypesContentVariableDialog', () => {
 
     const matDialogRefSpy: Spy<MatDialogRef<DeviceTypesContentVariableDialogComponent>> = createSpyFromClass<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
     const conceptServiceSpy: Spy<ConceptsService> = createSpyFromClass(ConceptsService);
+    const functionsServiceSpy: Spy<FunctionsService> = createSpyFromClass(FunctionsService);
+
+    functionsServiceSpy.getFunction.and.returnValues(of({
+            id: 'func_id_1',
+            name: 'with_concept_id',
+            rdf_type: 'rdf_type',
+        } as DeviceTypeFunctionModel),
+        of({
+            id: 'func_id_2',
+            name: 'with_concept_id',
+            rdf_type: 'rdf_type',
+            concept_id: 'urn:infai:ses:concept:ebfeabb3'
+        } as DeviceTypeFunctionModel));
 
     conceptServiceSpy.getConcepts.and.returnValue(of([{
         creator: 'd',
@@ -73,7 +87,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         rdf_type: 'https://senergy.infai.org/ontology/Concept'
     }));
 
-    function init(contentVariable: DeviceTypeContentVariableModel, functions: DeviceTypeFunctionModel[]) {
+    function init(contentVariable: DeviceTypeContentVariableModel, functionIds: string[]) {
         TestBed.configureTestingModule({
             imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatSelectModule, MatInputModule],
             declarations: [
@@ -82,9 +96,10 @@ describe('DeviceTypesContentVariableDialog', () => {
             providers: [
                 {provide: MatDialogRef, useValue: matDialogRefSpy},
                 {provide: ConceptsService, useValue: conceptServiceSpy},
+                {provide: FunctionsService, useValue: functionsServiceSpy},
                 {
                     provide: MAT_DIALOG_DATA,
-                    useValue: {contentVariable: contentVariable, functions: functions}
+                    useValue: {contentVariable: contentVariable, functionIds: functionIds}
                 },
             ]
         }).compileComponents();
@@ -219,19 +234,8 @@ describe('DeviceTypesContentVariableDialog', () => {
     }));
 
     it('init concepts and characteristics', async(() => {
-        const functions: DeviceTypeFunctionModel[] = [{
-            id: 'func_id_1',
-            name: 'without_concept_id',
-            rdf_type: 'rdf_type',
-            concept_id: ''
-        },
-            {
-                id: 'func_id_2',
-                name: 'with_concept_id',
-                rdf_type: 'rdf_type',
-                concept_id: 'urn:infai:ses:concept:ebfeabb3'
-            }];
-        init({} as DeviceTypeContentVariableModel, functions);
+        const functionIds: string[] = ['func_id_1', 'func_id_2'];
+        init({} as DeviceTypeContentVariableModel, functionIds);
         expect(component.functionConceptIds).toEqual(['urn:infai:ses:concept:ebfeabb3']);
         expect(component.conceptList).toEqual([{
             conceptName: 'binary state',

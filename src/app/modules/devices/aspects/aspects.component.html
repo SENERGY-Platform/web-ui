@@ -17,7 +17,7 @@
   -->
 
 
-<div class="functions-container">
+<div class="aspects-container">
     <div fxLayout="column">
         <senergy-searchbar fxFlex></senergy-searchbar>
         <div fxLayout="row">
@@ -26,34 +26,34 @@
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         </div>
     </div>
-    <div class="functions-scroll">
+    <div class="aspects-scroll">
         <div infiniteScroll
              [infiniteScrollDistance]="1"
              [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.functions-scroll'"
+             [infiniteScrollContainer]="'.aspects-scroll'"
              [fromRoot]="true"
              (scrolled)="onScroll()">
             <div class="layout-margin" fxLayout="column">
                 <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                               *ngIf="functions.length > 0">
+                               *ngIf="aspects.length > 0">
                     <mat-grid-tile class="mat-elevation-z1"
-                                   *ngFor="let function of functions; let i = index">
+                                   *ngFor="let aspect of aspects; let i = index">
                         <div fxFill>
-                            <img class="background" src="src/img/functions.jpg">
+                            <img class="background" src="src/img/aspects.jpg">
                         </div>
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>
-                                <div class="truncate footer-item-header" matTooltip="{{function.name}}">
-                                    {{function.name}}
+                                <div class="truncate footer-item-header" matTooltip="{{aspect.name}}">
+                                    {{aspect.name}}
                                 </div>
                                 <form fxLayout="row" class="footer-buttons">
                                     <div fxFlex></div>
                                     <div [fxLayoutAlign]="'start center'">
-                                        <button (click)="editFunction(function)"
+                                        <button (click)="editAspect(aspect)"
                                                 mat-icon-button class="color-accent" matTooltip="Edit">
                                             <mat-icon>edit</mat-icon>
                                         </button>
-                                        <button (click)="deleteFunction(function)"
+                                        <button (click)="deleteAspect(aspect)"
                                                 mat-icon-button
                                                 class="color-accent"
                                                 matTooltip="Delete">
@@ -65,12 +65,13 @@
                         </mat-grid-tile-footer>
                     </mat-grid-tile>
                 </mat-grid-list>
-                <div *ngIf="functions.length === 0 && ready">No function found.</div>
-                <senergy-spinner [elementCount]="functions.length" [show]="!ready"></senergy-spinner>
+                <div *ngIf="aspects.length === 0 && ready">No aspect found.</div>
+                <senergy-spinner [elementCount]="aspects.length" [show]="!ready"></senergy-spinner>
             </div>
         </div>
     </div>
 </div>
-<button mat-fab class="fab" matTooltip="Add new function" (click)="newFunction()">
+<button mat-fab class="fab" matTooltip="Add new aspect" (click)="newAspect()">
     <mat-icon>add</mat-icon>
 </button>
+

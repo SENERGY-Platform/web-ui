@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import {DeviceTypeBaseModel} from './device-type.model';
-
-export interface DeviceTypePermSearchModel extends DeviceTypeBaseModel {
+export interface DeviceClassesPermSearchModel {
     creator: string;
-    device_class_id: string;
-    service: string[] | string;
-    permissions: PermissionsModel;
-}
-
-export interface PermissionsModel {
-    a: boolean;
-    x: boolean;
-    r: boolean;
-    w: boolean;
+    id: string;
+    image: string;
+    name: string;
+    permissions: {
+        a: boolean;
+        x: boolean;
+        r: boolean;
+        w: boolean;
+    };
+    shared: false;
 }

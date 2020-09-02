@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-import {DeviceTypeBaseModel} from './device-type.model';
-
-export interface DeviceTypePermSearchModel extends DeviceTypeBaseModel {
-    creator: string;
-    device_class_id: string;
-    service: string[] | string;
-    permissions: PermissionsModel;
+.form {
+    min-width: 600px;
+    max-width: 700px;
+    width: 100%;
 }
 
-export interface PermissionsModel {
-    a: boolean;
-    x: boolean;
-    r: boolean;
-    w: boolean;
+.full-width {
+    width: 100%;
+}
+
+.textarea-size {
+    min-height: 200px;
+}
+
+mat-dialog-actions button:not(:last-child) {
+    margin-right: 8px;
+}
+
+.radio-button {
+    margin: 5px;
 }

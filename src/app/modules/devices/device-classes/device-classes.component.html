@@ -17,7 +17,7 @@
   -->
 
 
-<div class="functions-container">
+<div class="device-classes-container">
     <div fxLayout="column">
         <senergy-searchbar fxFlex></senergy-searchbar>
         <div fxLayout="row">
@@ -26,34 +26,34 @@
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         </div>
     </div>
-    <div class="functions-scroll">
+    <div class="device-classes-scroll">
         <div infiniteScroll
              [infiniteScrollDistance]="1"
              [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.functions-scroll'"
+             [infiniteScrollContainer]="'.device-classes-scroll'"
              [fromRoot]="true"
              (scrolled)="onScroll()">
             <div class="layout-margin" fxLayout="column">
                 <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                               *ngIf="functions.length > 0">
+                               *ngIf="deviceClasses.length > 0">
                     <mat-grid-tile class="mat-elevation-z1"
-                                   *ngFor="let function of functions; let i = index">
-                        <div fxFill>
-                            <img class="background" src="src/img/functions.jpg">
+                                   *ngFor="let deviceClass of deviceClasses; let i = index">
+                        <div fxFill class="background">
+                            <img class="device-class-image" src="{{deviceClass.image}}">
                         </div>
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>
-                                <div class="truncate footer-item-header" matTooltip="{{function.name}}">
-                                    {{function.name}}
+                                <div class="truncate footer-item-header" matTooltip="{{deviceClass.name}}">
+                                    {{deviceClass.name}}
                                 </div>
                                 <form fxLayout="row" class="footer-buttons">
                                     <div fxFlex></div>
                                     <div [fxLayoutAlign]="'start center'">
-                                        <button (click)="editFunction(function)"
+                                        <button (click)="editDeviceClass(deviceClass)"
                                                 mat-icon-button class="color-accent" matTooltip="Edit">
                                             <mat-icon>edit</mat-icon>
                                         </button>
-                                        <button (click)="deleteFunction(function)"
+                                        <button (click)="deleteDeviceClass(deviceClass)"
                                                 mat-icon-button
                                                 class="color-accent"
                                                 matTooltip="Delete">
@@ -65,12 +65,12 @@
                         </mat-grid-tile-footer>
                     </mat-grid-tile>
                 </mat-grid-list>
-                <div *ngIf="functions.length === 0 && ready">No function found.</div>
-                <senergy-spinner [elementCount]="functions.length" [show]="!ready"></senergy-spinner>
+                <div *ngIf="deviceClasses.length === 0 && ready">No device class found.</div>
+                <senergy-spinner [elementCount]="deviceClasses.length" [show]="!ready"></senergy-spinner>
             </div>
         </div>
     </div>
 </div>
-<button mat-fab class="fab" matTooltip="Add new function" (click)="newFunction()">
+<button mat-fab class="fab" matTooltip="Add new device class" (click)="newDeviceClass()">
     <mat-icon>add</mat-icon>
 </button>

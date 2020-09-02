@@ -40,12 +40,12 @@ mat-grid-tile {
     text-overflow: ellipsis;
 }
 
-.functions-container {
+.aspects-container {
     height: calc(100% - 64px);
     overflow-y: hidden;
 }
 
-.functions-scroll {
+.aspects-scroll {
     height: calc(100% - 106px);
     overflow-y: auto;
 }
@@ -77,3 +77,4 @@ mat-grid-tile {
     right: 15px;
     z-index: 100;
 }
+

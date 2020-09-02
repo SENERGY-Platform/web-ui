@@ -63,6 +63,12 @@ import {MatSortModule} from '@angular/material/sort';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {FunctionsComponent} from './functions/functions.component';
 import {DeviceInstancesExportDialogComponent} from './device-instances/dialogs/device-instances-export-dialog.component';
+import {FunctionsEditDialogComponent} from './functions/dialog/functions-edit-dialog.component';
+import {AspectsComponent} from './aspects/aspects.component';
+import {AspectsEditDialogComponent} from './aspects/dialog/aspects-edit-dialog.component';
+import {DeviceClassesComponent} from './device-classes/device-classes.component';
+import {DeviceClassesEditDialogComponent} from './device-classes/dialog/device-classes-edit-dialog.component';
+import {FunctionsCreateDialogComponent} from './functions/dialog/functions-create-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -75,6 +81,8 @@ const deviceTypes = {path: 'devices/devicetypesoverview', pathMatch: 'full', com
 const concepts = {path: 'devices/concepts', pathMatch: 'full', component: ConceptsComponent, data: {header: 'Devices'}};
 const characteristics = {path: 'devices/characteristics', pathMatch: 'full', component: CharacteristicsComponent, data: {header: 'Devices'}};
 const functions = {path: 'devices/functions', pathMatch: 'full', component: FunctionsComponent, data: {header: 'Devices'}};
+const aspects = {path: 'devices/aspects', pathMatch: 'full', component: AspectsComponent, data: {header: 'Devices'}};
+const deviceClasses = {path: 'devices/deviceclasses', pathMatch: 'full', component: DeviceClassesComponent, data: {header: 'Devices'}};
 
 @NgModule({
     imports: [MatGridListModule,
@@ -109,7 +117,7 @@ const functions = {path: 'devices/functions', pathMatch: 'full', component: Func
         MatSortModule,
         MatProgressSpinnerModule,
         DeviceTypesOverviewModule,
-        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics, functions])],
+        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics, functions, aspects, deviceClasses])],
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,
@@ -127,6 +135,12 @@ const functions = {path: 'devices/functions', pathMatch: 'full', component: Func
         ConceptsEditDialogComponent,
         CharacteristicsEditDialogComponent,
         FunctionsComponent,
+        FunctionsEditDialogComponent,
+        FunctionsCreateDialogComponent,
+        AspectsComponent,
+        AspectsEditDialogComponent,
+        DeviceClassesComponent,
+        DeviceClassesEditDialogComponent,
     ],
 })
 

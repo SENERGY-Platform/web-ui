@@ -27,6 +27,8 @@ import {ConceptsService} from '../../../concepts/shared/concepts.service';
 import {DeviceTypeHelperService} from '../shared/device-type-helper.service';
 import {ConceptsPermSearchModel} from '../../../concepts/shared/concepts-perm-search.model';
 import {forkJoin, Observable} from 'rxjs';
+import {DeviceTypeService} from '../../shared/device-type.service';
+import {FunctionsService} from '../../../functions/shared/functions.service';
 
 @Component({
     templateUrl: './device-types-content-variable-dialog.component.html',
@@ -46,15 +48,10 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 private _formBuilder: FormBuilder,
                 private conceptsService: ConceptsService,
                 private deviceTypeHelperService: DeviceTypeHelperService,
-                @Inject(MAT_DIALOG_DATA) data: { contentVariable: DeviceTypeContentVariableModel, functions: DeviceTypeFunctionModel[] }) {
+                private functionsService: FunctionsService,
+                @Inject(MAT_DIALOG_DATA) data: { contentVariable: DeviceTypeContentVariableModel, functionIds: string[] }) {
         this.contentVariable = data.contentVariable;
-        if (data.functions) {
-            data.functions.forEach((func: DeviceTypeFunctionModel) => {
-                if (func.concept_id !== '') {
-                    this.functionConceptIds.push(func.concept_id);
-                }
-            });
-        }
+        this.getConceptIds(data.functionIds);
     }
 
     ngOnInit(): void {
@@ -146,5 +143,19 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             colored: this.functionConceptIds.includes(concepts.id),
             characteristicList: characteristicsList
         });
+    }
+
+    private getConceptIds(functionIds: string[] | undefined): void {
+        if (functionIds) {
+            functionIds.forEach((functionId: string) => {
+                this.functionsService.getFunction(functionId).subscribe((resp: (DeviceTypeFunctionModel | null)) => {
+                    if (resp) {
+                        if (resp.concept_id) {
+                            this.functionConceptIds.push(resp.concept_id);
+                        }
+                    }
+                });
+            });
+        }
     }
 }

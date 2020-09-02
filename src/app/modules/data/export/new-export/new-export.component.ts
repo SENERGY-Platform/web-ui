@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {DeviceTypeService} from '../../../devices/device-types-overview/shared/device-type.service';
@@ -32,10 +32,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {IOModel, OperatorModel} from '../../operator-repo/shared/operator.model';
 import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
 import {environment} from '../../../../../environments/environment';
-import {FlowModel, FlowShareModel} from '../../flow-repo/shared/flow.model';
 import {forkJoin, Observable} from 'rxjs';
-import {catchError} from 'rxjs/operators';
-
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 
 @Component({
     selector: 'senergy-new-export',
@@ -43,7 +41,7 @@ import {catchError} from 'rxjs/operators';
     styleUrls: ['./new-export.component.css']
 })
 
-export class NewExportComponent implements AfterViewInit {
+export class NewExportComponent implements OnInit {
 
     ready = false;
     export = {} as ExportModel;
@@ -57,6 +55,8 @@ export class NewExportComponent implements AfterViewInit {
     pipelines: PipelineModel [] = [];
     paths = new Map<string, string | undefined>();
     allMessages = true;
+    image: SafeHtml = {};
+    showImage = false;
 
     timeSuggest = '';
 
@@ -83,11 +83,13 @@ export class NewExportComponent implements AfterViewInit {
         private exportService: ExportService,
         private operatorRepoService: OperatorRepoService,
         private router: Router,
-        public snackBar: MatSnackBar) {
+        private sanitizer: DomSanitizer,
+        public snackBar: MatSnackBar
+    ) {
         this.id = this.route.snapshot.paramMap.get('id');
     }
 
-    ngAfterViewInit() {
+    ngOnInit() {
         const array: Observable<(DeviceInstancesModel[] | PipelineModel[])>[] = [];
 
         array.push(this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc'));
@@ -272,8 +274,45 @@ export class NewExportComponent implements AfterViewInit {
         }
     }
 
-    pipelineChanged() {
+    pipelineChanged(pipe: PipelineModel) {
+        this.pipeline = pipe;
         this.resetVars();
+        if (typeof this.pipeline.image === 'string') {
+            const parser = new DOMParser();
+            const svg = parser.parseFromString(this.pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+            // @ts-ignore
+            const viewbox = svg.getAttribute('viewbox').split(' ');
+            svg.setAttribute('height', viewbox[3]);
+            this.image = this.sanitizer.bypassSecurityTrustHtml(
+                new XMLSerializer().serializeToString(svg));
+        }
+    }
+
+    operatorSelectChanged (opened: boolean) {
+        opened ? this.showImage = true : this.showImage = false;
+    }
+
+    enterOperatorOption (id: string) {
+        if (typeof this.pipeline.image === 'string') {
+            const parser = new DOMParser();
+            const svg = parser.parseFromString(this.pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+            // @ts-ignore
+            const viewbox = svg.getAttribute('viewbox').split(' ');
+            svg.setAttribute('height', viewbox[3]);
+            const elements = svg.getElementsByClassName('joint-cell');
+            // @ts-ignore
+            for (const element of elements) {
+                if (element.attributes['model-id'].value === id) {
+                    for (const node of element.childNodes) {
+                        if (node.attributes['stroke'] !== undefined && node.attributes['stroke'].value === 'black') {
+                            node.attributes['stroke'].value = 'red';
+                        }
+                    }
+                }
+            }
+            this.image = this.sanitizer.bypassSecurityTrustHtml(
+                new XMLSerializer().serializeToString(svg));
+        }
     }
 
     operatorChanged(operator: PipelineOperatorModel) {
