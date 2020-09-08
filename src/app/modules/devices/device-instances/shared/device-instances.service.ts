@@ -146,8 +146,14 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceSelections(criteria: DeviceFilterCriteriaModel[], protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined): Observable<DeviceSelectablesModel[]> {
-        let path = '/selectables?json=' + encodeURIComponent(JSON.stringify(criteria));
+    getDeviceSelections(criteria: DeviceFilterCriteriaModel[],  completeServices: boolean, protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined): Observable<DeviceSelectablesModel[]> {
+        let path = '/selectables';
+        if (completeServices) {
+            path += '?complete_services=true&';
+        } else {
+            path += '?';
+        }
+        path += 'json=' + encodeURIComponent(JSON.stringify(criteria));
         if (protocolBlocklist) {
             path = path + '&filter_protocols=' + encodeURIComponent(protocolBlocklist.join(','));
         }

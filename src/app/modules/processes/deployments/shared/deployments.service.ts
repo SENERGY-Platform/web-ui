@@ -91,6 +91,12 @@ export class DeploymentsService {
         );
     }
 
+    v2getPreparedDeploymentsByXml(xml: string, svg: string): Observable<V2DeploymentsPreparedModel | null> {
+        return this.http.post<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/prepared-deployments', {'xml': xml, 'svg': svg}).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null))
+        );
+    }
+
     getDeployments(deploymentId: string): Observable<DeploymentsPreparedModel | null> {
         return this.http.get<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments/' + deploymentId).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeployments', null))

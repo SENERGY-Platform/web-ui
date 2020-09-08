@@ -24,6 +24,7 @@ import {MultiValuePropertiesModel} from '../../../widgets/multi-value/shared/mul
 import {ProcessIncidentPropertiesModel} from '../../../widgets/process-incident-list/shared/process-incident-properties.model';
 import {DeviceStatusPropertiesModel} from '../../../widgets/device-status/shared/device-status-properties.model';
 import {ProcessSchedulerPropertiesModel} from '../../../widgets/process-scheduler/shared/process-scheduler.model';
+import {DataTableWidgetPropertiesModel} from '../../../widgets/data-table/shared/data-table.model';
 
 export interface WidgetModel {
     id: string;
@@ -45,5 +46,6 @@ export interface WidgetPropertiesModels extends SwitchPropertiesModel,
     MultiValuePropertiesModel,
     ProcessIncidentPropertiesModel,
     ProcessSchedulerPropertiesModel,
+    DataTableWidgetPropertiesModel,
     DeviceStatusPropertiesModel {
 }

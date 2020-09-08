@@ -29,6 +29,7 @@ import {DeviceStatusService} from '../../widgets/device-status/shared/device-sta
 import {moveItemInArray} from '@angular/cdk/drag-drop';
 import {DialogsService} from '../../core/services/dialogs.service';
 import {ProcessSchedulerService} from '../../widgets/process-scheduler/shared/process-scheduler.service';
+import {DataTableService} from '../../widgets/data-table/shared/data-table.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -62,6 +63,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 private dashboardService: DashboardService,
                 private dialogsService: DialogsService,
                 private processSchedulerService: ProcessSchedulerService,
+                private dataTableService: DataTableService,
                 private deviceStatusService: DeviceStatusService) {
     }
 
@@ -360,6 +362,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         this.processSchedulerService.deleteSchedulesByWidget(widget.id).subscribe(() => null);
                     }
                 });
+                break;
+            case DashboardTypesEnum.DataTable:
+                this.dataTableService.deleteElements(widget.properties.dataTable?.elements);
                 break;
         }
     }
