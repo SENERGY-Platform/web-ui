@@ -43,6 +43,7 @@ const grids = new Map([
     styleUrls: ['./characteristics.component.css']
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy {
+    readonly limitInit = 54;
 
     characteristics: CharacteristicsPermSearchModel[] = [];
     gridCols = 0;
@@ -52,7 +53,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
     private searchText = '';
-    private limit = 54;
+    private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
@@ -85,7 +86,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
             this.ready = false;
-            this.offset = this.offset + this.limit;
+            this.setRepoItemsParams(this.limitInit);
             this.getCharacteristics(false);
         }
     }
@@ -220,6 +221,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+        this.limit = this.limitInit;
     }
 
     private setRepoItemsParams(limit: number) {
