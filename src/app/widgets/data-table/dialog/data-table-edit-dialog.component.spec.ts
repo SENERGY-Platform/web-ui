@@ -46,7 +46,7 @@ import {ProcessSchedulerService} from '../../process-scheduler/shared/process-sc
 import uuid = util.uuid;
 
 
-fdescribe('DataTableEditDialogComponent', () => { // TODO remove 'f': fdescribe --> describe
+describe('DataTableEditDialogComponent', () => {
     let component: DataTableEditDialogComponent;
 
     // By assigning the value in beforeEach, call counters get resets before each test
