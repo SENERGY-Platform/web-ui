@@ -218,7 +218,7 @@ export class DataTableEditDialogComponent implements OnInit {
             .subscribe(() => this.onServiceSelected(newGroup));
 
         newGroup.get('elementDetails')?.get('device')?.get('deviceId')?.valueChanges
-            .subscribe(() => this.cdref.detectChanges()); // avoids changedAfterChecked error
+            .subscribe(() => this.runChangeDetection()); // avoids changedAfterChecked error
 
         newGroup.get('elementDetails')?.get('pipeline')?.get('operatorId')?.valueChanges
             .subscribe(() => this.onOperatorSelected(newGroup));
@@ -235,6 +235,7 @@ export class DataTableEditDialogComponent implements OnInit {
                     this.getWarningGroup(newGroup).disable();
                     newGroup.get('format')?.disable();
                 }
+                this.runChangeDetection();
             });
 
         newGroup.get('warning')?.get('enabled')?.valueChanges.subscribe(enabled => {
@@ -365,7 +366,7 @@ export class DataTableEditDialogComponent implements OnInit {
         }
         let functions: DeviceTypeFunctionModel[] = [];
         const aspectId = element.get('elementDetails')?.get('device')?.get('aspectId')?.value;
-        if (aspectId !== undefined) {
+        if (aspectId !== undefined && aspectId !== null) {
             functions = this.dataTableHelperService.getMeasuringFunctionsOfAspect(aspectId);
         }
         let functionId = element.get('elementDetails')?.get('device')?.get('functionId')?.value;
@@ -562,7 +563,12 @@ export class DataTableEditDialogComponent implements OnInit {
         this.addNewMeasurement();
         const newIndex = this.getElements().length - 1;
         this.getElement(newIndex).patchValue(this.getElement(index).value);
+        this.getElement(newIndex).patchValue({id: uuid()});
         this.step = newIndex;
+    }
+
+    runChangeDetection() {
+        this.cdref.detectChanges();
     }
 
     private getSelectedService(element: AbstractControl): DeviceTypeServiceModel | undefined {
@@ -747,7 +753,7 @@ export class DataTableEditDialogComponent implements OnInit {
             Values: [{
                 Name: exportValueName,
                 Path: exportValuePath,
-                Type: exportValuePath,
+                Type: valueType,
             }],
             EntityName: operator.id,
             Filter: pipeline.id + ':' + operator.id,
