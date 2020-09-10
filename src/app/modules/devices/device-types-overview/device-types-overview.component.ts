@@ -47,6 +47,7 @@ const grids = new Map([
     styleUrls: ['./device-types-overview.component.css']
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
+    readonly limitInit = 54;
 
     deviceTypes: DeviceTypePermSearchModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
@@ -55,7 +56,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
     private searchText = '';
-    private limit = 54;
+    private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
@@ -90,7 +91,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
             this.ready = false;
-            this.offset = this.offset + this.limit;
+            this.setRepoItemsParams(this.limitInit);
             this.getDeviceTypes();
         }
     }
@@ -103,6 +104,8 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
                         const index = this.deviceTypes.indexOf(deviceTypeInput);
                         this.deviceTypes.splice(index, 1);
                         this.snackBar.open('Device type deleted successfully.', '', {duration: 2000});
+                        this.setRepoItemsParams(1);
+                        this.getDeviceTypes();
 
                     } else {
                         this.snackBar.open('Error while deleting device type!', '', {duration: 2000});
@@ -188,6 +191,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+        this.limit = this.limitInit;
     }
 
     private loadDeviceClasses(): void {
@@ -195,6 +199,12 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
             (deviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceClasses = deviceClasses;
             });
+    }
+
+    private setRepoItemsParams(limit: number) {
+        this.ready = false;
+        this.limit = limit;
+        this.offset = this.deviceTypes.length;
     }
 
 }
