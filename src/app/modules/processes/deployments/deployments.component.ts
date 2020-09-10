@@ -59,6 +59,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
+    private getAllSub = new Subscription();
     private allDataLoaded = false;
     private source = 'sepl';
     selectedItems: DeploymentsModel[] = [];
@@ -84,6 +85,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+        this.getAllSub.unsubscribe();
     }
 
     onScroll() {
@@ -219,7 +221,8 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
             this.reset();
         }
 
-        this.deploymentsService.getAll(
+        this.getAllSub.unsubscribe(); // only one request at a time
+        this.getAllSub = this.deploymentsService.getAll(
             this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.source).subscribe(
             (repoItems: DeploymentsModel[]) => {
                 if (repoItems.length !== this.limit) {
