@@ -45,15 +45,15 @@
                                     <mat-icon>build</mat-icon>
                                     Export
                                 </button>
-                                <button mat-menu-item (click)="permission(device)">
+                                <button mat-menu-item (click)="permission(device)" [disabled]="!device.permissions.a">
                                     <mat-icon>share</mat-icon>
                                     Share
                                 </button>
-                                <button mat-menu-item (click)="edit(device)">
+                                <button mat-menu-item (click)="edit(device)" [disabled]="!device.permissions.w">
                                     <mat-icon>edit</mat-icon>
                                     Edit
                                 </button>
-                                <button mat-menu-item (click)="delete(device)">
+                                <button mat-menu-item (click)="delete(device)" [disabled]="!device.permissions.a">
                                     <mat-icon>delete</mat-icon>
                                     Delete
                                 </button>

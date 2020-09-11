@@ -50,12 +50,14 @@
                                     <div fxFlex></div>
                                     <div [fxLayoutAlign]="'start center'">
                                         <button (click)="editFunction(function)"
-                                                mat-icon-button class="color-accent" matTooltip="Edit">
+                                                [disabled]="!function.permissions.w"
+                                                mat-icon-button color="accent" matTooltip="Edit">
                                             <mat-icon>edit</mat-icon>
                                         </button>
                                         <button (click)="deleteFunction(function)"
+                                                [disabled]="!function.permissions.a"
                                                 mat-icon-button
-                                                class="color-accent"
+                                                color="accent"
                                                 matTooltip="Delete">
                                             <mat-icon>delete</mat-icon>
                                         </button>

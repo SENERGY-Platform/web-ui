@@ -21,7 +21,7 @@
         <div *ngIf="ready && processes.length != 0" fxLayout="column" fxFill>
             <mat-list>
                 <mat-list-item *ngFor="let process of processes">
-                    <button mat-list-icon mat-icon-button class="color-accent" matTooltip="edit process model"
+                    <button mat-list-icon mat-icon-button color="accent" matTooltip="edit process model"
                             routerLink="/processes/designer/{{process.id}}">
                         <mat-icon class="fix-position">edit</mat-icon>
                     </button>
