@@ -52,12 +52,12 @@
                                 <form fxLayout="row" class="footer-buttons">
                                     <div fxFlex></div>
                                     <div [fxLayoutAlign]="'start center'">
-                                        <button (click)="editCharacteristic(characteristic)"
-                                                mat-icon-button class="color-accent" matTooltip="Edit">
+                                        <button (click)="editCharacteristic(characteristic)" [disabled]="!characteristic.permissions.w"
+                                                mat-icon-button color="accent" matTooltip="Edit">
                                             <mat-icon>edit</mat-icon>
                                         </button>
-                                        <button (click)="deleteCharacteristic(characteristic)"
-                                                mat-icon-button class="color-accent" matTooltip="Delete">
+                                        <button (click)="deleteCharacteristic(characteristic)" [disabled]="!characteristic.permissions.a"
+                                                mat-icon-button color="accent" matTooltip="Delete">
                                             <mat-icon>delete</mat-icon>
                                         </button>
                                     </div>

@@ -62,7 +62,7 @@ export class DashboardNewWidgetDialogComponent {
             disabled: false,
             tooltip: SingleValueRequirementsService.requirement
         },
-        {value: DashboardTypesEnum.MultiValue, viewValue: 'Multi Value', disabled: false, tooltip: ''},
+        // {value: DashboardTypesEnum.MultiValue, viewValue: 'Multi Value', disabled: false, tooltip: ''},
         {
             value: DashboardTypesEnum.EnergyPrediction,
             viewValue: 'Energy Prediction',
@@ -84,7 +84,8 @@ export class DashboardNewWidgetDialogComponent {
             tooltip: '',
         },
         {value: DashboardTypesEnum.ProcessScheduler, viewValue: 'Process Scheduler', disabled: false, tooltip: ''},
-        {value: DashboardTypesEnum.DeviceStatus, viewValue: 'Device Status', disabled: false, tooltip: ''},
+        // {value: DashboardTypesEnum.DeviceStatus, viewValue: 'Device Status', disabled: false, tooltip: ''},
+        {value: DashboardTypesEnum.DataTable, viewValue: 'Data Table', disabled: false, tooltip: ''}, // TODO
     ];
     switchCategories: SwitchCategories[] = [
         {

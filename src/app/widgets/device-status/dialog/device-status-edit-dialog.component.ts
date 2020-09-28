@@ -177,7 +177,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             });
 
             const filter = [{function_id: this.getFunction(elementIndex).id, aspect_id: this.getAspectId(elementIndex).value}];
-            this.deviceInstanceService.getDeviceSelections(filter).subscribe((resp: DeviceSelectablesModel[] | null) => {
+            this.deviceInstanceService.getDeviceSelections(filter, true).subscribe((resp: DeviceSelectablesModel[] | null) => {
                 if (resp !== null) {
                     this.selectablesArray[elementIndex] = resp;
                 }

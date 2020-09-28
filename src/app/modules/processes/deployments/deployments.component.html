@@ -63,11 +63,11 @@
                                         <mat-icon>warning</mat-icon>
                                     </button>
                                     <div fxFlex></div>
-                                    <button mat-icon-button matTooltip="Run" class="color-accent"
+                                    <button mat-icon-button matTooltip="Run" color="accent"
                                             (click)="run(item.value.id)">
                                         <mat-icon>play_arrow</mat-icon>
                                     </button>
-                                    <button mat-icon-button matTooltip="Copy Deployment" class="color-accent"
+                                    <button mat-icon-button matTooltip="Copy Deployment" color="accent"
                                             (click)="copyDeployment(item.value.id)">
                                         <mat-icon>content_copy</mat-icon>
                                     </button>
@@ -77,7 +77,7 @@
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                     <button mat-icon-button [matMenuTriggerFor]="deploymentMenu"
-                                            class="color-accent" matTooltip="More">
+                                            color="accent" matTooltip="More">
                                         <mat-icon>more_vert</mat-icon>
                                     </button>
                                     <mat-menu #deploymentMenu="matMenu" [overlapTrigger]="false">

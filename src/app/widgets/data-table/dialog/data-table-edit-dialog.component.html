@@ -1,0 +1,313 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>Edit Data Table</h2>
+<senergy-widget-spinner [show]="!ready || saving"></senergy-widget-spinner>
+
+<mat-dialog-content *ngIf="ready && !saving">
+    <form [formGroup]="formGroup">
+        <table>
+            <tr>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Widget Name</mat-label>
+                        <input type="text" matInput placeholder="Widget Name" formControlName="name">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent" class="order-select">
+                        <mat-label>Default Order</mat-label>
+                        <mat-select formControlName="order" placeholder="Order by"
+                                    [compareWith]="compareStrings" required>
+                            <mat-option [value]="orderValues.Default">As listed</mat-option>
+                            <mat-option [value]="orderValues.AlphabeticallyAsc">Name</mat-option>
+                            <mat-option [value]="orderValues.AlphabeticallyDesc">Name desc</mat-option>
+                            <mat-option [value]="orderValues.ValueAsc">Value</mat-option>
+                            <mat-option [value]="orderValues.ValueDesc">Value desc</mat-option>
+                            <mat-option [value]="orderValues.TimeAsc">Time</mat-option>
+                            <mat-option [value]="orderValues.TimeDesc">Time desc</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Value Alias</mat-label>
+                        <input type="text" matInput placeholder="Value" formControlName="valueAlias">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Refresh time</mat-label>
+                        <input type="number" matInput placeholder="Refresh Time" formControlName="refreshTime">
+                    </mat-form-field>
+                </td>
+            </tr>
+        </table>
+        <table formArrayName="convertRules">
+            <tr [formGroupName]="convertRuleIndex"
+                *ngFor="let convertRule of convertRulesControl.controls; let convertRuleIndex = index">
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Status</mat-label>
+                        <input class="convert-input" type="text" matInput placeholder="Status" formControlName="status">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-select formControlName="icon"
+                                    placeholder="Choose Icon" class="convert-input">
+                            <mat-select-trigger>
+                                <mat-icon
+                                        [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
+                            </mat-select-trigger>
+                            <mat-option>-- None --</mat-option>
+                            <mat-option *ngFor="let icon of icons" [value]="icon">
+                                <mat-icon>{{icon}}</mat-icon>
+                                {{icon}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Color</mat-label>
+                        <input class="convert-input" type="text" matInput placeholder="Color" formControlName="color">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <button mat-icon-button style="float: right"
+                            (click)="deleteConvertRule(convertRuleIndex)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <button style="float: right" mat-icon-button (click)="addConvertRule()"
+                            matTooltip="Add icon conversion rule">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                </td>
+            </tr>
+        </table>
+
+
+        <mat-accordion>
+            <mat-expansion-panel *ngFor="let tab of getElements().controls; let index = index"
+                                 [expanded]="step === index">
+                <mat-expansion-panel-header class="right-aligned-header">
+                    <mat-panel-title>
+                        <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.get('name')?.value}} </span>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                        <span [ngClass]="{'color-warn': tab.invalid}"> {{index}} </span>
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+                <ng-template matExpansionPanelContent>
+                    <table [formGroup]="getElement(index)">
+                        <tr>
+                            <td colspan="1">
+                                <mat-form-field color="accent">
+                                    <mat-label>Alias</mat-label>
+                                    <input type="text" matInput placeholder="Alias" required
+                                           formControlName="name">
+                                </mat-form-field>
+                            </td>
+                            <td colspan="2" formGroupName="elementDetails">
+                                <mat-radio-group formControlName="elementType" fxLayout="row">
+                                    <mat-radio-button [value]="elementTypes.DEVICE" fxFlex>Device</mat-radio-button>
+                                    <mat-radio-button [value]="elementTypes.PIPELINE" fxFlex>Pipeline</mat-radio-button>
+                                </mat-radio-group>
+                            </td>
+                        </tr>
+
+                        <tr formGroupName="elementDetails" *ngIf="isDevice(tab)">
+                            <td formGroupName="device">
+                                <mat-form-field color="accent">
+                                    <mat-select formControlName="aspectId" required
+                                                placeholder="Choose Aspect">
+                                        <mat-option
+                                                *ngFor="let aspect of dataTableHelperService.getAspectsWithMeasuringFunction()"
+                                                [value]="aspect.id">
+                                            {{aspect.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td formGroupName="device">
+                                <mat-form-field color="accent">
+                                    <mat-select formControlName="functionId" required
+                                                placeholder="Choose Function" [compareWith]="compareStrings">
+                                        <mat-option *ngFor="let func of getFunctions(tab)" [value]="func.id">
+                                            {{func.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td formGroupName="device">
+                                <mat-form-field color="accent">
+                                    <mat-select [compareWith]="compareStrings"
+                                                formControlName="deviceId" placeholder="Choose Device"
+                                                required>
+                                        <mat-option *ngFor="let selectable of getSelectables(tab)"
+                                                    [value]="selectable.device.id">
+                                            {{selectable.device.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr *ngIf="isDevice(tab)">
+                            <td formGroupName="elementDetails">
+                                <mat-form-field color="accent" formGroupName="device">
+                                    <mat-select formControlName="serviceId" required
+                                                placeholder="Choose Service" [compareWith]="compareStrings">
+                                        <mat-option *ngFor="let service of getServices(tab)" [value]="service.id">
+                                            {{service.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <mat-select formControlName="exportValuePath" required
+                                                placeholder="Choose Value" [compareWith]="compareStrings">
+                                        <mat-option *ngFor="let exportValue of getServiceValues(tab)"
+                                                    [value]="exportValue.Path">
+                                            {{exportValue.Name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr *ngIf="isPipeline(tab)">
+                            <td formGroupName="elementDetails">
+                                <mat-form-field color="accent" formGroupName="pipeline">
+                                    <mat-select formControlName="pipelineId" required
+                                                placeholder="Choose Pipeline" [compareWith]="compareStrings">
+                                        <mat-option *ngFor="let pipeline of dataTableHelperService.getPipelines()"
+                                                    [value]="pipeline.id">
+                                            {{pipeline.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td formGroupName="elementDetails">
+                                <mat-form-field color="accent" formGroupName="pipeline">
+                                    <mat-select formControlName="operatorId" required
+                                                placeholder="Choose Operator" [compareWith]="compareStrings">
+                                        <mat-option *ngFor="let operator of getOperators(tab)" [value]="operator.id">
+                                            {{operator.name + ' (' + operator.id + ')'}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <mat-select formControlName="exportValuePath" required
+                                                placeholder="Choose Value" [compareWith]="compareStrings">
+                                        <mat-option *ngFor="let exportValue of getOperatorValues(tab)"
+                                                    [value]="exportValue.Path">
+                                            {{exportValue.Name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <mat-select formControlName="exportId" required [compareWith]="compareStrings"
+                                                placeholder="Choose Export">
+                                        <mat-option *ngFor="let exp of getExports(tab)" [value]="exp.ID">
+                                            {{exp.Name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+
+                            <td>
+                                <mat-form-field color="accent">
+                                    <mat-label>Unit</mat-label>
+                                    <input type="text" matInput placeholder="Unit" formControlName="unit">
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <mat-form-field color="accent" hintLabel="For use in Angular pipes">
+                                    <mat-label>Format</mat-label>
+                                    <input type="text" matInput placeholder="Format" formControlName="format">
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr formGroupName="warning" matTooltip="{{getBoundaryWarningTooltip(tab)}}">
+                            <td>
+                                <mat-slide-toggle formControlName="enabled">Enable warnings</mat-slide-toggle>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <mat-label>Lower boundary</mat-label>
+                                    <input matInput type="number" formControlName="lowerBoundary">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <mat-label>Upper boundary</mat-label>
+                                    <input matInput type="number" formControlName="upperBoundary">
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                    </table>
+                    <div>
+                    <span matTooltip="Move this measurement up or down">
+                    <button mat-icon-button
+                            [disabled]="this.getElements().controls.length === 1 || index === 0"
+                            (click)="moveUp(index)">
+                        <mat-icon>arrow_upward</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                            [disabled]="this.getElements().controls.length === 1 || index === this.getElements().controls.length - 1"
+                            (click)="moveDown(index)">
+                        <mat-icon>arrow_downward</mat-icon>
+                    </button>
+                    </span>
+                        <span style="float: right">
+                        <button mat-icon-button
+                                (click)="copyTab(index)">
+                            <mat-icon>content_copy</mat-icon>
+                        </button>
+                        <button mat-icon-button
+                                [disabled]="this.getElements().controls.length === 1"
+                                (click)="removeTab(index)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                        </span>
+                    </div>
+                </ng-template>
+            </mat-expansion-panel>
+        </mat-accordion>
+        <button (click)="addNewMeasurement()" mat-icon-button matTooltip="Add element">
+            <mat-icon>add</mat-icon>
+        </button>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center" *ngIf="ready && !saving">
+    <span *ngIf="!formGroup.valid" class="color-warn actions-warn">Widget not configured correctly</span>
+    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="save()" [disabled]="!formGroup.valid">Save</button>
+</mat-dialog-actions>

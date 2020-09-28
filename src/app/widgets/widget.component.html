@@ -78,6 +78,9 @@
   <div *ngSwitchCase="'device_status'" fxFill>
     <senergy-device-status [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-device-status>
   </div>
+  <div *ngSwitchCase="'data_table'" fxFill>
+    <senergy-data-table [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-data-table>
+  </div>
   <div *ngSwitchDefault>
     <div>default</div>
   </div>

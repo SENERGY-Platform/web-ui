@@ -71,7 +71,7 @@
                                                 <span>Details</span>
                                             </button>
                                             <button mat-menu-item (click)="delete(deviceType)"
-                                                    *ngIf="deviceType.permissions.a">
+                                                    [disabled]="!deviceType.permissions.a">
                                                 <mat-icon>delete</mat-icon>
                                                 <span>Delete</span>
                                             </button>

@@ -20,7 +20,7 @@ import {FlexLayoutModule} from '@angular/flex-layout';
 import {WidgetHeaderComponent} from './components/widget-header/widget-header.component';
 import {SwitchEditDialogComponent} from './switch/dialogs/switch-edit-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {CommonModule, registerLocaleData} from '@angular/common';
+import {CommonModule, DecimalPipe, registerLocaleData} from '@angular/common';
 import {DevicesStateComponent} from './devices-state/devices-state.component';
 import {DevicesStateEditDialogComponent} from './devices-state/dialog/devices-state-edit-dialog.component';
 import {EventListComponent} from './event-list/event-list.component';
@@ -91,6 +91,8 @@ import {ProcessSchedulerScheduleDialogComponent} from './process-scheduler/dialo
 import {ProcessSchedulerScheduleEditDialogComponent} from './process-scheduler/dialogs/process-scheduler-schedule-edit-dialog.component';
 import {DeviceStatusComponent} from './device-status/device-status.component';
 import {DeviceStatusEditDialogComponent} from './device-status/dialog/device-status-edit-dialog.component';
+import {DataTableComponent} from './data-table/data-table.component';
+import {DataTableEditDialogComponent} from './data-table/dialog/data-table-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -174,6 +176,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         ProcessSchedulerScheduleEditDialogComponent,
         DeviceStatusComponent,
         DeviceStatusEditDialogComponent,
+        DataTableComponent,
+        DataTableEditDialogComponent,
     ],
     exports: [
         SwitchComponent,
@@ -187,7 +191,10 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         WidgetComponent,
         WidgetFooterComponent,
     ],
-    providers: [{provide: LOCALE_ID, useValue: 'de'}] // todo: language;
+    providers: [
+        {provide: LOCALE_ID, useValue: 'de'},  // todo: language;
+        DecimalPipe,
+    ]
 
 })
 

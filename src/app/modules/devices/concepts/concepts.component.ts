@@ -43,6 +43,7 @@ const grids = new Map([
     styleUrls: ['./concepts.component.css']
 })
 export class ConceptsComponent implements OnInit, OnDestroy {
+    readonly limitInit = 54;
 
     concepts: ConceptsPermSearchModel[] = [];
     gridCols = 0;
@@ -50,7 +51,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
     private searchText = '';
-    private limit = 54;
+    private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
@@ -82,7 +83,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
             this.ready = false;
-            this.offset = this.offset + this.limit;
+            this.setRepoItemsParams(this.limitInit);
             this.getConcepts(false);
         }
     }
@@ -187,6 +188,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+        this.limit = this.limitInit;
     }
 
     private setRepoItemsParams(limit: number) {

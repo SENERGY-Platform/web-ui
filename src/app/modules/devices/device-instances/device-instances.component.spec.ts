@@ -21,12 +21,12 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {KeycloakService} from 'keycloak-angular';
-import {RouterTestingModule} from '@angular/router/testing';
 import {MockKeycloakService} from '../../../core/services/keycloak.mock';
 import {CoreModule} from '../../../core/core.module';
 import {MatTabsModule} from '@angular/material/tabs';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {DevicesModule} from '../devices.module';
+import {Router} from '@angular/router';
 
 
 
@@ -36,9 +36,10 @@ describe('DeviceInstancesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [MatDialogModule, HttpClientTestingModule, MatSnackBarModule, RouterTestingModule, CoreModule, MatTabsModule, InfiniteScrollModule, DevicesModule],
+      imports: [MatDialogModule, HttpClientTestingModule, MatSnackBarModule, CoreModule, MatTabsModule, InfiniteScrollModule, DevicesModule],
       declarations: [ DeviceInstancesComponent ],
-      providers: [{ provide: KeycloakService, useClass: MockKeycloakService }]
+      providers: [{ provide: KeycloakService, useClass: MockKeycloakService },
+        {provide: Router, useClass: RouterStub}]
     })
     .compileComponents();
   }));
@@ -53,3 +54,17 @@ describe('DeviceInstancesComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+
+class RouterStub {
+  getCurrentNavigation() {
+    return {
+      extras: {
+        state: {
+          locationId: 'someId',
+          locationName: 'someName'
+        }
+      }
+    };
+  }
+}

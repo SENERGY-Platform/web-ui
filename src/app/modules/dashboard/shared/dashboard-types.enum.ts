@@ -30,4 +30,5 @@ export enum DashboardTypesEnum {
     ProcessIncidentList = 'process_incident_list',
     ProcessScheduler = 'process_scheduler',
     DeviceStatus = 'device_status',
+    DataTable = 'data_table',
 }
