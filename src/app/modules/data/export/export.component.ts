@@ -43,7 +43,7 @@ const grids = new Map([
 export class ExportComponent implements OnInit, OnDestroy {
 
     exports: ExportModel[] = [];
-    showGenerated = false;
+    showGenerated = localStorage.getItem('data.exports.showGenerated') === 'true';
     ready = false;
     deleteInProgress = false;
     url = environment.influxAPIURL;
@@ -123,6 +123,7 @@ export class ExportComponent implements OnInit, OnDestroy {
     }
 
     showGeneratedChanged() {
+        localStorage.setItem('data.exports.showGenerated', String(this.showGenerated));
         this.getExports(true);
     }
 
