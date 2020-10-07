@@ -27,7 +27,7 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
 
     @Input() searchTextIn = '';
     @Input() disable = false;
-    formControl = new FormControl('');
+    formControl = new FormControl(this.searchTextIn);
 
     constructor(private searchbarService: SearchbarService) {
     }
@@ -37,6 +37,9 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
             this.formControl.disable();
         } else {
             this.formControl.enable();
+        }
+        if (this.formControl.value !== ''){
+            this.changeSearchtext();
         }
     }
 
