@@ -50,7 +50,7 @@ export class ExportComponent implements OnInit, OnDestroy {
     gridCols = 0;
     sortAttributes = [new SortModel('Name', 'name', 'asc'), new SortModel('Erstellungsdatum', 'created_at', 'asc')];
 
-    public searchText: string = '';
+    public searchText = '';
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
@@ -67,7 +67,9 @@ export class ExportComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.searchText = <string>localStorage.getItem('data.exports.search') ;
+        if (localStorage.getItem('data.exports.search') !== null) {
+            this.searchText = <string>localStorage.getItem('data.exports.search') ;
+        }
         this.initGridCols();
         this.initSearchAndGetExports();
     }
