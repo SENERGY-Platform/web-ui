@@ -38,7 +38,7 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
         } else {
             this.formControl.enable();
         }
-        if (this.formControl.value !== ''){
+        if (this.formControl.value !== '') {
             this.changeSearchtext();
         }
     }
