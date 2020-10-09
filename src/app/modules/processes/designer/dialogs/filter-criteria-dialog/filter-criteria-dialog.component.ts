@@ -70,7 +70,7 @@ export class FilterCriteriaDialogComponent implements OnInit {
         this.result = {
             aspect: this.aspectFormControl.value.id || '',
             iotfunction: this.functionFormControl.value.id || '',
-            characteristic: this.characteristic.id,
+            characteristic: this.characteristic.id || '',
             label: this.functionFormControl.value.name + ' ' +  this.characteristic.name
         };
         this.dialogRef.close(this.result);

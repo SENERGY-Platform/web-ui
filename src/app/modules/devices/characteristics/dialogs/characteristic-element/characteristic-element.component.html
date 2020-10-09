@@ -1,0 +1,79 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<form class="form" [formGroup]="form" [ngClass]="{'nested': nested}" fxLayout="column">
+
+    <mat-form-field class="full-width" appearance="outline" color="accent">
+        <mat-label>Name</mat-label>
+        <input matInput placeholder="Name" formControlName="name" required>
+    </mat-form-field>
+    <mat-form-field class="full-width" appearance="outline" color="accent">
+        <mat-label>Type</mat-label>
+        <mat-select placeholder="Type"
+                    formControlName="type" required>
+            <mat-option *ngFor="let type of types"
+                        [value]="type.type">
+                {{type.typeShort}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <span *ngIf="isNumeric()">
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Min Value</mat-label>
+            <input [type]="getType()" matInput placeholder="Min Value" formControlName="min_value">
+        </mat-form-field>
+        <mat-form-field class="full-width" appearance="outline" color="accent">
+            <mat-label>Max Value</mat-label>
+            <input [type]="getType()" matInput placeholder="Max Value" formControlName="max_value">
+        </mat-form-field>
+    </span>
+    <mat-form-field *ngIf="showValue()" class="full-width" appearance="outline" color="accent">
+        <mat-label>Value</mat-label>
+        <input [type]="getType()" matInput placeholder="Value" formControlName="value">
+    </mat-form-field>
+
+    <div *ngIf="isStructureOrList()">
+        <div>
+            <button mat-stroked-button color="accent" (click)="addSubCharacteristic()">
+                <mat-icon>add</mat-icon>
+                Sub Characteristic
+            </button>
+        </div>
+        <mat-tree *ngIf="getSubCharacteristics().length > 0" [treeControl]="treeControl" [dataSource]="dataSource">
+            <mat-nested-tree-node *matTreeNodeDef="let node">
+                <div class="mat-tree-node">
+                    <button mat-icon-button matTreeNodeToggle>
+                        <mat-icon class="mat-icon-rtl-mirror">
+                            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                        </mat-icon>
+                    </button>
+                    <span class="node-title">{{node.name}}</span>
+                    <span class="spacer"></span>
+                    <button mat-stroked-button color="warn" (click)="deleteSubCharacteristic(node)" class="button-after-spacer">
+                        <mat-icon>delete</mat-icon>
+                        Delete
+                    </button>
+                </div>
+                <div *ngIf="treeControl.isExpanded(node)">
+                    <ng-container>
+                        <senergy-characteristic-element [data]="node" [nested]="true"
+                                                        (valueChange)="updateSubCharacteristic($event, node)"></senergy-characteristic-element>
+                    </ng-container>
+                </div>
+            </mat-nested-tree-node>
+        </mat-tree>
+    </div>
+</form>

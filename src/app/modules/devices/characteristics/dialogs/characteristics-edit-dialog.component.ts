@@ -14,53 +14,65 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
-import {jsonValidator} from '../../../../core/validators/json.validator';
 import {CharacteristicsPermSearchModel} from '../shared/characteristics-perm-search.model';
 import {CharacteristicsService} from '../shared/characteristics.service';
 import {ConceptsPermSearchModel} from '../../concepts/shared/concepts-perm-search.model';
+import {DeviceTypeCharacteristicsModel} from '../../device-types-overview/shared/device-type.model';
+import {CharacteristicElementComponent} from './characteristic-element/characteristic-element.component';
 
 @Component({
     templateUrl: './characteristics-edit-dialog.component.html',
     styleUrls: ['./characteristics-edit-dialog.component.css']
 })
-export class CharacteristicsEditDialogComponent implements OnInit {
+export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit {
 
-    conceptControl = new FormControl({value: '', disabled: true}, [Validators.required]);
-    characteristicControl = new FormControl('', [Validators.required, jsonValidator(false)]);
-    characteristics!: CharacteristicsPermSearchModel;
+    @ViewChild('characteristicElementComponent', {static: false}) characteristicElementComponent!: CharacteristicElementComponent;
+
+    conceptControl = new FormControl({value: ''}, [Validators.required]);
+    characteristicPerm: CharacteristicsPermSearchModel | undefined = undefined;
     concepts: ConceptsPermSearchModel[] = [];
+
+    baseCharacteristic: DeviceTypeCharacteristicsModel | undefined = undefined;
 
     constructor(private conceptsService: ConceptsService,
                 private characteristicsService: CharacteristicsService,
                 private dialogRef: MatDialogRef<CharacteristicsEditDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: { characteristic: CharacteristicsPermSearchModel }) {
-        this.characteristics = data.characteristic;
-        this.conceptControl.setValue({id: this.characteristics.concept_id});
+                @Inject(MAT_DIALOG_DATA) data: { characteristic: CharacteristicsPermSearchModel } | null) {
+        if (data !== null) {
+            this.characteristicPerm = data.characteristic;
+            this.conceptControl.setValue(this.characteristicPerm.concept_id);
+            this.conceptControl.disable();
+        }
     }
 
     ngOnInit(): void {
         this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: ConceptsPermSearchModel[]) => {
             this.concepts = concepts;
         });
-        this.characteristicsService.getCharacteristic(this.characteristics.id).subscribe((resp) => {
-            this.characteristicControl.setValue(JSON.stringify(resp, null, 5));
+        if (this.characteristicPerm !== undefined) {
+            this.characteristicsService.getCharacteristic(this.characteristicPerm.id).subscribe(characteristic => {
+                this.baseCharacteristic = characteristic;
+                this.characteristicElementComponent.patch(characteristic);
+            });
+        }
+    }
+
+    ngAfterViewInit() {
+        this.characteristicElementComponent.valueChange.asObservable().subscribe(value => {
+            this.baseCharacteristic = value;
         });
     }
+
 
     close(): void {
         this.dialogRef.close();
     }
 
     save(): void {
-        this.dialogRef.close(JSON.parse(this.characteristicControl.value));
+        this.dialogRef.close({conceptId: this.conceptControl.value, characteristic: this.baseCharacteristic});
     }
-
-    compare(a: any, b: any): boolean {
-        return a.id === b.id;
-    }
-
 }

@@ -34,7 +34,6 @@ import {DeviceTypesOverviewModule} from './device-types-overview/device-types-ov
 import {ConceptsComponent} from './concepts/concepts.component';
 import {ConceptsNewDialogComponent} from './concepts/dialogs/concepts-new-dialog.component';
 import {CharacteristicsComponent} from './characteristics/characteristics.component';
-import {CharacteristicsNewDialogComponent} from './characteristics/dialogs/characteristics-new-dialog.component';
 import {ConceptsEditDialogComponent} from './concepts/dialogs/concepts-edit-dialog.component';
 import {CharacteristicsEditDialogComponent} from './characteristics/dialogs/characteristics-edit-dialog.component';
 import {MatGridListModule} from '@angular/material/grid-list';
@@ -69,6 +68,8 @@ import {AspectsEditDialogComponent} from './aspects/dialog/aspects-edit-dialog.c
 import {DeviceClassesComponent} from './device-classes/device-classes.component';
 import {DeviceClassesEditDialogComponent} from './device-classes/dialog/device-classes-edit-dialog.component';
 import {FunctionsCreateDialogComponent} from './functions/dialog/functions-create-dialog.component';
+import {CharacteristicElementComponent} from './characteristics/dialogs/characteristic-element/characteristic-element.component';
+import {MatTreeModule} from '@angular/material/tree';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -117,7 +118,7 @@ const deviceClasses = {path: 'devices/deviceclasses', pathMatch: 'full', compone
         MatSortModule,
         MatProgressSpinnerModule,
         DeviceTypesOverviewModule,
-        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics, functions, aspects, deviceClasses])],
+        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics, functions, aspects, deviceClasses]), MatTreeModule],
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,
@@ -131,7 +132,7 @@ const deviceClasses = {path: 'devices/deviceclasses', pathMatch: 'full', compone
         ConceptsComponent,
         ConceptsNewDialogComponent,
         CharacteristicsComponent,
-        CharacteristicsNewDialogComponent,
+        CharacteristicElementComponent,
         ConceptsEditDialogComponent,
         CharacteristicsEditDialogComponent,
         FunctionsComponent,

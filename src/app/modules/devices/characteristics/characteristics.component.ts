@@ -18,7 +18,6 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {ResponsiveService} from '../../../core/services/responsive.service';
-import {CharacteristicsNewDialogComponent} from './dialogs/characteristics-new-dialog.component';
 import {Navigation, Router} from '@angular/router';
 import {CharacteristicsService} from './shared/characteristics.service';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
@@ -94,7 +93,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     newCharacteristic() {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
-        const editDialogRef = this.dialog.open(CharacteristicsNewDialogComponent, dialogConfig);
+        const editDialogRef = this.dialog.open(CharacteristicsEditDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((resp: { conceptId: string, characteristic: DeviceTypeCharacteristicsModel }) => {
             if (resp !== undefined) {
@@ -144,8 +143,9 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
         const editDialogRef = this.dialog.open(CharacteristicsEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((newCharacteristic: DeviceTypeCharacteristicsModel) => {
-            if (newCharacteristic !== undefined) {
+        editDialogRef.afterClosed().subscribe((resp: { conceptId: string, characteristic: DeviceTypeCharacteristicsModel }) => {
+            if (resp !== undefined) {
+                const newCharacteristic = resp.characteristic;
                 this.reset();
                 this.characteristicsService.updateConcept(inputCharacteristic.concept_id, newCharacteristic).subscribe((characteristic: (DeviceTypeCharacteristicsModel | null)) => {
                     if (characteristic === null) {

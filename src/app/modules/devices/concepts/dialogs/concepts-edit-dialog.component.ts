@@ -69,7 +69,7 @@ export class ConceptsEditDialogComponent implements OnInit {
     fromObjectToIds(characteristics: DeviceTypeCharacteristicsModel[]): string[] {
         const array: string[] = [];
         characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
-            array.push(characteristic.id);
+            array.push(characteristic.id || '');
         });
         return array;
     }

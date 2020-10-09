@@ -15,8 +15,8 @@
  */
 
 .form {
-    min-width: 150px;
-    max-width: 500px;
+    min-width: 600px;
+    max-width: 700px;
     width: 100%;
 }
 
@@ -24,7 +24,20 @@
     width: 100%;
 }
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
+.nested {
+    padding-left: 35px;
 }
 
+.spacer {
+    width: -moz-available;
+    width: -webkit-fill-available;
+    width: stretch;
+}
+
+.button-after-spacer {
+    min-width: 100px;
+}
+
+.node-title {
+    min-width: fit-content;
+}
