@@ -79,6 +79,18 @@ export class DeploymentsService {
         );
     }
 
+    v2deleteDeployment(deploymentId: string): Observable<{ status: number }> {
+        return this.http.delete(environment.processDeploymentUrl + '/v2/deployments/' + encodeURIComponent(deploymentId), {
+            responseType: 'text',
+            observe: 'response'
+        }).pipe(
+            map(resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v2deleteDeployment', {status: 500}))
+        );
+    }
+
     getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null> {
         return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/prepared-deployments/' + processId).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null))
@@ -103,15 +115,15 @@ export class DeploymentsService {
         );
     }
 
-    getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null> {
-        return this.http.get<V2DeploymentsPreparedConfigurableModel[]>(environment.configurablesUrl + '?characteristicId=' + characteristicId + '&serviceIds=' + serviceId).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getConfigurables', null))
+    v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null> {
+        return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/deployments/' + deploymentId).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v2getDeployments', null))
         );
     }
 
-    v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null> {
-        return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/deployments/' + deploymentId).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeployments', null))
+    getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null> {
+        return this.http.get<V2DeploymentsPreparedConfigurableModel[]>(environment.configurablesUrl + '?characteristicId=' + characteristicId + '&serviceIds=' + serviceId).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getConfigurables', null))
         );
     }
 
@@ -129,7 +141,7 @@ export class DeploymentsService {
             map(resp => {
                 return {status: resp.status, id: resp.body ? resp.body.id : ''};
             }),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', {status: 500, id: ''}))
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v2postDeployments', {status: 500, id: ''}))
         );
     }
 

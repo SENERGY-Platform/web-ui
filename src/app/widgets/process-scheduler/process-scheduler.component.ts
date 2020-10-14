@@ -28,6 +28,7 @@ import {ProcessSchedulerScheduleDialogComponent} from './dialogs/process-schedul
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../core/services/dialogs.service';
 import {CronConverterService} from './shared/cron-converter.service';
+import {V2DeploymentsPreparedModel} from '../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 
 @Component({
     selector: 'senergy-process-scheduler',

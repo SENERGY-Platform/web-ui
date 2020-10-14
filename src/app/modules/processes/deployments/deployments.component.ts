@@ -122,7 +122,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     deleteDeployment(deployment: DeploymentsModel): void {
         this.dialogsService.openDeleteDialog('deployment ' + deployment.name).afterClosed().subscribe((deleteDeployment: boolean) => {
             if (deleteDeployment) {
-                this.deploymentsService.deleteDeployment(deployment.id).subscribe((resp: { status: number }) => {
+                this.deploymentsService.v2deleteDeployment(deployment.id).subscribe((resp: { status: number }) => {
                     if (resp.status === 200) {
                         this.repoItems.removeAt(this.repoItems.value.findIndex((item: DeploymentsModel) => deployment.id === item.id));
                         this.deploymentsService.checkForDeletedDeploymentWithRetries(deployment.id, 10, 100).subscribe((exists: boolean) => {
@@ -168,7 +168,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                 const array: Observable<boolean>[] = [];
                 this.selectedItems.forEach((item: DeploymentsModel) => {
                     array.push(this.deploymentsService.checkForDeletedDeploymentWithRetries (item.id, 15, 200));
-                    this.deploymentsService.deleteDeployment(item.id).subscribe((resp: { status: number }) => {
+                    this.deploymentsService.v2deleteDeployment(item.id).subscribe((resp: { status: number }) => {
                         if (resp.status !== 200) {
                             this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!');
                         }

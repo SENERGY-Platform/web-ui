@@ -42,6 +42,7 @@ import {ProcessSchedulerService} from '../../process-scheduler/shared/process-sc
 import {ProcessSchedulerModel} from '../../process-scheduler/shared/process-scheduler.model';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {DeviceSelectablesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
+import {V2DeploymentsPreparedModel} from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 
 
 @Component({
@@ -60,7 +61,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     widgetOld: WidgetModel = {} as WidgetModel;
     funcArray: DeviceTypeFunctionModel[][] = [];
     selectablesArray: DeviceSelectablesModel[][] = [];
-    preparedDeployment: DeploymentsPreparedModel[] = [];
+    preparedDeployment: V2DeploymentsPreparedModel[] = [];
     serviceExportValueArray: { service: DeviceTypeServiceModel, exportValues: ExportValueCharacteristicModel[] }[][] = [];
 
 
@@ -170,7 +171,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 '<!-- created with bpmn-js / http://bpmn.io -->\n' +
                 '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n' +
                 '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="112" height="92" viewBox="254 74 112 92" version="1.1"><defs><marker id="sequenceflow-end-white-black-8shwih7rrgzkmm4pwfqg6rb2a" viewBox="0 0 20 20" refX="11" refY="10" markerWidth="10" markerHeight="10" orient="auto"><path d="M 1 5 L 11 10 L 1 15 Z" style="fill: black; stroke-width: 1px; stroke-linecap: round; stroke-dasharray: 10000, 1; stroke: black;"/></marker></defs><g class="djs-group"><g class="djs-element djs-shape" data-element-id="Task_10z5wf9" style="display: block;" transform="matrix(1 0 0 1 260 80)"><g class="djs-visual"><rect x="0" y="0" width="100" height="80" rx="10" ry="10" style="stroke: black; stroke-width: 2px; fill: white; fill-opacity: 0.95;"/><text lineHeight="1.2" class="djs-label" style="font-family: Arial, sans-serif; font-size: 12px; font-weight: normal; fill: black;"><tspan x="11.4375" y="43.599999999999994">GENERATED!</tspan></text></g><rect x="0" y="0" width="100" height="80" class="djs-hit" style="fill: none; stroke-opacity: 0; stroke: white; stroke-width: 15px;"/><rect x="-6" y="-6" width="112" height="92" class="djs-outline" style="fill: none;"/></g></g></svg>';
-            this.deploymentsService.getPreparedDeploymentsByXml(xml, svg).subscribe((resp: DeploymentsPreparedModel | null) => {
+            this.deploymentsService.v2getPreparedDeploymentsByXml(xml, svg).subscribe((resp: V2DeploymentsPreparedModel | null) => {
                 if (resp !== null) {
                     this.preparedDeployment[elementIndex] = resp;
                 }
@@ -190,9 +191,13 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         if (name) {
             pD.name = name;
         }
-        pD.elements[0].task.selection.device = selectable.device;
-        pD.elements[0].task.selection.service = this.getService(index);
-        return this.deploymentsService.postDeployments(pD, 'generated');
+        if (pD.elements.length === 0 || pD.elements[0].task === null) {
+            console.log('PANIC: unexpected prepared deployment value', pD);
+            return of({status: 500, id: ''});
+        }
+        pD.elements[0].task.selection.selected_device_id = selectable.device.id;
+        pD.elements[0].task.selection.selected_service_id = this.getService(index).id;
+        return this.deploymentsService.v2postDeployments(pD, 'generated');
     }
 
     getIcon(index: number): string {

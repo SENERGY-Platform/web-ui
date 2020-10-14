@@ -46,7 +46,7 @@ export class DeviceStatusService {
                     this.exportService.stopPipeline({ID: element.exportId} as ExportModel).subscribe();
                 }
                 if (element.deploymentId) {
-                    this.deploymentsService.deleteDeployment(element.deploymentId).subscribe();
+                    this.deploymentsService.v2deleteDeployment(element.deploymentId).subscribe();
                 }
                 if (element.scheduleId) {
                     this.processSchedulerService.deleteSchedule(element.scheduleId).subscribe();
