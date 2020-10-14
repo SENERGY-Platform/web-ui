@@ -146,7 +146,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
                         this.deploymentsService.v2getDeployments(schedule.process_deployment_id)
                             .subscribe((v2deployment) => {
                                 if (v2deployment === null) { // probably old deployment
-                                    this.deploymentsService.v2getDeployments(schedule.process_deployment_id)
+                                    this.deploymentsService.getDeployments(schedule.process_deployment_id)
                                         .subscribe(v1Deployment => {
                                             newSchedule.processName = v1Deployment ? v1Deployment.name : 'Invalid deployment';
                                             this.schedules.push(newSchedule);
