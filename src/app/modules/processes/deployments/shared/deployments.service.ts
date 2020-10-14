@@ -48,6 +48,13 @@ export class DeploymentsService {
         );
     }
 
+    getDeploymentName(deploymentId: string): Observable<string> {
+        return this.http.get<DeploymentsModel>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId)).pipe(
+            map(resp => resp && resp.name || ''),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeploymentName', ''))
+        );
+    }
+
     getDefinition(deploymentId: string): Observable<DeploymentsDefinitionModel[]> {
         return this.http.get<DeploymentsDefinitionModel[]>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/definition').pipe(
             map(resp => resp || []),
