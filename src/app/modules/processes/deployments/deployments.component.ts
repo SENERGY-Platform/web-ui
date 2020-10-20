@@ -104,7 +104,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     run(deploymentId: string): void {
         this.deploymentsService.getDeploymentInputParameters(deploymentId).subscribe((parameter) => {
            if (parameter && parameter.size) {
-                console.log(parameter);
+               this.deploymentsService.openStartWithParameterDialog(deploymentId, parameter);
            } else {
                this.deploymentsService.startDeployment(deploymentId).subscribe((resp) => {
                    if (resp === null) {

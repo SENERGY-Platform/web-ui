@@ -69,6 +69,7 @@ import {MatChipsModule} from '@angular/material/chips';
 import {DesignerSnackBarComponent} from './designer/snack-bar/designer-snack-bar.component';
 import {MatBadgeModule} from '@angular/material/badge';
 import {FilterCriteriaDialogComponent} from './designer/dialogs/filter-criteria-dialog/filter-criteria-dialog.component';
+import {DeploymentsStartParameterDialogComponent} from './deployments/dialogs/deployments-start-parameter-dialog.component';
 
 const processRepo = {
     path: 'processes/repository',
@@ -144,6 +145,7 @@ const processDesigner = {
     declarations: [
         ProcessRepoComponent,
         ProcessDeploymentsComponent,
+        DeploymentsStartParameterDialogComponent,
         ProcessDeploymentsConfigComponent,
         DeploymentsConfigTimeEventComponent,
         ProcessMonitorComponent,

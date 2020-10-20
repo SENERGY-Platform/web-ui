@@ -25,13 +25,18 @@ import {CamundaVariable, DeploymentsDefinitionModel} from './deployments-definit
 import {DeploymentsMissingDependenciesModel} from './deployments-missing-dependencies.model';
 import {DeploymentsPreparedModel} from './deployments-prepared.model';
 import {V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
+import {DashboardModel} from '../../../dashboard/shared/dashboard.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DashboardEditDialogComponent} from '../../../dashboard/dialogs/dashboard-edit-dialog.component';
+import {DashboardManipulationEnum} from '../../../dashboard/shared/dashboard-manipulation.enum';
+import {DeploymentsStartParameterDialogComponent} from '../dialogs/deployments-start-parameter-dialog.component';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DeploymentsService {
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {
     }
 
     getAll(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]> {
@@ -97,6 +102,16 @@ export class DeploymentsService {
         return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start?' + queryParts.join('&')).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null))
         );
+    }
+
+    openStartWithParameterDialog(deploymentId: string, parameter: Map<string, CamundaVariable>): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            deploymentId: deploymentId,
+            parameter: parameter
+        };
+        const editDialogRef = this.dialog.open(DeploymentsStartParameterDialogComponent, dialogConfig);
     }
 
     deleteDeployment(deploymentId: string): Observable<{ status: number }> {
