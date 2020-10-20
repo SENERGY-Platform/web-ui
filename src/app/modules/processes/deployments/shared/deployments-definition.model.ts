@@ -21,4 +21,7 @@ export interface DeploymentsDefinitionModel {
 }
 
 
-
+export interface CamundaVariable {
+    value: any;
+    type: string | null | undefined;
+}

@@ -21,7 +21,7 @@ import {Observable, timer} from 'rxjs';
 import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {DeploymentsModel} from './deployments.model';
-import {DeploymentsDefinitionModel} from './deployments-definition.model';
+import {CamundaVariable, DeploymentsDefinitionModel} from './deployments-definition.model';
 import {DeploymentsMissingDependenciesModel} from './deployments-missing-dependencies.model';
 import {DeploymentsPreparedModel} from './deployments-prepared.model';
 import {V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
@@ -70,6 +70,31 @@ export class DeploymentsService {
 
     startDeployment(deploymentId: string): Observable<any | null> {
         return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start').pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null))
+        );
+    }
+
+    getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable>|null> {
+        return this.http.get<Map<string, CamundaVariable>>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/parameter').pipe(
+            map(resp => {
+                if (!resp) {
+                    return resp;
+                } else if (resp instanceof Map) {
+                    return resp;
+                } else {
+                    return new Map<string, CamundaVariable>(Object.entries(resp));
+                }
+            }),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getProcessParameters', null))
+        );
+    }
+
+    startDeploymentWithParameter(deploymentId: string, parameter: Map<string, CamundaVariable>): Observable<any | null> {
+        const queryParts: string[] = [];
+        parameter.forEach((value, key) => {
+            queryParts.push(key + '=' + encodeURIComponent(JSON.stringify(value.value)));
+        });
+        return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start?' + queryParts.join('&')).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null))
         );
     }
