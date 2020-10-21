@@ -18,6 +18,7 @@ import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DeploymentsService} from '../shared/deployments.service';
 import {CamundaVariable} from '../shared/deployments-definition.model';
+import {HttpErrorResponse} from '@angular/common/http';
 
 @Component({
     templateUrl: './deployments-start-parameter-dialog.component.html',
@@ -27,8 +28,8 @@ export class DeploymentsStartParameterDialogComponent {
 
     deploymentId: string;
     parameter: Map<string, CamundaVariable> = new Map<string, CamundaVariable>();
+    err: string | null;
 
-    displayedColumns: string[] = ['name', 'type', 'value'];
     starting = false;
 
     constructor(private dialogRef: MatDialogRef<DeploymentsStartParameterDialogComponent>,
@@ -36,6 +37,7 @@ export class DeploymentsStartParameterDialogComponent {
                 @Inject(MAT_DIALOG_DATA) data: { deploymentId: string, parameter: Map<string, CamundaVariable> }) {
         this.parameter = data.parameter;
         this.deploymentId = data.deploymentId;
+        this.err = null;
     }
 
     close(): void {
@@ -46,6 +48,13 @@ export class DeploymentsStartParameterDialogComponent {
         this.starting = true;
         this.deploymentsService.startDeploymentWithParameter(this.deploymentId, this.parameter).subscribe(() => {
             this.dialogRef.close();
+        }, ( err: HttpErrorResponse ) => {
+            try {
+                this.err = JSON.parse(err.error.substring(5)).message;
+            } catch (e) {
+                this.err = err.error;
+            }
+            this.starting = false;
         });
     }
 }

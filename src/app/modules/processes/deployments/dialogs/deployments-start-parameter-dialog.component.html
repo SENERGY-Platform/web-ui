@@ -17,6 +17,7 @@
 <h2 mat-dialog-title>Start</h2>
 
 <mat-dialog-content>
+    <mat-error *ngIf="err">{{err}}</mat-error>
     <mat-form-field fxFill color="accent" appearance="outline" *ngFor="let recipient of parameter | keyvalue">
         <mat-label>{{recipient.key}}: {{recipient.value.type}}</mat-label>
         <input *ngIf="recipient.value.type == 'String'" type="text" matInput [(ngModel)]="recipient.value.value">
@@ -26,11 +27,9 @@
             <mat-option [value]="false">False</mat-option>
         </mat-select>
     </mat-form-field>
-
-    <senergy-spinner [show]="starting"></senergy-spinner>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="start()">Start</button>
+    <button [disabled]="starting" mat-raised-button color="accent" (click)="start()">Start</button>
 </mat-dialog-actions>
