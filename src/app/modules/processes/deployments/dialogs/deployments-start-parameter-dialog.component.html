@@ -1,0 +1,35 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<h2 mat-dialog-title>Start</h2>
+
+<mat-dialog-content>
+    <mat-error *ngIf="err">{{err}}</mat-error>
+    <mat-form-field fxFill color="accent" appearance="outline" *ngFor="let recipient of parameter | keyvalue">
+        <mat-label>{{recipient.key}}: {{recipient.value.type}}</mat-label>
+        <input *ngIf="recipient.value.type == 'String'" type="text" matInput [(ngModel)]="recipient.value.value">
+        <input *ngIf="recipient.value.type == 'Long'" type="number" matInput [(ngModel)]="recipient.value.value">
+        <mat-select *ngIf="recipient.value.type == 'Boolean'" [(ngModel)]="recipient.value.value">
+            <mat-option [value]="true">True</mat-option>
+            <mat-option [value]="false">False</mat-option>
+        </mat-select>
+    </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+    <button [disabled]="starting" mat-raised-button color="accent" (click)="start()">Start</button>
+</mat-dialog-actions>

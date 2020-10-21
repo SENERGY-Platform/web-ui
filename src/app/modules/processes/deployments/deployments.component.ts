@@ -31,6 +31,7 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deployments-missing-dependencies-dialog.component';
 import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {CamundaVariable} from './shared/deployments-definition.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -100,13 +101,19 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
         this.getRepoItems(true);
     }
 
-    run(definitionId: string): void {
-        this.deploymentsService.startDeployment(definitionId).subscribe((resp) => {
-            if (resp === null) {
-                this.snackBar.open('Error while starting the deployment!', undefined, {duration: 2000});
-            } else {
-                this.snackBar.open('Deployment started successfully.', undefined, {duration: 2000});
-            }
+    run(deploymentId: string): void {
+        this.deploymentsService.getDeploymentInputParameters(deploymentId).subscribe((parameter) => {
+           if (parameter && parameter.size) {
+               this.deploymentsService.openStartWithParameterDialog(deploymentId, parameter);
+           } else {
+               this.deploymentsService.startDeployment(deploymentId).subscribe((resp) => {
+                   if (resp === null) {
+                       this.snackBar.open('Error while starting the deployment!', undefined, {duration: 2000});
+                   } else {
+                       this.snackBar.open('Deployment started successfully.', undefined, {duration: 2000});
+                   }
+               });
+           }
         });
     }
 

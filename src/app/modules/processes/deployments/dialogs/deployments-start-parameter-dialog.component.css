@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-export interface DeploymentsDefinitionModel {
-    id: string;
-    name: string;
-    deploymentId: string;
-}
 
-
-export interface CamundaVariable {
-    value: any;
-    type: string | null | undefined;
+mat-cell, .mat-cell,
+mat-footer-cell, .mat-footer-cell,
+mat-header-cell, .mat-header-cell {
+    padding: 0.75rem !important;
 }

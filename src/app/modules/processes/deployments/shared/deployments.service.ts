@@ -21,17 +21,22 @@ import {Observable, timer} from 'rxjs';
 import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {DeploymentsModel} from './deployments.model';
-import {DeploymentsDefinitionModel} from './deployments-definition.model';
+import {CamundaVariable, DeploymentsDefinitionModel} from './deployments-definition.model';
 import {DeploymentsMissingDependenciesModel} from './deployments-missing-dependencies.model';
 import {DeploymentsPreparedModel} from './deployments-prepared.model';
 import {V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
+import {DashboardModel} from '../../../dashboard/shared/dashboard.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DashboardEditDialogComponent} from '../../../dashboard/dialogs/dashboard-edit-dialog.component';
+import {DashboardManipulationEnum} from '../../../dashboard/shared/dashboard-manipulation.enum';
+import {DeploymentsStartParameterDialogComponent} from '../dialogs/deployments-start-parameter-dialog.component';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DeploymentsService {
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {
     }
 
     getAll(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]> {
@@ -72,6 +77,39 @@ export class DeploymentsService {
         return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start').pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null))
         );
+    }
+
+    getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable>|null> {
+        return this.http.get<Map<string, CamundaVariable>>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/parameter').pipe(
+            map(resp => {
+                if (!resp) {
+                    return resp;
+                } else if (resp instanceof Map) {
+                    return resp;
+                } else {
+                    return new Map<string, CamundaVariable>(Object.entries(resp));
+                }
+            }),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getProcessParameters', null))
+        );
+    }
+
+    startDeploymentWithParameter(deploymentId: string, parameter: Map<string, CamundaVariable>): Observable<any | null> {
+        const queryParts: string[] = [];
+        parameter.forEach((value, key) => {
+            queryParts.push(key + '=' + encodeURIComponent(JSON.stringify(value.value)));
+        });
+        return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start?' + queryParts.join('&'));
+    }
+
+    openStartWithParameterDialog(deploymentId: string, parameter: Map<string, CamundaVariable>): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            deploymentId: deploymentId,
+            parameter: parameter
+        };
+        this.dialog.open(DeploymentsStartParameterDialogComponent, dialogConfig);
     }
 
     deleteDeployment(deploymentId: string): Observable<{ status: number }> {
