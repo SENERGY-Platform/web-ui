@@ -87,7 +87,7 @@ export interface DeviceTypeConceptModel {
 }
 
 export interface DeviceTypeCharacteristicsModel {
-    id: string;
+    id?: string;
     name: string;
     type: string;
     rdf_type?: string;

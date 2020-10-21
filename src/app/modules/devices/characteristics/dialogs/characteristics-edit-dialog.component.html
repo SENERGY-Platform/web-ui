@@ -20,28 +20,21 @@
     <form class="form">
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Concept</mat-label>
-            <mat-select placeholder="Concept" [compareWith]="compare"
+            <mat-select placeholder="Concept"
                         [formControl]="conceptControl" required>
                 <mat-option *ngFor="let concept of concepts"
-                            [value]="concept">
+                            [value]="concept.id">
                     {{concept.name}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-form-field class="full-width" appearance="outline" color="accent">
-            <mat-label>Characteristics JSON</mat-label>
-            <textarea rows="10" [formControl]="characteristicControl" matInput
-                      placeholder="Insert structure in json format" rows="10"></textarea>
-            <mat-error *ngIf="characteristicControl.invalid">
-                Enter valid json!
-            </mat-error>
-        </mat-form-field>
+        <senergy-characteristic-element [data]="baseCharacteristic" #characteristicElementComponent></senergy-characteristic-element>
     </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="conceptControl.invalid || characteristicControl.invalid"
+    <button mat-raised-button color="accent" [disabled]="conceptControl.invalid || !this.characteristicElementComponent.isValid()"
             (click)="save()">Save
     </button>
 </mat-dialog-actions>

@@ -21,17 +21,22 @@ import {Observable, timer} from 'rxjs';
 import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {DeploymentsModel} from './deployments.model';
-import {DeploymentsDefinitionModel} from './deployments-definition.model';
+import {CamundaVariable, DeploymentsDefinitionModel} from './deployments-definition.model';
 import {DeploymentsMissingDependenciesModel} from './deployments-missing-dependencies.model';
 import {DeploymentsPreparedModel} from './deployments-prepared.model';
 import {V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
+import {DashboardModel} from '../../../dashboard/shared/dashboard.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DashboardEditDialogComponent} from '../../../dashboard/dialogs/dashboard-edit-dialog.component';
+import {DashboardManipulationEnum} from '../../../dashboard/shared/dashboard-manipulation.enum';
+import {DeploymentsStartParameterDialogComponent} from '../dialogs/deployments-start-parameter-dialog.component';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DeploymentsService {
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {
     }
 
     getAll(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]> {
@@ -45,6 +50,13 @@ export class DeploymentsService {
         return this.http.get<DeploymentsModel[]>(url).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getAll', []))
+        );
+    }
+
+    getDeploymentName(deploymentId: string): Observable<string> {
+        return this.http.get<DeploymentsModel>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId)).pipe(
+            map(resp => resp && resp.name || ''),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeploymentName', ''))
         );
     }
 
@@ -67,6 +79,41 @@ export class DeploymentsService {
         );
     }
 
+    getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable>|null> {
+        return this.http.get<Map<string, CamundaVariable>>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/parameter').pipe(
+            map(resp => {
+                if (!resp) {
+                    return resp;
+                } else if (resp instanceof Map) {
+                    return resp;
+                } else {
+                    return new Map<string, CamundaVariable>(Object.entries(resp));
+                }
+            }),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getProcessParameters', null))
+        );
+    }
+
+    startDeploymentWithParameter(deploymentId: string, parameter: Map<string, CamundaVariable>): Observable<any | null> {
+        const queryParts: string[] = [];
+        parameter.forEach((value, key) => {
+            queryParts.push(key + '=' + encodeURIComponent(JSON.stringify(value.value)));
+        });
+        return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start?' + queryParts.join('&')).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null))
+        );
+    }
+
+    openStartWithParameterDialog(deploymentId: string, parameter: Map<string, CamundaVariable>): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            deploymentId: deploymentId,
+            parameter: parameter
+        };
+        const editDialogRef = this.dialog.open(DeploymentsStartParameterDialogComponent, dialogConfig);
+    }
+
     deleteDeployment(deploymentId: string): Observable<{ status: number }> {
         return this.http.delete(environment.processDeploymentUrl + '/deployments/' + encodeURIComponent(deploymentId), {
             responseType: 'text',
@@ -76,6 +123,18 @@ export class DeploymentsService {
                 return {status: resp.status};
             }),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'deleteDeployment', {status: 500}))
+        );
+    }
+
+    v2deleteDeployment(deploymentId: string): Observable<{ status: number }> {
+        return this.http.delete(environment.processDeploymentUrl + '/v2/deployments/' + encodeURIComponent(deploymentId), {
+            responseType: 'text',
+            observe: 'response'
+        }).pipe(
+            map(resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v2deleteDeployment', {status: 500}))
         );
     }
 
@@ -103,15 +162,15 @@ export class DeploymentsService {
         );
     }
 
-    getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null> {
-        return this.http.get<V2DeploymentsPreparedConfigurableModel[]>(environment.configurablesUrl + '?characteristicId=' + characteristicId + '&serviceIds=' + serviceId).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getConfigurables', null))
+    v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null> {
+        return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/deployments/' + deploymentId).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v2getDeployments', null))
         );
     }
 
-    v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null> {
-        return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/deployments/' + deploymentId).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeployments', null))
+    getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null> {
+        return this.http.get<V2DeploymentsPreparedConfigurableModel[]>(environment.configurablesUrl + '?characteristicId=' + characteristicId + '&serviceIds=' + serviceId).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getConfigurables', null))
         );
     }
 
@@ -129,7 +188,7 @@ export class DeploymentsService {
             map(resp => {
                 return {status: resp.status, id: resp.body ? resp.body.id : ''};
             }),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', {status: 500, id: ''}))
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v2postDeployments', {status: 500, id: ''}))
         );
     }
 

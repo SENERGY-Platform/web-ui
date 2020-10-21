@@ -100,7 +100,7 @@ describe('DataTableEditDialogComponent', () => {
         } as ExportModel;
         exportServiceSpy.prepareDeviceServiceExport.and.returnValue([exampleExport]);
 
-        deploymentsServiceSpy.postDeployments.and.returnValue(of({status: 200, id: uuid()}));
+        deploymentsServiceSpy.v2postDeployments.and.returnValue(of({status: 200, id: uuid()}));
         deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(of({
             id: '0',
             name: 'unknown',

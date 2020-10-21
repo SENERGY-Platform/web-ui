@@ -61,10 +61,9 @@ export class CharacteristicsService {
         );
     }
 
-    getCharacteristic(characteristicsId: string): Observable<CharacteristicsPermSearchModel[]> {
-        return this.http.get<CharacteristicsPermSearchModel[]>(environment.semanticRepoUrl + '/characteristics/' + characteristicsId).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic', []))
+    getCharacteristic(characteristicsId: string): Observable<DeviceTypeCharacteristicsModel> {
+        return this.http.get<DeviceTypeCharacteristicsModel>(environment.semanticRepoUrl + '/characteristics/' + characteristicsId).pipe(
+            catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristic', {} as DeviceTypeCharacteristicsModel))
         );
     }
 

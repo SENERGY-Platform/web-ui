@@ -49,6 +49,7 @@ import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {environment} from '../../../../environments/environment';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {DeviceSelectablesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
+import {V2DeploymentsPreparedModel} from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 
 
 describe('DeviceStatusEditDialogComponent', () => {
@@ -86,22 +87,22 @@ describe('DeviceStatusEditDialogComponent', () => {
         };
         exportServiceSpy.addCharacteristicToDeviceTypeContentVariable.and.returnValue([exampleExportValueCharacteristicModel]);
         exportServiceSpy.getTimePath.and.returnValue({path: 'value.struct.time'});
-        deploymentsServiceSpy.postDeployments.and.returnValue(of({status: 200, id: uuid()}));
-        deploymentsServiceSpy.getPreparedDeploymentsByXml.and.returnValue(of({
+        deploymentsServiceSpy.v2postDeployments.and.returnValue(of({status: 200, id: uuid()}));
+        deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(of({
             id: '',
             elements: [{
                 task: {
-                    selectables: [{
-                        device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: ''},
-                        services: [{id: 'service_1', name: 'service'}]
-                    }],
                     selection: {
-                        device: {},
-                        service: {},
+                        selection_options: [{
+                            device: {id: 'device_1', name: 'device'},
+                            services: [{id: 'service_1', name: 'service'}]
+                        }],
+                        selected_device_id: '',
+                        selected_service_id: '',
                     }
                 }
             }]
-        } as DeploymentsPreparedModel));
+        } as V2DeploymentsPreparedModel));
 
         deviceInstanceServiceSpy.getDeviceSelections.and.returnValue(of([{
             device: {id: 'device_1', name: 'device', device_type_id: 'deviceTypeId_1', local_id: '', permissions: {r: true, w: false, x: true, a: false}},
@@ -352,11 +353,11 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.elements[0].deploymentId).toBeNull();
         exportServiceSpy.startPipeline.calls.reset();
         exportServiceSpy.stopPipeline.calls.reset();
-        deploymentsServiceSpy.postDeployments.calls.reset();
+        deploymentsServiceSpy.v2postDeployments.calls.reset();
         component.save();
         expect(component.elements[0].exportId).not.toBeNull();
         expect(component.elements[0].deploymentId).not.toBeNull();
-        expect(deploymentsServiceSpy.postDeployments.calls.count()).toBe(1);
+        expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(1);
         expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
         expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
     }));
@@ -373,11 +374,11 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.elements[0].deploymentId).toBeNull();
         exportServiceSpy.startPipeline.calls.reset();
         exportServiceSpy.stopPipeline.calls.reset();
-        deploymentsServiceSpy.postDeployments.calls.reset();
+        deploymentsServiceSpy.v2postDeployments.calls.reset();
         component.save();
         expect(component.elements[0].exportId).not.toBeNull();
         expect(component.elements[0].deploymentId).not.toBeNull();
-        expect(deploymentsServiceSpy.postDeployments.calls.count()).toBe(0);
+        expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
         expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
         expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
     }));

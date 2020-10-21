@@ -100,7 +100,7 @@ export class DeviceTypeHelperService {
 
     characteristicsFlatten(characteristics: DeviceTypeCharacteristicsModel, parentName: string = ''): { id: string, name: string }[] {
         if (characteristics.sub_characteristics === undefined || characteristics.sub_characteristics === null) {
-            return [{id: characteristics.id, name: parentName + characteristics.name}];
+            return [{id: characteristics.id || '', name: parentName + characteristics.name}];
         } else {
             let array: { id: string, name: string }[] = [];
             parentName += characteristics.name + '.';

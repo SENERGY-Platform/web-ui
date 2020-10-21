@@ -135,6 +135,9 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
     private initConceptList(concepts: ConceptsCharacteristicsModel): void {
         const characteristicsList: { id: string, name: string }[] = [];
+        if (!concepts.characteristics) {
+            concepts.characteristics = [];
+        }
         concepts.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
             characteristicsList.push(...this.deviceTypeHelperService.characteristicsFlatten(characteristic));
         });
