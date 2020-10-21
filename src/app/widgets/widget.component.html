@@ -18,6 +18,9 @@
   <div *ngSwitchCase="'switch'" fxFill>
     <senergy-switch [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-switch>
   </div>
+  <div *ngSwitchCase="'range_slider'" fxFill>
+    <senergy-range-slider [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-range-slider>
+  </div>
   <div *ngSwitchCase="'devices_state'" fxFill>
     <senergy-devices-state [dashboardId]="dashboardId" [widget]="widget" fxFill></senergy-devices-state>
   </div>

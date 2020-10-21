@@ -25,6 +25,7 @@ import {ProcessIncidentPropertiesModel} from '../../../widgets/process-incident-
 import {DeviceStatusPropertiesModel} from '../../../widgets/device-status/shared/device-status-properties.model';
 import {ProcessSchedulerPropertiesModel} from '../../../widgets/process-scheduler/shared/process-scheduler.model';
 import {DataTableWidgetPropertiesModel} from '../../../widgets/data-table/shared/data-table.model';
+import {RangeSliderPropertiesModel} from '../../../widgets/range-slider/shared/range-slider-properties.model';
 
 export interface WidgetModel {
     id: string;
@@ -38,6 +39,7 @@ export interface WidgetModel {
 }
 
 export interface WidgetPropertiesModels extends SwitchPropertiesModel,
+    RangeSliderPropertiesModel,
     ChartsExportPropertiesModel,
     DeviceDowntimeGatewayPropertiesModel,
     EnergyPredictionPropertiesModel,

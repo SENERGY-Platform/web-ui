@@ -48,6 +48,7 @@ export class DashboardNewWidgetDialogComponent {
     categoryDisabled = true;
     types: Types[] = [
         {value: DashboardTypesEnum.Switch, viewValue: 'Switch', disabled: false, tooltip: ''},
+        {value: DashboardTypesEnum.RangeSlider, viewValue: 'Range Slider', disabled: false, tooltip: ''},
         {value: DashboardTypesEnum.Chart, viewValue: 'Chart', disabled: false, tooltip: ''},
         {value: DashboardTypesEnum.DevicesState, viewValue: 'Devices state', disabled: false, tooltip: ''},
         {value: DashboardTypesEnum.ProcessState, viewValue: 'Process state', disabled: false, tooltip: ''},

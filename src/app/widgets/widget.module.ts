@@ -93,6 +93,9 @@ import {DeviceStatusComponent} from './device-status/device-status.component';
 import {DeviceStatusEditDialogComponent} from './device-status/dialog/device-status-edit-dialog.component';
 import {DataTableComponent} from './data-table/data-table.component';
 import {DataTableEditDialogComponent} from './data-table/dialog/data-table-edit-dialog.component';
+import {RangeSliderComponent} from './range-slider/range-slider.component';
+import {RangeSliderEditDialogComponent} from './range-slider/dialogs/range-slider-edit-dialog.component';
+import {MatSliderModule} from '@angular/material/slider';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -129,8 +132,11 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         AngularFittextModule,
         MatRadioModule,
         MatSortModule,
+        MatSliderModule,
     ],
     declarations: [
+        RangeSliderComponent,
+        RangeSliderEditDialogComponent,
         SwitchComponent,
         WidgetHeaderComponent,
         SwitchEditDialogComponent,
@@ -181,6 +187,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
     ],
     exports: [
         SwitchComponent,
+        RangeSliderComponent,
         WidgetHeaderComponent,
         DevicesStateComponent,
         EventListComponent,
