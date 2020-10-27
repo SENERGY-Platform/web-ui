@@ -23,7 +23,6 @@ import {MatTable} from '@angular/material/table';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {RangeSliderPropertiesDeploymentsModel} from '../shared/range-slider-properties.model';
 
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
@@ -57,7 +56,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
-            const deployment = this.deployments;
+            this.formControl.setValue(this.widget.properties.deployment);
         });
     }
 
@@ -66,6 +65,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
     }
 
     save(): void {
+        this.widget.properties.deployment = this.formControl.value;
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
                 this.dialogRef.close(this.widget);
@@ -77,5 +77,9 @@ export class RangeSliderEditDialogComponent implements OnInit {
         this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc', '').subscribe((deployments: DeploymentsModel[]) => {
             this.deployments = deployments;
         });
+    }
+
+    compareDeployments(first: DeploymentsModel, second: DeploymentsModel){
+        return first.id === second.id;
     }
 }

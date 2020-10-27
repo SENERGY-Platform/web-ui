@@ -32,9 +32,9 @@
         <mat-error *ngIf="formControl.hasError('valid') === false">
             Please enter a valid deployment!
         </mat-error>
-        <mat-select [formControl]="formControl">
-            <mat-option *ngFor="let option of deployments " [value]="option">
-                {{option.name}}
+        <mat-select [formControl]="formControl" [compareWith]="compareDeployments">
+            <mat-option *ngFor="let deployment of deployments" [value]="deployment">
+                {{deployment.name}}
             </mat-option>
         </mat-select>
     </mat-form-field>

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
+import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
+
 export interface RangeSliderPropertiesModel {
         imgUrl?: string;
         active?: boolean;
         rangeSliderValue?: number;
-}
-export interface RangeSliderPropertiesDeploymentsModel {
-        name: string;
-        id: string;
-        deployment: string;
+        deployment?: DeploymentsModel;
 }
