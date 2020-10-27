@@ -20,8 +20,13 @@ import {
 } from '../../modules/dashboard/shared/dashboard-widget.model';
 import {RangeSliderService} from './shared/range-slider.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {MatSliderChange} from '@angular/material/slider';
+import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
+import {CamundaVariable} from '../../modules/processes/deployments/shared/deployments-definition.model';
+import {environment} from '../../../environments/environment';
+import {RangeSliderPropertiesDeploymentsModel} from './shared/range-slider-properties.model';
+import {RangeSliderEditDialogComponent} from './dialogs/range-slider-edit-dialog.component';
 
 @Component({
     selector: 'senergy-range-slider',
@@ -69,6 +74,5 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
         }
         console.log(event.value);
     }
-
 
 }

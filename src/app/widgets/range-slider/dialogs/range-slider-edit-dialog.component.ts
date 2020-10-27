@@ -21,12 +21,9 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {MatTable} from '@angular/material/table';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-
-export interface TableElement {
-    name: string;
-    id: string;
-    trigger: string;
-}
+import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
+import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import {RangeSliderPropertiesDeploymentsModel} from '../shared/range-slider-properties.model';
 
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
@@ -38,12 +35,15 @@ export class RangeSliderEditDialogComponent implements OnInit {
 
     formControl = new FormControl('');
 
+    deployments: DeploymentsModel[] = [];
+
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {properties: {imgUrl: ''}} as WidgetModel;
 
     constructor(private dialogRef: MatDialogRef<RangeSliderEditDialogComponent>,
                 private dashboardService: DashboardService,
+                private deploymentsService: DeploymentsService,
                 @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
@@ -51,11 +51,13 @@ export class RangeSliderEditDialogComponent implements OnInit {
 
     ngOnInit() {
         this.getWidgetData();
+        this.initDeployments();
     }
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
+            const deployment = this.deployments;
         });
     }
 
@@ -64,5 +66,16 @@ export class RangeSliderEditDialogComponent implements OnInit {
     }
 
     save(): void {
+        this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
+            if (resp.message === 'OK') {
+                this.dialogRef.close(this.widget);
+            }
+        });
+    }
+
+    initDeployments() {
+        this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc', '').subscribe((deployments: DeploymentsModel[]) => {
+            this.deployments = deployments;
+        });
     }
 }

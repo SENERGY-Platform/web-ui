@@ -19,3 +19,8 @@ export interface RangeSliderPropertiesModel {
         active?: boolean;
         rangeSliderValue?: number;
 }
+export interface RangeSliderPropertiesDeploymentsModel {
+        name: string;
+        id: string;
+        deployment: string;
+}

@@ -27,7 +27,20 @@
             <input matInput placeholder="Image URL" [(ngModel)]="widget.properties.imgUrl">
         </mat-form-field>
     </div>
+    <mat-form-field color="accent" class="user-input">
+        <mat-label>Choose Deployment</mat-label>
+        <mat-error *ngIf="formControl.hasError('valid') === false">
+            Please enter a valid deployment!
+        </mat-error>
+        <mat-select [formControl]="formControl">
+            <mat-option *ngFor="let option of deployments " [value]="option">
+                {{option.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
 </mat-dialog-content>
+
+
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()" cdkFocusInitial>Cancel</button>

@@ -23,16 +23,23 @@ import {ErrorHandlerService} from '../../../core/services/error-handler.service'
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel} from '../../switch/shared/switch-properties.model';
+import {forkJoin, Observable} from 'rxjs';
+import {environment} from '../../../../environments/environment';
+import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
+import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
 
 @Injectable({
     providedIn: 'root'
 })
 export class RangeSliderService {
 
+
     constructor(private dialog: MatDialog,
                 private http: HttpClient,
                 private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService) {
+                private errorHandlerService: ErrorHandlerService,
+                private deployments: DeploymentsService ){
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {

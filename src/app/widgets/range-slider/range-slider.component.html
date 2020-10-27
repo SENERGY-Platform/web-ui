@@ -20,11 +20,12 @@
          src="{{widget.properties.imgUrl}}" alt="">
     <div>
         <mat-slider [(ngModel)]="widget.properties.active" min="4" max="28" step="1"
-            thumbLabel="true" (change)="sliderRange($event)"></mat-slider>
+                    (input)="sliderRange($event)"></mat-slider>
         <div fxFlex class="drag-handler"></div>
     </div>
     <div >
-
+        <span> Ausgabe: {{this.widget.properties.rangeSliderValue}}
+        </span>
     </div>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
