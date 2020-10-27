@@ -15,10 +15,13 @@
  */
 
 import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
+import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
 
 export interface RangeSliderPropertiesModel {
         imgUrl?: string;
         active?: boolean;
         rangeSliderValue?: number;
         deployment?: DeploymentsModel;
+        selectedParameter?: string;
+        selectedParameterModel?: CamundaVariable;
 }

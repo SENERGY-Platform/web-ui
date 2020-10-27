@@ -99,7 +99,8 @@ export class DeploymentsService {
         parameter.forEach((value, key) => {
             queryParts.push(key + '=' + encodeURIComponent(JSON.stringify(value.value)));
         });
-        return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start?' + queryParts.join('&'));
+        return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) +
+            '/start?' + queryParts.join('&'));
     }
 
     openStartWithParameterDialog(deploymentId: string, parameter: Map<string, CamundaVariable>): void {

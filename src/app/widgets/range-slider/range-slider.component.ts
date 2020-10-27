@@ -22,6 +22,8 @@ import {RangeSliderService} from './shared/range-slider.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
 import {MatSliderChange} from '@angular/material/slider';
+import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
+import {CamundaVariable} from '../../modules/processes/deployments/shared/deployments-definition.model';
 
 @Component({
     selector: 'senergy-range-slider',
@@ -39,7 +41,8 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
     @Input() zoom = false;
 
     constructor(private rangeSliderService: RangeSliderService,
-                private dashboardService: DashboardService) {
+                private dashboardService: DashboardService,
+                private deploymentService: DeploymentsService) {
     }
 
     ngOnInit() {
@@ -63,6 +66,12 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
         if (event.value !== null) {
             if (this.widget.properties.rangeSliderValue !== null) {
                 this.widget.properties.rangeSliderValue = event.value;
+                // @ts-ignore
+                this.widget.properties.selectedParameterModel.value = event.value;
+                // @ts-ignore
+                this.deploymentService.startDeploymentWithParameter(this.widget.properties.deployment.id, new Map<string, CamundaVariable>([
+                    [ this.widget.properties.selectedParameter, this.widget.properties.selectedParameterModel ],
+                ])).subscribe();
                 this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe();
             }
         }
