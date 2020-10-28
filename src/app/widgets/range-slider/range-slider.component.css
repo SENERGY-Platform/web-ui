@@ -46,3 +46,8 @@ img {
 .mat-slider{
     width: 100%;
 }
+
+.content-box {
+    height: 50%;
+    white-space: nowrap;
+}

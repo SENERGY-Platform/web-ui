@@ -24,4 +24,5 @@ export interface RangeSliderPropertiesModel {
         deployment?: DeploymentsModel;
         selectedParameter?: string;
         selectedParameterModel?: CamundaVariable;
+        rangeSliderValue2?: number;
 }

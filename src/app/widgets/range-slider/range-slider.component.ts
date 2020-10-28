@@ -70,11 +70,17 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
                 this.widget.properties.selectedParameterModel.value = event.value;
                 // @ts-ignore
                 this.deploymentService.startDeploymentWithParameter(this.widget.properties.deployment.id, new Map<string, CamundaVariable>([
-                    [ this.widget.properties.selectedParameter, this.widget.properties.selectedParameterModel ],
+                    [this.widget.properties.selectedParameter, this.widget.properties.selectedParameterModel],
                 ])).subscribe();
                 this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe();
             }
         }
     }
-
+    sliderRange2(event: MatSliderChange) {
+        if (event.value !== null) {
+        this.widget.properties.rangeSliderValue2 = event.value;
+        }
+    }
 }
+
+
