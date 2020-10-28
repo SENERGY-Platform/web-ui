@@ -39,6 +39,8 @@ testem.log
 Thumbs.db
 
 .env
+.env.prod
+.env.dev
 
 /src/environments/environment.dev.ts
 /src/environments/environment.dev.js

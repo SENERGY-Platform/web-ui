@@ -32,6 +32,7 @@ import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deploymen
 import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {CamundaVariable} from './shared/deployments-definition.model';
+import {DeploymentsStartParameterDialogComponent} from './dialogs/deployments-start-parameter-dialog.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -104,7 +105,7 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     run(deploymentId: string): void {
         this.deploymentsService.getDeploymentInputParameters(deploymentId).subscribe((parameter) => {
            if (parameter && parameter.size) {
-               this.deploymentsService.openStartWithParameterDialog(deploymentId, parameter);
+               this.openStartWithParameterDialog(deploymentId, parameter);
            } else {
                this.deploymentsService.startDeployment(deploymentId).subscribe((resp) => {
                    if (resp === null) {
@@ -115,6 +116,16 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
                });
            }
         });
+    }
+
+    openStartWithParameterDialog(deploymentId: string, parameter: Map<string, CamundaVariable>): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            deploymentId: deploymentId,
+            parameter: parameter
+        };
+        this.dialog.open(DeploymentsStartParameterDialogComponent, dialogConfig);
     }
 
     copyEndpoint(id: string) {

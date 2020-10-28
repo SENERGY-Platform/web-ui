@@ -29,7 +29,6 @@ import {DashboardModel} from '../../../dashboard/shared/dashboard.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardEditDialogComponent} from '../../../dashboard/dialogs/dashboard-edit-dialog.component';
 import {DashboardManipulationEnum} from '../../../dashboard/shared/dashboard-manipulation.enum';
-import {DeploymentsStartParameterDialogComponent} from '../dialogs/deployments-start-parameter-dialog.component';
 
 @Injectable({
     providedIn: 'root'
@@ -101,16 +100,6 @@ export class DeploymentsService {
         });
         return this.http.get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) +
             '/start?' + queryParts.join('&'));
-    }
-
-    openStartWithParameterDialog(deploymentId: string, parameter: Map<string, CamundaVariable>): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        dialogConfig.data = {
-            deploymentId: deploymentId,
-            parameter: parameter
-        };
-        this.dialog.open(DeploymentsStartParameterDialogComponent, dialogConfig);
     }
 
     deleteDeployment(deploymentId: string): Observable<{ status: number }> {
