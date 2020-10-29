@@ -27,7 +27,7 @@
         </div>
     </div>
     <div>
-        <mat-slider [(ngModel)]="widget.properties.active" min="4" max="28" step="1"
+        <mat-slider [(ngModel)]="widget.properties.active" [min]="widget.properties.selectedMinValue" [max]=widget.properties.selectedMaxValue step="1"
                     (change)="sliderRange($event)" (input)="sliderRange2($event)"></mat-slider>
         <div fxFlex class="drag-handler"></div>
     </div>

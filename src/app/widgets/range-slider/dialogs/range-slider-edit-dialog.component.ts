@@ -32,15 +32,19 @@ import {CamundaVariable} from '../../../modules/processes/deployments/shared/dep
 export class RangeSliderEditDialogComponent implements OnInit {
 
     @ViewChild(MatTable, {static: false}) table!: MatTable<DeploymentsModel>;
-    
+
     formGroup = this.formBuilder.group({
         deployment: '',
-        parameter: ''
+        parameter: '',
+        minValue: '',
+        maxValue: '',
     });
-    
+
     deployments: DeploymentsModel[] = [];
     parametersMap: Map<string, CamundaVariable> =  new Map<string, CamundaVariable>();
     parameters: string[] = [];
+    minValues: number[] = [];
+    maxValues: number[] = [];
 
     dashboardId: string;
     widgetId: string;
@@ -76,7 +80,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
             this.widget = widget;
             this.formGroup.patchValue({
                 deployment: this.widget.properties.deployment,
-                parameter: this.widget.properties.selectedParameter
+                parameter: this.widget.properties.selectedParameter,
             });
         });
     }
@@ -88,6 +92,8 @@ export class RangeSliderEditDialogComponent implements OnInit {
     save(): void {
         this.widget.properties.deployment = this.formGroup.get('deployment')?.value;
         this.widget.properties.selectedParameter = this.formGroup.get('parameter')?.value;
+        this.widget.properties.selectedMinValue = this.formGroup.get('minValue')?.value;
+        this.widget.properties.selectedMaxValue = this.formGroup.get('maxValue')?.value;
         this.widget.properties.selectedParameterModel = this.parametersMap.get(this.formGroup.get('parameter')?.value);
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
@@ -102,7 +108,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
         });
     }
 
-    compareDeployments(first: DeploymentsModel, second: DeploymentsModel){
+    compareDeployments(first: DeploymentsModel, second: DeploymentsModel) {
         return first.id === second.id;
     }
 }

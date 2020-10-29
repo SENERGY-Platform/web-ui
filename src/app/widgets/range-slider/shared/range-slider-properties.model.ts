@@ -25,4 +25,6 @@ export interface RangeSliderPropertiesModel {
         selectedParameter?: string;
         selectedParameterModel?: CamundaVariable;
         rangeSliderValue2?: number;
+        selectedMinValue?: number;
+        selectedMaxValue?: number;
 }

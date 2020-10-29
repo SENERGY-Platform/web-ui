@@ -45,6 +45,22 @@
             </mat-select>
         </mat-form-field>
     </div>
+    <div [formGroup]="formGroup">
+        <mat-form-field color="accent" class="user-input">
+            <mat-label>Choose minimum Value</mat-label>
+            <input matInput type ="number" formControlName="minValue" >
+                <mat-option *ngFor="let minValue of minValues" [value]="minValue">
+                    {{minValue}}
+                </mat-option>
+        </mat-form-field>
+        <mat-form-field color="accent" class="user-input">
+            <mat-label>Choose maximum Value</mat-label>
+            <input matInput type ="number" formControlName="maxValue" >
+                <mat-option *ngFor="let maxValue of maxValues " [value]="maxValue">
+                    {{ maxValue }}
+                </mat-option>
+        </mat-form-field>
+    </div>
 </mat-dialog-content>
 
 
