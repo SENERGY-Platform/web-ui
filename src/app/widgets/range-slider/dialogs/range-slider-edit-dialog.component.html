@@ -20,11 +20,9 @@
     <div fxLayout="column">
         <mat-form-field color="accent">
             <mat-label>Name</mat-label>
-            <input matInput placeholder="Name" [(ngModel)]="widget.name">
-        </mat-form-field>
-        <mat-form-field color="accent">
-            <mat-label>Image URL</mat-label>
-            <input matInput placeholder="Image URL" [(ngModel)]="widget.properties.imgUrl">
+            <label>
+                <input matInput placeholder="Name" [(ngModel)]="widget.name">
+            </label>
         </mat-form-field>
     </div>
     <div [formGroup]="formGroup">
@@ -44,21 +42,25 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
+        <mat-form-field color="accent" class="unit">
+                <mat-label>Unit</mat-label>
+            <label>
+                <input type="text" matInput formControlName="unit">
+            </label>
+        </mat-form-field>
     </div>
     <div [formGroup]="formGroup">
         <mat-form-field color="accent" class="user-input">
             <mat-label>Choose minimum Value</mat-label>
-            <input matInput type ="number" formControlName="minValue" >
-                <mat-option *ngFor="let minValue of minValues" [value]="minValue">
-                    {{minValue}}
-                </mat-option>
+            <label>
+                <input matInput type ="number" formControlName="minValue">
+            </label>
         </mat-form-field>
         <mat-form-field color="accent" class="user-input">
             <mat-label>Choose maximum Value</mat-label>
-            <input matInput type ="number" formControlName="maxValue" >
-                <mat-option *ngFor="let maxValue of maxValues " [value]="maxValue">
-                    {{ maxValue }}
-                </mat-option>
+            <label>
+                <input matInput type ="number" formControlName="maxValue">
+            </label>
         </mat-form-field>
     </div>
 </mat-dialog-content>
@@ -67,6 +69,6 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()" cdkFocusInitial>Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()">Save</button>
+    <button mat-raised-button color="accent" (click)="save()" [disabled]="formGroup.invalid">Save</button>
 </mat-dialog-actions>
 

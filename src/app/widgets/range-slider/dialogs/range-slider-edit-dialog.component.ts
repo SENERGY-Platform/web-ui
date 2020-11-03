@@ -15,7 +15,7 @@
  */
 
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {FormBuilder, FormControl} from '@angular/forms';
+import {FormBuilder, Validators} from '@angular/forms';
 import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -24,6 +24,8 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
+import {checkValueValidator} from './range-slider-edit-dialog.validators';
+
 
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
@@ -36,19 +38,17 @@ export class RangeSliderEditDialogComponent implements OnInit {
     formGroup = this.formBuilder.group({
         deployment: '',
         parameter: '',
-        minValue: '',
-        maxValue: '',
-    });
+        minValue: [{value: ''}, [Validators.required, Validators.min(0), Validators.max(100)]],
+        maxValue: [{value: ''}, [Validators.required, Validators.min(0), Validators.max(100)]],
+        unit: ''}, {validators: [checkValueValidator()]});
 
     deployments: DeploymentsModel[] = [];
     parametersMap: Map<string, CamundaVariable> =  new Map<string, CamundaVariable>();
     parameters: string[] = [];
-    minValues: number[] = [];
-    maxValues: number[] = [];
 
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {properties: {imgUrl: ''}} as WidgetModel;
+    widget: WidgetModel = {} as WidgetModel;
 
     constructor(private dialogRef: MatDialogRef<RangeSliderEditDialogComponent>,
                 private dashboardService: DashboardService,
@@ -81,6 +81,9 @@ export class RangeSliderEditDialogComponent implements OnInit {
             this.formGroup.patchValue({
                 deployment: this.widget.properties.deployment,
                 parameter: this.widget.properties.selectedParameter,
+                minValue: this.widget.properties.selectedMinValue,
+                maxValue: this.widget.properties.selectedMaxValue,
+                unit: this.widget.properties.selectedUnit
             });
         });
     }
@@ -94,6 +97,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
         this.widget.properties.selectedParameter = this.formGroup.get('parameter')?.value;
         this.widget.properties.selectedMinValue = this.formGroup.get('minValue')?.value;
         this.widget.properties.selectedMaxValue = this.formGroup.get('maxValue')?.value;
+        this.widget.properties.selectedUnit = this.formGroup.get('unit')?.value;
         this.widget.properties.selectedParameterModel = this.parametersMap.get(this.formGroup.get('parameter')?.value);
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
@@ -103,7 +107,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc', '').subscribe((deployments: DeploymentsModel[]) => {
+        this.deploymentsService.getAllMinimal('', 99999, 0, 'deploymentTime', 'desc', '').subscribe((deployments: DeploymentsModel[]) => {
             this.deployments = deployments;
         });
     }
@@ -111,4 +115,5 @@ export class RangeSliderEditDialogComponent implements OnInit {
     compareDeployments(first: DeploymentsModel, second: DeploymentsModel) {
         return first.id === second.id;
     }
+
 }

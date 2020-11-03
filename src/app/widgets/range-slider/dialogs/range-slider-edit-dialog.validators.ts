@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
+import {AbstractControl, FormGroup, ValidatorFn} from '@angular/forms';
 
-.margin {
-    margin: 0px;
-}
-
-.user-input {
-    margin-top: 6px;
-    margin-right: 16px;
-    width: 35%;
-}
-
-.example-first-footer-row td{
-    border-bottom: none;
-}
-
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}
-
-.unit{
-    margin-top: 6px;
-    margin-right: 16px;
-    width: 20%;
+export function checkValueValidator(): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+        const { minValue, maxValue} = (control as FormGroup).controls;
+        if (minValue.value >= maxValue.value) {
+            return { 'checkValueValidator': true };
+        }
+        return null;
+    };
 }

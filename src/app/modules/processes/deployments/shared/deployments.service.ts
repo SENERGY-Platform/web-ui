@@ -52,6 +52,20 @@ export class DeploymentsService {
         );
     }
 
+    getAllMinimal(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]> {
+        let url = environment.processServiceUrl + '/deployment?sortBy=' + feature + '&sortOrder=' + order + '&maxResults=' + limit + '&firstResult=' + offset
+        if (query) {
+            url += '&nameLike=' + encodeURIComponent('%' + query + '%');
+        }
+        if (source) {
+            url += '&source=' + encodeURIComponent(source);
+        }
+        return this.http.get<DeploymentsModel[]>(url).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getAll', []))
+        );
+    }
+
     getDeploymentName(deploymentId: string): Observable<string> {
         return this.http.get<DeploymentsModel>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId)).pipe(
             map(resp => resp && resp.name || ''),

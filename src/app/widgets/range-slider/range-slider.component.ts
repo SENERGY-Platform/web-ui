@@ -78,7 +78,7 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
     }
     sliderRange2(event: MatSliderChange) {
         if (event.value !== null) {
-        this.widget.properties.rangeSliderValue2 = event.value;
+            this.widget.properties.rangeSliderValue2 = event.value;
         }
     }
 }

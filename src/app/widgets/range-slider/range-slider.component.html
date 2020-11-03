@@ -20,9 +20,8 @@
         <div fxFill fxLayout="row" fxLayoutAlign="center center">
             <div [fittext] [maxFontSize]="widget.properties.threshold ? widget.properties.threshold : 128">
                     <span>
-                       {{this.widget.properties.rangeSliderValue2}}°C
+                       {{this.widget.properties.rangeSliderValue2}} {{this.widget.properties.selectedUnit}}
                     </span>
-
             </div>
         </div>
     </div>

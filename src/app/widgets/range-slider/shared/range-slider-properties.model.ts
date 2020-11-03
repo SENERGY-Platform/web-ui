@@ -18,7 +18,6 @@ import {DeploymentsModel} from '../../../modules/processes/deployments/shared/de
 import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
 
 export interface RangeSliderPropertiesModel {
-        imgUrl?: string;
         active?: boolean;
         rangeSliderValue?: number;
         deployment?: DeploymentsModel;
@@ -27,4 +26,5 @@ export interface RangeSliderPropertiesModel {
         rangeSliderValue2?: number;
         selectedMinValue?: number;
         selectedMaxValue?: number;
+        selectedUnit?: string;
 }
