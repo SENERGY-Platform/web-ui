@@ -108,22 +108,24 @@ export class DeployFlowComponent {
             for (const formDeviceEntry of this.selectedValues.get(pipeReqNode.nodeId).entries()) {
                 const nodeValues = [] as NodeValue [];
                 const operatorFieldName = formDeviceEntry[0];
-                const formDeviceInfo = formDeviceEntry[1];
+                const formDeviceInfo: {'device': DeviceInstancesModel[],
+                    'service': DeviceTypeServiceModel,
+                    'path': string} = formDeviceEntry[1];
 
                 // check if device and service are selected
                 if (operatorFieldName === '_config') {
-                    for (const config of formDeviceInfo.entries()) {
+                    for (const config of formDeviceEntry[1].entries()) {
                         pipeReqNode.config.push({name: config[0], value: config [1]});
                     }
                 } else {
                     let deviceIds = '';
-                    for (let x = 0; x < formDeviceInfo.device.length; x++) {
-                        if (x === 0) {
-                            deviceIds = formDeviceInfo.device[x].id;
+                    formDeviceInfo.device.forEach(device  => {
+                        if (deviceIds === '') {
+                            deviceIds = device.id;
                         } else {
-                            deviceIds += ',' + formDeviceInfo.device[x].id;
+                            deviceIds += ',' + device.id;
                         }
-                    }
+                    });
                     // parse input of form fields
                     const nodeValue = {name: operatorFieldName, path: formDeviceInfo.path} as NodeValue;
                     nodeValues.push(nodeValue);
@@ -136,9 +138,17 @@ export class DeployFlowComponent {
 
                     // check if node is local or cloud and set input topic accordingly
                     if (pipeReqNode.deploymentType === 'local') {
-                        nodeInput.topicName = 'event/' + formDeviceEntry[1].device.uri + '/' + formDeviceEntry[1].service.url;
+                        console.log(formDeviceInfo);
+                        formDeviceInfo.device.forEach( (device: DeviceInstancesModel) => {
+                            if (nodeInput.topicName === undefined) {
+                                nodeInput.topicName = 'event/' + device.local_id.split(/-(.+)/)[1] + '/' + formDeviceInfo.service.local_id;
+                            } else {
+                                nodeInput.topicName += ',event/' + device.local_id.split(/-(.+)/)[1] + '/'
+                                    + formDeviceInfo.service.local_id;
+                            }
+                        });
                     } else {
-                        nodeInput.topicName = formDeviceEntry[1].service.id.replace(/#/g, '_').replace(/:/g, '_');
+                        nodeInput.topicName = formDeviceInfo.service.id.replace(/#/g, '_').replace(/:/g, '_');
                     }
                     this.populateRequestNodeInputs(pipeReqNode, deviceIds, nodeValue, nodeInput);
                 }
@@ -151,8 +161,9 @@ export class DeployFlowComponent {
         this.pipeReq.name = this.name;
         this.pipeReq.description = this.description;
         this.ready = true;
+        console.log(this.pipeReq);
         this.flowEngineService.startPipeline(this.pipeReq).subscribe(function () {
-            self.router.navigate(['/data/pipelines']);
+            //self.router.navigate(['/data/pipelines']);
             self.snackBar.open('Pipeline started', undefined, {
                 duration: 2000,
             });
@@ -262,14 +273,21 @@ export class DeployFlowComponent {
 
     private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel) {
         if (field.type === 'https://schema.org/StructuredValue' && field.type !== undefined && field.type !== null) {
-            pathString += '.' + field.name;
+            if (pathString !== '') {
+                pathString += '.' + field.name;
+            } else {
+                if (field.name !== undefined) {
+                    pathString = field.name;
+                }
+            }
             if (field.sub_content_variables !== undefined) {
                 field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel) => {
                     this.traverseDataStructure(pathString, innerField);
                 });
             }
         } else {
-            this.vals.push(pathString + '.' + field.name);
+            const out = (pathString + '.' + field.name).split(/\.(.+)/)[1];
+            this.vals.push(out);
         }
     }
 }
