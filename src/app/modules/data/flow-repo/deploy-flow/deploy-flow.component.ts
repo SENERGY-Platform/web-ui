@@ -163,7 +163,7 @@ export class DeployFlowComponent {
         this.ready = true;
         console.log(this.pipeReq);
         this.flowEngineService.startPipeline(this.pipeReq).subscribe(function () {
-            //self.router.navigate(['/data/pipelines']);
+            self.router.navigate(['/data/pipelines']);
             self.snackBar.open('Pipeline started', undefined, {
                 duration: 2000,
             });
