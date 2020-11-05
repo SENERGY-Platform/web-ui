@@ -141,9 +141,9 @@ export class DeployFlowComponent {
                         console.log(formDeviceInfo);
                         formDeviceInfo.device.forEach( (device: DeviceInstancesModel) => {
                             if (nodeInput.topicName === undefined) {
-                                nodeInput.topicName = 'event/' + device.local_id.split(/-(.+)/)[1] + '/' + formDeviceInfo.service.local_id;
+                                nodeInput.topicName = 'event/' + device.local_id + '/' + formDeviceInfo.service.local_id;
                             } else {
-                                nodeInput.topicName += ',event/' + device.local_id.split(/-(.+)/)[1] + '/'
+                                nodeInput.topicName += ',event/' + device.local_id + '/'
                                     + formDeviceInfo.service.local_id;
                             }
                         });
@@ -161,7 +161,6 @@ export class DeployFlowComponent {
         this.pipeReq.name = this.name;
         this.pipeReq.description = this.description;
         this.ready = true;
-        console.log(this.pipeReq);
         this.flowEngineService.startPipeline(this.pipeReq).subscribe(function () {
             self.router.navigate(['/data/pipelines']);
             self.snackBar.open('Pipeline started', undefined, {
