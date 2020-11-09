@@ -52,7 +52,7 @@ export class ExportComponent implements OnInit, OnDestroy {
 
     public searchText = '';
     public searchField = 'name';
-    public searchFields = [['Name', 'name'], ['Gerätetyp', 'entity_name'], ['Beschreibung', 'description'], ['Service', 'service_name']];
+    public searchFields = [['Name', 'name'], ['Gerätename', 'entity_name'], ['Beschreibung', 'description'], ['Service', 'service_name']];
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
