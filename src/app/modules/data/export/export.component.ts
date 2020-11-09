@@ -51,6 +51,8 @@ export class ExportComponent implements OnInit, OnDestroy {
     sortAttributes = [new SortModel('Name', 'name', 'asc'), new SortModel('Erstellungsdatum', 'created_at', 'asc')];
 
     public searchText = '';
+    public searchField = 'name';
+    public searchFields = [['Name', 'name'], ['Gerätetyp', 'entity_name'], ['Beschreibung', 'description'], ['Service', 'service_name']];
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
@@ -68,8 +70,12 @@ export class ExportComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         if (localStorage.getItem('data.exports.search') !== null) {
-            this.searchText = <string>localStorage.getItem('data.exports.search') ;
+            this.searchText = <string>localStorage.getItem('data.exports.search');
         }
+        if (localStorage.getItem('data.exports.searchField') !== null) {
+            this.searchField = <string>localStorage.getItem('data.exports.searchField');
+        }
+        console.log(this.searchField);
         this.initGridCols();
         this.initSearchAndGetExports();
     }
@@ -125,6 +131,11 @@ export class ExportComponent implements OnInit, OnDestroy {
         });
     }
 
+    searchFieldChanged() {
+        localStorage.setItem('data.exports.searchField', String(this.searchField));
+        this.getExports(true);
+    }
+
     showGeneratedChanged() {
         localStorage.setItem('data.exports.showGenerated', String(this.showGenerated));
         this.getExports(true);
@@ -140,17 +151,19 @@ export class ExportComponent implements OnInit, OnDestroy {
             this.limit, this.offset,
             this.sortAttribute.value,
             this.sortAttribute.order,
-            (this.showGenerated ? undefined : false) )
+            (this.showGenerated ? undefined : false),
+            this.searchField
+        )
             .subscribe(
-            (resp: ExportModel [] | null) => {
-                if (resp !== null) {
-                    if (resp.length !== this.limit) {
-                        this.allDataLoaded = true;
+                (resp: ExportModel [] | null) => {
+                    if (resp !== null) {
+                        if (resp.length !== this.limit) {
+                            this.allDataLoaded = true;
+                        }
+                        this.exports = this.exports.concat(resp);
                     }
-                    this.exports = this.exports.concat(resp);
-                }
-                this.ready = true;
-            });
+                    this.ready = true;
+                });
     }
 
     private initGridCols(): void {
@@ -163,7 +176,7 @@ export class ExportComponent implements OnInit, OnDestroy {
     private initSearchAndGetExports() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            localStorage.setItem('data.exports.search', this.searchText) ;
+            localStorage.setItem('data.exports.search', this.searchText);
             this.getExports(true);
         });
     }

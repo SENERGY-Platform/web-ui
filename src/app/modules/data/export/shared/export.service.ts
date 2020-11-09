@@ -43,11 +43,15 @@ export class ExportService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getExports(search: string, limit: number, offset: number, sort: string, order: string, generated?: boolean):
+    getExports(search?: string, limit?: number, offset?: number, sort?: string, order?: string, generated?: boolean, searchField?: string):
         Observable<ExportModel[] | null> {
+        if (searchField === undefined || searchField === null){
+            searchField = 'name';
+        }
         return this.http.get<ExportModel[]>
         (environment.exportService + '/instance?limit=' + limit + '&offset=' + offset + '&order=' + sort +
-            ':' + order + (search ? ('&search=' + search) : '') + (generated !== undefined ? ('&generated=' + generated.valueOf()) : ''))
+            ':' + order + (search ? ('&search=' + searchField + ':' + search) : '') +
+            (generated !== undefined ? ('&generated=' + generated.valueOf()) : ''))
             .pipe(
                 map((resp: ExportModel[]) => resp || []),
                 catchError(this.errorHandlerService.handleError(ExportService.name, 'getExports: Error', null)

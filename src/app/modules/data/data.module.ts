@@ -43,6 +43,8 @@ import {MatCardModule} from '@angular/material/card';
 import {MatSortModule} from '@angular/material/sort';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatOptionModule} from '@angular/material/core';
+import {MatSelectModule} from '@angular/material/select';
 
 
 const operatorRepo = {path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Analytics' }};
@@ -75,7 +77,9 @@ const pipelineRegistry = {path: 'data/pipelines', pathMatch: 'full', component: 
         MatCardModule,
         MatSortModule,
         InfiniteScrollModule,
-        MatCheckboxModule
+        MatCheckboxModule,
+        MatOptionModule,
+        MatSelectModule
     ],
     declarations: [
         OperatorRepoComponent,

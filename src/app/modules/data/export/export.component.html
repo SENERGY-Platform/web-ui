@@ -15,7 +15,17 @@
   -->
 <div class="export-container">
     <div fxLayout="column">
-        <senergy-searchbar [searchTextIn]="searchText" fxFlex></senergy-searchbar>
+        <div fxLayout="row">
+            <senergy-searchbar [searchTextIn]="searchText" fxFlex></senergy-searchbar>
+            <mat-form-field color="accent" class="user-input" style="margin-top: 15px;">
+                <mat-label>Choose Search Field</mat-label>
+                <mat-select [(ngModel)]="searchField" (ngModelChange)="searchFieldChanged()">
+                    <mat-option *ngFor="let searchField of searchFields" [value]="searchField[1]">
+                        {{searchField[0]}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
         <div fxLayout="row">
             <div fxFlex></div>
             <div class="layout-margin" fxLayout="column">
