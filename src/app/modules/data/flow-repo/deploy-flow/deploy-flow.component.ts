@@ -285,7 +285,7 @@ export class DeployFlowComponent {
                 });
             }
         } else {
-            const out = (pathString + '.' + field.name).split(/\.(.+)/)[1];
+            const out = (pathString + '.' + field.name);//.split(/\.(.+)/)[1];
             this.vals.push(out);
         }
     }
