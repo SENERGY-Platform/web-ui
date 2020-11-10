@@ -20,6 +20,8 @@ import {ActivatedRoute} from '@angular/router';
 import {ExportService} from '../shared/export.service';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
 import {LastValuesRequestElementModel} from '../../../../widgets/shared/export-data.model';
+import {map} from 'rxjs/operators';
+import {Observable} from 'rxjs';
 
 
 @Component({
@@ -33,6 +35,8 @@ export class ExportDetailsComponent implements OnInit {
     ready = false;
     export = {} as ExportModel;
     displayedColumns: string[] = ['Name', 'Path', 'Type', 'LastValue', 'LastTimeStamp'];
+    lastValuesReady = false;
+    lastValuesRequestElementModels: LastValuesRequestElementModel[] = [];
 
     constructor(private route: ActivatedRoute, private exportService: ExportService, private exportDataService: ExportDataService) {
     }
@@ -44,26 +48,35 @@ export class ExportDetailsComponent implements OnInit {
                 if (resp !== null) {
                     this.export = resp;
                 }
-                const requestPayload: LastValuesRequestElementModel[] = [];
 
-                resp?.Values.forEach(value => {
-                        if (resp?.Measurement !== undefined) {
-                            requestPayload.push({
-                                measurement: resp?.Measurement,
+                this.export?.Values.forEach(value => {
+                        if (this.export?.Measurement !== undefined) {
+                            this.lastValuesRequestElementModels.push({
+                                measurement: this.export?.Measurement,
                                 columnName: value.Name,
                                 math: undefined
                             });
                         }
                     }
                 );
-                this.exportDataService.getLastValues(requestPayload).subscribe(pairs => {
-                    this.export.Values.forEach((_, index) => {
-                        this.export.Values[index].LastValue = pairs[index].value;
-                        this.export.Values[index].LastTimeStamp = pairs[index].time;
-                    });
-                });
+
+                this.getLatestValues().subscribe(() => this.lastValuesReady = true);
                 this.ready = true;
             });
         }
+    }
+
+    refreshValues() {
+        this.lastValuesReady = false;
+        this.getLatestValues().subscribe(() => this.lastValuesReady = true);
+    }
+
+    private getLatestValues(): Observable<void> {
+        return this.exportDataService.getLastValues(this.lastValuesRequestElementModels).pipe(map(pairs => {
+            this.export.Values.forEach((_, index) => {
+                this.export.Values[index].LastValue = pairs[index].value;
+                this.export.Values[index].LastTimeStamp = pairs[index].time;
+            });
+        }));
     }
 }

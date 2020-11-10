@@ -72,3 +72,11 @@ mat-grid-list {
 .radio-button {
     margin: 5px;
 }
+
+.full-width {
+    width: 100%;
+}
+
+.fill-remaining-space {
+    flex: 1 1 auto;
+}
