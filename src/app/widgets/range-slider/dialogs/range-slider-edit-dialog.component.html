@@ -55,12 +55,14 @@
             <label>
                 <input matInput type ="number" formControlName="minValue">
             </label>
+            <mat-error *ngIf="formGroup.value.minValue">Value must be between 0-100!</mat-error>
         </mat-form-field>
         <mat-form-field color="accent" class="user-input">
             <mat-label>Choose maximum Value</mat-label>
             <label>
                 <input matInput type ="number" formControlName="maxValue">
             </label>
+            <mat-error *ngIf="formGroup.value.maxValue">Value must be between 0-100!</mat-error>
         </mat-form-field>
     </div>
 </mat-dialog-content>
