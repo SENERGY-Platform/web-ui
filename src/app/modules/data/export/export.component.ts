@@ -75,7 +75,6 @@ export class ExportComponent implements OnInit, OnDestroy {
         if (localStorage.getItem('data.exports.searchField') !== null) {
             this.searchField = <string>localStorage.getItem('data.exports.searchField');
         }
-        console.log(this.searchField);
         this.initGridCols();
         this.initSearchAndGetExports();
     }

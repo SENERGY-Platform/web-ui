@@ -138,7 +138,6 @@ export class DeployFlowComponent {
 
                     // check if node is local or cloud and set input topic accordingly
                     if (pipeReqNode.deploymentType === 'local') {
-                        console.log(formDeviceInfo);
                         formDeviceInfo.device.forEach( (device: DeviceInstancesModel) => {
                             if (nodeInput.topicName === undefined) {
                                 nodeInput.topicName = 'event/' + device.local_id + '/' + formDeviceInfo.service.local_id;

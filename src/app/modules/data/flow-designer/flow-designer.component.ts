@@ -187,7 +187,6 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         ];
         this.removeSVGNodesByClassNames(svg, tags, classes);
         this.removeSVGAttributesByTagNames(svg, tags);
-        console.log(svg);
         source = serializer.serializeToString(svg);
         if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
             source = source.replace(/^<svg/,
