@@ -192,11 +192,11 @@ export class DeployFlowComponent {
         if (input !== undefined && input.deploymentType === 'local') {
             pathString = '';
             service.outputs.forEach((out: DeviceTypeContentModel) => {
-                this.traverseDataStructure(pathString, out.content_variable);
+                this.traverseDataStructure(pathString, out.content_variable, true);
             });
         } else {
             service.outputs.forEach((out: DeviceTypeContentModel) => {
-                this.traverseDataStructure(pathString, out.content_variable);
+                this.traverseDataStructure(pathString, out.content_variable, false);
             });
         }
         this.paths[inputId][port] = this.vals;
@@ -269,7 +269,7 @@ export class DeployFlowComponent {
         }
     }
 
-    private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel) {
+    private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel, isLocal: boolean) {
         if (field.type === 'https://schema.org/StructuredValue' && field.type !== undefined && field.type !== null) {
             if (pathString !== '') {
                 pathString += '.' + field.name;
@@ -280,11 +280,14 @@ export class DeployFlowComponent {
             }
             if (field.sub_content_variables !== undefined) {
                 field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel) => {
-                    this.traverseDataStructure(pathString, innerField);
+                    this.traverseDataStructure(pathString, innerField, isLocal);
                 });
             }
         } else {
-            const out = (pathString + '.' + field.name);//.split(/\.(.+)/)[1];
+            let out = (pathString + '.' + field.name);
+            if (isLocal) {
+                out = (pathString + '.' + field.name).split(/\.(.+)/)[1];
+            }
             this.vals.push(out);
         }
     }
