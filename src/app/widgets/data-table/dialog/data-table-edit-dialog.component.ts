@@ -563,7 +563,7 @@ export class DataTableEditDialogComponent implements OnInit {
         this.addNewMeasurement();
         const newIndex = this.getElements().length - 1;
         this.getElement(newIndex).patchValue(this.getElement(index).value);
-        this.getElement(newIndex).patchValue({id: uuid()});
+        this.getElement(newIndex).patchValue({id: uuid(), exportValuePath: this.getElement(index).get('exportValuePath')?.value});
         this.step = newIndex;
     }
 
