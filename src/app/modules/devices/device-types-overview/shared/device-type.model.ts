@@ -100,6 +100,7 @@ export interface DeviceTypeCharacteristicsModel {
 export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
+    description: string;
     rdf_type: string;
     concept_id: string;
 }

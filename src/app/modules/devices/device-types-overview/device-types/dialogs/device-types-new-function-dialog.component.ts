@@ -34,6 +34,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 export class DeviceTypesNewFunctionDialogComponent implements OnInit {
 
     nameControl = new FormControl('', [Validators.required]);
+    descriptionControl = new FormControl('');
     conceptControl = new FormControl('');
     concepts: ConceptsPermSearchModel[] = [];
     functionType = {} as DeviceTypeFunctionType;
@@ -54,6 +55,7 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
         const func: DeviceTypeFunctionModel = {
             id: this.setId(),
             name: this.nameControl.value,
+            description: this.descriptionControl.value,
             rdf_type: this.functionType.rdf_type,
             concept_id: this.conceptControl.value.id || null,
         };

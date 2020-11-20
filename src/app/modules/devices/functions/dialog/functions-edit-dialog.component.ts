@@ -61,6 +61,7 @@ export class FunctionsEditDialogComponent implements OnInit {
             id: [{value: func.id, disabled: true}],
             name: [func.name, Validators.required],
             concept_id: func.concept_id,
+            description: func.description,
         });
     }
 
