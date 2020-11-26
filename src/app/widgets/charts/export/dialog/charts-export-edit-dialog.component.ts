@@ -41,7 +41,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     chartTypes = ['LineChart', 'ColumnChart'];
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
-    groupTypes = ['mean', 'sum', 'count', 'median'];
+    groupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max'];
 
     displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'valueAlias', 'color', 'math', 'filterType', 'filterValue', 'duplicate-delete'];
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
