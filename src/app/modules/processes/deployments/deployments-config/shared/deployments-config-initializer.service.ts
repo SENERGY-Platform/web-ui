@@ -132,12 +132,14 @@ export class DeploymentsConfigInitializerService {
     }
 
     private initSelectionFormGroup(selection: V2DeploymentsPreparedSelectionModel, disable: boolean): FormGroup {
+        const selectedOptionIndex = this.getSelectedOptionIndex(selection);
         return this._formBuilder.group({
             filter_criteria: selection.filter_criteria,
             selection_options: this.initSelectionFormArray(selection.selection_options),
-            selection_options_index: selection.selection_options_index === undefined ? -1 : selection.selection_options_index,
+            selection_options_index: selectedOptionIndex,
             selected_device_id: [{value: selection.selected_device_id, disabled: disable}],
             selected_service_id: [{value: selection.selected_service_id, disabled: disable}],
+            selected_device_group_id: [{value: selection.selected_device_group_id, disabled: disable}],
             show: false
         });
     }
@@ -166,7 +168,8 @@ export class DeploymentsConfigInitializerService {
     private  initDeviceSelectionOptionGroup(selectionOption: V2DeploymentsPreparedSelectionOptionModel): FormGroup {
         return this._formBuilder.group({
             device: [selectionOption.device],
-            services: this._formBuilder.array(selectionOption.services)
+            services: this._formBuilder.array(selectionOption.services),
+            device_group: [selectionOption.device_group],
         });
     }
 
@@ -195,4 +198,20 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
+    private getSelectedOptionIndex(selection: V2DeploymentsPreparedSelectionModel) {
+        let result = selection.selection_options_index === undefined ? -1 : selection.selection_options_index;
+        selection.selection_options.forEach((option, index) => {
+            if (option.device && selection.selected_device_id && selection.selected_device_id === option.device.id) {
+                result = index;
+            }
+            if (
+                option.device_group &&
+                selection.selected_device_group_id &&
+                selection.selected_device_group_id === option.device_group.id
+            ) {
+                result = index;
+            }
+        });
+        return result;
+    }
 }

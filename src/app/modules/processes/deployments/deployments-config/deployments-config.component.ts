@@ -131,22 +131,35 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     changeTaskSelectionOption(selectedElementIndex: number, selectionOptionIndex: number): void {
-
-        this.setSelectedServiceId(selectedElementIndex, selectionOptionIndex, 'task');
-
         const elementClicked = this.getElement(selectedElementIndex);
+        const option = this.getOption(elementClicked, selectionOptionIndex);
+
+        const that = this;
+
+        const setOption = function(elementIndex: number) {
+            if (option && option.device_group) {
+                const selectedDeviceGroupId = that.elementsFormArray.at(elementIndex).get('task.selection.selected_device_group_id');
+                if (selectedDeviceGroupId) {
+                    selectedDeviceGroupId.patchValue(option.device_group.id);
+                }
+            }
+            if (option && option.device) {
+                const selectedDeviceId = that.elementsFormArray.at(elementIndex).get('task.selection.selected_device_id');
+                if (selectedDeviceId) {
+                    selectedDeviceId.patchValue(option.device.id);
+                }
+            }
+            that.setSelectedServiceId(elementIndex, selectionOptionIndex, 'task');
+        };
+
+        // set option for this task
+        setOption(selectedElementIndex);
+
+        // set options for tasks of the same group
         if (elementClicked.group) {
             this.elements.forEach((element: V2DeploymentsPreparedElementModel, elementIndex: number) => {
-                if (element.task !== null && elementClicked.bpmn_id !== element.bpmn_id) {
-                    if (elementClicked.group === (this.getElement(elementIndex).group)) {
-                        const selectedDeviceId = this.elementsFormArray.at(elementIndex).get('task.selection.selected_device_id');
-                        if (selectedDeviceId) {
-                            if (elementClicked.task) {
-                                selectedDeviceId.patchValue(elementClicked.task.selection.selected_device_id);
-                                this.setSelectedServiceId(elementIndex, this.getSelectionOptionIndex(selectedElementIndex, elementClicked.task.selection.selected_device_id), 'task');
-                            }
-                        }
-                    }
+                if (element.task !== null && elementClicked.bpmn_id !== element.bpmn_id && elementClicked.group === element.group) {
+                    setOption(elementIndex);
                 }
             });
         }
@@ -184,15 +197,14 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
     }
 
-    private getSelectionOptionIndex(elementIndex: number, selectedDeviceId: string): number {
-        const selectionOptions: V2DeploymentsPreparedSelectionOptionModel[] = (<FormArray>this.deploymentFormGroup.get(['elements', elementIndex, 'task', 'selection', 'selection_options'])).value;
-        let index = -1;
-        selectionOptions.forEach((selectionOption: V2DeploymentsPreparedSelectionOptionModel, selectionOptionIndex: number) => {
-            if (selectionOption.device.id === selectedDeviceId) {
-                index = selectionOptionIndex;
-            }
-        });
-        return index;
+    private getOption(element: V2DeploymentsPreparedElementModel, selectionOptionIndex: number): V2DeploymentsPreparedSelectionOptionModel | null {
+        if ( element.task && element.task.selection.selection_options ) {
+            return element.task.selection.selection_options[selectionOptionIndex];
+        }
+        if ( element.message_event && element.message_event.selection.selection_options ) {
+            return element.message_event.selection.selection_options[selectionOptionIndex];
+        }
+        return null;
     }
 
     private getFlows(): void {
@@ -216,4 +228,5 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         console.log(matches);
         return !(matches && matches.length);
     }
+
 }

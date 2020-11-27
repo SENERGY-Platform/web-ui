@@ -89,14 +89,16 @@ export interface V2DeploymentsPreparedSelectionModel {
     filter_criteria: V2DeploymentsPreparedFilterCriteriaModel;
     selection_options: V2DeploymentsPreparedSelectionOptionModel[];
     selection_options_index?: number;
-    selected_device_id: string;
-    selected_service_id: string;
+    selected_device_id: string | null;
+    selected_service_id: string | null;
+    selected_device_group_id: string | null;
     show?: boolean;
 }
 
 export interface V2DeploymentsPreparedSelectionOptionModel {
-    device: V2DeploymentsPreparedDeviceModel;
+    device: V2DeploymentsPreparedDeviceModel | null;
     services: V2DeploymentsPreparedServiceModel[];
+    device_group: V2DeploymentsPreparedGroupModel | null;
 }
 
 export interface V2DeploymentsPreparedServiceModel {
@@ -105,6 +107,12 @@ export interface V2DeploymentsPreparedServiceModel {
 }
 
 export interface V2DeploymentsPreparedDeviceModel {
+    id: string;
+    name: string;
+}
+
+
+export interface V2DeploymentsPreparedGroupModel {
     id: string;
     name: string;
 }

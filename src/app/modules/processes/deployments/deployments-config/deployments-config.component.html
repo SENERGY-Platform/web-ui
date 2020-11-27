@@ -34,12 +34,12 @@
                                     <td formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent">
                                             <mat-select placeholder="{{element.name}}" required
-                                                        formControlName="selected_device_id">
+                                                        formControlName="selection_options_index">
                                                 <mat-option
                                                         *ngFor="let selectionOption of element.task.selection.selection_options; let selectionOptionIndex = index"
-                                                        [value]="selectionOption.device.id"
+                                                        [value]="selectionOptionIndex"
                                                         (click)="changeTaskSelectionOption(elementIndex, selectionOptionIndex)">
-                                                    {{selectionOption.device.name}}
+                                                    {{ (selectionOption.device && selectionOption.device.name) || (selectionOption.device_group && selectionOption.device_group.name) }}
                                                 </mat-option>
                                             </mat-select>
                                         </mat-form-field>
@@ -88,9 +88,9 @@
                                                         formControlName="selected_device_id">
                                                 <mat-option
                                                         *ngFor="let selectionOption of element.message_event.selection.selection_options; let selectionOptionIndex = index"
-                                                        [value]="selectionOption.device.id"
+                                                        [value]="selectionOption.device && selectionOption.device.id"
                                                         (click)="setSelectedServiceId(elementIndex, selectionOptionIndex, 'message_event')">
-                                                    {{selectionOption.device.name}}
+                                                    {{selectionOption.device && selectionOption.device.name}}
                                                 </mat-option>
                                             </mat-select>
                                         </mat-form-field>
