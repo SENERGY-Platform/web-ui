@@ -48,6 +48,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatListModule} from '@angular/material/list';
 import {MatDialogModule} from '@angular/material/dialog';
+import {MatSelectModule} from '@angular/material/select';
+import {SelectSearchComponent} from './components/select-search/select-search.component';
 
 
 @NgModule({
@@ -71,6 +73,7 @@ import {MatDialogModule} from '@angular/material/dialog';
         ReactiveFormsModule,
         MatBadgeModule,
         MatExpansionModule,
+        MatSelectModule,
     ],
     declarations: [
         SidenavComponent,
@@ -88,6 +91,7 @@ import {MatDialogModule} from '@angular/material/dialog';
         DeleteDialogComponent,
         WidgetNoDataComponent,
         NotificationDialogComponent,
+        SelectSearchComponent,
     ],
     exports: [
         SidenavComponent,
@@ -102,6 +106,7 @@ import {MatDialogModule} from '@angular/material/dialog';
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
         WidgetNoDataComponent,
+        SelectSearchComponent,
     ],
 })
 
