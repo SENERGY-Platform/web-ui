@@ -104,8 +104,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     'device_group': null
                                 }
                             ],
-                            'selected_device_id': '',
-                            'selected_service_id': '',
+                            'selected_device_id': null,
+                            'selected_service_id': null,
                             'selected_device_group_id': null,
                         }
                     }
@@ -187,8 +187,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     'device_group': null
                                 }
                             ],
-                            'selected_device_id': '',
-                            'selected_service_id': '',
+                            'selected_device_id': null,
+                            'selected_service_id': null,
                             'selected_device_group_id': null,
                         }
                     }
@@ -266,8 +266,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     'device_group': null
                                 }
                             ],
-                            'selected_device_id': '',
-                            'selected_service_id': '',
+                            'selected_device_id': null,
+                            'selected_service_id': null,
                             'selected_device_group_id': null,
                         }
                     }
@@ -346,8 +346,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                 }
                             ],
                             'selection_options_index': -1,
-                            'selected_device_id': '',
-                            'selected_service_id': '',
+                            'selected_device_id': null,
+                            'selected_service_id': null,
                             'selected_device_group_id': null,
                             'show': false,
                         }
@@ -432,8 +432,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                 }
                             ],
                             'selection_options_index': -1,
-                            'selected_device_id': '',
-                            'selected_service_id': '',
+                            'selected_device_id': null,
+                            'selected_service_id': null,
                             'selected_device_group_id': null,
                             'show': false,
                         }
@@ -514,8 +514,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                 }
                             ],
                             'selection_options_index': -1,
-                            'selected_device_id': '',
-                            'selected_service_id': '',
+                            'selected_device_id': null,
+                            'selected_service_id': null,
                             'selected_device_group_id': null,
                             'show': false,
                         }
@@ -564,8 +564,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                 device_class_id: null,
                                 function_id: 'urn:infai:ses:measuring-function:20d3c1d3-77d7-4181-a9f3-b487add58cd0'
                             },
-                            selected_device_id: '',
-                            selected_service_id: '',
+                            selected_device_id: null,
+                            selected_service_id: null,
                             selected_device_group_id: null,
                             selection_options: [
                                 {
@@ -617,8 +617,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                 device_class_id: null,
                                 function_id: 'urn:infai:ses:measuring-function:20d3c1d3-77d7-4181-a9f3-b487add58cd0'
                             },
-                            selected_device_id: '',
-                            selected_service_id: '',
+                            selected_device_id: null,
+                            selected_service_id: null,
                             selected_device_group_id: null,
                             selection_options: [
                                 {

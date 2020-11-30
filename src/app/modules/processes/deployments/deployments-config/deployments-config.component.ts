@@ -137,14 +137,20 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         const that = this;
 
         const setOption = function(elementIndex: number) {
+            const selectedDeviceGroupId = that.elementsFormArray.at(elementIndex).get('task.selection.selected_device_group_id');
+            const selectedDeviceId = that.elementsFormArray.at(elementIndex).get('task.selection.selected_device_id');
             if (option && option.device_group) {
-                const selectedDeviceGroupId = that.elementsFormArray.at(elementIndex).get('task.selection.selected_device_group_id');
                 if (selectedDeviceGroupId) {
                     selectedDeviceGroupId.patchValue(option.device_group.id);
                 }
+                if (selectedDeviceId) {
+                    selectedDeviceId.patchValue(null);
+                }
             }
             if (option && option.device) {
-                const selectedDeviceId = that.elementsFormArray.at(elementIndex).get('task.selection.selected_device_id');
+                if (selectedDeviceGroupId) {
+                    selectedDeviceGroupId.patchValue(null);
+                }
                 if (selectedDeviceId) {
                     selectedDeviceId.patchValue(option.device.id);
                 }
@@ -177,12 +183,18 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         const selection = <FormGroup>this.deploymentFormGroup.get(['elements', elementIndex, elementType, 'selection']);
         const services = <FormArray>this.deploymentFormGroup.get(['elements', elementIndex, elementType, 'selection', 'selection_options', selectionOptionIndex, 'services']);
         selection.patchValue({'selection_options_index': selectionOptionIndex});
-        if (services.value.length <= 1) {
-            selection.patchValue({'selected_service_id': services.value[0].id});
-            selection.patchValue({'show': false});
-        } else {
-            selection.patchValue({'selected_service_id': ''});
-            selection.patchValue({'show': true});
+        switch (services.value.length) {
+            case 0:
+                selection.patchValue({'selected_service_id': null});
+                selection.patchValue({'show': false});
+                break;
+            case 1:
+                selection.patchValue({'selected_service_id': services.value[0].id});
+                selection.patchValue({'show': false});
+                break;
+            default:
+                selection.patchValue({'selected_service_id': null});
+                selection.patchValue({'show': true});
         }
     }
 

@@ -242,7 +242,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             function_id: 'urn:infai:ses:controlling-function:79e7914b-f303-4a7d-90af-dee70db05fd9'
                         },
                         selected_device_id: 'urn:infai:ses:device:20b915d4-5d1e-4446-b721-64c1481a0143',
-                        selected_service_id: '',
+                        selected_service_id: null,
                         selected_device_group_id: null,
                         show: true,
                         selection_options_index: 1,
@@ -354,8 +354,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     'device_group': null
                                 }
                             ],
-                            'selected_device_id': '',
-                            'selected_service_id': '',
+                            'selected_device_id': null,
+                            'selected_service_id': null,
                             'selected_device_group_id': null,
                         }
                     }
@@ -437,8 +437,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     'device_group': null
                                 }
                             ],
-                            'selected_device_id': '',
-                            'selected_service_id': '',
+                            'selected_device_id': null,
+                            'selected_service_id': null,
                             'selected_device_group_id': null,
                         }
                     }
@@ -516,8 +516,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     'device_group': null
                                 }
                             ],
-                            'selected_device_id': '',
-                            'selected_service_id': '',
+                            'selected_device_id': null,
+                            'selected_service_id': null,
                             'selected_device_group_id': null
                         }
                     }
@@ -785,6 +785,564 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_device_group_id: null,
                             show: false,
                             selection_options_index: 2
+                        }
+                    }
+                }
+            ],
+            executable: true,
+            id: '',
+            name: 'Lamp_in_Lane'
+        } as V2DeploymentsPreparedModel);
+    });
+
+
+
+
+
+    it('test lane process auto selection of device-group', () => {
+
+        const laneProcess = {
+            description: 'description',
+            diagram: {
+                svg: '',
+                xml_raw: '',
+                xml_deployed: ''
+            },
+            elements: [
+                {
+                    'bpmn_id': 'Task_1954wep',
+                    'group': 'pool:Lane_Lamp',
+                    'name': 'Lamp setOnStateFunction',
+                    'order': 0,
+                    'time_event': null,
+                    'notification': null,
+                    'message_event': null,
+                    'task': {
+                        'retries': 0,
+                        'parameter': {},
+                        'configurables': null,
+                        'selection': {
+                            'filter_criteria': {
+                                'characteristic_id': '',
+                                'function_id': 'urn:infai:ses:controlling-function:79e7914b-f303-4a7d-90af-dee70db05fd9',
+                                'device_class_id': 'urn:infai:ses:device-class:14e56881-16f9-4120-bb41-270a43070c86',
+                                'aspect_id': null
+                            },
+                            'selection_options': [
+                                {
+                                    'device': {
+                                        'id': 'urn:infai:ses:device:7fbd37f6-ff3b-46ae-8805-3ca89766893b',
+                                        'name': 'LIFX Color Bulb 1'
+                                    },
+                                    'services': [
+                                        {
+                                            'id': 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
+                                            'name': 'setOnService'
+                                        }
+                                    ],
+                                    'device_group': null
+                                },
+                                {
+                                    'device': {
+                                        'id': 'urn:infai:ses:device:5d9ffa2d-c3fc-4f56-80aa-2809c6dea757',
+                                        'name': 'Hue color lamp 1'
+                                    },
+                                    'services': [
+                                        {
+                                            'id': 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
+                                            'name': 'setOnService'
+                                        }
+                                    ],
+                                    'device_group': null
+                                },
+                                {
+                                    'device': {
+                                        'id': 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
+                                        'name': 'Hue color lamp 2'
+                                    },
+                                    'services': [
+                                        {
+                                            'id': 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
+                                            'name': 'setOnService'
+                                        }
+                                    ],
+                                    'device_group': null
+                                },
+                                {
+                                    'device': null,
+                                    'services': [],
+                                    'device_group': {
+                                        'id': 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                                        'name': 'group1'
+                                    }
+                                }
+                            ],
+                            'selected_device_id': null,
+                            'selected_service_id': null,
+                            'selected_device_group_id': null,
+                        }
+                    }
+                },
+                {
+                    'bpmn_id': 'IntermediateThrowEvent_0pciieh',
+                    'group': 'pool:Lane_Lamp',
+                    'name': '',
+                    'order': 0,
+                    'time_event': {
+                        'type': 'timeDuration',
+                        'time': 'PT10S',
+                    },
+                    'notification': null,
+                    'message_event': null,
+                    'task': null
+                },
+                {
+                    'bpmn_id': 'Task_1qz61o8',
+                    'group': 'pool:Lane_Lamp',
+                    'name': 'Lamp setColorFunction',
+                    'order': 0,
+                    'time_event': null,
+                    'notification': null,
+                    'message_event': null,
+                    'task': {
+                        'retries': 0,
+                        'parameter': {
+                            'inputs.b': '0',
+                            'inputs.g': '0',
+                            'inputs.r': '0'
+                        },
+                        'configurables': null,
+                        'selection': {
+                            'filter_criteria': {
+                                'characteristic_id': 'urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43',
+                                'function_id': 'urn:infai:ses:controlling-function:c54e2a89-1fb8-4ecb-8993-a7b40b355599',
+                                'device_class_id': 'urn:infai:ses:device-class:14e56881-16f9-4120-bb41-270a43070c86',
+                                'aspect_id': null
+                            },
+                            'selection_options': [
+                                {
+                                    'device': {
+                                        'id': 'urn:infai:ses:device:7fbd37f6-ff3b-46ae-8805-3ca89766893b',
+                                        'name': 'LIFX Color Bulb 1'
+                                    },
+                                    'services': [
+                                        {
+                                            'id': 'urn:infai:ses:service:98e7baf9-a0ba-4b43-acdf-2d2b915ac69d',
+                                            'name': 'setColorService'
+                                        }
+                                    ],
+                                    'device_group': null
+                                },
+                                {
+                                    'device': {
+                                        'id': 'urn:infai:ses:device:5d9ffa2d-c3fc-4f56-80aa-2809c6dea757',
+                                        'name': 'Hue color lamp 1'
+                                    },
+                                    'services': [
+                                        {
+                                            'id': 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
+                                            'name': 'setColorService'
+                                        }
+                                    ],
+                                    'device_group': null
+                                },
+                                {
+                                    'device': {
+                                        'id': 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
+                                        'name': 'Hue color lamp 2'
+                                    },
+                                    'services': [
+                                        {
+                                            'id': 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
+                                            'name': 'setColorService'
+                                        }
+                                    ],
+                                    'device_group': null
+                                },
+                                {
+                                    'device': null,
+                                    'services': [],
+                                    'device_group': {
+                                        'id': 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                                        'name': 'group1'
+                                    }
+                                }
+                            ],
+                            'selected_device_id': null,
+                            'selected_service_id': null,
+                            'selected_device_group_id': null,
+                        }
+                    }
+                },
+                {
+                    'bpmn_id': 'IntermediateThrowEvent_0yhxn55',
+                    'group': 'pool:Lane_Lamp',
+                    'name': '',
+                    'order': 0,
+                    'time_event': {
+                        'type': 'timeDuration',
+                        'time': 'PT2M',
+                    },
+                    'notification': null,
+                    'message_event': null,
+                    'task': null
+                },
+                {
+                    'bpmn_id': 'Task_0m8q0z5',
+                    'group': 'pool:Lane_Lamp',
+                    'name': 'Lamp setOffStateFunction',
+                    'order': 0,
+                    'time_event': null,
+                    'notification': null,
+                    'message_event': null,
+                    'task': {
+                        'retries': 0,
+                        'parameter': {},
+                        'configurables': null,
+                        'selection': {
+                            'filter_criteria': {
+                                'characteristic_id': '',
+                                'function_id': 'urn:infai:ses:controlling-function:2f35150b-9df7-4cad-95bc-165fa00219fd',
+                                'device_class_id': 'urn:infai:ses:device-class:14e56881-16f9-4120-bb41-270a43070c86',
+                                'aspect_id': null
+                            },
+                            'selection_options': [
+                                {
+                                    'device': {
+                                        'id': 'urn:infai:ses:device:7fbd37f6-ff3b-46ae-8805-3ca89766893b',
+                                        'name': 'LIFX Color Bulb 1'
+                                    },
+                                    'services': [
+                                        {
+                                            'id': 'urn:infai:ses:service:be1461ee-903d-46a2-9a28-1d7cb03b1c63',
+                                            'name': 'setOffService'
+                                        }
+                                    ],
+                                    'device_group': null
+                                },
+                                {
+                                    'device': {
+                                        'id': 'urn:infai:ses:device:5d9ffa2d-c3fc-4f56-80aa-2809c6dea757',
+                                        'name': 'Hue color lamp 1'
+                                    },
+                                    'services': [
+                                        {
+                                            'id': 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
+                                            'name': 'setOffService'
+                                        }
+                                    ],
+                                    'device_group': null
+                                },
+                                {
+                                    'device': {
+                                        'id': 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
+                                        'name': 'Hue color lamp 2'
+                                    },
+                                    'services': [
+                                        {
+                                            'id': 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
+                                            'name': 'setOffService'
+                                        }
+                                    ],
+                                    'device_group': null
+                                },
+                                {
+                                    'device': null,
+                                    'services': [],
+                                    'device_group': {
+                                        'id': 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                                        'name': 'group1'
+                                    }
+                                }
+                            ],
+                            'selected_device_id': null,
+                            'selected_service_id': null,
+                            'selected_device_group_id': null
+                        }
+                    }
+                }
+            ],
+            executable: true,
+            id: '',
+            name: 'Lamp_in_Lane'
+        } as V2DeploymentsPreparedModel;
+        deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(laneProcess));
+        const configurable: V2DeploymentsPreparedConfigurableModel[] = [{
+            characteristic_id: 'urn:infai:ses:characteristic:541665645sd-asdsad',
+            values: [{
+                label: 'second',
+                path: '',
+                value: '0',
+            }]
+        }];
+        deploymentsServiceSpy.getConfigurables.and.returnValue(of(configurable));
+        initSpies();
+        component.changeTaskSelectionOption(0, 3);
+        expect(component.deploymentFormGroup.getRawValue()).toEqual({
+            description: 'description',
+            diagram: {
+                svg: '',
+                xml_raw: '',
+                xml_deployed: ''
+            },
+            elements: [
+                {
+                    bpmn_id: 'Task_1954wep',
+                    group: 'pool:Lane_Lamp',
+                    name: 'Lamp setOnStateFunction',
+                    order: 0,
+                    time_event: null,
+                    notification: null,
+                    message_event: null,
+                    task: {
+                        retries: 0,
+                        parameter: {},
+                        configurables: [],
+                        selection: {
+                            filter_criteria: {
+                                characteristic_id: '',
+                                function_id: 'urn:infai:ses:controlling-function:79e7914b-f303-4a7d-90af-dee70db05fd9',
+                                device_class_id: 'urn:infai:ses:device-class:14e56881-16f9-4120-bb41-270a43070c86',
+                                aspect_id: null
+                            },
+                            selection_options: [
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:7fbd37f6-ff3b-46ae-8805-3ca89766893b',
+                                        name: 'LIFX Color Bulb 1'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
+                                            name: 'setOnService'
+                                        }
+                                    ],
+                                    device_group: null
+                                },
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:5d9ffa2d-c3fc-4f56-80aa-2809c6dea757',
+                                        name: 'Hue color lamp 1'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
+                                            name: 'setOnService'
+                                        }
+                                    ],
+                                    device_group: null
+                                },
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
+                                        name: 'Hue color lamp 2'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
+                                            name: 'setOnService'
+                                        }
+                                    ],
+                                    device_group: null
+                                },
+                                {
+                                    device: null,
+                                    services: [],
+                                    device_group: {
+                                        id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                                        name: 'group1'
+                                    }
+                                }
+                            ],
+                            selected_device_id: null,
+                            selected_service_id: null,
+                            selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                            show: false,
+                            selection_options_index: 3
+                        }
+                    }
+                },
+                {
+                    bpmn_id: 'IntermediateThrowEvent_0pciieh',
+                    group: 'pool:Lane_Lamp',
+                    name: '',
+                    order: 0,
+                    time_event: {
+                        type: 'timeDuration',
+                        time: 'PT10S',
+                        timeUnits: {years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 10}
+                    },
+                    notification: null,
+                    message_event: null,
+                    task: null
+                },
+                {
+                    bpmn_id: 'Task_1qz61o8',
+                    group: 'pool:Lane_Lamp',
+                    name: 'Lamp setColorFunction',
+                    order: 0,
+                    time_event: null,
+                    notification: null,
+                    message_event: null,
+                    task: {
+                        retries: 0,
+                        parameter: {
+                            'inputs.b': '0',
+                            'inputs.g': '0',
+                            'inputs.r': '0'
+                        },
+                        configurables: configurable,
+                        selection: {
+                            filter_criteria: {
+                                characteristic_id: 'urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43',
+                                function_id: 'urn:infai:ses:controlling-function:c54e2a89-1fb8-4ecb-8993-a7b40b355599',
+                                device_class_id: 'urn:infai:ses:device-class:14e56881-16f9-4120-bb41-270a43070c86',
+                                aspect_id: null
+                            },
+                            selection_options: [
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:7fbd37f6-ff3b-46ae-8805-3ca89766893b',
+                                        name: 'LIFX Color Bulb 1'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:98e7baf9-a0ba-4b43-acdf-2d2b915ac69d',
+                                            name: 'setColorService'
+                                        }
+                                    ],
+                                    device_group: null
+                                },
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:5d9ffa2d-c3fc-4f56-80aa-2809c6dea757',
+                                        name: 'Hue color lamp 1'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
+                                            name: 'setColorService'
+                                        }
+                                    ],
+                                    device_group: null
+                                },
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
+                                        name: 'Hue color lamp 2'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
+                                            name: 'setColorService'
+                                        }
+                                    ],
+                                    device_group: null
+                                },
+                                {
+                                    device: null,
+                                    services: [],
+                                    device_group: {
+                                        id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                                        name: 'group1'
+                                    }
+                                }
+                            ],
+                            selected_device_id: null,
+                            selected_service_id: null,
+                            selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                            show: false,
+                            selection_options_index: 3
+                        }
+                    }
+                },
+                {
+                    bpmn_id: 'IntermediateThrowEvent_0yhxn55',
+                    group: 'pool:Lane_Lamp',
+                    name: '',
+                    order: 0,
+                    time_event: {
+                        type: 'timeDuration',
+                        time: 'PT2M',
+                        timeUnits: {years: 0, months: 0, days: 0, hours: 0, minutes: 2, seconds: 0}
+                    },
+                    notification: null,
+                    message_event: null,
+                    task: null
+                },
+                {
+                    bpmn_id: 'Task_0m8q0z5',
+                    group: 'pool:Lane_Lamp',
+                    name: 'Lamp setOffStateFunction',
+                    order: 0,
+                    time_event: null,
+                    notification: null,
+                    message_event: null,
+                    task: {
+                        retries: 0,
+                        parameter: {},
+                        configurables: [],
+                        selection: {
+                            filter_criteria: {
+                                characteristic_id: '',
+                                function_id: 'urn:infai:ses:controlling-function:2f35150b-9df7-4cad-95bc-165fa00219fd',
+                                device_class_id: 'urn:infai:ses:device-class:14e56881-16f9-4120-bb41-270a43070c86',
+                                aspect_id: null
+                            },
+                            selection_options: [
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:7fbd37f6-ff3b-46ae-8805-3ca89766893b',
+                                        name: 'LIFX Color Bulb 1'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:be1461ee-903d-46a2-9a28-1d7cb03b1c63',
+                                            name: 'setOffService'
+                                        }
+                                    ],
+                                    device_group: null
+                                },
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:5d9ffa2d-c3fc-4f56-80aa-2809c6dea757',
+                                        name: 'Hue color lamp 1'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
+                                            name: 'setOffService'
+                                        }
+                                    ],
+                                    device_group: null
+                                },
+                                {
+                                    device: {
+                                        id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
+                                        name: 'Hue color lamp 2'
+                                    },
+                                    services: [
+                                        {
+                                            id: 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
+                                            name: 'setOffService'
+                                        }
+                                    ],
+                                    device_group: null
+                                },
+                                {
+                                    device: null,
+                                    services: [],
+                                    device_group: {
+                                        id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                                        name: 'group1'
+                                    }
+                                }
+                            ],
+                            selected_device_id: null,
+                            selected_service_id: null,
+                            selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                            show: false,
+                            selection_options_index: 3
                         }
                     }
                 }
