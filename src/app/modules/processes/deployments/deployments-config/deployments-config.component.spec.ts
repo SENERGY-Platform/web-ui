@@ -100,6 +100,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                         },
                         selected_device_id: '',
                         selected_service_id: '',
+                        selected_device_group_id: null,
                         selection_options: [
                             {
                                 device: {
@@ -109,7 +110,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                 services: [{
                                     id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                                     name: 'setOnService'
-                                }]
+                                }],
+                                device_group: null
                             },
                             {
                                 device: {
@@ -123,7 +125,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     {
                                         id: '87d5e964-b9c7-4e86-8d66-3bc9302c934e',
                                         name: 'setOnService2'
-                                    }]
+                                    }],
+                                device_group: null
                             }
 
                         ]
@@ -170,6 +173,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                         },
                         selected_device_id: 'urn:infai:ses:device:7fbd37f6-ff3b-46ae-8805-3ca89766893b',
                         selected_service_id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
+                        selected_device_group_id: null,
                         show: false,
                         selection_options_index: 0,
                         selection_options: [
@@ -181,7 +185,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                 services: [{
                                     id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                                     name: 'setOnService'
-                                }]
+                                }],
+                                device_group: null
                             },
                             {
                                 device: {
@@ -195,7 +200,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     {
                                         id: '87d5e964-b9c7-4e86-8d66-3bc9302c934e',
                                         name: 'setOnService2'
-                                    }]
+                                    }],
+                                device_group: null
                             }
                         ]
                     },
@@ -237,6 +243,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                         },
                         selected_device_id: 'urn:infai:ses:device:20b915d4-5d1e-4446-b721-64c1481a0143',
                         selected_service_id: '',
+                        selected_device_group_id: null,
                         show: true,
                         selection_options_index: 1,
                         selection_options: [
@@ -248,7 +255,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                 services: [{
                                     id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                                     name: 'setOnService'
-                                }]
+                                }],
+                                device_group: null
                             },
                             {
                                 device: {
@@ -262,7 +270,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     {
                                         id: '87d5e964-b9c7-4e86-8d66-3bc9302c934e',
                                         name: 'setOnService2'
-                                    }]
+                                    }],
+                                device_group: null
                             }
                         ]
                     },
@@ -315,7 +324,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'id': 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                                             'name': 'setOnService'
                                         }
-                                    ]
+                                    ],
+                                    'device_group': null
                                 },
                                 {
                                     'device': {
@@ -327,7 +337,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'id': 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
                                             'name': 'setOnService'
                                         }
-                                    ]
+                                    ],
+                                    'device_group': null
                                 },
                                 {
                                     'device': {
@@ -339,11 +350,13 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'id': 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
                                             'name': 'setOnService'
                                         }
-                                    ]
+                                    ],
+                                    'device_group': null
                                 }
                             ],
                             'selected_device_id': '',
-                            'selected_service_id': ''
+                            'selected_service_id': '',
+                            'selected_device_group_id': null,
                         }
                     }
                 },
@@ -394,7 +407,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'id': 'urn:infai:ses:service:98e7baf9-a0ba-4b43-acdf-2d2b915ac69d',
                                             'name': 'setColorService'
                                         }
-                                    ]
+                                    ],
+                                    'device_group': null
                                 },
                                 {
                                     'device': {
@@ -406,7 +420,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'id': 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
                                             'name': 'setColorService'
                                         }
-                                    ]
+                                    ],
+                                    'device_group': null
                                 },
                                 {
                                     'device': {
@@ -418,11 +433,13 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'id': 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
                                             'name': 'setColorService'
                                         }
-                                    ]
+                                    ],
+                                    'device_group': null
                                 }
                             ],
                             'selected_device_id': '',
-                            'selected_service_id': ''
+                            'selected_service_id': '',
+                            'selected_device_group_id': null,
                         }
                     }
                 },
@@ -469,7 +486,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'id': 'urn:infai:ses:service:be1461ee-903d-46a2-9a28-1d7cb03b1c63',
                                             'name': 'setOffService'
                                         }
-                                    ]
+                                    ],
+                                    'device_group': null
                                 },
                                 {
                                     'device': {
@@ -481,7 +499,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'id': 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
                                             'name': 'setOffService'
                                         }
-                                    ]
+                                    ],
+                                    'device_group': null
                                 },
                                 {
                                     'device': {
@@ -493,11 +512,13 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'id': 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
                                             'name': 'setOffService'
                                         }
-                                    ]
+                                    ],
+                                    'device_group': null
                                 }
                             ],
                             'selected_device_id': '',
-                            'selected_service_id': ''
+                            'selected_service_id': '',
+                            'selected_device_group_id': null
                         }
                     }
                 }
@@ -561,7 +582,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                                             name: 'setOnService'
                                         }
-                                    ]
+                                    ],
+                                    device_group: null
                                 },
                                 {
                                     device: {
@@ -573,7 +595,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             id: 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
                                             name: 'setOnService'
                                         }
-                                    ]
+                                    ],
+                                    device_group: null
                                 },
                                 {
                                     device: {
@@ -585,11 +608,13 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             id: 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
                                             name: 'setOnService'
                                         }
-                                    ]
+                                    ],
+                                    device_group: null
                                 }
                             ],
                             selected_device_id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
                             selected_service_id: 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
+                            selected_device_group_id: null,
                             show: false,
                             selection_options_index: 2
                         }
@@ -643,7 +668,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             id: 'urn:infai:ses:service:98e7baf9-a0ba-4b43-acdf-2d2b915ac69d',
                                             name: 'setColorService'
                                         }
-                                    ]
+                                    ],
+                                    device_group: null
                                 },
                                 {
                                     device: {
@@ -655,7 +681,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             id: 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
                                             name: 'setColorService'
                                         }
-                                    ]
+                                    ],
+                                    device_group: null
                                 },
                                 {
                                     device: {
@@ -667,11 +694,13 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             id: 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
                                             name: 'setColorService'
                                         }
-                                    ]
+                                    ],
+                                    device_group: null
                                 }
                             ],
                             selected_device_id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
                             selected_service_id: 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
+                            selected_device_group_id: null,
                             show: false,
                             selection_options_index: 2
                         }
@@ -721,7 +750,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             id: 'urn:infai:ses:service:be1461ee-903d-46a2-9a28-1d7cb03b1c63',
                                             name: 'setOffService'
                                         }
-                                    ]
+                                    ],
+                                    device_group: null
                                 },
                                 {
                                     device: {
@@ -733,7 +763,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             id: 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
                                             name: 'setOffService'
                                         }
-                                    ]
+                                    ],
+                                    device_group: null
                                 },
                                 {
                                     device: {
@@ -745,11 +776,13 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             id: 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
                                             name: 'setOffService'
                                         }
-                                    ]
+                                    ],
+                                    device_group: null
                                 }
                             ],
                             selected_device_id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
                             selected_service_id: 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
+                            selected_device_group_id: null,
                             show: false,
                             selection_options_index: 2
                         }

@@ -8,7 +8,7 @@
     "start_dev": "npm run config -- --environment=dev && NODE_OPTIONS=\"--max-old-space-size=8192\" ng serve -c dev",
     "start_dev_win": "npm run config -- --environment=dev && node --max_old_space_size=8192 ./node_modules/@angular/cli/bin/ng serve -c dev",
     "build": "ng build",
-    "test": "ng test",
+    "test": "NODE_OPTIONS=\"--max-old-space-size=8192\" ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "postinstall": "ngcc  ... --tsconfig \"./src/tsconfig.app.json\""
