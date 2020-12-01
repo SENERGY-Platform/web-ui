@@ -31,6 +31,10 @@
         [value]="value"
         (openedChange)="openChanged($event)"
         (selectionChange)="selectionChanged($event)" >
+    <mat-select-trigger *ngIf="getTriggerValue">
+        {{getTriggerValue(selected)}}
+    </mat-select-trigger>
+
     <mat-optgroup> <!-- does not show checkbox -->
         <mat-form-field fxFlex color="accent">
             <input matInput [formControl]="searchControl" placeholder="Search...">
@@ -39,6 +43,7 @@
             </button>
         </mat-form-field>
     </mat-optgroup>
+    <mat-option *ngIf="noneView !== ''">{{noneView}}</mat-option>
     <mat-option *ngFor="let option of getOptions() | async" [value]="getOptionValue(option)">
         {{getOptionViewValue(option)}}
     </mat-option>
