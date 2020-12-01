@@ -571,6 +571,11 @@ export class DataTableEditDialogComponent implements OnInit {
         this.cdref.detectChanges();
     }
 
+    getOperatorViewValue(operator: PipelineOperatorModel): string {
+        return operator.name + ' (' + operator.id + ')';
+    }
+
+
     private getSelectedService(element: AbstractControl): DeviceTypeServiceModel | undefined {
         const serviceId = element.get('elementDetails')?.get('device')?.get('serviceId')?.value;
         if (serviceId === null) {

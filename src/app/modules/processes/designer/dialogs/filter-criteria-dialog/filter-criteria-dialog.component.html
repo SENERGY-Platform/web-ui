@@ -21,23 +21,17 @@
 <mat-dialog-content>
     <form class="form">
         <mat-form-field class="form-field" color="accent">
-            <mat-select placeholder="Aspect" [compareWith]="compare"
-                        [formControl]="aspectFormControl" required>
-                <mat-option *ngFor="let aspect of aspects"
-                            [value]="aspect">
-                    {{aspect.name}}
-                </mat-option>
-            </mat-select>
+            <senergy-select-search placeholder="Aspect" [compareWith]="compare"
+                        [formControl]="aspectFormControl" [required]="true"
+                        [options]="aspects" useOptionViewProperty="name">
+            </senergy-select-search>
         </mat-form-field>
 
         <mat-form-field class="form-field" color="accent">
-            <mat-select placeholder="Function" [compareWith]="compare"
-                        [formControl]="functionFormControl" required>
-                <mat-option *ngFor="let func of functions"
-                            [value]="func">
-                    {{func.name}}
-                </mat-option>
-            </mat-select>
+            <senergy-select-search placeholder="Function" [compareWith]="compare"
+                        [formControl]="functionFormControl" [required]="true"
+                        [options]="functions" useOptionViewProperty="name">
+            </senergy-select-search>
         </mat-form-field>
     </form>
 </mat-dialog-content>

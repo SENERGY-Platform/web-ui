@@ -24,13 +24,10 @@
             <input [formControl]="descriptionControl" matInput placeholder="Description">
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline"  color="accent">
-            <mat-select placeholder="Concept" [compareWith]="compare"
-                        [formControl]="conceptControl" required>
-                <mat-option *ngFor="let category of concepts"
-                            [value]="category">
-                    {{category.name}}
-                </mat-option>
-            </mat-select>
+            <senergy-select-search placeholder="Concept" [compareWith]="compare"
+                        [formControl]="conceptControl" [required]="true" [options]="concepts"
+                        useOptionViewProperty="name">
+            </senergy-select-search>
         </mat-form-field>
     </form>
 </mat-dialog-content>

@@ -137,24 +137,18 @@
                                     <td>
                                         <mat-form-field color="accent">
                                             <mat-label>Export</mat-label>
-                                            <mat-select required placeholder="Export" [(ngModel)]="option.export"
-                                                        [compareWith]="compareExports">
-                                                <mat-option *ngFor="let export of exports" [value]="export">
-                                                    {{export.name}}
-                                                </mat-option>
-                                            </mat-select>
+                                            <senergy-select-search [required]="true" placeholder="Export" [(ngModel)]="option.export"
+                                                        [compareWith]="compareExports" [options]="exports" useOptionViewProperty="name">
+                                            </senergy-select-search>
                                         </mat-form-field>
                                     </td>
                                     <td>
                                         <mat-form-field color="accent">
                                             <mat-label>Value</mat-label>
-                                            <mat-select required placeholder="Value" [(ngModel)]="option.data.column"
-                                                        [compareWith]="compareExportValueModels">
-                                                <mat-option *ngFor="let value of option.export?.values || []"
-                                                            [value]="value">
-                                                    {{value.Name}}
-                                                </mat-option>
-                                            </mat-select>
+                                            <senergy-select-search [required]="true" placeholder="Value" [(ngModel)]="option.data.column"
+                                                        [compareWith]="compareExportValueModels" [options]="option.export?.values || []"
+                                                        useOptionViewProperty="Name">
+                                            </senergy-select-search>
                                         </mat-form-field>
                                     </td>
                                     <td>
@@ -181,26 +175,22 @@
                                         <td>
                                             <mat-form-field color="accent">
                                                 <mat-label>Export</mat-label>
-                                                <mat-select required placeholder="Export"
+                                                <senergy-select-search [required]="true" placeholder="Export"
                                                             [(ngModel)]="option.outsideExport"
-                                                            [compareWith]="compareExports">
-                                                    <mat-option *ngFor="let export of exports" [value]="export">
-                                                        {{export.name}}
-                                                    </mat-option>
-                                                </mat-select>
+                                                            [compareWith]="compareExports"
+                                                            [options]="exports" useOptionViewProperty="name">
+                                                </senergy-select-search>
                                             </mat-form-field>
                                         </td>
                                         <td>
                                             <mat-form-field color="accent">
                                                 <mat-label>Value</mat-label>
-                                                <mat-select required placeholder="Value"
+                                                <senergy-select-search [required]="true" placeholder="Value"
                                                             [(ngModel)]="option.outsideData.column"
-                                                            [compareWith]="compareExportValueModels">
-                                                    <mat-option *ngFor="let value of option.outsideExport?.values || []"
-                                                                [value]="value">
-                                                        {{value.Name}}
-                                                    </mat-option>
-                                                </mat-select>
+                                                            [compareWith]="compareExportValueModels"
+                                                            [options]="option.outsideExport?.values || []"
+                                                            useOptionViewProperty="Name">
+                                                </senergy-select-search>
                                             </mat-form-field>
                                         </td>
                                         <td>

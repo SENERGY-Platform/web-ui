@@ -33,26 +33,21 @@
                                 <tr>
                                     <td formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent">
-                                            <mat-select placeholder="{{element.name}}" required
-                                                        formControlName="selection_options_index">
-                                                <mat-option
-                                                        *ngFor="let selectionOption of element.task.selection.selection_options; let selectionOptionIndex = index"
-                                                        [value]="selectionOptionIndex"
-                                                        (click)="changeTaskSelectionOption(elementIndex, selectionOptionIndex)">
-                                                    {{ (selectionOption.device && selectionOption.device.name) || (selectionOption.device_group && selectionOption.device_group.name) }}
-                                                </mat-option>
-                                            </mat-select>
+                                            <senergy-select-search placeholder="{{element.name}}" [required]="true"
+                                                        formControlName="selection_options_index"
+                                                        [options]="element.task.selection.selection_options"
+                                                        [getOptionValue]="getIndex(element)"
+                                                        (selectionChange)="changeTaskSelectionOption(elementIndex, $event.value)"
+                                                        [getOptionViewValue]="getViewValue">
+                                            </senergy-select-search>
                                         </mat-form-field>
 
                                         <mat-form-field class="full-width" color="accent"
                                                         *ngIf="element.task.selection.show === true">
-                                            <mat-select placeholder="Service" required formControlName="selected_service_id">
-                                                <mat-option
-                                                        *ngFor="let services of element.task.selection.selection_options[element.task.selection.selection_options_index || 0].services"
-                                                        [value]="services.id">
-                                                    {{services.name}}
-                                                </mat-option>
-                                            </mat-select>
+                                            <senergy-select-search placeholder="Service" [required]="true" formControlName="selected_service_id"
+                                                        [options]="element.task.selection.selection_options[element.task.selection.selection_options_index || 0].services"
+                                                        useOptionValueProperty="id" useOptionViewProperty="name">
+                                            </senergy-select-search>
                                         </mat-form-field>
                                     </td>
                                     <td formGroupName="parameter"
@@ -97,26 +92,22 @@
 
                                         <mat-form-field class="full-width" color="accent"
                                                         *ngIf="element.message_event.selection.show === true">
-                                            <mat-select placeholder="Service" required
-                                                        formControlName="selected_service_id">
-                                                <mat-option
-                                                        *ngFor="let services of element.message_event.selection.selection_options[element.message_event.selection.selection_options_index || 0].services"
-                                                        [value]="services.id">
-                                                    {{services.name}}
-                                                </mat-option>
-                                            </mat-select>
+                                            <senergy-select-search placeholder="Service" [required]="true"
+                                                        formControlName="selected_service_id"
+                                                        [options]="element.message_event.selection.selection_options[element.message_event.selection.selection_options_index || 0].services"
+                                                        useOptionViewProperty="name"
+                                                        useOptionValueProperty="id">
+                                            </senergy-select-search>
                                         </mat-form-field>
                                     </td>
                                     <td>
                                         <mat-form-field class="full-width" color="accent">
-                                            <mat-select placeholder="Flow Id" required
-                                                        formControlName="flow_id">
-                                                <mat-option
-                                                        *ngFor="let flow of flowList"
-                                                        [value]="flow._id">
-                                                    {{flow.name}}
-                                                </mat-option>
-                                            </mat-select>
+                                            <senergy-select-search placeholder="Flow Id" [required]="true"
+                                                        formControlName="flow_id"
+                                                        [options]="flowList"
+                                                        useOptionValueProperty="_id"
+                                                        useOptionViewProperty="name">
+                                            </senergy-select-search>
                                         </mat-form-field>
                                     </td>
                                     <td>

@@ -198,6 +198,21 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
     }
 
+    getIndex(element: V2DeploymentsPreparedElementModel): (option: V2DeploymentsPreparedSelectionOptionModel) => number {
+        return option => {
+            if (element.task?.selection.selection_options === undefined) {
+                return -1;
+            }
+            return element.task?.selection.selection_options.findIndex(o =>
+                (o.device && o.device.id === option.device?.id)
+                || o.device_group && (o.device_group.id === option.device_group?.id));
+        };
+    }
+
+    getViewValue(option: any): string {
+        return (option.device && option.device.name) || (option.device_group && option.device_group.name);
+    }
+
     private getRouterParams(): void {
         const navigation: Navigation | null = this.router.getCurrentNavigation();
         if (navigation !== null) {

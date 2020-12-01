@@ -30,24 +30,18 @@
         </mat-form-field>
 
         <mat-form-field fxFlex color="accent" appearance="outline">
-            <mat-select *ngIf="selector==='device'" (ngModelChange)="deviceChanged($event)" placeholder="Device" [(ngModel)]="device">
-                <mat-option *ngFor="let device of devices" [value]="device">
-                    {{device.name}}
-                </mat-option>
-            </mat-select>
-            <mat-select *ngIf="selector==='pipe'" (ngModelChange)="pipelineChanged($event)" placeholder="Pipeline" [(ngModel)]="pipeline">
-                <mat-option *ngFor="let pipe of pipelines" [value]="pipe">
-                    {{pipe.name}}
-                </mat-option>
-            </mat-select>
+            <senergy-select-search *ngIf="selector==='device'" (ngModelChange)="deviceChanged($event)" placeholder="Device" [(ngModel)]="device"
+                [options]="devices" useOptionViewProperty="name">
+            </senergy-select-search>
+            <senergy-select-search *ngIf="selector==='pipe'" (ngModelChange)="pipelineChanged($event)" placeholder="Pipeline" [(ngModel)]="pipeline"
+                [options]="pipelines" useOptionViewProperty="name">
+            </senergy-select-search>
         </mat-form-field>
 
         <mat-form-field fxFlex color="accent" appearance="outline">
-            <mat-select  *ngIf="selector==='device'" placeholder="Service" (ngModelChange)="serviceChanged($event)" [(ngModel)]="service">
-                <mat-option *ngFor="let service of deviceType.services" [value]="service">
-                    {{service.name}}
-                </mat-option>
-            </mat-select>
+            <senergy-select-search  *ngIf="selector==='device'" placeholder="Service" (ngModelChange)="serviceChanged($event)" [(ngModel)]="service"
+                [options]="deviceType.services" useOptionViewProperty="name">
+            </senergy-select-search>
             <mat-select *ngIf="selector==='pipe'"  (openedChange)="operatorSelectChanged($event)" (ngModelChange)="operatorChanged($event)"  placeholder="Operator" [(ngModel)]="operator">
                 <mat-option (mouseenter)="enterOperatorOption(operator.id)" *ngFor="let operator of pipeline.operators" [value]="operator">
                     {{operator.name}} - {{operator.id}}
@@ -61,11 +55,9 @@
 
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>JSON time path</mat-label>
-            <mat-select #input [(ngModel)]="export.TimePath" placeholder="JSON time path" (selectionChange)="onTimePathSelected($event.value)">
-                <mat-option *ngFor="let path of paths | keyvalue" [value]="path.key">
-                    {{path.key}}
-                </mat-option>
-            </mat-select>
+            <senergy-select-search [(ngModel)]="export.TimePath" placeholder="JSON time path" (selectionChange)="onTimePathSelected($event.value)"
+                [options]="getPathsKeyOptions()">
+            </senergy-select-search>
         </mat-form-field>
 
         <mat-checkbox class="example-margin" [(ngModel)]="allMessages">Consume all messages</mat-checkbox>
@@ -77,11 +69,9 @@
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Path</mat-label>
-                <mat-select #input [(ngModel)]="item.Path" (ngModelChange)="pathChanged(key)"  placeholder="Path">
-                    <mat-option *ngFor="let path of paths | keyvalue" [value]="path.key">
-                        {{path.key}}
-                    </mat-option>
-                </mat-select>
+                <senergy-select-search [(ngModel)]="item.Path" (ngModelChange)="pathChanged(key)"  placeholder="Path"
+                    [options]="getPathsKeyOptions()">
+                </senergy-select-search>
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-select placeholder="Type" [(ngModel)]="item.Type" [(value)]="item.Type">

@@ -28,19 +28,14 @@
     <div [formGroup]="formGroup">
         <mat-form-field color="accent" class="user-input">
             <mat-label>Choose Deployment</mat-label>
-            <mat-select formControlName="deployment" [compareWith]="compareDeployments" >
-                <mat-option *ngFor="let deployment of deployments" [value]="deployment">
-                    {{deployment.name}}
-                </mat-option>
-            </mat-select>
+            <senergy-select-search formControlName="deployment" [compareWith]="compareDeployments"
+                [options]="deployments" useOptionViewProperty="name">
+            </senergy-select-search>
         </mat-form-field>
         <mat-form-field color="accent" class="user-input">
             <mat-label>Choose Parameter</mat-label>
-            <mat-select formControlName="parameter" >
-                <mat-option *ngFor="let parameter of parameters " [value]="parameter">
-                    {{ parameter }}
-                </mat-option>
-            </mat-select>
+            <senergy-select-search formControlName="parameter" [options]="parameters">
+            </senergy-select-search>
         </mat-form-field>
         <mat-form-field color="accent" class="unit">
                 <mat-label>Unit</mat-label>

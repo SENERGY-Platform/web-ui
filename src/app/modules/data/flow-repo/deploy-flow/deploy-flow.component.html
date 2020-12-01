@@ -59,34 +59,28 @@
                         <div fxLayout="row" fxFlex="">
                             <mat-form-field fxFlex color="accent" appearance="outline">
                                 <mat-label>Device</mat-label>
-                                <mat-select
-                                        (ngModelChange)="deviceChanged($event, input.id, port, operatorKey, deviceKey)"
-                                        placeholder="Device"
-                                        [(ngModel)]="selectedValues.get(input.id).get(port).device" multiple>
-                                    <mat-option *ngFor="let device of devices[operatorKey][deviceKey]" [value]="device">
-                                        {{device.name}}
-                                    </mat-option>
-                                </mat-select>
+                                <senergy-select-search [options]="devices[operatorKey][deviceKey]"
+                                    useOptionViewProperty="name"
+                                    (ngModelChange)="deviceChanged($event, input.id, port, operatorKey, deviceKey)"
+                                    placeholder="Device" ngDefaultControl
+                                    [(ngModel)]="selectedValues.get(input.id).get(port).device"
+                                                       [multiple]="true">
+                                </senergy-select-search>
                             </mat-form-field>
                         </div>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Service</mat-label>
-                            <mat-select (ngModelChange)="serviceChanged($event, input.id, port)" placeholder="Service"
-                                        [(ngModel)]="selectedValues.get(input.id).get(port).service">
-                                <mat-option *ngFor="let service of deviceTypes[input.id][port].services"
-                                            [value]="service">
-                                    {{service.name}}
-                                </mat-option>
-                            </mat-select>
+                            <senergy-select-search (ngModelChange)="serviceChanged($event, input.id, port)" placeholder="Service"
+                                        [(ngModel)]="selectedValues.get(input.id).get(port).service" [options]="deviceTypes[input.id][port].services"
+                            useOptionViewProperty="name">
+                            </senergy-select-search>
                         </mat-form-field>
 
                         <mat-form-field fxFill color="accent" appearance="outline">
                             <mat-label>Path</mat-label>
-                            <mat-select [(ngModel)]="selectedValues.get(input.id).get(port).path" placeholder="path">
-                                <mat-option *ngFor="let path of paths[input.id][port]" [value]="path">
-                                    {{path}}
-                                </mat-option>
-                            </mat-select>
+                            <senergy-select-search [(ngModel)]="selectedValues.get(input.id).get(port).path" placeholder="path"
+                            [options]="paths[input.id][port]">
+                            </senergy-select-search>
                         </mat-form-field>
                     </div>
                     <h4 *ngIf="input.config != undefined">Configuration</h4>

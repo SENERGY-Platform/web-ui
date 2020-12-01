@@ -33,14 +33,13 @@
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Concept</mat-label>
-            <mat-select placeholder="Concept"
-                        formControlName="concept_id">
-                <mat-option>-- None --</mat-option>
-                <mat-option *ngFor="let concept of concepts"
-                            [value]="concept.id">
-                    {{concept.name}}
-                </mat-option>
-            </mat-select>
+            <senergy-select-search placeholder="Concept"
+                        formControlName="concept_id"
+                        [options]="concepts"
+                        useOptionViewProperty="name"
+                        useOptionValueProperty="id"
+                        noneView="-- None --">
+            </senergy-select-search>
         </mat-form-field>
     </form>
 </mat-dialog-content>

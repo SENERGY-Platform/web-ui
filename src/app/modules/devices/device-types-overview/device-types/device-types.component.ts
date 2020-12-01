@@ -40,6 +40,7 @@ import {DeviceTypeHelperService} from './shared/device-type-helper.service';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
 import {DeviceTypesContentVariableDialogComponent} from './dialogs/device-types-content-variable-dialog.component';
+import {MatOption} from '@angular/material/core';
 
 @Component({
     selector: 'senergy-device-types',
@@ -220,6 +221,47 @@ export class DeviceTypesComponent implements OnInit {
             }
         });
         return aspectName;
+    }
+
+    getCustomTriggerFunction(service: AbstractControl): (options: MatOption | MatOption[]) => string {
+        return options => {
+            if (options === undefined) {
+                return '';
+            }
+            if (!Array.isArray(options)) {
+                return options.viewValue;
+            }
+            if (options.length > 0) {
+                let text = this.getFunctionName(this.functionIds(service)[0], this.functionType(service).text);
+                if (options.length > 1) {
+                    text += ' (+' + (options.length - 1) + (options.length === 2 ?
+                        ' other)' : ' others)');
+                }
+                return text;
+            }
+            return '';
+        };
+    }
+
+
+    getCustomTriggerAspect(service: AbstractControl): (options: MatOption | MatOption[]) => string {
+        return options => {
+            if (options === undefined) {
+                return '';
+            }
+            if (!Array.isArray(options)) {
+                return options.viewValue;
+            }
+            if (options.length > 0) {
+                let text = this.getAspectName(this.aspectIds(service)[0]);
+                if (options.length > 1) {
+                    text += ' (+' + (options.length - 1) + (options.length === 2 ?
+                        ' other)' : ' others)');
+                }
+                return text;
+            }
+            return '';
+        };
     }
 
     private cleanUpServices() {

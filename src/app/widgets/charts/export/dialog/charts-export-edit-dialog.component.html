@@ -47,10 +47,10 @@
 
             <mat-form-field color="accent">
                 <mat-label>Choose Exports</mat-label>
-                <mat-select required multiple
-                            [compareWith]="compare" formControlName="exports"  (valueChange)="selectionChange($event)">
-                    <mat-option *ngFor="let option of exportList" [value]="option">{{option.name}}</mat-option>
-                </mat-select>
+                <senergy-select-search [required]="true" [multiple]="true"
+                            [compareWith]="compare" formControlName="exports"  (selectionChange)="selectionChange($event.value)"
+                            [options]="exportList" useOptionViewProperty="name">
+                </senergy-select-search>
                 <mat-error *ngIf="exports.invalid">
                     Please make a selection!
                 </mat-error>

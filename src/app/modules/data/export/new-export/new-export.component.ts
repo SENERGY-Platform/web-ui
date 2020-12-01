@@ -424,4 +424,8 @@ export class NewExportComponent implements OnInit {
 
         return false;
     }
+
+    getPathsKeyOptions(): string[] {
+        return Array.from(this.paths.keys());
+    }
 }

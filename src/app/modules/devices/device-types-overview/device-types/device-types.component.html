@@ -32,13 +32,11 @@
                         <tr>
                             <td>
                                 <mat-form-field class="full-width" color="accent">
-                                    <mat-select placeholder="Device class"
-                                                formControlName="device_class_id" required>
-                                        <mat-option *ngFor="let deviceTypeClass of deviceTypeDeviceClasses"
-                                                    [value]="deviceTypeClass.id">
-                                            {{deviceTypeClass.name}}
-                                        </mat-option>
-                                    </mat-select>
+                                    <senergy-select-search placeholder="Device class"
+                                                formControlName="device_class_id" [required]="true"
+                                                [options]="deviceTypeDeviceClasses" useOptionViewProperty="name"
+                                                useOptionValueProperty="id">
+                                    </senergy-select-search>
                                 </mat-form-field>
                             </td>
                     </table>
@@ -79,17 +77,11 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-label>{{functionType(service).text === '' ? 'Function' : functionType(service).text + ' Function'}}</mat-label>
-                                                    <mat-select formControlName="function_ids" multiple required>
-                                                        <mat-select-trigger>
-                                                            {{functionIds(service).length > 0 ? getFunctionName(functionIds(service)[0], functionType(service).text) : '' }}
-                                                            <span *ngIf="functionIds(service).length > 1">
-                                                                {{'(+' + (functionIds(service).length - 1) + (functionIds(service).length === 2 ? ' other)' : ' others)')}}
-                                                                      </span>
-                                                        </mat-select-trigger>
-                                                        <mat-option
-                                                                *ngFor="let func of functionType(service).text === 'Measuring' ? measuringFunctions : controllingFunctions"
-                                                                [value]="func.id">{{func.name}}</mat-option>
-                                                    </mat-select>
+                                                    <senergy-select-search formControlName="function_ids" [multiple]="true" [required]="true"
+                                                    [options]="functionType(service).text === 'Measuring' ? measuringFunctions : controllingFunctions"
+                                                                           useOptionValueProperty="id" useOptionViewProperty="name" [getTriggerValue]="getCustomTriggerFunction(service)">
+
+                                                    </senergy-select-search>
                                                 </mat-form-field>
                                             </td>
                                         </tr>
@@ -108,16 +100,12 @@
                                             <td>
                                                 <mat-form-field class="full-width" color="accent">
                                                     <mat-label>Aspects</mat-label>
-                                                    <mat-select formControlName="aspect_ids" multiple required>
-                                                        <mat-select-trigger>
-                                                            {{aspectIds(service).length > 0 ? getAspectName(aspectIds(service)[0]) : ''}}
-                                                            <span *ngIf="aspectIds(service).length > 1">
-                                                                {{'(+' + (aspectIds(service).length - 1) + (aspectIds(service).length === 2 ? ' other)' : ' others)')}}
-                                                                      </span>
-                                                        </mat-select-trigger>
-                                                        <mat-option *ngFor="let aspect of aspectList"
-                                                                    [value]="aspect.id">{{aspect.name}}</mat-option>
-                                                    </mat-select>
+                                                    <senergy-select-search formControlName="aspect_ids" [multiple]="true" [required]="true"
+                                                                           [options]="aspectList"
+                                                                           useOptionViewProperty="name"
+                                                                           useOptionValueProperty="id"
+                                                                           [getTriggerValue]="getCustomTriggerAspect(service)">
+                                                    </senergy-select-search>
                                                 </mat-form-field>
                                             </td>
                                         </tr>
