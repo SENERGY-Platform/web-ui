@@ -10,6 +10,9 @@
     "**/*.spec.ts",
     "**/*.mock.ts",
     "environments/environment.dev.ts",
-    "environments/environment.prod.ts"
+    "environments/environment.prod.ts",
+    "environments/environment.dev.js",
+    "app/core/validators/json.validator.ts",
+    "app/modules/devices/device-types-overview/device-types/content-variable.validator.ts"
   ]
 }
