@@ -33,6 +33,9 @@ import {DeviceGroupModel} from '../shared/device-groups.model';
 export class DeviceGroupsEditComponent implements OnInit {
 
     id = '';
+    deviceGroupForm!: FormGroup;
+    selectedForm!: FormGroup;
+    selectableForm!: FormGroup;
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceGroupService: DeviceGroupsService,
@@ -68,20 +71,23 @@ export class DeviceGroupsEditComponent implements OnInit {
     }
 
     private initFormControls() {
-        this.initFormGroup({} as DeviceGroupModel);
+        this.initDeviceGroupFormGroup({} as DeviceGroupModel);
     }
 
-    private initFormGroup(deviceGroup: DeviceGroupModel) {
+    private initDeviceGroupFormGroup(deviceGroup: DeviceGroupModel) {
         console.log(deviceGroup);
-        // TODO
-        /*
-        this.firstFormGroup = this._formBuilder.group({
+        this.deviceGroupForm = this.createDeviceGroupFormGroup(deviceGroup);
+    }
+
+    private createDeviceGroupFormGroup(deviceGroup: DeviceGroupModel): FormGroup {
+        return this._formBuilder.group({
             id: [{value: deviceGroup.id, disabled: true}],
             name: [deviceGroup.name, Validators.required],
-            description: [deviceGroup.description],
-            device_class_id: [deviceGroup.device_class_id, Validators.required],
+            blocked_interaction: [deviceGroup.blocked_interaction, Validators.required],
+            image: [deviceGroup.image],
+            device_ids: [{value: deviceGroup.device_ids && deviceGroup.device_ids.length > 0 ? deviceGroup.device_ids : []}],
+            criteria: [{value: deviceGroup.criteria && deviceGroup.criteria.length > 0 ? deviceGroup.criteria : []}]
         });
-        */
     }
 
 
@@ -122,7 +128,7 @@ export class DeviceGroupsEditComponent implements OnInit {
         if (this.id !== '') {
             this.deviceGroupService.getDeviceGroup(this.id).subscribe((deviceGroup: DeviceGroupModel | null) => {
                 if (deviceGroup !== null) {
-                    this.initFormGroup(deviceGroup);
+                    this.initDeviceGroupFormGroup(deviceGroup);
                 }
             });
         }

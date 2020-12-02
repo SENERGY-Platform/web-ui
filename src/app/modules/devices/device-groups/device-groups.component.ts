@@ -69,7 +69,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initGridCols();
-        this.initSearchAndGetdeviceGroups();
+        this.initSearchAndGetDeviceGroups();
     }
 
     ngOnDestroy() {
@@ -124,7 +124,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         });
     }
 
-    private initSearchAndGetdeviceGroups() {
+    private initSearchAndGetDeviceGroups() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
             this.getDeviceGroups(true);
