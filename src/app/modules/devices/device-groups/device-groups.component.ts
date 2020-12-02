@@ -89,16 +89,32 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         }
     }
 
-    editDeviceGroup(inputDeviceGroup: DeviceGroupsPermSearchModel): void {
-        console.log('TODO: edit', JSON.stringify(inputDeviceGroup));
+    deleteDeviceGroup(deviceGroup: DeviceGroupsPermSearchModel): boolean {
+        this.dialogsService.openDeleteDialog('device group ' + deviceGroup.name).afterClosed().subscribe((deleteDeviceClass: boolean) => {
+            if (deleteDeviceClass) {
+                this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id).subscribe((resp: boolean) => {
+                    if (resp === true) {
+                        this.deviceGroups.splice(this.deviceGroups.indexOf(deviceGroup), 1);
+                        this.snackBar.open('Device-Group deleted successfully.', undefined, {duration: 2000});
+                        this.setLimitOffset(1);
+                        this.reloadDeviceGroups(false);
+                    } else {
+                        this.snackBar.open('Error while deleting the device-group!', undefined, {duration: 2000});
+                    }
+                });
+            }
+        });
+        return false;
     }
 
-    deleteDeviceGroup(deviceGroup: DeviceGroupsPermSearchModel): void {
-        console.log('TODO: edit', JSON.stringify(deviceGroup));
+    newDeviceGroup(): boolean {
+        this.router.navigate(['devices/devicegroups/edit']);
+        return false;
     }
 
-    newDeviceGroup(): void {
-        console.log('TODO: create');
+    editDeviceGroup(inputDeviceGroup: DeviceGroupsPermSearchModel): boolean {
+        this.router.navigate(['devices/devicegroups/edit/' + inputDeviceGroup.id]);
+        return false;
     }
 
     private initGridCols(): void {
@@ -152,14 +168,5 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         this.offset = this.deviceGroups.length;
     }
 
-    private reloadAndShowSnackbar(deviceGroup: DeviceGroupModel | null, text: string) {
-        if (deviceGroup === null) {
-            this.snackBar.open('Error while ' + text + 'ing the device class!', undefined, {duration: 2000});
-            this.getDeviceGroups(true);
-        } else {
-            this.snackBar.open('Device class ' + text + 'ed successfully.', undefined, {duration: 2000});
-            this.reloadDeviceGroups(true);
-        }
-    }
 
 }

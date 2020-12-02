@@ -71,6 +71,7 @@ import {FunctionsCreateDialogComponent} from './functions/dialog/functions-creat
 import {CharacteristicElementComponent} from './characteristics/dialogs/characteristic-element/characteristic-element.component';
 import {MatTreeModule} from '@angular/material/tree';
 import {DeviceGroupsComponent} from './device-groups/device-groups.component';
+import {DeviceGroupsEditComponent} from './device-groups/edit/device-groups-edit.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -86,6 +87,8 @@ const functions = {path: 'devices/functions', pathMatch: 'full', component: Func
 const aspects = {path: 'devices/aspects', pathMatch: 'full', component: AspectsComponent, data: {header: 'Devices'}};
 const deviceClasses = {path: 'devices/deviceclasses', pathMatch: 'full', component: DeviceClassesComponent, data: {header: 'Devices'}};
 const deviceGroups = {path: 'devices/devicegroups', pathMatch: 'full', component: DeviceGroupsComponent, data: {header: 'Devices'}};
+const deviceGroupsCreate = {path: 'devices/devicegroups/edit', pathMatch: 'full', component: DeviceGroupsEditComponent, data: {header: 'Devices'}};
+const deviceGroupsEdit = {path: 'devices/devicegroups/edit/:id', pathMatch: 'full', component: DeviceGroupsEditComponent, data: {header: 'Devices'}};
 
 @NgModule({
     imports: [MatGridListModule,
@@ -120,7 +123,18 @@ const deviceGroups = {path: 'devices/devicegroups', pathMatch: 'full', component
         MatSortModule,
         MatProgressSpinnerModule,
         DeviceTypesOverviewModule,
-        RouterModule.forChild([networks, deviceInstances, deviceGroups, deviceTypes, concepts, characteristics, functions, aspects, deviceClasses]), MatTreeModule],
+        RouterModule.forChild([
+            networks,
+            deviceInstances,
+            deviceGroups,
+            deviceGroupsCreate,
+            deviceGroupsEdit,
+            deviceTypes,
+            concepts,
+            characteristics,
+            functions,
+            aspects,
+            deviceClasses]), MatTreeModule],
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,

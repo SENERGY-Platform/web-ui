@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
+
 export interface DeviceGroupModel {
     id: string;
     image: string;
     name: string;
-    // TODO
+    blocked_interaction: string;
+    device_ids: string[];
+    criteria: DeviceGroupCriteriaModel[];
+}
+
+export interface DeviceGroupCriteriaModel {
+    function_id: string;
+    aspect_id: string;
+    device_class_id: string;
 }
