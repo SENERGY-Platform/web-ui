@@ -70,6 +70,7 @@ import {DeviceClassesEditDialogComponent} from './device-classes/dialog/device-c
 import {FunctionsCreateDialogComponent} from './functions/dialog/functions-create-dialog.component';
 import {CharacteristicElementComponent} from './characteristics/dialogs/characteristic-element/characteristic-element.component';
 import {MatTreeModule} from '@angular/material/tree';
+import {DeviceGroupsComponent} from './device-groups/device-groups.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -84,6 +85,7 @@ const characteristics = {path: 'devices/characteristics', pathMatch: 'full', com
 const functions = {path: 'devices/functions', pathMatch: 'full', component: FunctionsComponent, data: {header: 'Devices'}};
 const aspects = {path: 'devices/aspects', pathMatch: 'full', component: AspectsComponent, data: {header: 'Devices'}};
 const deviceClasses = {path: 'devices/deviceclasses', pathMatch: 'full', component: DeviceClassesComponent, data: {header: 'Devices'}};
+const deviceGroups = {path: 'devices/devicegroups', pathMatch: 'full', component: DeviceGroupsComponent, data: {header: 'Devices'}};
 
 @NgModule({
     imports: [MatGridListModule,
@@ -118,7 +120,7 @@ const deviceClasses = {path: 'devices/deviceclasses', pathMatch: 'full', compone
         MatSortModule,
         MatProgressSpinnerModule,
         DeviceTypesOverviewModule,
-        RouterModule.forChild([networks, deviceInstances, deviceTypes, concepts, characteristics, functions, aspects, deviceClasses]), MatTreeModule],
+        RouterModule.forChild([networks, deviceInstances, deviceGroups, deviceTypes, concepts, characteristics, functions, aspects, deviceClasses]), MatTreeModule],
     declarations: [
         NetworksComponent,
         NetworksEditDialogComponent,
@@ -141,6 +143,7 @@ const deviceClasses = {path: 'devices/deviceclasses', pathMatch: 'full', compone
         AspectsComponent,
         AspectsEditDialogComponent,
         DeviceClassesComponent,
+        DeviceGroupsComponent,
         DeviceClassesEditDialogComponent,
     ],
 })
