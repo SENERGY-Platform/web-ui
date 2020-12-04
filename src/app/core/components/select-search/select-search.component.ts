@@ -64,8 +64,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     }
 
     @Input()
-    get value(): any | null {
-        return this.select?.value || null;
+    get value(): any {
+        return this.select?.value || this.queuedWriteValue || null;
     }
 
     set value(selection: any | null) {
