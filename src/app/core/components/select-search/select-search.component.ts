@@ -139,6 +139,19 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         return this.select?.selected;
     }
 
+    @Input() set options(value: any[] | Map<string, any[]>) {
+        this._options = value;
+        this.withGroups = !Array.isArray(this.options);
+        if (!Array.isArray(this.options)) {
+            this.optionsGroups = this.getOptionsGroup('');
+            this.searchControl.valueChanges.subscribe((val: string) => this.optionsGroups = this.getOptionsGroup(val));
+        }
+    }
+
+    get options(): any[] | Map<string, any[]> {
+        return this._options;
+    }
+
     static nextId = 0;
     _disabled = false;
 
@@ -146,7 +159,9 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() multiple = false;
     @ViewChild(MatSelect, {static: false}) select!: MatSelect;
 
-    @Input() options: any[] = [];
+    _options: any[] | Map<string, any[]> = [];
+
+    withGroups = false;
     @Input() noneView = '';
 
     readonly controlType: string = 'select-autocomplete';
@@ -183,6 +198,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() useOptionViewProperty: string | undefined = undefined;
     @Input() useOptionValueProperty: string | undefined = undefined;
     @Input() getTriggerValue: ((options: MatOption | MatOption[]) => string) | undefined = undefined;
+
+    optionsGroups: Map<string, any> = new Map();
 
     ngOnInit() {
         if (this.useOptionViewProperty !== undefined) {
@@ -237,25 +254,32 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 obs.complete();
                 return;
             }
-            const filtered = this.options.filter(option =>
-                this.getOptionViewValue(option).toLowerCase().indexOf(this.searchControl.value.toLowerCase()) !== -1);
+            let filtered: any[] = [];
+            if (Array.isArray(this.options) && this.options.find) {
+                filtered = this.options.filter(option =>
+                    this.getOptionViewValue(option).toLowerCase().indexOf(this.searchControl.value.toLowerCase()) !== -1);
 
-            // append selected options if not already included
-            const addOptionByValue = (optionValue: any) => {
-                const option = this.options.find(optionC => this.getOptionValue(optionC) === optionValue);
-                if (option === undefined) {
-                    // Option got removed
-                    return;
-                }
-                if (filtered.indexOf(option) === -1) {
-                    filtered.push(option);
-                }
-            };
-            if (this.select?.selected) {
-                if (Array.isArray(this.select.selected)) {
-                    this.select.selected.forEach(sel => addOptionByValue(sel.value));
-                } else {
-                    addOptionByValue(this.select.selected.value);
+                // append selected options if not already included
+                const addOptionByValue = (optionValue: any) => {
+                    if (!Array.isArray(this.options)) {
+                        console.error('Can#t do that'); // TODO
+                        return;
+                    }
+                    const option = this.options.find(optionC => this.getOptionValue(optionC) === optionValue);
+                    if (option === undefined) {
+                        // Option got removed
+                        return;
+                    }
+                    if (filtered.indexOf(option) === -1) {
+                        filtered.push(option);
+                    }
+                };
+                if (this.select?.selected) {
+                    if (Array.isArray(this.select.selected)) {
+                        this.select.selected.forEach(sel => addOptionByValue(sel.value));
+                    } else {
+                        addOptionByValue(this.select.selected.value);
+                    }
                 }
             }
             obs.next(filtered);
@@ -325,5 +349,36 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     updateErrorState() {
         this.select?.updateErrorState();
+    }
+
+    getOptionsGroup(search: string): Map<string, any> {
+        if (Array.isArray(this.options)) {
+            return new Map();
+        }
+        if (this.options.forEach && search.length > 0) {
+            const r = new Map();
+            this.options.forEach((v, k) => {
+                const filtered = v.filter(option => {
+                    if (Array.isArray(this.select.selected)) {
+                        if (this.select.selected.find(sel => sel.value === this.getOptionValue(option)) !== undefined) {
+                            return true;
+                        }
+                    } else if (this.select.selected?.value === this.getOptionValue(option)) {
+                        return true;
+                    }
+                    return this.getOptionViewValue(option).toLowerCase().indexOf(search.toLowerCase()) !== -1;
+                });
+                if (filtered.length > 0) {
+                    r.set(k, filtered);
+                }
+            });
+            return r;
+        } else {
+            return this.options;
+        }
+    }
+
+    toArray(v: any): any[] {
+        return Array.isArray(v) ? v : [];
     }
 }

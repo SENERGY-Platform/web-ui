@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-::ng-deep .mat-optgroup-label {
+::ng-deep .searchgroup .mat-optgroup-label {
     padding: 10px 16px 0 16px !important;
     min-height: 60px;
 }

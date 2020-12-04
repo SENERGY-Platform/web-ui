@@ -35,7 +35,7 @@
         {{getTriggerValue(selected)}}
     </mat-select-trigger>
 
-    <mat-optgroup> <!-- does not show checkbox -->
+    <mat-optgroup class="searchgroup"> <!-- does not show checkbox -->
         <mat-form-field fxFlex color="accent">
             <input matInput [formControl]="searchControl" placeholder="Search...">
             <button mat-button *ngIf="searchControl.value" matSuffix mat-icon-button aria-label="Clear" (click)="resetSearch()">
@@ -44,7 +44,16 @@
         </mat-form-field>
     </mat-optgroup>
     <mat-option *ngIf="noneView !== ''">{{noneView}}</mat-option>
-    <mat-option *ngFor="let option of getOptions() | async" [value]="getOptionValue(option)">
-        {{getOptionViewValue(option)}}
-    </mat-option>
+    <span *ngIf="!withGroups">
+        <mat-option *ngFor="let option of getOptions() | async" [value]="getOptionValue(option)">
+            {{getOptionViewValue(option)}}
+        </mat-option>
+    </span>
+    <span *ngIf="withGroups">
+        <mat-optgroup *ngFor="let group of optionsGroups | keyvalue" [label]="group.key">
+            <mat-option *ngFor="let option of group.value" [value]="getOptionValue(option)">
+                {{getOptionViewValue(option)}}
+            </mat-option>
+        </mat-optgroup>
+    </span>
 </mat-select>
