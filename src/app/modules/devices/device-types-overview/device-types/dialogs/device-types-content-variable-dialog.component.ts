@@ -43,6 +43,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     primitiveTypes: { type: string, typeShort: string }[] = [];
     nonPrimitiveTypes: { type: string, typeShort: string }[] = [];
     conceptList: { conceptName: string, colored: boolean, characteristicList: { id: string, name: string }[] }[] = [];
+    options: Map<string, any[]> = new Map();
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesContentVariableDialogComponent>,
                 private _formBuilder: FormBuilder,
@@ -71,6 +72,12 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
     isPrimitiveType(): boolean {
         return this.typeOptionsControl.value === 'primitive';
+    }
+
+    getOptions(): Map<string, any[]> {
+        const m = new Map();
+        this.conceptList.forEach(c => m.set(c.conceptName, c.characteristicList));
+        return m;
     }
 
     private initTypeOptionControl() {
@@ -146,6 +153,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             colored: this.functionConceptIds.includes(concepts.id),
             characteristicList: characteristicsList
         });
+        this.options = this.getOptions();
     }
 
     private getConceptIds(functionIds: string[] | undefined): void {

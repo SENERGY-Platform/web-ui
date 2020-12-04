@@ -48,15 +48,9 @@
         </mat-form-field>
         <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType()">
             <mat-label>Characteristic</mat-label>
-            <mat-select formControlName="characteristic_id">
-                <mat-option>-- None --</mat-option>
-                <mat-optgroup *ngFor="let item of conceptList" [label]="item.conceptName">
-                    <mat-option *ngFor="let characteristic of item.characteristicList" [value]="characteristic.id"
-                                [ngClass]="{'color-accent': item.colored}">
-                        {{characteristic.name}}
-                    </mat-option>
-                </mat-optgroup>
-            </mat-select>
+            <senergy-select-search formControlName="characteristic_id" noneView="-- None --"
+                [options]="options" useOptionViewProperty="name" useOptionValueProperty="id">
+            </senergy-select-search>
         </mat-form-field>
         <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType()">
             <input matInput placeholder="Serialization Options" formControlName="serialization_options">
