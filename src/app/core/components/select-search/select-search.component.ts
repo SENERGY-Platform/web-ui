@@ -33,6 +33,7 @@ import {Observable, Subject} from 'rxjs';
 import {ControlValueAccessor, FormControl, NgControl} from '@angular/forms';
 import {coerceBooleanProperty} from '@angular/cdk/coercion';
 import {ErrorStateMatcher, MatOption} from '@angular/material/core';
+import {MatInput} from '@angular/material/input';
 
 export function useProperty(property: string): ((option: any) => string) {
     const properties = property.split('.');
@@ -201,6 +202,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     optionsGroups: Map<string, any> = new Map();
 
+    @ViewChild('searchInput', {static: false}) searchInput!: MatInput;
+
     ngOnInit() {
         if (this.useOptionViewProperty !== undefined) {
             this.getOptionViewValue = useProperty(this.useOptionViewProperty);
@@ -236,10 +239,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() getOptionViewValue: ((option: any) => string) = a => a as string;
 
     onContainerClick(_: MouseEvent): void {
-        if (!this.select?.panelOpen) {
-            this.select.open();
-            this.openChanged(true);
-        }
+        this.open();
     }
 
     resetSearch() {
@@ -262,7 +262,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 // append selected options if not already included
                 const addOptionByValue = (optionValue: any) => {
                     if (!Array.isArray(this.options)) {
-                        console.error('Can#t do that'); // TODO
+                        console.error('Cant do that');
                         return;
                     }
                     const option = this.options.find(optionC => this.getOptionValue(optionC) === optionValue);
@@ -276,7 +276,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 };
                 if (this.select?.selected) {
                     if (Array.isArray(this.select.selected)) {
-                        this.select.selected.forEach(sel => addOptionByValue(sel.value));
+                        this.select.selected?.forEach(sel => addOptionByValue(sel.value));
                     } else {
                         addOptionByValue(this.select.selected.value);
                     }
@@ -328,6 +328,9 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     }
 
     openChanged($event: boolean) {
+        if ($event && !this.select.selected) {
+            this.searchInput.focus();
+        }
         this.openedChange.emit($event);
     }
 
@@ -340,7 +343,10 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     }
 
     open() {
-        this.select?.open();
+        if (!this.select?.panelOpen) {
+            this.select.open();
+            this.openChanged(true);
+        }
     }
 
     toggle() {
@@ -355,7 +361,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         if (Array.isArray(this.options)) {
             return new Map();
         }
-        if (this.options.forEach && search.length > 0) {
+        if (this.options?.forEach && search.length > 0) {
             const r = new Map();
             this.options.forEach((v, k) => {
                 const filtered = v.filter(option => {

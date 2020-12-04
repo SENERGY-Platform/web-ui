@@ -13,7 +13,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <mat-select
         [aria-label]="ariaLabel"
         [aria-labelledby]="ariaLabelledby"
@@ -37,7 +36,7 @@
 
     <mat-optgroup class="searchgroup"> <!-- does not show checkbox -->
         <mat-form-field fxFlex color="accent">
-            <input matInput [formControl]="searchControl" placeholder="Search...">
+            <input matInput [formControl]="searchControl" placeholder="Search..." #searchInput="matInput">
             <button mat-button *ngIf="searchControl.value" matSuffix mat-icon-button aria-label="Clear" (click)="resetSearch()">
                 <mat-icon>close</mat-icon>
             </button>
