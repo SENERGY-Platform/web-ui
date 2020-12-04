@@ -50,6 +50,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     deploymentFormGroup!: FormGroup;
     flowList: FlowModel[] = [];
     ready = false;
+    optionGroups: Map<number, Map<string, V2DeploymentsPreparedSelectionOptionModel[]>> = new Map();
 
     constructor(private _formBuilder: FormBuilder,
                 private processRepoService: ProcessRepoService,
@@ -66,6 +67,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     ngOnInit() {
         if (this.processId !== '') {
             this.deploymentsService.getPreparedDeployments(this.processId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
+                this.initOptionGroups(deployment);
                 this.initFormGroup(deployment);
             });
         } else {
@@ -73,6 +75,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 this.deploymentsService.v2getDeployments(this.deploymentId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
                     if (deployment) {
                         deployment.id = '';
+                        this.initOptionGroups(deployment);
                         this.initFormGroup(deployment);
                     } else {
                         this.snackBar.open('Error while copying the deployment! Probably old version', undefined, {duration: 2000});
@@ -256,4 +259,30 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         return !(matches && matches.length);
     }
 
+    private getOptionGroups(selection_options: V2DeploymentsPreparedSelectionOptionModel[]): Map<string, V2DeploymentsPreparedSelectionOptionModel[]> {
+        const devices: V2DeploymentsPreparedSelectionOptionModel[] = [];
+        const deviceGroups: V2DeploymentsPreparedSelectionOptionModel[] = [];
+        for (const option of selection_options ) {
+            if (option.device) {
+                devices.push(option);
+            }
+            if (option.device_group) {
+                deviceGroups.push(option);
+            }
+        }
+        const result = new Map<string, V2DeploymentsPreparedSelectionOptionModel[]>();
+        result.set('Devices', devices);
+        result.set('Device-Groups', deviceGroups);
+        return result;
+    }
+
+    private initOptionGroups(deployment: V2DeploymentsPreparedModel | null) {
+        if (deployment) {
+            deployment.elements.forEach((element, index) => {
+                if (element.task) {
+                    this.optionGroups.set(index, this.getOptionGroups(element.task.selection.selection_options));
+                }
+            });
+        }
+    }
 }

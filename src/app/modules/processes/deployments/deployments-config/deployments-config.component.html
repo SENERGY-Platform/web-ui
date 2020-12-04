@@ -35,7 +35,7 @@
                                         <mat-form-field class="full-width" color="accent">
                                             <senergy-select-search placeholder="{{element.name}}" [required]="true"
                                                         formControlName="selection_options_index"
-                                                        [options]="element.task.selection.selection_options"
+                                                        [options]="optionGroups.get(elementIndex) || []"
                                                         [getOptionValue]="getIndex(element)"
                                                         (selectionChange)="changeTaskSelectionOption(elementIndex, $event.value)"
                                                         [getOptionViewValue]="getViewValue">
