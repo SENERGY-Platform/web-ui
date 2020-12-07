@@ -66,7 +66,13 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     @Input()
     get value(): any {
-        return this.select?.value || this.queuedWriteValue || null;
+        if (this.select?.value !== undefined) {
+            return this.select.value;
+        }
+        if (this.queuedWriteValue !== undefined) {
+            return this.queuedWriteValue;
+        }
+        return null;
     }
 
     set value(selection: any | null) {
@@ -75,7 +81,10 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     }
 
     get empty() {
-        return this.select?.empty || true;
+        if (this.select?.empty !== undefined) {
+            return this.select.empty;
+        }
+        return this.queuedWriteValue === undefined;
     }
 
     get shouldLabelFloat() {
@@ -314,8 +323,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     }
 
     writeValue(obj: any): void {
-        if (this.select) {
-            this.select?.writeValue(obj);
+        if (this.select !== undefined) {
+            this.select.writeValue(obj);
             this.queuedWriteValue = undefined;
         } else {
             this.queuedWriteValue = obj;
