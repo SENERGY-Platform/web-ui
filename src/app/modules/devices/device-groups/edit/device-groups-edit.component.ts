@@ -36,14 +36,14 @@ export class DeviceGroupsEditComponent implements OnInit {
     id = '';
     deviceGroupForm!: FormGroup;    // DeviceGroupModel
 
-    selectedForm: FormArray = new FormArray([]);       // []DeviceInstancesBaseModel
-    selectableForm: FormArray = new FormArray([]);     // []DeviceGroupHelperOptionsModel
+    selectedForm: FormControl = new FormControl([]);       // []DeviceInstancesBaseModel
+    selectableForm: FormControl = new FormControl([]);     // []DeviceGroupHelperOptionsModel
     searchText: FormControl = new FormControl('');
-    capabilities: FormArray = new FormArray([]);       // []DeviceGroupCapability
+    capabilities: FormControl = new FormControl([]);       // []DeviceGroupCapability
 
     deviceCache: Map<string, DeviceInstancesBaseModel> = new Map<string, DeviceInstancesBaseModel>();
 
-    searchTimeoutId: number | null = null;
+    searchTimeoutId: any = null;
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceGroupService: DeviceGroupsService,
@@ -54,7 +54,6 @@ export class DeviceGroupsEditComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.initFormControls();
         this.loadData();
     }
 
@@ -93,14 +92,6 @@ export class DeviceGroupsEditComponent implements OnInit {
         this.saveDeviceGroup(this.getDeviceGroupFromForm());
     }
 
-    compare(a: any, b: any): boolean {
-        return a && b && a.id === b.id && a.name === b.name;
-    }
-
-    trackByFn(index: any) {
-        return index;
-    }
-
     private initFormControls() {
         this.initDeviceGroupFormGroup({} as DeviceGroupModel);
     }
@@ -112,8 +103,8 @@ export class DeviceGroupsEditComponent implements OnInit {
         const devicesFc = this.deviceGroupForm.get('device_ids');
         if (devicesFc) {
             devicesFc.valueChanges.subscribe(this.updateSelectedDevices);
-            this.updateSelectedDevices(devicesFc.value);
-            this.runHelper('', devicesFc.value);
+            this.updateSelectedDevices(deviceGroup.device_ids);
+            this.runHelper('', deviceGroup.device_ids);
         } else {
             throw new Error('unexpected deviceGroupForm structure');
         }
@@ -173,6 +164,14 @@ export class DeviceGroupsEditComponent implements OnInit {
                     this.initDeviceGroupFormGroup(deviceGroup);
                 }
             });
+        } else {
+            this.initDeviceGroupFormGroup({
+                id: '',
+                image: '',
+                name: '',
+                device_ids: [],
+                criteria: []
+            });
         }
     }
 
@@ -210,11 +209,11 @@ export class DeviceGroupsEditComponent implements OnInit {
                     this.deviceCache.set(device.id, device);
                 }
                 const sortedResult = fromCache.concat(devices).sort(sortByName);
-                this.selectedForm.patchValue(sortedResult);
+                this.selectedForm.setValue(sortedResult);
             });
         } else {
             const sortedResult = fromCache.sort(sortByName);
-            this.selectedForm.patchValue(sortedResult);
+            this.selectedForm.setValue(sortedResult);
         }
     }
 
@@ -222,7 +221,7 @@ export class DeviceGroupsEditComponent implements OnInit {
     private runHelper(search: string, selectedDeviceIds: string[]) {
         this.deviceGroupService.useDeviceSelectionDeviceGroupHelper(selectedDeviceIds, search, 100, 0).subscribe((value: DeviceGroupHelperResultModel | null) => {
             if (value) {
-                this.selectableForm.patchValue(value.options);
+                this.selectableForm.setValue(value.options);
                 const criteria = this.deviceGroupForm.get('criteria');
                 if (criteria) {
                     criteria.setValue(value.criteria);
@@ -245,6 +244,6 @@ export class DeviceGroupsEditComponent implements OnInit {
                 ids = devicesFc.value;
             }
             that.runHelper(text, ids);
-        });
+        }, 1000);
     }
 }

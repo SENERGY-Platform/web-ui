@@ -39,7 +39,7 @@ export interface DeviceGroupHelperResultModel {
 }
 
 export interface DeviceGroupHelperOptionsModel {
-    devices: DeviceInstancesBaseModel[];
+    device: DeviceInstancesBaseModel;
     removes_criteria: DeviceGroupCriteriaModel[];
     maintains_group_usability: boolean;
 }
