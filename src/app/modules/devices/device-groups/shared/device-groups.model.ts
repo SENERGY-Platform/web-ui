@@ -15,17 +15,38 @@
  */
 
 
+import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
+
 export interface DeviceGroupModel {
     id: string;
     image: string;
     name: string;
-    blocked_interaction: string;
     device_ids: string[];
     criteria: DeviceGroupCriteriaModel[];
 }
 
 export interface DeviceGroupCriteriaModel {
+    interaction: string;
     function_id: string;
     aspect_id: string;
     device_class_id: string;
+}
+
+
+export interface DeviceGroupHelperResultModel {
+    criteria: DeviceGroupCriteriaModel[];
+    options: DeviceGroupHelperOptionsModel[];
+}
+
+export interface DeviceGroupHelperOptionsModel {
+    devices: DeviceInstancesBaseModel[];
+    removes_criteria: DeviceGroupCriteriaModel[];
+    maintains_group_usability: boolean;
+}
+
+export interface DeviceGroupCapability extends DeviceGroupCriteriaModel {
+    function_type: string;
+    function_name: string;
+    aspect_name: string;
+    device_class_name: string;
 }

@@ -21,8 +21,9 @@ import {Observable} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {DeviceGroupsPermSearchModel} from './device-groups-perm-search.model';
-import {DeviceGroupModel} from './device-groups.model';
+import {DeviceGroupHelperResultModel, DeviceGroupModel} from './device-groups.model';
 import {DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
+import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
 
 @Injectable({
     providedIn: 'root'
@@ -72,6 +73,36 @@ export class DeviceGroupsService {
     deleteDeviceGroup(id: string): Observable<boolean> {
         return this.http.delete<boolean>(environment.deviceManagerUrl + '/device-groups/' + encodeURIComponent(id)).pipe(
             catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'deleteDeviceGroup', false))
+        );
+    }
+
+    getDeviceListByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
+        return this.http.post<DeviceInstancesBaseModel[]>(
+            environment.permissionSearchUrl + '/v2/query', {
+                list_ids: {
+                    ids: ids,
+                    limit: ids.length,
+                    offset: 0,
+                    rights: 'rx',
+                    sort_by: 'name',
+                    sort_desc: false,
+                },
+            }).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceListByIds(ids)', []))
+        );
+    }
+
+    useDeviceSelectionDeviceGroupHelper(currentDeviceIds: string[], search: string, limit: number, offset: number): Observable<DeviceGroupHelperResultModel | null> {
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'search=' + encodeURIComponent(search)
+        ].join('&');
+        return this.http.post<DeviceGroupHelperResultModel>(
+            environment.deviceSelectionUrl + '/device-group-helper?' + params, currentDeviceIds).pipe(
+            map(resp => resp || null),
+            catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'useDeviceSelectionDeviceGroupHelper()', null))
         );
     }
 }
