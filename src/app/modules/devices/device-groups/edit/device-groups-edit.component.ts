@@ -75,7 +75,7 @@ export class DeviceGroupsEditComponent implements OnInit {
     removeDevice(id: string) {
         const devicesFc = this.deviceGroupForm.get('device_ids');
         if (devicesFc) {
-            const arr = devicesFc.value();
+            const arr = devicesFc.value;
             const index = arr.indexOf(id);
             if (index >= 0) {
                 arr.splice(index, 1);
