@@ -25,6 +25,7 @@ import {MatTreeNestedDataSource} from '@angular/material/tree';
 import {MatOption} from '@angular/material/core';
 import {DeviceGroupHelperResultModel, DeviceGroupModel} from '../shared/device-groups.model';
 import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
+import {debounceTime} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-device-groups-edit',
@@ -42,8 +43,7 @@ export class DeviceGroupsEditComponent implements OnInit {
     capabilities: FormControl = new FormControl([]);       // []DeviceGroupCapability
 
     deviceCache: Map<string, DeviceInstancesBaseModel> = new Map<string, DeviceInstancesBaseModel>();
-
-    searchTimeoutId: any = null;
+    debounceTimeInMs = 1000;
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceGroupService: DeviceGroupsService,
@@ -95,10 +95,6 @@ export class DeviceGroupsEditComponent implements OnInit {
         this.saveDeviceGroup(this.getDeviceGroupFromForm());
     }
 
-    private initFormControls() {
-        this.initDeviceGroupFormGroup({} as DeviceGroupModel);
-    }
-
     private initDeviceGroupFormGroup(deviceGroup: DeviceGroupModel) {
         this.deviceGroupForm = this.createDeviceGroupFormGroup(deviceGroup);
         const that = this;
@@ -114,7 +110,7 @@ export class DeviceGroupsEditComponent implements OnInit {
         }
 
         // update search
-        this.searchText.valueChanges.subscribe(this.search);
+        this.searchText.valueChanges.pipe(debounceTime(this.debounceTimeInMs)).subscribe(value => { that.search(value); });
     }
 
     private createDeviceGroupFormGroup(deviceGroup: DeviceGroupModel): FormGroup {
@@ -235,18 +231,11 @@ export class DeviceGroupsEditComponent implements OnInit {
 
 
     private search(text: string) {
-        if (this.searchTimeoutId) {
-            clearTimeout(this.searchTimeoutId);
+        const devicesFc = this.deviceGroupForm.get('device_ids');
+        let ids = [];
+        if (devicesFc && devicesFc.value) {
+            ids = devicesFc.value;
         }
-        const that = this;
-        this.searchTimeoutId = setTimeout(function () {
-            that.searchTimeoutId = null;
-            const devicesFc = that.deviceGroupForm.get('device_ids');
-            let ids = [];
-            if (devicesFc && devicesFc.value) {
-                ids = devicesFc.value;
-            }
-            that.runHelper(text, ids);
-        }, 1000);
+        this.runHelper(text, ids);
     }
 }

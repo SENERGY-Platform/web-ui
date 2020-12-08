@@ -340,6 +340,34 @@ describe('DeviceGroupsEditComponent', () => {
         ]
     };
 
+    const helperScenario4: DeviceGroupHelperResultModel = {
+        criteria: [
+            {
+                interaction: 'request',
+                function_id: 'function:id-1',
+                aspect_id: 'aspect:id-1',
+                device_class_id: '',
+            },
+            {
+                interaction: 'request',
+                function_id: 'function:id-2',
+                aspect_id: '',
+                device_class_id: 'device-class:id-1',
+            }
+        ],
+        options: [
+            {
+                device: {
+                    id: 'device:id-3',
+                    local_id: 'local-device-id-3',
+                    name: 'device3'
+                },
+                maintains_group_usability: true,
+                removes_criteria: []
+            }
+        ]
+    };
+
     beforeEach(waitForAsync(() => {
         const deviceGroupServiceSpy: Spy<DeviceGroupsService> = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
         deviceGroupServiceSpy.getDeviceGroup.and.returnValue(of(JSON.parse(JSON.stringify(exampleGroup as DeviceGroupModel))));
@@ -364,6 +392,9 @@ describe('DeviceGroupsEditComponent', () => {
             }
             if (search === '' && currentDeviceIds.length === 1) {
                 return of(JSON.parse(JSON.stringify(helperScenario3)));
+            }
+            if (search === '3' && currentDeviceIds.length === 2) {
+                return of(JSON.parse(JSON.stringify(helperScenario4)));
             }
             throw new Error('unknown test scenario for useDeviceSelectionDeviceGroupHelper: ' + JSON.stringify([currentDeviceIds, search, limit, offset]));
         });
@@ -454,6 +485,31 @@ describe('DeviceGroupsEditComponent', () => {
                 name: 'device1'
             }
         ]);
+    }));
+
+    it('can search', waitForAsync(() => {
+        (async () =>  {
+            component.searchText.setValue('3');
+            function delay(ms: number) {
+                return new Promise( resolve => setTimeout(resolve, ms) );
+            }
+            await delay(component.debounceTimeInMs);
+            expect(component).toBeTruthy();
+            expect(component.deviceGroupForm.getRawValue()).toEqual(exampleGroup);
+            expect(component.selectableForm.value).toEqual(helperScenario4.options);
+            expect(component.selectedForm.value).toEqual([
+                {
+                    id: 'device:id-1',
+                    local_id: 'local-device-id-1',
+                    name: 'device1'
+                },
+                {
+                    id: 'device:id-2',
+                    local_id: 'local-device-id-2',
+                    name: 'device2'
+                }
+            ]);
+        })();
     }));
 
 });
