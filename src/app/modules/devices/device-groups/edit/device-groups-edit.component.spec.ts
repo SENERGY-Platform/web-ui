@@ -31,6 +31,9 @@ import {DeviceGroupsEditComponent} from './device-groups-edit.component';
 import {DeviceGroupsService} from '../shared/device-groups.service';
 import {DeviceGroupCriteriaModel, DeviceGroupHelperResultModel, DeviceGroupModel} from '../shared/device-groups.model';
 import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
+import {DeviceTypeFunctionModel} from '../../device-types-overview/shared/device-type.model';
+import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
+import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
 
 describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;
@@ -100,6 +103,44 @@ describe('DeviceGroupsEditComponent', () => {
             }
         ],
     };
+
+    const knownFunctions = [
+        {
+            id: 'function:id-1',
+            name: 'getSomething',
+            rdf_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
+            concept_id: '',
+            description: ''
+        },
+        {
+            id: 'function:id-2',
+            name: 'setSomething',
+            rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction',
+            concept_id: '',
+            description: ''
+        },
+    ] as DeviceTypeFunctionModel[];
+
+    const knownDeviceClasses = [
+        {
+            id: 'device-class:id-1',
+            name: 'controller-type',
+            image: '',
+            creator: '',
+            permissions: {r: true, w: true, x: true, a: true},
+            shared: false
+        },
+    ] as DeviceClassesPermSearchModel[];
+
+    const knownAspects = [
+        {
+            id: 'aspect:id-1',
+            name: 'temperature',
+            creator: '',
+            permissions: {r: true, w: true, x: true, a: true},
+            shared: false
+        },
+    ] as AspectsPermSearchModel[];
 
     const knownDevices = [
         {
@@ -382,6 +423,39 @@ describe('DeviceGroupsEditComponent', () => {
             }
             return of(JSON.parse(JSON.stringify(result)));
         });
+        deviceGroupServiceSpy.getFunctionListByIds.and.callFake(function (ids: string[]) {
+            const result: DeviceTypeFunctionModel[] = [];
+            for (const id of ids) {
+                for (const f of knownFunctions) {
+                    if (id === f.id) {
+                        result.push(f);
+                    }
+                }
+            }
+            return of(JSON.parse(JSON.stringify(result)));
+        });
+        deviceGroupServiceSpy.getAspectListByIds.and.callFake(function (ids: string[]) {
+            const result: AspectsPermSearchModel[] = [];
+            for (const id of ids) {
+                for (const aspect of knownAspects) {
+                    if (id === aspect.id) {
+                        result.push(aspect);
+                    }
+                }
+            }
+            return of(JSON.parse(JSON.stringify(result)));
+        });
+        deviceGroupServiceSpy.getDeviceClassListByIds.and.callFake(function (ids: string[]) {
+            const result: DeviceClassesPermSearchModel[] = [];
+            for (const id of ids) {
+                for (const dc of knownDeviceClasses) {
+                    if (id === dc.id) {
+                        result.push(dc);
+                    }
+                }
+            }
+            return of(JSON.parse(JSON.stringify(result)));
+        });
 
         deviceGroupServiceSpy.useDeviceSelectionDeviceGroupHelper.and.callFake(function (currentDeviceIds: string[], search: string, limit: number, offset: number) {
             if (search === '' && currentDeviceIds.length === 2) {
@@ -446,45 +520,124 @@ describe('DeviceGroupsEditComponent', () => {
                 name: 'device2'
             }
         ]);
+        expect(component.capabilities.value).toEqual(component.sortCapabilities([
+            {
+                interaction: 'request',
+                function_id: 'function:id-1',
+                aspect_id: 'aspect:id-1',
+                device_class_id: '',
+                function_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
+                function_name: 'getSomething',
+                device_class_name: '',
+                aspect_name: 'temperature'
+            },
+            {
+                interaction: 'request',
+                function_id: 'function:id-2',
+                aspect_id: '',
+                device_class_id: 'device-class:id-1',
+                function_type: 'https://senergy.infai.org/ontology/ControllingFunction',
+                function_name: 'setSomething',
+                device_class_name: 'controller-type',
+                aspect_name: ''
+            }
+        ]));
     }));
 
 
     it('can add device', waitForAsync(() => {
-        component.addDevice('device:id-4');
-        expect(component).toBeTruthy();
-        expect(component.deviceGroupForm.getRawValue()).toEqual(exampleExpandedGroup);
-        expect(component.selectableForm.value).toEqual(helperScenario2.options);
-        expect(component.selectedForm.value).toEqual([
-            {
-                id: 'device:id-1',
-                local_id: 'local-device-id-1',
-                name: 'device1'
-            },
-            {
-                id: 'device:id-2',
-                local_id: 'local-device-id-2',
-                name: 'device2'
-            },
-            {
-                id: 'device:id-4',
-                local_id: 'local-device-id-4',
-                name: 'device4'
+        (async () =>  {
+            function delay(ms: number) {
+                return new Promise( resolve => setTimeout(resolve, ms) );
             }
-        ]);
+            component.addDevice('device:id-4');
+            await delay(100);
+            expect(component).toBeTruthy();
+            expect(component.deviceGroupForm.getRawValue()).toEqual(exampleExpandedGroup);
+            expect(component.selectableForm.value).toEqual(helperScenario2.options);
+            expect(component.selectedForm.value).toEqual([
+                {
+                    id: 'device:id-1',
+                    local_id: 'local-device-id-1',
+                    name: 'device1'
+                },
+                {
+                    id: 'device:id-2',
+                    local_id: 'local-device-id-2',
+                    name: 'device2'
+                },
+                {
+                    id: 'device:id-4',
+                    local_id: 'local-device-id-4',
+                    name: 'device4'
+                }
+            ]);
+            expect(component.capabilities.value).toEqual(component.sortCapabilities([
+                {
+                    interaction: 'request',
+                    function_id: 'function:id-2',
+                    aspect_id: '',
+                    device_class_id: 'device-class:id-1',
+                    function_type: 'https://senergy.infai.org/ontology/ControllingFunction',
+                    function_name: 'setSomething',
+                    device_class_name: 'controller-type',
+                    aspect_name: ''
+                }
+            ]));
+        })();
     }));
 
     it('can remove device', waitForAsync(() => {
-        component.removeDevice('device:id-2');
-        expect(component).toBeTruthy();
-        expect(component.deviceGroupForm.getRawValue()).toEqual(exampleReducedGroup);
-        expect(component.selectableForm.value).toEqual(helperScenario3.options);
-        expect(component.selectedForm.value).toEqual([
-            {
-                id: 'device:id-1',
-                local_id: 'local-device-id-1',
-                name: 'device1'
+        (async () =>  {
+            function delay(ms: number) {
+                return new Promise( resolve => setTimeout(resolve, ms) );
             }
-        ]);
+
+            component.removeDevice('device:id-2');
+            await delay(100);
+            expect(component).toBeTruthy();
+            expect(component.deviceGroupForm.getRawValue()).toEqual(exampleReducedGroup);
+            expect(component.selectableForm.value).toEqual(helperScenario3.options);
+            expect(component.selectedForm.value).toEqual([
+                {
+                    id: 'device:id-1',
+                    local_id: 'local-device-id-1',
+                    name: 'device1'
+                }
+            ]);
+            expect(component.capabilities.value).toEqual(component.sortCapabilities([
+                {
+                    interaction: 'request',
+                    function_id: 'function:id-1',
+                    aspect_id: 'aspect:id-1',
+                    device_class_id: '',
+                    function_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
+                    function_name: 'getSomething',
+                    device_class_name: '',
+                    aspect_name: 'temperature'
+                },
+                {
+                    interaction: 'event',
+                    function_id: 'function:id-1',
+                    aspect_id: 'aspect:id-1',
+                    device_class_id: '',
+                    function_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
+                    function_name: 'getSomething',
+                    device_class_name: '',
+                    aspect_name: 'temperature'
+                },
+                {
+                    interaction: 'request',
+                    function_id: 'function:id-2',
+                    aspect_id: '',
+                    device_class_id: 'device-class:id-1',
+                    function_type: 'https://senergy.infai.org/ontology/ControllingFunction',
+                    function_name: 'setSomething',
+                    device_class_name: 'controller-type',
+                    aspect_name: ''
+                }
+            ]));
+        })();
     }));
 
     it('can search', waitForAsync(() => {
@@ -509,6 +662,28 @@ describe('DeviceGroupsEditComponent', () => {
                     name: 'device2'
                 }
             ]);
+            expect(component.capabilities.value).toEqual(component.sortCapabilities([
+                {
+                    interaction: 'request',
+                    function_id: 'function:id-1',
+                    aspect_id: 'aspect:id-1',
+                    device_class_id: '',
+                    function_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
+                    function_name: 'getSomething',
+                    device_class_name: '',
+                    aspect_name: 'temperature'
+                },
+                {
+                    interaction: 'request',
+                    function_id: 'function:id-2',
+                    aspect_id: '',
+                    device_class_id: 'device-class:id-1',
+                    function_type: 'https://senergy.infai.org/ontology/ControllingFunction',
+                    function_name: 'setSomething',
+                    device_class_name: 'controller-type',
+                    aspect_name: ''
+                }
+            ]));
         })();
     }));
 

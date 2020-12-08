@@ -22,8 +22,10 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {DeviceGroupsPermSearchModel} from './device-groups-perm-search.model';
 import {DeviceGroupHelperResultModel, DeviceGroupModel} from './device-groups.model';
-import {DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
+import {DeviceTypeFunctionModel, DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
 import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
+import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
+import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
 
 @Injectable({
     providedIn: 'root'
@@ -79,6 +81,7 @@ export class DeviceGroupsService {
     getDeviceListByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
         return this.http.post<DeviceInstancesBaseModel[]>(
             environment.permissionSearchUrl + '/v2/query', {
+                resource: 'devices',
                 list_ids: {
                     ids: ids,
                     limit: ids.length,
@@ -90,6 +93,60 @@ export class DeviceGroupsService {
             }).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceListByIds(ids)', []))
+        );
+    }
+
+    getFunctionListByIds(ids: string[]): Observable<DeviceTypeFunctionModel[]> {
+        return this.http.post<DeviceTypeFunctionModel[]>(
+            environment.permissionSearchUrl + '/v2/query', {
+                resource: 'functions',
+                list_ids: {
+                    ids: ids,
+                    limit: ids.length,
+                    offset: 0,
+                    rights: 'rx',
+                    sort_by: 'name',
+                    sort_desc: false,
+                },
+            }).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getFunctionListByIds(ids)', []))
+        );
+    }
+
+    getAspectListByIds(ids: string[]): Observable<AspectsPermSearchModel[]> {
+        return this.http.post<AspectsPermSearchModel[]>(
+            environment.permissionSearchUrl + '/v2/query', {
+                resource: 'aspects',
+                list_ids: {
+                    ids: ids,
+                    limit: ids.length,
+                    offset: 0,
+                    rights: 'rx',
+                    sort_by: 'name',
+                    sort_desc: false,
+                },
+            }).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getAspectListByIds(ids)', []))
+        );
+    }
+
+    getDeviceClassListByIds(ids: string[]): Observable<DeviceClassesPermSearchModel[]> {
+        return this.http.post<DeviceClassesPermSearchModel[]>(
+            environment.permissionSearchUrl + '/v2/query', {
+                resource: 'device-classes',
+                list_ids: {
+                    ids: ids,
+                    limit: ids.length,
+                    offset: 0,
+                    rights: 'rx',
+                    sort_by: 'name',
+                    sort_desc: false,
+                },
+            }).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceClassListByIds(ids)', []))
         );
     }
 

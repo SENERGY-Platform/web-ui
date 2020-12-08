@@ -23,9 +23,17 @@ import {forkJoin, Observable} from 'rxjs';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
 import {MatOption} from '@angular/material/core';
-import {DeviceGroupHelperResultModel, DeviceGroupModel} from '../shared/device-groups.model';
+import {
+    DeviceGroupCapability,
+    DeviceGroupCriteriaModel,
+    DeviceGroupHelperResultModel,
+    DeviceGroupModel
+} from '../shared/device-groups.model';
 import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
 import {debounceTime} from 'rxjs/operators';
+import {DeviceTypeFunctionModel} from '../../device-types-overview/shared/device-type.model';
+import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
+import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
 
 @Component({
     selector: 'senergy-device-groups-edit',
@@ -43,6 +51,10 @@ export class DeviceGroupsEditComponent implements OnInit {
     capabilities: FormControl = new FormControl([]);       // []DeviceGroupCapability
 
     deviceCache: Map<string, DeviceInstancesBaseModel> = new Map<string, DeviceInstancesBaseModel>();
+    functionsCache: Map<string, DeviceTypeFunctionModel> = new Map<string, DeviceTypeFunctionModel>();
+    aspectCache: Map<string, AspectsPermSearchModel> = new Map<string, AspectsPermSearchModel>();
+    deviceClassCache: Map<string, DeviceClassesPermSearchModel> = new Map<string, DeviceClassesPermSearchModel>();
+
     debounceTimeInMs = 1000;
 
     constructor(private _formBuilder: FormBuilder,
@@ -98,6 +110,7 @@ export class DeviceGroupsEditComponent implements OnInit {
     private initDeviceGroupFormGroup(deviceGroup: DeviceGroupModel) {
         this.deviceGroupForm = this.createDeviceGroupFormGroup(deviceGroup);
         const that = this;
+
         // watch device selection changes
         const devicesFc = this.deviceGroupForm.get('device_ids');
         if (devicesFc) {
@@ -106,7 +119,15 @@ export class DeviceGroupsEditComponent implements OnInit {
             this.updateSelectedDevices(deviceGroup.device_ids);
             this.runHelper('', deviceGroup.device_ids);
         } else {
-            throw new Error('unexpected deviceGroupForm structure');
+            throw new Error('missing device_ids in deviceGroupForm');
+        }
+
+        const criteriaFc = this.deviceGroupForm.get('criteria');
+        if (criteriaFc) {
+            criteriaFc.valueChanges.subscribe(value => { that.updateCapabilities(value); });
+            this.updateCapabilities(deviceGroup.criteria);
+        } else {
+            throw new Error('missing criteria in deviceGroupForm');
         }
 
         // update search
@@ -216,6 +237,81 @@ export class DeviceGroupsEditComponent implements OnInit {
         }
     }
 
+
+    private updateCapabilities(criteria: DeviceGroupCriteriaModel[]) {
+        const that = this;
+        const functionIds = [];
+        const aspectIds = [];
+        const deviceClassIds = [];
+        for (const c of criteria) {
+            functionIds.push(c.function_id);
+            if (c.aspect_id) {
+                aspectIds.push(c.aspect_id);
+            }
+            if (c.device_class_id) {
+                deviceClassIds.push(c.device_class_id);
+            }
+        }
+        Promise.all([
+            this.loadIotFunctions(functionIds),
+            this.loadAspects(aspectIds),
+            this.loadDeviceClasses(deviceClassIds)
+        ]).then((infos) => {
+            const functions: Map<string, DeviceTypeFunctionModel> = infos[0];
+            const aspects: Map<string, AspectsPermSearchModel> = infos[1];
+            const deviceClasses: Map<string, DeviceClassesPermSearchModel> = infos[2];
+            let result: DeviceGroupCapability[] = [];
+            for (const c of criteria) {
+                const element: DeviceGroupCapability = {
+                    device_class_id: c.device_class_id,
+                    aspect_id: c.aspect_id,
+                    function_id: c.function_id,
+                    interaction: c.interaction,
+                    aspect_name: '',
+                    device_class_name: '',
+                    function_name: '',
+                    function_type: ''
+                };
+                if (c.aspect_id) {
+                    const aspect = aspects.get(c.aspect_id);
+                    if (aspect) {
+                        element.aspect_name = aspect.name;
+                    }
+                }
+                if (c.device_class_id) {
+                    const deviceClass = deviceClasses.get(c.device_class_id);
+                    if (deviceClass) {
+                        element.device_class_name = deviceClass.name;
+                    }
+                }
+                if (c.function_id) {
+                    const iotFunction = functions.get(c.function_id);
+                    if (iotFunction) {
+                        element.function_name = iotFunction.name;
+                        element.function_type = iotFunction.rdf_type;
+                    }
+                }
+                result.push(element);
+            }
+            result = this.sortCapabilities(result);
+            that.capabilities.setValue(result);
+        });
+    }
+
+    sortCapabilities(list: DeviceGroupCapability[]): DeviceGroupCapability[] {
+        return list.sort((a, b) => {
+            const ahash = a.function_id + '_' + a.aspect_id + '_' + a.device_class_id + '_' + a.interaction;
+            const bhash = b.function_id + '_' + b.aspect_id + '_' + b.device_class_id + '_' + b.interaction;
+            if (ahash > bhash) {
+                return 1;
+            }
+            if (ahash < bhash) {
+                return -1;
+            }
+            return 0;
+        });
+    }
+
     // update selectables by calling POST device-selection/device-group-helper?search={search}&limit={limit}&offset=offset
     private runHelper(search: string, selectedDeviceIds: string[]) {
         this.deviceGroupService.useDeviceSelectionDeviceGroupHelper(selectedDeviceIds, search, 100, 0).subscribe((value: DeviceGroupHelperResultModel | null) => {
@@ -229,7 +325,6 @@ export class DeviceGroupsEditComponent implements OnInit {
         });
     }
 
-
     private search(text: string) {
         const devicesFc = this.deviceGroupForm.get('device_ids');
         let ids = [];
@@ -237,5 +332,80 @@ export class DeviceGroupsEditComponent implements OnInit {
             ids = devicesFc.value;
         }
         this.runHelper(text, ids);
+    }
+
+    private loadIotFunctions(functionIds: string[]): Promise<Map<string, DeviceTypeFunctionModel>> {
+        const result: Map<string, DeviceTypeFunctionModel> = new Map<string, DeviceTypeFunctionModel>();
+        const idsForRepoSearch: string[] = [];
+        for (const id of functionIds) {
+            const cachedElement = this.functionsCache.get(id);
+            if (cachedElement) {
+                result.set(cachedElement.id, cachedElement);
+            } else {
+                idsForRepoSearch.push(id);
+            }
+        }
+        if (idsForRepoSearch.length) {
+            return new Promise<Map<string, DeviceTypeFunctionModel>>(resolve => {
+                this.deviceGroupService.getFunctionListByIds(idsForRepoSearch).subscribe(value => {
+                    for (const element of value) {
+                        result.set(element.id, element);
+                    }
+                    resolve(result);
+                });
+            });
+        } else {
+            return Promise.resolve(result);
+        }
+    }
+
+    private loadAspects(aspectIds: string[]): Promise<Map<string, AspectsPermSearchModel>> {
+        const result: Map<string, AspectsPermSearchModel> = new Map<string, AspectsPermSearchModel>();
+        const idsForRepoSearch: string[] = [];
+        for (const id of aspectIds) {
+            const cachedElement = this.aspectCache.get(id);
+            if (cachedElement) {
+                result.set(cachedElement.id, cachedElement);
+            } else {
+                idsForRepoSearch.push(id);
+            }
+        }
+        if (idsForRepoSearch.length) {
+            return new Promise<Map<string, AspectsPermSearchModel>>(resolve => {
+                this.deviceGroupService.getAspectListByIds(idsForRepoSearch).subscribe(value => {
+                    for (const element of value) {
+                        result.set(element.id, element);
+                    }
+                    resolve(result);
+                });
+            });
+        } else {
+            return Promise.resolve(result);
+        }
+    }
+
+    private loadDeviceClasses(deviceClassIds: string[]): Promise<Map<string, DeviceClassesPermSearchModel>> {
+        const result: Map<string, DeviceClassesPermSearchModel> = new Map<string, DeviceClassesPermSearchModel>();
+        const idsForRepoSearch: string[] = [];
+        for (const id of deviceClassIds) {
+            const cachedElement = this.deviceClassCache.get(id);
+            if (cachedElement) {
+                result.set(cachedElement.id, cachedElement);
+            } else {
+                idsForRepoSearch.push(id);
+            }
+        }
+        if (idsForRepoSearch.length) {
+            return new Promise<Map<string, DeviceClassesPermSearchModel>>(resolve => {
+                this.deviceGroupService.getDeviceClassListByIds(idsForRepoSearch).subscribe(value => {
+                    for (const element of value) {
+                        result.set(element.id, element);
+                    }
+                    resolve(result);
+                });
+            });
+        } else {
+            return Promise.resolve(result);
+        }
     }
 }
