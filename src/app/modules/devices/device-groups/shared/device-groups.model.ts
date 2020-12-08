@@ -47,6 +47,7 @@ export interface DeviceGroupHelperOptionsModel {
 export interface DeviceGroupCapability extends DeviceGroupCriteriaModel {
     function_type: string;
     function_name: string;
+    function_description: string;
     aspect_name: string;
     device_class_name: string;
 }

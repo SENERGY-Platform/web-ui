@@ -270,6 +270,7 @@ export class DeviceGroupsEditComponent implements OnInit {
                     aspect_name: '',
                     device_class_name: '',
                     function_name: '',
+                    function_description: '',
                     function_type: ''
                 };
                 if (c.aspect_id) {
@@ -288,6 +289,7 @@ export class DeviceGroupsEditComponent implements OnInit {
                     const iotFunction = functions.get(c.function_id);
                     if (iotFunction) {
                         element.function_name = iotFunction.name;
+                        element.function_description = iotFunction.description;
                         element.function_type = iotFunction.rdf_type;
                     }
                 }

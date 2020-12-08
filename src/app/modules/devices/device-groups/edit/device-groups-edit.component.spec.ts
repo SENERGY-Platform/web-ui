@@ -110,14 +110,14 @@ describe('DeviceGroupsEditComponent', () => {
             name: 'getSomething',
             rdf_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
             concept_id: '',
-            description: ''
+            description: 'measure something'
         },
         {
             id: 'function:id-2',
             name: 'setSomething',
             rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction',
             concept_id: '',
-            description: ''
+            description: 'control something'
         },
     ] as DeviceTypeFunctionModel[];
 
@@ -528,6 +528,7 @@ describe('DeviceGroupsEditComponent', () => {
                 device_class_id: '',
                 function_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
                 function_name: 'getSomething',
+                function_description: 'measure something',
                 device_class_name: '',
                 aspect_name: 'temperature'
             },
@@ -538,6 +539,7 @@ describe('DeviceGroupsEditComponent', () => {
                 device_class_id: 'device-class:id-1',
                 function_type: 'https://senergy.infai.org/ontology/ControllingFunction',
                 function_name: 'setSomething',
+                function_description: 'control something',
                 device_class_name: 'controller-type',
                 aspect_name: ''
             }
@@ -580,6 +582,7 @@ describe('DeviceGroupsEditComponent', () => {
                     device_class_id: 'device-class:id-1',
                     function_type: 'https://senergy.infai.org/ontology/ControllingFunction',
                     function_name: 'setSomething',
+                    function_description: 'control something',
                     device_class_name: 'controller-type',
                     aspect_name: ''
                 }
@@ -613,6 +616,7 @@ describe('DeviceGroupsEditComponent', () => {
                     device_class_id: '',
                     function_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
                     function_name: 'getSomething',
+                    function_description: 'measure something',
                     device_class_name: '',
                     aspect_name: 'temperature'
                 },
@@ -623,6 +627,7 @@ describe('DeviceGroupsEditComponent', () => {
                     device_class_id: '',
                     function_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
                     function_name: 'getSomething',
+                    function_description: 'measure something',
                     device_class_name: '',
                     aspect_name: 'temperature'
                 },
@@ -633,6 +638,7 @@ describe('DeviceGroupsEditComponent', () => {
                     device_class_id: 'device-class:id-1',
                     function_type: 'https://senergy.infai.org/ontology/ControllingFunction',
                     function_name: 'setSomething',
+                    function_description: 'control something',
                     device_class_name: 'controller-type',
                     aspect_name: ''
                 }
@@ -670,6 +676,7 @@ describe('DeviceGroupsEditComponent', () => {
                     device_class_id: '',
                     function_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
                     function_name: 'getSomething',
+                    function_description: 'measure something',
                     device_class_name: '',
                     aspect_name: 'temperature'
                 },
@@ -680,6 +687,7 @@ describe('DeviceGroupsEditComponent', () => {
                     device_class_id: 'device-class:id-1',
                     function_type: 'https://senergy.infai.org/ontology/ControllingFunction',
                     function_name: 'setSomething',
+                    function_description: 'control something',
                     device_class_name: 'controller-type',
                     aspect_name: ''
                 }
