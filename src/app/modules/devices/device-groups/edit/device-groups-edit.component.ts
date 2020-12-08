@@ -62,21 +62,24 @@ export class DeviceGroupsEditComponent implements OnInit {
     }
 
     addDevice(id: string) {
-        const devicesFc = this.deviceGroupForm.get('device_ids') as FormArray;
+        const devicesFc = this.deviceGroupForm.get('device_ids');
         if (devicesFc) {
-            devicesFc.push(new FormControl(id));
+            const idList = devicesFc.value;
+            idList.push(id);
+            devicesFc.setValue(idList);
         } else {
             throw new Error('unexpected deviceGroupForm structure');
         }
     }
 
     removeDevice(id: string) {
-        const devicesFc = this.deviceGroupForm.get('device_ids') as FormArray;
+        const devicesFc = this.deviceGroupForm.get('device_ids');
         if (devicesFc) {
-            const arr = devicesFc.getRawValue();
+            const arr = devicesFc.value();
             const index = arr.indexOf(id);
             if (index >= 0) {
-                devicesFc.removeAt(index);
+                arr.splice(index, 1);
+                devicesFc.setValue(arr);
             } else {
                 throw new Error('device not found in device_ids');
             }
@@ -98,11 +101,12 @@ export class DeviceGroupsEditComponent implements OnInit {
 
     private initDeviceGroupFormGroup(deviceGroup: DeviceGroupModel) {
         this.deviceGroupForm = this.createDeviceGroupFormGroup(deviceGroup);
-
+        const that = this;
         // watch device selection changes
         const devicesFc = this.deviceGroupForm.get('device_ids');
         if (devicesFc) {
-            devicesFc.valueChanges.subscribe(this.updateSelectedDevices);
+            devicesFc.valueChanges.subscribe(value => { that.updateSelectedDevices(value); });
+            devicesFc.valueChanges.subscribe(value => { that.runHelper(this.searchText.value, value); });
             this.updateSelectedDevices(deviceGroup.device_ids);
             this.runHelper('', deviceGroup.device_ids);
         } else {
@@ -183,7 +187,6 @@ export class DeviceGroupsEditComponent implements OnInit {
     private updateSelectedDevices(deviceIds: string[]) {
         const fromCache: DeviceInstancesBaseModel[] = [];
         const idsForRepoSearch: string[] = [];
-
         for (const id of deviceIds) {
             const cachedDevice = this.deviceCache.get(id);
             if (cachedDevice) {

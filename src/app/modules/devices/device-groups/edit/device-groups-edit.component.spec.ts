@@ -35,9 +35,8 @@ import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-ins
 describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;
     let fixture: ComponentFixture<DeviceGroupsEditComponent>;
-    const deviceGroupsEdit = {path: 'devices/devicegroups/edit/:id', pathMatch: 'full', component: DeviceGroupsEditComponent, data: {header: 'Devices'}};
 
-    const deviceGroupServiceSpy: Spy<DeviceGroupsService> = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
+    const deviceGroupsEdit = {path: 'devices/devicegroups/edit/:id', pathMatch: 'full', component: DeviceGroupsEditComponent, data: {header: 'Devices'}};
 
     const exampleGroup = {
         id: 'test-group:id',
@@ -53,7 +52,22 @@ describe('DeviceGroupsEditComponent', () => {
             },
             {
                 interaction: 'request',
-                function_id: 'function:id-1',
+                function_id: 'function:id-2',
+                aspect_id: '',
+                device_class_id: 'device-class:id-1',
+            }
+        ],
+    };
+
+    const exampleExpandedGroup = {
+        id: 'test-group:id',
+        image: 'some-image.png',
+        name: 'group-name',
+        device_ids: ['device:id-1', 'device:id-2', 'device:id-4'],
+        criteria: [
+            {
+                interaction: 'request',
+                function_id: 'function:id-2',
                 aspect_id: '',
                 device_class_id: 'device-class:id-1',
             }
@@ -88,7 +102,7 @@ describe('DeviceGroupsEditComponent', () => {
         }
     ] as DeviceInstancesBaseModel[];
 
-    const helperScenario1Result: DeviceGroupHelperResultModel = {
+    const helperScenario1: DeviceGroupHelperResultModel = {
         criteria: [
             {
                 interaction: 'request',
@@ -98,7 +112,7 @@ describe('DeviceGroupsEditComponent', () => {
             },
             {
                 interaction: 'request',
-                function_id: 'function:id-1',
+                function_id: 'function:id-2',
                 aspect_id: '',
                 device_class_id: 'device-class:id-1',
             }
@@ -145,7 +159,7 @@ describe('DeviceGroupsEditComponent', () => {
                     },
                     {
                         interaction: 'request',
-                        function_id: 'function:id-1',
+                        function_id: 'function:id-2',
                         aspect_id: '',
                         device_class_id: 'device-class:id-1',
                     }
@@ -154,28 +168,69 @@ describe('DeviceGroupsEditComponent', () => {
         ]
     };
 
-    deviceGroupServiceSpy.getDeviceGroup.and.returnValue(of(exampleGroup as DeviceGroupModel));
-    deviceGroupServiceSpy.getDeviceListByIds.and.callFake(function (ids: string[]) {
-        const result: DeviceInstancesBaseModel[] = [];
-        for (const id of ids) {
-            for (const device of knownDevices) {
-                if (id === device.id) {
-                    result.push(device);
-                }
+    const helperScenario2: DeviceGroupHelperResultModel = {
+        criteria: [
+            {
+                interaction: 'request',
+                function_id: 'function:id-2',
+                aspect_id: '',
+                device_class_id: 'device-class:id-1',
             }
-        }
-        return of(result);
-    });
-
-    deviceGroupServiceSpy.useDeviceSelectionDeviceGroupHelper.and.callFake(function (currentDeviceIds: string[], search: string, limit: number, offset: number) {
-        if (search === '' && currentDeviceIds.length === 2) {
-            return of(helperScenario1Result);
-        }
-        throw new Error('unknown test scenario for useDeviceSelectionDeviceGroupHelper: ' + JSON.stringify([currentDeviceIds, search, limit, offset]));
-    });
-
+        ],
+        options: [
+            {
+                device: {
+                    id: 'device:id-3',
+                    local_id: 'local-device-id-3',
+                    name: 'device3'
+                },
+                maintains_group_usability: true,
+                removes_criteria: []
+            },
+            {
+                device: {
+                    id: 'device:id-5',
+                    local_id: 'local-device-id-5',
+                    name: 'device5'
+                },
+                maintains_group_usability: false,
+                removes_criteria: [
+                    {
+                        interaction: 'request',
+                        function_id: 'function:id-2',
+                        aspect_id: '',
+                        device_class_id: 'device-class:id-1',
+                    }
+                ]
+            }
+        ]
+    };
 
     beforeEach(waitForAsync(() => {
+        const deviceGroupServiceSpy: Spy<DeviceGroupsService> = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
+        deviceGroupServiceSpy.getDeviceGroup.and.returnValue(of(JSON.parse(JSON.stringify(exampleGroup as DeviceGroupModel))));
+        deviceGroupServiceSpy.getDeviceListByIds.and.callFake(function (ids: string[]) {
+            const result: DeviceInstancesBaseModel[] = [];
+            for (const id of ids) {
+                for (const device of knownDevices) {
+                    if (id === device.id) {
+                        result.push(device);
+                    }
+                }
+            }
+            return of(JSON.parse(JSON.stringify(result)));
+        });
+
+        deviceGroupServiceSpy.useDeviceSelectionDeviceGroupHelper.and.callFake(function (currentDeviceIds: string[], search: string, limit: number, offset: number) {
+            if (search === '' && currentDeviceIds.length === 2) {
+                return of(JSON.parse(JSON.stringify(helperScenario1)));
+            }
+            if (search === '' && currentDeviceIds.length === 3) {
+                return of(JSON.parse(JSON.stringify(helperScenario2)));
+            }
+            throw new Error('unknown test scenario for useDeviceSelectionDeviceGroupHelper: ' + JSON.stringify([currentDeviceIds, search, limit, offset]));
+        });
+
         TestBed.configureTestingModule({
             imports: [CoreModule, RouterTestingModule.withRoutes([deviceGroupsEdit]), HttpClientTestingModule, MatSnackBarModule,
                 MatFormFieldModule, MatSelectModule, MatIconModule, ReactiveFormsModule, MatInputModule],
@@ -198,36 +253,56 @@ describe('DeviceGroupsEditComponent', () => {
         fixture.detectChanges();
     }));
 
+    afterEach(waitForAsync(() => {
+        fixture.destroy();
+    }));
+
 
     it('should create the app', waitForAsync(() => {
         expect(component).toBeTruthy();
     }));
 
-    it('should set id from path', waitForAsync(() => {
+    it('should init', waitForAsync(() => {
         expect(component.id).toBe('test-group:id');
-    }));
-
-    it('should set deviceGroupForm', waitForAsync(() => {
         expect(component.deviceGroupForm.getRawValue()).toEqual(exampleGroup);
-    }));
-
-    it('should set initial selectableForm', waitForAsync(() => {
-        expect(component.selectableForm.value).toEqual(helperScenario1Result.options);
-    }));
-
-    it('should set initial selectedForm', waitForAsync(() => {
+        expect(component.selectableForm.value).toEqual(helperScenario1.options);
         expect(component.selectedForm.value).toEqual([
-                {
-                    id: 'device:id-1',
-                    local_id: 'local-device-id-1',
-                    name: 'device1'
-                },
-                {
-                    id: 'device:id-2',
-                    local_id: 'local-device-id-2',
-                    name: 'device2'
-                }
-            ]);
+            {
+                id: 'device:id-1',
+                local_id: 'local-device-id-1',
+                name: 'device1'
+            },
+            {
+                id: 'device:id-2',
+                local_id: 'local-device-id-2',
+                name: 'device2'
+            }
+        ]);
+    }));
+
+
+    it('can add device', waitForAsync(() => {
+        component.addDevice('device:id-4');
+        expect(component).toBeTruthy();
+        expect(component.deviceGroupForm.getRawValue()).toEqual(exampleExpandedGroup);
+        expect(component.selectableForm.value).toEqual(helperScenario2.options);
+        expect(component.selectedForm.value).toEqual([
+            {
+                id: 'device:id-1',
+                local_id: 'local-device-id-1',
+                name: 'device1'
+            },
+            {
+                id: 'device:id-2',
+                local_id: 'local-device-id-2',
+                name: 'device2'
+            },
+            {
+                id: 'device:id-4',
+                local_id: 'local-device-id-4',
+                name: 'device4'
+            }
+        ]);
     }));
 
 });
