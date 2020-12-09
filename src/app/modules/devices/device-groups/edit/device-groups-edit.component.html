@@ -14,7 +14,48 @@
   ~ limitations under the License.
   -->
 <div class="device-group-edit-container">
+    <div>
+        <label>
+            Search:
+            <input type="text" [formControl]="searchText">
+        </label>
+    </div>
+    <div>
+        <h2>Selectable Devices:</h2>
+        <div *ngFor="let option of selectableForm.value">
+            <button (click)="addDevice(option.device.id)">Add {{option.device.name || option.device.id}}</button>
+        </div>
+    </div>
 
+    <div *ngIf="deviceGroupForm" [formGroup]="deviceGroupForm">
+        <h2>Device-Group</h2>
+        <label>
+            Name:
+            <input type="text" formControlName="name">
+        </label>
+        <label>
+            Image:
+            <input type="text" formControlName="image">
+        </label>
+    </div>
+
+    <div>
+        <h2>Selected Devices:</h2>
+        <div *ngFor="let device of selectedForm.value">
+            <button (click)="removeDevice(device.id)">Remove {{device.name}}</button>
+        </div>
+    </div>
+
+    <div>
+        <h2>Capabilities:</h2>
+        <div *ngFor="let capability of capabilities.value">
+           {{capability.interaction}} {{capability.function_description || capability.function_name || capability.function_id}} {{capability.aspect_name || capability.device_class_name}}
+        </div>
+    </div>
+
+    <div>
+        <button (click)="save()">Save</button>
+    </div>
 </div>
 
 

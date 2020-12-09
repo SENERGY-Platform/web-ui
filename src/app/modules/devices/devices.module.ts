@@ -158,6 +158,7 @@ const deviceGroupsEdit = {path: 'devices/devicegroups/edit/:id', pathMatch: 'ful
         AspectsEditDialogComponent,
         DeviceClassesComponent,
         DeviceGroupsComponent,
+        DeviceGroupsEditComponent,
         DeviceClassesEditDialogComponent,
     ],
 })

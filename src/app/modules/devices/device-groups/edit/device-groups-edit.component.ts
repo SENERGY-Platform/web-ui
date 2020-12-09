@@ -30,7 +30,7 @@ import {
     DeviceGroupModel
 } from '../shared/device-groups.model';
 import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
-import {debounceTime} from 'rxjs/operators';
+import {debounceTime, delay} from 'rxjs/operators';
 import {DeviceTypeFunctionModel} from '../../device-types-overview/shared/device-type.model';
 import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
 import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
@@ -56,6 +56,7 @@ export class DeviceGroupsEditComponent implements OnInit {
     deviceClassCache: Map<string, DeviceClassesPermSearchModel> = new Map<string, DeviceClassesPermSearchModel>();
 
     debounceTimeInMs = 1000;
+    rerouteAfterSaveDelayInMs = 2000;
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceGroupService: DeviceGroupsService,
@@ -147,12 +148,12 @@ export class DeviceGroupsEditComponent implements OnInit {
 
     private saveDeviceGroup(deviceGroup: DeviceGroupModel) {
         if (deviceGroup.id === '' || deviceGroup.id === undefined) {
-            this.deviceGroupService.createDeviceGroup(deviceGroup).subscribe((deviceGroupSaved: DeviceGroupModel | null) => {
+            this.deviceGroupService.createDeviceGroup(deviceGroup).pipe(delay(this.rerouteAfterSaveDelayInMs)).subscribe((deviceGroupSaved: DeviceGroupModel | null) => {
                 this.showMessage(deviceGroupSaved);
                 this.reload(deviceGroupSaved);
             });
         } else {
-            this.deviceGroupService.updateDeviceGroup(deviceGroup).subscribe((deviceGroupSaved: DeviceGroupModel | null) => {
+            this.deviceGroupService.updateDeviceGroup(deviceGroup).pipe(delay(this.rerouteAfterSaveDelayInMs)).subscribe((deviceGroupSaved: DeviceGroupModel | null) => {
                 this.showMessage(deviceGroupSaved);
                 this.reload(deviceGroupSaved);
             });
