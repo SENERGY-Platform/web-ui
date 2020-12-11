@@ -18,6 +18,18 @@
     height: calc(100% - 64px);
 }
 
+.selectables {
+    margin: 8px 8px 8px 8px;
+}
+
+.device-group-state {
+    margin: 8px 8px 8px 8px;
+}
+
+.controls {
+
+}
+
 .device-group-edit-container ::ng-deep .mat-step-header .mat-step-icon-selected {
     background-color: #4484ce; /* cc */
     color: white;

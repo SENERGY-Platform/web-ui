@@ -14,48 +14,55 @@
   ~ limitations under the License.
   -->
 <div class="device-group-edit-container">
-    <div>
-        <label>
-            Search:
-            <input type="text" [formControl]="searchText">
-        </label>
-    </div>
-    <div>
-        <h2>Selectable Devices:</h2>
-        <div *ngFor="let option of selectableForm.value">
-            <button (click)="addDevice(option.device.id)">Add {{option.device.name || option.device.id}}</button>
+    <div fxLayout="row" xLayoutAlign="start start">
+        <div fxLayout="column" xLayoutAlign="start start" class="selectables">
+            <mat-form-field class="full-width" color="accent">
+                <input matInput placeholder="Search" [formControl]="searchText">
+                <mat-icon matPrefix *ngIf="searchText.value === ''">search</mat-icon>
+            </mat-form-field>
+            <div>
+                <div *ngFor="let option of selectableForm.value">
+                    <button (click)="addDevice(option.device.id)">Add {{option.device.name || option.device.id}}</button>
+                </div>
+            </div>
+        </div>
+
+        <div fxLayout="column" xLayoutAlign="start start" fxFlex class="device-group-state">
+
+            <div *ngIf="deviceGroupForm" [formGroup]="deviceGroupForm">
+                <mat-form-field class="full-width" color="accent">
+                    <input matInput placeholder="Name" formControlName="name" required>
+                </mat-form-field>
+                <mat-form-field class="full-width" color="accent">
+                    <input matInput placeholder="Image" formControlName="image">
+                </mat-form-field>
+            </div>
+
+            <mat-form-field>
+                <mat-label>Capabilities</mat-label>
+                <mat-chip-list aria-label="Capabilities">
+                    <mat-chip *ngFor="let capability of capabilities.value">
+                        {{capability.interaction}} {{capability.function_description || capability.function_name || capability.function_id}} {{capability.aspect_name || capability.device_class_name}}
+                    </mat-chip>
+                </mat-chip-list>
+            </mat-form-field>
+
+            <div>
+                <h2>Selected Devices:</h2>
+                <div *ngFor="let device of selectedForm.value">
+                    <button (click)="removeDevice(device.id)">Remove {{device.name}}</button>
+                </div>
+            </div>
+
+            <div class="controls" fxLayoutAlign="end center">
+                <button mat-raised-button color="accent"
+                        (click)="save()">Save
+                </button>
+            </div>
         </div>
     </div>
 
-    <div *ngIf="deviceGroupForm" [formGroup]="deviceGroupForm">
-        <h2>Device-Group</h2>
-        <label>
-            Name:
-            <input type="text" formControlName="name">
-        </label>
-        <label>
-            Image:
-            <input type="text" formControlName="image">
-        </label>
-    </div>
 
-    <div>
-        <h2>Selected Devices:</h2>
-        <div *ngFor="let device of selectedForm.value">
-            <button (click)="removeDevice(device.id)">Remove {{device.name}}</button>
-        </div>
-    </div>
-
-    <div>
-        <h2>Capabilities:</h2>
-        <div *ngFor="let capability of capabilities.value">
-           {{capability.interaction}} {{capability.function_description || capability.function_name || capability.function_id}} {{capability.aspect_name || capability.device_class_name}}
-        </div>
-    </div>
-
-    <div>
-        <button (click)="save()">Save</button>
-    </div>
 </div>
 
 

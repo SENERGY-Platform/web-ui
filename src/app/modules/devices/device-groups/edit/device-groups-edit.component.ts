@@ -168,7 +168,6 @@ export class DeviceGroupsEditComponent implements OnInit {
             this.router.onSameUrlNavigation = 'reload';
             this.router.navigate(['devices/devicegroups/edit/' + deviceGroup.id], {});
         }
-
     }
 
     private showMessage(deviceGroupSaved: DeviceGroupModel | null) {
