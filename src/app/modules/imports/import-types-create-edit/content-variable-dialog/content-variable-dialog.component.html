@@ -1,0 +1,62 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<h2 mat-dialog-title><span *ngIf="!data.infoOnly">Edit</span><span *ngIf="data.infoOnly">View</span> Content Variable
+</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="form" fxLayout="column">
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" required>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Type</mat-label>
+                <mat-select formControlName="type" required>
+                    <mat-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Characteristic</mat-label>
+                <senergy-select-search noneView="--None--" [options]="data.characteristics"
+                                       useOptionValueProperty="id"
+                                       useOptionViewProperty="name"
+                                       formControlName="characteristic_id"></senergy-select-search>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-checkbox formControlName="use_as_tag" matTooltip="If the import provides data of multiple unique
+             measurements and this variable identifies a single measurement, please check this box. If a measurement is only
+             identified by multiple variables, set this flag for all these variables.">
+                Identifies measurement
+            </mat-checkbox>
+        </div>
+
+    </form>
+</mat-dialog-content>
+
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="save()" *ngIf="!data.infoOnly">Save</button>
+</mat-dialog-actions>

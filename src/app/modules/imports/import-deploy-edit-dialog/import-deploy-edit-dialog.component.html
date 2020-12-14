@@ -1,0 +1,72 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<h2 mat-dialog-title>Deploy Import</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="form" fxLayout="column">
+        <div *ngIf="editMode">
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>ID</mat-label>
+                <input matInput formControlName="id">
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Image</mat-label>
+                <input matInput formControlName="image" required>
+            </mat-form-field>
+        </div>
+
+        <div *ngIf="editMode">
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Topic</mat-label>
+                <input matInput formControlName="kafka_topic">
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" required>
+            </mat-form-field>
+        </div>
+
+        <h4 fxFlex>Configs</h4>
+        <div *ngFor="let config of getConfigs()" [formGroup]="config" fxLayout="row">
+            <span fxFlex="20" class="config-name">{{config.get('name')?.value || ''}}</span>
+            <mat-form-field color="accent" appearance="outline" fxFlex="80"
+                            matTooltip="{{config.get('description')?.value || ''}}">
+                <mat-label>Value</mat-label>
+                <input matInput formControlName="value">
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-checkbox formControlName="restart" matTooltip="Should be checked, if the import is regularly
+             importing recent data. If it only imports historic data once, it should not be checked.">Restart
+            </mat-checkbox>
+        </div>
+
+
+    </form>
+</mat-dialog-content>
+
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="save()">Save</button>
+</mat-dialog-actions>
