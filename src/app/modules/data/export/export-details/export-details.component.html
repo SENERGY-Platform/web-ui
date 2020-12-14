@@ -30,11 +30,15 @@
                         <mat-icon *ngIf="export.FilterType === 'deviceId'" mat-list-icon>
                             router
                         </mat-icon>
-                        <mat-icon *ngIf="export.FilterType === 'pipeId' || 'operatorId'" mat-list-icon>
+                        <mat-icon *ngIf="export.FilterType === 'pipeId' || export.FilterType === 'operatorId'" mat-list-icon>
                             timeline
+                        </mat-icon>
+                        <mat-icon *ngIf="export.FilterType === 'import_id'" mat-list-icon>
+                            play_circle_outline
                         </mat-icon>
                         <h4 mat-line *ngIf="export.FilterType === 'deviceId'">Device</h4>
                         <h4 mat-line *ngIf="export.FilterType === 'pipeId'">Pipeline</h4>
+                        <h4 mat-line *ngIf="export.FilterType === 'import_id'">Import</h4>
                         <p mat-line>{{export.EntityName}} </p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
