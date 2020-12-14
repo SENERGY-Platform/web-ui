@@ -34,6 +34,7 @@ import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-ins
 import {DeviceTypeFunctionModel} from '../../device-types-overview/shared/device-type.model';
 import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
 import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
+import {MatChipsModule} from "@angular/material/chips";
 
 describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;
@@ -475,7 +476,7 @@ describe('DeviceGroupsEditComponent', () => {
 
         TestBed.configureTestingModule({
             imports: [CoreModule, RouterTestingModule.withRoutes([deviceGroupsEdit]), HttpClientTestingModule, MatSnackBarModule,
-                MatFormFieldModule, MatSelectModule, MatIconModule, ReactiveFormsModule, MatInputModule],
+                MatFormFieldModule, MatSelectModule, MatIconModule, ReactiveFormsModule, MatInputModule, MatChipsModule],
             declarations: [
                 DeviceGroupsEditComponent
             ],
