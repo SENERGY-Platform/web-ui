@@ -38,14 +38,14 @@
                 </mat-form-field>
             </div>
 
-            <mat-form-field>
+            <div>
                 <mat-label>Capabilities</mat-label>
                 <mat-chip-list aria-label="Capabilities">
                     <mat-chip *ngFor="let capability of capabilities.value">
                         {{capability.interaction}} {{capability.function_description || capability.function_name || capability.function_id}} {{capability.aspect_name || capability.device_class_name}}
                     </mat-chip>
                 </mat-chip-list>
-            </mat-form-field>
+            </div>
 
             <div>
                 <h2>Selected Devices:</h2>
