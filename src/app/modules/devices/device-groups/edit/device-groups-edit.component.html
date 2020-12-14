@@ -69,6 +69,7 @@
         <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="Search" [formControl]="searchText">
             <mat-icon matPrefix *ngIf="searchText.value === ''">search</mat-icon>
+            <mat-icon class="pointer" matPrefix *ngIf="searchText.value !== ''" (click)="resetSearchText()">close</mat-icon>
         </mat-form-field>
         <div class="selectable-devices">
             <mat-card fxLayout="row" fxLayoutAlign="space-between center" *ngFor="let option of selectableForm.value" class="selectable-card">

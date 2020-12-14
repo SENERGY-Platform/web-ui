@@ -337,6 +337,11 @@ export class DeviceGroupsEditComponent implements OnInit {
         this.runHelper(text, ids);
     }
 
+    resetSearchText() {
+        this.searchText.setValue('');
+        return false;
+    }
+
     private loadIotFunctions(functionIds: string[]): Promise<Map<string, DeviceTypeFunctionModel>> {
         const result: Map<string, DeviceTypeFunctionModel> = new Map<string, DeviceTypeFunctionModel>();
         const idsForRepoSearch: string[] = [];

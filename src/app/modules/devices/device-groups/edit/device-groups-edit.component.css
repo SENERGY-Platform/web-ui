@@ -26,6 +26,7 @@
 
 .selectable-devices {
     height: 100%;
+    width: 290px;
 }
 
 .selectable-card {
@@ -54,7 +55,7 @@
 }
 
 .selected-device-info{
-    width: 330px;
+    width: calc(100% - 40px);
 }
 
 .selected-device-id {
@@ -62,12 +63,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: smaller;
+    width: 100%;
 }
 
 .selected-device-name {
     font-size: large;
     font-weight: 500;
 
+}
+
+.pointer {
+    cursor: pointer;
 }
 
 .controls {
