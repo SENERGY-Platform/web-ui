@@ -13,9 +13,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="device-group-edit-container" fxLayout="row" xLayoutAlign="start start" >
+<div class="device-group-edit-container" fxLayout="column" fxLayout.gt-xs="row">
 
-        <div fxLayout="column" xLayoutAlign="start start" fxFlex class="device-group-state">
+        <div fxLayout="column" fxFlex class="device-group-state" [ngClass.gt-xs]="'device-group-state-large'">
             <h2>Device-Group</h2>
 
             <div *ngIf="deviceGroupForm" [formGroup]="deviceGroupForm">
@@ -64,7 +64,7 @@
                 </button>
             </div>
         </div>
-    <div fxLayout="column" xLayoutAlign="start start" class="selectables">
+    <div fxLayout="column" Class="selectables" [ngClass.gt-xs]="'selectables-large'">
         <h2>Selectable-Devices</h2>
         <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="Search" [formControl]="searchText">
