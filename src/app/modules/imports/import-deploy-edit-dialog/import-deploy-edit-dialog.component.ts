@@ -19,8 +19,12 @@ import {ImportInstanceConfigModel, ImportInstancesModel} from '../import-instanc
 import {ImportInstancesService} from '../import-instances/shared/import-instances.service';
 import {ImportTypesService} from '../import-types/shared/import-types.service';
 import {ImportTypeConfigModel, ImportTypeModel} from '../import-types/shared/import-types.model';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {TypeValueValidator} from "../validators/type-value-validator";
+import {FunctionsPermSearchModel} from "../../devices/functions/shared/functions-perm-search.model";
+import {AspectsPermSearchModel} from "../../devices/aspects/shared/aspects-perm-search.model";
+import {CharacteristicsPermSearchModel} from "../../devices/characteristics/shared/characteristics-perm-search.model";
 
 @Component({
     selector: 'senergy-import-deploy-dialog',
@@ -31,7 +35,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
 
     form = this.fb.group({
         id: {value: '', disabled: true},
-        name: '',
+        name: ['', Validators.required],
         import_type_id: {value: '', disabled: true},
         image: {value: '', disabled: true},
         kafka_topic: {value: '', disabled: true},
@@ -40,9 +44,17 @@ export class ImportDeployEditDialogComponent implements OnInit {
     });
 
 
-    STRING = 'https://schema.org/Text';
-    UNKNOWN = 'unknown';
     editMode = false;
+
+    STRING = 'https://schema.org/Text';
+    INTEGER = 'https://schema.org/Integer';
+    FLOAT = 'https://schema.org/Float';
+    BOOLEAN = 'https://schema.org/Boolean';
+    STRUCTURE = 'https://schema.org/StructuredValue';
+    LIST = 'https://schema.org/ItemList';
+    UNKNOWN = 'unknown';
+
+    types: Map<string, string> = new Map();
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: ImportInstancesModel,
                 private fb: FormBuilder, private dialogRef: MatDialogRef<ImportDeployEditDialogComponent>,
@@ -55,6 +67,13 @@ export class ImportDeployEditDialogComponent implements OnInit {
     ready = false;
 
     ngOnInit(): void {
+        this.types.set(this.STRING, 'string');
+        this.types.set(this.INTEGER, 'int');
+        this.types.set(this.FLOAT, 'float');
+        this.types.set(this.BOOLEAN, 'bool');
+        this.types.set(this.STRUCTURE, 'Structure');
+        this.types.set(this.LIST, 'List');
+
         this.editMode = this.data.id !== undefined && this.data.id.length > 0;
         this.form.patchValue(this.data);
         this.importTypesService.getImportType(this.data.import_type_id).subscribe(type => {
@@ -93,11 +112,11 @@ export class ImportDeployEditDialogComponent implements OnInit {
 
     private newConfigGroupFromType(config: ImportTypeConfigModel): FormGroup {
         const group = this.fb.group({
-            name: config.name,
-            value: '',
+            name: [config.name, Validators.required],
+            value: ['', Validators.required],
             type: config.type,
             description: config.description,
-        });
+        }, {validators: TypeValueValidator('type', 'value', false)});
         if (config.type !== this.STRING) {
             group.patchValue({value: JSON.stringify(config.default_value)});
         } else {

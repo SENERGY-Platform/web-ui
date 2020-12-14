@@ -47,8 +47,9 @@
 
         <h4 fxFlex>Configs</h4>
         <div *ngFor="let config of getConfigs()" [formGroup]="config" fxLayout="row">
-            <span fxFlex="20" class="config-name">{{config.get('name')?.value || ''}}</span>
-            <mat-form-field color="accent" appearance="outline" fxFlex="80"
+            <span fxFlex="20" class="inline">{{config.get('name')?.value || ''}}</span>
+            <span fxFlex="10" class="inline">{{types.get(config.get('type')?.value) || 'unknown'}}</span>
+            <mat-form-field color="accent" appearance="outline" fxFlex="70"
                             matTooltip="{{config.get('description')?.value || ''}}">
                 <mat-label>Value</mat-label>
                 <input matInput formControlName="value">
@@ -68,5 +69,5 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()">Save</button>
+    <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
 </mat-dialog-actions>
