@@ -15,7 +15,7 @@
  */
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ImportInstancesModel} from './shared/import-instances.model';
-import {FormArray, FormControl} from '@angular/forms';
+import {FormControl} from '@angular/forms';
 import {ImportTypePermissionSearchModel} from '../import-types/shared/import-types.model';
 import {debounceTime} from 'rxjs/internal/operators';
 import {Sort} from '@angular/material/sort';
@@ -25,6 +25,9 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ImportDeployEditDialogComponent} from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {ImportInstanceExportDialogComponent} from './import-instance-export-dialog/import-instance-export-dialog.component';
+import {ExportModel} from '../../data/export/shared/export.model';
+import {Router} from '@angular/router';
 
 @Component({
     selector: 'senergy-import-instances',
@@ -36,7 +39,8 @@ export class ImportInstancesComponent implements OnInit {
     @ViewChild(MatTable, {static: false}) table!: MatTable<ImportTypePermissionSearchModel>;
 
     constructor(private importInstancesService: ImportInstancesService, private dialog: MatDialog,
-                private snackBar: MatSnackBar, private deleteDialog: DialogsService) {
+                private snackBar: MatSnackBar, private deleteDialog: DialogsService,
+                private router: Router) {
     }
 
     instances: ImportInstancesModel[] = [];
@@ -110,5 +114,19 @@ export class ImportInstancesComponent implements OnInit {
         this.limit += this.limitInit;
         this.offset = this.instances.length;
         this.load();
+    }
+
+    export(m: ImportInstancesModel) {
+        const config: MatDialogConfig = {
+            data: m,
+            minHeight: '300px',
+            minWidth: '400px',
+        };
+        this.dialog.open(ImportInstanceExportDialogComponent, config).afterClosed()
+            .subscribe((val: ExportModel | undefined) => {
+                if (val !== undefined) {
+                    this.router.navigateByUrl('data/export/details/' + val.ID);
+                }
+            });
     }
 }

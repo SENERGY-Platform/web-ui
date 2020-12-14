@@ -31,6 +31,7 @@ export interface ExportModel {
     Offset: string;
     Generated: boolean;
     Values: ExportValueModel [];
+    Tags?:  ExportValueModel [];
     CreatedAt: string;
     UpdatedAt: string;
 }

@@ -38,6 +38,7 @@ import {ContentVariableDialogComponent} from './import-types-create-edit/content
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatTreeModule} from '@angular/material/tree';
 import {ImportDeployEditDialogComponent} from './import-deploy-edit-dialog/import-deploy-edit-dialog.component';
+import { ImportInstanceExportDialogComponent } from './import-instances/import-instance-export-dialog/import-instance-export-dialog.component';
 
 
 const types = {
@@ -79,6 +80,7 @@ const instances = {
         ImportTypesCreateEditComponent,
         ContentVariableDialogComponent,
         ImportDeployEditDialogComponent,
+        ImportInstanceExportDialogComponent,
     ],
     imports: [
         CommonModule,

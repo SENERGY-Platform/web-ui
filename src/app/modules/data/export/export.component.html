@@ -73,6 +73,9 @@
                                                     <mat-icon *ngIf="item.FilterType === 'pipeId' || item.FilterType === 'operatorId'" mat-list-icon>
                                                         timeline
                                                     </mat-icon>
+                                                    <mat-icon *ngIf="item.FilterType === 'import_id'" mat-list-icon>
+                                                        play_circle_outline
+                                                    </mat-icon>
                                                     <h3 mat-line matTooltip="{{item.EntityName}}">{{item.EntityName}}</h3>
                                                     <p mat-line>Source</p>
                                                 </mat-list-item>
@@ -87,8 +90,8 @@
                                     </mat-card-content>
                                     <mat-card-actions>
                                         <div fxFlex></div>
-                                        <button mat-icon-button routerLink="/data/export/edit/{{item.ID}}">
-                                            <mat-icon  color="accent">
+                                        <button mat-icon-button routerLink="/data/export/edit/{{item.ID}}" [disabled]="item.FilterType === 'import_id'" color="accent">
+                                            <mat-icon>
                                                 edit
                                             </mat-icon>
                                         </button>
