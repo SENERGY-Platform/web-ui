@@ -58,5 +58,5 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" *ngIf="!data.infoOnly">Save</button>
+    <button mat-raised-button color="accent" (click)="save()" *ngIf="!data.infoOnly" [disabled]="form.invalid">Save</button>
 </mat-dialog-actions>

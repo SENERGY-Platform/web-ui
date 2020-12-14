@@ -17,7 +17,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ImportTypeContentVariableModel} from '../../import-types/shared/import-types.model';
 import {CharacteristicsPermSearchModel} from '../../../devices/characteristics/shared/characteristics-perm-search.model';
-import {FormBuilder} from '@angular/forms';
+import {FormBuilder, Validators} from '@angular/forms';
 
 @Component({
     selector: 'senergy-import-content-variable-dialog',
@@ -27,8 +27,8 @@ import {FormBuilder} from '@angular/forms';
 export class ContentVariableDialogComponent implements OnInit {
 
     form = this.fb.group({
-        name: '',
-        type: '',
+        name: [undefined, Validators.required],
+        type: [undefined, Validators.required],
         characteristic_id: '',
         use_as_tag: false
     });
