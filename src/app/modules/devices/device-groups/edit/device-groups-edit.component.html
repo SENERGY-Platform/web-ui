@@ -13,33 +13,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="device-group-edit-container">
-    <div fxLayout="row" xLayoutAlign="start start">
-        <div fxLayout="column" xLayoutAlign="start start" class="selectables">
-            <mat-form-field class="full-width" color="accent">
-                <input matInput placeholder="Search" [formControl]="searchText">
-                <mat-icon matPrefix *ngIf="searchText.value === ''">search</mat-icon>
-            </mat-form-field>
-            <div>
-                <mat-card fxLayout="row" fxLayoutAlign="space-between center" *ngFor="let option of selectableForm.value" class="selectable-card">
-                    <div class="selectable-device-info">
-                        <div matTooltip="{{option.device.name || option.device.id}}" class="selectable-device-name">
-                            {{option.device.name || option.device.id}}
-                        </div>
-                    </div>
-                    <div class="selectable-device-ctrl">
-                        <button mat-icon-button color="accent" (click)="addDevice(option.device.id)" matTooltip="Add" *ngIf="option.maintains_group_usability">
-                            <mat-icon>add</mat-icon>
-                        </button>
-                        <button mat-icon-button color="warn" (click)="addDevice(option.device.id)" matTooltip="Add (wont maintain group usability)" *ngIf="!option.maintains_group_usability">
-                            <mat-icon>add</mat-icon>
-                        </button>
-                    </div>
-                </mat-card>
-            </div>
-        </div>
+<div class="device-group-edit-container" fxLayout="row" xLayoutAlign="start start" >
 
         <div fxLayout="column" xLayoutAlign="start start" fxFlex class="device-group-state">
+            <h2>Device-Group</h2>
 
             <div *ngIf="deviceGroupForm" [formGroup]="deviceGroupForm">
                 <mat-form-field class="full-width" color="accent">
@@ -50,7 +27,7 @@
                 </mat-form-field>
             </div>
 
-            <div>
+            <div class="capabilities-container">
                 <mat-label>Capabilities</mat-label>
                 <mat-chip-list aria-label="Capabilities">
                     <mat-chip *ngFor="let capability of capabilities.value">
@@ -87,9 +64,30 @@
                 </button>
             </div>
         </div>
+    <div fxLayout="column" xLayoutAlign="start start" class="selectables">
+        <h2>Selectable-Devices</h2>
+        <mat-form-field class="full-width" color="accent">
+            <input matInput placeholder="Search" [formControl]="searchText">
+            <mat-icon matPrefix *ngIf="searchText.value === ''">search</mat-icon>
+        </mat-form-field>
+        <div class="selectable-devices">
+            <mat-card fxLayout="row" fxLayoutAlign="space-between center" *ngFor="let option of selectableForm.value" class="selectable-card">
+                <div class="selectable-device-info">
+                    <div matTooltip="{{option.device.name || option.device.id}}" class="selectable-device-name">
+                        {{option.device.name || option.device.id}}
+                    </div>
+                </div>
+                <div class="selectable-device-ctrl">
+                    <button mat-icon-button color="accent" (click)="addDevice(option.device.id)" matTooltip="Add" *ngIf="option.maintains_group_usability">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="addDevice(option.device.id)" matTooltip="Add (wont maintain group usability)" *ngIf="!option.maintains_group_usability">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                </div>
+            </mat-card>
+        </div>
     </div>
-
-
 </div>
 
 

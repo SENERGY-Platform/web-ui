@@ -20,6 +20,12 @@
 
 .selectables {
     margin: 8px 8px 8px 8px;
+    height: 100%;
+    overflow: auto;
+}
+
+.selectable-devices {
+    height: 100%;
 }
 
 .selectable-card {
@@ -29,9 +35,16 @@
 
 .device-group-state {
     margin: 8px 8px 8px 8px;
+    height: 100%;
+    overflow-y: auto;
 }
 
 .selected-devices-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.capabilities-container {
     margin-top: 10px;
     margin-bottom: 10px;
 }
