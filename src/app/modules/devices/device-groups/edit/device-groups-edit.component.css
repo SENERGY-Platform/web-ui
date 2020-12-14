@@ -22,8 +22,39 @@
     margin: 8px 8px 8px 8px;
 }
 
+.selectable-card {
+    width: 290px;
+    margin-bottom: 5px;
+}
+
 .device-group-state {
     margin: 8px 8px 8px 8px;
+}
+
+.selected-devices-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.selected-device-card {
+    margin-bottom: 10px;
+}
+
+.selected-device-info{
+    width: 330px;
+}
+
+.selected-device-id {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: smaller;
+}
+
+.selected-device-name {
+    font-size: large;
+    font-weight: 500;
+
 }
 
 .controls {

@@ -21,9 +21,21 @@
                 <mat-icon matPrefix *ngIf="searchText.value === ''">search</mat-icon>
             </mat-form-field>
             <div>
-                <div *ngFor="let option of selectableForm.value">
-                    <button (click)="addDevice(option.device.id)">Add {{option.device.name || option.device.id}}</button>
-                </div>
+                <mat-card fxLayout="row" fxLayoutAlign="space-between center" *ngFor="let option of selectableForm.value" class="selectable-card">
+                    <div class="selectable-device-info">
+                        <div matTooltip="{{option.device.name || option.device.id}}" class="selectable-device-name">
+                            {{option.device.name || option.device.id}}
+                        </div>
+                    </div>
+                    <div class="selectable-device-ctrl">
+                        <button mat-icon-button color="accent" (click)="addDevice(option.device.id)" matTooltip="Add" *ngIf="option.maintains_group_usability">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="addDevice(option.device.id)" matTooltip="Add (wont maintain group usability)" *ngIf="!option.maintains_group_usability">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                    </div>
+                </mat-card>
             </div>
         </div>
 
@@ -47,11 +59,26 @@
                 </mat-chip-list>
             </div>
 
-            <div>
-                <h2>Selected Devices:</h2>
-                <div *ngFor="let device of selectedForm.value">
-                    <button (click)="removeDevice(device.id)">Remove {{device.name}}</button>
+            <div class="selected-devices-container">
+                <mat-label>Selected Devices</mat-label>
+                <div *ngIf="selectedForm.value.length > 0">
+                    <mat-card  *ngFor="let item of selectedForm.value" fxLayout="row" fxLayoutAlign="space-between center" class="selected-device-card">
+                        <div class="selected-device-info">
+                            <div matTooltip="{{item.name}}" class="selected-device-name">
+                                {{item.name}}
+                            </div>
+                            <div *ngIf="true" matTooltip="{{item.id}}" class="selected-device-id">
+                                {{item.id}}
+                            </div>
+                        </div>
+                        <div class="selected-device-ctrl">
+                            <button mat-icon-button color="accent" (click)="removeDevice(item.id)" matTooltip="Remove">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </mat-card>
                 </div>
+
             </div>
 
             <div class="controls" fxLayoutAlign="end center">

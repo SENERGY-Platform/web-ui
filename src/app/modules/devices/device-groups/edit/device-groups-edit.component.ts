@@ -34,6 +34,7 @@ import {debounceTime, delay} from 'rxjs/operators';
 import {DeviceTypeFunctionModel} from '../../device-types-overview/shared/device-type.model';
 import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
 import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
+import {ResponsiveService} from '../../../../core/services/responsive.service';
 
 @Component({
     selector: 'senergy-device-groups-edit',
@@ -55,7 +56,7 @@ export class DeviceGroupsEditComponent implements OnInit {
     aspectCache: Map<string, AspectsPermSearchModel> = new Map<string, AspectsPermSearchModel>();
     deviceClassCache: Map<string, DeviceClassesPermSearchModel> = new Map<string, DeviceClassesPermSearchModel>();
 
-    debounceTimeInMs = 1000;
+    debounceTimeInMs = 500;
     rerouteAfterSaveDelayInMs = 2000;
 
     constructor(private _formBuilder: FormBuilder,
