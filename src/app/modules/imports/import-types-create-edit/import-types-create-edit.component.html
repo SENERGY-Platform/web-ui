@@ -69,7 +69,7 @@
                 <div fxLayout="row" fxLayoutGap="8px">
                     <mat-form-field color="accent" appearance="outline" fxFlex="30">
                         <mat-label>Name</mat-label>
-                        <input matInput formControlName="name">
+                        <input matInput formControlName="name" required>
                     </mat-form-field>
                     <mat-form-field color="accent" appearance="outline" fxFlex>
                         <mat-label>Description</mat-label>
@@ -80,7 +80,7 @@
                 <div fxLayout="row" fxLayoutGap="8px">
                     <mat-form-field color="accent" appearance="outline" fxFlex="30">
                         <mat-label>Type</mat-label>
-                        <mat-select formControlName="type">
+                        <mat-select formControlName="type" required>
                             <mat-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mat-option>
                         </mat-select>
                     </mat-form-field>
@@ -121,7 +121,8 @@
                         <button mat-icon-button (click)="editContentVariable(node)" color="accent">
                             <mat-icon>edit</mat-icon>
                         </button>
-                        <button mat-icon-button (click)="addSubContentVariable(node)" color="accent">
+                        <button mat-icon-button (click)="addSubContentVariable(node)" color="accent"
+                                [disabled]="!isComplex(node)">
                             <mat-icon>add</mat-icon>
                         </button>
                     </span>
@@ -149,7 +150,8 @@
                             <button mat-icon-button (click)="editContentVariable(node)" color="accent">
                                 <mat-icon>edit</mat-icon>
                             </button>
-                            <button mat-icon-button (click)="addSubContentVariable(node)" color="accent">
+                            <button mat-icon-button (click)="addSubContentVariable(node)" color="accent"
+                                [disabled]="!isComplex(node)">
                                 <mat-icon>add</mat-icon>
                             </button>
                         </span>
@@ -182,7 +184,7 @@
         </button>
         <span fxFlex></span>
 
-        <button mat-raised-button color="accent" (click)="save()" *ngIf="!detailsMode">
+        <button mat-raised-button color="accent" (click)="save()" *ngIf="!detailsMode" [disabled]="form.invalid">
             Save
         </button>
     </div>

@@ -15,7 +15,7 @@
  */
 import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormGroup, ValidatorFn, Validators} from '@angular/forms';
 import {
     ImportTypeConfigModel,
     ImportTypeContentVariableModel,
@@ -35,6 +35,7 @@ import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {Observable} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {convertPunctuation, TypeValueValidator} from '../validators/type-value-validator';
 
 @Component({
     selector: 'senergy-import-types-create-edit',
@@ -55,6 +56,13 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 private functionsService: FunctionsService) {
     }
 
+    static STRING = 'https://schema.org/Text';
+    static INTEGER = 'https://schema.org/Integer';
+    static FLOAT = 'https://schema.org/Float';
+    static BOOLEAN = 'https://schema.org/Boolean';
+    static STRUCTURE = 'https://schema.org/StructuredValue';
+    static LIST = 'https://schema.org/ItemList';
+
     ready = false;
     id: string | null = null;
     editMode = false;
@@ -63,28 +71,22 @@ export class ImportTypesCreateEditComponent implements OnInit {
     aspects: AspectsPermSearchModel[] = [];
     characteristics: CharacteristicsPermSearchModel[] = [];
 
-    STRING = 'https://schema.org/Text';
-    INTEGER = 'https://schema.org/Integer';
-    FLOAT = 'https://schema.org/Float';
-    BOOLEAN = 'https://schema.org/Boolean';
-    STRUCTURE = 'https://schema.org/StructuredValue';
-    LIST = 'https://schema.org/ItemList';
 
     types: { id: string; name: string }[] = [
-        {id: this.STRING, name: 'string'},
-        {id: this.INTEGER, name: 'int'},
-        {id: this.FLOAT, name: 'float'},
-        {id: this.BOOLEAN, name: 'bool'},
-        {id: this.STRUCTURE, name: 'Structure'},
-        {id: this.LIST, name: 'List'},
+        {id: ImportTypesCreateEditComponent.STRING, name: 'string'},
+        {id: ImportTypesCreateEditComponent.INTEGER, name: 'int'},
+        {id: ImportTypesCreateEditComponent.FLOAT, name: 'float'},
+        {id: ImportTypesCreateEditComponent.BOOLEAN, name: 'bool'},
+        {id: ImportTypesCreateEditComponent.STRUCTURE, name: 'Structure'},
+        {id: ImportTypesCreateEditComponent.LIST, name: 'List'},
     ];
 
 
     form = this.fb.group({
         id: '',
-        name: '',
+        name: [undefined, Validators.required],
         description: '',
-        image: '',
+        image: [undefined, Validators.required],
         default_restart: true,
         configs: this.fb.array([]),
         aspect_ids: [],
@@ -95,27 +97,27 @@ export class ImportTypesCreateEditComponent implements OnInit {
     usesDefaultOutput = true;
     defaultOutput: ImportTypeContentVariableModel = {
         name: 'root',
-        type: this.STRUCTURE,
+        type: ImportTypesCreateEditComponent.STRUCTURE,
         characteristic_id: '',
         use_as_tag: false,
         sub_content_variables: [
             {
                 name: 'import_id',
-                type: this.STRING,
+                type: ImportTypesCreateEditComponent.STRING,
                 sub_content_variables: [],
                 characteristic_id: '',
                 use_as_tag: false,
             },
             {
                 name: 'time',
-                type: this.STRING,
+                type: ImportTypesCreateEditComponent.STRING,
                 sub_content_variables: [],
                 characteristic_id: environment.timeStampCharacteristicId,
                 use_as_tag: false,
             },
             {
                 name: 'value',
-                type: this.STRUCTURE,
+                type: ImportTypesCreateEditComponent.STRUCTURE,
                 sub_content_variables: [],
                 characteristic_id: '',
                 use_as_tag: false,
@@ -151,7 +153,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 this.importTypesService.getImportType(this.id || '').subscribe(type => {
                     this.form.patchValue(type);
                     type.configs.forEach(config => this.addConfig(config));
-                    const value = type.output.sub_content_variables?.find(sub => sub.name === 'value' && sub.type === this.STRUCTURE);
+                    const value = type.output.sub_content_variables?.find(sub => sub.name === 'value' && sub.type === ImportTypesCreateEditComponent.STRUCTURE);
                     if (type.output.name === 'root' && type.output.sub_content_variables?.length === 3 && value !== undefined) {
                         this.dataSource.data = value.sub_content_variables || [];
                     } else {
@@ -192,8 +194,12 @@ export class ImportTypesCreateEditComponent implements OnInit {
         this.ready = false;
         const val: ImportTypeModel = this.form.getRawValue();
         val.configs.forEach((config: ImportTypeConfigModel) => {
-            if (config.type !== this.STRING) {
-                config.default_value = JSON.parse(config.default_value);
+            if (config.type !== ImportTypesCreateEditComponent.STRING) {
+                let toParse = config.default_value;
+                if (config.type === ImportTypesCreateEditComponent.INTEGER) {
+                    toParse = convertPunctuation(toParse);
+                }
+                config.default_value = JSON.parse(toParse);
             }
         });
         if (this.usesDefaultOutput) {
@@ -221,17 +227,17 @@ export class ImportTypesCreateEditComponent implements OnInit {
 
     addConfig(config: ImportTypeConfigModel | undefined) {
         const group = this.fb.group({
-            name: '',
+            name: [undefined, Validators.required],
             description: '',
-            type: '',
+            type: [undefined, Validators.required],
             default_value: '',
-        });
+        }, {validators: TypeValueValidator('type', 'default_value')});
         if (this.detailsMode) {
             group.disable();
         }
         if (config !== undefined) {
             group.patchValue({name: config.name, description: config.description, type: config.type});
-            if (config.type !== this.STRING) {
+            if (config.type !== ImportTypesCreateEditComponent.STRING) {
                 group.patchValue({default_value: JSON.stringify(config.default_value)});
             } else {
                 group.patchValue({default_value: config.default_value});
@@ -257,7 +263,14 @@ export class ImportTypesCreateEditComponent implements OnInit {
     editContentVariable(sub: ImportTypeContentVariableModel) {
         this.openDialog(sub).subscribe(val => {
             if (val !== undefined) {
+                if (!this.isComplex(val)) {
+                    val.sub_content_variables?.forEach(child => this.deleteContentVariable(child));
+                    val.sub_content_variables = [];
+                }
                 sub = val;
+                const data = this.dataSource.data;
+                this.dataSource.data = [];
+                this.dataSource.data = data; // forces redraw
             }
         });
     }
@@ -326,5 +339,9 @@ export class ImportTypesCreateEditComponent implements OnInit {
 
     viewContentVariable(node: ImportTypeContentVariableModel) {
         this.openDialog(node, true);
+    }
+
+    isComplex(node: ImportTypeContentVariableModel): boolean {
+        return node.type === ImportTypesCreateEditComponent.STRUCTURE || node.type === ImportTypesCreateEditComponent.LIST;
     }
 }
