@@ -28,10 +28,32 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
+import {CharacteristicsPermSearchModel} from '../../../devices/characteristics/shared/characteristics-perm-search.model';
 
-describe('ContentVariableDialogComponent', () => {
+fdescribe('ContentVariableDialogComponent', () => {
     let component: ContentVariableDialogComponent;
     let fixture: ComponentFixture<ContentVariableDialogComponent>;
+
+    const exampleChar: CharacteristicsPermSearchModel = {
+        concept_id: '0',
+        creator: '0',
+        id: 'char0',
+        name: 'char0',
+        permissions: {
+            a: true,
+            r: true,
+            w: true,
+            x: true,
+        },
+        shared: false,
+    };
+
+    const dialogData = {
+        characteristics: [exampleChar],
+        content: undefined,
+        infoOnly: false,
+    };
+    let r: any;
 
 
     beforeEach(async () => {
@@ -52,11 +74,12 @@ describe('ContentVariableDialogComponent', () => {
                 MatDialogModule,
             ],
             providers: [
-                {provide: MAT_DIALOG_DATA, useValue: {characteristics: []}},
+                {provide: MAT_DIALOG_DATA, useValue: dialogData},
                 {
                     provide: MatDialogRef,
                     useValue: {
-                        close: (_: any) => {
+                        close: (rv: any) => {
+                            r = rv;
                         }
                     }
                 },
@@ -74,4 +97,23 @@ describe('ContentVariableDialogComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('should allow editing', () => {
+        expect(component.form.disabled).toBeFalse();
+    });
+
+    it('should return a valid value', () => {
+        r = undefined;
+        const val = {
+            name: 'test',
+            type: component.STRING,
+            characteristic_id: 'char0',
+            use_as_tag: true,
+        };
+        component.form.patchValue(val);
+        component.save();
+        expect(r).toEqual(val);
+    });
+
+
 });
