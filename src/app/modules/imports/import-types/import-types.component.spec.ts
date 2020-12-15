@@ -17,10 +17,10 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {ImportTypesComponent} from './import-types.component';
 import {CoreModule} from '../../../core/core.module';
-import {RouterModule} from '@angular/router';
+import {Router, RouterModule} from '@angular/router';
 import {ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
-import {MatDialogModule} from '@angular/material/dialog';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {FlexModule} from '@angular/flex-layout';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -37,6 +37,9 @@ import {ImportTypesService} from './shared/import-types.service';
 import {of} from 'rxjs';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {MatTableModule} from '@angular/material/table';
+import {ImportTypePermissionSearchModel} from './shared/import-types.model';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 
 describe('ImportTypesComponent', () => {
     let component: ImportTypesComponent;
@@ -44,7 +47,31 @@ describe('ImportTypesComponent', () => {
 
     const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
 
-    importTypesServiceSpy.listImportTypes.and.returnValue(of([]));
+    const permSearchModelExample = {
+        id: '0',
+        permissions: {
+            a: true,
+            r: true,
+            w: true,
+            x: true,
+        }
+    } as ImportTypePermissionSearchModel;
+    importTypesServiceSpy.listImportTypes.and.returnValue(of([
+        permSearchModelExample,
+    ] as ImportTypePermissionSearchModel[]));
+
+    importTypesServiceSpy.deleteImportInstance.and.returnValue(of());
+
+    const deleteDialogServiceSpy: Spy<DialogsService> = createSpyFromClass(DialogsService);
+    deleteDialogServiceSpy.openDeleteDialog.and.returnValue({afterClosed: () => of(true)});
+
+    const routerSpy: Spy<Router> = createSpyFromClass(Router);
+    routerSpy.navigateByUrl.and.returnValue(new Promise(_ => true));
+
+    const dialogSpy: Spy<MatDialog> = createSpyFromClass(MatDialog);
+    dialogSpy.open.and.returnValue({afterClosed: () => of(true)});
+
+    const permissionsDialogServiceSpy: Spy<PermissionsDialogService> = createSpyFromClass(PermissionsDialogService);
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -76,6 +103,10 @@ describe('ImportTypesComponent', () => {
             ],
             providers: [
                 {provide: ImportTypesService, useValue: importTypesServiceSpy},
+                {provide: DialogsService, useValue: deleteDialogServiceSpy},
+                {provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy},
+                {provide: Router, useValue: routerSpy},
+                {provide: MatDialog, useValue: dialogSpy},
             ]
         })
             .compileComponents();
@@ -87,7 +118,50 @@ describe('ImportTypesComponent', () => {
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it('should create and load data', () => {
         expect(component).toBeTruthy();
+        expect(importTypesServiceSpy.listImportTypes).toHaveBeenCalled();
+    });
+
+    it('should delete a type', () => {
+        component.delete(permSearchModelExample);
+        expect(deleteDialogServiceSpy.openDeleteDialog).toHaveBeenCalled();
+        expect(importTypesServiceSpy.deleteImportInstance).toHaveBeenCalled();
+    });
+
+    it('should search', () => {
+        jasmine.clock().install();
+        importTypesServiceSpy.listImportTypes.calls.reset();
+        component.searchControl.patchValue('search');
+        jasmine.clock().tick(301);
+        expect(importTypesServiceSpy.listImportTypes.calls.mostRecent().args[0]).toEqual('search');
+        jasmine.clock().uninstall();
+    });
+
+    it('should open the edit view', () => {
+        component.edit(permSearchModelExample);
+        expect(routerSpy.navigateByUrl.calls.mostRecent().args[0]).toEqual('/imports/types/edit/0');
+    });
+
+    it('should open the detail view', () => {
+        component.details(permSearchModelExample);
+        expect(routerSpy.navigateByUrl.calls.mostRecent().args[0]).toEqual('/imports/types/details/0');
+    });
+
+    it('should open the add view', () => {
+        component.add();
+        expect(routerSpy.navigateByUrl.calls.mostRecent().args[0]).toEqual('/imports/types/new');
+    });
+
+    it('should open the start dialog', () => {
+        dialogSpy.open.calls.reset();
+        component.start(permSearchModelExample);
+        expect(dialogSpy.open).toHaveBeenCalled();
+    });
+
+    it('should open the permission dialog', () => {
+        permissionsDialogServiceSpy.openPermissionDialog.calls.reset();
+        component.share(permSearchModelExample);
+        expect(permissionsDialogServiceSpy.openPermissionDialog).toHaveBeenCalled();
     });
 });
