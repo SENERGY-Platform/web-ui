@@ -16,10 +16,10 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ImportInstancesComponent} from './import-instances.component';
 import {CoreModule} from '../../../core/core.module';
-import {RouterModule} from '@angular/router';
+import {Router, RouterModule} from '@angular/router';
 import {ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
-import {MatDialogModule} from '@angular/material/dialog';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FlexModule} from '@angular/flex-layout';
@@ -37,14 +37,35 @@ import {ImportInstancesService} from './shared/import-instances.service';
 import {of} from 'rxjs';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {MatTableModule} from '@angular/material/table';
+import {ImportInstancesModel} from './shared/import-instances.model';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 describe('ImportInstancesComponent', () => {
     let component: ImportInstancesComponent;
     let fixture: ComponentFixture<ImportInstancesComponent>;
 
-    const importInstancesServiceSpy: Spy<ImportInstancesService> = createSpyFromClass(ImportInstancesService);
+    const testInstance: ImportInstancesModel = {
+        import_type_id: 'typeid',
+        name: 'test',
+        kafka_topic: 'test-topic',
+        id: 'test-id',
+        restart: true,
+        configs: [],
+        image: 'test-image',
+    };
 
-    importInstancesServiceSpy.listImportInstances.and.returnValue(of([]));
+    const importInstancesServiceSpy: Spy<ImportInstancesService> = createSpyFromClass(ImportInstancesService);
+    importInstancesServiceSpy.listImportInstances.and.returnValue(of([testInstance]));
+    importInstancesServiceSpy.deleteImportInstance.and.returnValue(of());
+
+    const deleteDialogServiceSpy: Spy<DialogsService> = createSpyFromClass(DialogsService);
+    deleteDialogServiceSpy.openDeleteDialog.and.returnValue({afterClosed: () => of(true)});
+
+    const routerSpy: Spy<Router> = createSpyFromClass(Router);
+    routerSpy.navigateByUrl.and.returnValue(new Promise(_ => true));
+
+    const dialogSpy: Spy<MatDialog> = createSpyFromClass(MatDialog);
+    dialogSpy.open.and.returnValue({afterClosed: () => of(true)});
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -73,6 +94,9 @@ describe('ImportInstancesComponent', () => {
             ],
             providers: [
                 {provide: ImportInstancesService, useValue: importInstancesServiceSpy},
+                {provide: DialogsService, useValue: deleteDialogServiceSpy},
+                {provide: Router, useValue: routerSpy},
+                {provide: MatDialog, useValue: dialogSpy},
             ]
         })
             .compileComponents();
@@ -84,7 +108,36 @@ describe('ImportInstancesComponent', () => {
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it('should create and load data', () => {
         expect(component).toBeTruthy();
+        expect(importInstancesServiceSpy.listImportInstances).toHaveBeenCalled();
     });
+
+    it('should delete a instance', () => {
+        component.delete(testInstance);
+        expect(deleteDialogServiceSpy.openDeleteDialog).toHaveBeenCalled();
+        expect(importInstancesServiceSpy.deleteImportInstance).toHaveBeenCalled();
+    });
+
+    it('should search', () => {
+        jasmine.clock().install();
+        importInstancesServiceSpy.listImportInstances.calls.reset();
+        component.searchControl.patchValue('search');
+        jasmine.clock().tick(301);
+        expect(importInstancesServiceSpy.listImportInstances.calls.mostRecent().args[0]).toEqual('search');
+        jasmine.clock().uninstall();
+    });
+
+    it('should open the edit dialog', () => {
+        dialogSpy.open.calls.reset();
+        component.edit(testInstance);
+        expect(dialogSpy.open).toHaveBeenCalled();
+    });
+
+    it('should open the export dialog', () => {
+        dialogSpy.open.calls.reset();
+        component.export(testInstance);
+        expect(dialogSpy.open).toHaveBeenCalled();
+    });
+
 });
