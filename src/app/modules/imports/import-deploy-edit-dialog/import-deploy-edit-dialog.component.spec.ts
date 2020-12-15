@@ -33,7 +33,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ImportInstancesService} from '../import-instances/shared/import-instances.service';
 
-fdescribe('ImportDeployDialogComponent', () => {
+describe('ImportDeployDialogComponent', () => {
     let component: ImportDeployEditDialogComponent;
     let fixture: ComponentFixture<ImportDeployEditDialogComponent>;
     let r: any;
