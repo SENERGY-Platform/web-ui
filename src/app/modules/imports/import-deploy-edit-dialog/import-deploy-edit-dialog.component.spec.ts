@@ -31,10 +31,12 @@ import {HttpClientModule} from '@angular/common/http';
 import {of} from 'rxjs';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {ImportInstancesService} from '../import-instances/shared/import-instances.service';
 
-describe('ImportDeployDialogComponent', () => {
+fdescribe('ImportDeployDialogComponent', () => {
     let component: ImportDeployEditDialogComponent;
     let fixture: ComponentFixture<ImportDeployEditDialogComponent>;
+    let r: any;
 
     const importTypeServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
     importTypeServiceSpy.getImportType.and.returnValue(of({
@@ -55,6 +57,10 @@ describe('ImportDeployDialogComponent', () => {
         function_ids: [],
         owner: 'user',
     }));
+
+    const importInstancesServiceSpy: Spy<ImportInstancesService> = createSpyFromClass(ImportInstancesService);
+    importInstancesServiceSpy.saveImportInstance.and.returnValue(of(true));
+
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -82,23 +88,43 @@ describe('ImportDeployDialogComponent', () => {
                 {
                     provide: MatDialogRef,
                     useValue: {
-                        close: (_: any) => {
+                        close: (rv: any) => {
+                            r = rv;
                         }
                     }
                 },
                 {provide: ImportTypesService, useValue: importTypeServiceSpy},
+                {provide: ImportInstancesService, useValue: importInstancesServiceSpy},
             ]
         })
             .compileComponents();
     });
 
     beforeEach(() => {
+        importTypeServiceSpy.getImportType.calls.reset();
         fixture = TestBed.createComponent(ImportDeployEditDialogComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it('should create and load the type', () => {
         expect(component).toBeTruthy();
+        expect(importTypeServiceSpy.getImportType).toHaveBeenCalled();
+    });
+
+    it('should allow editing', () => {
+        expect(component.form.disabled).toBeFalse();
+    });
+
+    it('should save correctly', () => {
+        importInstancesServiceSpy.saveImportInstance.calls.reset();
+        const val = {
+            name: 'test',
+            image: 'test-image',
+        };
+        component.form.patchValue(val);
+        component.save();
+        expect(r).toBeTrue();
+        expect(importInstancesServiceSpy.saveImportInstance).toHaveBeenCalled();
     });
 });

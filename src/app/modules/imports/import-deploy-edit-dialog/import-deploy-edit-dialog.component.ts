@@ -21,10 +21,7 @@ import {ImportTypesService} from '../import-types/shared/import-types.service';
 import {ImportTypeConfigModel, ImportTypeModel} from '../import-types/shared/import-types.model';
 import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {TypeValueValidator} from "../validators/type-value-validator";
-import {FunctionsPermSearchModel} from "../../devices/functions/shared/functions-perm-search.model";
-import {AspectsPermSearchModel} from "../../devices/aspects/shared/aspects-perm-search.model";
-import {CharacteristicsPermSearchModel} from "../../devices/characteristics/shared/characteristics-perm-search.model";
+import {TypeValueValidator} from '../validators/type-value-validator';
 
 @Component({
     selector: 'senergy-import-deploy-dialog',
