@@ -30,7 +30,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {CharacteristicsPermSearchModel} from '../../../devices/characteristics/shared/characteristics-perm-search.model';
 
-fdescribe('ContentVariableDialogComponent', () => {
+describe('ContentVariableDialogComponent', () => {
     let component: ContentVariableDialogComponent;
     let fixture: ComponentFixture<ContentVariableDialogComponent>;
 
