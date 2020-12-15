@@ -26,7 +26,7 @@ export function TypeValueValidator(typeControlName: string, valueControlName: st
 
         let defaultNotOk = false;
 
-        if (!defaultValue) {
+        if (!defaultValue.value) {
             if (allowEmpty) {
                 return null;
             } else {
