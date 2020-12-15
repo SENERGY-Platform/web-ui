@@ -37,6 +37,8 @@ import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.m
 import {MatChipsModule} from '@angular/material/chips';
 import {MatCardModule} from '@angular/material/card';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {CommonModule} from '@angular/common';
+import {FlexLayoutModule} from '@angular/flex-layout';
 
 describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;
@@ -479,7 +481,7 @@ describe('DeviceGroupsEditComponent', () => {
         TestBed.configureTestingModule({
             imports: [CoreModule, RouterTestingModule.withRoutes([deviceGroupsEdit]), HttpClientTestingModule, MatSnackBarModule,
                 MatFormFieldModule, MatSelectModule, MatIconModule, ReactiveFormsModule, MatInputModule, MatChipsModule, MatCardModule,
-                MatTooltipModule],
+                MatTooltipModule, CommonModule, FlexLayoutModule],
             declarations: [
                 DeviceGroupsEditComponent
             ],
