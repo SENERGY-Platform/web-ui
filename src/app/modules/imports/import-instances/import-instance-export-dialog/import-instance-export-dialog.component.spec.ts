@@ -32,30 +32,105 @@ import {HttpClientModule} from '@angular/common/http';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatTableModule} from '@angular/material/table';
+import {ImportTypeModel} from '../../import-types/shared/import-types.model';
+import {environment} from '../../../../../environments/environment';
+import {ExportService} from '../../../data/export/shared/export.service';
 
 describe('ImportInstanceExportDialogComponent', () => {
     let component: ImportInstanceExportDialogComponent;
     let fixture: ComponentFixture<ImportInstanceExportDialogComponent>;
 
-    const importTypeServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
-    importTypeServiceSpy.getImportType.and.returnValue(of({
-        id: 'test-id',
-        name: 'name',
-        description: '',
+    const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
+    const testType: ImportTypeModel = {
+        id: 'urn:infai:ses:import-type:1234',
+        name: 'test',
+        description: 'test',
         image: 'test-image',
         default_restart: true,
-        configs: [],
+        configs: [
+            {
+                name: 'test-config',
+                description: 'none',
+                type: 'https://schema.org/Text',
+                default_value: 'config-value'
+            }
+        ],
         aspect_ids: [],
         output: {
-            name: 'output',
-            type: 'https://schema.org/Text',
+            name: 'root',
+            type: 'https://schema.org/StructuredValue',
             characteristic_id: '',
-            sub_content_variables: null,
-            use_as_tag: false,
+            sub_content_variables: [
+                {
+                    name: 'import_id',
+                    type: 'https://schema.org/Text',
+                    characteristic_id: '',
+                    sub_content_variables: [],
+                    use_as_tag: false
+                },
+                {
+                    name: 'time',
+                    type: 'https://schema.org/Text',
+                    characteristic_id: environment.timeStampCharacteristicId,
+                    sub_content_variables: [],
+                    use_as_tag: false
+                },
+                {
+                    name: 'value',
+                    type: 'https://schema.org/StructuredValue',
+                    characteristic_id: '',
+                    sub_content_variables: [
+                        {
+                            name: 'value',
+                            type: 'https://schema.org/Float',
+                            characteristic_id: '',
+                            sub_content_variables: [],
+                            use_as_tag: false
+                        },
+                        {
+                            name: 'meta',
+                            type: 'https://schema.org/StructuredValue',
+                            characteristic_id: '',
+                            sub_content_variables: [
+                                {
+                                    name: 'value2',
+                                    type: 'https://schema.org/Float',
+                                    characteristic_id: '',
+                                    sub_content_variables: null,
+                                    use_as_tag: false
+                                },
+                                {
+                                    name: 'tag1',
+                                    type: 'https://schema.org/Float',
+                                    characteristic_id: '',
+                                    sub_content_variables: null,
+                                    use_as_tag: true
+                                },
+                                {
+                                    name: 'tag2',
+                                    type: 'https://schema.org/Text',
+                                    characteristic_id: '',
+                                    sub_content_variables: null,
+                                    use_as_tag: true
+                                }
+                            ],
+                            use_as_tag: false
+                        }
+                    ],
+                    use_as_tag: false
+                }
+            ],
+            use_as_tag: false
         },
         function_ids: [],
-        owner: 'user',
-    }));
+        owner: 'test-owner'
+    };
+    importTypesServiceSpy.getImportType.and.returnValue(of(testType));
+
+    const exportServiceSpy: Spy<ExportService> = createSpyFromClass(ExportService);
+    exportServiceSpy.startPipeline.and.returnValue(of(true));
+
+    let r: any;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -77,17 +152,21 @@ describe('ImportInstanceExportDialogComponent', () => {
                 {
                     provide: MAT_DIALOG_DATA, useValue: {
                         name: 'name',
-                        import_type_id: 'test-id',
+                        id: 'instance-id',
+                        kafka_topic: 'kafka-topic',
+                        import_type_id: 'urn:infai:ses:import-type:1234',
                     } as ImportInstancesModel
                 },
                 {
                     provide: MatDialogRef,
                     useValue: {
-                        close: (_: any) => {
+                        close: (rv: any) => {
+                            r = rv;
                         }
                     }
                 },
-                {provide: ImportTypesService, useValue: importTypeServiceSpy},
+                {provide: ImportTypesService, useValue: importTypesServiceSpy},
+                {provide: ExportService, useValue: exportServiceSpy},
             ]
         })
             .compileComponents();
@@ -99,7 +178,55 @@ describe('ImportInstanceExportDialogComponent', () => {
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it('should create and load type', () => {
         expect(component).toBeTruthy();
+        expect(importTypesServiceSpy.getImportType).toHaveBeenCalled();
+    });
+
+    it('should correctly select all values and tags', () => {
+        exportServiceSpy.startPipeline.calls.reset();
+        component.descControl.setValue('desc');
+        component.create();
+        expect(exportServiceSpy.startPipeline).toHaveBeenCalled();
+        expect(exportServiceSpy.startPipeline.calls.mostRecent().args.length).toBe(1);
+        expect(exportServiceSpy.startPipeline.calls.mostRecent().args[0]).toEqual({
+            Name: 'name',
+            Description: 'desc',
+            FilterType: 'import_id',
+            Filter: 'instance-id',
+            Topic: 'kafka-topic',
+            Generated: false,
+            Offset: 'earliest',
+            TimePath: 'time',
+            Values: [
+                {
+                    Name: 'value',
+                    Path: 'value.value',
+                    Type: 'float'
+                },
+                {
+                    Name: 'value2',
+                    Path: 'value.meta.value2',
+                    Type: 'float'
+                },
+                {
+                    Name: 'tag1',
+                    Path: 'value.meta.tag1',
+                    Type: 'float'
+                }],
+            Tags: [
+                {
+                    Name: 'tag1_tag',
+                    Path: 'value.meta.tag1',
+                    Type: 'string'
+                }, {
+                    Name: 'tag2',
+                    Path: 'value.meta.tag2',
+                    Type: 'string'
+                }],
+            EntityName: 'name',
+            ServiceName: 'urn:infai:ses:import-type:1234',
+        });
+        expect(r).toBeDefined();
     });
 });
