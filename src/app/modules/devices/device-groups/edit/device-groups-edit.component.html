@@ -44,9 +44,6 @@
                             <div matTooltip="{{item.name}}" class="selected-device-name">
                                 {{item.name}}
                             </div>
-                            <div *ngIf="true" matTooltip="{{item.id}}" class="selected-device-id">
-                                {{item.id}}
-                            </div>
                         </div>
                         <div class="selected-device-ctrl">
                             <button mat-icon-button color="accent" (click)="removeDevice(item.id)" matTooltip="Remove">
