@@ -150,14 +150,18 @@ export class DeviceGroupsService {
         );
     }
 
-    useDeviceSelectionDeviceGroupHelper(currentDeviceIds: string[], search: string, limit: number, offset: number): Observable<DeviceGroupHelperResultModel | null> {
-        const params = [
+    useDeviceSelectionDeviceGroupHelper(currentDeviceIds: string[], search: string, limit: number, offset: number, filterMaintainUsability: boolean): Observable<DeviceGroupHelperResultModel | null> {
+        let params = [
             'limit=' + limit,
             'offset=' + offset,
             'search=' + encodeURIComponent(search)
-        ].join('&');
+        ];
+        if (filterMaintainUsability) {
+            params.push('maintains_group_usability=true');
+        }
+        const paramsStr = params.join('&');
         return this.http.post<DeviceGroupHelperResultModel>(
-            environment.deviceSelectionUrl + '/device-group-helper?' + params, currentDeviceIds).pipe(
+            environment.deviceSelectionUrl + '/device-group-helper?' + paramsStr, currentDeviceIds).pipe(
             map(resp => resp || null),
             catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'useDeviceSelectionDeviceGroupHelper()', null))
         );

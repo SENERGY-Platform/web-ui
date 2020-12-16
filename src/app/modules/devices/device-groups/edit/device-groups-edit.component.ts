@@ -317,7 +317,7 @@ export class DeviceGroupsEditComponent implements OnInit {
 
     // update selectables by calling POST device-selection/device-group-helper?search={search}&limit={limit}&offset=offset
     private runHelper(search: string, selectedDeviceIds: string[]) {
-        this.deviceGroupService.useDeviceSelectionDeviceGroupHelper(selectedDeviceIds, search, 100, 0).subscribe((value: DeviceGroupHelperResultModel | null) => {
+        this.deviceGroupService.useDeviceSelectionDeviceGroupHelper(selectedDeviceIds, search, 100, 0, true).subscribe((value: DeviceGroupHelperResultModel | null) => {
             if (value) {
                 this.selectableForm.setValue(value.options);
                 const criteria = this.deviceGroupForm.get('criteria');
