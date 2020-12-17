@@ -285,6 +285,10 @@ export class NewExportComponent implements OnInit {
             svg.setAttribute('height', viewbox[3]);
             this.image = this.sanitizer.bypassSecurityTrustHtml(
                 new XMLSerializer().serializeToString(svg));
+            if (pipe.operators.length === 1) {
+                this.operator = pipe.operators[0];
+                this.operatorChanged(this.operator);
+            }
         }
     }
 
