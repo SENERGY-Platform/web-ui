@@ -46,7 +46,7 @@ export class ToolbarComponent implements OnInit {
     ngOnInit() {
         this.setHeader();
         this.initUser();
-        this.updateNotifications();
+        this.regularNotificationUpdate();
     }
 
     toggle(sidenavOpen: boolean): void {
@@ -100,5 +100,10 @@ export class ToolbarComponent implements OnInit {
 
     openNotificationsDialog() {
         this.notificationService.openDialog(this.notifications).subscribe(() => this.updateNotifications());
+    }
+
+    private regularNotificationUpdate() {
+        this.updateNotifications();
+        setTimeout(() => this.regularNotificationUpdate(), 60 * 1000);
     }
 }
