@@ -42,7 +42,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     typeOptionsControl: FormControl = new FormControl();
     primitiveTypes: { type: string, typeShort: string }[] = [];
     nonPrimitiveTypes: { type: string, typeShort: string }[] = [];
-    conceptList: { conceptName: string, colored: boolean, characteristicList: { id: string, name: string }[] }[] = [];
+    conceptList: { conceptName: string, colored: boolean, characteristicList:
+            { id: string, name: string, type: string | undefined }[] }[] = [];
     options: Map<string, any[]> = new Map();
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesContentVariableDialogComponent>,
@@ -76,8 +77,28 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
     getOptions(): Map<string, any[]> {
         const m = new Map();
-        this.conceptList.forEach(c => m.set(c.conceptName, c.characteristicList));
+        const filteredList = this.getFilteredConceptList();
+        filteredList.forEach(c => m.set(c.conceptName, c.characteristicList));
         return m;
+    }
+
+    getType(): string {
+        return this.firstFormGroup?.get('type')?.value;
+    }
+
+    getFilteredConceptList(): { conceptName: string, colored: boolean, characteristicList:
+            { id: string, name: string, type: string | undefined }[]}[] {
+
+        if (this.getType() === null) {
+            return this.conceptList;
+        }
+        const type = this.getType();
+        const copy = JSON.parse(JSON.stringify(this.conceptList));
+        copy.forEach((concept: any) => {
+            concept.characteristicList = concept.characteristicList.filter((characteristic: any) =>
+                characteristic.type === undefined || characteristic.type === type);
+        });
+        return copy.filter((concept: any) => concept.characteristicList.length > 0);
     }
 
     private initTypeOptionControl() {
@@ -111,6 +132,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                         this.initConceptList(concept);
                     }
                 });
+                this.options = this.getOptions();
             });
         });
     }
@@ -128,6 +150,26 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 value: [this.contentVariable.value],
             }
         );
+        this.firstFormGroup?.get('characteristic_id')?.valueChanges.subscribe(id => {
+            if (id) {
+                this.patchType(id);
+            }
+        });
+        this.firstFormGroup?.get('type')?.valueChanges.subscribe(_ => {
+            this.options = this.getOptions();
+        });
+        if (this.firstFormGroup.get('characteristic_id')?.value) {
+            this.patchType(this.firstFormGroup.get('characteristic_id')?.value);
+        }
+    }
+
+    private patchType(characteristicId: string) {
+        this.conceptList.forEach(concept => {
+            const selectedChar = concept.characteristicList.find(characteristic => characteristic.id === characteristicId);
+            if (selectedChar !== undefined && selectedChar.type !== undefined) {
+                this.firstFormGroup.patchValue({type: selectedChar.type});
+            }
+        });
     }
 
     private initTypesList(): void {
@@ -141,19 +183,18 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     }
 
     private initConceptList(concepts: ConceptsCharacteristicsModel): void {
-        const characteristicsList: { id: string, name: string }[] = [];
-        if (!concepts.characteristics) {
-            concepts.characteristics = [];
+        const characteristicsList: { id: string, name: string, type: string | undefined }[] = [];
+        if (concepts.characteristics !== null) {
+            concepts.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
+                characteristicsList.push(...this.deviceTypeHelperService.characteristicsFlatten(characteristic));
+            });
         }
-        concepts.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
-            characteristicsList.push(...this.deviceTypeHelperService.characteristicsFlatten(characteristic));
-        });
+
         this.conceptList.push({
             conceptName: concepts.name,
             colored: this.functionConceptIds.includes(concepts.id),
             characteristicList: characteristicsList
         });
-        this.options = this.getOptions();
     }
 
     private getConceptIds(functionIds: string[] | undefined): void {

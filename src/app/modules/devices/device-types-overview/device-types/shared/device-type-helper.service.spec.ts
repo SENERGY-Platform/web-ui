@@ -238,15 +238,18 @@ describe('DeviceTypeHelperService', () => {
         } as DeviceTypeCharacteristicsModel)).toEqual([
             {
                 id: 'urn:infai:ses:characteristic:d840607c-c8f9-45d6-b9bd-2c2d444e2899',
-                name: 'HSB.b'
+                name: 'HSB.b',
+                type: 'https://schema.org/Integer',
             },
             {
                 id: 'urn:infai:ses:characteristic:a66dc568-c0e0-420f-b513-18e8df405538',
-                name: 'HSB.s'
+                name: 'HSB.s',
+                type: 'https://schema.org/Integer',
             },
             {
                 id: 'urn:infai:ses:characteristic:6ec70e99-8c6a-4909-8d5a-7cc12af76b9a',
-                name: 'HSB.h'
+                name: 'HSB.h',
+                type: 'https://schema.org/Integer',
             }]);
         expect(service.characteristicsFlatten(
             {
@@ -257,7 +260,8 @@ describe('DeviceTypeHelperService', () => {
             },
         )).toEqual([{
             id: 'urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8',
-            name: 'hex'
+            name: 'hex',
+            type: 'https://schema.org/Text',
         }]);
         expect(service.characteristicsFlatten(
             {
@@ -280,7 +284,8 @@ describe('DeviceTypeHelperService', () => {
             },
         )).toEqual([{
             id: 'id3',
-            name: 'ebene1.ebene2.field'
+            name: 'ebene1.ebene2.field',
+            type: 'https://schema.org/Float',
         }]);
     });
 

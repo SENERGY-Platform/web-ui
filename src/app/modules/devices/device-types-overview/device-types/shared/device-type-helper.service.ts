@@ -98,11 +98,11 @@ export class DeviceTypeHelperService {
         }
     }
 
-    characteristicsFlatten(characteristics: DeviceTypeCharacteristicsModel, parentName: string = ''): { id: string, name: string }[] {
+    characteristicsFlatten(characteristics: DeviceTypeCharacteristicsModel, parentName: string = ''): { id: string, name: string, type: string | undefined }[] {
         if (characteristics.sub_characteristics === undefined || characteristics.sub_characteristics === null) {
-            return [{id: characteristics.id || '', name: parentName + characteristics.name}];
+            return [{id: characteristics.id || '', name: parentName + characteristics.name, type: characteristics.type}];
         } else {
-            let array: { id: string, name: string }[] = [];
+            let array: { id: string, name: string, type: string | undefined }[] = [];
             parentName += characteristics.name + '.';
             characteristics.sub_characteristics.forEach((subCharacteristic: DeviceTypeCharacteristicsModel) => {
                 array = array.concat(this.characteristicsFlatten(subCharacteristic, parentName));

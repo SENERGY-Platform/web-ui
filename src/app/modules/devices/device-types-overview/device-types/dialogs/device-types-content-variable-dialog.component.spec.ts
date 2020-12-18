@@ -244,14 +244,17 @@ describe('DeviceTypesContentVariableDialog', () => {
                 {
                     id: 'urn:infai:ses:characteristic:7621686a',
                     name: 'on_off',
+                    type: 'https://schema.org/Text',
                 },
                 {
                     id: 'urn:infai:ses:characteristic:c0353532',
                     name: 'binary status code',
+                    type: 'https://schema.org/Integer',
                 },
                 {
                     id: 'urn:infai:ses:characteristic:7dc1bb7e',
                     name: 'boolean',
+                    type: 'https://schema.org/Boolean',
                 }]
         }]);
     }));
