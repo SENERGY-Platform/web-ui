@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {async, ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import {ToolbarComponent} from './toolbar.component';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -27,18 +27,24 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
 import {MatToolbarModule} from '@angular/material/toolbar';
+import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
+import {NotificationService} from './notification/shared/notification.service';
+import {of} from 'rxjs';
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;
     let fixture: ComponentFixture<ToolbarComponent>;
 
+    const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService);
+    notificationServiceSpy.getNotifications.and.returnValue(of([]));
 
-    beforeEach(async(() => {
+    beforeEach((() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule, RouterTestingModule, MatDialogModule, MatSnackBarModule, MatMenuModule, MatDividerModule, MatIconModule, MatToolbarModule],
             declarations: [ ToolbarComponent ],
             providers: [
-                { provide: AuthorizationService, useClass: AuthorizationServiceMock }
+                { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                {provide: NotificationService, useValue: notificationServiceSpy}
             ]
         })
             .compileComponents();

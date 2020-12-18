@@ -27,7 +27,7 @@ describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
 
-  beforeEach(async(() => {
+  beforeEach((() => {
     TestBed.configureTestingModule({
         imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule],
       declarations: [
@@ -41,7 +41,7 @@ describe('AppComponent', () => {
     fixture.detectChanges();
   }));
 
-  it('should create the app', async(() => {
+  it('should create the app', (() => {
     expect(component).toBeTruthy();
   }));
 });
