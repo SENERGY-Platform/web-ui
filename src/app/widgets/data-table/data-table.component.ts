@@ -68,7 +68,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
     }
 
     private static parseNumber(m: DataTableComponentItem, max: boolean): number {
-        if (m.value == null || typeof (m.value) === 'string') {
+        if (m.value == null) {
             if (max) {
                 return Number.MAX_VALUE;
             }
@@ -225,8 +225,14 @@ export class DataTableComponent implements OnInit, OnDestroy {
                     case DataTableOrderEnum.AlphabeticallyDesc:
                         return b.name.charCodeAt(0) - a.name.charCodeAt(0);
                     case DataTableOrderEnum.ValueAsc:
+                        if (typeof a.value === 'string' || typeof b.value === 'string') {
+                            return ('' + a.value).localeCompare('' + b.value);
+                        }
                         return DataTableComponent.parseNumber(a, true) - DataTableComponent.parseNumber(b, true);
                     case DataTableOrderEnum.ValueDesc:
+                        if (typeof a.value === 'string' || typeof b.value === 'string') {
+                            return ('' + b.value).localeCompare('' + a.value);
+                        }
                         return DataTableComponent.parseNumber(b, false) - DataTableComponent.parseNumber(a, false);
                     case DataTableOrderEnum.TimeDesc:
                         return new Date(b.time || '').valueOf() - new Date(a.time || '').valueOf();
