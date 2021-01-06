@@ -204,7 +204,8 @@
             <td mat-cell *matCellDef="let element">
                 <mat-form-field color="accent" appearance="standard">
                     <input type="text" matInput placeholder="e.g. / 1000"
-                           [(ngModel)]="element.math">
+                           [(ngModel)]="element.math"
+                            [disabled]="groupTypeIsDifference">
                 </mat-form-field>
             </td>
         </ng-container>

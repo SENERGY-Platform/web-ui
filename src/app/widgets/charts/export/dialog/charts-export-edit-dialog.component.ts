@@ -41,7 +41,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
     chartTypes = ['LineChart', 'ColumnChart'];
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
-    groupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max'];
+    groupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median'];
+    groupTypeIsDifference = false;
 
     displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'valueAlias', 'color', 'math', 'filterType', 'filterValue', 'duplicate-delete'];
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
@@ -103,6 +104,13 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 vAxisLabel: widget.properties.vAxisLabel,
                 vAxes: widget.properties.vAxes,
             })
+        });
+        this.groupTypeIsDifference = widget.properties.group?.type?.startsWith('difference') || false;
+        this.formGroupController.get('properties.group.type')?.valueChanges.subscribe(val => {
+            this.groupTypeIsDifference = val.startsWith('difference');
+            if (this.groupTypeIsDifference) {
+                this.dataSource.data.forEach(element => element.math = '');
+            }
         });
     }
 
