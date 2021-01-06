@@ -68,6 +68,8 @@ export class DataTableEditDialogComponent implements OnInit {
     exportTypes = ExportValueTypes;
     orderValues = DataTableOrderEnum;
     operatorExportValueCache = new Map<String, ExportValueBaseModel[]>();
+    numReady = 0;
+    numReadyNeeded = 2; // helper and widget raw data
     ready = false;
     saving = false;
     icons: string[] = [
@@ -101,17 +103,21 @@ export class DataTableEditDialogComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.dataTableHelperService.initialize().subscribe(() => this.ready = true);
+        this.dataTableHelperService.initialize().subscribe(() => {
+            this.numReady++;
+            this.setReady();
+        });
         this.getWidgetData();
     }
 
 
-    onFunctionSelected(element: AbstractControl) {
+    onFunctionSelected(element: AbstractControl): Observable<DeviceSelectablesModel[]> {
         const functionId = element.get('elementDetails')?.get('device')?.get('functionId')?.value;
         const aspectId = element.get('elementDetails')?.get('device')?.get('aspectId')?.value;
         if (aspectId) {
-            this.dataTableHelperService.preloadDevicesOfFunctionAndAspect(aspectId, functionId).subscribe();
+            return this.dataTableHelperService.preloadDevicesOfFunctionAndAspect(aspectId, functionId)
         }
+        return of([]);
     }
 
 
@@ -153,11 +159,13 @@ export class DataTableEditDialogComponent implements OnInit {
             convertRules.forEach(rule => this.addConvertRule(rule));
 
             const measurements: DataTableElementModel[] = (this.widget.properties.dataTable?.elements || []);
-            measurements.forEach(measurement => this.addMeasurement(measurement));
+            measurements.forEach(measurement => this.addMeasurement(measurement, true));
 
             if (measurements.length === 0) {
                 this.addNewMeasurement();
             }
+            this.numReady++;
+            this.setReady();
         });
     }
 
@@ -169,7 +177,7 @@ export class DataTableEditDialogComponent implements OnInit {
         return element.get('warning') as FormGroup;
     }
 
-    addMeasurement(measurement: DataTableElementModel | undefined) {
+    addMeasurement(measurement: DataTableElementModel | undefined, init: boolean = false) {
         const newGroup = this.fb.group({
             id: [undefined, Validators.required],
             name: [undefined, Validators.required],
@@ -208,11 +216,32 @@ export class DataTableEditDialogComponent implements OnInit {
             .subscribe(elementType => this.enableDisableElementDevicePipelineFields(newGroup, elementType));
 
         newGroup.get('elementDetails')?.get('device')?.get('aspectId')?.valueChanges
-            .subscribe(aspectId => aspectId !== null
-                ? this.dataTableHelperService.preloadMeasuringFunctionsOfAspect(aspectId).subscribe() : null);
+            .subscribe(aspectId => {
+                if (aspectId !== null) {
+                    if (init) {
+                        this.numReadyNeeded++;
+                    }
+                    this.dataTableHelperService.preloadMeasuringFunctionsOfAspect(aspectId).subscribe(() => {
+                        if (init) {
+                            this.numReady++;
+                            this.setReady();
+                        }
+                    });
+                }
+            });
 
         newGroup.get('elementDetails')?.get('device')?.get('functionId')?.valueChanges
-            .subscribe(() => this.onFunctionSelected(newGroup));
+            .subscribe(() => {
+                if (init) {
+                    this.numReadyNeeded++;
+                }
+                this.onFunctionSelected(newGroup).subscribe(() => {
+                    if (init) {
+                        this.numReady++;
+                        this.setReady();
+                    }
+                });
+            });
 
         newGroup.get('elementDetails')?.get('device')?.get('serviceId')?.valueChanges
             .subscribe(() => this.onServiceSelected(newGroup));
@@ -862,5 +891,9 @@ export class DataTableEditDialogComponent implements OnInit {
             }
         });
         return observables;
+    }
+
+    private setReady() {
+        this.ready = this.numReady === this.numReadyNeeded;
     }
 }
