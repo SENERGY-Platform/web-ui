@@ -147,7 +147,9 @@ export class DeployFlowComponent {
                             }
                         });
                     } else {
-                        nodeInput.topicName = formDeviceInfo.service.id.replace(/#/g, '_').replace(/:/g, '_');
+                        if (formDeviceInfo.service !== undefined && formDeviceInfo.service.id !== undefined) {
+                            nodeInput.topicName = formDeviceInfo.service.id.replace(/#/g, '_').replace(/:/g, '_');
+                        }
                     }
                     this.populateRequestNodeInputs(pipeReqNode, deviceIds, nodeValue, nodeInput);
                 }
