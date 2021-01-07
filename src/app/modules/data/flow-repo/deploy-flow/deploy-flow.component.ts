@@ -87,9 +87,9 @@ export class DeployFlowComponent {
             this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc')
                 .subscribe((devices: DeviceInstancesModel []) => {
                     this.allDevices = devices;
-                    this.inputs.forEach((input, operatorKey) => {
+                    this.inputs?.forEach((input, operatorKey) => {
                         this.devices[operatorKey] = [];
-                        input.inPorts.forEach((_, deviceKey) => {
+                        input.inPorts?.forEach((_, deviceKey) => {
                             this.devices[operatorKey][deviceKey] = devices;
                         });
                     });
