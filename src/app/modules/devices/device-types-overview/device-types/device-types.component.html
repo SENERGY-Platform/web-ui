@@ -163,7 +163,7 @@
                                             <div *ngIf="inOut.dataSource">
                                                 <button mat-raised-button color="accent"
                                                         (click)="addContentVariable(service.value.function_ids, inOut, [])"
-                                                        [disabled]="inOut.dataSource.data.length === 1">
+                                                        [disabled]="inOut.dataSource.data.length === 1 || !editable">
                                                     ADD ContentVariable
                                                 </button>
                                             </div>
@@ -180,6 +180,7 @@
                                                                 {{node.name}}
                                                             </button>
                                                             <button mat-icon-button
+                                                                    [disabled]="!editable"
                                                                     (click)="deleteContentVariable(inOut, node.indices)">
                                                                 <mat-icon>delete_outline</mat-icon>
                                                             </button>
@@ -201,10 +202,12 @@
                                                                     {{node.name}}
                                                                 </button>
                                                                 <button mat-icon-button
+                                                                        [disabled]="!editable"
                                                                         (click)="deleteContentVariable(inOut, node.indices)">
                                                                     <mat-icon>delete_outline</mat-icon>
                                                                 </button>
                                                                 <button mat-icon-button
+                                                                        [disabled]="!editable"
                                                                         (click)="addContentVariable(service.value.function_ids, inOut, node.indices)">
                                                                     <mat-icon>add</mat-icon>
                                                                 </button>

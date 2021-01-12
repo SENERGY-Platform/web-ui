@@ -36,6 +36,7 @@ import {FunctionsService} from '../../../functions/shared/functions.service';
 })
 export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
+    disabled: boolean;
     contentVariable: DeviceTypeContentVariableModel;
     functionConceptIds: string[] = [];
     firstFormGroup!: FormGroup;
@@ -51,7 +52,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 private conceptsService: ConceptsService,
                 private deviceTypeHelperService: DeviceTypeHelperService,
                 private functionsService: FunctionsService,
-                @Inject(MAT_DIALOG_DATA) data: { contentVariable: DeviceTypeContentVariableModel, functionIds: string[] }) {
+                @Inject(MAT_DIALOG_DATA) data: { contentVariable: DeviceTypeContentVariableModel, functionIds: string[], disabled: boolean }) {
+        this.disabled = data.disabled;
         this.contentVariable = data.contentVariable;
         this.getConceptIds(data.functionIds);
     }
@@ -138,18 +140,35 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     }
 
     private initFormGroup() {
-        this.firstFormGroup = this._formBuilder.group({
-                indices: [this.contentVariable.indices],
-                id: [{value: this.contentVariable.id || null, disabled: true}],
-                name: [this.contentVariable.name],
-                type: [this.contentVariable.type],
-                characteristic_id: [this.contentVariable.characteristic_id],
-                serialization_options: [this.contentVariable.serialization_options],
-                unit_reference: [this.contentVariable.unit_reference],
-                sub_content_variables: [this.contentVariable.sub_content_variables],
-                value: [this.contentVariable.value],
-            }
-        );
+        const disabled = this.disabled;
+        if (disabled) {
+            this.firstFormGroup = this._formBuilder.group({
+                    indices: [this.contentVariable.indices],
+                    id: [{value: this.contentVariable.id || null, disabled: true}],
+                    name: [{disabled: true, value: this.contentVariable.name}],
+                    type: [{disabled: true, value: this.contentVariable.type}],
+                    characteristic_id: [{disabled: true, value: this.contentVariable.characteristic_id}],
+                    serialization_options: [{disabled: true, value: this.contentVariable.serialization_options}],
+                    unit_reference: [{disabled: true, value: this.contentVariable.unit_reference}],
+                    sub_content_variables: [{disabled: true, value: this.contentVariable.sub_content_variables}],
+                    value: [{disabled: true, value: this.contentVariable.value}],
+                }
+            );
+        } else {
+            this.firstFormGroup = this._formBuilder.group({
+                    indices: [this.contentVariable.indices],
+                    id: [{value: this.contentVariable.id || null, disabled: true}],
+                    name: [this.contentVariable.name],
+                    type: [this.contentVariable.type],
+                    characteristic_id: [this.contentVariable.characteristic_id],
+                    serialization_options: [this.contentVariable.serialization_options],
+                    unit_reference: [this.contentVariable.unit_reference],
+                    sub_content_variables: [this.contentVariable.sub_content_variables],
+                    value: [this.contentVariable.value],
+                }
+            );
+        }
+
         this.firstFormGroup?.get('characteristic_id')?.valueChanges.subscribe(id => {
             if (id) {
                 this.patchType(id);

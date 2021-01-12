@@ -118,11 +118,13 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     addContentVariable(functionIds: string[], inOut: DeviceTypeContentTreeModel, indices: number[]): void {
+        const disabled = !this.editable;
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: {} as DeviceTypeContentVariableModel,
-            functionIds: functionIds
+            functionIds: functionIds,
+            disabled: disabled
         };
         this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
             (resp: DeviceTypeContentVariableModel | undefined) => {
@@ -138,11 +140,13 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     editContent(node: DeviceTypeContentVariableModel, functionIds: string[], inOut: DeviceTypeContentTreeModel): void {
+        const disabled = !this.editable;
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: node,
-            functionIds: functionIds
+            functionIds: functionIds,
+            disabled: disabled
         };
         this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
             (resp: DeviceTypeContentVariableModel | undefined) => {
@@ -338,31 +342,61 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private initFirstFormGroup(deviceType: DeviceTypeModel) {
-        this.firstFormGroup = this._formBuilder.group({
-            id: [{value: deviceType.id, disabled: true}],
-            name: [deviceType.name, Validators.required],
-            description: [deviceType.description],
-            device_class_id: [deviceType.device_class_id, Validators.required],
-        });
+        const disabled = !this.editable;
+        if (disabled) {
+            this.firstFormGroup = this._formBuilder.group({
+                id: [{value: deviceType.id, disabled: true}],
+                name: [{disabled: true, value: deviceType.name}, Validators.required],
+                description: [{disabled: true, value: deviceType.description}],
+                device_class_id: [{disabled: true, value: deviceType.device_class_id}, Validators.required],
+            });
+        } else {
+            this.firstFormGroup = this._formBuilder.group({
+                id: [{value: deviceType.id, disabled: true}],
+                name: [deviceType.name, Validators.required],
+                description: [deviceType.description],
+                device_class_id: [deviceType.device_class_id, Validators.required],
+            });
+        }
     }
 
     private createServiceGroup(deviceTypeService: DeviceTypeServiceModel): FormGroup {
-        return this._formBuilder.group({
-            id: [{value: deviceTypeService.id, disabled: true}],
-            local_id: [deviceTypeService.local_id],
-            name: [deviceTypeService.name, Validators.required],
-            description: [deviceTypeService.description],
-            protocol_id: [deviceTypeService.protocol_id, Validators.required],
-            interaction: [deviceTypeService.interaction, Validators.required],
-            inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : this._formBuilder.array([]),
-            outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : this._formBuilder.array([]),
-            functionType: [deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? this.getFunctionType(deviceTypeService.function_ids[0]) : {text: ''}, Validators.required],
-            function_ids: [{
-                value: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? deviceTypeService.function_ids : [],
-                disabled: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true
-            }, Validators.required],
-            aspect_ids: [deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : [], Validators.required],
-        });
+        const disabled = !this.editable;
+        if (disabled) {
+            return this._formBuilder.group({
+                id: [{value: deviceTypeService.id, disabled: true}],
+                local_id: [{disabled: true, value: deviceTypeService.local_id}],
+                name: [{disabled: true, value: deviceTypeService.name}, Validators.required],
+                description: [{disabled: true, value: deviceTypeService.description}],
+                protocol_id: [{disabled: true, value: deviceTypeService.protocol_id}, Validators.required],
+                interaction: [{disabled: true, value: deviceTypeService.interaction}, Validators.required],
+                inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : this._formBuilder.array([]),
+                outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : this._formBuilder.array([]),
+                functionType: [{disabled: true, value: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? this.getFunctionType(deviceTypeService.function_ids[0]) : {text: ''}}, Validators.required],
+                function_ids: [{
+                    value: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? deviceTypeService.function_ids : [],
+                    disabled: true || (deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true)
+                }, Validators.required],
+                aspect_ids: [{disabled: true, value: deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : []}, Validators.required],
+            });
+        } else {
+            return this._formBuilder.group({
+                id: [{value: deviceTypeService.id, disabled: true}],
+                local_id: [deviceTypeService.local_id],
+                name: [deviceTypeService.name, Validators.required],
+                description: [deviceTypeService.description],
+                protocol_id: [deviceTypeService.protocol_id, Validators.required],
+                interaction: [deviceTypeService.interaction, Validators.required],
+                inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : this._formBuilder.array([]),
+                outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : this._formBuilder.array([]),
+                functionType: [deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? this.getFunctionType(deviceTypeService.function_ids[0]) : {text: ''}, Validators.required],
+                function_ids: [{
+                    value: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? deviceTypeService.function_ids : [],
+                    disabled: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true
+                }, Validators.required],
+                aspect_ids: [deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : [], Validators.required],
+            });
+        }
     }
 
     private getFunctionType(functionId: string): DeviceTypeFunctionType {
@@ -409,10 +443,11 @@ export class DeviceTypesComponent implements OnInit {
             this.deviceTypeHelperService.setIndices(content.content_variable);
             dataSource.data = [content.content_variable];
         }
+        const disabled = !this.editable;
         return this._formBuilder.group({
             id: [content.id],
             name: [protocolSegment.name],
-            serialization: [content.serialization],
+            serialization: disabled ? [{disabled: true, value: content.serialization}] : [content.serialization],
             protocol_segment_id: [protocolSegment.id],
             show: [content.protocol_segment_id ? true : false],
             dataSource: dataSource,
