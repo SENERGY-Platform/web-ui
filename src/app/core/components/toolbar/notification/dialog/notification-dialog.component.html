@@ -27,7 +27,9 @@
                         {{n.title}}
                     </mat-panel-title>
                     <mat-panel-description>
+                        <span *ngIf="n.created_at !== null" class="date">{{n.created_at | date:'dd.MM.yy HH:mm'}}</span>
                         <mat-icon *ngIf="!n.isRead">new_releases</mat-icon>
+                        <span *ngIf="n.isRead" class="icon-spacer"></span>
                     </mat-panel-description>
                 </mat-expansion-panel-header>
                 <div>

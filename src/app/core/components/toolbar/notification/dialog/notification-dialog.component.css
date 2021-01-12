@@ -22,3 +22,11 @@
 mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
+
+.date {
+    padding-right: 8px;
+}
+
+.icon-spacer {
+    width: 24px;
+}

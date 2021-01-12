@@ -20,6 +20,7 @@ export interface NotificationModel {
     userId: string;
     _id: string;
     isRead: boolean;
+    created_at: Date | null;
 }
 
 export interface NotificationUpdateModel {
@@ -27,6 +28,7 @@ export interface NotificationUpdateModel {
     message: string;
     userId: string;
     isRead: boolean;
+    created_at: Date| null;
 }
 
 export interface NotificationServiceResponse {

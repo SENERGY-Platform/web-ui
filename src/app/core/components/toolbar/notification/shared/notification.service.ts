@@ -65,7 +65,8 @@ export class NotificationService {
             isRead: notification.isRead,
             message: notification.message,
             title: notification.title,
-            userId: notification.userId
+            userId: notification.userId,
+            created_at: notification.created_at,
         };
         return this.http.post(environment.notificationsUrl + '/' + notification._id, n);
     }
