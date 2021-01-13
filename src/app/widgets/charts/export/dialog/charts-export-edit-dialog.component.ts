@@ -101,6 +101,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                     type: widget.properties.group ? widget.properties.group.type : undefined,
                 }),
                 hAxisLabel: widget.properties.hAxisLabel,
+                hAxisFormat: widget.properties.hAxisFormat,
                 vAxisLabel: widget.properties.vAxisLabel,
                 vAxes: widget.properties.vAxes,
             })

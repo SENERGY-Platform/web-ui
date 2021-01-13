@@ -51,6 +51,7 @@ export class ChartsModel {
                 gridlines?: {
                     count?: number
                 }
+                ticks?: (Date | string | number)[];
             }
             colors?: string[];
             interpolateNulls?: boolean;

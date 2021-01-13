@@ -24,6 +24,7 @@ export interface ChartsExportPropertiesModel {
         chartType?: string;
         interval?: number; // deprecated
         hAxisLabel?: string;
+        hAxisFormat?: string;
         vAxis?: ExportValueModel; // deprecated
         vAxes?: ChartsExportVAxesModel[];
         vAxisLabel?: string;
