@@ -37,6 +37,7 @@ import {
     ChartsExportRequestPayloadQueriesModel, ChartsExportRequestPayloadTimeModel,
 } from './charts-export-request-payload.model';
 import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
+import {getUndecoratedClassWithAngularFeaturesDiagnostic} from "@angular/compiler-cli/src/ngtsc/annotations/src/diagnostics";
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -213,7 +214,8 @@ export class ChartsExportService {
                 curveType: widget.properties.curvedFunction ? 'function' : '',
                 vAxis: {
                     title: widget.properties.vAxisLabel,
-                    viewWindowMode: element.height > 200 ? 'pretty' : 'maximized',
+                    viewWindowMode: widget.properties.chartType !== 'ColumnChart' ?
+                        (element.height > 200 ? 'pretty' : 'maximized') : undefined,
                 },
                 explorer: {
                     actions: ['dragToZoom', 'rightClickToReset'],
