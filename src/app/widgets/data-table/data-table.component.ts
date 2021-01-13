@@ -261,9 +261,11 @@ export class DataTableComponent implements OnInit, OnDestroy {
                         break;
                     }
                     case ExportValueTypes.BOOLEAN: {
-                        if (status === JSON.parse(convertRules[i].status)) {
-                            return {icon: convertRules[i].icon, color: convertRules[i].color};
-                        }
+                        try {
+                            if (status === JSON.parse(convertRules[i].status)) {
+                                return {icon: convertRules[i].icon, color: convertRules[i].color};
+                            }
+                        } catch (_) {} // happens when rule is not parsable, no problem
                         break;
                     }
                     case ExportValueTypes.FLOAT:
