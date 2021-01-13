@@ -51,7 +51,7 @@
                                          *ngFor="let service of services.controls; let i = index">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
-                                Service {{service.value.name}}
+                                Service {{service.get('name')?.value}}
                             </mat-panel-title>
                         </mat-expansion-panel-header>
                         <mat-tab-group color="accent" headerPosition="above" dynamicHeight="true">
