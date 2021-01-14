@@ -29,6 +29,7 @@ import {ConceptsPermSearchModel} from '../../../concepts/shared/concepts-perm-se
 import {forkJoin, Observable} from 'rxjs';
 import {DeviceTypeService} from '../../shared/device-type.service';
 import {FunctionsService} from '../../../functions/shared/functions.service';
+import {convertPunctuation, TypeValueValidator} from "../../../../imports/validators/type-value-validator";
 
 @Component({
     templateUrl: './device-types-content-variable-dialog.component.html',
@@ -70,6 +71,14 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     }
 
     save(): void {
+        const type = this.firstFormGroup.get('type')?.value;
+        if (type !== 'https://schema.org/Text') {
+            let toParse = this.firstFormGroup.get('value')?.value;
+            if (type === 'https://schema.org/Float') {
+                toParse = convertPunctuation(toParse);
+            }
+            this.firstFormGroup.patchValue({value: JSON.parse(toParse)});
+        }
         this.dialogRef.close(this.firstFormGroup.getRawValue());
     }
 
@@ -165,7 +174,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                     unit_reference: [this.contentVariable.unit_reference],
                     sub_content_variables: [this.contentVariable.sub_content_variables],
                     value: [this.contentVariable.value],
-                }
+                }, {validators: TypeValueValidator('type', 'value')}
             );
         }
 

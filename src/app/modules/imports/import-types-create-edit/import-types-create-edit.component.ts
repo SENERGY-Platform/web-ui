@@ -196,7 +196,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
         val.configs.forEach((config: ImportTypeConfigModel) => {
             if (config.type !== ImportTypesCreateEditComponent.STRING) {
                 let toParse = config.default_value;
-                if (config.type === ImportTypesCreateEditComponent.INTEGER) {
+                if (config.type === ImportTypesCreateEditComponent.FLOAT) {
                     toParse = convertPunctuation(toParse);
                 }
                 config.default_value = JSON.parse(toParse);

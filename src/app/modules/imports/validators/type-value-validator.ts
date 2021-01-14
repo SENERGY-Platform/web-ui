@@ -9,6 +9,10 @@ const STRUCTURE = 'https://schema.org/StructuredValue';
 const LIST = 'https://schema.org/ItemList';
 
 export function convertPunctuation(str: string): string {
+    if (str.replace === undefined) {
+        // not a string
+        return str;
+    }
     return str.replace(',', '.');
 }
 
@@ -59,7 +63,7 @@ export function TypeValueValidator(typeControlName: string, valueControlName: st
                     break;
                 case INTEGER:
                     const intVal = convertPunctuation(defaultValue.value);
-                    if (intVal.indexOf('.') !== -1) {
+                    if (intVal.indexOf !== undefined && intVal.indexOf('.') !== -1) {
                         defaultNotOk = true;
                     }
                     try {
