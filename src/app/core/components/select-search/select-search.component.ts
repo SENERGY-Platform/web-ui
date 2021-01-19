@@ -156,10 +156,20 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             this.optionsGroups = this.getOptionsGroup('');
             this.searchControl.valueChanges.subscribe((val: string) => this.optionsGroups = this.getOptionsGroup(val));
         }
+        this.selectSingleElement();
     }
 
     get options(): any[] | Map<string, any[]> {
         return this._options;
+    }
+
+    get autoSelectSingleElement(): boolean {
+        return this._autoSelectSingleElement;
+    }
+
+    @Input() set autoSelectSingleElement(value: boolean) {
+        this._autoSelectSingleElement = value;
+        this.selectSingleElement();
     }
 
     static nextId = 0;
@@ -167,6 +177,9 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     @Input() required = false;
     @Input() multiple = false;
+
+    _autoSelectSingleElement = false;
+
     @ViewChild(MatSelect, {static: false}) select!: MatSelect;
 
     _options: any[] | Map<string, any[]> = [];
@@ -395,5 +408,40 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     toArray(v: any): any[] {
         return Array.isArray(v) ? v : [];
+    }
+
+    private selectSingleElement() {
+        if (!this.empty || !this.autoSelectSingleElement) {
+            return;
+        }
+        let toWrite: any;
+        if (!Array.isArray(this.options)) {
+            const optionsGroups = this.getOptionsGroup('');
+            let singleValue: any;
+            let moreFound = false;
+            optionsGroups.forEach((v: any[]) => {
+                if (v.length > 1) {
+                    moreFound = true;
+                } else if (v.length === 1) {
+                    if (singleValue !== undefined) {
+                        moreFound = true;
+                    } else {
+                        singleValue = v[0];
+                    }
+                }
+            });
+            if (singleValue !== undefined && !moreFound) {
+                toWrite = singleValue;
+            }
+
+        } else if (this.options.length === 1) {
+            toWrite = this.options[0];
+        }
+        if (toWrite !== undefined) {
+            toWrite = this.getOptionValue(toWrite);
+            this.value = toWrite;
+            this.selectionChanged({source: this.select, value: toWrite});
+            this.ngControl?.reset(this.value);
+        }
     }
 }
