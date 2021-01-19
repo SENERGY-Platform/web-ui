@@ -443,6 +443,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         }
         if (toWrite !== undefined) {
             toWrite = this.getOptionValue(toWrite);
+            toWrite = this.multiple ? [toWrite] : toWrite;
             this.value = toWrite;
             this.selectionChanged({source: this.select, value: toWrite});
             this.ngControl?.reset(this.value);
