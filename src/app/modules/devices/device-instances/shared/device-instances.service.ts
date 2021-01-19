@@ -19,7 +19,13 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
-import {DeviceInstancesModel, DeviceFilterCriteriaModel, DeviceSelectablesModel, DeviceInstancesBaseModel} from './device-instances.model';
+import {
+    DeviceInstancesModel,
+    DeviceFilterCriteriaModel,
+    DeviceSelectablesModel,
+    DeviceInstancesBaseModel,
+    DeviceSelectablesWithGroupsModel, DeviceInstancesPermSearchModel
+} from './device-instances.model';
 import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
 import {MatDialog} from '@angular/material/dialog';
@@ -55,7 +61,7 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceInstance(id: string): Observable< DeviceInstancesBaseModel| null> {
+    getDeviceInstance(id: string): Observable<DeviceInstancesBaseModel | null> {
         return this.http.get<DeviceInstancesBaseModel>
         (environment.deviceManagerUrl + '/devices/' + id).pipe(
             map(resp => resp),
@@ -146,7 +152,25 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceSelections(criteria: DeviceFilterCriteriaModel[],  completeServices: boolean, protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined): Observable<DeviceSelectablesModel[]> {
+    getDeviceSelections(criteria: DeviceFilterCriteriaModel[], completeServices: boolean, protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined): Observable<DeviceSelectablesModel[]> {
+        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter,
+            false) as Observable<DeviceSelectablesModel[]>;
+
+    }
+
+    getDeviceSelectionsWithGroups(criteria: DeviceFilterCriteriaModel[], completeServices: boolean,
+                                  protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined)
+        : Observable<DeviceSelectablesWithGroupsModel[]> {
+
+        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter,
+            true) as Observable<DeviceSelectablesWithGroupsModel[]>;
+    }
+
+    private getDeviceSelectionsInternal(criteria: DeviceFilterCriteriaModel[], completeServices: boolean,
+                                        protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined,
+                                        includeGroups?: boolean)
+        : Observable<DeviceSelectablesWithGroupsModel[] | DeviceSelectablesModel[]> {
+
         let path = '/selectables';
         if (completeServices) {
             path += '?complete_services=true&';
@@ -159,6 +183,9 @@ export class DeviceInstancesService {
         }
         if (interactionFilter) {
             path = path + '&filter_interaction=' + encodeURIComponent(interactionFilter);
+        }
+        if (includeGroups === true) {
+            path += '&include_groups=true';
         }
         return this.http.get<DeviceSelectablesModel[]>(
             environment.deviceSelectionUrl + path
@@ -203,5 +230,10 @@ export class DeviceInstancesService {
         } else {
             throw new Error('expected urn:infai:ses:device as prefix');
         }
+    }
+
+    getDeviceInstancesByIds(ids: string[]): Observable<DeviceInstancesPermSearchModel[]> {
+        return this.http.post<DeviceInstancesPermSearchModel[] | null>(environment.permissionSearchUrl + '/v2/query',
+            {resource: 'devices', list_ids: {ids: ids}}).pipe(map(res => res || []));
     }
 }

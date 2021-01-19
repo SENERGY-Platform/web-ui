@@ -18,7 +18,6 @@ import {
     DeviceTypePermSearchModel,
     PermissionsModel
 } from '../../device-types-overview/shared/device-type-perm-search.model';
-import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {DeviceTypeServiceModel} from '../../device-types-overview/shared/device-type.model';
 
 export interface DeviceInstancesBaseModel {
@@ -51,4 +50,13 @@ export interface DeviceFilterCriteriaModel {
 export interface DeviceSelectablesModel {
     device: DeviceInstancesPermSearchModel;
     services: DeviceTypeServiceModel[];
+}
+
+export interface DeviceSelectablesWithGroupsModel {
+    device?: DeviceInstancesPermSearchModel;
+    services?: DeviceTypeServiceModel[];
+    device_group?: {
+        id: string;
+        name: string;
+    };
 }

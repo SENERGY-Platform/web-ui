@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatDialogModule} from '@angular/material/dialog';
@@ -29,41 +29,40 @@ import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
 describe('DeployFlowComponent', () => {
-  let component: DeployFlowComponent;
-  let fixture: ComponentFixture<DeployFlowComponent>;
+    let component: DeployFlowComponent;
+    let fixture: ComponentFixture<DeployFlowComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule, RouterTestingModule],
-      declarations: [ DeployFlowComponent ],
-      providers: [
-        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-        DialogsService,
-        {provide: ActivatedRoute, useValue: {
-            snapshot: {
-              paramMap: {
-                get(): string {
-                  return '123';
-                },
-              },
-            }
-          }}
-      ]
-    })
-    .compileComponents();
-  }));
+    beforeEach(async(() => {
+        TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule, RouterTestingModule],
+            declarations: [DeployFlowComponent],
+            providers: [
+                {provide: AuthorizationService, useClass: AuthorizationServiceMock},
+                DialogsService,
+                {
+                    provide: ActivatedRoute, useValue: {
+                        snapshot: {
+                            paramMap: {
+                                get(): string {
+                                    return '123';
+                                },
+                            },
+                        }
+                    }
+                }
+            ]
+        })
+            .compileComponents();
+    }));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(DeployFlowComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(DeployFlowComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-  it('should parse inputs', () => {
-    console.log(component.selectedValues);
-  });
 });

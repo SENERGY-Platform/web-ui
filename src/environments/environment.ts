@@ -52,6 +52,7 @@ export const environment = {
     yrUrl: 'http://localhost',
     notificationsUrl: 'http://localhost',
     configurablesUrl: 'http://localhost',
+    marshallerUrl: 'http://localhost',
     /** Semantic Keys **/
     timeStampCharacteristicId: 'urn:infai:ses:characteristic:xxxxxx-xxxx-xxxxx-xxxx',
     timeStampCharacteristicUnixSecondsId: 'urn:infai:ses:characteristic:xxxxxx-xxxx-xxxxx-xxxx',

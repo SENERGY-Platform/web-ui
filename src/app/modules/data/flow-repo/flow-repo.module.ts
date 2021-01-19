@@ -20,7 +20,7 @@ import {RouterModule} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {CoreModule} from '../../../core/core.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {DeployFlowComponent} from './deploy-flow/deploy-flow.component';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatExpansionModule} from '@angular/material/expansion';
@@ -35,13 +35,16 @@ import {MatInputModule} from '@angular/material/input';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSelectModule} from '@angular/material/select';
 import {MatCardModule} from '@angular/material/card';
+import {DeployFlowClassicComponent} from './deploy-flow/classic/deploy-flow-component-classic.component';
 
 
 const deploy = {path: 'data/flow-repo/deploy/:id', pathMatch: 'full', component: DeployFlowComponent, data: { header: 'Analytics' }};
+const deployClassic = {path: 'data/flow-repo/deploy-classic/:id', pathMatch: 'full', component: DeployFlowClassicComponent, data: { header: 'Analytics' }};
+
 
 @NgModule({
     imports: [
-        RouterModule.forChild([deploy]),
+        RouterModule.forChild([deploy, deployClassic]),
         CoreModule,
         CommonModule,
         MatGridListModule,
@@ -58,11 +61,13 @@ const deploy = {path: 'data/flow-repo/deploy/:id', pathMatch: 'full', component:
         FormsModule,
         MatCheckboxModule,
         MatSelectModule,
-        MatCardModule
+        MatCardModule,
+        ReactiveFormsModule,
 
     ],
     declarations: [
-        DeployFlowComponent
+        DeployFlowComponent,
+        DeployFlowClassicComponent,
     ],
 })
 export class FlowRepoModule {

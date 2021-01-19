@@ -62,6 +62,7 @@ export const environment = {
   yrUrl: '${process.env.YR_URL}',
   notificationsUrl: '${process.env.NOTIFICATION_SERVICE_URL}',
   configurablesUrl: '${process.env.CONFIGURABLES_URL}',
+  marshallerUrl: '${process.env.MARSHALLER_URL}',
   timeStampCharacteristicId: '${process.env.TIMESTAMP_CHARACTERISTIC_ID}',
   timeStampCharacteristicUnixSecondsId: '${process.env.TIMESTAMP_CHARACTERISTIC_UNIX_SECONDS_ID}',
   timeStampCharacteristicUnixNanoSecondsId: '${process.env.TIMESTAMP_CHARACTERISTIC_UNIX_NANO_SECONDS_ID}',
