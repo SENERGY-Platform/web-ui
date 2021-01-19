@@ -76,7 +76,11 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     }
 
     set value(selection: any | null) {
-        this.select.value = selection;
+        if (this.select === undefined) {
+            this.queuedWriteValue = selection;
+        } else {
+            this.select.value = selection;
+        }
         this.stateChanges.next();
     }
 
