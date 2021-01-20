@@ -41,7 +41,10 @@
                         </div>
                         <mat-grid-tile-footer>
                             <div fxLayout="column" fxFill>
-                                <div class="truncate footer-item-header" matTooltip="{{item.description}}">
+                                <div *ngIf="item.description !== null" class="truncate footer-item-header" matTooltip="{{item.name + ' - ' + item.description}}">
+                                    {{item.name}}
+                                </div>
+                                <div *ngIf="item.description === null" class="truncate footer-item-header" matTooltip="{{item.name}}">
                                     {{item.name}}
                                 </div>
                                 <div class="truncate footer-item-subtitle" fxLayoutAlign="start center"
