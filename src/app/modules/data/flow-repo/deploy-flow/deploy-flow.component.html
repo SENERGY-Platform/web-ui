@@ -83,14 +83,26 @@
                             </senergy-select-search>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-label>Characteristics</mat-label>
+                            <senergy-select-search
+                                    [options]="getFunctionCharacteristics(input.get('functionId')?.value)"
+                                    useOptionViewProperty="name"
+                                    placeholder="characteristics"
+                                    useOptionValueProperty="id"
+                                    formControlName="characteristics"
+                                    [autoSelectSingleElement]="true"
+                                    [multiple]="true"
+                            >
+                            </senergy-select-search>
+                        </mat-form-field>
+                        <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Device/Group</mat-label>
                             <senergy-select-search
-                                    [options]="getSelectables(input.get('aspectId')?.value, input.get('functionId')?.value)"
+                                    [options]="getSelectables(input.get('aspectId')?.value, input.get('functionId')?.value, input.get('characteristics')?.value)"
                                     useOptionViewProperty="name"
                                     useOptionValueProperty="id"
                                     placeholder="Device/Group"
                                     formControlName="selectableId"
-                                    [autoSelectSingleElement]="true"
                             >
                             </senergy-select-search>
                         </mat-form-field>
@@ -99,7 +111,9 @@
                         </div>
                         <div fxFlex fxLayout="row" *ngFor="let deviceType of getDeviceTypes(input)">
                             <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-label>Service/Path: {{deviceType.name}}</mat-label>
+                                <mat-label [ngClass]="{'device-type-not-used-label': getServiceOptions(input, deviceType).size === 0}">
+                                    {{getServiceOptions(input, deviceType).size > 0 ? 'Service/Path: ' + deviceType.name
+                                    :  deviceType.name + ' will not be used: no matching characteristic!'}}</mat-label>
                                 <senergy-select-search placeholder="Service"
                                                        [options]="getServiceOptions(input, deviceType)"
                                                        [disabled]="disableServiceOptions(input, deviceType)"

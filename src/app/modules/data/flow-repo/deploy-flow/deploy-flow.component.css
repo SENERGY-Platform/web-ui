@@ -79,3 +79,7 @@ mat-grid-list {
     padding-bottom: 20px;
     padding-left: 5px;
 }
+
+.device-type-not-used-label {
+    font-weight: bold;
+}

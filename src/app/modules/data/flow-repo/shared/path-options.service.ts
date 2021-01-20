@@ -21,10 +21,18 @@ import {environment} from '../../../../../environments/environment';
 import {catchError} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {
+    DeviceTypeContentVariableModel,
+    DeviceTypeServiceModel
+} from '../../../devices/device-types-overview/shared/device-type.model';
 
 export interface PathOption {
     service_id: string;
     json_path: string[];
+}
+
+export interface PathOptionFull extends PathOption {
+    service: DeviceTypeServiceModel;
 }
 
 @Injectable({
@@ -53,6 +61,32 @@ export class PathOptionsService {
             catchError(_ => this.errorHandlerService.handleError<Map<string, PathOption[]>>(
                 'PathOptionsService', 'getPathOptions', new Map<string, PathOption[]>()))
         );
+    }
+
+    getPathOptionsLocal(services: DeviceTypeServiceModel[], without_envelope: boolean = false,
+                        characteristic_id_filter: string[] = []): PathOptionFull[] {
+        const pathOptions: PathOptionFull[] = [];
+        services.forEach(service => {
+            const serviceOptions: PathOptionFull = {service_id: service.id, json_path: [], service: service};
+            service.outputs.forEach(output => {
+                this.getPathOptionsRecursive(!without_envelope ? 'value' : '', serviceOptions.json_path,
+                    output.content_variable, characteristic_id_filter);
+            });
+            if (serviceOptions.json_path.length > 0) {
+                pathOptions.push(serviceOptions);
+            }
+        });
+        return pathOptions;
+    }
+
+    private getPathOptionsRecursive(parentPath: string, pathArray: string[], contentVariable: DeviceTypeContentVariableModel,
+                                    characteristic_id_filter: string[]) {
+        const path = (parentPath.length > 0 ? parentPath + '.' : '') + contentVariable.name;
+        if (contentVariable.characteristic_id !== undefined
+            && characteristic_id_filter.findIndex(c => c === contentVariable.characteristic_id) !== -1) {
+            pathArray.push(path);
+        }
+        contentVariable.sub_content_variables?.forEach(sub => this.getPathOptionsRecursive(path, pathArray, sub, characteristic_id_filter));
     }
 
 }
