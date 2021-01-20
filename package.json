@@ -42,7 +42,7 @@
     "cronstrue": "^1.96.0",
     "dotenv": "^8.2.0",
     "file-saver": "^2.0.2",
-    "jointjs": "^3.2.0",
+    "jointjs": "^3.3.0",
     "jquery": "^3.5.1",
     "keycloak-angular": "^8.0.1",
     "keycloak-js": "11.0.0",
