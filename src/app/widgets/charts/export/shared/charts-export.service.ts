@@ -96,7 +96,11 @@ export class ChartsExportService {
             const array: ChartsExportRequestPayloadQueriesModel[] = [];
             widgetProperties.vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
 
-                const newField: ChartsExportRequestPayloadQueriesFieldsModel = {name: vAxis.valueName, math: vAxis.math, filterType: vAxis.filterType};
+                const newField: ChartsExportRequestPayloadQueriesFieldsModel = {
+                    name: vAxis.valueName,
+                    math: vAxis.math,
+                    filterType: vAxis.filterType
+                };
                 newField.filterValue = vAxis.valueType === 'string' ? vAxis.filterValue : Number(vAxis.filterValue);
 
                 if (this.canAppendField(array, vAxis, newField)) {
@@ -151,8 +155,8 @@ export class ChartsExportService {
             array[array.length - 1].fields
                 .forEach(field => hasFilteredField =
                     (field.filterValue === undefined || field.filterValue === null || isNaN(<number>appender.filterValue))
-                    && (field.filterType === undefined  ||  field.filterType === null) ?
-                    hasFilteredField : true);
+                    && (field.filterType === undefined || field.filterType === null) ?
+                        hasFilteredField : true);
             return !hasFilteredField;
         }
         return false;
@@ -200,7 +204,7 @@ export class ChartsExportService {
                 colors.splice(deleteColorIndices[i], 1);
             }
         }
-        return new ChartsModel(
+        const chartModel = new ChartsModel(
             (widget.properties.chartType === undefined || widget.properties.chartType === '') ? 'LineChart' : widget.properties.chartType,
             dataTable.data,
             {
@@ -210,8 +214,8 @@ export class ChartsExportService {
                     title: widget.properties.hAxisLabel,
                     gridlines: {count: -1},
                     format: widget.properties.hAxisFormat,
-                    ticks:  widget.properties.chartType === 'ColumnChart' ? dataTable.data.slice(1).map(x => x[0] as Date) : undefined,
-                    },
+                    ticks: widget.properties.chartType === 'ColumnChart' ? dataTable.data.slice(1).map(x => x[0] as Date) : undefined,
+                },
                 height: element.height,
                 width: element.width,
                 legend: 'none',
@@ -220,14 +224,23 @@ export class ChartsExportService {
                     title: widget.properties.vAxisLabel,
                     viewWindowMode: widget.properties.chartType !== 'ColumnChart' ?
                         (element.height > 200 ? 'pretty' : 'maximized') : undefined,
+                    viewWindow: {},
                 },
                 explorer: {
                     actions: ['dragToZoom', 'rightClickToReset'],
                     axis: 'horizontal',
                     keepInBounds: true,
-                    maxZoomIn: 0.001},
+                    maxZoomIn: 0.001
+                },
                 interpolateNulls: true,
             });
+        if (widget.properties.chartType === 'ColumnChart'
+            && dataTable.data.slice(1).findIndex(column => column.slice(1).findIndex(val => val < 0) !== -1) === -1 // all values >= 0 ?
+            && chartModel.options?.vAxis?.viewWindow !== undefined) {
+
+            chartModel.options.vAxis.viewWindow.min = 0;
+        }
+        return chartModel;
     }
 
     private getColorArray(vAxes: ChartsExportVAxesModel[]): string[] {
