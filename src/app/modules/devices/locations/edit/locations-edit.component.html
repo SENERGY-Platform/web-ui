@@ -28,7 +28,24 @@
         </mat-form-field>
     </div>
 
-
+    <div class="devices-container">
+        <h2>Device-Groups</h2>
+        <div *ngIf="deviceGroupsForm.value.length > 0">
+            <mat-card  *ngFor="let item of deviceGroupsForm.value" fxLayout="row" fxLayoutAlign="space-between center" class="device-card">
+                <div class="device-info">
+                    <div matTooltip="{{item.name}}" class="device-name">
+                        {{item.name}}
+                    </div>
+                </div>
+                <div class="device-ctrl">
+                    <button mat-icon-button color="accent" (click)="removeDeviceGroup(item.id)" matTooltip="Remove">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+            </mat-card>
+        </div>
+    </div>
+    <mat-divider></mat-divider>
     <div class="devices-container">
         <h2>Devices</h2>
         <div *ngIf="devicesForm.value.length > 0">
@@ -45,7 +62,6 @@
                 </div>
             </mat-card>
         </div>
-
     </div>
 
     <div class="controls" fxLayoutAlign="end center">

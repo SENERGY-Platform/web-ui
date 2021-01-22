@@ -26,6 +26,8 @@ import {DeviceTypeFunctionModel} from '../../device-types-overview/shared/device
 import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
 import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
 import {DeviceInstancesService} from '../../device-instances/shared/device-instances.service';
+import {DeviceGroupModel} from '../../device-groups/shared/device-groups.model';
+import {DeviceGroupsService} from '../../device-groups/shared/device-groups.service';
 
 @Component({
     selector: 'senergy-locations-edit',
@@ -38,8 +40,10 @@ export class LocationsEditComponent implements OnInit {
     locationForm!: FormGroup;    // LocationModel
 
     devicesForm: FormControl = new FormControl([]);       // []DeviceInstancesBaseModel
+    deviceGroupsForm: FormControl = new FormControl([]);
 
     deviceCache: Map<string, DeviceInstancesBaseModel> = new Map<string, DeviceInstancesBaseModel>();
+    deviceGroupCache: Map<string, DeviceGroupModel> = new Map<string, DeviceGroupModel>();
 
     debounceTimeInMs = 500;
     rerouteAfterSaveDelayInMs = 2000;
@@ -47,6 +51,7 @@ export class LocationsEditComponent implements OnInit {
     constructor(private _formBuilder: FormBuilder,
                 private locationService: LocationsService,
                 private deviceService: DeviceInstancesService,
+                private deviceGroupService: DeviceGroupsService,
                 private snackBar: MatSnackBar,
                 private route: ActivatedRoute,
                 private router: Router) {
@@ -88,6 +93,33 @@ export class LocationsEditComponent implements OnInit {
         }
     }
 
+    addDeviceGroup(id: string) {
+        const deviceGroupsFc = this.locationForm.get('device_group_ids');
+        if (deviceGroupsFc) {
+            const idList = deviceGroupsFc.value;
+            idList.push(id);
+            deviceGroupsFc.setValue(idList);
+        } else {
+            throw new Error('unexpected locationForm structure');
+        }
+    }
+
+    removeDeviceGroup(id: string) {
+        const deviceGroupsFc = this.locationForm.get('device_group_ids');
+        if (deviceGroupsFc) {
+            const arr = deviceGroupsFc.value;
+            const index = arr.indexOf(id);
+            if (index >= 0) {
+                arr.splice(index, 1);
+                deviceGroupsFc.setValue(arr);
+            } else {
+                throw new Error('device not found in device_ids');
+            }
+        } else {
+            throw new Error('unexpected locationForm structure');
+        }
+    }
+
     close(): void {
     }
 
@@ -99,11 +131,20 @@ export class LocationsEditComponent implements OnInit {
         this.locationForm = this.createLocationFormGroup(location);
         const that = this;
 
-        // watch device selection changes
+        // watch devices changes
         const devicesFc = this.locationForm.get('device_ids');
         if (devicesFc) {
             devicesFc.valueChanges.subscribe(value => { that.updateDevicesForm(value); });
             this.updateDevicesForm(location.device_ids);
+        } else {
+            throw new Error('missing device_ids in locationForm');
+        }
+
+        // watch device groups changes
+        const devicesGroupsFc = this.locationForm.get('device_group_ids');
+        if (devicesGroupsFc) {
+            devicesGroupsFc.valueChanges.subscribe(value => { that.updateDeviceGroupsForm(value); });
+            this.updateDeviceGroupsForm(location.device_group_ids);
         } else {
             throw new Error('missing device_ids in locationForm');
         }
@@ -210,6 +251,42 @@ export class LocationsEditComponent implements OnInit {
         } else {
             const sortedResult = fromCache.sort(sortByName);
             this.devicesForm.setValue(sortedResult);
+        }
+    }
+
+    private updateDeviceGroupsForm(deviceGroupIds: string[]) {
+        const fromCache: DeviceGroupModel[] = [];
+        const idsForRepoSearch: string[] = [];
+        for (const id of deviceGroupIds) {
+            const cachedGroups = this.deviceGroupCache.get(id);
+            if (cachedGroups) {
+                fromCache.push(cachedGroups);
+            } else {
+                idsForRepoSearch.push(id);
+            }
+        }
+
+        const sortByName = (n1: DeviceGroupModel, n2: DeviceGroupModel) => {
+            if (n1.name > n2.name) {
+                return 1;
+            }
+            if (n1.name < n2.name) {
+                return -1;
+            }
+            return 0;
+        };
+
+        if (idsForRepoSearch.length) {
+            this.deviceGroupService.getDeviceGroupListByIds(idsForRepoSearch).subscribe(groups => {
+                for (const group of groups) {
+                    this.deviceGroupCache.set(group.id, group);
+                }
+                const sortedResult = fromCache.concat(groups).sort(sortByName);
+                this.deviceGroupsForm.setValue(sortedResult);
+            });
+        } else {
+            const sortedResult = fromCache.sort(sortByName);
+            this.deviceGroupsForm.setValue(sortedResult);
         }
     }
 }

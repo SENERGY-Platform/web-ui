@@ -55,7 +55,15 @@ export class DeviceGroupsService {
     getDeviceGroup(id: string): Observable<DeviceGroupModel | null> {
         return this.http.get<DeviceGroupModel>(
             environment.deviceManagerUrl + '/device-groups/' + encodeURIComponent(id)).pipe(
-            map(resp => resp),
+            map(resp => {
+                if (resp && !resp.device_ids) {
+                    resp.device_ids = [];
+                }
+                if (resp && !resp.criteria) {
+                    resp.criteria = [];
+                }
+                return resp;
+            }),
             catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceGroup(id)', null))
         );
     }
@@ -93,6 +101,24 @@ export class DeviceGroupsService {
             }).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceListByIds(ids)', []))
+        );
+    }
+
+    getDeviceGroupListByIds(ids: string[]): Observable<DeviceGroupModel[]> {
+        return this.http.post<DeviceGroupModel[]>(
+            environment.permissionSearchUrl + '/v2/query', {
+                resource: 'device-groups',
+                list_ids: {
+                    ids: ids,
+                    limit: ids.length,
+                    offset: 0,
+                    rights: 'r',
+                    sort_by: 'name',
+                    sort_desc: false,
+                },
+            }).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceGroupListByIds(ids)', []))
         );
     }
 
