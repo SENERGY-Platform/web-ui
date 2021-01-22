@@ -72,6 +72,7 @@ import {CharacteristicElementComponent} from './characteristics/dialogs/characte
 import {MatTreeModule} from '@angular/material/tree';
 import {DeviceGroupsComponent} from './device-groups/device-groups.component';
 import {DeviceGroupsEditComponent} from './device-groups/edit/device-groups-edit.component';
+import {LocationsComponent} from './locations/locations.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -89,6 +90,8 @@ const deviceClasses = {path: 'devices/deviceclasses', pathMatch: 'full', compone
 const deviceGroups = {path: 'devices/devicegroups', pathMatch: 'full', component: DeviceGroupsComponent, data: {header: 'Devices'}};
 const deviceGroupsCreate = {path: 'devices/devicegroups/edit', pathMatch: 'full', component: DeviceGroupsEditComponent, data: {header: 'Devices'}};
 const deviceGroupsEdit = {path: 'devices/devicegroups/edit/:id', pathMatch: 'full', component: DeviceGroupsEditComponent, data: {header: 'Devices'}};
+
+const locations = {path: 'devices/locations', pathMatch: 'full', component: LocationsComponent, data: {header: 'Devices'}};
 
 @NgModule({
     imports: [MatGridListModule,
@@ -124,6 +127,7 @@ const deviceGroupsEdit = {path: 'devices/devicegroups/edit/:id', pathMatch: 'ful
         MatProgressSpinnerModule,
         DeviceTypesOverviewModule,
         RouterModule.forChild([
+            locations,
             networks,
             deviceInstances,
             deviceGroups,
@@ -160,6 +164,7 @@ const deviceGroupsEdit = {path: 'devices/devicegroups/edit/:id', pathMatch: 'ful
         DeviceGroupsComponent,
         DeviceGroupsEditComponent,
         DeviceClassesEditDialogComponent,
+        LocationsComponent
     ],
 })
 

@@ -66,6 +66,7 @@ export class SidenavService {
         ]));
 
         sections.push(new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', [
+            new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'),
             new SidenavPageModel('Hubs', 'link', 'device_hub', '/devices/networks'),
             new SidenavPageModel('Devices', 'link', 'important_devices', '/devices/deviceinstances'),
             new SidenavPageModel('Device Groups', 'link', 'group_work', '/devices/devicegroups'),
