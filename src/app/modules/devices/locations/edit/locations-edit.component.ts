@@ -1,0 +1,215 @@
+/*
+ * Copyright 2020 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {Component, OnInit} from '@angular/core';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {LocationsService} from '../shared/locations.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {LocationModel} from '../shared/locations.model';
+import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
+import {debounceTime, delay} from 'rxjs/operators';
+import {DeviceTypeFunctionModel} from '../../device-types-overview/shared/device-type.model';
+import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
+import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
+import {DeviceInstancesService} from '../../device-instances/shared/device-instances.service';
+
+@Component({
+    selector: 'senergy-locations-edit',
+    templateUrl: './locations-edit.component.html',
+    styleUrls: ['./locations-edit.component.css']
+})
+export class LocationsEditComponent implements OnInit {
+
+    id = '';
+    locationForm!: FormGroup;    // LocationModel
+
+    devicesForm: FormControl = new FormControl([]);       // []DeviceInstancesBaseModel
+
+    deviceCache: Map<string, DeviceInstancesBaseModel> = new Map<string, DeviceInstancesBaseModel>();
+
+    debounceTimeInMs = 500;
+    rerouteAfterSaveDelayInMs = 2000;
+
+    constructor(private _formBuilder: FormBuilder,
+                private locationService: LocationsService,
+                private deviceService: DeviceInstancesService,
+                private snackBar: MatSnackBar,
+                private route: ActivatedRoute,
+                private router: Router) {
+        this.getRouterParams();
+    }
+
+    ngOnInit() {
+        this.loadData();
+    }
+
+    private getRouterParams(): void {
+        this.id = this.route.snapshot.paramMap.get('id') || '';
+    }
+
+    addDevice(id: string) {
+        const devicesFc = this.locationForm.get('device_ids');
+        if (devicesFc) {
+            const idList = devicesFc.value;
+            idList.push(id);
+            devicesFc.setValue(idList);
+        } else {
+            throw new Error('unexpected locationForm structure');
+        }
+    }
+
+    removeDevice(id: string) {
+        const devicesFc = this.locationForm.get('device_ids');
+        if (devicesFc) {
+            const arr = devicesFc.value;
+            const index = arr.indexOf(id);
+            if (index >= 0) {
+                arr.splice(index, 1);
+                devicesFc.setValue(arr);
+            } else {
+                throw new Error('device not found in device_ids');
+            }
+        } else {
+            throw new Error('unexpected locationForm structure');
+        }
+    }
+
+    close(): void {
+    }
+
+    save(): void {
+        this.saveLocation(this.getLocationFromForm());
+    }
+
+    private initLocationFormGroup(location: LocationModel) {
+        this.locationForm = this.createLocationFormGroup(location);
+        const that = this;
+
+        // watch device selection changes
+        const devicesFc = this.locationForm.get('device_ids');
+        if (devicesFc) {
+            devicesFc.valueChanges.subscribe(value => { that.updateDevicesForm(value); });
+            this.updateDevicesForm(location.device_ids);
+        } else {
+            throw new Error('missing device_ids in locationForm');
+        }
+    }
+
+    private createLocationFormGroup(location: LocationModel): FormGroup {
+        return this._formBuilder.group({
+            id: [{value: location.id, disabled: true}],
+            name: [location.name, Validators.required],
+            description: [location.description],
+            image: [location.image],
+            device_ids: [location.device_ids && location.device_ids.length > 0 ? location.device_ids : []],
+            device_group_ids: [location.device_group_ids && location.device_group_ids.length > 0 ? location.device_group_ids : []]
+        });
+    }
+
+
+    private saveLocation(location: LocationModel) {
+        if (location.id === '' || location.id === undefined) {
+            this.locationService.createLocation(location).pipe(delay(this.rerouteAfterSaveDelayInMs)).subscribe((locationSaved: LocationModel | null) => {
+                this.showMessage(locationSaved);
+                this.reload(locationSaved);
+            });
+        } else {
+            this.locationService.updateLocation(location).pipe(delay(this.rerouteAfterSaveDelayInMs)).subscribe((locationSaved: LocationModel | null) => {
+                this.showMessage(locationSaved);
+                this.reload(locationSaved);
+            });
+        }
+    }
+
+    private reload(location: LocationModel | null) {
+        if (location) {
+            this.router.routeReuseStrategy.shouldReuseRoute = function () {
+                return false;
+            };
+            this.router.onSameUrlNavigation = 'reload';
+            this.router.navigate(['devices/locations/edit/' + location.id], {});
+        }
+    }
+
+    private showMessage(locationSaved: LocationModel | null) {
+        if (locationSaved) {
+            this.snackBar.open('Location saved successfully.', undefined, {duration: 2000});
+        } else {
+            this.snackBar.open('Error while saving the device group!', undefined, {duration: 2000});
+        }
+    }
+
+    private loadData(): void {
+        if (this.id !== '') {
+            this.locationService.getLocation(this.id).subscribe((location: LocationModel | null) => {
+                if (location !== null) {
+                    this.initLocationFormGroup(location);
+                }
+            });
+        } else {
+            this.initLocationFormGroup({
+                id: '',
+                name: '',
+                description: '',
+                image: '',
+                device_ids: [],
+                device_group_ids: []
+            });
+        }
+    }
+
+
+    private getLocationFromForm(): LocationModel {
+        return this.locationForm.getRawValue();
+    }
+
+    private updateDevicesForm(deviceIds: string[]) {
+        const fromCache: DeviceInstancesBaseModel[] = [];
+        const idsForRepoSearch: string[] = [];
+        for (const id of deviceIds) {
+            const cachedDevice = this.deviceCache.get(id);
+            if (cachedDevice) {
+                fromCache.push(cachedDevice);
+            } else {
+                idsForRepoSearch.push(id);
+            }
+        }
+
+        const sortByName = (n1: DeviceInstancesBaseModel, n2: DeviceInstancesBaseModel) => {
+            if (n1.name > n2.name) {
+                return 1;
+            }
+            if (n1.name < n2.name) {
+                return -1;
+            }
+            return 0;
+        };
+
+        if (idsForRepoSearch.length) {
+            this.deviceService.getDeviceListByIds(idsForRepoSearch).subscribe(devices => {
+                for (const device of devices) {
+                    this.deviceCache.set(device.id, device);
+                }
+                const sortedResult = fromCache.concat(devices).sort(sortByName);
+                this.devicesForm.setValue(sortedResult);
+            });
+        } else {
+            const sortedResult = fromCache.sort(sortByName);
+            this.devicesForm.setValue(sortedResult);
+        }
+    }
+}

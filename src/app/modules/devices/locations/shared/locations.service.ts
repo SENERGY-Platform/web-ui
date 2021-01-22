@@ -60,4 +60,24 @@ export class LocationsService {
             catchError(this.errorHandlerService.handleError(LocationsService.name, 'deleteLocation', false))
         );
     }
+
+    getLocation(id: string): Observable<LocationModel | null> {
+        return this.http.get<LocationModel>(
+            environment.deviceManagerUrl + '/locations/' + encodeURIComponent(id)).pipe(
+            map(resp => resp),
+            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocation(id)', null))
+        );
+    }
+
+    createLocation(location: LocationModel): Observable<LocationModel | null> {
+        return this.http.post<LocationModel>(environment.deviceManagerUrl + '/locations', location).pipe(
+            catchError(this.errorHandlerService.handleError(LocationsService.name, 'createLocation', null))
+        );
+    }
+
+    updateLocation(location: LocationModel): Observable<LocationModel | null> {
+        return this.http.put<LocationModel>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(location.id), location).pipe(
+            catchError(this.errorHandlerService.handleError(LocationsService.name, 'updateLocation', null))
+        );
+    }
 }

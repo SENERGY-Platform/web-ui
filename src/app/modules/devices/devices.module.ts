@@ -73,6 +73,7 @@ import {MatTreeModule} from '@angular/material/tree';
 import {DeviceGroupsComponent} from './device-groups/device-groups.component';
 import {DeviceGroupsEditComponent} from './device-groups/edit/device-groups-edit.component';
 import {LocationsComponent} from './locations/locations.component';
+import {LocationsEditComponent} from './locations/edit/locations-edit.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -92,6 +93,8 @@ const deviceGroupsCreate = {path: 'devices/devicegroups/edit', pathMatch: 'full'
 const deviceGroupsEdit = {path: 'devices/devicegroups/edit/:id', pathMatch: 'full', component: DeviceGroupsEditComponent, data: {header: 'Devices'}};
 
 const locations = {path: 'devices/locations', pathMatch: 'full', component: LocationsComponent, data: {header: 'Devices'}};
+const locationsCreate = {path: 'devices/locations/edit', pathMatch: 'full', component: LocationsEditComponent, data: {header: 'Devices'}};
+const locationsEdit = {path: 'devices/locations/edit/:id', pathMatch: 'full', component: LocationsEditComponent, data: {header: 'Devices'}};
 
 @NgModule({
     imports: [MatGridListModule,
@@ -128,6 +131,8 @@ const locations = {path: 'devices/locations', pathMatch: 'full', component: Loca
         DeviceTypesOverviewModule,
         RouterModule.forChild([
             locations,
+            locationsCreate,
+            locationsEdit,
             networks,
             deviceInstances,
             deviceGroups,
@@ -164,7 +169,8 @@ const locations = {path: 'devices/locations', pathMatch: 'full', component: Loca
         DeviceGroupsComponent,
         DeviceGroupsEditComponent,
         DeviceClassesEditDialogComponent,
-        LocationsComponent
+        LocationsComponent,
+        LocationsEditComponent
     ],
 })
 

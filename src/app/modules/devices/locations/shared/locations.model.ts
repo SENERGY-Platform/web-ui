@@ -21,6 +21,6 @@ export interface LocationModel {
     name: string;
     description: string;
     image: string;
-    device_ids: string;
-    device_group_ids: string;
+    device_ids: string[];
+    device_group_ids: string[];
 }
