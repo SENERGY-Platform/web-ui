@@ -47,9 +47,9 @@
 
         <h4 fxFlex>Configs</h4>
         <div *ngFor="let config of getConfigs()" [formGroup]="config" fxLayout="row">
-            <span fxFlex="20" class="inline">{{config.get('name')?.value || ''}}</span>
+            <span fxFlex="25" class="inline hide-overflow">{{config.get('name')?.value || ''}}</span>
             <span fxFlex="10" class="inline">{{types.get(config.get('type')?.value) || 'unknown'}}</span>
-            <mat-form-field color="accent" appearance="outline" fxFlex="70"
+            <mat-form-field color="accent" appearance="outline" fxFlex="65"
                             matTooltip="{{config.get('description')?.value || ''}}">
                 <mat-label>Value</mat-label>
                 <input matInput formControlName="value">

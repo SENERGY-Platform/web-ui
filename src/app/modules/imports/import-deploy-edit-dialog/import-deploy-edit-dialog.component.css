@@ -16,3 +16,7 @@
 .inline {
     padding-top: 1.5em;
 }
+
+.hide-overflow {
+    overflow: hidden;
+}
