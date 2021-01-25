@@ -27,6 +27,8 @@ import uuid = util.uuid;
 import {util} from 'jointjs';
 import {LocationModel} from './shared/locations.model';
 import {LocationsService} from './shared/locations.service';
+import {DeviceTypePermSearchModel} from '../device-types-overview/shared/device-type-perm-search.model';
+import {DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum} from '../device-instances/device-instances.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -86,6 +88,13 @@ export class LocationsComponent implements OnInit, OnDestroy {
             this.offset = this.offset + this.limit;
             this.getLocations(false);
         }
+    }
+
+    showDevices(location: LocationModel) {
+        this.router.navigate(['devices/deviceinstances'], {
+            state: {type: DeviceInstancesRouterStateTypesEnum.LOCATION, value: location} as DeviceInstancesRouterState,
+        });
+        return false;
     }
 
     deleteLocation(location: LocationModel): boolean {

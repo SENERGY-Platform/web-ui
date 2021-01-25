@@ -47,6 +47,12 @@
                                 <form fxLayout="row" class="footer-buttons">
                                     <div fxFlex></div>
                                     <div [fxLayoutAlign]="'start center'">
+                                        <button (click)="showDevices(location)"
+                                                mat-icon-button
+                                                color="accent"
+                                                matTooltip="Show Devices">
+                                            <mat-icon>important_devices</mat-icon>
+                                        </button>
                                         <button (click)="editLocation(location)" mat-icon-button color="accent" matTooltip="Edit">
                                             <mat-icon>edit</mat-icon>
                                         </button>

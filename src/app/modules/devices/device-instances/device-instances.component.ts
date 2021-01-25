@@ -29,6 +29,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {Navigation, Router} from '@angular/router';
 import {NetworksModel} from '../networks/shared/networks.model';
 import {DeviceTypePermSearchModel} from '../device-types-overview/shared/device-type-perm-search.model';
+import {LocationModel} from '../locations/shared/locations.model';
 
 
 const tabs = [{label: 'Online', state: 'connected'}, {label: 'Offline', state: 'disconnected'}, {
@@ -45,6 +46,7 @@ export interface DeviceInstancesRouterState {
 export enum DeviceInstancesRouterStateTypesEnum {
     NETWORK,
     DEVICE_TYPE,
+    LOCATION,
 }
 
 @Component({
@@ -63,6 +65,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     selectedTagType = '';
     routerNetwork: NetworksModel | null = null;
     routerDeviceType: DeviceTypePermSearchModel | null = null;
+    routerLocation: LocationModel | null = null;
     activeIndex = 0;
     animationDone = true;
     tabs: { label: string, state: string }[] = tabs;
@@ -110,6 +113,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     tagRemoved(): void {
         this.routerNetwork = null;
         this.routerDeviceType = null;
+        this.routerLocation = null;
         this.resetTag();
         this.getDeviceInstances(true);
     }
@@ -117,6 +121,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     getDevicesByTag(event: { tag: string, tagType: string }) {
         this.routerNetwork = null;
         this.routerDeviceType = null;
+        this.routerLocation = null;
         this.searchText = '';
         if (event.tagType === 'tag') {
             this.selectedTagTransformed = new TagValuePipe().transform(event.tag, '');
@@ -165,6 +170,9 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                     case DeviceInstancesRouterStateTypesEnum.NETWORK:
                         this.routerNetwork = state.value as NetworksModel;
                         break;
+                    case DeviceInstancesRouterStateTypesEnum.LOCATION:
+                        this.routerLocation = state.value as LocationModel;
+                        break;
                 }
             }
         }
@@ -174,6 +182,12 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         if (reset) {
             this.setRepoItemsParams(this.limitInit);
             this.reset();
+        }
+
+        if (this.routerLocation !== null) {
+            this.selectedTag = this.routerLocation.id;
+            this.selectedTagTransformed = this.routerLocation.name;
+            this.selectedTagType = 'location';
         }
 
         if (this.routerNetwork !== null) {
@@ -241,6 +255,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             if (searchText) {
                 this.routerNetwork = null;
                 this.routerDeviceType = null;
+                this.routerLocation = null;
             }
             this.resetTag();
             this.searchText = searchText;
