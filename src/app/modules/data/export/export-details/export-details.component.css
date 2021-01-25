@@ -80,3 +80,7 @@ mat-grid-list {
 .fill-remaining-space {
     flex: 1 1 auto;
 }
+
+.mat-cell {
+    padding: 0 8px;
+}
