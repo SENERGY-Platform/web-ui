@@ -77,7 +77,12 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             if (type === 'https://schema.org/Float') {
                 toParse = convertPunctuation(toParse);
             }
-            this.firstFormGroup.patchValue({value: JSON.parse(toParse)});
+            console.log(toParse); // TODO
+            if (toParse.length > 0) {
+                this.firstFormGroup.patchValue({value: JSON.parse(toParse)});
+            } else {
+                this.firstFormGroup.patchValue({value: null});
+            }
         }
         this.dialogRef.close(this.firstFormGroup.getRawValue());
     }

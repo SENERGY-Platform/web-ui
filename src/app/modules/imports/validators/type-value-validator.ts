@@ -8,7 +8,10 @@ const BOOLEAN = 'https://schema.org/Boolean';
 const STRUCTURE = 'https://schema.org/StructuredValue';
 const LIST = 'https://schema.org/ItemList';
 
-export function convertPunctuation(str: string): string {
+export function convertPunctuation(str: string | undefined | null): string | null {
+    if (str === null || str === undefined) {
+        return null;
+    }
     if (str.replace === undefined) {
         // not a string
         return str;
@@ -54,7 +57,7 @@ export function TypeValueValidator(typeControlName: string, valueControlName: st
                 case FLOAT:
                     const floatVal = convertPunctuation(defaultValue.value);
                     try {
-                        if (typeof JSON.parse(floatVal) !== 'number') {
+                        if (typeof JSON.parse(floatVal || '') !== 'number') {
                             defaultNotOk = true;
                         }
                     } catch (e) {
@@ -62,7 +65,7 @@ export function TypeValueValidator(typeControlName: string, valueControlName: st
                     }
                     break;
                 case INTEGER:
-                    const intVal = convertPunctuation(defaultValue.value);
+                    const intVal = convertPunctuation(defaultValue.value) || '';
                     if (intVal.indexOf !== undefined && intVal.indexOf('.') !== -1) {
                         defaultNotOk = true;
                     }
