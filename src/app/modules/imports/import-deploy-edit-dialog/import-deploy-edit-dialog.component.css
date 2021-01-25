@@ -20,3 +20,15 @@
 .hide-overflow {
     overflow: hidden;
 }
+
+.mat-cell {
+    padding: 0 8px;
+}
+
+.mat-header-cell {
+    padding: 0 8px;
+}
+
+.mat-column-value {
+    min-width: 400px;
+}

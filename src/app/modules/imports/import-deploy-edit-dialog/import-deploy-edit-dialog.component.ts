@@ -62,6 +62,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
 
     type: ImportTypeModel | undefined = undefined;
     ready = false;
+    configs: FormGroup[] = [];
 
     ngOnInit(): void {
         this.types.set(this.STRING, 'string');
@@ -99,6 +100,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
             if (this.data.restart === undefined) {
                 this.form.patchValue({restart: type.default_restart});
             }
+            this.configs = (this.form.get('configs') as FormArray).controls as FormGroup[];
             this.ready = true;
         }, err => {
             console.error(err);
@@ -148,9 +150,5 @@ export class ImportDeployEditDialogComponent implements OnInit {
 
     close() {
         this.dialogRef.close();
-    }
-
-    getConfigs(): FormGroup[] {
-        return (this.form.get('configs') as FormArray).controls as FormGroup[];
     }
 }
