@@ -27,9 +27,8 @@ import {ConceptsService} from '../../../concepts/shared/concepts.service';
 import {DeviceTypeHelperService} from '../shared/device-type-helper.service';
 import {ConceptsPermSearchModel} from '../../../concepts/shared/concepts-perm-search.model';
 import {forkJoin, Observable} from 'rxjs';
-import {DeviceTypeService} from '../../shared/device-type.service';
 import {FunctionsService} from '../../../functions/shared/functions.service';
-import {convertPunctuation, TypeValueValidator} from "../../../../imports/validators/type-value-validator";
+import {convertPunctuation, TypeValueValidator} from '../../../../imports/validators/type-value-validator';
 
 @Component({
     templateUrl: './device-types-content-variable-dialog.component.html',
@@ -44,8 +43,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     typeOptionsControl: FormControl = new FormControl();
     primitiveTypes: { type: string, typeShort: string }[] = [];
     nonPrimitiveTypes: { type: string, typeShort: string }[] = [];
-    conceptList: { conceptName: string, colored: boolean, characteristicList:
-            { id: string, name: string, type: string | undefined }[] }[] = [];
+    conceptList: { conceptName: string, characteristicList:
+            { id: string, name: string, type: string | undefined, class: string }[] }[] = [];
     options: Map<string, any[]> = new Map();
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesContentVariableDialogComponent>,
@@ -102,7 +101,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         return this.firstFormGroup?.get('type')?.value;
     }
 
-    getFilteredConceptList(): { conceptName: string, colored: boolean, characteristicList:
+    getFilteredConceptList(): { conceptName: string, characteristicList:
             { id: string, name: string, type: string | undefined }[]}[] {
 
         if (this.getType() === null) {
@@ -216,16 +215,18 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     }
 
     private initConceptList(concepts: ConceptsCharacteristicsModel): void {
-        const characteristicsList: { id: string, name: string, type: string | undefined }[] = [];
+        const characteristicsList: { id: string, name: string, type: string | undefined, class: string }[] = [];
+        const ngclass =  this.functionConceptIds.includes(concepts.id) ? 'color-accent' : '';
         if (concepts.characteristics !== null) {
             concepts.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
-                characteristicsList.push(...this.deviceTypeHelperService.characteristicsFlatten(characteristic));
+                this.deviceTypeHelperService.characteristicsFlatten(characteristic).forEach(char => {
+                    characteristicsList.push({id: char.id, name: char.name, type: char.type, class: ngclass});
+                });
             });
         }
 
         this.conceptList.push({
             conceptName: concepts.name,
-            colored: this.functionConceptIds.includes(concepts.id),
             characteristicList: characteristicsList
         });
     }

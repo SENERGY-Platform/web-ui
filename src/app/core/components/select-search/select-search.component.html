@@ -44,13 +44,13 @@
     </mat-optgroup>
     <mat-option *ngIf="noneView !== ''">{{noneView}}</mat-option>
     <span *ngIf="!withGroups">
-        <mat-option *ngFor="let option of getOptions() | async" [value]="getOptionValue(option)">
+        <mat-option *ngFor="let option of getOptions() | async" [value]="getOptionValue(option)" [ngClass]="getOptionClass(option)">
             {{getOptionViewValue(option)}}
         </mat-option>
     </span>
     <span *ngIf="withGroups">
         <mat-optgroup *ngFor="let group of optionsGroups | keyvalue" [label]="group.key">
-            <mat-option *ngFor="let option of group.value" [value]="getOptionValue(option)">
+            <mat-option *ngFor="let option of group.value" [value]="getOptionValue(option)" [ngClass]="getOptionClass(option)">
                 {{getOptionViewValue(option)}}
             </mat-option>
         </mat-optgroup>

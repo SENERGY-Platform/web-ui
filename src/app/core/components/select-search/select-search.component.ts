@@ -35,7 +35,7 @@ import {coerceBooleanProperty} from '@angular/cdk/coercion';
 import {ErrorStateMatcher, MatOption} from '@angular/material/core';
 import {MatInput} from '@angular/material/input';
 
-export function useProperty(property: string): ((option: any) => string) {
+export function useProperty(property: string): ((option: any) => any) {
     const properties = property.split('.');
     return option => {
         let obj = option;
@@ -224,6 +224,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     queuedWriteValue: any = undefined;
     @Input() useOptionViewProperty: string | undefined = undefined;
     @Input() useOptionValueProperty: string | undefined = undefined;
+    @Input() useOptionClassProperty: string | undefined = undefined;
     @Input() getTriggerValue: ((options: MatOption | MatOption[]) => string) | undefined = undefined;
 
     optionsGroups: Map<string, any> = new Map();
@@ -236,6 +237,9 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         }
         if (this.useOptionValueProperty !== undefined) {
             this.getOptionValue = useProperty(this.useOptionValueProperty);
+        }
+        if (this.useOptionClassProperty !== undefined) {
+            this.getOptionClass = useProperty(this.useOptionClassProperty);
         }
     }
 
@@ -262,6 +266,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     }
 
     @Input() getOptionValue: ((option: any) => any) = a => a;
+    @Input() getOptionClass: ((option: any) => string) = _ => '';
     @Input() getOptionViewValue: ((option: any) => string) = a => a as string;
 
     onContainerClick(_: MouseEvent): void {
