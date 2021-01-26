@@ -16,8 +16,8 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ImportTypeContentVariableModel} from '../../import-types/shared/import-types.model';
-import {CharacteristicsPermSearchModel} from '../../../devices/characteristics/shared/characteristics-perm-search.model';
 import {FormBuilder, Validators} from '@angular/forms';
+import {DeviceTypeCharacteristicsModel} from '../../../devices/device-types-overview/shared/device-type.model';
 
 @Component({
     selector: 'senergy-import-content-variable-dialog',
@@ -29,7 +29,7 @@ export class ContentVariableDialogComponent implements OnInit {
     form = this.fb.group({
         name: [undefined, Validators.required],
         type: [undefined, Validators.required],
-        characteristic_id: '',
+        characteristic_id: null,
         use_as_tag: false
     });
 
@@ -49,8 +49,11 @@ export class ContentVariableDialogComponent implements OnInit {
         {id: this.LIST, name: 'List'},
     ];
 
-    constructor(@Inject(MAT_DIALOG_DATA) public data:
-                    { content?: ImportTypeContentVariableModel, characteristics: CharacteristicsPermSearchModel[], infoOnly: boolean },
+    constructor(@Inject(MAT_DIALOG_DATA) public data: {
+                    content?: ImportTypeContentVariableModel,
+                    typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>>,
+                    infoOnly: boolean
+                },
                 private fb: FormBuilder, private dialogRef: MatDialogRef<ContentVariableDialogComponent>) {
     }
 
@@ -64,6 +67,9 @@ export class ContentVariableDialogComponent implements OnInit {
         if (this.data.infoOnly) {
             this.form.disable();
         }
+        this.form.get('type')?.valueChanges.subscribe(_ => {
+            this.form.patchValue({characteristic_id: null});
+        });
     }
 
 
@@ -81,5 +87,10 @@ export class ContentVariableDialogComponent implements OnInit {
 
     close() {
         this.dialogRef.close();
+    }
+
+    getConceptCharacteristics(): Map<string, DeviceTypeCharacteristicsModel[]> {
+        const type = this.form.get('type')?.value;
+        return this.data.typeConceptCharacteristics.get(type) || new Map();
     }
 }

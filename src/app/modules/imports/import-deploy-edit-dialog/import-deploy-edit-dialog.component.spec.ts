@@ -32,6 +32,7 @@ import {of} from 'rxjs';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ImportInstancesService} from '../import-instances/shared/import-instances.service';
+import {MatTableModule} from "@angular/material/table";
 
 describe('ImportDeployDialogComponent', () => {
     let component: ImportDeployEditDialogComponent;
@@ -77,6 +78,7 @@ describe('ImportDeployDialogComponent', () => {
                 HttpClientModule,
                 MatCheckboxModule,
                 BrowserAnimationsModule,
+                MatTableModule,
             ],
             providers: [
                 {

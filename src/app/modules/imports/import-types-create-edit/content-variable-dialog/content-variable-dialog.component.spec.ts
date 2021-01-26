@@ -28,28 +28,24 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
-import {CharacteristicsPermSearchModel} from '../../../devices/characteristics/shared/characteristics-perm-search.model';
+import {DeviceTypeCharacteristicsModel} from '../../../devices/device-types-overview/shared/device-type.model';
 
 describe('ContentVariableDialogComponent', () => {
     let component: ContentVariableDialogComponent;
     let fixture: ComponentFixture<ContentVariableDialogComponent>;
-
-    const exampleChar: CharacteristicsPermSearchModel = {
-        concept_id: '0',
-        creator: '0',
+    const exampleChar: DeviceTypeCharacteristicsModel = {
         id: 'char0',
         name: 'char0',
-        permissions: {
-            a: true,
-            r: true,
-            w: true,
-            x: true,
-        },
-        shared: false,
+        type: 'https://schema.org/Text',
+        sub_characteristics: null,
     };
+    const typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>> = new Map();
+    const m:  Map<string, DeviceTypeCharacteristicsModel[]> = new Map();
+    m.set('testconcept', [exampleChar]);
+    typeConceptCharacteristics.set('https://schema.org/Text', m);
 
     const dialogData = {
-        characteristics: [exampleChar],
+        typeConceptCharacteristics,
         content: undefined,
         infoOnly: false,
     };

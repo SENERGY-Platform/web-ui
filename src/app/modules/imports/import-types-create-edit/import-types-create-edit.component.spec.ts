@@ -16,15 +16,14 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {ImportTypesCreateEditComponent} from './import-types-create-edit.component';
-import {ActivatedRoute, Router, RouterModule} from '@angular/router';
-import {FormArray, ReactiveFormsModule} from '@angular/forms';
+import {ActivatedRoute, RouterModule} from '@angular/router';
+import {ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {FunctionsService} from '../../devices/functions/shared/functions.service';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {AspectsService} from '../../devices/aspects/shared/aspects.service';
-import {CharacteristicsService} from '../../devices/characteristics/shared/characteristics.service';
 import {of} from 'rxjs';
 import {CoreModule} from '../../../core/core.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
@@ -41,20 +40,21 @@ import {MatTreeModule} from '@angular/material/tree';
 import {ImportTypesService} from '../import-types/shared/import-types.service';
 import {environment} from '../../../../environments/environment';
 import {ImportTypeModel} from '../import-types/shared/import-types.model';
-import {ImportTypesComponent} from "../import-types/import-types.component";
+import {ImportTypesComponent} from '../import-types/import-types.component';
+import {ConceptsService} from '../../devices/concepts/shared/concepts.service';
 
 describe('ImportTypesCreateEditComponent', () => {
     let component: ImportTypesCreateEditComponent;
     let fixture: ComponentFixture<ImportTypesCreateEditComponent>;
     const functionsServiceSpy: Spy<FunctionsService> = createSpyFromClass(FunctionsService);
     const aspectsServiceSpy: Spy<AspectsService> = createSpyFromClass(AspectsService);
-    const characteristicsServiceSpy: Spy<CharacteristicsService> = createSpyFromClass(CharacteristicsService);
+    const conceptsServiceSpy: Spy<ConceptsService> = createSpyFromClass(ConceptsService);
     const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
 
 
     functionsServiceSpy.getFunctions.and.returnValue(of([]));
     aspectsServiceSpy.getAspects.and.returnValue(of([]));
-    characteristicsServiceSpy.getCharacteristics.and.returnValue(of([]));
+    conceptsServiceSpy.getConceptsWithCharacteristics.and.returnValue(of([]));
     const testType: ImportTypeModel = {
         id: 'urn:infai:ses:import-type:1234',
         name: 'test',
@@ -177,7 +177,7 @@ describe('ImportTypesCreateEditComponent', () => {
                 {provide: FunctionsService, useValue: functionsServiceSpy},
                 {provide: AspectsService, useValue: aspectsServiceSpy},
                 {provide: ImportTypesService, useValue: importTypesServiceSpy},
-                {provide: CharacteristicsService, useValue: characteristicsServiceSpy},
+                {provide: ConceptsService, useValue: conceptsServiceSpy},
                 {
                     provide: ActivatedRoute, useValue: {
                         url: of(['edit', '1234']),

@@ -15,7 +15,7 @@
  */
 import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {AbstractControl, FormArray, FormBuilder, FormGroup, ValidatorFn, Validators} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {
     ImportTypeConfigModel,
     ImportTypeContentVariableModel,
@@ -29,13 +29,13 @@ import {AspectsPermSearchModel} from '../../devices/aspects/shared/aspects-perm-
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ContentVariableDialogComponent} from './content-variable-dialog/content-variable-dialog.component';
 import {environment} from '../../../../environments/environment';
-import {CharacteristicsPermSearchModel} from '../../devices/characteristics/shared/characteristics-perm-search.model';
-import {CharacteristicsService} from '../../devices/characteristics/shared/characteristics.service';
 import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {Observable} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {convertPunctuation, TypeValueValidator} from '../validators/type-value-validator';
+import {ConceptsService} from '../../devices/concepts/shared/concepts.service';
+import {DeviceTypeCharacteristicsModel} from '../../devices/device-types-overview/shared/device-type.model';
 
 @Component({
     selector: 'senergy-import-types-create-edit',
@@ -49,7 +49,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 private fb: FormBuilder,
                 private importTypesService: ImportTypesService,
                 private aspectsService: AspectsService,
-                private characteristicsService: CharacteristicsService,
+                private conceptsService: ConceptsService,
                 private dialog: MatDialog,
                 private changeDetectorRef: ChangeDetectorRef,
                 private snackBar: MatSnackBar,
@@ -69,7 +69,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     detailsMode = false;
     functions: FunctionsPermSearchModel[] = [];
     aspects: AspectsPermSearchModel[] = [];
-    characteristics: CharacteristicsPermSearchModel[] = [];
+    typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>> = new Map();
 
 
     types: { id: string; name: string }[] = [
@@ -181,12 +181,24 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 this.snackBar.open('Error loading aspects', 'OK', {duration: 3000});
                 this.navigateToList();
             });
-        this.characteristicsService.getCharacteristics('', 10000, 0, 'name', 'asc')
-            .subscribe(chacteristics => this.characteristics = chacteristics, err => {
-                console.log(err);
-                this.snackBar.open('Error loading characteristics', 'OK', {duration: 3000});
-                this.navigateToList();
-            });
+        this.types.forEach(type => this.typeConceptCharacteristics.set(type.id, new Map()));
+        this.conceptsService.getConceptsWithCharacteristics()
+            .subscribe(concepts => concepts.forEach(concept => {
+                    concept.characteristics.forEach(characteristic => {
+                        const m = this.typeConceptCharacteristics.get(characteristic.type);
+                        let arr = m?.get(concept.name);
+                        if (arr === undefined) {
+                            m?.set(concept.name, []);
+                            arr = m?.get(concept.name);
+                        }
+                        arr?.push(characteristic);
+                    });
+                }),
+                err => {
+                    console.log(err);
+                    this.snackBar.open('Error loading characteristics', 'OK', {duration: 3000});
+                    this.navigateToList();
+                });
     }
 
 
@@ -303,7 +315,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     private openDialog(content: ImportTypeContentVariableModel | undefined, infoOnly = false): Observable<ImportTypeContentVariableModel | undefined> {
         const config: MatDialogConfig = {
             data: {
-                characteristics: this.characteristics,
+                typeConceptCharacteristics: this.typeConceptCharacteristics,
                 content: content,
                 infoOnly: infoOnly,
             },
