@@ -41,6 +41,8 @@ import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
 import {DeviceTypesContentVariableDialogComponent} from './dialogs/device-types-content-variable-dialog.component';
 import {MatOption} from '@angular/material/core';
+import {ConceptsService} from '../../concepts/shared/concepts.service';
+import {ConceptsCharacteristicsModel} from '../../concepts/shared/concepts-characteristics.model';
 
 @Component({
     selector: 'senergy-device-types',
@@ -64,6 +66,7 @@ export class DeviceTypesComponent implements OnInit {
     id = '';
     queryParamFunction = '';
     leafCharacteristics: DeviceTypeCharacteristicsModel[] = [];
+    concepts: ConceptsCharacteristicsModel[] = [];
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceTypeService: DeviceTypeService,
@@ -71,6 +74,7 @@ export class DeviceTypesComponent implements OnInit {
                 private snackBar: MatSnackBar,
                 private route: ActivatedRoute,
                 private deviceTypeHelperService: DeviceTypeHelperService,
+                private conceptsService: ConceptsService,
                 private router: Router) {
         this.getRouterParams();
     }
@@ -118,13 +122,15 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     addContentVariable(functionIds: string[], inOut: DeviceTypeContentTreeModel, indices: number[]): void {
+        const functionConceptIds = this.getFunctionConceptIds(functionIds);
         const disabled = !this.editable;
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: {} as DeviceTypeContentVariableModel,
-            functionIds: functionIds,
-            disabled: disabled
+            functionConceptIds: functionConceptIds,
+            disabled: disabled,
+            concepts: this.concepts,
         };
         this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
             (resp: DeviceTypeContentVariableModel | undefined) => {
@@ -140,13 +146,15 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     editContent(node: DeviceTypeContentVariableModel, functionIds: string[], inOut: DeviceTypeContentTreeModel): void {
+        const functionConceptIds = this.getFunctionConceptIds(functionIds);
         const disabled = !this.editable;
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: node,
-            functionIds: functionIds,
-            disabled: disabled
+            functionConceptIds: functionConceptIds,
+            disabled: disabled,
+            concepts: this.concepts,
         };
         this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
             (resp: DeviceTypeContentVariableModel | undefined) => {
@@ -520,6 +528,11 @@ export class DeviceTypesComponent implements OnInit {
             (aspects: DeviceTypeAspectModel[]) => {
                 this.aspectList = aspects;
             });
+
+        this.conceptsService.getConceptsWithCharacteristics().subscribe(
+            concepts => {
+                this.concepts = concepts;
+            });
     }
 
     private getRouterParams(): void {
@@ -577,5 +590,19 @@ export class DeviceTypesComponent implements OnInit {
 
     private getServiceFormArray(serviceFormGroup: AbstractControl, FormControlName: string): FormArray {
         return serviceFormGroup.get(FormControlName) as FormArray;
+    }
+
+    private getFunctionConceptIds(functionIds: string[]): string[] {
+        const list: string[] = [];
+        functionIds.forEach(functionId => {
+            let func = this.controllingFunctions.find(f => f.id === functionId)
+            if (func === undefined) {
+                func = this.measuringFunctions.find(f => f.id === functionId);
+            }
+            if (func !== undefined) {
+                list.push(func.concept_id);
+            }
+        });
+        return list;
     }
 }

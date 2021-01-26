@@ -34,60 +34,7 @@ describe('DeviceTypesContentVariableDialog', () => {
     let fixture: ComponentFixture<DeviceTypesContentVariableDialogComponent>;
 
     const matDialogRefSpy: Spy<MatDialogRef<DeviceTypesContentVariableDialogComponent>> = createSpyFromClass<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
-    const conceptServiceSpy: Spy<ConceptsService> = createSpyFromClass(ConceptsService);
-    const functionsServiceSpy: Spy<FunctionsService> = createSpyFromClass(FunctionsService);
-
-    functionsServiceSpy.getFunction.and.returnValues(of({
-            id: 'func_id_1',
-            name: 'with_concept_id',
-            rdf_type: 'rdf_type',
-        } as DeviceTypeFunctionModel),
-        of({
-            id: 'func_id_2',
-            name: 'with_concept_id',
-            rdf_type: 'rdf_type',
-            concept_id: 'urn:infai:ses:concept:ebfeabb3'
-        } as DeviceTypeFunctionModel));
-
-    conceptServiceSpy.getConcepts.and.returnValue(of([{
-        creator: 'd',
-        id: 'concept:id:4711',
-        name: 'binary state'
-    }]));
-
-    conceptServiceSpy.getConceptWithCharacteristics.and.returnValue(of({
-        id: 'urn:infai:ses:concept:ebfeabb3',
-        name: 'binary state',
-        base_characteristic_id: 'urn:infai:ses:characteristic:7621686a',
-        characteristics: [
-            {
-                id: 'urn:infai:ses:characteristic:7621686a',
-                name: 'on_off',
-                type: 'https://schema.org/Text',
-                sub_characteristics: null,
-                rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
-            },
-            {
-                id: 'urn:infai:ses:characteristic:c0353532',
-                name: 'binary status code',
-                type: 'https://schema.org/Integer',
-                min_value: 0,
-                max_value: 1,
-                sub_characteristics: null,
-                rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
-            },
-            {
-                id: 'urn:infai:ses:characteristic:7dc1bb7e',
-                name: 'boolean',
-                type: 'https://schema.org/Boolean',
-                sub_characteristics: null,
-                rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
-            }
-        ],
-        rdf_type: 'https://senergy.infai.org/ontology/Concept'
-    }));
-
-    function init(contentVariable: DeviceTypeContentVariableModel, functionIds: string[]) {
+    function init(contentVariable: DeviceTypeContentVariableModel, functionConceptIds: string[], concepts: ConceptsCharacteristicsModel[]) {
         TestBed.configureTestingModule({
             imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatSelectModule, MatInputModule],
             declarations: [
@@ -95,11 +42,12 @@ describe('DeviceTypesContentVariableDialog', () => {
             ],
             providers: [
                 {provide: MatDialogRef, useValue: matDialogRefSpy},
-                {provide: ConceptsService, useValue: conceptServiceSpy},
-                {provide: FunctionsService, useValue: functionsServiceSpy},
                 {
                     provide: MAT_DIALOG_DATA,
-                    useValue: {contentVariable: contentVariable, functionIds: functionIds}
+                    useValue: {
+                        contentVariable: contentVariable, functionConceptIds: functionConceptIds,
+                        concepts: concepts
+                    }
                 },
             ]
         }).compileComponents();
@@ -113,12 +61,12 @@ describe('DeviceTypesContentVariableDialog', () => {
 
     it('should create the app', async(() => {
         const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
-        init(contentVariable, []);
+        init(contentVariable, [], []);
         expect(component).toBeTruthy();
     }));
 
     it('create primitive Type', async(() => {
-        init({} as DeviceTypeContentVariableModel, []);
+        init({} as DeviceTypeContentVariableModel, [], []);
         expect(component.isPrimitiveType()).toBe(true);
         expect(component.typeOptionsControl.value).toBe('primitive');
         expect(component.firstFormGroup.invalid).toBe(true);
@@ -159,7 +107,7 @@ describe('DeviceTypesContentVariableDialog', () => {
             unit_reference: 'unit_reference',
             value: 'value',
         } as DeviceTypeContentVariableModel;
-        init(contentVariable, []);
+        init(contentVariable, [], []);
         expect(component.typeOptionsControl.value).toBe('primitive');
         expect(component.typeOptionsControl.disabled).toBe(true);
         expect(component.firstFormGroup.getRawValue()).toEqual({
@@ -177,7 +125,7 @@ describe('DeviceTypesContentVariableDialog', () => {
 
     it('create non-primitive Type', async(() => {
         const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
-        init(contentVariable, []);
+        init(contentVariable, [], []);
         component.typeOptionsControl.setValue('non-primitive');
         expect(component.typeOptionsControl.value).toBe('non-primitive');
         expect(component.isPrimitiveType()).toBe(false);
@@ -211,7 +159,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 type: 'https://schema.org/Float'
             }] as DeviceTypeContentVariableModel[],
         } as DeviceTypeContentVariableModel;
-        init(contentVariable, []);
+        init(contentVariable, [], []);
         expect(component.typeOptionsControl.value).toBe('non-primitive');
         expect(component.typeOptionsControl.disabled).toBe(true);
         expect(component.firstFormGroup.getRawValue()).toEqual({
@@ -234,9 +182,37 @@ describe('DeviceTypesContentVariableDialog', () => {
     }));
 
     it('init concepts and characteristics', async(() => {
-        const functionIds: string[] = ['func_id_1', 'func_id_2'];
-        init({} as DeviceTypeContentVariableModel, functionIds);
-        expect(component.functionConceptIds).toEqual(['urn:infai:ses:concept:ebfeabb3']);
+        const functionIds: string[] = ['urn:infai:ses:concept:ebfeabb3', 'func_id_2'];
+        init({} as DeviceTypeContentVariableModel, functionIds, [{
+            id: 'urn:infai:ses:concept:ebfeabb3',
+            name: 'binary state',
+            base_characteristic_id: 'urn:infai:ses:characteristic:7621686a',
+            characteristics: [
+            {
+                id: 'urn:infai:ses:characteristic:7621686a',
+                name: 'on_off',
+                type: 'https://schema.org/Text',
+                sub_characteristics: null,
+                rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+            },
+            {
+                id: 'urn:infai:ses:characteristic:c0353532',
+                name: 'binary status code',
+                type: 'https://schema.org/Integer',
+                min_value: 0,
+                max_value: 1,
+                sub_characteristics: null,
+                rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+            },
+            {
+                id: 'urn:infai:ses:characteristic:7dc1bb7e',
+                name: 'boolean',
+                type: 'https://schema.org/Boolean',
+                sub_characteristics: null,
+                rdf_type: 'https://senergy.infai.org/ontology/Characteristic'
+            }
+        ]}]);
+        expect(component.functionConceptIds).toEqual(functionIds);
         expect(component.conceptList).toEqual([{
             conceptName: 'binary state',
             characteristicList: [

@@ -16,18 +16,10 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {
-    DeviceTypeCharacteristicsModel,
-    DeviceTypeContentVariableModel,
-    DeviceTypeFunctionModel
-} from '../../shared/device-type.model';
+import {DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel} from '../../shared/device-type.model';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
-import {ConceptsService} from '../../../concepts/shared/concepts.service';
 import {DeviceTypeHelperService} from '../shared/device-type-helper.service';
-import {ConceptsPermSearchModel} from '../../../concepts/shared/concepts-perm-search.model';
-import {forkJoin, Observable} from 'rxjs';
-import {FunctionsService} from '../../../functions/shared/functions.service';
 import {convertPunctuation, TypeValueValidator} from '../../../../imports/validators/type-value-validator';
 
 @Component({
@@ -46,22 +38,24 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     conceptList: { conceptName: string, characteristicList:
             { id: string, name: string, type: string | undefined, class: string }[] }[] = [];
     options: Map<string, any[]> = new Map();
+    concepts: ConceptsCharacteristicsModel[] = [];
 
     constructor(private dialogRef: MatDialogRef<DeviceTypesContentVariableDialogComponent>,
                 private _formBuilder: FormBuilder,
-                private conceptsService: ConceptsService,
                 private deviceTypeHelperService: DeviceTypeHelperService,
-                private functionsService: FunctionsService,
-                @Inject(MAT_DIALOG_DATA) data: { contentVariable: DeviceTypeContentVariableModel, functionIds: string[], disabled: boolean }) {
+                @Inject(MAT_DIALOG_DATA) data: { contentVariable: DeviceTypeContentVariableModel, functionConceptIds: string[],
+                    disabled: boolean, concepts: ConceptsCharacteristicsModel[] }) {
         this.disabled = data.disabled;
         this.contentVariable = data.contentVariable;
-        this.getConceptIds(data.functionIds);
+        this.functionConceptIds = data.functionConceptIds;
+        this.concepts = data.concepts;
     }
 
     ngOnInit(): void {
         this.initTypesList();
         this.initFormGroup();
-        this.loadConcepts();
+        this.initConceptList();
+        this.options = this.getOptions();
         this.initTypeOptionControl();
     }
 
@@ -135,23 +129,6 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         });
     }
 
-    private loadConcepts() {
-        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((conceptsPermSearch: ConceptsPermSearchModel[]) => {
-            const observables: Observable<ConceptsCharacteristicsModel | null>[] = [];
-            conceptsPermSearch.forEach((concept: ConceptsPermSearchModel) => {
-                observables.push(this.conceptsService.getConceptWithCharacteristics(concept.id));
-            });
-            forkJoin(observables).subscribe((concepts: (ConceptsCharacteristicsModel | null)[]) => {
-                concepts.forEach((concept: (ConceptsCharacteristicsModel | null)) => {
-                    if (concept) {
-                        this.initConceptList(concept);
-                    }
-                });
-                this.options = this.getOptions();
-            });
-        });
-    }
-
     private initFormGroup() {
         const disabled = this.disabled;
         if (disabled) {
@@ -214,34 +191,23 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         this.nonPrimitiveTypes.push({type: 'https://schema.org/ItemList', typeShort: 'List'});
     }
 
-    private initConceptList(concepts: ConceptsCharacteristicsModel): void {
-        const characteristicsList: { id: string, name: string, type: string | undefined, class: string }[] = [];
-        const ngclass =  this.functionConceptIds.includes(concepts.id) ? 'color-accent' : '';
-        if (concepts.characteristics !== null) {
-            concepts.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
-                this.deviceTypeHelperService.characteristicsFlatten(characteristic).forEach(char => {
-                    characteristicsList.push({id: char.id, name: char.name, type: char.type, class: ngclass});
+    private initConceptList(): void {
+        this.concepts.forEach(concept => {
+            const characteristicsList: { id: string, name: string, type: string | undefined, class: string }[] = [];
+            const ngclass =  this.functionConceptIds.includes(concept.id) ? 'color-accent' : '';
+            if (concept.characteristics !== null) {
+                concept.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
+                    this.deviceTypeHelperService.characteristicsFlatten(characteristic).forEach(char => {
+                        characteristicsList.push({id: char.id, name: char.name, type: char.type, class: ngclass});
+                    });
                 });
-            });
-        }
+            }
 
-        this.conceptList.push({
-            conceptName: concepts.name,
-            characteristicList: characteristicsList
+            this.conceptList.push({
+                conceptName: concept.name,
+                characteristicList: characteristicsList
+            });
         });
     }
 
-    private getConceptIds(functionIds: string[] | undefined): void {
-        if (functionIds) {
-            functionIds.forEach((functionId: string) => {
-                this.functionsService.getFunction(functionId).subscribe((resp: (DeviceTypeFunctionModel | null)) => {
-                    if (resp) {
-                        if (resp.concept_id) {
-                            this.functionConceptIds.push(resp.concept_id);
-                        }
-                    }
-                });
-            });
-        }
-    }
 }

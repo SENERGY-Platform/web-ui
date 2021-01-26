@@ -23,6 +23,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ConceptsPermSearchModel} from './concepts-perm-search.model';
 import {ConceptsCharacteristicsModel} from './concepts-characteristics.model';
+import {forkJoin} from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -55,6 +56,25 @@ export class ConceptsService {
         return this.http.get<ConceptsCharacteristicsModel>(environment.semanticRepoUrl + '/concepts/' + conceptId + '?sub-class=true').pipe(
             catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcept', null))
         );
+    }
+
+    getConceptsWithCharacteristics(): Observable<ConceptsCharacteristicsModel[]> {
+        const list: ConceptsCharacteristicsModel[] = [];
+        return new Observable<ConceptsCharacteristicsModel[]>(obs => {
+            this.getConcepts('', 9999, 0, 'name', 'asc').subscribe(concepts => {
+                const observables: Observable<ConceptsCharacteristicsModel | null>[] = [];
+                concepts.forEach(permConcept => observables.push(this.getConceptWithCharacteristics(permConcept.id).pipe(map(concept => {
+                    if (concept !== null) {
+                        list.push(concept);
+                    }
+                    return concept;
+                }))));
+                forkJoin(observables).subscribe(_ => {
+                    obs.next(list);
+                    obs.complete();
+                });
+            });
+        });
     }
 
     deleteConcept(conceptId: string): Observable<boolean> {
