@@ -117,7 +117,7 @@ export class ImportInstanceExportDialogComponent implements OnInit {
                 Name: content.name,
                 Path: parentPath + '.' + content.name,
                 Type: this.types.get(content.type),
-                Tag: false,
+                Tag: content.use_as_tag,
             } as ExportValueModel;
             if (content.use_as_tag) {
                 if (content.type !== this.STRING) {

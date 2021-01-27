@@ -202,27 +202,31 @@ describe('ImportInstanceExportDialogComponent', () => {
                 {
                     Name: 'value',
                     Path: 'value.value',
-                    Type: 'float'
+                    Type: 'float',
+                    Tag: false,
                 },
                 {
                     Name: 'value2',
                     Path: 'value.meta.value2',
-                    Type: 'float'
+                    Type: 'float',
+                    Tag: false,
                 },
                 {
                     Name: 'tag1',
                     Path: 'value.meta.tag1',
-                    Type: 'float'
-                }],
-            Tags: [
+                    Type: 'float',
+                    Tag: true,
+                },
                 {
                     Name: 'tag1_tag',
                     Path: 'value.meta.tag1',
-                    Type: 'string'
+                    Type: 'string',
+                    Tag: true,
                 }, {
                     Name: 'tag2',
                     Path: 'value.meta.tag2',
-                    Type: 'string'
+                    Type: 'string',
+                    Tag: true,
                 }],
             EntityName: 'name',
             ServiceName: 'urn:infai:ses:import-type:1234',
