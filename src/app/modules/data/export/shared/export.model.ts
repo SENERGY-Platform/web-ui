@@ -31,7 +31,6 @@ export interface ExportModel {
     Offset: string;
     Generated: boolean;
     Values: ExportValueModel [];
-    Tags?:  ExportValueModel [];
     CreatedAt: string;
     UpdatedAt: string;
 }
@@ -40,6 +39,7 @@ export interface ExportValueBaseModel {
     Name: string;
     Path: string;
     Type: string;
+    Tag?: boolean;
 }
 
 export interface ExportValueModel extends ExportValueBaseModel {

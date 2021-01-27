@@ -86,6 +86,8 @@ export class ImportInstanceExportDialogComponent implements OnInit {
 
 
     create() {
+        const values = this.valueSelection.selected;
+        values.push(...this.tags);
         const exp: ExportModel = {
             Name: this.nameControl.value,
             Description: this.descControl.value,
@@ -95,8 +97,7 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             Generated: false,
             Offset: 'earliest',
             TimePath: 'time',
-            Values: this.valueSelection.selected,
-            Tags: this.tags,
+            Values: values,
             EntityName: this.data.name,
             ServiceName: this.data.import_type_id,
         } as ExportModel;
@@ -110,20 +111,21 @@ export class ImportInstanceExportDialogComponent implements OnInit {
 
     private fillValuesAndTags(values: ExportValueModel[], tags: ExportValueModel[],
                               content: ImportTypeContentVariableModel, parentPath: string) {
-
         if (content.sub_content_variables === null || content.sub_content_variables.length === 0
             && this.types.has(content.type)) { // can only export primitive types
             const model = {
                 Name: content.name,
                 Path: parentPath + '.' + content.name,
-                Type: this.types.get(content.type)
+                Type: this.types.get(content.type),
+                Tag: false,
             } as ExportValueModel;
             if (content.use_as_tag) {
                 if (content.type !== this.STRING) {
                     const tag = {
                         Name: content.name + '_tag',
                         Path: parentPath + '.' + content.name,
-                        Type: this.types.get(this.STRING)
+                        Type: this.types.get(this.STRING),
+                        Tag: true,
                     } as ExportValueModel;
                     tags.push(tag);
                     values.push(model); // tags are always strings, thus needing the value twice
