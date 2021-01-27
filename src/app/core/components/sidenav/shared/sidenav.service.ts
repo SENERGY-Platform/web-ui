@@ -79,8 +79,8 @@ export class SidenavService {
         ]));
 
         sections.push(new SidenavSectionModel('Import', 'toggle', 'play_circle_outline', '/imports', [
-            new SidenavPageModel('Imports', 'link', 'storage', '/imports/instances'),
             new SidenavPageModel('Types', 'link', 'description', '/imports/types/list'),
+            new SidenavPageModel('Imports', 'link', 'storage', '/imports/instances'),
         ]));
 
         return sections;
