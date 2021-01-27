@@ -19,6 +19,7 @@
         <mat-radio-group [(ngModel)]="selector" (ngModelChange)="exportTypeChanged()" class="radio-group">
             <mat-radio-button class="radio-button" value="device">Gerät</mat-radio-button>
             <mat-radio-button class="radio-button" value="pipe">Analyse</mat-radio-button>
+            <mat-radio-button class="radio-button" value="import">Import</mat-radio-button>
         </mat-radio-group>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>
@@ -36,9 +37,12 @@
             <senergy-select-search *ngIf="selector==='pipe'" (ngModelChange)="pipelineChanged($event)" placeholder="Pipeline" [(ngModel)]="pipeline"
                 [options]="pipelines" useOptionViewProperty="name">
             </senergy-select-search>
+            <senergy-select-search *ngIf="selector==='import'" (ngModelChange)="importChanged($event)" placeholder="Import" [(ngModel)]="import"
+                                   [options]="imports" useOptionViewProperty="name">
+            </senergy-select-search>
         </mat-form-field>
 
-        <mat-form-field fxFlex color="accent" appearance="outline">
+        <mat-form-field fxFlex color="accent" appearance="outline" *ngIf="selector !== 'import'">
             <senergy-select-search  *ngIf="selector==='device'" placeholder="Service" (ngModelChange)="serviceChanged($event)" [(ngModel)]="service"
                 [options]="deviceType.services" useOptionViewProperty="name">
             </senergy-select-search>
@@ -80,8 +84,9 @@
                     </mat-option>
                 </mat-select>
             </mat-form-field>
+            <mat-checkbox [(ngModel)]="item.Tag" (ngModelChange)="pathChanged(key)" class="inline layout-margin pad-right">Tag</mat-checkbox>
             <button mat-icon-button>
-                <mat-icon (click)="deleteValue(item)" color="warn">
+                <mat-icon (click)="deleteValue(item)" color="warn" class="inline">
                     delete
                 </mat-icon>
             </button>

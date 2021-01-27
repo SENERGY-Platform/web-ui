@@ -68,3 +68,11 @@ mat-grid-list {
 .radio-button {
     margin: 5px;
 }
+
+.inline {
+    padding-bottom: 1.25em;
+}
+
+.pad-right {
+    padding-right: 30px;
+}

@@ -13,19 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Injectable} from '@angular/core';
-import {ImportTypeModel, ImportTypePermissionSearchModel} from './import-types.model';
+import {Injectable, OnInit} from '@angular/core';
+import {ImportTypeContentVariableModel, ImportTypeModel, ImportTypePermissionSearchModel} from './import-types.model';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../../../environments/environment';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/internal/operators';
 import {delay} from 'rxjs/operators';
+import {ExportValueModel} from '../../../data/export/shared/export.model';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ImportTypesService {
     eventualConsistencyDelay = 2000;
+
+    STRING = 'https://schema.org/Text';
+    INTEGER = 'https://schema.org/Integer';
+    FLOAT = 'https://schema.org/Float';
+    BOOLEAN = 'https://schema.org/Boolean';
+    STRUCTURE = 'https://schema.org/StructuredValue';
+    types: Map<string, string> = new Map();
 
     constructor(private http: HttpClient) {
     }
@@ -77,5 +85,48 @@ export class ImportTypesService {
     deleteImportInstance(id: string): Observable<void> {
         return this.http.delete<void>(environment.importRepoUrl + '/import-types/' + id)
             .pipe(delay(this.eventualConsistencyDelay));
+    }
+
+    parseImportTypeExportValues(importType: ImportTypeModel): ExportValueModel[] {
+        this.types.set(this.STRING, 'string');
+        this.types.set(this.INTEGER, 'int');
+        this.types.set(this.FLOAT, 'float');
+        this.types.set(this.BOOLEAN, 'bool');
+
+        let exportContent = importType.output.sub_content_variables?.find(sub => sub.name === 'value' && sub.type === this.STRUCTURE);
+        if (exportContent === undefined) {
+            exportContent = importType.output;
+        }
+        const values: ExportValueModel[] = [];
+        this.fillValuesAndTags(values, exportContent, '');
+        return values;
+    }
+
+    private fillValuesAndTags(values: ExportValueModel[],
+                              content: ImportTypeContentVariableModel, parentPath: string) {
+        if ((content.sub_content_variables === null || content.sub_content_variables.length === 0)
+            && this.types.has(content.type)) { // can only export primitive types
+            const model = {
+                Name: content.name,
+                Path: parentPath + '.' + content.name,
+                Type: this.types.get(content.type),
+                Tag: content.use_as_tag && content.type === this.STRING,
+            } as ExportValueModel;
+            values.push(model);
+
+            // check if tag is needed
+            if (content.use_as_tag && content.type !== this.STRING) {
+                const tag = {
+                    Name: content.name + '_tag',
+                    Path: parentPath + '.' + content.name,
+                    Type: this.types.get(this.STRING),
+                    Tag: true,
+                } as ExportValueModel;
+                values.push(tag);
+            }
+        } else {
+            const path = parentPath === '' ? content.name : parentPath + '.' + content.name;
+            content.sub_content_variables?.forEach(sub => this.fillValuesAndTags(values, sub, path));
+        }
     }
 }

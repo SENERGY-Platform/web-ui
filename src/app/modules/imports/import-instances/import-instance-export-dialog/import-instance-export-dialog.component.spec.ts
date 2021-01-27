@@ -126,6 +126,36 @@ describe('ImportInstanceExportDialogComponent', () => {
         owner: 'test-owner'
     };
     importTypesServiceSpy.getImportType.and.returnValue(of(testType));
+    importTypesServiceSpy.parseImportTypeExportValues.and.returnValue([
+        {
+            Name: 'value',
+            Path: 'value.value',
+            Type: 'float',
+            Tag: false,
+        },
+        {
+            Name: 'value2',
+            Path: 'value.meta.value2',
+            Type: 'float',
+            Tag: false,
+        },
+        {
+            Name: 'tag1',
+            Path: 'value.meta.tag1',
+            Type: 'float',
+            Tag: false,
+        },
+        {
+            Name: 'tag1_tag',
+            Path: 'value.meta.tag1',
+            Type: 'string',
+            Tag: true,
+        }, {
+            Name: 'tag2',
+            Path: 'value.meta.tag2',
+            Type: 'string',
+            Tag: true,
+        }]);
 
     const exportServiceSpy: Spy<ExportService> = createSpyFromClass(ExportService);
     exportServiceSpy.startPipeline.and.returnValue(of(true));
@@ -215,7 +245,7 @@ describe('ImportInstanceExportDialogComponent', () => {
                     Name: 'tag1',
                     Path: 'value.meta.tag1',
                     Type: 'float',
-                    Tag: true,
+                    Tag: false,
                 },
                 {
                     Name: 'tag1_tag',

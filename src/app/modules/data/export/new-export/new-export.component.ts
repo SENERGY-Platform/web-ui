@@ -32,8 +32,13 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {IOModel, OperatorModel} from '../../operator-repo/shared/operator.model';
 import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
 import {environment} from '../../../../../environments/environment';
-import {forkJoin, Observable} from 'rxjs';
+import {forkJoin, Observable, of} from 'rxjs';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {ImportInstancesService} from '../../../imports/import-instances/shared/import-instances.service';
+import {ImportInstancesModel} from '../../../imports/import-instances/shared/import-instances.model';
+import {ImportTypeContentVariableModel, ImportTypeModel} from '../../../imports/import-types/shared/import-types.model';
+import {ImportTypesService} from '../../../imports/import-types/shared/import-types.service';
+import {map} from 'rxjs/internal/operators';
 
 @Component({
     selector: 'senergy-new-export',
@@ -57,6 +62,9 @@ export class NewExportComponent implements OnInit {
     allMessages = true;
     image: SafeHtml = {};
     showImage = false;
+    imports: ImportInstancesModel[] = [];
+    import = {} as ImportInstancesModel;
+    importTypes: Map<string, ImportTypeModel> = new Map();
 
     timeSuggest = '';
 
@@ -84,20 +92,24 @@ export class NewExportComponent implements OnInit {
         private operatorRepoService: OperatorRepoService,
         private router: Router,
         private sanitizer: DomSanitizer,
-        public snackBar: MatSnackBar
+        public snackBar: MatSnackBar,
+        private importInstancesService: ImportInstancesService,
+        private importTypesService: ImportTypesService,
     ) {
         this.id = this.route.snapshot.paramMap.get('id');
     }
 
     ngOnInit() {
-        const array: Observable<(DeviceInstancesModel[] | PipelineModel[])>[] = [];
+        const array: Observable<(DeviceInstancesModel[] | PipelineModel[] | ImportInstancesModel[])>[] = [];
 
         array.push(this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc'));
         array.push(this.pipelineRegistryService.getPipelines());
+        array.push(this.importInstancesService.listImportInstances('', 9999, 0, 'name.asc'));
 
         forkJoin(array).subscribe(response => {
             this.devices = response [0] as DeviceInstancesModel[];
             this.pipelines = response [1] as PipelineModel[];
+            this.imports = response[2] as ImportInstancesModel[];
             setTimeout(() => {
                 const id = this.route.snapshot.paramMap.get('id');
                 if (id !== null) {
@@ -172,6 +184,12 @@ export class NewExportComponent implements OnInit {
                                         }
                                     }
                                 });
+                            } else if (exp.FilterType === 'import_id') {
+                                this.selector = 'import';
+                                this.import = this.imports.find(i => i.id === exp.Filter) || {} as ImportInstancesModel;
+                                this.getImportType(this.import.import_type_id).subscribe(type => {
+                                    type.output.sub_content_variables?.forEach(output => this.traverseDataStructure('', output));
+                                });
                             }
                             this.export = exp;
                         }
@@ -235,6 +253,7 @@ export class NewExportComponent implements OnInit {
         this.deviceType = {} as DeviceTypeModel;
         this.pipeline = {} as PipelineModel;
         this.operator = {} as PipelineOperatorModel;
+        this.import = {} as ImportInstancesModel;
     }
 
     deviceChanged(device: DeviceInstancesModel) {
@@ -257,16 +276,23 @@ export class NewExportComponent implements OnInit {
         this.autofillValues();
     }
 
-    traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel) {
+    traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel | ImportTypeContentVariableModel) {
         if (field.type === 'https://schema.org/StructuredValue' && field.type !== undefined && field.type !== null) {
-            pathString += '.' + field.name;
-            if (field.sub_content_variables !== undefined) {
-                field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel) => {
+            if (pathString.length > 0) {
+                pathString += '.';
+            }
+            pathString += field.name;
+            if (field.sub_content_variables !== undefined && field.sub_content_variables !== null) {
+                field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel |  ImportTypeContentVariableModel) => {
                     this.traverseDataStructure(pathString, innerField);
                 });
             }
         } else {
-            const path = pathString + '.' + field.name;
+            let path = pathString;
+            if (pathString.length > 0) {
+                path += '.';
+            }
+            path += field.name;
             this.paths.set(path, field.type);
             if (field.characteristic_id === environment.timeStampCharacteristicId) {
                 this.timeSuggest = path;
@@ -350,24 +376,28 @@ export class NewExportComponent implements OnInit {
 
     pathChanged(id: number) {
         if (id !== undefined) {
-            let type = this.paths.get(this.export.Values[id].Path);
-            switch (this.paths.get(this.export.Values[id].Path)) {
-                case this.typeString:
-                    type = 'string';
-                    break;
-                case this.typeFloat:
-                    type = 'float';
-                    break;
-                case this.typeInteger:
-                    type = 'int';
-                    break;
-                case this.typeBoolean:
-                    type = 'bool';
-                    break;
+            if (this.export.Values[id].Tag) {
+                this.export.Values[id].Type = 'string';
+            } else {
+                let type = this.paths.get(this.export.Values[id].Path);
+                switch (this.paths.get(this.export.Values[id].Path)) {
+                    case this.typeString:
+                        type = 'string';
+                        break;
+                    case this.typeFloat:
+                        type = 'float';
+                        break;
+                    case this.typeInteger:
+                        type = 'int';
+                        break;
+                    case this.typeBoolean:
+                        type = 'bool';
+                        break;
 
+                }
+                // @ts-ignore
+                this.export.Values[id].Type = type;
             }
-            // @ts-ignore
-            this.export.Values[id].Type = type;
         }
     }
 
@@ -377,23 +407,32 @@ export class NewExportComponent implements OnInit {
     }
 
     autofillValues() {
-        if (this.selector === 'pipe') {
+        if (this.selector === 'pipe' || this.selector === 'import') {
             this.export.TimePath = 'time';
         } else if (this.selector === 'device') {
             this.export.TimePath = this.timeSuggest;
         }
-
-        const hasAmbiguousNames = this.hasAmbiguousNames();
-        this.export.Values = [];
-        this.paths.forEach((_type, path) => {
-            if (this.export.TimePath !== path) { // don't add path if it's selected as time
-                this.addValue();
-                const index = this.export.Values.length - 1;
-                this.export.Values[index].Name = hasAmbiguousNames ? path : path.slice(path.lastIndexOf('.') + 1);
-                this.export.Values[index].Path = path;
-                this.pathChanged(index);
+        if (this.selector === 'import') {
+            const importType = this.importTypes.get(this.import.import_type_id);
+            if (importType !== undefined) {
+                this.export.Values = this.importTypesService.parseImportTypeExportValues(importType);
+                this.export.Values.forEach((_, index) => this.pathChanged(index));
+            } else {
+                this.export.Values = [];
             }
-        });
+        } else {
+            const hasAmbiguousNames = this.hasAmbiguousNames();
+            this.export.Values = [];
+            this.paths.forEach((_type, path) => {
+                if (this.export.TimePath !== path) { // don't add path if it's selected as time
+                    this.addValue();
+                    const index = this.export.Values.length - 1;
+                    this.export.Values[index].Name = hasAmbiguousNames ? path : path.slice(path.lastIndexOf('.') + 1);
+                    this.export.Values[index].Path = path;
+                    this.pathChanged(index);
+                }
+            });
+        }
     }
 
     onTimePathSelected(path: string) {
@@ -432,4 +471,24 @@ export class NewExportComponent implements OnInit {
     getPathsKeyOptions(): string[] {
         return Array.from(this.paths.keys());
     }
+
+    importChanged(i: ImportInstancesModel) {
+        this.getImportType(i.import_type_id).subscribe(type => {
+            type.output.sub_content_variables?.forEach(output => this.traverseDataStructure('', output));
+            this.autofillValues();
+        });
+    }
+
+    private getImportType(id: string): Observable<ImportTypeModel> {
+        const importType = this.importTypes.get(id);
+        if (importType !== undefined) {
+            return of(importType);
+        }
+        return this.importTypesService.getImportType(id).pipe(map(type => {
+            this.importTypes.set(id, type);
+            return type;
+        }));
+    }
+
+
 }
