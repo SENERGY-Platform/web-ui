@@ -15,6 +15,7 @@
  */
 
 import {SafeHtml} from '@angular/platform-browser';
+import {PipelineInputSelectionModel} from '../../flow-repo/deploy-flow/shared/pipeline-request.model';
 
 export interface PipelineModel {
     id: string;
@@ -25,6 +26,9 @@ export interface PipelineModel {
     createdAt: Date;
     updatedAt: Date;
     operators: PipelineOperatorModel [];
+    consumeAllMessages?: boolean;
+    windowTime?: number;
+    metrics?: boolean;
 }
 
 export interface PipelineOperatorModel {
@@ -34,6 +38,8 @@ export interface PipelineOperatorModel {
     name: string;
     deploymentType: string;
     inputTopics: OperatorInputTopic [];
+    inputSelections?: PipelineInputSelectionModel[];
+    config?: Map<string, string>;
 }
 
 export interface OperatorInputTopic {

@@ -15,13 +15,14 @@
  */
 
 export interface PipelineRequestModel {
-    id: string;
+    id: string | null; // id of pipeline for updating
     name: string;
     description: string;
     windowTime: number;
     metrics: boolean;
     consumeAllMessages: boolean;
     nodes: NodeModel [];
+    flowId: string;
 }
 
 export interface NodeModel {
@@ -29,6 +30,7 @@ export interface NodeModel {
     deploymentType: string;
     config: NodeConfig [] | undefined;
     inputs: NodeInput [] | undefined;
+    inputSelections?: PipelineInputSelectionModel[];
 }
 
 export interface NodeInput {
@@ -45,4 +47,12 @@ export interface NodeValue {
 export interface NodeConfig {
     name: string;
     value: string;
+}
+
+export interface PipelineInputSelectionModel {
+    inputName: string;
+    aspectId: string;
+    functionId: string;
+    characteristicIds: string[];
+    selectableId: string;
 }

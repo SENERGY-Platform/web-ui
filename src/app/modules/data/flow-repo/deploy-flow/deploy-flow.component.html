@@ -15,7 +15,7 @@
   -->
 
 <div class="main-panel">
-    <button mat-raised-button (click)="switchToClassic()" color="accent" class="layout-margin">Use classic deployment
+    <button mat-raised-button *ngIf="!editMode && ready" (click)="switchToClassic()" color="accent" class="layout-margin">Use classic deployment
     </button>
     <div class="layout-margin" fxLayout="column" *ngIf="ready == true" [formGroup]="form">
         <mat-accordion class="example-headers-align" multi>
@@ -56,7 +56,6 @@
                         {{node.get('id')?.value}}
                     </mat-panel-description>
                 </mat-expansion-panel-header>
-                <ng-template matExpansionPanelContent>
                     <div fxLayout="column"
                          *ngFor="let input of getSubElementAsGroupArray(node, 'inputs'), let inputIndex = index"
                          [formGroup]="input">
@@ -109,17 +108,17 @@
                         <div fxFlex *ngIf="getDeviceTypes(input).length > 1" class="color-warn warn-text">
                             Operator might be unable to handle multiple device types!
                         </div>
-                        <div fxFlex fxLayout="row" *ngFor="let deviceType of getDeviceTypes(input)">
+                        <div fxFlex fxLayout="row" *ngFor="let deviceType of getSubElementAsGroupArray(input, 'deviceTypes')" [formGroup]="deviceType">
                             <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-label [ngClass]="{'device-type-not-used-label': getServiceOptions(input, deviceType).size === 0}">
-                                    {{getServiceOptions(input, deviceType).size > 0 ? 'Service/Path: ' + deviceType.name
-                                    :  deviceType.name + ' will not be used: no matching characteristic!'}}</mat-label>
+                                <mat-label [ngClass]="{'device-type-not-used-label': getServiceOptions(input, deviceType.get('id')?.value).size === 0}">
+                                    {{getServiceOptions(input, deviceType.get('id')?.value).size > 0 ? 'Service/Path: ' + deviceType.get('name')?.value
+                                    :  deviceType.get('name')?.value + ' will not be used: no matching characteristic!'}}</mat-label>
                                 <senergy-select-search placeholder="Service"
-                                                       [options]="getServiceOptions(input, deviceType)"
-                                                       [disabled]="disableServiceOptions(input, deviceType)"
+                                                       [options]="getServiceOptions(input, deviceType.get('id')?.value)"
                                                        [autoSelectSingleElement]="true"
                                                        [getTriggerValue]="getServiceTriggerValue"
-                                                       (selectionChange)="servicePathSelected(input, deviceType.id, $event.value)"
+                                                       [compareWith]="comparePathOptions"
+                                                       formControlName="selection"
                                                        useOptionViewProperty="path">
                                 </senergy-select-search>
                             </mat-form-field>
@@ -134,7 +133,6 @@
                                    placeholder="{{config.get('name')?.value}}">
                         </mat-form-field>
                     </div>
-                </ng-template>
             </mat-expansion-panel>
             <!--
             Global Settings
@@ -164,7 +162,7 @@
         </mat-accordion>
 
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
-            <button mat-raised-button color="accent" (click)="startPipeline()">Start</button>
+            <button mat-raised-button color="accent" (click)="startPipeline()">{{editMode ? 'Update' : 'Start'}}</button>
         </div>
     </div>
     <senergy-spinner [show]="!ready"></senergy-spinner>

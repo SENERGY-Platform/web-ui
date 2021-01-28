@@ -78,7 +78,7 @@ export class DeployFlowClassicComponent {
         }
 
         this.pipeReq = {
-            id: this.id, name: '', description: '', nodes: [], windowTime: this.windowTime, metrics: this.metrics,
+            id: null, flowId: this.id, name: '', description: '', nodes: [], windowTime: this.windowTime, metrics: this.metrics,
             consumeAllMessages: this.allMessages
         };
 

@@ -27,13 +27,15 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatListModule} from '@angular/material/list';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FormsModule} from '@angular/forms';
+import {DeployFlowComponent} from '../flow-repo/deploy-flow/deploy-flow.component';
 
 
 const details = {path: 'data/pipelines/details/:id', pathMatch: 'full', component: PipelineDetailsComponent, data: { header: 'Analytics' }};
+const edit = {path: 'data/pipelines/edit/:id', pathMatch: 'full', component: DeployFlowComponent, data: { header: 'Analytics' }};
 
 @NgModule({
     imports: [
-        RouterModule.forChild([details]),
+        RouterModule.forChild([details, edit]),
         CoreModule,
         CommonModule,
         MatExpansionModule,

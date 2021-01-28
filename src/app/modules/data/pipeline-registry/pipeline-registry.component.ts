@@ -33,7 +33,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
     pipes = [] as PipelineModel [];
     ready = false;
-    displayedColumns: string[] = ['id', 'name', 'createdat', 'info', 'delete'];
+    displayedColumns: string[] = ['id', 'name', 'createdat', 'updatedat', 'info',  'edit', 'delete'];
 
     @ViewChild(MatTable, {static: false}) table!: MatTable<PipelineModel>;
     @ViewChild(MatSort, {static: false}) sort!: MatSort;
@@ -78,5 +78,9 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
             }
         });
 
+    }
+
+    isEditable(pipe: PipelineModel): boolean {
+        return pipe.operators.findIndex(op => op.inputSelections !== undefined && op.inputSelections.length > 0) !== -1;
     }
 }
