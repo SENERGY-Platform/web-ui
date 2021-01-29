@@ -74,6 +74,7 @@ import {DeviceGroupsComponent} from './device-groups/device-groups.component';
 import {DeviceGroupsEditComponent} from './device-groups/edit/device-groups-edit.component';
 import {LocationsComponent} from './locations/locations.component';
 import {LocationsEditComponent} from './locations/edit/locations-edit.component';
+import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups/edit/device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Devices'}};
 const deviceInstances = {
@@ -170,7 +171,8 @@ const locationsEdit = {path: 'devices/locations/edit/:id', pathMatch: 'full', co
         DeviceGroupsEditComponent,
         DeviceClassesEditDialogComponent,
         LocationsComponent,
-        LocationsEditComponent
+        LocationsEditComponent,
+        DeviceGroupsPipelineHelperDialogComponent,
     ],
 })
 

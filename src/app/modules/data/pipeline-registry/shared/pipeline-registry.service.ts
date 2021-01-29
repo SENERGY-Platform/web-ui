@@ -44,6 +44,14 @@ export class PipelineRegistryService {
 
     }
 
+    getPipelinesWithSelectable(selectableId: string): Observable<PipelineModel[]> {
+        return this.getPipelines().pipe(map(pipes => pipes || []), map(pipes => pipes.filter(pipe =>
+            pipe.operators.findIndex(operator =>
+                operator.inputSelections !== undefined && operator.inputSelections.findIndex(selection =>
+                selection.selectableId === selectableId) !== -1) !== -1
+        )));
+    }
+
     getPipeline(id: string): Observable<PipelineModel | null> {
         return this.http.get<PipelineModel>
         (environment.pipelineRegistryUrl + '/pipeline/' + id).pipe(

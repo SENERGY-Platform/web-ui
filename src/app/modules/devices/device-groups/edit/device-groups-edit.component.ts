@@ -15,14 +15,10 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {DeviceGroupsService} from '../shared/device-groups.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {forkJoin, Observable} from 'rxjs';
-import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatTreeNestedDataSource} from '@angular/material/tree';
-import {MatOption} from '@angular/material/core';
 import {
     DeviceGroupCapability,
     DeviceGroupCriteriaModel,
@@ -34,7 +30,9 @@ import {debounceTime, delay} from 'rxjs/operators';
 import {DeviceTypeFunctionModel} from '../../device-types-overview/shared/device-type.model';
 import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
 import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
-import {ResponsiveService} from '../../../../core/services/responsive.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DeviceGroupsPipelineHelperDialogComponent} from './device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
+import {PipelineRegistryService} from '../../../data/pipeline-registry/shared/pipeline-registry.service';
 
 @Component({
     selector: 'senergy-device-groups-edit',
@@ -62,6 +60,8 @@ export class DeviceGroupsEditComponent implements OnInit {
     constructor(private _formBuilder: FormBuilder,
                 private deviceGroupService: DeviceGroupsService,
                 private snackBar: MatSnackBar,
+                private dialog: MatDialog,
+                private pipelineRegistryService: PipelineRegistryService,
                 private route: ActivatedRoute,
                 private router: Router) {
         this.getRouterParams();
@@ -156,7 +156,16 @@ export class DeviceGroupsEditComponent implements OnInit {
         } else {
             this.deviceGroupService.updateDeviceGroup(deviceGroup).pipe(delay(this.rerouteAfterSaveDelayInMs)).subscribe((deviceGroupSaved: DeviceGroupModel | null) => {
                 this.showMessage(deviceGroupSaved);
-                this.reload(deviceGroupSaved);
+                this.pipelineRegistryService.getPipelinesWithSelectable(deviceGroupSaved?.id || '').subscribe(pipelines => {
+                    if (pipelines.length === 0) {
+                        this.reload(deviceGroupSaved);
+                    } else {
+                        const config: MatDialogConfig = {
+                            data: pipelines
+                        };
+                        this.dialog.open(DeviceGroupsPipelineHelperDialogComponent, config);
+                    }
+                });
             });
         }
     }

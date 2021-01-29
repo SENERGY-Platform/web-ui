@@ -39,7 +39,7 @@ import {
     PipelineRequestModel
 } from './shared/pipeline-request.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {map} from 'rxjs/operators';
+import {first, map} from 'rxjs/operators';
 import {forkJoin, Observable, of} from 'rxjs';
 import {DeviceGroupsService} from '../../../devices/device-groups/shared/device-groups.service';
 import {PathOptionsService} from '../shared/path-options.service';
@@ -124,14 +124,16 @@ export class DeployFlowComponent implements OnInit {
     }
 
     ngOnInit() {
-        let id = this.route.snapshot.paramMap.get('id');
-        if (id === null) {
-            console.error('id not set!');
-            return;
-        }
         this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe(aspects => this.aspects = aspects);
-
         this.route.url.subscribe(url => {
+            this.ready = false;
+            this.resetForm();
+            let id = this.route.snapshot.paramMap.get('id');
+            if (id === null) {
+                console.error('id not set!');
+                return;
+            }
+            console.log(url); // TODO
             if (url[url.length - 2]?.path === 'edit') {
                 this.editMode = true;
                 this.pipelineRegistryService.getPipeline(id || '').subscribe((pipeline: PipelineModel | null) => {
@@ -163,7 +165,6 @@ export class DeployFlowComponent implements OnInit {
                                         operator?.inputSelections || [],
                                         operator?.config, operator?.inputTopics));
                                 });
-                                console.log(observables);
                                 forkJoin(observables).subscribe(_ => this.ready = true);
                             });
                     });
@@ -181,6 +182,17 @@ export class DeployFlowComponent implements OnInit {
                     this.ready = true;
                 });
             }
+        });
+    }
+
+    private resetForm() {
+        this.form = this.fb.group({
+            name: '',
+            description: '',
+            nodes: this.fb.array([]),
+            windowTime: 30,
+            enable_metrics: false,
+            consume_all_msgs: false,
         });
     }
 
@@ -649,10 +661,26 @@ export class DeployFlowComponent implements OnInit {
 
         if (this.editMode) {
             this.flowEngineService.updatePipeline(pipeReq).subscribe(_ => {
-                this.router.navigate(['/data/pipelines']);
-                this.snackBar.open('Pipeline updated', undefined, {
-                    duration: 2000,
-                });
+                this.route.queryParams
+                    .pipe(first()).subscribe(params => {
+                        if (params.next !== undefined && params.next.length > 0) {
+                            const next = (params.next as string).split(',');
+                            let url = '/data/pipelines/edit/' + next[0];
+                            if (next.length > 1) {
+                                url += '?next=' + next.splice(1).join(',');
+                            }
+                            this.router.navigateByUrl(url);
+                            this.snackBar.open('Pipeline updated, preparing next update...', undefined, {
+                                duration: 2000,
+                            });
+                        } else {
+                            this.router.navigate(['/data/pipelines']);
+                            this.snackBar.open('Pipeline updated', undefined, {
+                                duration: 2000,
+                            });
+                        }
+                    }
+                );
             });
         } else {
             this.flowEngineService.startPipeline(pipeReq).subscribe(_ => {
