@@ -145,6 +145,13 @@
                                    formControlName="vAxisLabel">
                         </mat-form-field>
                     </td>
+                    <td>
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-label>Second Y-Axis-Label</mat-label>
+                            <input type="text" matInput placeholder="Second-Y-Axis-Label"
+                                   formControlName="secondVAxisLabel">
+                        </mat-form-field>
+                    </td>
                 </tr>
             </table>
         </div>
@@ -237,6 +244,14 @@
                     <input [type]="element.valueType === 'string' ? 'text' : 'number'" matInput placeholder="e.g. 1000, filter" [disabled]="element.filterType === undefined"
                            [(ngModel)]="element.filterValue">
                 </mat-form-field>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="displayOnSecondVAxis">
+            <th mat-header-cell *matHeaderCellDef>Use second Y-Axis</th>
+            <td mat-cell *matCellDef="let element">
+                <mat-checkbox [(ngModel)]="element.displayOnSecondVAxis">
+                </mat-checkbox>
             </td>
         </ng-container>
 

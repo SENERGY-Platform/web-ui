@@ -37,6 +37,7 @@ import {
     ChartsExportRequestPayloadQueriesModel, ChartsExportRequestPayloadTimeModel,
 } from './charts-export-request-payload.model';
 import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
+import {chartsExportMeasurementModelValidator} from "./chartsExportMeasurementModel.validator";
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -221,10 +222,12 @@ export class ChartsExportService {
                 legend: 'none',
                 curveType: widget.properties.curvedFunction ? 'function' : '',
                 vAxis: {
-                    title: widget.properties.vAxisLabel,
                     viewWindowMode: widget.properties.chartType !== 'ColumnChart' ?
                         (element.height > 200 ? 'pretty' : 'maximized') : undefined,
                     viewWindow: {},
+                },
+                vAxes: {
+                    0: {title: widget.properties.vAxisLabel},
                 },
                 explorer: {
                     actions: ['dragToZoom', 'rightClickToReset'],
@@ -239,6 +242,18 @@ export class ChartsExportService {
             && chartModel.options?.vAxis?.viewWindow !== undefined) {
 
             chartModel.options.vAxis.viewWindow.min = 0;
+        }
+        const firstAxesSeries: number[] = [];
+        const secondAxisSeries: number[] = [];
+        widget.properties.vAxes?.forEach((v, idx) => v.displayOnSecondVAxis === true ?
+            secondAxisSeries.push(idx) : firstAxesSeries.push(idx));
+        if (chartModel.options?.vAxes !== undefined && secondAxisSeries.length > 0) {
+            chartModel.options.vAxes['1'] = {title: widget.properties.secondVAxisLabel};
+            chartModel.options.series = {};
+            // tslint:disable-next-line:no-non-null-assertion
+            firstAxesSeries.forEach(i => chartModel.options!.series[i] = {targetAxisIndex: 0});
+            // tslint:disable-next-line:no-non-null-assertion
+            secondAxisSeries.forEach(i => chartModel.options!.series[i] = {targetAxisIndex: 1});
         }
         return chartModel;
     }

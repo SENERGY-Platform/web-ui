@@ -21,20 +21,21 @@ import {
 } from './charts-export-request-payload.model';
 
 export interface ChartsExportPropertiesModel {
-        chartType?: string;
-        interval?: number; // deprecated
-        hAxisLabel?: string;
-        hAxisFormat?: string;
-        vAxis?: ExportValueModel; // deprecated
-        vAxes?: ChartsExportVAxesModel[];
-        vAxisLabel?: string;
-        exports?: ChartsExportMeasurementModel[];
-        measurement?: ChartsExportMeasurementModel; // deprecated
-        math?: string;
-        curvedFunction?: boolean;
-        timeRangeType?: string;
-        time?: ChartsExportRequestPayloadTimeModel;
-        group?: ChartsExportRequestPayloadGroupModel;
+    chartType?: string;
+    interval?: number; // deprecated
+    hAxisLabel?: string;
+    hAxisFormat?: string;
+    vAxis?: ExportValueModel; // deprecated
+    vAxes?: ChartsExportVAxesModel[];
+    vAxisLabel?: string;
+    secondVAxisLabel?: string;
+    exports?: ChartsExportMeasurementModel[];
+    measurement?: ChartsExportMeasurementModel; // deprecated
+    math?: string;
+    curvedFunction?: boolean;
+    timeRangeType?: string;
+    time?: ChartsExportRequestPayloadTimeModel;
+    group?: ChartsExportRequestPayloadGroupModel;
 }
 
 export interface ChartsExportMeasurementModel {
@@ -54,5 +55,6 @@ export interface ChartsExportVAxesModel {
     filterType?:  '=' | '<>' | '!=' | '>' | '>=' | '<' | '<=';
     filterValue?: number | string;
     isDuplicate?: boolean;
+    displayOnSecondVAxis?: boolean;
 }
 

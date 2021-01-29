@@ -44,7 +44,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     groupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median'];
     groupTypeIsDifference = false;
 
-    displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'valueAlias', 'color', 'math', 'filterType', 'filterValue', 'duplicate-delete'];
+    displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'valueAlias', 'color', 'math', 'filterType', 'filterValue', 'displayOnSecondVAxis', 'duplicate-delete'];
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
     selection = new SelectionModel<ChartsExportVAxesModel>(true, []);
 
@@ -103,6 +103,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 hAxisLabel: widget.properties.hAxisLabel,
                 hAxisFormat: widget.properties.hAxisFormat,
                 vAxisLabel: widget.properties.vAxisLabel,
+                secondVAxisLabel: widget.properties.secondVAxisLabel,
                 vAxes: widget.properties.vAxes,
             })
         });
@@ -186,7 +187,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
                     valueName: value.Name,
                     valueType: value.Type,
                     color: '',
-                    math: ''
+                    math: '',
+                    displayOnSecondVAxis: false,
                 };
                 const index = this.selection.selected.findIndex(
                     item => item.instanceId === newVAxis.instanceId &&
