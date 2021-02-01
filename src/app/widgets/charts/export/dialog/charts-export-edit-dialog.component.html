@@ -48,8 +48,9 @@
             <mat-form-field color="accent">
                 <mat-label>Choose Exports</mat-label>
                 <senergy-select-search [required]="true" [multiple]="true"
-                            [compareWith]="compare" formControlName="exports"  (selectionChange)="selectionChange($event.value)"
-                            [options]="exportList" useOptionViewProperty="name">
+                                       [compareWith]="compare" formControlName="exports"
+                                       (selectionChange)="selectionChange($event.value)"
+                                       [options]="exportList" useOptionViewProperty="name">
                 </senergy-select-search>
                 <mat-error *ngIf="exports.invalid">
                     Please make a selection!
@@ -135,7 +136,7 @@
                             <mat-label>X-Axis-Format</mat-label>
                             <input type="text" matInput placeholder="X-Axis-Format"
                                    formControlName="hAxisFormat"
-                                    matTooltip="Date format string">
+                                   matTooltip="Date format string">
                         </mat-form-field>
                     </td>
                     <td>
@@ -220,8 +221,50 @@
                 <mat-form-field color="accent" appearance="standard">
                     <input type="text" matInput placeholder="e.g. / 1000"
                            [(ngModel)]="element.math"
-                            [disabled]="groupTypeIsDifference">
+                           [disabled]="groupTypeIsDifference">
                 </mat-form-field>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="conversions">
+            <th mat-header-cell *matHeaderCellDef>Rules</th>
+            <td mat-cell *matCellDef="let element">
+                <button mat-icon-button [matMenuTriggerFor]="menu">
+                    <mat-icon color="accent">swap_horiz</mat-icon>
+                </button>
+
+                <mat-menu #menu>
+                    <div mat-menu-item (click)="$event.stopPropagation()">
+                        <span class="from-to">Default</span>
+                        -->
+                        <mat-form-field class="from-to" color="accent">
+                            <mat-label>To</mat-label>
+                            <input matInput placeholder="To" type="number" [(ngModel)]="element.conversionDefault">
+                        </mat-form-field>
+                    </div>
+                    <div mat-menu-item (click)="$event.stopPropagation()">
+                        <mat-form-field class="from-to" color="accent">
+                            <mat-label>From</mat-label>
+                            <input matInput placeholder="From" type="text" [(ngModel)]="element.__from">
+                        </mat-form-field>
+                        -->
+                        <mat-form-field class="from-to" color="accent">
+                            <mat-label>To</mat-label>
+                            <input matInput placeholder="To" type="number" [(ngModel)]="element.__to">
+                        </mat-form-field>
+                        <button mat-icon-button (click)="addConversion(element)" disableRipple [disabled]="element.__from === undefined || element.__to === undefined">
+                            <mat-icon color="accent">add</mat-icon>
+                        </button>
+                    </div>
+                    <div *ngFor="let rule of element.conversions; let index=index" mat-menu-item (click)="$event.stopPropagation()">
+                        <span class="from-to">{{rule.from}}</span>
+                        -->
+                        <span class="from-to">{{rule.to}}</span>
+                        <button mat-icon-button (click)="deleteConversion(element, index, $event)" disableRipple>
+                            <mat-icon color="warn">delete</mat-icon>
+                        </button>
+                    </div>
+                </mat-menu>
             </td>
         </ng-container>
 
@@ -229,9 +272,11 @@
             <th mat-header-cell *matHeaderCellDef>Filter</th>
             <td mat-cell *matCellDef="let element">
                 <mat-form-field color="accent" appearance="standard">
-                    <mat-select [compareWith]="compareFilterTypes" [(ngModel)]="element.filterType" (valueChange)="filerTypeSelected(element)">
+                    <mat-select [compareWith]="compareFilterTypes" [(ngModel)]="element.filterType"
+                                (valueChange)="filerTypeSelected(element)">
                         <mat-option [value]="undefined">None</mat-option>
-                        <mat-option *ngFor="let option of [ '=', '!=', '>', '>=', '<' ,'<=']" [value]="option">{{option}}</mat-option>
+                        <mat-option *ngFor="let option of [ '=', '!=', '>', '>=', '<' ,'<=']"
+                                    [value]="option">{{option}}</mat-option>
                     </mat-select>
                 </mat-form-field>
             </td>
@@ -241,7 +286,8 @@
             <th mat-header-cell *matHeaderCellDef>Filtervalue</th>
             <td mat-cell *matCellDef="let element">
                 <mat-form-field color="accent" appearance="standard">
-                    <input [type]="element.valueType === 'string' ? 'text' : 'number'" matInput placeholder="e.g. 1000, filter" [disabled]="element.filterType === undefined"
+                    <input [type]="element.valueType === 'string' ? 'text' : 'number'" matInput
+                           placeholder="e.g. 1000, filter" [disabled]="element.filterType === undefined"
                            [(ngModel)]="element.filterValue">
                 </mat-form-field>
             </td>
@@ -258,7 +304,8 @@
         <ng-container matColumnDef="duplicate-delete">
             <th mat-header-cell *matHeaderCellDef></th>
             <td mat-cell *matCellDef="let element, let i = index">
-                <button mat-icon-button *ngIf="element.isDuplicate === false || element.isDuplicate === undefined" (click)="duplicate(element, i)">
+                <button mat-icon-button *ngIf="element.isDuplicate === false || element.isDuplicate === undefined"
+                        (click)="duplicate(element, i)">
                     <mat-icon>content_copy</mat-icon>
                 </button>
                 <button mat-icon-button *ngIf="element.isDuplicate === true" (click)="deleteDuplicate(element, i)">
@@ -276,7 +323,8 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" [disabled]="formGroupController.invalid || selection.selected.length === 0">
+    <button mat-raised-button color="accent" (click)="save()"
+            [disabled]="formGroupController.invalid || selection.selected.length === 0">
         Save
     </button>
 </mat-dialog-actions>

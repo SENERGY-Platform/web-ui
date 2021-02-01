@@ -44,7 +44,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     groupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median'];
     groupTypeIsDifference = false;
 
-    displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'valueAlias', 'color', 'math', 'filterType', 'filterValue', 'displayOnSecondVAxis', 'duplicate-delete'];
+    displayedColumns: string[] = ['select', 'exportName', 'valueName', 'valueType', 'valueAlias', 'color', 'math', 'conversions', 'filterType', 'filterValue', 'displayOnSecondVAxis', 'duplicate-delete'];
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
     selection = new SelectionModel<ChartsExportVAxesModel>(true, []);
 
@@ -275,5 +275,19 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     get timeRangeType(): FormControl {
         return this.formGroupController.get(['properties', 'timeRangeType']) as FormControl;
+    }
+
+    deleteConversion(element: ChartsExportVAxesModel, index: number, $event: MouseEvent) {
+        element.conversions?.splice(index, 1);
+        $event.stopPropagation();
+    }
+
+    addConversion(element: any) {
+        if (element.conversions === undefined) {
+            element.conversions = [];
+        }
+        element.conversions.push({from: element.__from, to: element.__to});
+        element.__from = undefined;
+        element.__to = undefined;
     }
 }

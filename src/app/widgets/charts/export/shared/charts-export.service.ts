@@ -37,7 +37,6 @@ import {
     ChartsExportRequestPayloadQueriesModel, ChartsExportRequestPayloadTimeModel,
 } from './charts-export-request-payload.model';
 import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
-import {chartsExportMeasurementModelValidator} from "./chartsExportMeasurementModel.validator";
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -164,13 +163,15 @@ export class ChartsExportService {
     }
 
     private setData(series: ChartsExportColumnsModel, vAxes: ChartsExportVAxesModel[]): ChartDataTableModel {
-        const indices: { index: number, math: string }[] = [];
+        const indices: { index: number, math: string, conversions: { from: string, to: number }[],
+            conversionDefault?: number, type: string}[] = [];
         const header: string[] = ['time'];
         if (vAxes) {
             vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
                 const index = series.columns.indexOf(vAxis.instanceId + '.' + vAxis.valueName + vAxis.math.trim() + (vAxis.filterType || '') + (vAxis.filterValue || ''));
                 if (index !== -1) {
-                    indices.push({index: index, math: vAxis.math});
+                    indices.push({index: index, math: vAxis.math, conversions: vAxis.conversions || [],
+                        conversionDefault: vAxis.conversionDefault, type: vAxis.valueType});
                     header.push(vAxis.valueAlias || vAxis.valueName);
                 }
             });
@@ -179,8 +180,15 @@ export class ChartsExportService {
 
         series.values.forEach((item: (string | number)[]) => {
                 const dataPoint: (Date | number) [] = [new Date(<string>item[0])];
-                indices.forEach((resp: { index: number, math: string }) => {
-                    dataPoint.push(<number>item[resp.index]);
+                indices.forEach(resp => {
+                    let value = item[resp.index];
+                    const matchingRule = resp.conversions.find(rule => rule.from === value);
+                    if (matchingRule !== undefined) {
+                        value = matchingRule.to;
+                    } else if (resp.type === 'string' && resp.conversionDefault !== undefined) {
+                        value = resp.conversionDefault;
+                    }
+                    dataPoint.push(value as number);
                 });
                 dataTable.data.push(dataPoint);
             }

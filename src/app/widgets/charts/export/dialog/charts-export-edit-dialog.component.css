@@ -49,3 +49,8 @@ mat-dialog-actions button:not(:last-child) {
 .mat-column-duplicate-delete {
     width: 40px;
 }
+
+.from-to {
+    display: inline-block;
+    width: 37%;
+}

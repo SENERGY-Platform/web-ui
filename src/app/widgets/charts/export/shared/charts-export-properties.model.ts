@@ -56,5 +56,7 @@ export interface ChartsExportVAxesModel {
     filterValue?: number | string;
     isDuplicate?: boolean;
     displayOnSecondVAxis?: boolean;
+    conversions?: {from: string; to: number}[];
+    conversionDefault?: number;
 }
 
