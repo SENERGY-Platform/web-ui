@@ -473,10 +473,16 @@ export class NewExportComponent implements OnInit {
     }
 
     importChanged(i: ImportInstancesModel) {
+        this.resetVars();
         this.getImportType(i.import_type_id).subscribe(type => {
             type.output.sub_content_variables?.forEach(output => this.traverseDataStructure('', output));
             this.autofillValues();
         });
+        this.export.Filter = i.id;
+        this.export.Topic = i.kafka_topic;
+        this.export.FilterType = 'import_id';
+        this.export.EntityName = i.name;
+        this.export.ServiceName = i.import_type_id;
     }
 
     private getImportType(id: string): Observable<ImportTypeModel> {
