@@ -70,8 +70,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             if (type === 'https://schema.org/Float') {
                 toParse = convertPunctuation(toParse);
             }
-            console.log(toParse); // TODO
-            if (toParse.length > 0) {
+            if (toParse !== null && toParse !== undefined && toParse.length > 0) {
                 this.firstFormGroup.patchValue({value: JSON.parse(toParse)});
             } else {
                 this.firstFormGroup.patchValue({value: null});
