@@ -27,9 +27,9 @@ import {
 } from '../shared/device-groups.model';
 import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
 import {debounceTime, delay} from 'rxjs/operators';
-import {DeviceTypeFunctionModel} from '../../device-types-overview/shared/device-type.model';
-import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
-import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
+import {DeviceTypeFunctionModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {AspectsPermSearchModel} from '../../../metadata/aspects/shared/aspects-perm-search.model';
+import {DeviceClassesPermSearchModel} from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceGroupsPipelineHelperDialogComponent} from './device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 import {PipelineRegistryService} from '../../../data/pipeline-registry/shared/pipeline-registry.service';

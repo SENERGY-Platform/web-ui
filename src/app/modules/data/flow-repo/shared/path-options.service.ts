@@ -24,7 +24,7 @@ import {map} from 'rxjs/operators';
 import {
     DeviceTypeContentVariableModel,
     DeviceTypeServiceModel
-} from '../../../devices/device-types-overview/shared/device-type.model';
+} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 export interface PathOption {
     service_id: string;

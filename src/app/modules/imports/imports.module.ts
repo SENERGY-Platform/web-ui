@@ -45,31 +45,31 @@ const types = {
     path: 'imports/types/list',
     pathMatch: 'full',
     component: ImportTypesComponent,
-    data: {header: 'Import Types'}
+    data: {header: 'Types'}
 };
 const editType = {
     path: 'imports/types/edit/:id',
     pathMatch: 'full',
     component: ImportTypesCreateEditComponent,
-    data: {header: 'Edit Import Type'}
+    data: {header: 'Types'}
 };
 const detailsType = {
     path: 'imports/types/details/:id',
     pathMatch: 'full',
     component: ImportTypesCreateEditComponent,
-    data: {header: 'View Import Type'}
+    data: {header: 'Types'}
 };
 const createType = {
     path: 'imports/types/new',
     pathMatch: 'full',
     component: ImportTypesCreateEditComponent,
-    data: {header: 'Create Import Type'}
+    data: {header: 'Types'}
 };
 const instances = {
     path: 'imports/instances',
     pathMatch: 'full',
     component: ImportInstancesComponent,
-    data: {header: 'Imports'}
+    data: {header: 'Instances'}
 };
 
 

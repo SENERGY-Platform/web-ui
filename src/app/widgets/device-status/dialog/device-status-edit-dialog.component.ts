@@ -19,22 +19,22 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {ExportService} from '../../../modules/data/export/shared/export.service';
+import {ExportService} from '../../../modules/exports/shared/export.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {
     DeviceTypeAspectModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
     DeviceTypeServiceModel
-} from '../../../modules/devices/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
+} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import {DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel} from '../shared/device-status-properties.model';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {
     DeploymentsPreparedModel,
     DeploymentsPreparedSelectableModel
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
-import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/data/export/shared/export.model';
+import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/exports/shared/export.model';
 import {forkJoin, Observable, of} from 'rxjs';
 import {environment} from '../../../../environments/environment';
 import {DeviceStatusService} from '../shared/device-status.service';

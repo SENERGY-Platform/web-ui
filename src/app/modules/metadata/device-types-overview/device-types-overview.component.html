@@ -1,0 +1,98 @@
+<!--
+  ~ Copyright 2021 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="device-type-overview-container">
+    <div fxLayout="column">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <div fxLayout="row">
+            <div fxFlex></div>
+            <senergy-sort [sortAttributes]="sortAttributes"
+                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        </div>
+    </div>
+    <div class="device-type-overview-scroll">
+        <div infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [infiniteScrollContainer]="'.device-type-overview-scroll'"
+             [fromRoot]="true"
+             (scrolled)="onScroll()">
+            <div class="layout-margin" fxLayout="column">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+                               *ngIf="deviceTypes.length > 0">
+                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let deviceType of deviceTypes; let i = index">
+                        <div class="background">
+                            <img class="device-icon" src="{{getImage(deviceType.device_class_id)}}">
+                        </div>
+                        <mat-grid-tile-footer>
+                            <div fxLayout="column" fxFill>
+                                <div class="truncate footer-item-header" matTooltip="{{deviceType.name}}">
+                                    {{deviceType.name}}
+                                </div>
+                                <form fxLayout="row" class="footer-buttons">
+                                    <div fxFlex></div>
+                                    <div [fxLayoutAlign]="'start center'">
+                                        <button mat-icon-button [matMenuTriggerFor]="menu" color="accent">
+                                            <mat-icon>more_vert</mat-icon>
+                                        </button>
+                                        <mat-menu #menu="matMenu" [overlapTrigger]="false">
+                                            <button mat-menu-item [disabled]="!deviceType.permissions.w"
+                                                    (click)="editDeviceType(deviceType.id)">
+                                                <mat-icon>edit</mat-icon>
+                                                <span>Edit</span>
+                                            </button>
+                                            <button mat-menu-item (click)="copyDeviceType(deviceType.id)">
+                                                <mat-icon>content_copy</mat-icon>
+                                                <span>Copy</span>
+                                            </button>
+                                            <button mat-menu-item (click)="newInstance(deviceType)">
+                                                <mat-icon>add_box</mat-icon>
+                                                <span>New instance</span>
+                                            </button>
+                                            <button mat-menu-item (click)="showDevices(deviceType)">
+                                                <mat-icon>important_devices</mat-icon>
+                                                <span>Show Devices</span>
+                                            </button>
+                                            <button mat-menu-item (click)="detailsDeviceType(deviceType.id)">
+                                                <mat-icon>info</mat-icon>
+                                                <span>Details</span>
+                                            </button>
+                                            <button mat-menu-item (click)="delete(deviceType)"
+                                                    [disabled]="!deviceType.permissions.a">
+                                                <mat-icon>delete</mat-icon>
+                                                <span>Delete</span>
+                                            </button>
+                                        </mat-menu>
+                                    </div>
+                                </form>
+                            </div>
+                        </mat-grid-tile-footer>
+                    </mat-grid-tile>
+                </mat-grid-list>
+                <div *ngIf="deviceTypes.length === 0 && ready">No device type found.</div>
+                <senergy-spinner [elementCount]="deviceTypes.length" [show]="!ready"></senergy-spinner>
+            </div>
+        </div>
+    </div>
+</div>
+<button mat-fab class="fab" (click)="createDeviceType()" matTooltip="Add new device type">
+    <mat-icon>add</mat-icon>
+</button>
+
+
+
+
+

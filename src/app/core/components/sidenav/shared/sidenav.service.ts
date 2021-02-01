@@ -43,44 +43,41 @@ export class SidenavService {
 
         sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []));
 
-        /* sections.push(new SidenavSectionModel('Marketplace', 'toggle', 'shop', '/marketplace', [
-            new SidenavPageModel('Overview', 'link', 'assessment', '/marketplace/overview'),
-            new SidenavPageModel('Processes', 'link', 'timeline', '/marketplace/processes'),
-            // new SidenavPageModel('Analytics', 'link', 'bar_chart', '/marketplace/data'),
-            new SidenavPageModel('Data Export', 'link', 'tune', '/marketplace/dataexport')
-        ])); */
-
         sections.push(new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', [
+            new SidenavPageModel('Designer', 'link', 'create', '/processes/designer'),
             new SidenavPageModel('Repository', 'link', 'storage', '/processes/repository'),
             new SidenavPageModel('Deployments', 'link', 'publish', '/processes/deployments'),
-            new SidenavPageModel('Monitor', 'link', 'search', '/processes/monitor'),
-            new SidenavPageModel('Designer', 'link', 'create', '/processes/designer')
+            new SidenavPageModel('Monitor', 'link', 'search', '/processes/monitor')
         ]));
+
+        sections.push(new SidenavSectionModel('Exports', 'link', 'west', '/exports', []));
 
         sections.push(new SidenavSectionModel('Analytics', 'toggle', 'bar_chart', '/data', [
             new SidenavPageModel('Operators', 'link', 'storage', '/data/operator-repo'),
             new SidenavPageModel('Designer', 'link', 'create', '/data/designer'),
-            new SidenavPageModel('Flows', 'link', 'timeline', '/data/flow-repo'),
-            new SidenavPageModel('Pipelines', 'link', 'golf_course', '/data/pipelines'),
-            new SidenavPageModel('Export', 'link', 'build', '/data/export')
+            new SidenavPageModel('Flows', 'link', 'insights', '/data/flow-repo'),
+            new SidenavPageModel('Pipelines', 'link', 'analytics', '/data/pipelines')
         ]));
 
         sections.push(new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', [
             new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'),
             new SidenavPageModel('Hubs', 'link', 'device_hub', '/devices/networks'),
             new SidenavPageModel('Devices', 'link', 'important_devices', '/devices/deviceinstances'),
-            new SidenavPageModel('Device Groups', 'link', 'group_work', '/devices/devicegroups'),
-            new SidenavPageModel('Device Types', 'link', 'devices', '/devices/devicetypesoverview'),
-            new SidenavPageModel('Concepts', 'link', 'category', '/devices/concepts'),
-            new SidenavPageModel('Characteristics', 'link', 'palette', '/devices/characteristics'),
-            new SidenavPageModel('Functions', 'link', 'functions', '/devices/functions'),
-            new SidenavPageModel('Aspects', 'link', 'wallpaper', '/devices/aspects'),
-            new SidenavPageModel('Device Classes', 'link', 'devices_other', '/devices/deviceclasses'),
+            new SidenavPageModel('Device Groups', 'link', 'group_work', '/devices/devicegroups')
         ]));
 
-        sections.push(new SidenavSectionModel('Import', 'toggle', 'play_circle_outline', '/imports', [
-            new SidenavPageModel('Types', 'link', 'description', '/imports/types/list'),
-            new SidenavPageModel('Imports', 'link', 'storage', '/imports/instances'),
+        sections.push(new SidenavSectionModel('Imports', 'toggle', 'east', '/imports', [
+            new SidenavPageModel('Types', 'link', 'storage', '/imports/types/list'),
+            new SidenavPageModel('Instances', 'link', 'cloud_upload', '/imports/instances')
+        ]));
+
+        sections.push(new SidenavSectionModel('Metadata', 'toggle', 'folder_open', '/metadata', [
+            new SidenavPageModel('Device Classes', 'link', 'devices_other', '/metadata/deviceclasses'),
+            new SidenavPageModel('Functions', 'link', 'functions', '/metadata/functions'),
+            new SidenavPageModel('Aspects', 'link', 'wallpaper', '/metadata/aspects'),
+            new SidenavPageModel('Concepts', 'link', 'category', '/metadata/concepts'),
+            new SidenavPageModel('Characteristics', 'link', 'scatter_plot', '/metadata/characteristics'),
+            new SidenavPageModel('Device Types', 'link', 'devices', '/metadata/devicetypesoverview')
         ]));
 
         return sections;

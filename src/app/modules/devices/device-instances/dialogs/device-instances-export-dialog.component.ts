@@ -16,9 +16,9 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ExportModel} from '../../../data/export/shared/export.model';
+import {ExportModel} from '../../../exports/shared/export.model';
 import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
-import {ExportService} from '../../../data/export/shared/export.service';
+import {ExportService} from '../../../exports/shared/export.service';
 import {forkJoin, Observable} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
@@ -63,7 +63,7 @@ export class DeviceInstancesExportDialogComponent implements OnInit {
         forkJoin(obs).subscribe(_ => {
             const msg = 'Created ' + obs.length + ' export' + (obs.length !== 1 ? 's' : ''); // plural s
             const snackBarRef = this.snackBar.open(msg, 'View', {duration: 5000});
-            snackBarRef.onAction().subscribe(() => this.router.navigateByUrl('data/export'));
+            snackBarRef.onAction().subscribe(() => this.router.navigateByUrl('exports'));
 
             this.dialogRef.close();
         }, err => {

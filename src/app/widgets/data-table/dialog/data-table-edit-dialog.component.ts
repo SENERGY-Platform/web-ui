@@ -22,7 +22,7 @@ import {
     ExportModel,
     ExportValueBaseModel,
     ExportValueCharacteristicModel
-} from '../../../modules/data/export/shared/export.model';
+} from '../../../modules/exports/shared/export.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {DeviceStatusConfigConvertRuleModel} from '../../device-status/shared/device-status-properties.model';
@@ -36,13 +36,13 @@ import {
     DeviceTypeFunctionModel,
     DeviceTypeInteractionEnum,
     DeviceTypeServiceModel
-} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {
     DeviceInstancesPermSearchModel,
     DeviceSelectablesModel
 } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import {DataTableHelperService} from '../shared/data-table-helper.service';
-import {ExportService} from '../../../modules/data/export/shared/export.service';
+import {ExportService} from '../../../modules/exports/shared/export.service';
 import {PipelineModel, PipelineOperatorModel} from '../../../modules/data/pipeline-registry/shared/pipeline.model';
 import {V2DeploymentsPreparedModel} from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 import {forkJoin, Observable, of} from 'rxjs';

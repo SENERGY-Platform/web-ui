@@ -26,7 +26,7 @@ import {ImportDeployEditDialogComponent} from '../import-deploy-edit-dialog/impo
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ImportInstanceExportDialogComponent} from './import-instance-export-dialog/import-instance-export-dialog.component';
-import {ExportModel} from '../../data/export/shared/export.model';
+import {ExportModel} from '../../exports/shared/export.model';
 import {Router} from '@angular/router';
 
 @Component({
@@ -125,7 +125,7 @@ export class ImportInstancesComponent implements OnInit {
         this.dialog.open(ImportInstanceExportDialogComponent, config).afterClosed()
             .subscribe((val: ExportModel | undefined) => {
                 if (val !== undefined) {
-                    this.router.navigateByUrl('data/export/details/' + val.ID);
+                    this.router.navigateByUrl('exports/details/' + val.ID);
                 }
             });
     }

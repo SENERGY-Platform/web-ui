@@ -21,9 +21,9 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {FunctionsService} from '../../devices/functions/shared/functions.service';
+import {FunctionsService} from '../../metadata/functions/shared/functions.service';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
-import {AspectsService} from '../../devices/aspects/shared/aspects.service';
+import {AspectsService} from '../../metadata/aspects/shared/aspects.service';
 import {of} from 'rxjs';
 import {CoreModule} from '../../../core/core.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
@@ -41,7 +41,7 @@ import {ImportTypesService} from '../import-types/shared/import-types.service';
 import {environment} from '../../../../environments/environment';
 import {ImportTypeModel} from '../import-types/shared/import-types.model';
 import {ImportTypesComponent} from '../import-types/import-types.component';
-import {ConceptsService} from '../../devices/concepts/shared/concepts.service';
+import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
 
 describe('ImportTypesCreateEditComponent', () => {
     let component: ImportTypesCreateEditComponent;

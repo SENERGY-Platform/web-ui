@@ -20,14 +20,14 @@ import {FormBuilder, FormControl, Validators} from '@angular/forms';
 import {
     DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeFunctionType, functionTypes,
-} from '../../../../devices/device-types-overview/shared/device-type.model';
+} from '../../../../metadata/device-types-overview/shared/device-type.model';
 import {
     DeviceTypeSelectionRefModel,
     DeviceTypeSelectionResultModel
-} from '../../../../devices/device-types-overview/shared/device-type-selection.model';
-import {DeviceTypeService} from '../../../../devices/device-types-overview/shared/device-type.service';
-import {ConceptsService} from '../../../../devices/concepts/shared/concepts.service';
-import {ConceptsCharacteristicsModel} from '../../../../devices/concepts/shared/concepts-characteristics.model';
+} from '../../../../metadata/device-types-overview/shared/device-type-selection.model';
+import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
+import {ConceptsService} from '../../../../metadata/concepts/shared/concepts.service';
+import {ConceptsCharacteristicsModel} from '../../../../metadata/concepts/shared/concepts-characteristics.model';
 import {FilterCriteriaDialogResultModel} from '../../shared/designer-dialog.model';
 import {Observable} from 'rxjs';
 

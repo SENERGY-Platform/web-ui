@@ -34,6 +34,7 @@ import {registerLocaleData} from '@angular/common';
 import {SettingsModule} from './modules/settings/settings.module';
 import {ClipboardModule} from 'ngx-clipboard';
 import {ImportsModule} from './modules/imports/imports.module';
+import {MetadataModule} from "./modules/metadata/metadata.module";
 
 registerLocaleData(localeDe);
 
@@ -52,6 +53,7 @@ registerLocaleData(localeDe);
         DataModule,
         ProcessesModule,
         ImportsModule,
+        MetadataModule,
         BrowserAnimationsModule,
         PermissionsModule,
         SettingsModule,

@@ -22,10 +22,10 @@ import {
     ImportTypeModel
 } from '../import-types/shared/import-types.model';
 import {ImportTypesService} from '../import-types/shared/import-types.service';
-import {FunctionsService} from '../../devices/functions/shared/functions.service';
-import {FunctionsPermSearchModel} from '../../devices/functions/shared/functions-perm-search.model';
-import {AspectsService} from '../../devices/aspects/shared/aspects.service';
-import {AspectsPermSearchModel} from '../../devices/aspects/shared/aspects-perm-search.model';
+import {FunctionsService} from '../../metadata/functions/shared/functions.service';
+import {FunctionsPermSearchModel} from '../../metadata/functions/shared/functions-perm-search.model';
+import {AspectsService} from '../../metadata/aspects/shared/aspects.service';
+import {AspectsPermSearchModel} from '../../metadata/aspects/shared/aspects-perm-search.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ContentVariableDialogComponent} from './content-variable-dialog/content-variable-dialog.component';
 import {environment} from '../../../../environments/environment';
@@ -34,8 +34,8 @@ import {NestedTreeControl} from '@angular/cdk/tree';
 import {Observable} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {convertPunctuation, TypeValueValidator} from '../validators/type-value-validator';
-import {ConceptsService} from '../../devices/concepts/shared/concepts.service';
-import {DeviceTypeCharacteristicsModel} from '../../devices/device-types-overview/shared/device-type.model';
+import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
+import {DeviceTypeCharacteristicsModel} from '../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     selector: 'senergy-import-types-create-edit',

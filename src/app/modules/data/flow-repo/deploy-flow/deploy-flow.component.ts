@@ -28,8 +28,8 @@ import {
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
     DeviceTypeServiceModel
-} from '../../../devices/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../../devices/device-types-overview/shared/device-type.service';
+} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {FlowEngineService} from '../shared/flow-engine.service';
 import {
     NodeConfig,
@@ -44,9 +44,9 @@ import {forkJoin, Observable, of} from 'rxjs';
 import {DeviceGroupsService} from '../../../devices/device-groups/shared/device-groups.service';
 import {PathOptionsService} from '../shared/path-options.service';
 import {AbstractControl, FormArray, FormBuilder, FormGroup} from '@angular/forms';
-import {DeviceTypePermSearchModel} from '../../../devices/device-types-overview/shared/device-type-perm-search.model';
+import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import {MatOption} from '@angular/material/core';
-import {ConceptsService} from '../../../devices/concepts/shared/concepts.service';
+import {ConceptsService} from '../../../metadata/concepts/shared/concepts.service';
 import {OperatorInputTopic, PipelineModel} from '../../pipeline-registry/shared/pipeline.model';
 import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
 

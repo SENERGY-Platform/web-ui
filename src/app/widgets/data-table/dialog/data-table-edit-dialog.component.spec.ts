@@ -24,13 +24,13 @@ import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.mo
 import {of} from 'rxjs';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {FormArray, ReactiveFormsModule} from '@angular/forms';
-import {DeviceTypeInteractionEnum} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+import {DeviceTypeInteractionEnum} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {MatIconModule} from '@angular/material/icon';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatInputModule} from '@angular/material/input';
-import {ExportService} from '../../../modules/data/export/shared/export.service';
-import {ExportModel} from '../../../modules/data/export/shared/export.model';
+import {ExportService} from '../../../modules/exports/shared/export.service';
+import {ExportModel} from '../../../modules/exports/shared/export.model';
 import {util} from 'jointjs';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {environment} from '../../../../environments/environment';

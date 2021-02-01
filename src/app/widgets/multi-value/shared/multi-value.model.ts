@@ -15,7 +15,7 @@
  */
 
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
-import {ExportValueModel} from '../../../modules/data/export/shared/export.model';
+import {ExportValueModel} from '../../../modules/exports/shared/export.model';
 
 export interface MultiValuePropertiesModel {
     multivaluemeasurements?: MultiValueMeasurement[];

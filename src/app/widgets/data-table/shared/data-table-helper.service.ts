@@ -15,19 +15,19 @@
  */
 
 import {Injectable} from '@angular/core';
-import {ExportService} from '../../../modules/data/export/shared/export.service';
-import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
+import {ExportService} from '../../../modules/exports/shared/export.service';
+import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {
     DeviceTypeAspectModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
     DeviceTypeServiceModel
-} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {DeviceSelectablesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
 import {forkJoin, Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/data/export/shared/export.model';
+import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/exports/shared/export.model';
 import {PipelineRegistryService} from '../../../modules/data/pipeline-registry/shared/pipeline-registry.service';
 import {PipelineModel} from '../../../modules/data/pipeline-registry/shared/pipeline.model';
 import {OperatorModel} from '../../../modules/data/operator-repo/shared/operator.model';

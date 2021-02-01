@@ -17,8 +17,8 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {HistoricDataConfig} from '../../shared/designer.model';
-import {ExportModel} from '../../../../data/export/shared/export.model';
-import {ExportService} from '../../../../data/export/shared/export.service';
+import {ExportModel} from '../../../../exports/shared/export.model';
+import {ExportService} from '../../../../exports/shared/export.service';
 
 
 @Component({

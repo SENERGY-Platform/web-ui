@@ -24,8 +24,8 @@ import {
     DeviceTypeContentModel, DeviceTypeContentVariableModel,
     DeviceTypeModel,
     DeviceTypeServiceModel
-} from '../../../../devices/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../../../devices/device-types-overview/shared/device-type.service';
+} from '../../../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
 import {FlowEngineService} from '../../shared/flow-engine.service';
 import {NodeInput, NodeModel, NodeValue, PipelineRequestModel} from '../shared/pipeline-request.model';
 import {MatSnackBar} from '@angular/material/snack-bar';

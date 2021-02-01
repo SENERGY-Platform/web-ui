@@ -28,7 +28,7 @@ import {EmailConfigDialogComponent} from '../dialogs/email-config-dialog/email-c
 import {
     DeviceTypeSelectionRefModel,
     DeviceTypeSelectionResultModel
-} from '../../../devices/device-types-overview/shared/device-type-selection.model';
+} from '../../../metadata/device-types-overview/shared/device-type-selection.model';
 import {TaskConfigDialogComponent} from '../dialogs/task-config-dialog/task-config-dialog.component';
 import {NotificationConfigDialogComponent} from '../dialogs/notification-config-dialog/notification-config-dialog.component';
 import {FilterCriteriaDialogResultModel} from './designer-dialog.model';

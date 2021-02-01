@@ -19,9 +19,9 @@ import {PipelineRegistryService} from '../shared/pipeline-registry.service';
 import {PipelineModel} from '../shared/pipeline.model';
 import {ActivatedRoute} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
-import {DeviceTypeService} from '../../../devices/device-types-overview/shared/device-type.service';
+import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
-import {DeviceTypeServiceModel} from '../../../devices/device-types-overview/shared/device-type.model';
+import {DeviceTypeServiceModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 import {DeviceInstancesBaseModel} from '../../../devices/device-instances/shared/device-instances.model';
 
 @Component({

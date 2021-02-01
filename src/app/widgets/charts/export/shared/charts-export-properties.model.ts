@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ExportValueModel} from '../../../../modules/data/export/shared/export.model';
+import {ExportValueModel} from '../../../../modules/exports/shared/export.model';
 import {
     ChartsExportRequestPayloadGroupModel,
     ChartsExportRequestPayloadTimeModel

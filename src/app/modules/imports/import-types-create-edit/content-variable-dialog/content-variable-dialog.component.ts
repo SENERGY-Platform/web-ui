@@ -17,7 +17,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ImportTypeContentVariableModel} from '../../import-types/shared/import-types.model';
 import {FormBuilder, Validators} from '@angular/forms';
-import {DeviceTypeCharacteristicsModel} from '../../../devices/device-types-overview/shared/device-type.model';
+import {DeviceTypeCharacteristicsModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     selector: 'senergy-import-content-variable-dialog',

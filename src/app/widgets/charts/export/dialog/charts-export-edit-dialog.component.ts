@@ -20,8 +20,8 @@ import {DeploymentsService} from '../../../../modules/processes/deployments/shar
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {DashboardResponseMessageModel} from '../../../../modules/dashboard/shared/dashboard-response-message.model';
 import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {ExportService} from '../../../../modules/data/export/shared/export.service';
-import {ExportModel, ExportValueModel} from '../../../../modules/data/export/shared/export.model';
+import {ExportService} from '../../../../modules/exports/shared/export.service';
+import {ExportModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
 import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
 import {SelectionModel} from '@angular/cdk/collections';
 import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';

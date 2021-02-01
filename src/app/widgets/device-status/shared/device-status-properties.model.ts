@@ -17,9 +17,9 @@
 import {
     DeviceTypeFunctionModel,
     DeviceTypeServiceModel
-} from '../../../modules/devices/device-types-overview/shared/device-type.model';
+} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {DeploymentsPreparedSelectableModel} from '../../../modules/processes/deployments/shared/deployments-prepared.model';
-import {ExportValueCharacteristicModel} from '../../../modules/data/export/shared/export.model';
+import {ExportValueCharacteristicModel} from '../../../modules/exports/shared/export.model';
 
 export interface DeviceStatusPropertiesModel {
     refreshTime?: number;

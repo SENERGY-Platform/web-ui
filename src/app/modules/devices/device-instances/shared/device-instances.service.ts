@@ -29,7 +29,7 @@ import {
 import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
 import {MatDialog} from '@angular/material/dialog';
-import {DeviceTypeService} from '../../device-types-overview/shared/device-type.service';
+import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {UtilService} from '../../../../core/services/util.service';

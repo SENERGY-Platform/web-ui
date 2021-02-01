@@ -15,7 +15,7 @@
  */
 
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
-import {ExportValueModel} from '../../../modules/data/export/shared/export.model';
+import {ExportValueModel} from '../../../modules/exports/shared/export.model';
 import {UBAStation} from './uba.model';
 import {DWDSinglePollenForecast} from './dwd-pollen.model';
 import {YrWeatherModel} from './yr-weather.model';

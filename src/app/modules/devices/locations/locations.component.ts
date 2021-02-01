@@ -27,7 +27,6 @@ import uuid = util.uuid;
 import {util} from 'jointjs';
 import {LocationModel} from './shared/locations.model';
 import {LocationsService} from './shared/locations.service';
-import {DeviceTypePermSearchModel} from '../device-types-overview/shared/device-type-perm-search.model';
 import {DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum} from '../device-instances/device-instances.component';
 
 const grids = new Map([

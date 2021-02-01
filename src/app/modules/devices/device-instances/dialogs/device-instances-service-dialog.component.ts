@@ -16,7 +16,7 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {DeviceTypeServiceModel} from '../../device-types-overview/shared/device-type.model';
+import {DeviceTypeServiceModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',

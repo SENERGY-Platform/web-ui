@@ -20,11 +20,11 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {DeviceInstancesModel} from './device-instances.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
-import {DeviceTypeModel} from '../../device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../device-types-overview/shared/device-type.service';
+import {DeviceTypeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
-import {DeviceTypePermSearchModel} from '../../device-types-overview/shared/device-type-perm-search.model';
+import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesService} from './device-instances.service';
 

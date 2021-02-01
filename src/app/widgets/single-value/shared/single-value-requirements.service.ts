@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {ExportService} from '../../../modules/data/export/shared/export.service';
+import {ExportService} from '../../../modules/exports/shared/export.service';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 

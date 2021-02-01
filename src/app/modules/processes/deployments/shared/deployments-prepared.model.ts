@@ -20,7 +20,7 @@ import {
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
     DeviceTypeServiceModel
-} from '../../../devices/device-types-overview/shared/device-type.model';
+} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 export interface DeploymentsPreparedModel {
     elements: DeploymentsPreparedElementModel[];

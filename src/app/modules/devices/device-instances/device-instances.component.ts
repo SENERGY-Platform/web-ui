@@ -28,7 +28,7 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Navigation, Router} from '@angular/router';
 import {NetworksModel} from '../networks/shared/networks.model';
-import {DeviceTypePermSearchModel} from '../device-types-overview/shared/device-type-perm-search.model';
+import {DeviceTypePermSearchModel} from '../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import {LocationModel} from '../locations/shared/locations.model';
 
 

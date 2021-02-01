@@ -30,8 +30,8 @@ import {
     DeviceTypeAspectModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel, DeviceTypeServiceModel
-} from '../../../modules/devices/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
+} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import {
     DeploymentsPreparedModel,
     DeploymentsPreparedSelectableModel
@@ -41,8 +41,8 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatInputModule} from '@angular/material/input';
 import {By} from '@angular/platform-browser';
-import {ExportService} from '../../../modules/data/export/shared/export.service';
-import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/data/export/shared/export.model';
+import {ExportService} from '../../../modules/exports/shared/export.service';
+import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/exports/shared/export.model';
 import {util} from 'jointjs';
 import uuid = util.uuid;
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';

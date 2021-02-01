@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DeviceTypeService} from '../../../modules/devices/device-types-overview/shared/device-type.service';
+import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import {Observable} from 'rxjs';
 import {Injectable} from '@angular/core';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';

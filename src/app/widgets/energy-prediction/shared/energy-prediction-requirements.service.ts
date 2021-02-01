@@ -17,9 +17,9 @@
 import {defer, Observable} from 'rxjs';
 import {Injectable} from '@angular/core';
 import {map} from 'rxjs/operators';
-import {ExportService} from '../../../modules/data/export/shared/export.service';
+import {ExportService} from '../../../modules/exports/shared/export.service';
 import {EnergyPredictionEditDialogComponent} from '../dialog/energy-prediction-edit-dialog.component';
-import {ExportValueModel} from "../../../modules/data/export/shared/export.model";
+import {ExportValueModel} from "../../../modules/exports/shared/export.model";
 
 
 @Injectable({

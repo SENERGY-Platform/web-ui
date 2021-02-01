@@ -1,0 +1,76 @@
+<!--
+  ~ Copyright 2021 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+
+<div class="aspects-container">
+    <div fxLayout="column">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <div fxLayout="row">
+            <div fxFlex></div>
+            <senergy-sort [sortAttributes]="sortAttributes"
+                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        </div>
+    </div>
+    <div class="aspects-scroll">
+        <div infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [infiniteScrollContainer]="'.aspects-scroll'"
+             [fromRoot]="true"
+             (scrolled)="onScroll()">
+            <div class="layout-margin" fxLayout="column">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
+                               *ngIf="aspects.length > 0">
+                    <mat-grid-tile class="mat-elevation-z1"
+                                   *ngFor="let aspect of aspects; let i = index">
+                        <div fxFill>
+                            <img class="background" src="src/img/aspects.jpg">
+                        </div>
+                        <mat-grid-tile-footer>
+                            <div fxLayout="column" fxFill>
+                                <div class="truncate footer-item-header" matTooltip="{{aspect.name}}">
+                                    {{aspect.name}}
+                                </div>
+                                <form fxLayout="row" class="footer-buttons">
+                                    <div fxFlex></div>
+                                    <div [fxLayoutAlign]="'start center'">
+                                        <button (click)="editAspect(aspect)" [disabled]="!aspect.permissions.w"
+                                                mat-icon-button color="accent" matTooltip="Edit">
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+                                        <button (click)="deleteAspect(aspect)"
+                                                [disabled]="!aspect.permissions.a"
+                                                mat-icon-button
+                                                color="accent"
+                                                matTooltip="Delete">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </mat-grid-tile-footer>
+                    </mat-grid-tile>
+                </mat-grid-list>
+                <div *ngIf="aspects.length === 0 && ready">No aspect found.</div>
+                <senergy-spinner [elementCount]="aspects.length" [show]="!ready"></senergy-spinner>
+            </div>
+        </div>
+    </div>
+</div>
+<button mat-fab class="fab" matTooltip="Add new aspect" (click)="newAspect()">
+    <mat-icon>add</mat-icon>
+</button>
+

@@ -16,7 +16,7 @@
 
 import {Injectable} from '@angular/core';
 import {BpmnElement, BpmnParameter} from './designer.model';
-import {DeviceTypeSelectionResultModel} from '../../../devices/device-types-overview/shared/device-type-selection.model';
+import {DeviceTypeSelectionResultModel} from '../../../metadata/device-types-overview/shared/device-type-selection.model';
 import {DesignerErrorModel} from './designer-error.model';
 import {
     DesignerElementFlowNodeRefModel,
@@ -25,9 +25,9 @@ import {
     DesignerElementModel,
     DesignerElementParticipantsModel
 } from './designer-element.model';
-import {DeviceTypeService} from '../../../devices/device-types-overview/shared/device-type.service';
+import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {forkJoin, Observable} from 'rxjs';
-import {DeviceTypeModel} from '../../../devices/device-types-overview/shared/device-type.model';
+import {DeviceTypeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Injectable({
     providedIn: 'root'

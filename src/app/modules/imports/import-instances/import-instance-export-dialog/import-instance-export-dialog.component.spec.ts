@@ -34,7 +34,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatTableModule} from '@angular/material/table';
 import {ImportTypeModel} from '../../import-types/shared/import-types.model';
 import {environment} from '../../../../../environments/environment';
-import {ExportService} from '../../../data/export/shared/export.service';
+import {ExportService} from '../../../exports/shared/export.service';
 
 describe('ImportInstanceExportDialogComponent', () => {
     let component: ImportInstanceExportDialogComponent;

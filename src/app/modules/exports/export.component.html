@@ -1,0 +1,126 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<div class="export-container">
+    <div fxLayout="column">
+        <div fxLayout="row">
+            <senergy-searchbar [searchTextIn]="searchText" fxFlex></senergy-searchbar>
+            <mat-form-field color="accent" class="user-input" style="margin-top: 15px;">
+                <mat-label>Choose Search Field</mat-label>
+                <mat-select [(ngModel)]="searchField" (ngModelChange)="searchFieldChanged()">
+                    <mat-option *ngFor="let searchField of searchFields" [value]="searchField[1]">
+                        {{searchField[0]}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <div fxLayout="row">
+            <div fxFlex></div>
+            <div class="layout-margin" fxLayout="column">
+                <mat-checkbox [(ngModel)]="showGenerated" (ngModelChange)="showGeneratedChanged()">Show generated exports</mat-checkbox>
+            </div>
+            <senergy-sort [sortAttributes]="sortAttributes"
+                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        </div>
+    </div>
+    <div class="export-scroll">
+        <div infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [infiniteScrollContainer]="'.export-scroll'"
+             [fromRoot]="true"
+             (scrolled)="onScroll()">
+            <div fxLayout="column">
+                <div *ngIf="!deleteInProgress">
+                    <div class="layout-margin" fxLayout="column">
+                        <mat-grid-list cols="{{gridCols}}" rowHeight="352px" gutterSize="16px"
+                                       *ngIf="exports.length > 0">
+                            <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of exports">
+                                <mat-card>
+                                    <div fxLayout="row" fxLayoutAlign="none center">
+                                    <mat-icon class="warning-icon" *ngIf="item.FilterType === 'pipeId'" matTooltip="Outdated export version - Please redeploy the export" mat-list-icon>
+                                            warning
+                                        </mat-icon>
+                                        <mat-icon *ngIf="item.Generated === true" matTooltip="generated export" mat-list-icon>
+                                            autorenew
+                                        </mat-icon>
+                                        <div class="truncate header-text" matTooltip="{{item.Name}}">{{item.Name}}</div>
+                                    </div>
+                                    <mat-card-content>
+                                        <mat-list fxLayoutAlign="center center">
+                                            <div fxFill fxLayout="column">
+                                                <mat-list-item>
+                                                    <mat-icon mat-list-icon>description</mat-icon>
+                                                    <h3 mat-line matTooltip="{{item.Description}}">{{item.Description}}</h3>
+                                                    <p mat-line>Description</p>
+                                                </mat-list-item>
+                                                <mat-list-item>
+                                                    <mat-icon *ngIf="item.FilterType === 'deviceId'" mat-list-icon>
+                                                        router
+                                                    </mat-icon>
+                                                    <mat-icon *ngIf="item.FilterType === 'pipeId' || item.FilterType === 'operatorId'" mat-list-icon>
+                                                        timeline
+                                                    </mat-icon>
+                                                    <mat-icon *ngIf="item.FilterType === 'import_id'" mat-list-icon>
+                                                        play_circle_outline
+                                                    </mat-icon>
+                                                    <h3 mat-line matTooltip="{{item.EntityName}}">{{item.EntityName}}</h3>
+                                                    <p mat-line>Source</p>
+                                                </mat-list-item>
+                                                <mat-list-item>
+                                                    <mat-icon mat-list-icon>date_range</mat-icon>
+                                                    <h3 mat-line
+                                                        matTooltip="{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}">{{item.CreatedAt |  date:'dd.MM.yyyy - HH:mm'}}</h3>
+                                                    <p mat-line>createdAt</p>
+                                                </mat-list-item>
+                                            </div>
+                                        </mat-list>
+                                    </mat-card-content>
+                                    <mat-card-actions>
+                                        <div fxFlex></div>
+                                        <button mat-icon-button routerLink="/exports/edit/{{item.ID}}" color="accent">
+                                            <mat-icon>
+                                                edit
+                                            </mat-icon>
+                                        </button>
+                                        <button mat-icon-button color="accent" routerLink="/exports/details/{{item.ID}}"
+                                                matTooltip="access the details of the export">
+                                            <mat-icon>info</mat-icon>
+                                        </button>
+                                        <button mat-icon-button color="accent"
+                                                (click)="copyEndpoint(url + '/measurement/' + item.Measurement)"
+                                                matTooltip="copy endpoint to clipboard">
+                                            <mat-icon>content_copy</mat-icon>
+                                        </button>
+                                        <button mat-icon-button color="accent" (click)="deleteExport(item)">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </mat-card-actions>
+                                </mat-card>
+                            </mat-grid-tile>
+                        </mat-grid-list>
+                    </div>
+                    <button mat-fab class="fab" routerLink="new" matTooltip="Start new Export">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                    <div *ngIf="exports.length === 0 && ready">No export instances found.</div>
+                </div>
+                <senergy-spinner [elementCount]="exports.length" [show]="!ready || deleteInProgress"></senergy-spinner>
+            </div>
+        </div>
+    </div>
+</div>
+
+

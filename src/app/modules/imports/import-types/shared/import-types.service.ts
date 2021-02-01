@@ -20,7 +20,7 @@ import {environment} from '../../../../../environments/environment';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/internal/operators';
 import {delay} from 'rxjs/operators';
-import {ExportValueModel} from '../../../data/export/shared/export.model';
+import {ExportValueModel} from '../../../exports/shared/export.model';
 
 @Injectable({
     providedIn: 'root'

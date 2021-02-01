@@ -22,8 +22,8 @@ import {CommonModule} from '@angular/common';
 import {CoreModule} from '../../core/core.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {OperatorRepoModule} from './operator-repo/operator-repo.module';
-import {ExportComponent} from './export/export.component';
-import {ExportModule} from './export/export.module';
+import {ExportComponent} from '../exports/export.component';
+import {ExportModule} from '../exports/export.module';
 import {FlowDesignerComponent} from './flow-designer/flow-designer.component';
 import {FormsModule} from '@angular/forms';
 import {FlowRepoComponent} from './flow-repo/flow-repo.component';
@@ -47,16 +47,15 @@ import {MatOptionModule} from '@angular/material/core';
 import {MatSelectModule} from '@angular/material/select';
 
 
-const operatorRepo = {path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Analytics' }};
-const dataExport = {path: 'data/export', pathMatch: 'full', component: ExportComponent, data: { header: 'Analytics' }};
-const designer = {path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Analytics' }};
-const designerEdit = {path: 'data/designer/:id', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Analytics' }};
-const flowRepo = {path: 'data/flow-repo', pathMatch: 'full', component: FlowRepoComponent, data: { header: 'Analytics' }};
-const pipelineRegistry = {path: 'data/pipelines', pathMatch: 'full', component: PipelineRegistryComponent, data: { header: 'Analytics' }};
+const operatorRepo = {path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Operators' }};
+const designer = {path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' }};
+const designerEdit = {path: 'data/designer/:id', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' }};
+const flowRepo = {path: 'data/flow-repo', pathMatch: 'full', component: FlowRepoComponent, data: { header: 'Flows' }};
+const pipelineRegistry = {path: 'data/pipelines', pathMatch: 'full', component: PipelineRegistryComponent, data: { header: 'Pipelines' }};
 
 @NgModule({
     imports: [
-        RouterModule.forChild([operatorRepo, dataExport, designer, designerEdit, flowRepo, pipelineRegistry]),
+        RouterModule.forChild([operatorRepo, designer, designerEdit, flowRepo, pipelineRegistry]),
         CoreModule,
         OperatorRepoModule,
         FlowRepoModule,
@@ -83,7 +82,6 @@ const pipelineRegistry = {path: 'data/pipelines', pathMatch: 'full', component: 
     ],
     declarations: [
         OperatorRepoComponent,
-        ExportComponent,
         FlowDesignerComponent,
         FlowRepoComponent,
         PipelineRegistryComponent

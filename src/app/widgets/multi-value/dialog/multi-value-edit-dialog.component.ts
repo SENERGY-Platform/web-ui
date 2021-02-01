@@ -19,9 +19,9 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {ExportModel, ExportValueModel} from '../../../modules/data/export/shared/export.model';
+import {ExportModel, ExportValueModel} from '../../../modules/exports/shared/export.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {ExportService} from '../../../modules/data/export/shared/export.service';
+import {ExportService} from '../../../modules/exports/shared/export.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {MultiValueMeasurement, MultiValueOrderEnum} from '../shared/multi-value.model';
 import {

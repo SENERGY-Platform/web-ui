@@ -28,7 +28,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
-import {DeviceTypeCharacteristicsModel} from '../../../devices/device-types-overview/shared/device-type.model';
+import {DeviceTypeCharacteristicsModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 describe('ContentVariableDialogComponent', () => {
     let component: ContentVariableDialogComponent;

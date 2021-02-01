@@ -75,36 +75,36 @@ const processRepo = {
     path: 'processes/repository',
     pathMatch: 'full',
     component: ProcessRepoComponent,
-    data: {header: 'Processes'}
+    data: {header: 'Repository'}
 };
 const processDeployments = {
     path: 'processes/deployments',
     pathMatch: 'full',
     component: ProcessDeploymentsComponent,
-    data: {header: 'Processes'}
+    data: {header: 'Deployments'}
 };
 const processDeploymentsConfig = {
     path: 'processes/deployments/config',
     pathMatch: 'full',
     component: ProcessDeploymentsConfigComponent,
-    data: {header: 'Processes'}
+    data: {header: 'Deployments'}
 };
 const processMonitor = {
     path: 'processes/monitor',
     pathMatch: 'full',
     component: ProcessMonitorComponent,
-    data: {header: 'Processes'}
+    data: {header: 'Monitor'}
 };
 const processDesignerEdit = {
     path: 'processes/designer/:id',
     component: ProcessDesignerComponent,
-    data: {header: 'Processes'}
+    data: {header: 'Designer'}
 };
 const processDesigner = {
     path: 'processes/designer',
     pathMatch: 'full',
     component: ProcessDesignerComponent,
-    data: {header: 'Processes'}
+    data: {header: 'Designer'}
 };
 
 @NgModule({

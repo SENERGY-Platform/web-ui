@@ -17,8 +17,8 @@
 import {
     DeviceTypePermSearchModel,
     PermissionsModel
-} from '../../device-types-overview/shared/device-type-perm-search.model';
-import {DeviceTypeServiceModel} from '../../device-types-overview/shared/device-type.model';
+} from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
+import {DeviceTypeServiceModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 export interface DeviceInstancesBaseModel {
     id: string;

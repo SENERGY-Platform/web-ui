@@ -22,7 +22,7 @@ import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {of} from 'rxjs';
 import {ImportTypeModel} from './import-types.model';
 import {environment} from '../../../../../environments/environment';
-import {ExportValueModel} from '../../../data/export/shared/export.model';
+import {ExportValueModel} from '../../../exports/shared/export.model';
 
 describe('ImportTypesService', () => {
     let service: ImportTypesService;
