@@ -105,9 +105,6 @@
                             >
                             </senergy-select-search>
                         </mat-form-field>
-                        <div fxFlex *ngIf="getDeviceTypes(input).length > 1" class="color-warn warn-text">
-                            Operator might be unable to handle multiple device types!
-                        </div>
                         <div fxFlex fxLayout="row" *ngFor="let deviceType of getSubElementAsGroupArray(input, 'deviceTypes')" [formGroup]="deviceType">
                             <mat-form-field fxFlex color="accent" appearance="outline">
                                 <mat-label [ngClass]="{'device-type-not-used-label': getServiceOptions(input, deviceType.get('id')?.value).size === 0}">
