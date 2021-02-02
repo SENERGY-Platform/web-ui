@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {waitForAsync, ComponentFixture, TestBed, async} from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {RouterTestingModule} from '@angular/router/testing';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {CoreModule} from '../../../../core/core.module';
@@ -29,16 +29,16 @@ import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {of} from 'rxjs';
 import {DeviceGroupsEditComponent} from './device-groups-edit.component';
 import {DeviceGroupsService} from '../shared/device-groups.service';
-import {DeviceGroupCriteriaModel, DeviceGroupHelperResultModel, DeviceGroupModel} from '../shared/device-groups.model';
+import {DeviceGroupHelperResultModel, DeviceGroupModel} from '../shared/device-groups.model';
 import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
-import {DeviceTypeFunctionModel} from '../../device-types-overview/shared/device-type.model';
-import {DeviceClassesPermSearchModel} from '../../device-classes/shared/device-classes-perm-search.model';
-import {AspectsPermSearchModel} from '../../aspects/shared/aspects-perm-search.model';
 import {MatChipsModule} from '@angular/material/chips';
 import {MatCardModule} from '@angular/material/card';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {CommonModule} from '@angular/common';
 import {FlexLayoutModule} from '@angular/flex-layout';
+import {DeviceTypeFunctionModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceClassesPermSearchModel} from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
+import {AspectsPermSearchModel} from '../../../metadata/aspects/shared/aspects-perm-search.model';
 
 describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;
