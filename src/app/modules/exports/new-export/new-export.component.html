@@ -93,15 +93,17 @@
         </div>
         <div fxLayout="row" style="margin-top:8px;">
             <div fxLayout="column" fxFlex fxLayoutAlign="center start">
-                <button mat-raised-button color="accent" (click)="addValue()">Add Export Value</button>
-            </div>
-            <div fxLayout="column" fxFlex fxLayoutAlign="center center">
                 <button mat-raised-button color="accent" (click)="autofillValues()" disabled="{{paths.size === 0}}">Autofill Export Values</button>
             </div>
             <div fxLayout="column" fxFlex fxLayoutAlign="center end">
-                <button *ngIf="id === null"  mat-raised-button color="accent" (click)="startExport()">Start Export</button>
-                <button *ngIf="id !== null"  mat-raised-button color="accent" (click)="startExport()">Edit Export</button>
+                <button mat-raised-button color="accent" (click)="addValue()">Add Export Value</button>
             </div>
+            <button *ngIf="id === null" mat-fab class="fab" (click)="startExport()" matTooltip="Start Export">
+                <mat-icon>save</mat-icon>
+            </button>
+            <button *ngIf="id !== null" mat-fab class="fab" (click)="startExport()" matTooltip="Edit Export">
+                <mat-icon>save</mat-icon>
+            </button>
         </div>
     </div>
     <senergy-spinner [show]="!ready"></senergy-spinner>

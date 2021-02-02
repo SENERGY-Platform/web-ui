@@ -102,8 +102,8 @@
                 </mat-icon>
             </button>
         </div>
-        <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
-            <button mat-raised-button color="accent" (click)="saveOperator()" *ngIf="operator.editable">Save</button>
-        </div>
+        <button *ngIf="operator.editable" mat-fab class="fab" (click)="saveOperator()" matTooltip="Save">
+            <mat-icon>save</mat-icon>
+        </button>
     </div>
 </div>
