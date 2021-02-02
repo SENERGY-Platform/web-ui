@@ -366,7 +366,7 @@ export class DeployFlowComponent implements OnInit {
         });
 
         (this.form.get('nodes') as FormArray).push(node);
-        return forkJoin(observables);
+        return observables.length > 0 ? forkJoin(observables) : of([null]);
     }
 
     getAspectFunctions(aspectId: string): DeviceTypeFunctionModel[] {
