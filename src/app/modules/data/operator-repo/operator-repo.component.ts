@@ -108,16 +108,13 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
             this.setRepoItemsParams(this.limitInit);
             this.reset();
         }
-        this.operatorRepoService.getOperators(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe((resp: { operators: OperatorModel[] }) => {
+        this.operatorRepoService.getOperators(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).
+        subscribe((resp: { operators: OperatorModel[] }) => {
             if (resp.operators.length !== this.limit) {
                 this.allDataLoaded = true;
             }
             for (const operator of resp.operators) {
-                if (operator.userId === this.userId) {
-                    operator.editable = true;
-                } else {
-                    operator.editable = false;
-                }
+                operator.editable = operator.userId === this.userId;
                 this.operators.push(operator);
             }
             this.ready = true;

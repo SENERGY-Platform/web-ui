@@ -19,6 +19,7 @@ import {IOModel, OperatorModel} from '../shared/operator.model';
 import {ActivatedRoute} from '@angular/router';
 import {OperatorRepoService} from '../shared/operator-repo.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {AuthorizationService} from '../../../../core/services/authorization.service';
 
 
 @Component({
@@ -29,21 +30,27 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 export class OperatorComponent implements OnInit {
 
     operator = {} as OperatorModel;
+    userId: string | Error = '';
     dropdown = [
         'float',
         'string',
         'int'
     ];
 
-    constructor(private route: ActivatedRoute, private operatorService: OperatorRepoService, public snackBar: MatSnackBar) {
+    constructor(private route: ActivatedRoute,
+                private operatorService: OperatorRepoService,
+                public snackBar: MatSnackBar,
+                protected auth: AuthorizationService) {
     }
 
     ngOnInit() {
+        this.userId = this.auth.getUserId();
         const id = this.route.snapshot.paramMap.get('id');
         if (id !== null) {
             this.operatorService.getOperator(id).subscribe((resp: OperatorModel | null) => {
                 if (resp !== null) {
                     this.operator = resp;
+                    this.operator.editable = resp.userId === this.userId;
                 }
             });
         }

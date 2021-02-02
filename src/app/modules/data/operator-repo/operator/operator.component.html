@@ -16,91 +16,94 @@
 
 <div class="main-panel">
     <div fxLayout="column" class="layout-margin">
+        <div fxLayout="row" fxLayoutAlign="start center" style="margin-bottom:8px;">
+            <button mat-raised-button color="accent" routerLink="/data/operator-repo">back</button>
+        </div>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>
-            <input matInput [(ngModel)]="operator.name" placeholder="Name">
+            <input matInput [(ngModel)]="operator.name" placeholder="Name" [disabled]="!operator.editable">
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Image</mat-label>
-            <input matInput [(ngModel)]="operator.image" placeholder="Image">
+            <input matInput [(ngModel)]="operator.image" placeholder="Image" [disabled]="!operator.editable">
         </mat-form-field>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Description</mat-label>
-            <input matInput [(ngModel)]="operator.description" placeholder="Description">
+            <input matInput [(ngModel)]="operator.description" placeholder="Description" [disabled]="!operator.editable">
         </mat-form-field>
         <mat-form-field fxFlex color="accent" appearance="outline">
-            <mat-select placeholder="Deployment type" [(ngModel)]="operator.deploymentType" >
+            <mat-select placeholder="Deployment type" [(ngModel)]="operator.deploymentType" [disabled]="!operator.editable">
                 <mat-option  value="cloud">cloud</mat-option>
                 <mat-option  value="local">local</mat-option>
                 <mat-option  value="both">both</mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-checkbox [(ngModel)]="operator.pub">Public</mat-checkbox>
+        <mat-checkbox [(ngModel)]="operator.pub" [disabled]="!operator.editable">Public</mat-checkbox>
         <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
-            <button mat-raised-button color="accent" (click)="addInput()">Add Input</button>
+            <button mat-raised-button color="accent" (click)="addInput()" *ngIf="operator.editable">Add Input</button>
         </div>
         <div *ngFor="let item of operator.inputs" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name" placeholder="Name">
+                <input matInput [(ngModel)]="item.name" placeholder="Name" [disabled]="!operator.editable">
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type">
+                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type" [disabled]="!operator.editable">
                     <mat-option *ngFor="let option of dropdown"  [value]="option">
                         {{option}}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-icon-button>
+            <button mat-icon-button *ngIf="operator.editable">
                 <mat-icon (click)="deleteInput(item)" color="warn">
                     delete
                 </mat-icon>
             </button>
         </div>
         <div fxLayout="row" fxLayoutAlign="center center">
-            <button mat-raised-button color="accent" (click)="addOutput()">Add Output</button>
+            <button mat-raised-button color="accent" (click)="addOutput()" *ngIf="operator.editable">Add Output</button>
         </div>
         <div *ngFor="let item of operator.outputs" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name" placeholder="Name">
+                <input matInput [(ngModel)]="item.name" placeholder="Name" [disabled]="!operator.editable">
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type">
+                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type" [disabled]="!operator.editable">
                     <mat-option *ngFor="let option of dropdown"  [value]="option">
                         {{option}}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-icon-button>
+            <button mat-icon-button *ngIf="operator.editable">
                 <mat-icon (click)="deleteOutput(item)" color="warn">
                     delete
                 </mat-icon>
             </button>
         </div>
         <div fxLayout="row" fxLayoutAlign="center center">
-            <button mat-raised-button color="accent" (click)="addConfig()">Add Config Value</button>
+            <button mat-raised-button color="accent" (click)="addConfig()" *ngIf="operator.editable">Add Config Value</button>
         </div>
         <div *ngFor="let item of operator.config_values" fxLayout="row" class="layout-margin" fxLayoutAlign="center center" >
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                 <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name" placeholder="Name">
+                <input matInput [(ngModel)]="item.name" placeholder="Name" [disabled]="!operator.editable">
             </mat-form-field>
             <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type">
+                <mat-select placeholder="Type" [(ngModel)]="item.type" [(value)]="item.type" [disabled]="!operator.editable">
                     <mat-option *ngFor="let option of dropdown"  [value]="option">
                         {{option}}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-icon-button>
+            <button mat-icon-button *ngIf="operator.editable">
                 <mat-icon (click)="deleteConfig(item)" color="warn">
                     delete
                 </mat-icon>
             </button>
         </div>
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
-            <button mat-raised-button color="accent" (click)="saveOperator()">Save</button>
+            <button mat-raised-button color="accent" (click)="saveOperator()" *ngIf="operator.editable">Save</button>
         </div>
     </div>
 </div>

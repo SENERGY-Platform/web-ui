@@ -38,7 +38,7 @@
                             <mat-card-header>
                                 <mat-card-title-group>
                                     <mat-card-title>{{item.name}}</mat-card-title>
-                                    <mat-icon color="accent" class="header-icon" *ngIf="item.pub == true && item.editable == false" matTooltip="public">
+                                    <mat-icon color="accent" class="header-icon" *ngIf="item.pub == true && item.editable == false" matTooltip="shared">
                                         public
                                     </mat-icon>
                                     <mat-icon color="accent" class="header-icon" *ngIf="item.pub == true && item.editable == true" matTooltip="published">
@@ -67,9 +67,10 @@
                             <mat-card-actions>
                                 <div fxFlex></div>
                                 <button mat-icon-button color="accent" routerLink="op/{{item._id}}">
-                                    <mat-icon>edit</mat-icon>
+                                    <mat-icon *ngIf="item.editable == true">edit</mat-icon>
+                                    <mat-icon *ngIf="item.editable == false">info</mat-icon>
                                 </button>
-                                <button mat-icon-button color="accent" (click)="deleteOperator(item)">
+                                <button *ngIf="item.editable == true" mat-icon-button color="accent" (click)="deleteOperator(item)">
                                     <mat-icon>delete</mat-icon>
                                 </button>
                             </mat-card-actions>
