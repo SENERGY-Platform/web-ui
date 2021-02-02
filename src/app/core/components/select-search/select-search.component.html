@@ -29,7 +29,7 @@
         [sortComparator]="sortComparator"
         [value]="value"
         (openedChange)="openChanged($event)"
-        (selectionChange)="selectionChanged($event)" >
+        (selectionChange)="selectionChanged($event)">
     <mat-select-trigger *ngIf="getTriggerValue">
         {{getTriggerValue(selected)}}
     </mat-select-trigger>
@@ -37,20 +37,25 @@
     <mat-optgroup class="searchgroup"> <!-- does not show checkbox -->
         <mat-form-field fxFlex color="accent">
             <input matInput [formControl]="searchControl" placeholder="Search..." #searchInput="matInput">
-            <button mat-button *ngIf="searchControl.value" matSuffix mat-icon-button aria-label="Clear" (click)="resetSearch()">
+            <button mat-button *ngIf="searchControl.value" matSuffix mat-icon-button aria-label="Clear"
+                    (click)="resetSearch()">
                 <mat-icon>close</mat-icon>
             </button>
         </mat-form-field>
     </mat-optgroup>
     <mat-option *ngIf="noneView !== ''">{{noneView}}</mat-option>
     <span *ngIf="!withGroups">
-        <mat-option *ngFor="let option of getOptions() | async" [value]="getOptionValue(option)" [ngClass]="getOptionClass(option)">
+        <mat-option *ngFor="let option of getOptions() | async" [value]="getOptionValue(option)"
+                    [ngClass]="getOptionClass(option)"
+                    [disabled]="getOptionDisabled(option)">
             {{getOptionViewValue(option)}}
         </mat-option>
     </span>
     <span *ngIf="withGroups">
         <mat-optgroup *ngFor="let group of optionsGroups | keyvalue" [label]="group.key">
-            <mat-option *ngFor="let option of group.value" [value]="getOptionValue(option)" [ngClass]="getOptionClass(option)">
+            <mat-option *ngFor="let option of group.value" [value]="getOptionValue(option)"
+                        [ngClass]="getOptionClass(option)"
+                        [disabled]="getOptionDisabled(option)">
                 {{getOptionViewValue(option)}}
             </mat-option>
         </mat-optgroup>

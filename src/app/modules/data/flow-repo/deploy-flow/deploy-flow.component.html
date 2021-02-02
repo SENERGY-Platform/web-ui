@@ -114,10 +114,12 @@
                                     {{getServiceOptions(input, deviceType.get('id')?.value).size > 0 ? 'Service/Path: ' + deviceType.get('name')?.value
                                     :  deviceType.get('name')?.value + ' will not be used: no matching characteristic!'}}</mat-label>
                                 <senergy-select-search placeholder="Service"
+                                                       [multiple]="true"
                                                        [options]="getServiceOptions(input, deviceType.get('id')?.value)"
                                                        [autoSelectSingleElement]="true"
                                                        [getTriggerValue]="getServiceTriggerValue"
                                                        [compareWith]="comparePathOptions"
+                                                       [getOptionDisabled]="getServiceOptionDisabledFunction(deviceType)"
                                                        formControlName="selection"
                                                        useOptionViewProperty="path">
                                 </senergy-select-search>

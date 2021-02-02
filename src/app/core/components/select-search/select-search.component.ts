@@ -225,6 +225,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() useOptionViewProperty: string | undefined = undefined;
     @Input() useOptionValueProperty: string | undefined = undefined;
     @Input() useOptionClassProperty: string | undefined = undefined;
+    @Input() useOptionDisabledProperty: string | undefined = undefined;
     @Input() getTriggerValue: ((options: MatOption | MatOption[]) => string) | undefined = undefined;
 
     optionsGroups: Map<string, any> = new Map();
@@ -240,6 +241,9 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         }
         if (this.useOptionClassProperty !== undefined) {
             this.getOptionClass = useProperty(this.useOptionClassProperty);
+        }
+        if (this.useOptionDisabledProperty !== undefined) {
+            this.getOptionDisabled = useProperty(this.useOptionDisabledProperty);
         }
     }
 
@@ -268,6 +272,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() getOptionValue: ((option: any) => any) = a => a;
     @Input() getOptionClass: ((option: any) => string) = _ => '';
     @Input() getOptionViewValue: ((option: any) => string) = a => a as string;
+    @Input() getOptionDisabled: ((option: any) => boolean) = _ => false;
 
     onContainerClick(_: MouseEvent): void {
         this.open();

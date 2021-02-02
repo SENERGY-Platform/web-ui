@@ -133,7 +133,6 @@ export class DeployFlowComponent implements OnInit {
                 console.error('id not set!');
                 return;
             }
-            console.log(url); // TODO
             if (url[url.length - 2]?.path === 'edit') {
                 this.editMode = true;
                 this.pipelineRegistryService.getPipeline(id || '').subscribe((pipeline: PipelineModel | null) => {
@@ -267,7 +266,7 @@ export class DeployFlowComponent implements OnInit {
                     const deviceTypeGroup = this.fb.group({
                         id: deviceType.id,
                         name: deviceType.name,
-                        selection: undefined,
+                        selection: [],
                     });
                     formArray.push(deviceTypeGroup);
                     deviceTypeGroup.get('selection')?.valueChanges.subscribe(value =>
@@ -278,7 +277,7 @@ export class DeployFlowComponent implements OnInit {
                     if (options < 2) {
                         serviceOptions.forEach(option => {
                             if (option.length === 1) {
-                                deviceTypeGroup.patchValue({selection: option[0]});
+                                deviceTypeGroup.patchValue({selection: [option[0]]});
                             }
                         });
                         deviceTypeGroup.disable();
@@ -322,22 +321,33 @@ export class DeployFlowComponent implements OnInit {
                                             } else {
                                                 serviceIds.push(...deviceType.service);
                                             }
-                                            const matchingTopic = inputTopics?.find(topic =>
+                                            const matchingTopics = inputTopics?.filter(topic =>
                                                 serviceIds.includes(topic.name.replace(/_/g, ':')));
-                                            if (matchingTopic !== undefined) {
+                                            matchingTopics?.forEach(matchingTopic => {
                                                 const matchingInput = matchingTopic.mappings.find(mapping => mapping.dest === input);
                                                 if (matchingInput !== undefined) {
                                                     const deviceTypeGroups = this.getSubElementAsGroupArray(inputGroup, 'deviceTypes');
                                                     const matchingDeviceTypeGroup = deviceTypeGroups.find(deviceTypeGroup =>
                                                         deviceTypeGroup.get('id')?.value === deviceType.id);
-                                                    matchingDeviceTypeGroup?.patchValue({
-                                                        selection: {
-                                                            service_id: matchingTopic.name.replace(/_/g, ':'),
+                                                    let selections = matchingDeviceTypeGroup?.get('selection')?.value as
+                                                        { path: string; service_id: string; }[] | null;
+                                                    if (selections === null) {
+                                                        selections = [];
+                                                    }
+                                                    const serviceId = matchingTopic.name.replace(/_/g, ':');
+                                                    if (selections.findIndex(s => s.path === matchingInput.source
+                                                        && s.service_id === serviceId) === -1) {
+
+                                                        selections.push({
+                                                            service_id: serviceId,
                                                             path: matchingInput.source
-                                                        },
-                                                    });
+                                                        });
+                                                        matchingDeviceTypeGroup?.patchValue({
+                                                            selection: selections,
+                                                        });
+                                                    }
                                                 }
-                                            }
+                                            });
                                             obs.next(null);
                                             obs.complete();
                                         });
@@ -576,16 +586,17 @@ export class DeployFlowComponent implements OnInit {
             const flatFilters: DeviceServicePath[] = [];
             // Create a filter for each device/topic/value
             inputs.forEach(input => {
-                const deviceTypeServicePath: Map<string, { serviceId: string, path: string }> = new Map();
-                const filters = input.get('filter')?.value as Map<string, { serviceId: string, path: string }>;
-                filters.forEach((filter, deviceId) => {
-                    flatFilters.push({
-                        devices: [deviceId],
-                        topic: filter.serviceId.replace(/:/g, '_'),
-                        values: [{
-                            name: input.get('name')?.value,
-                            path: filter.path,
-                        }],
+                const filters = input.get('filter')?.value as Map<string, { serviceId: string, path: string }[]>;
+                filters.forEach((subfilters, deviceId) => {
+                    subfilters.forEach(filter => {
+                        flatFilters.push({
+                            devices: [deviceId],
+                            topic: filter.serviceId.replace(/:/g, '_'),
+                            values: [{
+                                name: input.get('name')?.value,
+                                path: filter.path,
+                            }],
+                        });
                     });
                 });
 
@@ -717,22 +728,32 @@ export class DeployFlowComponent implements OnInit {
         return (element.get(subElementPath) as FormArray)?.controls as FormGroup[] || [];
     }
 
-    servicePathSelected(input: FormGroup, deviceTypeId: string, selection: { service_id: string, path: string } | null) {
+    servicePathSelected(input: FormGroup, deviceTypeId: string, selection: { service_id: string, path: string }[] | null) {
         if (selection === null) {
             return;
         }
         let devices = input.get('devices')?.value as DeviceInstancesModel[];
         devices = devices.filter(d => d.device_type.id === deviceTypeId);
-        const filter = input.get('filter')?.value as Map<string, { serviceId: string, path: string }>;
-        devices.forEach(d => filter.set(d.id, {serviceId: selection.service_id, path: selection.path}));
+        const filter = input.get('filter')?.value as Map<string, { serviceId: string, path: string }[]>;
+        const convertedSelection = selection.map(x => {
+            return {serviceId: x.service_id, path: x.path};
+        });
+        devices.forEach(d => filter.set(d.id, convertedSelection));
         input.patchValue({filter});
     }
 
     getServiceTriggerValue(selection: MatOption | MatOption[] | undefined): string {
-        if (Array.isArray(selection)) {
-            return 'Err'; // multiple should never be set here
+        if (!Array.isArray(selection) || selection === undefined) {
+            return ''; // multiple should always be set here
         }
-        return selection?.group.label + ': ' + selection?.value.path;
+        let r = '';
+        selection.forEach(s => {
+            if (r.length > 0) {
+                r += ', ';
+            }
+            r += s.group.label + ': ' + s.value.path;
+        });
+        return r;
     }
 
     loadFunctionCharacteristics(func: DeviceTypeFunctionModel): Observable<DeviceTypeCharacteristicsModel[]> {
@@ -751,5 +772,15 @@ export class DeployFlowComponent implements OnInit {
 
     comparePathOptions(a: any, b: any) {
         return a && b && a.path && b.path && a.path === b.path && a.service_id && b.service_id && a.service_id === b.service_id;
+    }
+
+    getServiceOptionDisabledFunction(deviceType: FormGroup): ((option: { path: string; service_id: string; }) => boolean) {
+        return ((option: { path: string; service_id: string; }) => {
+            const selection = deviceType.get('selection')?.value as { path: string; service_id: string; }[] | null;
+            if (selection === null) {
+                return false;
+            }
+            return selection.findIndex(s => s.service_id === option.service_id && s.path !== option.path) !== -1;
+        });
     }
 }
