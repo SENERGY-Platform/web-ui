@@ -24,7 +24,10 @@ import {
     DeviceFilterCriteriaModel,
     DeviceSelectablesModel,
     DeviceInstancesBaseModel,
-    DeviceSelectablesWithGroupsModel, DeviceInstancesPermSearchModel
+    DeviceSelectablesWithGroupsModel,
+    DeviceInstancesPermSearchModel,
+    DeviceSelectablesWithImportsModel,
+    DeviceSelectablesWithGroupsAndImportsModel
 } from './device-instances.model';
 import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
@@ -184,9 +187,25 @@ export class DeviceInstancesService {
             true) as Observable<DeviceSelectablesWithGroupsModel[]>;
     }
 
+    getDeviceSelectionsWithImports(criteria: DeviceFilterCriteriaModel[], completeServices: boolean,
+                                  protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined)
+        : Observable<DeviceSelectablesWithImportsModel[]> {
+
+        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter,
+            false, true) as Observable<DeviceSelectablesWithImportsModel[]>;
+    }
+
+    getDeviceSelectionsWithGroupsAndImports(criteria: DeviceFilterCriteriaModel[], completeServices: boolean,
+                                   protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined)
+        : Observable<DeviceSelectablesWithGroupsAndImportsModel[]> {
+
+        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter,
+            true, true) as Observable<DeviceSelectablesWithGroupsAndImportsModel[]>;
+    }
+
     private getDeviceSelectionsInternal(criteria: DeviceFilterCriteriaModel[], completeServices: boolean,
                                         protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined,
-                                        includeGroups?: boolean)
+                                        includeGroups?: boolean, includeImports?: boolean)
         : Observable<DeviceSelectablesWithGroupsModel[] | DeviceSelectablesModel[]> {
 
         let path = '/selectables';
@@ -204,6 +223,9 @@ export class DeviceInstancesService {
         }
         if (includeGroups === true) {
             path += '&include_groups=true';
+        }
+        if (includeImports === true) {
+            path += '&include_imports=true';
         }
         return this.http.get<DeviceSelectablesModel[]>(
             environment.deviceSelectionUrl + path
