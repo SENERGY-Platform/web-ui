@@ -193,6 +193,9 @@ export class ExportService {
             } else if (t.characteristicId === environment.timeStampCharacteristicUnixSecondsId) {
                 path = t.Path;
                 precision = 's';
+            } else if (t.characteristicId === environment.timeStampCharacteristicUnixMilliSecondsId) {
+                path = t.Path;
+                precision = 'ms';
             }
         });
         return {path, precision};
