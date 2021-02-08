@@ -47,10 +47,24 @@ export class PermissionsDialogService {
 
         this.permissionsService.getResourcePermissions(kind, id).subscribe((permissionsModel: PermissionsResourceModel) => {
             Object.entries(permissionsModel.user_rights).forEach((resp: (string | PermissionsRightsModel)[]) => {
-                permissionsIn.push({userId: <string>resp[0], userName: '', userRights: <PermissionsRightsModel>resp[1]});
+                permissionsIn.push({
+                    userId: <string>resp[0],
+                    userName: '',
+                    userRights: <PermissionsRightsModel>resp[1]
+                });
             });
 
-            this.getUserNames(permissionsIn).subscribe((users: PermissionsUserModel[]) => {
+            Object.entries(permissionsModel.group_rights).forEach((resp: (string | PermissionsRightsModel)[]) => {
+                const role = <string>resp[0];
+                permissionsIn.push({
+                    userId: '',
+                    userName: role,
+                    userRights: <PermissionsRightsModel>resp[1],
+                    isRole: true
+                });
+            });
+
+            this.getUserNames(permissionsIn.filter(x => x.isRole !== true)).subscribe((users: PermissionsUserModel[]) => {
                 users.forEach((user: PermissionsUserModel, index: number) => {
                     permissionsIn[index].userName = user.username;
                 });
@@ -92,9 +106,17 @@ export class PermissionsDialogService {
         const array: Observable<any>[] = [];
         permissions.forEach((permission: PermissionsEditModel) => {
             if (permission.deleted) {
-                array.push(this.permissionsService.removeUserRight(permission.userId, kind, id));
+                if (permission.isRole === true) {
+                    array.push(this.permissionsService.removeRoleRight(permission.userName, kind, id));
+                } else {
+                    array.push(this.permissionsService.removeUserRight(permission.userId, kind, id));
+                }
             } else {
-                array.push(this.permissionsService.setUserRight(permission.userId, kind, id, permission.userRights));
+                if (permission.isRole === true) {
+                    array.push(this.permissionsService.setRoleRight(permission.userName, kind, id, permission.userRights));
+                } else {
+                    array.push(this.permissionsService.setUserRight(permission.userId, kind, id, permission.userRights));
+                }
             }
         });
 

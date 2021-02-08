@@ -22,4 +22,7 @@ export interface PermissionsResourceModel {
     user_rights: {
         [key: string]: PermissionsRightsModel;
     };
+    group_rights: {
+        [key: string]: PermissionsRightsModel;
+    };
 }

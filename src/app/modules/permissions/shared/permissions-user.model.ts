@@ -18,3 +18,12 @@ export interface PermissionsUserModel {
     id: string;
     username: string;
 }
+
+export interface PermissionsGroupModel {
+    id: string;
+    name: string;
+    description: string;
+    composite: boolean;
+    clientRole: boolean;
+    containerId: string;
+}

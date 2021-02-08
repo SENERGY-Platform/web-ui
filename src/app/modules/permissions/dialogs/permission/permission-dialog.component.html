@@ -38,10 +38,34 @@
             </td>
         </ng-container>
 
+        <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef> User</th>
+            <td mat-footer-cell *matFooterCellDef>
+                <form class="user-input">
+                    <mat-form-field color="accent">
+                        <senergy-select-search placeholder="Add role"
+                                               [formControl]="groupFormControl"
+                                               [options]="roles"
+                                               useOptionViewProperty="name">
+                        </senergy-select-search>
+                    </mat-form-field>
+                </form>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="isRole">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let element">
+                <mat-icon *ngIf="element.isRole === true" color="accent" matTooltip="role">group</mat-icon>
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
         <ng-container matColumnDef="read">
             <th mat-header-cell *matHeaderCellDef> Read</th>
             <td mat-cell *matCellDef="let element">
-                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.read" [disabled]="element.userId === userId"></mat-checkbox>
+                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.read"
+                              [disabled]="element.userId === userId || (element.isRole === true && element.userName === 'admin')"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
@@ -50,7 +74,8 @@
         <ng-container matColumnDef="write">
             <th mat-header-cell *matHeaderCellDef> Write</th>
             <td mat-cell *matCellDef="let element">
-                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.write"></mat-checkbox>
+                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.write"
+                              [disabled]="element.isRole === true && element.userName === 'admin'"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
@@ -59,7 +84,8 @@
         <ng-container matColumnDef="execute">
             <th mat-header-cell *matHeaderCellDef> Execute</th>
             <td mat-cell *matCellDef="let element">
-                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.execute"></mat-checkbox>
+                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.execute"
+                              [disabled]="element.isRole === true && element.userName === 'admin'"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
@@ -68,7 +94,8 @@
         <ng-container matColumnDef="administrate">
             <th mat-header-cell *matHeaderCellDef> Administrate</th>
             <td mat-cell *matCellDef="let element">
-                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.administrate" [disabled]="element.userId === userId"></mat-checkbox>
+                <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.administrate"
+                              [disabled]="element.userId === userId || (element.isRole === true && element.userName === 'admin')"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
@@ -77,7 +104,8 @@
         <ng-container matColumnDef="action">
             <th mat-header-cell *matHeaderCellDef> Action</th>
             <td mat-cell *matCellDef="let i = index; let element">
-                <button class="margin" mat-icon-button color="accent" (click)="deleteRow(i)" [disabled]="element.userId === userId">
+                <button class="margin" mat-icon-button color="accent" (click)="deleteRow(i)"
+                        [disabled]="element.userId === userId || (element.isRole === true && element.userName === 'admin')">
                     <mat-icon>delete</mat-icon>
                 </button>
             </td>
@@ -88,9 +116,21 @@
             </td>
         </ng-container>
 
+        <ng-container matColumnDef="roleAction">
+            <th mat-header-cell *matHeaderCellDef> Action</th>
+            <td mat-footer-cell *matFooterCellDef>
+                <button class="margin" mat-icon-button color="accent" (click)="addRole()">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </td>
+        </ng-container>
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         <tr mat-footer-row *matFooterRowDef="displayedColumns" class="example-first-footer-row"></tr>
+        <tr mat-footer-row
+            *matFooterRowDef="['role', 'isRole', 'read', 'write', 'execute', 'administrate', 'roleAction']"
+            class="example-first-footer-row"></tr>
     </table>
 
 </mat-dialog-content>

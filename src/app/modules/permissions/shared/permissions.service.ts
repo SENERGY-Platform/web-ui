@@ -21,7 +21,7 @@ import {Observable} from 'rxjs';
 import {catchError, map} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {PermissionsResourceModel} from './permissions-resource.model';
-import {PermissionsUserModel} from './permissions-user.model';
+import {PermissionsGroupModel, PermissionsUserModel} from './permissions-user.model';
 import {PermissionsRightsModel} from './permissions-rights.model';
 import {PermissionsResponseModel} from './permissions-response.model';
 
@@ -31,6 +31,23 @@ import {PermissionsResponseModel} from './permissions-response.model';
 export class PermissionsService {
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
+    }
+
+    static rightObjToStr(right: PermissionsRightsModel): string {
+        let result = '';
+        if (right.read) {
+            result += 'r';
+        }
+        if (right.write) {
+            result += 'w';
+        }
+        if (right.execute) {
+            result += 'x';
+        }
+        if (right.administrate) {
+            result += 'a';
+        }
+        return result;
     }
 
     getResourcePermissions(kind: string, id: string): Observable<PermissionsResourceModel> {
@@ -62,26 +79,29 @@ export class PermissionsService {
 
     setUserRight(user: string, kind: string, resourceId: string, rights: PermissionsRightsModel): Observable<PermissionsResponseModel> {
         return this.http.put<any>(environment.permissionCommandUrl + '/user/' + encodeURIComponent(user) + '/' +
-            encodeURIComponent(kind) + '/' + encodeURIComponent(resourceId) + '/' + rightObjToStr(rights), {}).pipe(
+            encodeURIComponent(kind) + '/' + encodeURIComponent(resourceId) + '/' + PermissionsService.rightObjToStr(rights), {}).pipe(
             catchError(this.errorHandlerService.handleError(PermissionsService.name, 'setUserRight', {status: 'Error setUserRight!'}))
         );
+    }
 
-        function rightObjToStr(right: PermissionsRightsModel): string {
-            let result = '';
-            if (right.read) {
-                result += 'r';
-            }
-            if (right.write) {
-                result += 'w';
-            }
-            if (right.execute) {
-                result += 'x';
-            }
-            if (right.administrate) {
-                result += 'a';
-            }
-            return result;
-        }
+    removeRoleRight(user: string, kind: string, resourceId: string): Observable<PermissionsResponseModel> {
+        return this.http.delete<PermissionsResponseModel>(environment.permissionCommandUrl + '/group/' + encodeURIComponent(user) +
+            '/' + encodeURIComponent(kind) + '/' + encodeURIComponent(resourceId)).pipe(
+            catchError(this.errorHandlerService.handleError(PermissionsService.name, 'removeRoleRight', {status: 'Error removeRoleRight!'}))
+        );
+    }
+
+    setRoleRight(user: string, kind: string, resourceId: string, rights: PermissionsRightsModel): Observable<PermissionsResponseModel> {
+        return this.http.put<any>(environment.permissionCommandUrl + '/group/' + encodeURIComponent(user) + '/' +
+            encodeURIComponent(kind) + '/' + encodeURIComponent(resourceId) + '/' + PermissionsService.rightObjToStr(rights), {}).pipe(
+            catchError(this.errorHandlerService.handleError(PermissionsService.name, 'setRoleRight', {status: 'Error setRoleRight!'}))
+        );
+    }
+
+    getRoles(): Observable<PermissionsGroupModel[]> {
+        return this.http.get<PermissionsGroupModel[]>(environment.usersServiceUrl + '/roles').pipe(
+            catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getRoles', [] as PermissionsGroupModel[]))
+        );
     }
 
 }

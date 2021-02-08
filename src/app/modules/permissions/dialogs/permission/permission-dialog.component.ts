@@ -20,7 +20,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {PermissionsEditModel} from '../../shared/permissions-edit.model';
 import {FormControl} from '@angular/forms';
 import {AuthorizationService} from '../../../../core/services/authorization.service';
-import {PermissionsUserModel} from '../../shared/permissions-user.model';
+import {PermissionsGroupModel, PermissionsUserModel} from '../../shared/permissions-user.model';
 import {HttpClient} from '@angular/common/http';
 import {PermissionsService} from '../../shared/permissions.service';
 import {MatTable} from '@angular/material/table';
@@ -33,9 +33,11 @@ export class PermissionDialogComponent implements OnInit {
 
     @ViewChild(MatTable, {static: false}) table!: MatTable<PermissionsEditModel>;
     formControl = new FormControl('');
+    groupFormControl = new FormControl('');
+    roles: PermissionsGroupModel[] = [];
     name: string;
     userId: null | string = null;
-    displayedColumns: string[] = ['user', 'read', 'write', 'execute', 'administrate', 'action'];
+    displayedColumns: string[] = ['user', 'isRole', 'read', 'write', 'execute', 'administrate', 'action'];
     permissions: PermissionsEditModel[] = [];
     deletedPermissions: PermissionsEditModel[] = [];
 
@@ -55,6 +57,10 @@ export class PermissionDialogComponent implements OnInit {
 
     ngOnInit() {
         this.getUserId();
+        this.permissionsService.getRoles().subscribe(roles => {
+            this.roles = roles.filter(r =>
+                this.permissions.findIndex(p => p.isRole === true && p.userName === r.name) === -1);
+        });
     }
 
 
@@ -114,6 +120,20 @@ export class PermissionDialogComponent implements OnInit {
 
     private getUserId(): void {
         this.userId = <string>this.authorizationService.getUserId();
+    }
+
+    addRole() {
+        if (this.groupFormControl.value === '') {
+            return;
+        }
+        this.permissions.push({
+            userId: this.groupFormControl.value.id, userName: this.groupFormControl.value.name, userRights: {
+                administrate: false, execute: false, write: false, read: false
+            }, isRole: true
+        });
+        this.table.renderRows();
+
+        this.roles = this.roles.filter(r => this.permissions.findIndex(p => p.isRole === true && p.userId === r.id) === -1);
     }
 }
 

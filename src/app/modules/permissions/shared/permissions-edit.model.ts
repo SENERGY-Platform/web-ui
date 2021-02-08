@@ -21,4 +21,5 @@ export interface PermissionsEditModel {
     userName: string;
     userRights: PermissionsRightsModel;
     deleted?: boolean;
+    isRole?: boolean;
 }

@@ -27,6 +27,8 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
+import {CoreModule} from '../../core/core.module';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 @NgModule({
     imports: [
@@ -41,6 +43,8 @@ import {MatInputModule} from '@angular/material/input';
         MatButtonModule,
         MatInputModule,
         FlexLayoutModule,
+        CoreModule,
+        MatTooltipModule,
     ],
     declarations: [
         PermissionDialogComponent,
