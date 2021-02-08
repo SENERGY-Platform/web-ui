@@ -18,8 +18,6 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {
     WidgetModel
 } from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material/icon';
-import {DomSanitizer} from '@angular/platform-browser';
 import {DevicesStateService} from './shared/devices-state.service';
 import {DevicesStateModel} from './shared/devices-state.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
@@ -40,24 +38,16 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private iconRegistry: MatIconRegistry,
-                private sanitizer: DomSanitizer,
-                private devicesStateService: DevicesStateService,
+    constructor(private devicesStateService: DevicesStateService,
                 private dashboardService: DashboardService) {
     }
 
     ngOnInit() {
         this.setDeviceStatus();
-        this.registerIcons();
     }
 
     ngOnDestroy() {
         this.destroy.unsubscribe();
-    }
-
-    registerIcons() {
-        this.iconRegistry.addSvgIcon('online', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/connect_white.svg'));
-        this.iconRegistry.addSvgIcon('offline', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/disconnect_white.svg'));
     }
 
     edit() {

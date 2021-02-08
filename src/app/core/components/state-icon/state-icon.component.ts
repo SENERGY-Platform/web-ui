@@ -15,8 +15,6 @@
  */
 
 import {Component, Input} from '@angular/core';
-import {DomSanitizer} from '@angular/platform-browser';
-import {MatIconRegistry} from '@angular/material/icon';
 
 @Component({
     selector: 'senergy-state-icon',
@@ -26,15 +24,5 @@ import {MatIconRegistry} from '@angular/material/icon';
 export class StateIconComponent  {
 
     @Input() state = false;
-
-    constructor(private iconRegistry: MatIconRegistry,
-                private sanitizer: DomSanitizer) {
-        this.registerIcons();
-    }
-
-    private registerIcons(): void {
-        this.iconRegistry.addSvgIcon('online', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/connect.svg'));
-        this.iconRegistry.addSvgIcon('offline', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/disconnect.svg'));
-    }
 
 }

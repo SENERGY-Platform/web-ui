@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 <div fxLayout="column" fxLayoutAlign="center center">
-    <mat-icon class="padding" matTooltip="connected" *ngIf="state === true" svgIcon="online"></mat-icon>
-    <mat-icon class="padding" matTooltip="disconnected" *ngIf="state === false" svgIcon="offline"></mat-icon>
+    <mat-icon class="padding connected" matTooltip="connected" *ngIf="state === true">cloud</mat-icon>
+    <mat-icon class="padding disconnected" matTooltip="disconnected" *ngIf="state === false">cloud_off</mat-icon>
     <mat-icon class="padding color-sidenav" matTooltip="unknown" *ngIf="state === undefined">help outline</mat-icon>
 </div>
