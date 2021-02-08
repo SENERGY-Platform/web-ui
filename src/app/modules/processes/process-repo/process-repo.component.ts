@@ -292,21 +292,21 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
         let conditions: ProcessRepoConditionsModel | null = {};
         switch (this.activeIndex) {
             case 0:
-                /** all */
+                //all
                 conditions = null;
                 break;
             case 1:
-                /** own */
+                //own
                 conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
                     {'condition': this.setCondition('features.parent_id', '==', 'null')}];
                 break;
+            /** case 2:
+             //marketplace
+             conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
+             {'condition': this.setCondition('features.parent_id', '!=', 'null')}];
+             break; */
             case 2:
-                /** marketplace */
-                conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
-                    {'condition': this.setCondition('features.parent_id', '!=', 'null')}];
-                break;
-            case 3:
-                /** shared */
+                // shared
                 conditions.condition = this.setCondition('creator', '!=', 'jwt.user');
                 break;
         }
