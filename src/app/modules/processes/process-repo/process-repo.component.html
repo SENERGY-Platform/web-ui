@@ -56,11 +56,11 @@
                                         {{item.value.date | date:"medium"}}
                                     </div>
                                     <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
+                                        <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
+                                        </mat-checkbox>
                                         <mat-icon matTooltip="Process is shared" *ngIf="item.value.shared"
                                                   class="color-sidenav info-icon">share
                                         </mat-icon>
-                                        <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
-                                        </mat-checkbox>
                                         <div fxFlex></div>
                                         <button mat-icon-button color="accent" matTooltip="Edit"
                                                 routerLink="/processes/designer/{{item.value.id}}">
