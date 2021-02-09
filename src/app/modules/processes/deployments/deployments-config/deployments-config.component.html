@@ -36,7 +36,7 @@
                                             <senergy-select-search placeholder="{{element.name}}" [required]="true"
                                                         formControlName="selection_options_index"
                                                         [options]="optionGroups.get(elementIndex) || []"
-                                                        [getOptionValue]="getIndex(element)"
+                                                        [getOptionValue]="getTaskIndex(element)"
                                                         (selectionChange)="changeTaskSelectionOption(elementIndex, $event.value)"
                                                         [getOptionViewValue]="getViewValue">
                                             </senergy-select-search>
@@ -79,15 +79,13 @@
                                 <tr>
                                     <td formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent">
-                                            <mat-select placeholder="{{element.name}}" required
-                                                        formControlName="selected_device_id">
-                                                <mat-option
-                                                        *ngFor="let selectionOption of element.message_event.selection.selection_options; let selectionOptionIndex = index"
-                                                        [value]="selectionOption.device && selectionOption.device.id"
-                                                        (click)="setSelectedServiceId(elementIndex, selectionOptionIndex, 'message_event')">
-                                                    {{selectionOption.device && selectionOption.device.name}}
-                                                </mat-option>
-                                            </mat-select>
+                                            <senergy-select-search placeholder="{{element.name}}" [required]="true"
+                                                                   formControlName="selection_options_index"
+                                                                   [options]="optionGroups.get(elementIndex) || []"
+                                                                   [getOptionValue]="getMsgEventIndex(element)"
+                                                                   (selectionChange)="changeEventSelectionOption(elementIndex, $event.value)"
+                                                                   [getOptionViewValue]="getViewValue">
+                                            </senergy-select-search>
                                         </mat-form-field>
 
                                         <mat-form-field class="full-width" color="accent"

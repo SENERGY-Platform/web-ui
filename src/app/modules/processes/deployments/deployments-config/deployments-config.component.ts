@@ -134,14 +134,23 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     changeTaskSelectionOption(selectedElementIndex: number, selectionOptionIndex: number): void {
+        this.changeElementSelectionOption(selectedElementIndex, selectionOptionIndex, 'task');
+    }
+
+    changeEventSelectionOption(selectedElementIndex: number, selectionOptionIndex: number): void {
+        this.changeElementSelectionOption(selectedElementIndex, selectionOptionIndex, 'message_event');
+    }
+
+
+    changeElementSelectionOption(selectedElementIndex: number, selectionOptionIndex: number, elementType: string): void {
         const elementClicked = this.getElement(selectedElementIndex);
         const option = this.getOption(elementClicked, selectionOptionIndex);
 
         const that = this;
 
         const setOption = function(elementIndex: number) {
-            const selectedDeviceGroupId = that.elementsFormArray.at(elementIndex).get('task.selection.selected_device_group_id');
-            const selectedDeviceId = that.elementsFormArray.at(elementIndex).get('task.selection.selected_device_id');
+            const selectedDeviceGroupId = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_device_group_id');
+            const selectedDeviceId = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_device_id');
             if (option && option.device_group) {
                 if (selectedDeviceGroupId) {
                     selectedDeviceGroupId.patchValue(option.device_group.id);
@@ -158,14 +167,14 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                     selectedDeviceId.patchValue(option.device.id);
                 }
             }
-            that.setSelectedServiceId(elementIndex, selectionOptionIndex, 'task');
+            that.setSelectedServiceId(elementIndex, selectionOptionIndex, elementType);
         };
 
-        // set option for this task
+        // set option for this element
         setOption(selectedElementIndex);
 
         // set options for tasks of the same group
-        if (elementClicked.group) {
+        if (elementClicked.group && elementType === 'task') {
             this.elements.forEach((element: V2DeploymentsPreparedElementModel, elementIndex: number) => {
                 if (element.task !== null && elementClicked.bpmn_id !== element.bpmn_id && elementClicked.group === element.group) {
                     setOption(elementIndex);
@@ -201,12 +210,23 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
     }
 
-    getIndex(element: V2DeploymentsPreparedElementModel): (option: V2DeploymentsPreparedSelectionOptionModel) => number {
+    getTaskIndex(element: V2DeploymentsPreparedElementModel): (option: V2DeploymentsPreparedSelectionOptionModel) => number {
         return option => {
             if (element.task?.selection.selection_options === undefined) {
                 return -1;
             }
             return element.task?.selection.selection_options.findIndex(o =>
+                (o.device && o.device.id === option.device?.id)
+                || o.device_group && (o.device_group.id === option.device_group?.id));
+        };
+    }
+
+    getMsgEventIndex(element: V2DeploymentsPreparedElementModel): (option: V2DeploymentsPreparedSelectionOptionModel) => number {
+        return option => {
+            if (element.message_event?.selection.selection_options === undefined) {
+                return -1;
+            }
+            return element.message_event?.selection.selection_options.findIndex(o =>
                 (o.device && o.device.id === option.device?.id)
                 || o.device_group && (o.device_group.id === option.device_group?.id));
         };
@@ -281,6 +301,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             deployment.elements.forEach((element, index) => {
                 if (element.task) {
                     this.optionGroups.set(index, this.getOptionGroups(element.task.selection.selection_options));
+                }
+                if (element.message_event) {
+                    this.optionGroups.set(index, this.getOptionGroups(element.message_event.selection.selection_options));
                 }
             });
         }
