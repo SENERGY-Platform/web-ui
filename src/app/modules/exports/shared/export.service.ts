@@ -20,7 +20,13 @@ import {ErrorHandlerService} from '../../../core/services/error-handler.service'
 import {environment} from '../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
-import {ExportModel, ExportValueBaseModel, ExportValueCharacteristicModel, ExportValueModel} from './export.model';
+import {
+    ExportModel,
+    ExportResponseModel,
+    ExportValueBaseModel,
+    ExportValueCharacteristicModel,
+    ExportValueModel
+} from './export.model';
 import {
     DeviceTypeContentVariableModel,
     DeviceTypeServiceModel
@@ -44,16 +50,16 @@ export class ExportService {
     }
 
     getExports(search?: string, limit?: number, offset?: number, sort?: string, order?: string, generated?: boolean, searchField?: string):
-        Observable<ExportModel[] | null> {
+        Observable<ExportResponseModel | null> {
         if (searchField === undefined || searchField === null){
             searchField = 'name';
         }
-        return this.http.get<ExportModel[]>
+        return this.http.get<ExportResponseModel>
         (environment.exportService + '/instance?limit=' + limit + '&offset=' + offset + '&order=' + sort +
             ':' + order + (search ? ('&search=' + searchField + ':' + search) : '') +
             (generated !== undefined ? ('&generated=' + generated.valueOf()) : ''))
             .pipe(
-                map((resp: ExportModel[]) => resp || []),
+                map((resp: ExportResponseModel) => resp || []),
                 catchError(this.errorHandlerService.handleError(ExportService.name, 'getExports: Error', null)
                 )
         );

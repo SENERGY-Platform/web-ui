@@ -64,8 +64,8 @@ export class EnergyPredictionRequirementsService {
                 }
 
                 return {
-                    found: r.filter(ex => EnergyPredictionRequirementsService.exportHasRequiredValues(ex.Values)).length !== 0,
-                    hasMore: r.length === pageSize,
+                    found: r.instances.filter(ex => EnergyPredictionRequirementsService.exportHasRequiredValues(ex.Values)).length !== 0,
+                    hasMore: r.instances.length === pageSize,
                 };
             })).toPromise();
     }

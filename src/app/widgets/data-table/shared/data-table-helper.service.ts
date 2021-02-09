@@ -27,7 +27,11 @@ import {
 import {DeviceSelectablesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
 import {forkJoin, Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {ExportModel, ExportValueCharacteristicModel} from '../../../modules/exports/shared/export.model';
+import {
+    ExportModel,
+    ExportResponseModel,
+    ExportValueCharacteristicModel
+} from '../../../modules/exports/shared/export.model';
 import {PipelineRegistryService} from '../../../modules/data/pipeline-registry/shared/pipeline-registry.service';
 import {PipelineModel} from '../../../modules/data/pipeline-registry/shared/pipeline.model';
 import {OperatorModel} from '../../../modules/data/operator-repo/shared/operator.model';
@@ -139,7 +143,7 @@ export class DataTableHelperService {
             return of(this.exportCache);
         }
         return this.exportService.getExports('', -1, 0, 'name', 'asc')
-            .pipe(map(exports => this.exportCache = exports === null ? [] : exports));
+            .pipe(map(exports => this.exportCache = exports === null ? [] : exports.instances));
     }
 
     getExportsForDeviceAndValue(serviceId: string, deviceId: string, path: string): ExportModel[] {

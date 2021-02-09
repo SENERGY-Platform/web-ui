@@ -18,6 +18,7 @@ import {Injectable} from '@angular/core';
 import {ExportService} from '../../../modules/exports/shared/export.service';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {ExportResponseModel} from "../../../modules/exports/shared/export.model";
 
 
 @Injectable({
@@ -33,7 +34,7 @@ export class SingleValueRequirementsService {
 
     requirementsFulfilled(): Observable<boolean> {
         return this.exportService.getExports('', 1, 0, 'name', 'asc').pipe(map(r => {
-            return r !== null && r.length !== 0;
+            return r !== null && r.instances.length !== 0;
         }));
     }
 }

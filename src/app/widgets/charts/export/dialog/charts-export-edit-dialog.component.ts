@@ -21,7 +21,7 @@ import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.s
 import {DashboardResponseMessageModel} from '../../../../modules/dashboard/shared/dashboard-response-message.model';
 import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {ExportService} from '../../../../modules/exports/shared/export.service';
-import {ExportModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
+import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
 import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
 import {SelectionModel} from '@angular/cdk/collections';
 import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
@@ -117,9 +117,9 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     initDeployments(widget: WidgetModel) {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: (ExportModel[] | null)) => {
+        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: (ExportResponseModel | null)) => {
             if (exports !== null) {
-                exports.forEach((exportModel: ExportModel) => {
+                exports.instances.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
                         this.exportList.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
                     }
@@ -127,11 +127,11 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 // remove deleted exports
                 if (widget.properties.exports !== undefined) {
                     widget.properties.exports = widget.properties.exports
-                        .filter(selected => exports.findIndex(existing => existing.ID === selected.id) !== -1);
+                        .filter(selected => exports.instances.findIndex(existing => existing.ID === selected.id) !== -1);
 
                     // exports values or names might have changed
                     widget.properties.exports.forEach(selected => {
-                        const latestExisting = exports.find(existing => existing.ID === selected.id);
+                        const latestExisting = exports.instances.find(existing => existing.ID === selected.id);
                         if (latestExisting !== undefined && latestExisting.Name !== undefined && latestExisting.ID !== undefined) {
                             selected.values = latestExisting.Values;
                             selected.name = latestExisting.Name;
