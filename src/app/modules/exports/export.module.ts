@@ -40,6 +40,8 @@ import {MatCardModule} from '@angular/material/card';
 import {MatTableModule} from '@angular/material/table';
 import {ExportComponent} from "./export.component";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
+import {MatPaginatorModule} from "@angular/material/paginator";
+import {MatSortModule} from "@angular/material/sort";
 
 const dataExport = {path: 'exports', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' }};
 const exp = {path: 'exports/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'Exports' }};
@@ -54,6 +56,8 @@ const details = {path: 'exports/details/:id', pathMatch: 'full', component: Expo
         MatGridListModule,
         MatIconModule,
         MatTooltipModule,
+        MatPaginatorModule,
+        MatSortModule,
         MatDividerModule,
         MatListModule,
         FlexLayoutModule,

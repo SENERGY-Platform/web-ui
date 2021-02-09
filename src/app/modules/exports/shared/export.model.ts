@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+export interface ExportResponseModel {
+    count: number;
+    instances: ExportModel[];
+    total: number;
+}
+
 export interface ExportModel {
     ID: string | undefined;
     Filter: string;

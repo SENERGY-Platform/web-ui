@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ExportService} from './shared/export.service';
-import {ExportModel} from './shared/export.model';
+import {ExportModel, ExportResponseModel} from './shared/export.model';
 import {environment} from '../../../environments/environment';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../core/services/dialogs.service';
 import {ResponsiveService} from '../../core/services/responsive.service';
 import {ClipboardService} from 'ngx-clipboard';
-import {SortModel} from '../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs';
+import {merge, Subscription} from 'rxjs';
 import {SearchbarService} from '../../core/components/searchbar/shared/searchbar.service';
-
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
+import {SelectionModel} from "@angular/cdk/collections";
+import {MatTableDataSource} from "@angular/material/table";
+import {MatSort} from "@angular/material/sort";
+import {MatPaginator} from "@angular/material/paginator";
+import {startWith, switchMap} from "rxjs/internal/operators";
 
 @Component({
     selector: 'senergy-export',
@@ -42,23 +38,27 @@ const grids = new Map([
 
 export class ExportComponent implements OnInit, OnDestroy {
 
+    @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
+    @ViewChild('sort', {static: false}) sort!: MatSort;
+
+    selection = new SelectionModel<ExportModel>(true, []);
+    displayedColumns: string[] = ['select', 'filter_type', 'name', 'description', 'created_at', 'updated_at', 'info', 'edit', 'copy', 'delete'];
+    totalCount = 0;
+
     exports: ExportModel[] = [];
+    exportsDataSource = new MatTableDataSource<ExportModel>();
     showGenerated = localStorage.getItem('data.exports.showGenerated') === 'true';
     ready = false;
     deleteInProgress = false;
     url = environment.influxAPIURL;
     gridCols = 0;
-    sortAttributes = [new SortModel('Name', 'name', 'asc'), new SortModel('Erstellungsdatum', 'created_at', 'asc')];
 
     public searchText = '';
     public searchField = 'name';
     public searchFields = [['Name', 'name'], ['Gerätename', 'entity_name'], ['Beschreibung', 'description'], ['Service', 'service_name']];
-    private limitInit = 54;
-    private limit = this.limitInit;
-    private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
+
+    private exportSub: Subscription = new Subscription();
 
     constructor(private exportService: ExportService,
                 public snackBar: MatSnackBar,
@@ -75,24 +75,13 @@ export class ExportComponent implements OnInit, OnDestroy {
         if (localStorage.getItem('data.exports.searchField') !== null) {
             this.searchField = <string>localStorage.getItem('data.exports.searchField');
         }
-        this.initGridCols();
+
         this.initSearchAndGetExports();
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
-    }
-
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.setRepoItemsParams(this.limitInit);
-            this.getExports(false);
-        }
-    }
-
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getExports(true);
+        this.exportSub.unsubscribe();
     }
 
     deleteExport(exp: ExportModel) {
@@ -109,7 +98,6 @@ export class ExportComponent implements OnInit, OnDestroy {
                         if (index > -1) {
                             this.exports.splice(index, 1);
                         }
-                        this.setRepoItemsParams(1);
                         this.getExports(false);
                     } else {
                         this.snackBar.open('Export could not be deleted', undefined, {
@@ -142,34 +130,29 @@ export class ExportComponent implements OnInit, OnDestroy {
 
     private getExports(reset: boolean) {
         if (reset) {
-            this.setRepoItemsParams(this.limitInit);
             this.reset();
         }
-        this.exportService.getExports(
-            this.searchText,
-            this.limit, this.offset,
-            this.sortAttribute.value,
-            this.sortAttribute.order,
-            (this.showGenerated ? undefined : false),
-            this.searchField
-        )
-            .subscribe(
-                (resp: ExportModel [] | null) => {
-                    if (resp !== null) {
-                        if (resp.length !== this.limit) {
-                            this.allDataLoaded = true;
-                        }
-                        this.exports = this.exports.concat(resp);
-                    }
-                    this.ready = true;
-                });
-    }
+        this.exportsDataSource.sort = this.sort;
+        this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
 
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
+        this.exportSub = merge(this.sort.sortChange, this.paginator.page).pipe(startWith({}), switchMap(() => {
+            return this.exportService.getExports(
+                this.searchText,
+                this.paginator.pageSize, this.paginator.pageSize * this.paginator.pageIndex,
+                this.sort.active,
+                this.sort.direction,
+                (this.showGenerated ? undefined : false),
+                this.searchField
+            )
+        })).subscribe(
+            (resp: ExportResponseModel | null) => {
+                if (resp !== null) {
+                    this.exports = resp.instances;
+                    this.totalCount = resp.total;
+                    this.exportsDataSource.data = this.exports;
+                }
+                this.ready = true;
+            });
     }
 
     private initSearchAndGetExports() {
@@ -180,16 +163,30 @@ export class ExportComponent implements OnInit, OnDestroy {
         });
     }
 
-    private setRepoItemsParams(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.exports.length;
-    }
-
     private reset() {
         this.exports = [];
-        this.offset = 0;
-        this.allDataLoaded = false;
         this.ready = false;
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.exportsDataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.exportsDataSource.connect().value.forEach(row => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems(): void {
+        //TODO implement multiple delete
     }
 }
