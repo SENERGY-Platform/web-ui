@@ -49,6 +49,9 @@ import {MatOption} from '@angular/material/core';
 import {ConceptsService} from '../../../metadata/concepts/shared/concepts.service';
 import {OperatorInputTopic, PipelineModel} from '../../pipeline-registry/shared/pipeline.model';
 import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {OperatorModel} from '../../operator-repo/shared/operator.model';
+import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
 
 
 interface CustomSelectable {
@@ -61,6 +64,7 @@ interface DeviceServicePath {
     values: NodeValue[];
     topic: string;
 }
+
 
 @Component({
     selector: 'senergy-deploy-flow',
@@ -80,6 +84,8 @@ export class DeployFlowComponent implements OnInit {
                 private pipelineRegistryService: PipelineRegistryService,
                 private fb: FormBuilder,
                 private conceptsService: ConceptsService,
+                private sanitizer: DomSanitizer,
+                private operatorRepoService: OperatorRepoService,
                 private flowEngineService: FlowEngineService) {
     }
 
@@ -92,6 +98,7 @@ export class DeployFlowComponent implements OnInit {
     pipelineId = '';
     editMode = false;
     allDevices: DeviceInstancesModel[] = [];
+    pipelines: PipelineModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     aspectFunctions = new Map<string, DeviceTypeFunctionModel[]>();
     selectables = new Map<string, DeviceSelectablesWithGroupsModel[]>();
@@ -100,6 +107,7 @@ export class DeployFlowComponent implements OnInit {
     serviceOptions: Map<string, Map<string, Map<string, Map<string, Map<string, { path: string; service_id: string; }[]>>>>> = new Map();
     services = new Map<string, DeviceTypeServiceModel>();
     functionCharacteristics: Map<string, DeviceTypeCharacteristicsModel[]> = new Map();
+    operators: Map<string, OperatorModel> = new Map();
 
 
     form = this.fb.group({
@@ -125,6 +133,7 @@ export class DeployFlowComponent implements OnInit {
 
     ngOnInit() {
         this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe(aspects => this.aspects = aspects);
+        this.pipelineRegistryService.getPipelines().subscribe(pipelines => this.pipelines = pipelines);
         this.route.url.subscribe(url => {
             this.ready = false;
             this.resetForm();
@@ -226,6 +235,7 @@ export class DeployFlowComponent implements OnInit {
                 devices: [],
                 deviceTypes: this.fb.array([]),
                 name: input,
+                pipelines: this.fb.array([]),
             });
             inputGroup.get('aspectId')?.valueChanges.subscribe(aspectId => {
                 this.loadAspectFunctions(aspectId).subscribe();
@@ -287,6 +297,25 @@ export class DeployFlowComponent implements OnInit {
                 });
             });
 
+            // Fill previous pipeline selections
+            inputTopics.forEach(inputTopic => {
+                if (inputTopic.filterType === 'OperatorId') {
+                    const split = inputTopic.filterValue.split(':');
+                    if (split.length !== 2) {
+                        console.error('Unexpected filterValue not in format operatorId:pipelineId',
+                            inputTopic.filterValue);
+                        return;
+                    }
+                    const pipelineId = split[1];
+                    const operatorId = split[0];
+                    inputTopic.mappings.forEach(mapping => {
+                        if (mapping.dest === input) {
+                            this.addPipeline(inputGroup, pipelineId, operatorId, mapping.source);
+                        }
+                    });
+                }
+            });
+
             const inputSelection = inputSelections?.find(s => s.inputName === input);
             if (inputSelection !== undefined) {
                 observables.push(new Observable<null>(obs => {
@@ -302,7 +331,7 @@ export class DeployFlowComponent implements OnInit {
                                 });
                                 return this.prepareSelectables(inputGroup).subscribe(__ => {
                                     let o: Observable<any>;
-                                    if (inputSelection.selectableId.startsWith(DeployFlowComponent.GROUP_PREFIX)) {
+                                    if (inputSelection.selectableId?.startsWith(DeployFlowComponent.GROUP_PREFIX)) {
                                         o = this.loadDeviceGroup(inputSelection.selectableId);
                                     } else {
                                         o = of(null);
@@ -348,9 +377,9 @@ export class DeployFlowComponent implements OnInit {
                                                     }
                                                 }
                                             });
-                                            obs.next(null);
-                                            obs.complete();
                                         });
+                                        obs.next(null);
+                                        obs.complete();
                                     });
                                 });
                             });
@@ -530,8 +559,8 @@ export class DeployFlowComponent implements OnInit {
         }
     }
 
-    selectableSelected(input: FormGroup, selectableId: string | null) {
-        if (selectableId === null) {
+    selectableSelected(input: FormGroup, selectableId: string | null | undefined) {
+        if (selectableId === null || selectableId === undefined) {
             return;
         }
         if (selectableId.startsWith(DeployFlowComponent.GROUP_PREFIX)) {
@@ -570,10 +599,13 @@ export class DeployFlowComponent implements OnInit {
         pipeReq.windowTime = JSON.parse(this.form.get('windowTime')?.value);
         pipeReq.nodes = [];
         this.getSubElementAsGroupArray(this.form, 'nodes').forEach(node => {
-            const nodeModel: NodeModel = {} as NodeModel;
-            nodeModel.nodeId = node.get('id')?.value;
-            nodeModel.deploymentType = node.get('deploymentType')?.value;
-            nodeModel.config = [];
+            const nodeModel: NodeModel = {
+                inputSelections: [],
+                inputs: [],
+                config: [],
+                deploymentType: node.get('deploymentType')?.value,
+                nodeId: node.get('id')?.value,
+            };
             this.getSubElementAsGroupArray(node, 'configs').forEach(config => {
                 const nodeConfig: NodeConfig = {
                     name: config.get('name')?.value,
@@ -584,6 +616,7 @@ export class DeployFlowComponent implements OnInit {
             nodeModel.inputSelections = [];
             const inputs = this.getSubElementAsGroupArray(node, 'inputs');
             const flatFilters: DeviceServicePath[] = [];
+            const flatPipelineFilters: { topic: string; filters: { pipelineId: string, operatorId: string }[], values: NodeValue[] }[] = [];
             // Create a filter for each device/topic/value
             inputs.forEach(input => {
                 const filters = input.get('filter')?.value as Map<string, { serviceId: string, path: string }[]>;
@@ -607,7 +640,91 @@ export class DeployFlowComponent implements OnInit {
                     functionId: input.get('functionId')?.value,
                     selectableId: input.get('selectableId')?.value,
                 });
+
+                this.getSubElementAsGroupArray(input, 'pipelines').forEach(pipelineGroup => {
+                    flatPipelineFilters.push({
+                        topic: pipelineGroup.get('topic')?.value,
+                        values: [{
+                            name: input.get('name')?.value,
+                            path: pipelineGroup.get('path')?.value,
+                        }],
+                        filters: [{
+                            pipelineId: pipelineGroup.get('pipelineId')?.value,
+                            operatorId: pipelineGroup.get('operatorId')?.value,
+                        }],
+                    });
+                });
             });
+            // Create a filter for each pipeline input
+            // Join all filters with same topic/value combination
+            const joinedOperatorFilters: {
+                topic: string; filters:
+                    { pipelineId: string, operatorId: string }[], values: NodeValue[]
+            }[] = [];
+            flatPipelineFilters.forEach(filter => {
+                const idx = joinedOperatorFilters.findIndex(joined => {
+                    if (joined.topic !== filter.topic || joined.values.length !== filter.values.length) {
+                        return false;
+                    }
+
+                    let valuesEqual = true;
+                    joined.values.forEach(joinedVal => {
+                        if (filter.values.findIndex(filterVal =>
+                            filterVal.name === joinedVal.name && filterVal.path === joinedVal.path) === -1) {
+                            valuesEqual = false;
+                        }
+                    });
+                    return valuesEqual;
+                });
+
+                if (idx === -1) {
+                    joinedOperatorFilters.push(filter);
+                } else {
+                    const missingFilters = filter.filters.filter(filterFilter =>
+                        joinedOperatorFilters[idx].filters.findIndex(joinedFilter => filterFilter.pipelineId === joinedFilter.pipelineId
+                            && filterFilter.operatorId === joinedFilter.operatorId) === -1);
+                    joinedOperatorFilters[idx].filters.push(...missingFilters);
+                }
+            });
+
+            // Join all filters with same topic/pipe/operator combination
+            const joinedPipelineFilters: {
+                topic: string; filters:
+                    { pipelineId: string, operatorId: string }[], values: NodeValue[]
+            }[] = [];
+            joinedOperatorFilters.forEach(filter => {
+                const idx = joinedPipelineFilters.findIndex(joined => {
+                    if (joined.topic !== filter.topic || joined.filters.length !== filter.filters.length) {
+                        return false;
+                    }
+
+                    let filtersEqual = true;
+                    joined.filters.forEach(joinedFilter => {
+                        if (filter.filters.findIndex(filterFilter => filterFilter.pipelineId === joinedFilter.pipelineId
+                            && filterFilter.operatorId === joinedFilter.operatorId) === -1) {
+                            filtersEqual = false;
+                        }
+                    });
+                    return filtersEqual;
+                });
+                if (idx === -1) {
+                    joinedPipelineFilters.push(filter);
+                } else {
+                    const missingValues = filter.values.filter(filterVal =>
+                        joinedPipelineFilters[idx].values.findIndex(joinedVal =>
+                            filterVal.name === joinedVal.name && filterVal.path === joinedVal.path) === -1);
+                    joinedPipelineFilters[idx].values.push(...missingValues);
+                }
+            });
+
+            joinedPipelineFilters.forEach(filter => nodeModel.inputs?.push({
+                filterType: 'operatorId',
+                filterIds: filter.filters.map(f => f.operatorId + ':' + f.pipelineId).join(','),
+                topicName: filter.topic,
+                values: filter.values,
+            }));
+
+
             // Join all filters with same topic/value combination
             const joinedDeviceFilters: DeviceServicePath[] = [];
             flatFilters.forEach(filter => {
@@ -660,9 +777,9 @@ export class DeployFlowComponent implements OnInit {
                 }
             });
 
-            nodeModel.inputs = [];
             joinedValueFilters.forEach(filter => nodeModel.inputs?.push({
-                deviceId: filter.devices.join(','),
+                filterType: 'deviceId',
+                filterIds: filter.devices.join(','),
                 topicName: filter.topic,
                 values: filter.values,
             }));
@@ -782,5 +899,116 @@ export class DeployFlowComponent implements OnInit {
             }
             return selection.findIndex(s => s.service_id === option.service_id && s.path !== option.path) !== -1;
         });
+    }
+
+    addPipeline(input: FormGroup, pipelineId: string = '', operatorId: string = '', path: string = '') {
+        const pipelineOperator = this.getPipelineById(pipelineId)?.operators.find(o => o.id === operatorId);
+        const pipelineGroup = this.fb.group({
+            pipelineId: '',
+            operatorId: '',
+            topic: pipelineOperator !== undefined ? 'analytics-' + pipelineOperator.name : '',
+            path: '',
+            operatorId_considered: '',
+        });
+        pipelineGroup.get('pipelineId')?.valueChanges.subscribe(newPipelineId => {
+            const pipeline = this.getPipelineById(newPipelineId);
+            if (pipeline !== undefined && pipeline.operators.length === 1) {
+                pipelineGroup.patchValue({
+                    operatorId: pipeline.operators[0].id,
+                    topic: 'analytics-' + pipeline.operators[0].name
+                });
+            } else {
+                pipelineGroup.patchValue({operatorId: '', topic: ''});
+            }
+        });
+        pipelineGroup.get('operatorId')?.valueChanges.subscribe(newOperatorId => {
+            const newPipelineId = pipelineGroup.get('pipelineId')?.value;
+            if (newPipelineId !== undefined && newPipelineId !== '' && newOperatorId !== '') {
+                const newPipelineOperator = this.getPipelineById(newPipelineId)?.operators.find(o => o.id === newOperatorId);
+                if (newPipelineOperator !== undefined) {
+                    this.loadOperator(newPipelineOperator.operatorId).subscribe();
+                    pipelineGroup.patchValue({topic: 'analytics-' + newPipelineOperator.name});
+                }
+            }
+            pipelineGroup.patchValue({path: ''});
+        });
+        pipelineGroup.patchValue({
+            pipelineId: pipelineId,
+            operatorId: operatorId,
+            topic: pipelineOperator !== undefined ? 'analytics-' + pipelineOperator.name : '',
+            path: path,
+            operatorId_considered: '',
+        });
+        this.getSubElementAsGroupArray(input, 'pipelines').push(pipelineGroup);
+    }
+
+    loadOperator(operatorId: string): Observable<OperatorModel | null> {
+        const operator = this.operators.get(operatorId);
+        if (operator !== undefined) {
+            return of(operator);
+        }
+        return this.operatorRepoService.getOperator(operatorId).pipe(map(resp => {
+            if (resp !== null) {
+                this.operators.set(operatorId, resp);
+            }
+            return resp;
+        }));
+    }
+
+    getPipelineById(id: string | undefined | null): PipelineModel | undefined {
+        if (id === null || id === undefined) {
+            return undefined;
+        }
+        return this.pipelines.find(p => p.id === id);
+    }
+
+    getImage(pipelineGroup: FormGroup): SafeHtml | undefined {
+        const pipeline = this.getPipelineById(pipelineGroup.get('pipelineId')?.value);
+        if (pipeline === undefined) {
+            return undefined;
+        }
+        if (typeof pipeline.image !== 'string') {
+            return undefined;
+        }
+        const parser = new DOMParser();
+        const svg = parser.parseFromString(pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+        // @ts-ignore
+        const viewbox = svg.getAttribute('viewbox').split(' ');
+        svg.setAttribute('height', viewbox[3]);
+        const elements = svg.getElementsByClassName('joint-cell');
+        // @ts-ignore
+        for (const element of elements) {
+            if (element.attributes['model-id'].value === pipelineGroup.get('operatorId_considered')?.value) {
+                for (const node of element.childNodes) {
+                    if (node.attributes['stroke'] !== undefined && node.attributes['stroke'].value === 'black') {
+                        node.attributes['stroke'].value = 'red';
+                    }
+                }
+            }
+        }
+        return this.sanitizer.bypassSecurityTrustHtml(
+            new XMLSerializer().serializeToString(svg));
+    }
+
+    mouseEnterOperator(pipeline: FormGroup, id: string) {
+        pipeline.patchValue({operatorId_considered: id});
+    }
+
+    mouseLeaveOperator(pipeline: FormGroup) {
+        pipeline.patchValue({operatorId_considered: ''});
+    }
+
+    getOperatorPaths(pipelineId: string, operatorId: string): string[] {
+        const pipelineOperator = this.getPipelineById(pipelineId)?.operators.find(o => o.id === operatorId);
+        if (pipelineOperator === undefined) {
+            return [];
+        }
+        return this.operators.get(pipelineOperator.operatorId)?.outputs?.map(x => x.name) || [];
+    }
+
+    removePipeline(inputGroup: FormGroup, index: number) {
+        const pipelines = this.getSubElementAsGroupArray(inputGroup, 'pipelines');
+        pipelines.splice(index, 1);
+        inputGroup.patchValue({pipelines});
     }
 }

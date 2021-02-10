@@ -34,7 +34,8 @@ export interface NodeModel {
 }
 
 export interface NodeInput {
-    deviceId: string;
+    filterType: string; // 'deviceId' or 'operatorId'
+    filterIds: string;
     topicName: string;
     values: NodeValue [];
 }

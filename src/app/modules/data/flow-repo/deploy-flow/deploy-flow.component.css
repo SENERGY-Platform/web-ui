@@ -83,3 +83,26 @@ mat-grid-list {
 .device-type-not-used-label {
     font-weight: bold;
 }
+
+.radio-option {
+    padding: 8px;
+}
+
+.add-pipeline-button {
+    max-width: fit-content;
+    margin-bottom: 16px;
+}
+
+.post-pipeline-divider {
+    padding-bottom: 16px;
+}
+
+.widget-image {
+    height: fit-content;
+    width: 100%;
+    background-color: whitesmoke;
+}
+
+.fill-delete {
+    width: calc(100% - 1em);
+}

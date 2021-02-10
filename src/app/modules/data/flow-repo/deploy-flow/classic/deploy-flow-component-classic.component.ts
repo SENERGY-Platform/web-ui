@@ -132,7 +132,8 @@ export class DeployFlowClassicComponent {
 
                     // add values from input form
                     const nodeInput = {
-                        deviceId: deviceIds,
+                        filterIds: deviceIds,
+                        filterType: 'devcieId',
                         values: nodeValues
                     } as NodeInput;
 
@@ -254,7 +255,7 @@ export class DeployFlowClassicComponent {
                 // Try to add current entry to existing input
                 pipeReqNode.inputs.forEach((pipeReqNodeInput: NodeInput) => {
                     counter++;
-                    if (pipeReqNodeInput.deviceId === deviceIds && pipeReqNodeInput.topicName === nodeInput.topicName) {
+                    if (pipeReqNodeInput.filterIds === deviceIds && pipeReqNodeInput.topicName === nodeInput.topicName) {
                         if (pipeReqNodeInput.values.length > 0) {
                             pipeReqNodeInput.values.push(nodeValue);
                             inserted = true;

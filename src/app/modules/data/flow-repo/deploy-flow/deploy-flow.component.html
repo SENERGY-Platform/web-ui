@@ -14,8 +14,9 @@
   ~ limitations under the License.
   -->
 
-<div class="main-panel">
-    <button mat-raised-button *ngIf="!editMode && ready" (click)="switchToClassic()" color="accent" class="layout-margin">Use classic deployment
+<div class="main-panel" #panel>
+    <button mat-raised-button *ngIf="!editMode && ready" (click)="switchToClassic()" color="accent"
+            class="layout-margin">Use classic deployment
     </button>
     <div class="layout-margin" fxLayout="column" *ngIf="ready == true" [formGroup]="form">
         <mat-accordion class="example-headers-align" multi>
@@ -56,82 +57,135 @@
                         {{node.get('id')?.value}}
                     </mat-panel-description>
                 </mat-expansion-panel-header>
-                    <div fxLayout="column"
-                         *ngFor="let input of getSubElementAsGroupArray(node, 'inputs'), let inputIndex = index"
-                         [formGroup]="input">
-                        <h4>{{ input.get('name')?.value }}</h4>
+                <div fxLayout="column"
+                     *ngFor="let input of getSubElementAsGroupArray(node, 'inputs'), let inputIndex = index"
+                     [formGroup]="input">
+                    <h4>{{ input.get('name')?.value }}</h4>
+                    <button mat-stroked-button color="accent" class="add-pipeline-button" (click)="addPipeline(input)">
+                        Add pipeline as input
+                    </button>
+                    <div fxFlex fxLayout="column"
+                         *ngFor="let pipeline of getSubElementAsGroupArray(input, 'pipelines'); let pipelineIndex = index"
+                         [formGroup]="pipeline">
                         <mat-form-field fxFlex color="accent" appearance="outline">
-                            <mat-label>Aspect</mat-label>
-                            <senergy-select-search [options]="this.aspects"
-                                                   useOptionViewProperty="name"
-                                                   placeholder="Aspect"
+                            <mat-label>Pipeline</mat-label>
+                            <senergy-select-search placeholder="Pipeline"
+                                                   [options]="pipelines"
+                                                   formControlName="pipelineId"
                                                    useOptionValueProperty="id"
-                                                   formControlName="aspectId">
+                                                   useOptionViewProperty="name">
                             </senergy-select-search>
                         </mat-form-field>
-                        <mat-form-field fxFlex color="accent" appearance="outline">
-                            <mat-label>Function</mat-label>
-                            <senergy-select-search
-                                    [options]="getAspectFunctions(input.get('aspectId')?.value)"
-                                    useOptionViewProperty="name"
-                                    placeholder="Function"
-                                    useOptionValueProperty="id"
-                                    formControlName="functionId"
-                                    [autoSelectSingleElement]="true"
-                                >
-                            </senergy-select-search>
-                        </mat-form-field>
-                        <mat-form-field fxFlex color="accent" appearance="outline">
-                            <mat-label>Characteristics</mat-label>
-                            <senergy-select-search
-                                    [options]="getFunctionCharacteristics(input.get('functionId')?.value)"
-                                    useOptionViewProperty="name"
-                                    placeholder="characteristics"
-                                    useOptionValueProperty="id"
-                                    formControlName="characteristics"
-                                    [autoSelectSingleElement]="true"
-                                    [multiple]="true"
-                            >
-                            </senergy-select-search>
-                        </mat-form-field>
-                        <mat-form-field fxFlex color="accent" appearance="outline">
-                            <mat-label>Device/Group</mat-label>
-                            <senergy-select-search
-                                    [options]="getSelectables(input.get('aspectId')?.value, input.get('functionId')?.value, input.get('characteristics')?.value)"
-                                    useOptionViewProperty="name"
-                                    useOptionValueProperty="id"
-                                    placeholder="Device/Group"
-                                    formControlName="selectableId"
-                            >
-                            </senergy-select-search>
-                        </mat-form-field>
-                        <div fxFlex fxLayout="row" *ngFor="let deviceType of getSubElementAsGroupArray(input, 'deviceTypes')" [formGroup]="deviceType">
+
+                        <div #operatorSelect>
                             <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-label [ngClass]="{'device-type-not-used-label': getServiceOptions(input, deviceType.get('id')?.value).size === 0}">
-                                    {{getServiceOptions(input, deviceType.get('id')?.value).size > 0 ? 'Service/Path: ' + deviceType.get('name')?.value
-                                    :  deviceType.get('name')?.value + ' will not be used: no matching characteristic!'}}</mat-label>
-                                <senergy-select-search placeholder="Service"
-                                                       [multiple]="true"
-                                                       [options]="getServiceOptions(input, deviceType.get('id')?.value)"
-                                                       [autoSelectSingleElement]="true"
-                                                       [getTriggerValue]="getServiceTriggerValue"
-                                                       [compareWith]="comparePathOptions"
-                                                       [getOptionDisabled]="getServiceOptionDisabledFunction(deviceType)"
-                                                       formControlName="selection"
-                                                       useOptionViewProperty="path">
-                                </senergy-select-search>
+                                <mat-select placeholder="Operator" formControlName="operatorId">
+                                    <mat-option (mouseenter)="mouseEnterOperator(pipeline, operator.id)"
+                                                (mouseleave)="mouseLeaveOperator(pipeline)"
+                                                *ngFor="let operator of getPipelineById(pipeline.get('pipelineId')?.value)?.operators"
+                                                [value]="operator.id">
+                                        {{operator.name}} - {{operator.id}}
+                                    </mat-option>
+                                </mat-select>
                             </mat-form-field>
                         </div>
+
+                        <mat-card *ngIf="pipeline.get('operatorId_considered')?.value !== ''"
+                                  style="margin-bottom: 10px;" fxFlex>
+                            <div class="widget-image" [innerHtml]="getImage(pipeline)">
+                            </div>
+                        </mat-card>
+
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <senergy-select-search
+                                    [options]="getOperatorPaths(pipeline.get('pipelineId')?.value, pipeline.get('operatorId')?.value)"
+                                    placeholder="Path"
+                                    formControlName="path">
+                            </senergy-select-search>
+                        </mat-form-field>
+                        <div fxLayout="row">
+                            <span class="fill-delete"></span>
+                            <button mat-icon-button color="warn" (click)="removePipeline(input, pipelineIndex)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                        <mat-divider class="post-pipeline-divider"></mat-divider>
                     </div>
-                    <h4 *ngIf="getSubElementAsGroupArray(node, 'configs').length > 0">Configuration</h4>
-                    <div fxLayout="column" *ngFor="let config of getSubElementAsGroupArray(node, 'configs')"
-                         [formGroup]="config">
-                        <mat-form-field fxFill color="accent" appearance="outline">
-                            <mat-label>{{ config.get('name')?.value }}</mat-label>
-                            <input matInput formControlName="value"
-                                   placeholder="{{config.get('name')?.value}}">
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Aspect</mat-label>
+                        <senergy-select-search [options]="this.aspects"
+                                               useOptionViewProperty="name"
+                                               placeholder="Aspect"
+                                               useOptionValueProperty="id"
+                                               formControlName="aspectId">
+                        </senergy-select-search>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Function</mat-label>
+                        <senergy-select-search
+                                [options]="getAspectFunctions(input.get('aspectId')?.value)"
+                                useOptionViewProperty="name"
+                                placeholder="Function"
+                                useOptionValueProperty="id"
+                                formControlName="functionId"
+                                [autoSelectSingleElement]="true"
+                        >
+                        </senergy-select-search>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Characteristics</mat-label>
+                        <senergy-select-search
+                                [options]="getFunctionCharacteristics(input.get('functionId')?.value)"
+                                useOptionViewProperty="name"
+                                placeholder="characteristics"
+                                useOptionValueProperty="id"
+                                formControlName="characteristics"
+                                [autoSelectSingleElement]="true"
+                                [multiple]="true"
+                        >
+                        </senergy-select-search>
+                    </mat-form-field>
+                    <mat-form-field fxFlex color="accent" appearance="outline">
+                        <mat-label>Device/Group</mat-label>
+                        <senergy-select-search
+                                [options]="getSelectables(input.get('aspectId')?.value, input.get('functionId')?.value, input.get('characteristics')?.value)"
+                                useOptionViewProperty="name"
+                                useOptionValueProperty="id"
+                                placeholder="Device/Group"
+                                formControlName="selectableId"
+                        >
+                        </senergy-select-search>
+                    </mat-form-field>
+                    <div fxFlex fxLayout="row"
+                         *ngFor="let deviceType of getSubElementAsGroupArray(input, 'deviceTypes')"
+                         [formGroup]="deviceType">
+                        <mat-form-field fxFlex color="accent" appearance="outline">
+                            <mat-label
+                                    [ngClass]="{'device-type-not-used-label': getServiceOptions(input, deviceType.get('id')?.value).size === 0}">
+                                {{getServiceOptions(input, deviceType.get('id')?.value).size > 0 ? 'Service/Path: ' + deviceType.get('name')?.value
+                                : deviceType.get('name')?.value + ' will not be used: no matching characteristic!'}}</mat-label>
+                            <senergy-select-search placeholder="Service"
+                                                   [multiple]="true"
+                                                   [options]="getServiceOptions(input, deviceType.get('id')?.value)"
+                                                   [autoSelectSingleElement]="true"
+                                                   [getTriggerValue]="getServiceTriggerValue"
+                                                   [compareWith]="comparePathOptions"
+                                                   [getOptionDisabled]="getServiceOptionDisabledFunction(deviceType)"
+                                                   formControlName="selection"
+                                                   useOptionViewProperty="path">
+                            </senergy-select-search>
                         </mat-form-field>
                     </div>
+                </div>
+                <h4 *ngIf="getSubElementAsGroupArray(node, 'configs').length > 0">Configuration</h4>
+                <div fxLayout="column" *ngFor="let config of getSubElementAsGroupArray(node, 'configs')"
+                     [formGroup]="config">
+                    <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label>{{ config.get('name')?.value }}</mat-label>
+                        <input matInput formControlName="value"
+                               placeholder="{{config.get('name')?.value}}">
+                    </mat-form-field>
+                </div>
             </mat-expansion-panel>
             <!--
             Global Settings
@@ -161,7 +215,8 @@
         </mat-accordion>
 
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
-            <button mat-raised-button color="accent" (click)="startPipeline()">{{editMode ? 'Update' : 'Start'}}</button>
+            <button mat-raised-button color="accent"
+                    (click)="startPipeline()">{{editMode ? 'Update' : 'Start'}}</button>
         </div>
     </div>
     <senergy-spinner [show]="!ready"></senergy-spinner>
