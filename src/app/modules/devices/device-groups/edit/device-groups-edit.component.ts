@@ -56,6 +56,7 @@ export class DeviceGroupsEditComponent implements OnInit {
 
     debounceTimeInMs = 500;
     rerouteAfterSaveDelayInMs = 2000;
+    isSaving = false;
 
     constructor(private _formBuilder: FormBuilder,
                 private deviceGroupService: DeviceGroupsService,
@@ -152,6 +153,7 @@ export class DeviceGroupsEditComponent implements OnInit {
 
 
     private saveDeviceGroup(deviceGroup: DeviceGroupModel) {
+        this.isSaving = true;
         if (deviceGroup.id === '' || deviceGroup.id === undefined) {
             this.deviceGroupService.createDeviceGroup(deviceGroup).pipe(delay(this.rerouteAfterSaveDelayInMs)).subscribe((deviceGroupSaved: DeviceGroupModel | null) => {
                 this.showMessage(deviceGroupSaved);

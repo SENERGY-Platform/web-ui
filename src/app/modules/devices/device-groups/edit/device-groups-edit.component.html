@@ -46,7 +46,7 @@
                             </div>
                         </div>
                         <div class="selected-device-ctrl">
-                            <button mat-icon-button color="accent" (click)="removeDevice(item.id)" matTooltip="Remove">
+                            <button mat-icon-button color="accent" [disabled]="isSaving" (click)="removeDevice(item.id)" matTooltip="Remove">
                                 <mat-icon>delete</mat-icon>
                             </button>
                         </div>
@@ -57,6 +57,8 @@
 
             <div class="controls" fxLayoutAlign="end center">
                 <button mat-raised-button color="accent"
+                        [class.spinner]="isSaving"
+                        [disabled]="isSaving"
                         (click)="save()">Save
                 </button>
             </div>
@@ -76,10 +78,10 @@
                     </div>
                 </div>
                 <div class="selectable-device-ctrl">
-                    <button mat-icon-button color="accent" (click)="addDevice(option.device.id)" matTooltip="Add" *ngIf="option.maintains_group_usability">
+                    <button mat-icon-button color="accent" [disabled]="isSaving" (click)="addDevice(option.device.id)" matTooltip="Add" *ngIf="option.maintains_group_usability">
                         <mat-icon>add</mat-icon>
                     </button>
-                    <button mat-icon-button color="warn" (click)="addDevice(option.device.id)" matTooltip="Add (wont maintain group usability)" *ngIf="!option.maintains_group_usability">
+                    <button mat-icon-button color="warn" [disabled]="isSaving" (click)="addDevice(option.device.id)" matTooltip="Add (wont maintain group usability)" *ngIf="!option.maintains_group_usability">
                         <mat-icon>add</mat-icon>
                     </button>
                 </div>
