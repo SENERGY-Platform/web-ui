@@ -26,6 +26,7 @@ import {CoreModule} from '../../core/core.module';
 import {NetworksEditDialogComponent} from './networks/dialogs/networks-edit-dialog.component';
 import {DeviceInstancesServiceDialogComponent} from './device-instances/dialogs/device-instances-service-dialog.component';
 import {DeviceInstancesEditDialogComponent} from './device-instances/dialogs/device-instances-edit-dialog.component';
+import {DeviceInstancesSelectDialogComponent} from './device-instances/dialogs/device-instances-select-dialog.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NetworksClearDialogComponent} from './networks/dialogs/networks-clear-dialog.component';
 import {DeviceInstancesGridComponent} from './device-instances/device-instances-grid/device-instances-grid.component';
@@ -153,6 +154,7 @@ const locationsEdit = {
         DeviceInstancesComponent,
         DeviceInstancesServiceDialogComponent,
         DeviceInstancesEditDialogComponent,
+        DeviceInstancesSelectDialogComponent,
         NetworksClearDialogComponent,
         DeviceInstancesGridComponent,
         DeviceInstancesExportDialogComponent,

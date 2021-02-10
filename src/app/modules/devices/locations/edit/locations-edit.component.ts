@@ -25,6 +25,7 @@ import {debounceTime, delay} from 'rxjs/operators';
 import {DeviceInstancesService} from '../../device-instances/shared/device-instances.service';
 import {DeviceGroupModel} from '../../device-groups/shared/device-groups.model';
 import {DeviceGroupsService} from '../../device-groups/shared/device-groups.service';
+import {DeviceInstancesDialogService} from '../../device-instances/shared/device-instances-dialog.service';
 
 @Component({
     selector: 'senergy-locations-edit',
@@ -48,6 +49,7 @@ export class LocationsEditComponent implements OnInit {
     constructor(private _formBuilder: FormBuilder,
                 private locationService: LocationsService,
                 private deviceService: DeviceInstancesService,
+                private deviceDialogService: DeviceInstancesDialogService,
                 private deviceGroupService: DeviceGroupsService,
                 private snackBar: MatSnackBar,
                 private route: ActivatedRoute,
@@ -66,8 +68,31 @@ export class LocationsEditComponent implements OnInit {
     addDevice(id: string) {
         const devicesFc = this.locationForm.get('device_ids');
         if (devicesFc) {
-            const idList = devicesFc.value;
+            let idList = devicesFc.value;
             idList.push(id);
+
+            // filter duplicates
+            idList = idList.filter((item: string, index: number) => {
+                return idList.indexOf(item) === index;
+            });
+
+            devicesFc.setValue(idList);
+        } else {
+            throw new Error('unexpected locationForm structure');
+        }
+    }
+
+    addDevices(ids: string[]) {
+        const devicesFc = this.locationForm.get('device_ids');
+        if (devicesFc) {
+            let idList = devicesFc.value;
+            idList.push(...ids);
+
+            // filter duplicates
+            idList = idList.filter((item: string, index: number) => {
+                return idList.indexOf(item) === index;
+            });
+
             devicesFc.setValue(idList);
         } else {
             throw new Error('unexpected locationForm structure');
@@ -93,8 +118,31 @@ export class LocationsEditComponent implements OnInit {
     addDeviceGroup(id: string) {
         const deviceGroupsFc = this.locationForm.get('device_group_ids');
         if (deviceGroupsFc) {
-            const idList = deviceGroupsFc.value;
+            let idList = deviceGroupsFc.value;
             idList.push(id);
+
+            // filter duplicates
+            idList = idList.filter((item: string, index: number) => {
+                return idList.indexOf(item) === index;
+            });
+
+            deviceGroupsFc.setValue(idList);
+        } else {
+            throw new Error('unexpected locationForm structure');
+        }
+    }
+
+    addDeviceGroups(ids: string[]) {
+        const deviceGroupsFc = this.locationForm.get('device_group_ids');
+        if (deviceGroupsFc) {
+            let idList = deviceGroupsFc.value;
+            idList.push(...ids);
+
+            // filter duplicates
+            idList = idList.filter((item: string, index: number) => {
+                return idList.indexOf(item) === index;
+            });
+
             deviceGroupsFc.setValue(idList);
         } else {
             throw new Error('unexpected locationForm structure');
@@ -285,5 +333,17 @@ export class LocationsEditComponent implements OnInit {
             const sortedResult = fromCache.sort(sortByName);
             this.deviceGroupsForm.setValue(sortedResult);
         }
+    }
+
+    selectAndAddDevices() {
+        this.deviceDialogService.openDeviceSelectDialog().subscribe(deviceIds => {
+            if (deviceIds) {
+                this.addDevices(deviceIds);
+            }
+        });
+    }
+
+    selectAndAddGroups() {
+        // TODO
     }
 }

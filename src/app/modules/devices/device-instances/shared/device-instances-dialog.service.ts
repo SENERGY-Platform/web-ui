@@ -27,6 +27,8 @@ import {DeviceInstancesUpdateModel} from './device-instances-update.model';
 import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesService} from './device-instances.service';
+import {DeviceInstancesSelectDialogComponent} from '../dialogs/device-instances-select-dialog.component';
+import {Observable} from 'rxjs/index';
 
 
 @Injectable({
@@ -40,6 +42,13 @@ export class DeviceInstancesDialogService {
                 private deviceTypeService: DeviceTypeService,
                 private snackBar: MatSnackBar,
                 private deviceInstancesService: DeviceInstancesService) {
+    }
+
+    openDeviceSelectDialog(): Observable<string[] | null | undefined> {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        const editDialogRef = this.dialog.open(DeviceInstancesSelectDialogComponent, dialogConfig);
+        return editDialogRef.afterClosed();
     }
 
     openDeviceServiceDialog(deviceTypeId: string): void {

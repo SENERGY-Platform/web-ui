@@ -73,9 +73,9 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceInstances(searchText: string, limit: number, offset: number, value: string, order: string): Observable<DeviceInstancesModel[]> {
+    getDeviceInstances(searchText: string, limit: number, offset: number, sortBy: string, sortOrder: string): Observable<DeviceInstancesModel[]> {
         return this.http.get<DeviceInstancesModel[]>
-        (environment.apiAggregatorUrl + '/devices?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order +
+        (environment.apiAggregatorUrl + '/devices?limit=' + limit + '&offset=' + offset + '&sort=' + sortBy + '.' + sortOrder +
             (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText))).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstances', []))
