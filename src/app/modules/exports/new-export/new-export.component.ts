@@ -148,6 +148,7 @@ export class NewExportComponent implements OnInit {
                                         this.pipeline.operators.forEach(operator => {
                                             if (operator.id === exp.Filter.split(':')[1]) {
                                                 this.operator = operator;
+                                                this.updateImage(this.operator.id);
                                                 this.operatorRepoService.getOperator(operator.operatorId)
                                                     .subscribe((resp: OperatorModel | null) => {
                                                         if (resp !== null && resp.outputs !== undefined) {
@@ -322,7 +323,7 @@ export class NewExportComponent implements OnInit {
         opened ? this.showImage = true : this.showImage = false;
     }
 
-    enterOperatorOption (id: string) {
+    updateImage(id: string) {
         if (typeof this.pipeline.image === 'string') {
             const parser = new DOMParser();
             const svg = parser.parseFromString(this.pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
@@ -347,6 +348,7 @@ export class NewExportComponent implements OnInit {
 
     operatorChanged(operator: PipelineOperatorModel) {
         this.resetVars();
+        this.updateImage(operator.id);
         this.operatorRepoService.getOperator(operator.operatorId).subscribe((resp: OperatorModel | null) => {
             if (resp !== null && resp.outputs !== undefined) {
                 resp.outputs.forEach((out: IOModel) => {
@@ -496,5 +498,22 @@ export class NewExportComponent implements OnInit {
         }));
     }
 
+    selectOperator($event: MouseEvent) {
+        for (const operatorNode of ($event.target as any)?.childNodes[0]?.childNodes[0]?.childNodes || []) {
+            if (operatorNode.attributes['data-type'] !== undefined &&
+                operatorNode.attributes['data-type'].value === 'senergy.NodeElement') {
+
+                const rect: DOMRect = operatorNode.getBoundingClientRect();
+                if ($event.x < rect.right && $event.x > rect.left && $event.y > rect.top && $event.y < rect.bottom) {
+                    const clickedOperator = this.pipeline.operators.find(o => o.id === operatorNode.attributes['model-id'].value);
+                    if (clickedOperator !== undefined) {
+                        this.operator = clickedOperator;
+                        this.operatorChanged(this.operator);
+                        return;
+                    }
+                }
+            }
+        }
+    }
 
 }

@@ -76,3 +76,17 @@ mat-grid-list {
 .pad-right {
     padding-right: 30px;
 }
+
+.operator-accordion {
+    border: 1px solid rgba(0,0,0,.12);
+    margin-bottom: 1em;
+}
+
+.operator-accordion .mat-expansion-panel {
+    margin-bottom: 0!important;
+    background-color: #fafafa;
+}
+
+.operator-accordion .mat-expansion-panel .mat-expansion-panel-header {
+    padding-left: 0.75em;
+}

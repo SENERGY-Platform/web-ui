@@ -42,20 +42,30 @@
             </senergy-select-search>
         </mat-form-field>
 
-        <mat-form-field fxFlex color="accent" appearance="outline" *ngIf="selector !== 'import'">
+        <mat-form-field fxFlex color="accent" appearance="outline" *ngIf="selector === 'device'">
             <senergy-select-search  *ngIf="selector==='device'" placeholder="Service" (ngModelChange)="serviceChanged($event)" [(ngModel)]="service"
                 [options]="deviceType.services" useOptionViewProperty="name">
             </senergy-select-search>
-            <mat-select *ngIf="selector==='pipe'"  (openedChange)="operatorSelectChanged($event)" (ngModelChange)="operatorChanged($event)"  placeholder="Operator" [(ngModel)]="operator">
-                <mat-option (mouseenter)="enterOperatorOption(operator.id)" *ngFor="let operator of pipeline.operators" [value]="operator">
-                    {{operator.name}} - {{operator.id}}
-                </mat-option>
-            </mat-select>
         </mat-form-field>
-        <mat-card *ngIf="selector==='pipe' && showImage"  style="margin-bottom: 10px;">
-            <div class="widget-image" [innerHtml]="image">
-            </div>
-        </mat-card>
+        <mat-accordion *ngIf="selector==='pipe'" class="operator-accordion">
+            <mat-expansion-panel style="margin-bottom: 10px;" fxFlex
+                                 [disabled]="pipeline?.id === undefined"
+                                 class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>Operator</mat-panel-title>
+                    <mat-panel-description>
+                        {{operator?.name}}
+                        -
+                        {{operator?.id}}
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+                <div>Select an operator by clicking on it</div>
+                <span class="widget-image" [innerHtml]="image"
+                      (click)="selectOperator($event)">
+                                </span>
+
+            </mat-expansion-panel>
+        </mat-accordion>
 
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>JSON time path</mat-label>
