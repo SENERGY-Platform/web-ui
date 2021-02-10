@@ -51,7 +51,6 @@ export class ExportComponent implements OnInit, OnDestroy {
     ready = false;
     deleteInProgress = false;
     url = environment.influxAPIURL;
-    gridCols = 0;
 
     public searchText = '';
     public searchField = 'name';
