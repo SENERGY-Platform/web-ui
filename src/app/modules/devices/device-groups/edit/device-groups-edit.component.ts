@@ -78,8 +78,12 @@ export class DeviceGroupsEditComponent implements OnInit {
     addDevice(id: string) {
         const devicesFc = this.deviceGroupForm.get('device_ids');
         if (devicesFc) {
-            const idList = devicesFc.value;
+            let idList = devicesFc.value;
             idList.push(id);
+            // filter duplicates
+            idList = idList.filter((item: string, index: number) => {
+                return idList.indexOf(item) === index;
+            });
             devicesFc.setValue(idList);
         } else {
             throw new Error('unexpected deviceGroupForm structure');
