@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<div class="main-panel" #panel>
+<div class="main-panel">
     <button mat-raised-button *ngIf="!editMode && ready" (click)="switchToClassic()" color="accent"
             class="layout-margin">Use classic deployment
     </button>
@@ -76,31 +76,32 @@
                                                    useOptionViewProperty="name">
                             </senergy-select-search>
                         </mat-form-field>
+                        <mat-accordion class="operator-accordion">
+                            <mat-expansion-panel style="margin-bottom: 10px;" fxFlex
+                                                 [disabled]="pipeline.get('pipelineId')?.value === ''"
+                                                 class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title>Operator</mat-panel-title>
+                                    <mat-panel-description>
+                                        {{this.getPipelineOperator(pipeline.get('pipelineId')?.value, pipeline.get('operatorId')?.value)?.name}}
+                                        -
+                                        {{this.getPipelineOperator(pipeline.get('pipelineId')?.value, pipeline.get('operatorId')?.value)?.id}}
+                                    </mat-panel-description>
+                                </mat-expansion-panel-header>
+                                <div>Select an operator by clicking on it</div>
+                                <span class="widget-image" [innerHtml]="getImage(pipeline)"
+                                      (click)="selectOperator($event, pipeline)">
+                                </span>
 
-                        <div #operatorSelect>
-                            <mat-form-field fxFlex color="accent" appearance="outline">
-                                <mat-select placeholder="Operator" formControlName="operatorId">
-                                    <mat-option (mouseenter)="mouseEnterOperator(pipeline, operator.id)"
-                                                (mouseleave)="mouseLeaveOperator(pipeline)"
-                                                *ngFor="let operator of getPipelineById(pipeline.get('pipelineId')?.value)?.operators"
-                                                [value]="operator.id">
-                                        {{operator.name}} - {{operator.id}}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                        </div>
-
-                        <mat-card *ngIf="pipeline.get('operatorId_considered')?.value !== ''"
-                                  style="margin-bottom: 10px;" fxFlex>
-                            <div class="widget-image" [innerHtml]="getImage(pipeline)">
-                            </div>
-                        </mat-card>
+                            </mat-expansion-panel>
+                        </mat-accordion>
 
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <senergy-select-search
                                     [options]="getOperatorPaths(pipeline.get('pipelineId')?.value, pipeline.get('operatorId')?.value)"
                                     placeholder="Path"
-                                    formControlName="path">
+                                    formControlName="path"
+                                    [autoSelectSingleElement]="true">
                             </senergy-select-search>
                         </mat-form-field>
                         <div fxLayout="row">

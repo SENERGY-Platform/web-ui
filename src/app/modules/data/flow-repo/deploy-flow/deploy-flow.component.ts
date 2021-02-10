@@ -47,7 +47,7 @@ import {AbstractControl, FormArray, FormBuilder, FormGroup} from '@angular/forms
 import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import {MatOption} from '@angular/material/core';
 import {ConceptsService} from '../../../metadata/concepts/shared/concepts.service';
-import {OperatorInputTopic, PipelineModel} from '../../pipeline-registry/shared/pipeline.model';
+import {OperatorInputTopic, PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shared/pipeline.model';
 import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {OperatorModel} from '../../operator-repo/shared/operator.model';
@@ -908,7 +908,6 @@ export class DeployFlowComponent implements OnInit {
             operatorId: '',
             topic: pipelineOperator !== undefined ? 'analytics-' + pipelineOperator.name : '',
             path: '',
-            operatorId_considered: '',
         });
         pipelineGroup.get('pipelineId')?.valueChanges.subscribe(newPipelineId => {
             const pipeline = this.getPipelineById(newPipelineId);
@@ -937,7 +936,6 @@ export class DeployFlowComponent implements OnInit {
             operatorId: operatorId,
             topic: pipelineOperator !== undefined ? 'analytics-' + pipelineOperator.name : '',
             path: path,
-            operatorId_considered: '',
         });
         this.getSubElementAsGroupArray(input, 'pipelines').push(pipelineGroup);
     }
@@ -978,7 +976,7 @@ export class DeployFlowComponent implements OnInit {
         const elements = svg.getElementsByClassName('joint-cell');
         // @ts-ignore
         for (const element of elements) {
-            if (element.attributes['model-id'].value === pipelineGroup.get('operatorId_considered')?.value) {
+            if (element.attributes['model-id'].value === pipelineGroup.get('operatorId')?.value) {
                 for (const node of element.childNodes) {
                     if (node.attributes['stroke'] !== undefined && node.attributes['stroke'].value === 'black') {
                         node.attributes['stroke'].value = 'red';
@@ -990,14 +988,6 @@ export class DeployFlowComponent implements OnInit {
             new XMLSerializer().serializeToString(svg));
     }
 
-    mouseEnterOperator(pipeline: FormGroup, id: string) {
-        pipeline.patchValue({operatorId_considered: id});
-    }
-
-    mouseLeaveOperator(pipeline: FormGroup) {
-        pipeline.patchValue({operatorId_considered: ''});
-    }
-
     getOperatorPaths(pipelineId: string, operatorId: string): string[] {
         const pipelineOperator = this.getPipelineById(pipelineId)?.operators.find(o => o.id === operatorId);
         if (pipelineOperator === undefined) {
@@ -1006,9 +996,27 @@ export class DeployFlowComponent implements OnInit {
         return this.operators.get(pipelineOperator.operatorId)?.outputs?.map(x => x.name) || [];
     }
 
+    getPipelineOperator(pipelineId: string, operatorId: string): PipelineOperatorModel | undefined {
+        return this.getPipelineById(pipelineId)?.operators.find(o => o.id === operatorId);
+    }
+
     removePipeline(inputGroup: FormGroup, index: number) {
         const pipelines = this.getSubElementAsGroupArray(inputGroup, 'pipelines');
         pipelines.splice(index, 1);
         inputGroup.patchValue({pipelines});
+    }
+
+    selectOperator($event: MouseEvent, pipeline: FormGroup) {
+        for (const operatorNode of ($event.target as any)?.childNodes[0]?.childNodes[0]?.childNodes || []) {
+            if (operatorNode.attributes['data-type'] !== undefined &&
+                operatorNode.attributes['data-type'].value === 'senergy.NodeElement') {
+
+                const rect: DOMRect = operatorNode.getBoundingClientRect();
+                if ($event.x < rect.right && $event.x > rect.left && $event.y > rect.top && $event.y < rect.bottom) {
+                    pipeline.patchValue({operatorId:  operatorNode.attributes['model-id'].value});
+                    return;
+                }
+            }
+        }
     }
 }
