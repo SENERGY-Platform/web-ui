@@ -16,7 +16,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {PipelineRegistryService} from '../shared/pipeline-registry.service';
-import {PipelineModel} from '../shared/pipeline.model';
+import {OperatorInputTopic, PipelineModel} from '../shared/pipeline.model';
 import {ActivatedRoute} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -49,16 +49,14 @@ export class PipelineDetailsComponent implements OnInit {
                     this.pipe.operators.forEach(operator => {
                         operator.inputTopics.forEach(topic => {
                             if (topic.filterType === 'DeviceId') {
-                                this.deviceTypeService.getDeviceService(topic.name.replace(/_/g, ':')).
-                                subscribe((service: DeviceTypeServiceModel | null) => {
+                                this.deviceTypeService.getDeviceService(topic.name.replace(/_/g, ':')).subscribe((service: DeviceTypeServiceModel | null) => {
                                     if (service !== null) {
                                         topic.name = service.name;
                                     }
                                 });
                                 const devices = topic.filterValue.split(',');
                                 for (const [i, value] of devices.entries()) {
-                                    this.deviceInstanceService.getDeviceInstance(value).
-                                    subscribe((device: DeviceInstancesBaseModel | null) => {
+                                    this.deviceInstanceService.getDeviceInstance(value).subscribe((device: DeviceInstancesBaseModel | null) => {
                                         if (device !== null) {
                                             devices[i] = device.name;
                                         }
@@ -81,6 +79,19 @@ export class PipelineDetailsComponent implements OnInit {
                 this.ready = true;
             });
         }
+    }
+
+    show(topic: OperatorInputTopic) {
+        console.log(this.pipe.id, topic.filterValue.split(':')); // TODO
+        return this.showAll || topic.filterType === 'DeviceId' || topic.filterValue.split(':').length === 2;
+    }
+
+    getOperatorPipelineStr(filterValue: string) {
+        const splitted = filterValue.split(':');
+        if (splitted.length !== 2) {
+            return filterValue;
+        }
+        return 'Pipeline: ' + splitted[1] + ', Operator: ' + splitted[0];
     }
 }
 
