@@ -123,6 +123,7 @@ export class ExportComponent implements OnInit, OnDestroy {
     }
 
     showGeneratedChanged() {
+        this.showGenerated = !this.showGenerated;
         localStorage.setItem('data.exports.showGenerated', String(this.showGenerated));
         this.getExports(true);
     }

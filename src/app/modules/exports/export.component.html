@@ -14,25 +14,28 @@
   ~ limitations under the License.
   -->
 
-<div>
-    <div fxLayout="row">
-        <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
-        <mat-form-field color="accent" class="user-input" style="margin-top: 15px;">
-            <mat-label>Choose Search Field</mat-label>
-            <mat-select [(ngModel)]="searchField" (ngModelChange)="searchFieldChanged()">
-                <mat-option *ngFor="let searchField of searchFields" [value]="searchField[1]">
-                    {{searchField[0]}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
-    </div>
-    <div fxLayout="row">
-        <div fxFlex></div>
-        <div class="layout-margin" fxLayout="column">
-            <mat-checkbox [(ngModel)]="showGenerated" (ngModelChange)="showGeneratedChanged()">Show generated exports
-            </mat-checkbox>
-        </div>
-    </div>
+
+<div fxLayout="row">
+    <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
+    <mat-form-field color="accent" class="user-input" style="margin-top: 15px;">
+        <mat-label>Choose Search Field</mat-label>
+        <mat-select [(ngModel)]="searchField" (ngModelChange)="searchFieldChanged()">
+            <mat-option *ngFor="let searchField of searchFields" [value]="searchField[1]">
+                {{searchField[0]}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
+<div fxLayout="row">
+    <div fxFlex></div>
+    <button matTooltip="Show generated" mat-icon-button color="accent" (click)="showGeneratedChanged()"
+            *ngIf="!this.showGenerated">
+        <mat-icon>visibility</mat-icon>
+    </button>
+    <button matTooltip="Hide generated" mat-icon-button color="accent" (click)="showGeneratedChanged()"
+            *ngIf="this.showGenerated">
+        <mat-icon>visibility_off</mat-icon>
+    </button>
 </div>
 
 <div class="layout-margin">
