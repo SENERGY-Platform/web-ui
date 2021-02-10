@@ -40,8 +40,8 @@
         <div class="mat-elevation-z1" [hidden]="!ready || (exports.length === 0 && ready)">
             <div class="table-container">
                 <table #sort="matSort" mat-table [dataSource]="exportsDataSource" matSort
-                       matSortActive="name"
-                       matSortDirection="asc" matSortDisableClear>
+                       matSortActive="created_at"
+                       matSortDirection="desc" matSortDisableClear>
 
                     <ng-container matColumnDef="select">
                         <th mat-header-cell *matHeaderCellDef>
