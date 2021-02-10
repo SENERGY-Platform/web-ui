@@ -61,6 +61,7 @@ import {DeviceGroupsEditComponent} from './device-groups/edit/device-groups-edit
 import {LocationsComponent} from './locations/locations.component';
 import {LocationsEditComponent} from './locations/edit/locations-edit.component';
 import {DeviceGroupsPipelineHelperDialogComponent} from './device-groups/edit/device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
+import {DeviceGroupsSelectDialogComponent} from './device-groups/dialog/device-groups-select-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Hubs'}};
 const deviceInstances = {
@@ -160,6 +161,7 @@ const locationsEdit = {
         DeviceInstancesExportDialogComponent,
         DeviceGroupsComponent,
         DeviceGroupsEditComponent,
+        DeviceGroupsSelectDialogComponent,
         LocationsComponent,
         LocationsEditComponent,
         DeviceGroupsPipelineHelperDialogComponent,

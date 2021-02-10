@@ -17,22 +17,22 @@
 
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
-import {DeviceInstancesModel} from '../shared/device-instances.model';
-import {DeviceInstancesService} from '../shared/device-instances.service';
+import {DeviceGroupsService} from '../shared/device-groups.service';
 import {MatTable} from '@angular/material/table';
 import {FormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/internal/operators';
 import {Sort} from '@angular/material/sort';
+import {DeviceGroupsPermSearchModel} from '../shared/device-groups-perm-search.model';
 
 @Component({
-    templateUrl: './device-instances-select-dialog.component.html',
-    styleUrls: ['./device-instances-select-dialog.component.css'],
+    templateUrl: './device-groups-select-dialog.component.html',
+    styleUrls: ['./device-groups-select-dialog.component.css'],
 })
-export class DeviceInstancesSelectDialogComponent implements OnInit {
+export class DeviceGroupsSelectDialogComponent implements OnInit {
 
-    @ViewChild(MatTable, {static: false}) table!: MatTable<DeviceInstancesModel>;
+    @ViewChild(MatTable, {static: false}) table!: MatTable<DeviceGroupsSelectDialogComponent>;
 
-    devices: DeviceInstancesModel[] = [];
+    deviceGroups: DeviceGroupsPermSearchModel[] = [];
     dataReady = false;
     sortBy = 'name';
     sortOrder = 'asc';
@@ -41,11 +41,11 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
     limit = this.limitInit;
     offset = 0;
 
-    selectedDevices: string[] = [];
+    selectedGroups: string[] = [];
 
     constructor(
-        private dialogRef: MatDialogRef<DeviceInstancesSelectDialogComponent>,
-        private deviceInstancesService: DeviceInstancesService
+        private dialogRef: MatDialogRef<DeviceGroupsSelectDialogComponent>,
+        private deviceGroupsService: DeviceGroupsService
     ) {
     }
 
@@ -61,8 +61,8 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
     }
 
     load() {
-        this.deviceInstancesService.getDeviceInstances(this.searchControl.value, this.limit, this.offset, this.sortBy, this.sortOrder).subscribe(devices => {
-            this.devices.push(...devices);
+        this.deviceGroupsService.getDeviceGroups(this.searchControl.value, this.limit, this.offset, this.sortBy, this.sortOrder).subscribe(groups => {
+            this.deviceGroups.push(...groups);
             if (this.table !== undefined) {
                 this.table.renderRows();
             }
@@ -73,7 +73,7 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
     reload() {
         this.limit = this.limitInit;
         this.offset = 0;
-        this.devices = [];
+        this.deviceGroups = [];
         this.load();
     }
 
@@ -83,7 +83,7 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
 
     onScroll() {
         this.limit += this.limitInit;
-        this.offset = this.devices.length;
+        this.offset = this.deviceGroups.length;
         this.load();
     }
 
@@ -92,27 +92,27 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.dialogRef.close(this.selectedDevices);
+        this.dialogRef.close(this.selectedGroups);
     }
 
     isSelected(id: string): boolean {
-        return this.selectedDevices.indexOf(id) !== -1;
+        return this.selectedGroups.indexOf(id) !== -1;
     }
 
     select(checked: boolean, id: string) {
         if (checked) {
             // add
-            this.selectedDevices.push(id);
+            this.selectedGroups.push(id);
         } else {
             // remove
-            const index = this.selectedDevices.indexOf(id);
+            const index = this.selectedGroups.indexOf(id);
             if (index > -1) {
-                this.selectedDevices.splice(index, 1);
+                this.selectedGroups.splice(index, 1);
             }
         }
         // remove duplicates
-        this.selectedDevices = this.selectedDevices.filter((item: string, index: number) => {
-            return this.selectedDevices.indexOf(item) === index;
+        this.selectedGroups = this.selectedGroups.filter((item: string, index: number) => {
+            return this.selectedGroups.indexOf(item) === index;
         });
     }
 }

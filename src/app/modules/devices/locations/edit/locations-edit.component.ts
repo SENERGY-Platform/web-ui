@@ -26,6 +26,7 @@ import {DeviceInstancesService} from '../../device-instances/shared/device-insta
 import {DeviceGroupModel} from '../../device-groups/shared/device-groups.model';
 import {DeviceGroupsService} from '../../device-groups/shared/device-groups.service';
 import {DeviceInstancesDialogService} from '../../device-instances/shared/device-instances-dialog.service';
+import {DeviceGroupsDialogService} from '../../device-groups/shared/device-groups-dialog.service';
 
 @Component({
     selector: 'senergy-locations-edit',
@@ -51,6 +52,7 @@ export class LocationsEditComponent implements OnInit {
                 private deviceService: DeviceInstancesService,
                 private deviceDialogService: DeviceInstancesDialogService,
                 private deviceGroupService: DeviceGroupsService,
+                private deviceGroupDialogService: DeviceGroupsDialogService,
                 private snackBar: MatSnackBar,
                 private route: ActivatedRoute,
                 private router: Router) {
@@ -344,6 +346,10 @@ export class LocationsEditComponent implements OnInit {
     }
 
     selectAndAddGroups() {
-        // TODO
+        this.deviceGroupDialogService.openDeviceGroupSelectDialog().subscribe(ids => {
+            if (ids) {
+                this.addDeviceGroups(ids);
+            }
+        });
     }
 }
