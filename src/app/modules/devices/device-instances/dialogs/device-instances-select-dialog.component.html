@@ -18,7 +18,7 @@
 
 <mat-dialog-content class="container">
     <form class="form">
-                <span fxLayout="row" class="search-refresh">
+        <span fxLayout="row" class="search-refresh">
             <mat-form-field color="accent" appearance="outline" fxFlex>
                 <input matInput [formControl]="searchControl" placeholder="Search...">
                 <mat-icon matPrefix *ngIf="searchControl.value === ''">search</mat-icon>
@@ -26,9 +26,6 @@
                     <mat-icon>close</mat-icon>
                 </button>
             </mat-form-field>
-            <button mat-icon-button (click)="reload()" color="accent" class="refresh">
-                <mat-icon>refresh</mat-icon>
-            </button>
         </span>
 
         <div *ngIf="dataReady" class="mat-elevation-z1" fxLayout="column"
