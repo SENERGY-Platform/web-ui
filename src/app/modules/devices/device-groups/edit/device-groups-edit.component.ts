@@ -157,14 +157,16 @@ export class DeviceGroupsEditComponent implements OnInit {
         if (deviceGroup.id === '' || deviceGroup.id === undefined) {
             this.deviceGroupService.createDeviceGroup(deviceGroup).pipe(delay(this.rerouteAfterSaveDelayInMs)).subscribe((deviceGroupSaved: DeviceGroupModel | null) => {
                 this.showMessage(deviceGroupSaved);
+                this.isSaving = false;
                 this.reload(deviceGroupSaved);
             });
         } else {
             this.deviceGroupService.updateDeviceGroup(deviceGroup).pipe(delay(this.rerouteAfterSaveDelayInMs)).subscribe((deviceGroupSaved: DeviceGroupModel | null) => {
                 this.showMessage(deviceGroupSaved);
                 this.pipelineRegistryService.getPipelinesWithSelectable(deviceGroupSaved?.id || '').subscribe(pipelines => {
+                    this.isSaving = false;
                     if (pipelines.length === 0) {
-                        this.reload(deviceGroupSaved);
+                        // this.reload(deviceGroupSaved);
                     } else {
                         const config: MatDialogConfig = {
                             data: pipelines
