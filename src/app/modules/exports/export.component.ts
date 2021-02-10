@@ -45,7 +45,7 @@ export class ExportComponent implements OnInit, OnDestroy {
     displayedColumns: string[] = ['select', 'filter_type', 'name', 'description', 'created_at', 'updated_at', 'info', 'edit', 'copy', 'delete'];
     totalCount = 0;
 
-    exports: ExportModel[] = [];
+    exports: ExportModel[] = [] as ExportModel[];
     exportsDataSource = new MatTableDataSource<ExportModel>();
     showGenerated = localStorage.getItem('data.exports.showGenerated') === 'true';
     ready = false;
@@ -143,11 +143,14 @@ export class ExportComponent implements OnInit, OnDestroy {
                 this.sort.direction,
                 (this.showGenerated ? undefined : false),
                 this.searchField
-            )
+            );
         })).subscribe(
             (resp: ExportResponseModel | null) => {
                 if (resp !== null) {
                     this.exports = resp.instances;
+                    if (this.exports === undefined) {
+                        this.exports = [];
+                    }
                     this.totalCount = resp.total;
                     this.exportsDataSource.data = this.exports;
                 }
