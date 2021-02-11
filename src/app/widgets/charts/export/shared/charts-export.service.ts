@@ -113,7 +113,7 @@ export class ChartsExportService {
             requestPayload.queries = array;
         }
 
-        return this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).pipe(
+        return this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries?include_empty_columns=false'), requestPayload).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {error: 'error'}))
         );
     }

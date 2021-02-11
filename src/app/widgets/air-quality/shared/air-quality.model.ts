@@ -15,7 +15,7 @@
  */
 
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
-import {ExportValueModel} from '../../../modules/exports/shared/export.model';
+import {ExportModel, ExportValueModel} from '../../../modules/exports/shared/export.model';
 import {UBAStation} from './uba.model';
 import {DWDSinglePollenForecast} from './dwd-pollen.model';
 import {YrWeatherModel} from './yr-weather.model';
@@ -23,7 +23,9 @@ import {YrWeatherModel} from './yr-weather.model';
 
 export interface AirQualityPropertiesModel {
     location?: (Location);
+    /** @deprecated */
     ubaStation?: (UBAStation);
+    ubaInfo?: AirQualityImportExportModel;
     formatted_address?: (string);
     measurements?: (MeasurementModel[]);
     dwd_partregion_name?: (string);
@@ -41,9 +43,10 @@ export interface MeasurementModel {
     is_warning?: (boolean);
     is_critical?: (boolean);
     can_web?: boolean;
-    export?: (ChartsExportMeasurementModel);
+    provider?: AirQualityExternalProvider;
+    export?: (ExportModel);
     math?: string;
-    outsideExport?: (ChartsExportMeasurementModel);
+    outsideExport?: (ExportModel);
     outsideMath?: string;
     unit_html: (string);
     data: (SensorDataModel);
@@ -72,3 +75,14 @@ export interface Location {
     latitude: number;
 }
 
+export interface AirQualityImportExportModel {
+    stationId?: string;
+    importInstanceId?: string;
+    importGenerated?: boolean;
+    exportId?: string;
+    exportGenerated?: boolean;
+}
+
+export enum AirQualityExternalProvider {
+    UBA,
+}

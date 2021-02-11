@@ -30,6 +30,7 @@ import {moveItemInArray} from '@angular/cdk/drag-drop';
 import {DialogsService} from '../../core/services/dialogs.service';
 import {ProcessSchedulerService} from '../../widgets/process-scheduler/shared/process-scheduler.service';
 import {DataTableService} from '../../widgets/data-table/shared/data-table.service';
+import {AirQualityService} from '../../widgets/air-quality/shared/air-quality.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -64,6 +65,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 private dialogsService: DialogsService,
                 private processSchedulerService: ProcessSchedulerService,
                 private dataTableService: DataTableService,
+                private airQualityService: AirQualityService,
                 private deviceStatusService: DeviceStatusService) {
     }
 
@@ -365,6 +367,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 break;
             case DashboardTypesEnum.DataTable:
                 this.dataTableService.deleteElements(widget.properties.dataTable?.elements);
+                break;
+            case DashboardTypesEnum.AirQuality:
+                this.airQualityService.cleanGeneratedContent(widget.properties);
                 break;
         }
     }

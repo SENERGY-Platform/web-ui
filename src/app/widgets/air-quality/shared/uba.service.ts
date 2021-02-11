@@ -136,7 +136,7 @@ export class UBAService {
             this.http.get<UBADataResponse>(
                 environment.ubaUrl + '/air_data/v2/airquality/json?date_from=' + this.getDateString() + '&date_to=' + this.getDateString()
                 + '&lang=de&time_to=' + date.getHours()
-                + '&time_from=' + (date.getHours() - 3 < 0 ? 0 : (date.getHours() - 3))
+                + '&time_from=' + (date.getHours() - 12 < 1 ? 1 : (date.getHours() - 12))
                 + '&station=' + station_id)
                 .pipe(map(resp => resp || []),
                     catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBADataResponse))

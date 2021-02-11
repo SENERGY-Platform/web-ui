@@ -76,7 +76,7 @@ export class DWDPollenService {
     extractPollenArea(lat: number, lon: number, pollenAreaResponse: any): string {
         let area = ' ';
         // @ts-ignore
-        pollenAreaResponse['features'].forEach(feature => {
+        pollenAreaResponse['features']?.forEach(feature => {
             // @ts-ignore
             feature['geometry']['coordinates'].forEach(poly => {
                 let inside = false;

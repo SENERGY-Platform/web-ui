@@ -69,6 +69,7 @@ export const environment = {
     aspectAirId: 'urn:infai:ses:aspect:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     importRepoUrl: 'http://localhost',
     importDeployUrl: 'http://localhost',
+    importTypeIdUbaStation: 'urn:infai:ses:import-type:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
 };
 
 /*

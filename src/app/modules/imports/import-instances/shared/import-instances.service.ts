@@ -52,11 +52,11 @@ export class ImportInstancesService {
         return this.http.delete<void>(environment.importDeployUrl + '/instances/' + id);
     }
 
-    saveImportInstance(importInstance: ImportInstancesModel): Observable<void> {
+    saveImportInstance(importInstance: ImportInstancesModel): Observable<ImportInstancesModel> {
         if (importInstance.id !== undefined && importInstance.id.length > 0) {
-            return this.http.put<void>(environment.importDeployUrl + '/instances/' + importInstance.id, importInstance);
+            return this.http.put<ImportInstancesModel>(environment.importDeployUrl + '/instances/' + importInstance.id, importInstance);
         } else {
-            return this.http.post<void>(environment.importDeployUrl + '/instances', importInstance);
+            return this.http.post<ImportInstancesModel>(environment.importDeployUrl + '/instances', importInstance);
         }
     }
 }

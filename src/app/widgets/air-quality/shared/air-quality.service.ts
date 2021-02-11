@@ -16,7 +16,7 @@
 
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {MeasurementModel} from './air-quality.model';
+import {AirQualityPropertiesModel, AirQualityExternalProvider, MeasurementModel} from './air-quality.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {AirQualityEditDialogComponent} from '../dialog/air-quality-edit-dialog.component';
@@ -28,8 +28,11 @@ import {HttpClient} from '@angular/common/http';
 import {ChartsExportModel} from '../../charts/export/shared/charts-export.model';
 import {
     ChartsExportRequestPayloadModel,
+    ChartsExportRequestPayloadQueriesFieldsModel,
     ChartsExportRequestPayloadQueriesModel
 } from '../../charts/export/shared/charts-export-request-payload.model';
+import {ExportService} from '../../../modules/exports/shared/export.service';
+import {ImportInstancesService} from '../../../modules/imports/import-instances/shared/import-instances.service';
 
 @Injectable({
     providedIn: 'root'
@@ -47,6 +50,8 @@ export class AirQualityService {
     constructor(private dialog: MatDialog,
                 private dashboardService: DashboardService,
                 private errorHandlerService: ErrorHandlerService,
+                private exportService: ExportService,
+                private importInstancesService: ImportInstancesService,
                 private http: HttpClient) {
     }
 
@@ -86,63 +91,84 @@ export class AirQualityService {
 
                 const measurements = widget.properties.measurements;
                 const array: ChartsExportRequestPayloadQueriesModel[] = [];
-                const ids = new Map<string, number>();
+                let fieldCounter = 0;
+                const insideMap = new Map<number, number>();
+                const outsideMap = new Map<number, number>();
                 measurements.forEach((measurement: MeasurementModel, index) => {
                     if (measurement.is_enabled) {
-                        const id = (measurement.export ? measurement.export.id : '');
+                        const id = (measurement.export ? measurement.export.ID : '');
                         const column = measurement.data.column ? measurement.data.column.Name : '';
-                        const key = id + '.' + column + (measurement.math ? measurement.math : '');
-                        if (ids.has(key)) {
-                            console.error('AirQualityService: Can\'t use the same combination of export + column twice');
-                        }
-                        ids.set(key, index);
-                        array.push({id: id, fields: [{name: column, math: measurement.math || ''}]});
+                        insideMap.set(++fieldCounter, index);
+                        array.push({id: id || '', fields: [{name: column, math: measurement.math || ''}]});
 
                     }
-                    if (measurement.has_outside) {
-                        const id = (measurement.outsideExport ? measurement.outsideExport.id : '');
+                    if (measurement.has_outside || measurement.provider === AirQualityExternalProvider.UBA) {
+                        const id = (measurement.outsideExport ? measurement.outsideExport.ID : '');
                         const column = measurement.outsideData.column ? measurement.outsideData.column.Name : '';
-                        const key = id + '.' + column + (measurement.outsideMath ? measurement.outsideMath.trim() : '');
-                        if (ids.has(key)) {
-                            console.error('AirQualityService:  Can\'t use the same combination of export + column twice');
+                        const fields: ChartsExportRequestPayloadQueriesFieldsModel[] = [];
+                        fields.push({name: column, math: measurement.outsideMath || ''});
+                        outsideMap.set(++fieldCounter, index);
+                        if (measurement.provider === AirQualityExternalProvider.UBA) {
+                            fields.push({
+                                name: 'measurement',
+                                filterType: '=',
+                                filterValue: measurement.short_name,
+                                math: ''
+                            });
+                            fieldCounter++;
+                            fields.push({
+                                name: 'station_id',
+                                filterType: '=',
+                                filterValue: widget.properties.ubaInfo?.stationId || '',
+                                math: ''
+                            });
+                            fieldCounter++;
                         }
-                        array.push({id: id, fields: [{name: column, math: measurement.outsideMath || ''}]});
-                        ids.set(key, index);
+                        array.push({id: id || '', fields: fields});
                     }
                 });
                 requestPayload.queries = array;
 
                 const myMeasurements = widget.properties.measurements || [];
 
-                this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries'), requestPayload).subscribe(model => {
-                    const columns = model.results[0].series[0].columns;
-                    const values = model.results[0].series[0].values;
-                    ids.forEach((idIndex, id) => {
-                        const columnIndex = columns.findIndex(col => col === id);
-                        values.forEach(val => {
-                            if (val[columnIndex]) {
-                                // Found the correct row for the column, but need to check if it belongs to inside or outside export
-                                const m = myMeasurements[idIndex];
-                                const value = Math.round(Number(val[columnIndex]) * 100) / 100; // two digits
-                                const insideId = (m.export ? m.export.id : '') + '.' + (m.data.column ? m.data.column.Name : '') + (m.math ? m.math.trim() : '');
+                this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries?include_empty_columns=true'), requestPayload)
+                    .subscribe(model => {
+                        const values = model.results[0].series[0].values;
+                        if (values.length === 0) {
+                            observer.next(myMeasurements);
+                            observer.complete();
+                            return;
+                        }
 
-                                if (insideId === id) {
-                                    myMeasurements[idIndex].data.value = value;
-                                } else {
-                                    const outsideId = (m.outsideExport ? m.outsideExport.id : '') + '.'
-                                        + (m.outsideData.column ? m.outsideData.column.Name : '') + (m.outsideMath ? m.outsideMath.trim() : '');
-                                    if (outsideId === id) {
-                                        myMeasurements[idIndex].outsideData.value = value;
-                                    }
+                        insideMap.forEach((measurementIndex, columnIndex) => {
+                            values.forEach(val => {
+                                if (val[columnIndex] !== null) {
+                                    myMeasurements[measurementIndex].data.value = Math.round(Number(val[columnIndex]) * 100) / 100;
                                 }
-                            }
+                            });
                         });
+
+                        outsideMap.forEach((measurementIndex, columnIndex) => {
+                            values.forEach(val => {
+                                if (val[columnIndex] !== null) {
+                                    myMeasurements[measurementIndex].outsideData.value = Math.round(Number(val[columnIndex]) * 100) / 100;
+                                }
+                            });
+                        });
+                        observer.next(myMeasurements);
+                        observer.complete();
                     });
-                    observer.next(myMeasurements);
-                    observer.complete();
-                });
             }
         });
+    }
+
+    cleanGeneratedContent(properties: AirQualityPropertiesModel) {
+        if (properties.ubaInfo?.exportGenerated === true) {
+            this.exportService.stopPipelineById(properties.ubaInfo?.exportId || '').subscribe();
+        }
+        if (properties.ubaInfo?.importGenerated === true) {
+            this.importInstancesService.deleteImportInstance(properties.ubaInfo?.importInstanceId || '').subscribe();
+        }
     }
 }
 

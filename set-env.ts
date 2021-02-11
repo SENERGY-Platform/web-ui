@@ -78,6 +78,7 @@ export const environment = {
   aspectAirId: '${process.env.ASPECT_AIR_ID}',
   importRepoUrl: '${process.env.IMPORT_REPO_URL}',
   importDeployUrl: '${process.env.IMPORT_DEPLOY_URL}',
+  importTypeIdUbaStation: '${process.env.IMPORT_TYPE_ID_UBA_STATIONS}',
 };
 `;
 

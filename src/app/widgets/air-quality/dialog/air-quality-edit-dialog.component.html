@@ -15,8 +15,9 @@
   -->
 
 <h2 mat-dialog-title>Edit Air Recommendation</h2>
+<senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
 
-<mat-dialog-content>
+<mat-dialog-content *ngIf="ready">
 
     <mat-vertical-stepper #stepper>
         <mat-step label="Give the widget a name">
@@ -138,7 +139,7 @@
                                         <mat-form-field color="accent">
                                             <mat-label>Export</mat-label>
                                             <senergy-select-search [required]="true" placeholder="Export" [(ngModel)]="option.export"
-                                                        [compareWith]="compareExports" [options]="exports" useOptionViewProperty="name">
+                                                        [compareWith]="compareExports" [options]="exports" useOptionViewProperty="Name">
                                             </senergy-select-search>
                                         </mat-form-field>
                                     </td>
@@ -146,7 +147,7 @@
                                         <mat-form-field color="accent">
                                             <mat-label>Value</mat-label>
                                             <senergy-select-search [required]="true" placeholder="Value" [(ngModel)]="option.data.column"
-                                                        [compareWith]="compareExportValueModels" [options]="option.export?.values || []"
+                                                        [compareWith]="compareExportValueModels" [options]="option.export?.Values || []"
                                                         useOptionViewProperty="Name">
                                             </senergy-select-search>
                                         </mat-form-field>
@@ -178,7 +179,7 @@
                                                 <senergy-select-search [required]="true" placeholder="Export"
                                                             [(ngModel)]="option.outsideExport"
                                                             [compareWith]="compareExports"
-                                                            [options]="exports" useOptionViewProperty="name">
+                                                            [options]="exports" useOptionViewProperty="Name">
                                                 </senergy-select-search>
                                             </mat-form-field>
                                         </td>
@@ -188,7 +189,7 @@
                                                 <senergy-select-search [required]="true" placeholder="Value"
                                                             [(ngModel)]="option.outsideData.column"
                                                             [compareWith]="compareExportValueModels"
-                                                            [options]="option.outsideExport?.values || []"
+                                                            [options]="option.outsideExport?.Values || []"
                                                             useOptionViewProperty="Name">
                                                 </senergy-select-search>
                                             </mat-form-field>
@@ -311,7 +312,7 @@
     </mat-vertical-stepper>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions fxLayoutAlign="end center" *ngIf="ready">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()" [disabled]="disableSave">Save</button>
 </mat-dialog-actions>

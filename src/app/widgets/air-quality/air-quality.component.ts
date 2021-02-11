@@ -87,7 +87,9 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                 this.numReady = 0;
                 this.tooltip = [];
                 this.updateMeasurements();
-                this.updateUbaData();
+                if (this.widget.properties.ubaStation !== undefined) { // legacy
+                    this.updateUbaData();
+                }
                 this.updateDWDData();
                 this.checkYrUpdate();
                 while (!this.isReady()) {

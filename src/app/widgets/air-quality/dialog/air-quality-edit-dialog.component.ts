@@ -23,7 +23,7 @@ import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../modul
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {ExportService} from '../../../modules/exports/shared/export.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {Location, MeasurementModel, SensorDataModel} from '../shared/air-quality.model';
+import {AirQualityExternalProvider, Location, MeasurementModel, SensorDataModel} from '../shared/air-quality.model';
 import {UBAService} from '../shared/uba.service';
 import {DWDPollenService} from '../shared/dwd-pollen.service';
 import {UBAStation} from '../shared/uba.model';
@@ -32,15 +32,40 @@ import {GeonamesService} from '../shared/geonames.service';
 import {Geoname} from '../shared/geonames.model';
 import {FormControl} from '@angular/forms';
 import {debounceTime, map} from 'rxjs/operators';
-import {from, Observable} from 'rxjs';
+import {forkJoin, from, Observable, of, Subscriber} from 'rxjs';
 import {NameValuePair} from '../shared/dwd-pollen.model';
+import {ImportInstancesService} from '../../../modules/imports/import-instances/shared/import-instances.service';
+import {ImportInstancesModel} from '../../../modules/imports/import-instances/shared/import-instances.model';
+import {environment} from '../../../../environments/environment';
+import {ImportTypesService} from '../../../modules/imports/import-types/shared/import-types.service';
+import {mergeMap} from 'rxjs/internal/operators';
+
 
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',
     styleUrls: ['./air-quality-edit-dialog.component.css'],
 })
 export class AirQualityEditDialogComponent implements OnInit {
-    exports: ChartsExportMeasurementModel[] = [];
+
+    constructor(private dialogRef: MatDialogRef<AirQualityEditDialogComponent>,
+                private deploymentsService: DeploymentsService,
+                private dashboardService: DashboardService,
+                private exportService: ExportService,
+                private ngZone: NgZone,
+                private ubaService: UBAService,
+                private dwdPollenService: DWDPollenService,
+                private yrWeatherService: YrWeatherService,
+                private geonamesService: GeonamesService,
+                private importInstancesService: ImportInstancesService,
+                private importTypesService: ImportTypesService,
+                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
+        this.dashboardId = data.dashboardId;
+        this.widgetId = data.widgetId;
+        this.geonamesSearchResults = from([]);
+        this.pollenLevel = dwdPollenService.getNameValuePairs();
+    }
+
+    exports: ExportModel[] = [];
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
@@ -53,8 +78,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'PM10',
             description_html: 'Particulate matter up to 10μm',
             unit_html: 'μg/m<sup>3</sup>',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 40}, critical: {lower: 0, upper: 50}}
         },
@@ -63,8 +88,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'PM2.5',
             description_html: 'Particulate matter up to 2.5μm',
             unit_html: 'μg/m<sup>3</sup>',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 25}, critical: {lower: 0, upper: 30}}
         },
@@ -73,8 +98,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'PM1',
             description_html: 'Particulate matter up to 1μm',
             unit_html: 'μg/m<sup>3</sup>',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 0}, critical: {lower: 0, upper: 0}}
         },
@@ -83,8 +108,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'CO2',
             description_html: 'Carbon Dioxide',
             unit_html: 'ppm',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 1000}, critical: {lower: 0, upper: 5000}}
         },
@@ -93,8 +118,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'O2',
             description_html: 'Oxygen',
             unit_html: '%',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 19, upper: 21}, critical: {lower: 18, upper: 25}}
         },
@@ -103,8 +128,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'SO2',
             description_html: 'Sulfur Dioxide',
             unit_html: 'μg/m<sup>3</sup>',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 0}, critical: {lower: 1, upper: 0}}
         },
@@ -112,8 +137,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             name_html: 'CH<sub>4</sub>',
             short_name: 'CH4',
             description_html: 'Methane',
-            unit_html: '%', data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            unit_html: '%', data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 0}, critical: {lower: 1, upper: 0}}
         },
@@ -122,8 +147,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'NO2',
             description_html: 'Nitrogen Dioxide',
             unit_html: 'μg/m<sup>3</sup>',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 40}, critical: {lower: 0, upper: 200}}
         },
@@ -132,8 +157,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'CO',
             description_html: 'Carbon Monoxide',
             unit_html: 'μg/m<sup>3</sup>',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 8}, critical: {lower: 0, upper: 35}}
         },
@@ -142,8 +167,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'O3',
             description_html: 'Ozone',
             unit_html: 'μg/m<sup>3</sup>',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 0}, critical: {lower: 0, upper: 180}}
         },
@@ -152,8 +177,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'Rn',
             description_html: 'Radon',
             unit_html: 'Bq/m<sup>3</sup>',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 250}, critical: {lower: 0, upper: 1000}}
         },
@@ -162,8 +187,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'Hum.',
             description_html: 'relative Humidity',
             unit_html: '%',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 40, upper: 50}, critical: {lower: 30, upper: 70}}
         },
@@ -172,8 +197,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'Temp.',
             description_html: 'Temperature',
             unit_html: '°C',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             can_web: true,
             boundaries: {warn: {lower: 20, upper: 22}, critical: {lower: 18, upper: 26}}
@@ -182,8 +207,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             name_html: 'Noise',
             short_name: 'Noise',
             unit_html: 'dB',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 40}, critical: {lower: 0, upper: 65}}
         },
@@ -192,8 +217,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'VOC',
             description_html: 'Volatile Organic Compounds',
             unit_html: 'mg/m<sup>3</sup>',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 10}}
         },
@@ -202,8 +227,8 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'Pressure',
             description_html: 'Barometric Air Pressure',
             unit_html: 'hPa',
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
             has_outside: false,
             can_web: true,
             boundaries: {warn: {lower: 0, upper: 1100}, critical: {lower: 0, upper: 1100}}
@@ -216,6 +241,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     };
     formatted_address = ' ';
     ubaStations: UBAStation[] = [];
+    ubaBlacklist: number[] = [];
     invalidUbaStation: UBAStation = {
         station_id: -1,
         station_longitude: -1000,
@@ -233,64 +259,64 @@ export class AirQualityEditDialogComponent implements OnInit {
             short_name: 'Ambrosia',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
         },
         {
             name_html: 'Birke',
             short_name: 'Birke',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
         },
         {
             name_html: 'Erle',
             short_name: 'Erle',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
         },
         {
             name_html: 'Hasel',
             short_name: 'Hasel',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
         },
         {
             name_html: 'Beifuss',
             short_name: 'Beifuss',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
         },
         {
             name_html: 'Esche',
             short_name: 'Esche',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
         },
         {
             name_html: 'Roggen',
             short_name: 'Roggen',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
         },
         {
             name_html: 'Graeser',
             short_name: 'Graeser',
             unit_html: 'Level',
             boundaries: {warn: {lower: 0, upper: 1}, critical: {lower: 0, upper: 3}},
-            data: this.getEmptyDataModel(),
-            outsideData: this.getEmptyDataModel(),
+            data: AirQualityEditDialogComponent.getEmptyDataModel(),
+            outsideData: AirQualityEditDialogComponent.getEmptyDataModel(),
         },
     ];
     pollenLevel: NameValuePair[];
@@ -298,35 +324,74 @@ export class AirQualityEditDialogComponent implements OnInit {
     yrPath = '';
     geonamesSearchResults: Observable<Geoname[]>;
     searchFormControl = new FormControl();
+    importInstances: ImportInstancesModel[] = [];
+    ready = false;
 
-    constructor(private dialogRef: MatDialogRef<AirQualityEditDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                private dashboardService: DashboardService,
-                private exportService: ExportService,
-                private ngZone: NgZone,
-                private ubaService: UBAService,
-                private dwdPollenService: DWDPollenService,
-                private yrWeatherService: YrWeatherService,
-                private geonamesService: GeonamesService,
-                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
-        this.dashboardId = data.dashboardId;
-        this.widgetId = data.widgetId;
-        this.geonamesSearchResults = from([]);
-        this.pollenLevel = dwdPollenService.getNameValuePairs();
+    private static getEmptyExportValueModel(): ExportValueModel {
+        return {InstanceID: '', Name: '', Path: '', Type: ''};
+    }
+
+    private static getEmptyDataModel(): SensorDataModel {
+        return {column: AirQualityEditDialogComponent.getEmptyExportValueModel(), value: NaN};
+    }
+
+    private static latLongDistance(latA: number, longA: number, latB: number, longB: number): number {
+        const er = 6366.707;
+
+        // convert degree to radial
+        const latFrom = latA * (Math.PI / 180);
+        const latTo = latB * (Math.PI / 180);
+        const lngFrom = longA * (Math.PI / 180);
+        const lngTo = longB * (Math.PI / 180);
+
+        const x1 = er * Math.cos(lngFrom) * Math.sin(latFrom);
+        const y1 = er * Math.sin(lngFrom) * Math.sin(latFrom);
+        const z1 = er * Math.cos(latFrom);
+
+        const x2 = er * Math.cos(lngTo) * Math.sin(latTo);
+        const y2 = er * Math.sin(lngTo) * Math.sin(latTo);
+        const z2 = er * Math.cos(latTo);
+
+        const d = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
+
+        return d;
     }
 
     ngOnInit() {
-        this.getWidgetData();
-        this.initDeployments();
+        const obs: Observable<any>[] = [];
+        obs.push(this.getWidgetData());
+        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: (ExportResponseModel | null)) => {
+            if (exports !== null) {
+                this.exports = exports.instances;
+            }
+        });
+        obs.push(this.importInstancesService.listImportInstances('', undefined, undefined, 'name.asc')
+            .pipe(map(importInstances => this.importInstances = importInstances)));
+
+        obs.push(this.ubaService.getUBAStations().pipe(map(resp => {
+            this.ubaStations = resp;
+        })));
+
+        forkJoin(obs).subscribe(_ => {
+            this.sortUBAStations();
+            if (this.widget.properties.ubaInfo?.stationId !== undefined) {
+                const station = this.ubaStations.find(s => '' + s.station_id === this.widget.properties.ubaInfo?.stationId);
+                if (station !== undefined) {
+                    this.ubaStationSelected = station;
+                }
+            }
+            this.ready = true;
+        });
+
 
         this.searchFormControl.valueChanges.pipe(
             debounceTime(300),
             map(value => this.geonamesService.searchPlaces(value)))
-            .subscribe(obs => this.geonamesSearchResults = obs);
+            .subscribe(res => this.geonamesSearchResults = res);
     }
 
-    getWidgetData() {
-        this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
+    getWidgetData(): Observable<any> {
+        return this.dashboardService.getWidget(this.dashboardId, this.widgetId).pipe(map((widget: WidgetModel) => {
             this.widget = widget;
             this.measurements = widget.properties.measurements ? widget.properties.measurements : this.measurements;
             this.pollen = widget.properties.pollen ? widget.properties.pollen : this.pollen;
@@ -350,43 +415,33 @@ export class AirQualityEditDialogComponent implements OnInit {
             this.ubaStationSelected = widget.properties.ubaStation ? widget.properties.ubaStation : this.ubaStationSelected;
             this.dwd_partregion_name = widget.properties.dwd_partregion_name ? widget.properties.dwd_partregion_name : ' ';
             this.yrPath = widget.properties.yrPath ? widget.properties.yrPath : this.yrPath;
-        });
+        }));
     }
 
-    initDeployments() {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: (ExportResponseModel | null)) => {
-            if (exports !== null) {
-                exports.instances.forEach((exportModel: ExportModel) => {
-                    if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
-                    }
-                });
-            }
-        });
-    }
 
     close(): void {
         this.dialogRef.close();
     }
 
     save(): void {
-        this.widget.properties.measurements = this.measurements;
-        this.widget.properties.location = this.location;
-        this.widget.properties.formatted_address = this.formatted_address;
-        this.widget.name = this.name;
-        if (this.ubaStationSelected.station_id !== -1) {
-            this.widget.properties.ubaStation = this.ubaStationSelected;
-        } else {
-            this.widget.properties.ubaStation = undefined;
-        }
-        this.widget.properties.dwd_partregion_name = this.dwd_partregion_name === ' ' ? undefined : this.dwd_partregion_name;
-        this.widget.properties.pollen = this.pollen;
-        this.widget.properties.yrPath = this.yrPath === '' ? undefined : this.yrPath;
+        this.ready = false;
+        this.prepareUbaSave().subscribe(_ => {
+            this.widget.properties.measurements = this.measurements;
+            this.widget.properties.location = this.location;
+            this.widget.properties.formatted_address = this.formatted_address;
+            this.widget.name = this.name;
+            this.widget.properties.ubaStation = undefined; // overrides legacy widgets
+            this.widget.properties.dwd_partregion_name = this.dwd_partregion_name === ' ' ? undefined : this.dwd_partregion_name;
+            this.widget.properties.pollen = this.pollen;
+            this.widget.properties.yrPath = this.yrPath === '' ? undefined : this.yrPath;
 
-        this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
-            if (resp.message === 'OK') {
-                this.dialogRef.close(this.widget);
-            }
+            this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
+                if (resp.message === 'OK') {
+                    this.dialogRef.close(this.widget);
+                } else {
+                    this.ready = true;
+                }
+            });
         });
     }
 
@@ -394,14 +449,14 @@ export class AirQualityEditDialogComponent implements OnInit {
         return input ? input.name : undefined;
     }
 
-    compareExports(a: ChartsExportMeasurementModel, b: ChartsExportMeasurementModel): boolean {
+    compareExports(a: ExportModel, b: ExportModel): boolean {
         if (a === undefined && b === undefined) {
             return true;
         }
         if (a === undefined || b === undefined) {
             return false;
         }
-        return a.id === b.id && a.name === b.name;
+        return a.ID === b.ID;
     }
 
     compareExportValueModels(a: ExportValueModel, b: ExportValueModel): boolean {
@@ -458,23 +513,13 @@ export class AirQualityEditDialogComponent implements OnInit {
     }
 
     private selectUBAStation() {
-        if (this.ubaStations.length === 0) {
-            // only load if not done yet
-            this.ubaService.getUBAStations().subscribe(resp => {
-                this.ubaStations = resp;
-                this.sortUBAStations();
-                this.selectClosestUBAStation();
-                this.mergeUBAStationCapabilities();
-            });
-        } else {
-            this.sortUBAStations();
-            this.selectClosestUBAStation();
-        }
-
+        this.sortUBAStations();
+        this.selectClosestUBAStation();
+        this.mergeUBAStationCapabilities();
     }
 
     private selectClosestUBAStation() {
-        const closest = this.ubaStations[0];
+        const closest = this.ubaStations.find(u => this.ubaBlacklist.indexOf(u.station_id) === -1) || this.invalidUbaStation;
         if (closest.distance === undefined) {
             this.ubaStationSelected = this.invalidUbaStation;
             return;
@@ -493,11 +538,19 @@ export class AirQualityEditDialogComponent implements OnInit {
                     const idx = short_names.findIndex(short_name => m.short_name === short_name);
                     if (idx === -1) {
                         m.can_web = false;
+                        m.provider = undefined;
                     } else {
                         m.can_web = true;
+                        m.provider = AirQualityExternalProvider.UBA;
                     }
                 }
             });
+            if (short_names.length === 0) {
+                this.ubaBlacklist.push(this.ubaStationSelected.station_id);
+                console.log('Blacklisting uba station ' + this.ubaStationSelected.station_id + ': No data');
+                this.ubaStationSelected = this.invalidUbaStation;
+                this.selectUBAStation();
+            }
         });
     }
 
@@ -507,7 +560,7 @@ export class AirQualityEditDialogComponent implements OnInit {
 
     private sortUBAStations() {
         this.ubaStations.forEach(station =>
-            station.distance = this.latLongDistance(station.station_latitude, station.station_longitude,
+            station.distance = AirQualityEditDialogComponent.latLongDistance(station.station_latitude, station.station_longitude,
                 this.location.latitude, this.location.longitude));
         this.ubaStations.sort((a, b) => {
             if (!a.distance || !b.distance) {
@@ -515,28 +568,6 @@ export class AirQualityEditDialogComponent implements OnInit {
             }
             return a.distance < b.distance ? -1 : 1;
         });
-    }
-
-    private latLongDistance(latA: number, longA: number, latB: number, longB: number): number {
-        const er = 6366.707;
-
-        // convert degree to radial
-        const latFrom = latA * (Math.PI / 180);
-        const latTo = latB * (Math.PI / 180);
-        const lngFrom = longA * (Math.PI / 180);
-        const lngTo = longB * (Math.PI / 180);
-
-        const x1 = er * Math.cos(lngFrom) * Math.sin(latFrom);
-        const y1 = er * Math.sin(lngFrom) * Math.sin(latFrom);
-        const z1 = er * Math.cos(latFrom);
-
-        const x2 = er * Math.cos(lngTo) * Math.sin(latTo);
-        const y2 = er * Math.sin(lngTo) * Math.sin(latTo);
-        const z2 = er * Math.cos(latTo);
-
-        const d = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
-
-        return d;
     }
 
     hasValidPollenArea(): boolean {
@@ -582,11 +613,151 @@ export class AirQualityEditDialogComponent implements OnInit {
         }
     }
 
-    private getEmptyExportValueModel(): ExportValueModel {
-        return {InstanceID: '', Name: '', Path: '', Type: ''};
+    private getImportInstancesOfType(typeId: string): ImportInstancesModel[] {
+        return this.importInstances.filter(i => i.import_type_id === typeId);
     }
 
-    private getEmptyDataModel(): SensorDataModel {
-        return {column: this.getEmptyExportValueModel(), value: NaN};
+    private filterImportInstancesByConfigValue(importInstances: ImportInstancesModel[], configName: string,
+                                               configValue: any, moreAllowed = true) {
+
+        return importInstances.filter(i => i.configs.findIndex(c => {
+            if (c.name !== configName) {
+                return false;
+            }
+            if (moreAllowed && Array.isArray(c.value)) {
+                return c.value.findIndex(v => v === configValue) !== -1;
+            }
+            return configValue === c.value;
+        }) !== -1);
+    }
+
+    private getExportsOfImports(importInstances: ImportInstancesModel[]): ExportModel[] {
+        const ids = importInstances.map(i => i.id);
+        return this.exports.filter(e => e.FilterType === 'import_id' && ids.indexOf(e.Filter) !== -1);
+    }
+
+    private generateUbaImportInstance(stationId: string): Observable<ImportInstancesModel> {
+        return this.importInstancesService.saveImportInstance({
+            name: 'AirQuality Widget: ' + this.name + ' (station ' + stationId + ')',
+            configs: [
+                {
+                    name: 'FilterStationIds',
+                    value: ['' + +this.ubaStationSelected.station_id],
+                }
+            ],
+            import_type_id: environment.importTypeIdUbaStation,
+        } as ImportInstancesModel);
+    }
+
+    private generateUbaExport(importInstance: ImportInstancesModel, stationId: string): Observable<ExportModel> {
+        return this.importTypesService.getImportType(environment.importTypeIdUbaStation).pipe(mergeMap(type => {
+            return this.exportService.startPipeline({
+                Offset: 'smallest',
+                Name: 'AirQuality Widget: ' + this.name + ' (station ' + stationId + ')',
+                Filter: importInstance.id,
+                FilterType: 'import_id',
+                ServiceName: type.name,
+                Values: this.importTypesService.parseImportTypeExportValues(type),
+                EntityName: importInstance.name,
+                Topic: importInstance.kafka_topic,
+                TimePath: 'time',
+                Generated: true,
+            } as ExportModel);
+        }));
+    }
+
+    private prepareUbaSave(): Observable<null> {
+        if (!this.hasValidUBAStation()) {
+            // no station -> nothing to do
+            return of(null);
+        }
+        return new Observable<null>(obs => {
+            if (this.widget.properties.ubaInfo === undefined) {
+                this.widget.properties.ubaInfo = {};
+            }
+            this.widget.properties.ubaInfo.stationId = '' + this.ubaStationSelected.station_id;
+            let ubaInstances = this.getImportInstancesOfType(environment.importTypeIdUbaStation);
+            ubaInstances = this.filterImportInstancesByConfigValue(ubaInstances, 'FilterStationIds',
+                '' + this.ubaStationSelected.station_id);
+            if (ubaInstances.length === 0) {
+                // no matching import instance, generate import and export
+                if (this.widget.properties.ubaInfo.importGenerated === true
+                    && this.widget.properties.ubaInfo.importInstanceId !== undefined) {
+                    this.importInstancesService.deleteImportInstance(this.widget.properties.ubaInfo.importInstanceId).subscribe();
+                }
+                this.generateUbaImportInstance(this.widget.properties.ubaInfo.stationId).subscribe(instance => {
+                    if (this.widget.properties.ubaInfo === undefined) {
+                        this.widget.properties.ubaInfo = {};
+                    }
+                    this.widget.properties.ubaInfo.importInstanceId = instance.id;
+                    this.widget.properties.ubaInfo.importGenerated = true;
+                    this.helperGenerateUbaExport(instance, obs);
+                });
+            } else {
+                // matching import instance found, might need to generate export
+                const instance = ubaInstances[0];
+                if (this.widget.properties.ubaInfo === undefined) {
+                    this.widget.properties.ubaInfo = {};
+                }
+                this.widget.properties.ubaInfo.importInstanceId = instance.id;
+                const matchingExports = this.getExportsOfImports(ubaInstances);
+                matchingExports.filter(e => e.Values.filter(v =>
+                    (v.Path === 'value.measurement' && v.Name === 'measurement')
+                    || (v.Path === 'value.value' && v.Name === 'value')
+                    || (v.Path === 'value.meta.station_id' && v.Name === 'station_id')
+                ).length === 3);
+                if (matchingExports.length === 0) {
+                    this.helperGenerateUbaExport(instance, obs);
+                } else {
+                    // matching export found, no need to generate anything
+                    this.widget.properties.ubaInfo.exportId = matchingExports[0].ID;
+                    this.fillMeasurementsUbaInfo(matchingExports[0]);
+                    obs.next();
+                    obs.complete();
+                }
+            }
+        });
+    }
+
+    /**
+     * Cleans measurements from old uba export (if needed), creates a new export and fills measurements
+     * @param instance
+     * @param obs
+     * @private
+     */
+    private helperGenerateUbaExport(instance: ImportInstancesModel, obs: Subscriber<null>) {
+        // clean old export if needed
+        if (this.widget.properties.ubaInfo?.exportGenerated === true && this.widget.properties.ubaInfo?.exportId !== undefined) {
+            this.cleanMeasurementsUbaInfo(this.widget.properties.ubaInfo?.exportId);
+            this.exportService.stopPipelineById(this.widget.properties.ubaInfo.exportId).subscribe();
+        }
+        this.generateUbaExport(instance, this.widget.properties.ubaInfo?.stationId || '').subscribe(exp => {
+            if (this.widget.properties.ubaInfo === undefined) {
+                this.widget.properties.ubaInfo = {};
+            }
+            this.widget.properties.ubaInfo.exportId = exp.ID;
+            this.widget.properties.ubaInfo.exportGenerated = true;
+            this.fillMeasurementsUbaInfo(exp);
+            obs.next();
+            obs.complete();
+        });
+    }
+
+    private fillMeasurementsUbaInfo(exp: ExportModel) {
+        this.measurements.forEach(m => {
+            if (m.provider === AirQualityExternalProvider.UBA && !m.has_outside) {
+                m.outsideExport = exp;
+                m.outsideData.column = exp.Values.find(v => v.Path === 'value.value');
+            }
+        });
+    }
+
+    private cleanMeasurementsUbaInfo(exportId: string) {
+        this.measurements.forEach(m => {
+            if (m.outsideExport?.ID === exportId) {
+                m.outsideExport = undefined;
+                m.outsideData.column = undefined;
+            }
+        });
     }
 }
