@@ -23,6 +23,8 @@ import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
 import {DeviceTypeServiceModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 import {DeviceInstancesBaseModel} from '../../../devices/device-instances/shared/device-instances.model';
+import {util} from 'jointjs';
+import string = util.format.string;
 
 @Component({
     selector: 'senergy-pipeline-details',
@@ -35,6 +37,7 @@ export class PipelineDetailsComponent implements OnInit {
     ready = false;
     pipe = {} as PipelineModel;
     showAll = false;
+    configs = new Map<string, [[string, string]]>();
 
     constructor(private route: ActivatedRoute, private pipelineRegistryService: PipelineRegistryService, private sanitizer: DomSanitizer,
                 private deviceTypeService: DeviceTypeService, private deviceInstanceService: DeviceInstancesService) {
@@ -47,16 +50,25 @@ export class PipelineDetailsComponent implements OnInit {
                 if (resp !== null) {
                     this.pipe = resp;
                     this.pipe.operators.forEach(operator => {
+                        if (operator.config) {
+                            const c = [] as unknown as [[string, string]];
+                            operator.config.forEach((value: string, key: string) => {
+                                c.push([key, value]);
+                            });
+                            this.configs.set(operator.id, c);
+                        }
                         operator.inputTopics.forEach(topic => {
                             if (topic.filterType === 'DeviceId') {
-                                this.deviceTypeService.getDeviceService(topic.name.replace(/_/g, ':')).subscribe((service: DeviceTypeServiceModel | null) => {
+                                this.deviceTypeService.getDeviceService(topic.name.replace(/_/g, ':')).
+                                subscribe((service: DeviceTypeServiceModel | null) => {
                                     if (service !== null) {
                                         topic.name = service.name;
                                     }
                                 });
                                 const devices = topic.filterValue.split(',');
                                 for (const [i, value] of devices.entries()) {
-                                    this.deviceInstanceService.getDeviceInstance(value).subscribe((device: DeviceInstancesBaseModel | null) => {
+                                    this.deviceInstanceService.getDeviceInstance(value).
+                                    subscribe((device: DeviceInstancesBaseModel | null) => {
                                         if (device !== null) {
                                             devices[i] = device.name;
                                         }
@@ -81,8 +93,14 @@ export class PipelineDetailsComponent implements OnInit {
         }
     }
 
+    getConfigByOperatorId(id: string): [[string, string]] | undefined {
+        if (this.configs.has(id)) {
+                return this.configs.get(id);
+        }
+        return undefined;
+    }
+
     show(topic: OperatorInputTopic) {
-        console.log(this.pipe.id, topic.filterValue.split(':')); // TODO
         return this.showAll || topic.filterType === 'DeviceId' || topic.filterValue.split(':').length === 2;
     }
 

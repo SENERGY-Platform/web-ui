@@ -41,6 +41,14 @@
                     <h3>
                         <mat-icon class="v-align-middle">poll</mat-icon>
                         {{ operator.name }} - {{ operator.id }} - {{ operator.imageId }}</h3>
+                        <div *ngFor="let config of getConfigByOperatorId(operator.id)">
+                            <h4>
+                                <mat-icon
+                                        class="v-align-middle material-icons-outlined">build
+                                </mat-icon>
+                                {{config[0]}}: {{config[1]}}
+                            </h4>
+                    </div>
                     <div class="pipe-operator" *ngFor="let topic of operator.inputTopics">
                         <div *ngIf="show(topic)">
                             <h4>
