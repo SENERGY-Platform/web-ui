@@ -183,6 +183,29 @@ export class ExportComponent implements OnInit, OnDestroy {
     }
 
     deleteMultipleItems(): void {
-        //TODO implement multiple delete
+        this.dialogsService.openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' exports' : ' export')).afterClosed().subscribe(
+            (deleteExports: boolean) => {
+
+                if (deleteExports) {
+                    this.ready = false;
+                    
+                    let exportIDs: string[] = [];
+
+                    this.selection.selected.forEach((exp: ExportModel) => {
+                            if (exp.ID !== undefined) {
+                                exportIDs.push(exp.ID)
+                            }
+                        }
+                    );
+
+                    this.exportService.stopPipelines(exportIDs).subscribe(() => {
+                        this.paginator.pageIndex = 0;
+                        this.getExports(true);
+                        this.selectionClear();
+
+                        this.ready = true;
+                    });
+                }
+            });
     }
 }

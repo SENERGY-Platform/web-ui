@@ -99,6 +99,15 @@ export class ExportService {
         );
     }
 
+    stopPipelines(exp: String[]): Observable<{status: number}> {
+        return this.http.request('DELETE', environment.exportService + '/instances', {body: exp, responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipelines: Error', {status: 404}))
+        );
+    }
+
     prepareDeviceServiceExport(deviceInstancesModel: DeviceInstancesModel | DeviceInstancesUpdateModel,
                                service: DeviceTypeServiceModel): ExportModel[] {
         const exports: ExportModel[] = [];
