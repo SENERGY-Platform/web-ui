@@ -49,7 +49,6 @@ export class ExportComponent implements OnInit, OnDestroy {
     exportsDataSource = new MatTableDataSource<ExportModel>();
     showGenerated = localStorage.getItem('data.exports.showGenerated') === 'true';
     ready = false;
-    deleteInProgress = false;
     url = environment.influxAPIURL;
 
     public searchText = '';
@@ -87,24 +86,18 @@ export class ExportComponent implements OnInit, OnDestroy {
         this.dialogsService.openDeleteDialog('export').afterClosed().subscribe((deleteExport: boolean) => {
             if (deleteExport) {
                 this.ready = false;
-                this.deleteInProgress = true;
                 this.exportService.stopPipeline(exp).subscribe((response) => {
                     if (response.status === 204) {
                         this.snackBar.open('Export deleted', undefined, {
                             duration: 2000,
                         });
-                        const index = this.exports.indexOf(exp);
-                        if (index > -1) {
-                            this.exports.splice(index, 1);
-                        }
-                        this.getExports(false);
+                        this.getExports(true);
                     } else {
                         this.snackBar.open('Export could not be deleted', undefined, {
                             duration: 2000,
                         });
                     }
                     this.ready = true;
-                    this.deleteInProgress = false;
                 });
             }
         });
