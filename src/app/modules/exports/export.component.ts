@@ -126,9 +126,14 @@ export class ExportComponent implements OnInit, OnDestroy {
             this.reset();
         }
         this.exportsDataSource.sort = this.sort;
-        this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
+        this.sort.sortChange.subscribe(() => {
+                this.paginator.pageIndex = 0;
+                this.selectionClear();
+            }
+        );
 
         this.exportSub = merge(this.sort.sortChange, this.paginator.page).pipe(startWith({}), switchMap(() => {
+            this.ready = false;
             return this.exportService.getExports(
                 this.searchText,
                 this.paginator.pageSize, this.paginator.pageSize * this.paginator.pageIndex,
@@ -188,7 +193,7 @@ export class ExportComponent implements OnInit, OnDestroy {
 
                 if (deleteExports) {
                     this.ready = false;
-                    
+
                     let exportIDs: string[] = [];
 
                     this.selection.selected.forEach((exp: ExportModel) => {
