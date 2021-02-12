@@ -250,8 +250,6 @@ export class AirQualityEditDialogComponent implements OnInit {
     };
     ubaStationSelected = this.invalidUbaStation;
     maxUBADistance = 10;
-    pollenAreaResponse: any = undefined;
-    dwd_partregion_name = ' ';
     autoLocationFailed = false;
     pollen: MeasurementModel[] = [
         {
@@ -352,9 +350,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         const y2 = er * Math.sin(lngTo) * Math.sin(latTo);
         const z2 = er * Math.cos(latTo);
 
-        const d = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
-
-        return d;
+        return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
     }
 
     ngOnInit() {
@@ -413,7 +409,6 @@ export class AirQualityEditDialogComponent implements OnInit {
                 }
             });
             this.ubaStationSelected = widget.properties.ubaStation ? widget.properties.ubaStation : this.ubaStationSelected;
-            this.dwd_partregion_name = widget.properties.dwd_partregion_name ? widget.properties.dwd_partregion_name : ' ';
             this.yrPath = widget.properties.yrPath ? widget.properties.yrPath : this.yrPath;
         }));
     }
@@ -425,13 +420,16 @@ export class AirQualityEditDialogComponent implements OnInit {
 
     save(): void {
         this.ready = false;
-        this.prepareUbaSave().subscribe(_ => {
+        const observables: Observable<any>[] = [];
+        observables.push(this.prepareDWDSave());
+        observables.push(this.prepareUbaSave());
+        forkJoin(observables).subscribe(_ => {
             this.widget.properties.measurements = this.measurements;
             this.widget.properties.location = this.location;
             this.widget.properties.formatted_address = this.formatted_address;
             this.widget.name = this.name;
             this.widget.properties.ubaStation = undefined; // overrides legacy widgets
-            this.widget.properties.dwd_partregion_name = this.dwd_partregion_name === ' ' ? undefined : this.dwd_partregion_name;
+            this.widget.properties.dwd_partregion_name = undefined; // overrides legacy widgets
             this.widget.properties.pollen = this.pollen;
             this.widget.properties.yrPath = this.yrPath === '' ? undefined : this.yrPath;
 
@@ -474,21 +472,6 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.changeLocation = false;
         this.location = {latitude: Number(geoname.lat), longitude: Number(geoname.lng)};
         this.selectUBAStation();
-        if (this.pollenAreaResponse === undefined) {
-            this.dwdPollenService.getPollenAreaResponse().subscribe(resp => {
-                this.pollenAreaResponse = resp;
-                this.dwd_partregion_name = this.dwdPollenService.extractPollenArea(this.location.latitude, this.location.longitude, resp);
-                if (!this.hasValidPollenArea()) {
-                    this.erasePollenData();
-                }
-            });
-        } else {
-            this.dwd_partregion_name =
-                this.dwdPollenService.extractPollenArea(this.location.latitude, this.location.longitude, this.pollenAreaResponse);
-            if (!this.hasValidPollenArea()) {
-                this.erasePollenData();
-            }
-        }
         this.yrPath = this.yrWeatherService.getYrPath(geoname);
         this.yrWeatherService.getYrForecast(this.yrPath).subscribe(() => {
                 this.toggleYrCanWeb(true);
@@ -568,15 +551,6 @@ export class AirQualityEditDialogComponent implements OnInit {
             }
             return a.distance < b.distance ? -1 : 1;
         });
-    }
-
-    hasValidPollenArea(): boolean {
-        return this.dwd_partregion_name !== ' ';
-    }
-
-    private erasePollenData() {
-        this.pollenSelected = [];
-        this.measurementsSelected(this.pollen, this.pollenSelected);
     }
 
     autoLocation() {
@@ -780,6 +754,154 @@ export class AirQualityEditDialogComponent implements OnInit {
                 m.outsideExport = undefined;
                 m.outsideData.column = undefined;
             }
+        });
+    }
+
+    private prepareDWDSave(): Observable<any> {
+        const selectedPollen = this.pollen.filter(p => p.is_enabled);
+        if (selectedPollen.length === 0) {
+            if (this.widget.properties.dwdPollenInfo !== undefined) {
+                if (this.widget.properties.dwdPollenInfo.importGenerated === true
+                    && this.widget.properties.dwdPollenInfo.importInstanceId !== undefined) {
+                    this.importInstancesService.deleteImportInstance(this.widget.properties.dwdPollenInfo.importInstanceId).subscribe();
+                }
+                this.widget.properties.dwdPollenInfo.importGenerated = undefined;
+                this.widget.properties.dwdPollenInfo.importInstanceId = undefined;
+
+                if (this.widget.properties.dwdPollenInfo.exportGenerated === true
+                    && this.widget.properties.dwdPollenInfo.exportId !== undefined) {
+                    this.exportService.stopPipelineById(this.widget.properties.dwdPollenInfo.exportId).subscribe();
+                }
+                this.widget.properties.dwdPollenInfo.exportGenerated = undefined;
+                this.widget.properties.dwdPollenInfo.exportId = undefined;
+            }
+            return of(null);
+
+        } else {
+            return new Observable<any>(obs => {
+                let matchingImportInstances = this.getImportInstancesOfType(environment.importTypeIdDwdPollen);
+                matchingImportInstances = this.filterImportInstancesByConfigValue(matchingImportInstances, 'lat', this.location.latitude);
+                matchingImportInstances = this.filterImportInstancesByConfigValue(matchingImportInstances, 'long', this.location.longitude);
+                selectedPollen.forEach(p => matchingImportInstances = this.filterImportInstancesByConfigValue(matchingImportInstances, 'FilterPollen', p.short_name));
+                if (matchingImportInstances.length === 0) {
+                    if (this.widget.properties.dwdPollenInfo?.importGenerated === true
+                        && this.widget.properties.dwdPollenInfo.importInstanceId !== undefined) {
+                        this.importInstancesService.deleteImportInstance(this.widget.properties.dwdPollenInfo.importInstanceId).subscribe();
+                    }
+                    this.generateDwdImportInstance(this.location.latitude, this.location.longitude, selectedPollen)
+                        .subscribe(instance => {
+                            if (this.widget.properties.dwdPollenInfo === undefined) {
+                                this.widget.properties.dwdPollenInfo = {};
+                            }
+                            this.widget.properties.dwdPollenInfo.importInstanceId = instance.id;
+                            this.widget.properties.dwdPollenInfo.importGenerated = true;
+                            this.helperGenerateDWDExport(instance, this.location.latitude, this.location.longitude, obs);
+                        });
+                } else {
+                    if (this.widget.properties.dwdPollenInfo === undefined) {
+                        this.widget.properties.dwdPollenInfo = {};
+                    }
+                    // matching import instance found, might need to generate export
+                    const oldInstance = matchingImportInstances.find(i => i.id === this.widget.properties.dwdPollenInfo?.importInstanceId);
+                    let instance: ImportInstancesModel;
+                    if (oldInstance !== undefined) {
+                        instance = oldInstance;
+                    } else {
+                        if (this.widget.properties.dwdPollenInfo.importGenerated === true
+                            && this.widget.properties.dwdPollenInfo.importInstanceId !== undefined) {
+                            this.importInstancesService.deleteImportInstance(this.widget.properties.dwdPollenInfo.importInstanceId).subscribe();
+                        }
+                        instance = matchingImportInstances[0];
+                    }
+                    this.widget.properties.dwdPollenInfo.importInstanceId = instance.id;
+                    const matchingExports = this.getExportsOfImports(matchingImportInstances);
+                    matchingExports.filter(e => e.Values.filter(v =>
+                        (v.Path === 'value.pollen' && v.Name === 'pollen')
+                        || (v.Path === 'value.today' && v.Name === 'today')
+                    ).length === 3);
+                    if (matchingExports.length === 0) {
+                        this.helperGenerateDWDExport(instance, this.location.latitude, this.location.longitude, obs);
+                    } else {
+                        // matching export found, no need to generate anything
+                        const oldExport = matchingExports.find(e => e.ID === this.widget.properties.dwdPollenInfo?.exportId);
+                        let exp: ExportModel;
+                        if (oldExport !== undefined) {
+                            exp = oldExport;
+                        } else {
+                            if (this.widget.properties.dwdPollenInfo?.exportGenerated === true
+                                && this.widget.properties.dwdPollenInfo?.exportId !== undefined) {
+                                this.exportService.stopPipelineById(this.widget.properties.dwdPollenInfo.exportId).subscribe();
+                            }
+                            exp = matchingExports[0];
+                        }
+                        this.widget.properties.dwdPollenInfo.exportId = exp.ID;
+                        obs.next();
+                        obs.complete();
+                    }
+                }
+            });
+        }
+    }
+
+    private generateDwdImportInstance(lat: number, long: number, pollen: MeasurementModel[]): Observable<ImportInstancesModel> {
+        return this.importInstancesService.saveImportInstance({
+            name: 'AirQuality Widget: ' + this.name + ' (lat: ' + lat + ', long: ' + long + ')',
+            configs: [
+                {
+                    name: 'lat',
+                    value: lat,
+                },
+                {
+                    name: 'long',
+                    value: long,
+                },
+                {
+                    name: 'FilterPollen',
+                    value: pollen.map(p => p.short_name),
+                }
+            ],
+            import_type_id: environment.importTypeIdDwdPollen,
+        } as ImportInstancesModel);
+    }
+
+    private generateDWDExport(importInstance: ImportInstancesModel, lat: number, long: number): Observable<ExportModel> {
+        return this.importTypesService.getImportType(environment.importTypeIdDwdPollen).pipe(mergeMap(type => {
+            return this.exportService.startPipeline({
+                Offset: 'smallest',
+                Name: 'AirQuality Widget: ' + this.name + ' (lat: ' + lat + ', long: ' + long + ')',
+                Filter: importInstance.id,
+                FilterType: 'import_id',
+                ServiceName: type.name,
+                Values: this.importTypesService.parseImportTypeExportValues(type),
+                EntityName: importInstance.name,
+                Topic: importInstance.kafka_topic,
+                TimePath: 'time',
+                Generated: true,
+            } as ExportModel);
+        }));
+    }
+
+    /**
+     * Cleans measurements from old dwd export (if needed), creates a new export and fills measurements
+     * @param instance
+     * @param lat
+     * @param long
+     * @param obs
+     * @private
+     */
+    private helperGenerateDWDExport(instance: ImportInstancesModel, lat: number, long: number, obs: Subscriber<null>) {
+        // clean old export if needed
+        if (this.widget.properties.dwdPollenInfo?.exportGenerated === true && this.widget.properties.dwdPollenInfo?.exportId !== undefined) {
+            this.exportService.stopPipelineById(this.widget.properties.dwdPollenInfo.exportId).subscribe();
+        }
+        this.generateDWDExport(instance, lat, long).subscribe(exp => {
+            if (this.widget.properties.dwdPollenInfo === undefined) {
+                this.widget.properties.dwdPollenInfo = {};
+            }
+            this.widget.properties.dwdPollenInfo.exportId = exp.ID;
+            this.widget.properties.dwdPollenInfo.exportGenerated = true;
+            obs.next();
+            obs.complete();
         });
     }
 }

@@ -45,12 +45,6 @@
                 <div *ngIf="!hasValidUBAStation()" class="small-error-text color-warn">
                     No <span matTooltip="Umweltbundesamt">UBA</span> station within {{maxUBADistance}} km!
                 </div>
-                <div *ngIf="hasValidPollenArea()" class="help-text color-accent">
-                    <span matTooltip="Deutscher Wetterdienst">DWD</span> pollen area: {{dwd_partregion_name}}
-                </div>
-                <div *ngIf="!hasValidPollenArea()" class="small-error-text color-warn">
-                    Location outside all <span matTooltip="Deutscher Wetterdienst">DWD</span> pollen areas!
-                </div>
                 <div *ngIf="!this.yrPath" class="small-error-text color-warn">
                     Can't get weather forecast for this location!
                 </div>
@@ -99,8 +93,7 @@
                 <mat-form-field color="accent">
                     <mat-label>Enable pollen warnings</mat-label>
                     <mat-select multiple [(ngModel)]="pollenSelected"
-                                (closed)="measurementsSelected(pollen, pollenSelected)"
-                                [disabled]="!hasValidPollenArea()">
+                                (closed)="measurementsSelected(pollen, pollenSelected)">
                         <mat-option *ngFor="let option of pollen" [value]="option.name_html">
                             <div [innerHTML]="option.name_html"></div>
                         </mat-option>

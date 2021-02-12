@@ -72,8 +72,8 @@ export class AirQualityService {
         });
     }
 
-    readAllData(widget: WidgetModel): Observable<MeasurementModel[]> {
-        return new Observable<MeasurementModel[]>((observer) => {
+    readAllData(widget: WidgetModel): Observable<WidgetModel> {
+        return new Observable<WidgetModel>((observer) => {
             if (widget.properties.measurements) {
                 const requestPayload: ChartsExportRequestPayloadModel = {
                     time: {
@@ -94,6 +94,7 @@ export class AirQualityService {
                 let fieldCounter = 0;
                 const insideMap = new Map<number, number>();
                 const outsideMap = new Map<number, number>();
+                const pollenMap = new Map<number, number>();
                 measurements.forEach((measurement: MeasurementModel, index) => {
                     if (measurement.is_enabled) {
                         const id = (measurement.export ? measurement.export.ID : '');
@@ -127,35 +128,43 @@ export class AirQualityService {
                         array.push({id: id || '', fields: fields});
                     }
                 });
+                if (widget.properties.dwdPollenInfo?.exportId !== undefined) {
+                    widget.properties.pollen?.forEach((p, index) => {
+                        if (!p.is_enabled || widget.properties.dwdPollenInfo?.exportId === undefined) {
+                            return;
+                        }
+                        const fields: ChartsExportRequestPayloadQueriesFieldsModel[] = [];
+                        fields.push({
+                            name: 'today',
+                            math: '',
+                        });
+                        pollenMap.set(++fieldCounter, index);
+                        fields.push({
+                            name: 'pollen',
+                            math: '',
+                            filterType: '=',
+                            filterValue: p.short_name,
+                        });
+                        fieldCounter++;
+                        array.push({id: widget.properties.dwdPollenInfo.exportId, fields: fields});
+                    });
+                }
                 requestPayload.queries = array;
 
-                const myMeasurements = widget.properties.measurements || [];
 
                 this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries?include_empty_columns=true'), requestPayload)
                     .subscribe(model => {
                         const values = model.results[0].series[0].values;
                         if (values.length === 0) {
-                            observer.next(myMeasurements);
+                            observer.next(widget);
                             observer.complete();
                             return;
                         }
+                        this.mapValuesIntoMeasurements(insideMap, values, widget, 'measurements', true);
+                        this.mapValuesIntoMeasurements(outsideMap, values, widget, 'measurements', false);
+                        this.mapValuesIntoMeasurements(pollenMap, values, widget, 'pollen', false);
 
-                        insideMap.forEach((measurementIndex, columnIndex) => {
-                            values.forEach(val => {
-                                if (val[columnIndex] !== null) {
-                                    myMeasurements[measurementIndex].data.value = Math.round(Number(val[columnIndex]) * 100) / 100;
-                                }
-                            });
-                        });
-
-                        outsideMap.forEach((measurementIndex, columnIndex) => {
-                            values.forEach(val => {
-                                if (val[columnIndex] !== null) {
-                                    myMeasurements[measurementIndex].outsideData.value = Math.round(Number(val[columnIndex]) * 100) / 100;
-                                }
-                            });
-                        });
-                        observer.next(myMeasurements);
+                        observer.next(widget);
                         observer.complete();
                     });
             }
@@ -163,12 +172,39 @@ export class AirQualityService {
     }
 
     cleanGeneratedContent(properties: AirQualityPropertiesModel) {
-        if (properties.ubaInfo?.exportGenerated === true) {
-            this.exportService.stopPipelineById(properties.ubaInfo?.exportId || '').subscribe();
+        if (properties.ubaInfo?.exportGenerated === true && properties.ubaInfo?.exportId !== undefined) {
+            this.exportService.stopPipelineById(properties.ubaInfo.exportId).subscribe();
         }
-        if (properties.ubaInfo?.importGenerated === true) {
-            this.importInstancesService.deleteImportInstance(properties.ubaInfo?.importInstanceId || '').subscribe();
+        if (properties.ubaInfo?.importGenerated === true && properties.ubaInfo?.importInstanceId !== undefined) {
+            this.importInstancesService.deleteImportInstance(properties.ubaInfo.importInstanceId).subscribe();
         }
+        if (properties.dwdPollenInfo?.exportGenerated === true && properties.dwdPollenInfo?.exportId !== undefined) {
+            this.exportService.stopPipelineById(properties.dwdPollenInfo?.exportId).subscribe();
+        }
+        if (properties.dwdPollenInfo?.importGenerated === true && properties.dwdPollenInfo?.importInstanceId !== undefined) {
+            this.importInstancesService.deleteImportInstance(properties.dwdPollenInfo.importInstanceId).subscribe();
+        }
+    }
+
+    private mapValuesIntoMeasurements(m: Map<number, number>, values: (string | number)[][], widget: WidgetModel,
+                                      property: string, inside: boolean) {
+
+        m.forEach((measurementIndex, columnIndex) => {
+            values.forEach(val => {
+                // @ts-ignore
+                if (val[columnIndex] !== null && widget.properties[property] !== undefined) {
+                    if (inside) {
+                        // @ts-ignore
+                        widget.properties[property][measurementIndex].data.value =
+                            Math.round(Number(val[columnIndex]) * 100) / 100;
+                    } else {
+                        // @ts-ignore
+                        widget.properties[property][measurementIndex].outsideData.value =
+                            Math.round(Number(val[columnIndex]) * 100) / 100;
+                    }
+                }
+            });
+        });
     }
 }
 

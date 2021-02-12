@@ -26,8 +26,10 @@ export interface AirQualityPropertiesModel {
     /** @deprecated */
     ubaStation?: (UBAStation);
     ubaInfo?: AirQualityImportExportModel;
+    dwdPollenInfo?: AirQualityImportExportModel;
     formatted_address?: (string);
     measurements?: (MeasurementModel[]);
+    /** @deprecated */
     dwd_partregion_name?: (string);
     pollen?: (MeasurementModel[]);
     weather?: (YrWeatherModel);

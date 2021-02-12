@@ -17,8 +17,8 @@
 <mat-card>
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="content-size">
-        <senergy-widget-spinner [show]="!isReady() && isWidgetConfigured()"></senergy-widget-spinner>
-        <div *ngIf="isReady() && isWidgetConfigured()" style="height: 100%">
+        <senergy-widget-spinner [show]="!ready && isWidgetConfigured()"></senergy-widget-spinner>
+        <div *ngIf="ready && isWidgetConfigured()" style="height: 100%">
             <div *ngIf="!inDetailView" (click)="clicked()" matTooltip="Click to view details!"
                  [matTooltipShowDelay]="500"
                  fxLayout="column" fxLayoutAlign="space-evenly center" style="height: 100%">

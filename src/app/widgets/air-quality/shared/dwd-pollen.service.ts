@@ -31,31 +31,31 @@ export class DWDPollenService {
     private pollenLevel: NameValuePair[] = [
         {
             name: 'keine Belastung',
-            value: 0,
-        },
-        {
-            name: 'keine bis geringe Belastung',
-            value: 0.5,
-        },
-        {
-            name: 'geringe Belastung',
             value: 1,
         },
         {
-            name: 'geringe bis mittlere Belastung',
-            value: 1.5,
-        },
-        {
-            name: 'mittlere Belastung',
+            name: 'keine bis geringe Belastung',
             value: 2,
         },
         {
+            name: 'geringe Belastung',
+            value: 3,
+        },
+        {
+            name: 'geringe bis mittlere Belastung',
+            value: 4,
+        },
+        {
+            name: 'mittlere Belastung',
+            value: 5,
+        },
+        {
             name: 'mittlere bis hohe Belastung',
-            value: 2.5,
+            value: 6,
         },
         {
             name: 'hohe Belastung',
-            value: 3,
+            value: 7,
         },
     ];
 
@@ -73,6 +73,7 @@ export class DWDPollenService {
                 );
     }
 
+    /** @deprecated */
     extractPollenArea(lat: number, lon: number, pollenAreaResponse: any): string {
         let area = ' ';
         // @ts-ignore
@@ -97,7 +98,7 @@ export class DWDPollenService {
         return area;
     }
 
-
+    /** @deprecated */
     getPollenForecast(): Observable<any> {
         return this.http.get<any>(
                     environment.dwdOpenUrl + '/climate_environment/health/alerts/s31fg.json')
@@ -106,6 +107,7 @@ export class DWDPollenService {
                     );
     }
 
+    /** @deprecated */
     extractPollenForecast(partregion_name: string, pollenForecastResponse: any): DWDPollenForecast {
         // @ts-ignore
         const areaForecast = pollenForecastResponse['content'].find(region => region['partregion_name'] === partregion_name);

@@ -70,6 +70,7 @@ export const environment = {
     importRepoUrl: 'http://localhost',
     importDeployUrl: 'http://localhost',
     importTypeIdUbaStation: 'urn:infai:ses:import-type:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    importTypeIdDwdPollen: 'urn:infai:ses:import-type:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
 };
 
 /*
