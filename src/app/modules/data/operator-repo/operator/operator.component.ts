@@ -20,6 +20,8 @@ import {ActivatedRoute} from '@angular/router';
 import {OperatorRepoService} from '../shared/operator-repo.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {AuthorizationService} from '../../../../core/services/authorization.service';
+import {PermissionsService} from '../../../permissions/shared/permissions.service';
+import {PermissionsUserModel} from '../../../permissions/shared/permissions-user.model';
 
 
 @Component({
@@ -36,11 +38,14 @@ export class OperatorComponent implements OnInit {
         'string',
         'int'
     ];
+    shareUser: string | undefined = undefined;
 
     constructor(private route: ActivatedRoute,
                 private operatorService: OperatorRepoService,
                 public snackBar: MatSnackBar,
-                protected auth: AuthorizationService) {
+                protected auth: AuthorizationService,
+                protected permission: PermissionsService
+    ) {
     }
 
     ngOnInit() {
@@ -51,8 +56,15 @@ export class OperatorComponent implements OnInit {
                 if (resp !== null) {
                     this.operator = resp;
                     this.operator.editable = resp.userId === this.userId;
+                    if (this.operator.userId !== undefined && this.userId !== this.operator.userId ) {
+                        this.permission.getUserById(this.operator.userId).subscribe((response: PermissionsUserModel) => {
+                            this.shareUser = response.username;
+                        });
+                    }
                 }
             });
+        } else {
+            this.operator.editable = true;
         }
     }
 
