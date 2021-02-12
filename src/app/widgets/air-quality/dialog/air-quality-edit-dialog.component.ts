@@ -695,7 +695,17 @@ export class AirQualityEditDialogComponent implements OnInit {
                 });
             } else {
                 // matching import instance found, might need to generate export
-                const instance = ubaInstances[0];
+                const oldInstance = ubaInstances.find(i => i.id === this.widget.properties.ubaInfo?.importInstanceId);
+                let instance: ImportInstancesModel;
+                if (oldInstance !== undefined) {
+                    instance = oldInstance;
+                } else {
+                    if (this.widget.properties.ubaInfo.importGenerated === true
+                        && this.widget.properties.ubaInfo.importInstanceId !== undefined) {
+                        this.importInstancesService.deleteImportInstance(this.widget.properties.ubaInfo.importInstanceId).subscribe();
+                    }
+                    instance = ubaInstances[0];
+                }
                 if (this.widget.properties.ubaInfo === undefined) {
                     this.widget.properties.ubaInfo = {};
                 }
@@ -710,8 +720,20 @@ export class AirQualityEditDialogComponent implements OnInit {
                     this.helperGenerateUbaExport(instance, obs);
                 } else {
                     // matching export found, no need to generate anything
-                    this.widget.properties.ubaInfo.exportId = matchingExports[0].ID;
-                    this.fillMeasurementsUbaInfo(matchingExports[0]);
+                    const oldExport = matchingExports.find(e => e.ID === this.widget.properties.ubaInfo?.exportId);
+                    let exp: ExportModel;
+                    if (oldExport !== undefined) {
+                        exp = oldExport;
+                    } else {
+                        if (this.widget.properties.ubaInfo?.exportGenerated === true
+                            && this.widget.properties.ubaInfo?.exportId !== undefined) {
+                            this.cleanMeasurementsUbaInfo(this.widget.properties.ubaInfo?.exportId);
+                            this.exportService.stopPipelineById(this.widget.properties.ubaInfo.exportId).subscribe();
+                        }
+                        exp = matchingExports[0];
+                    }
+                    this.widget.properties.ubaInfo.exportId = exp.ID;
+                    this.fillMeasurementsUbaInfo(exp);
                     obs.next();
                     obs.complete();
                 }
