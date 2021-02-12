@@ -38,7 +38,7 @@
                             <mat-card-header>
                                 <mat-card-title-group>
                                     <mat-card-title>{{item.name}}</mat-card-title>
-                                    <mat-icon color="accent" class="header-icon" *ngIf="item.pub == true && item.editable == false" matTooltip="shared">
+                                    <mat-icon color="accent" (mouseover)="getOperatorUser(item.userId)" class="header-icon" *ngIf="item.pub == true && item.editable == false" matTooltip="shared by {{shareUser}}">
                                         public
                                     </mat-icon>
                                     <mat-icon color="accent" class="header-icon" *ngIf="item.pub == true && item.editable == true" matTooltip="published">
