@@ -16,7 +16,8 @@
 <div class="device-instance-container">
 
     <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true"
-                   (selectedIndexChange)="setIndex($event)"
+                   [(selectedIndex)]="activeIndex"
+                   (selectedIndexChange)="updateTab()"
                    (animationDone)="animation()">
         <mat-tab label="All">
             <div fxLayout="column">
@@ -56,6 +57,7 @@
                      [infiniteScrollDistance]="1"
                      [infiniteScrollThrottle]="50"
                      [infiniteScrollContainer]="'.device-instances-scroll'"
+                     [infiniteScrollDisabled]="!(activeIndex === 0 && animationDone)"
                      [fromRoot]="true"
                      (scrolled)="onScroll()">
                     <div *ngIf="activeIndex === 0 && animationDone">

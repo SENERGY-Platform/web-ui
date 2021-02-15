@@ -22,6 +22,11 @@ import {DevicesStateService} from './shared/devices-state.service';
 import {DevicesStateModel} from './shared/devices-state.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Subscription} from 'rxjs';
+import {
+    DeviceInstancesRouterState,
+    DeviceInstancesRouterStateTypesEnum, DeviceInstancesRouterStateTabEnum
+} from '../../modules/devices/device-instances/device-instances.component';
+import {Router} from '@angular/router';
 
 @Component({
     selector: 'senergy-devices-state',
@@ -39,7 +44,8 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     @Input() zoom = false;
 
     constructor(private devicesStateService: DevicesStateService,
-                private dashboardService: DashboardService) {
+                private dashboardService: DashboardService,
+                private router: Router) {
     }
 
     ngOnInit() {
@@ -64,5 +70,26 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
                 });
             }
         });
+    }
+
+    showOnlineDevices() {
+        this.router.navigate(['devices/deviceinstances'], {
+            state: {tab: DeviceInstancesRouterStateTabEnum.ONLINE} as DeviceInstancesRouterState,
+        });
+        return false;
+    }
+
+    showOfflineDevices() {
+        this.router.navigate(['devices/deviceinstances'], {
+            state: {tab: DeviceInstancesRouterStateTabEnum.OFFLINE} as DeviceInstancesRouterState,
+        });
+        return false;
+    }
+
+    showUnknownDevices() {
+        this.router.navigate(['devices/deviceinstances'], {
+            state: {tab: DeviceInstancesRouterStateTabEnum.UNKNOWN} as DeviceInstancesRouterState,
+        });
+        return false;
     }
 }

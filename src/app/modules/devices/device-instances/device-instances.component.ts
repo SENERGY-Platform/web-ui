@@ -43,7 +43,8 @@ const tabs = [{label: 'Online', state: 'connected'}, {label: 'Offline', state: '
 const sortingAttributes = [new SortModel('Name', 'name', 'asc')];
 
 export interface DeviceInstancesRouterState {
-    type: DeviceInstancesRouterStateTypesEnum;
+    type: DeviceInstancesRouterStateTypesEnum | undefined | null;
+    tab: DeviceInstancesRouterStateTabEnum | undefined | null;
     value: any;
 }
 
@@ -51,6 +52,13 @@ export enum DeviceInstancesRouterStateTypesEnum {
     NETWORK,
     DEVICE_TYPE,
     LOCATION,
+}
+
+export enum DeviceInstancesRouterStateTabEnum {
+    ALL,
+    ONLINE,
+    OFFLINE,
+    UNKNOWN
 }
 
 @Component({
@@ -155,8 +163,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         }
     }
 
-    setIndex(event: number) {
-        this.activeIndex = event;
+    updateTab() {
         this.animationDone = false;
         this.searchText = '';
         this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
@@ -185,6 +192,9 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                     case DeviceInstancesRouterStateTypesEnum.LOCATION:
                         this.routerLocation = state.value as LocationModel;
                         break;
+                }
+                if (state.tab) {
+                    this.activeIndex = state.tab;
                 }
             }
         }
