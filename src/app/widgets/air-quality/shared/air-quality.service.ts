@@ -185,6 +185,12 @@ export class AirQualityService {
         if (properties.dwdPollenInfo?.importGenerated === true && properties.dwdPollenInfo?.importInstanceId !== undefined) {
             this.importInstancesService.deleteImportInstance(properties.dwdPollenInfo.importInstanceId).subscribe();
         }
+        if (properties.yrInfo?.exportGenerated === true && properties.yrInfo?.exportId !== undefined) {
+            this.exportService.stopPipelineById(properties.yrInfo?.exportId).subscribe();
+        }
+        if (properties.yrInfo?.importGenerated === true && properties.yrInfo?.importInstanceId !== undefined) {
+            this.importInstancesService.deleteImportInstance(properties.yrInfo.importInstanceId).subscribe();
+        }
     }
 
     private mapValuesIntoMeasurements(m: Map<number, number>, values: (string | number)[][], widget: WidgetModel,
