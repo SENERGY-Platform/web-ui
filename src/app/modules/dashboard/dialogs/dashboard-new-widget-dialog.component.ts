@@ -20,7 +20,6 @@ import {WidgetModel} from '../shared/dashboard-widget.model';
 import {DashboardTypesEnum} from '../shared/dashboard-types.enum';
 import {Observable} from 'rxjs';
 import {SingleValueRequirementsService} from '../../../widgets/single-value/shared/single-value-requirements.service';
-import {AirQualityRequirementsService} from '../../../widgets/air-quality/shared/air-quality-requirements.service';
 import {EnergyPredictionRequirementsService} from '../../../widgets/energy-prediction/shared/energy-prediction-requirements.service';
 
 export interface Types {
@@ -74,7 +73,6 @@ export class DashboardNewWidgetDialogComponent {
         {
             value: DashboardTypesEnum.AirQuality,
             viewValue: 'Air Quality',
-            requirementsService: this.airQualityRequirementsService,
             disabled: false,
             tooltip: '',
         },
@@ -127,7 +125,6 @@ export class DashboardNewWidgetDialogComponent {
 
     constructor(private dialogRef: MatDialogRef<DashboardNewWidgetDialogComponent>,
                 private singleValueRequirementsService: SingleValueRequirementsService,
-                private airQualityRequirementsService: AirQualityRequirementsService,
                 private energyPredictionRequirementsService: EnergyPredictionRequirementsService,
     ) {
         this.types.forEach(t => this.checkRequirements(t));
