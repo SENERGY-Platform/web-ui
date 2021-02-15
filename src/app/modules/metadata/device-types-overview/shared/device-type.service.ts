@@ -21,7 +21,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {forkJoin, Observable, of} from 'rxjs';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeBaseModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
@@ -46,6 +46,24 @@ export class DeviceTypeService {
         return this.http.get<DeviceTypeModel>
         (environment.deviceManagerUrl + '/device-types/' + encodeURIComponent(id)).pipe(
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null))
+        );
+    }
+
+    getDeviceTypeListByIds(ids: string[]): Observable<DeviceTypeBaseModel[]> {
+        return this.http.post<DeviceTypeBaseModel[]>(
+            environment.permissionSearchUrl + '/v2/query', {
+                resource: 'device-types',
+                list_ids: {
+                    ids: ids,
+                    limit: ids.length,
+                    offset: 0,
+                    rights: 'r',
+                    sort_by: 'name',
+                    sort_desc: false,
+                },
+            }).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypeListByIds(ids)', []))
         );
     }
 

@@ -55,6 +55,27 @@ export class LocationsService {
         );
     }
 
+    listLocations(limit: number, offset: number, sortBy: string, sortDirection: string): Observable<LocationModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
+        }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection
+        ].join('&');
+
+        return this.http.get<LocationModel[]>(
+            environment.permissionSearchUrl + '/v2/locations?' + params).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', []))
+        );
+    }
+
     deleteLocation(id: string) {
         return this.http.delete<boolean>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(id)).pipe(
             catchError(this.errorHandlerService.handleError(LocationsService.name, 'deleteLocation', false))

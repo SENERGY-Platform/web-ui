@@ -132,7 +132,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
             this.reset();
         }
 
-        this.networksService.getNetworks(
+        this.networksService.searchNetworks(
             this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
             (networks: NetworksModel[]) => {
                 if (networks.length !== this.limit) {

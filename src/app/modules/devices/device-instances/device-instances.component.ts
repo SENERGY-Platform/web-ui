@@ -30,6 +30,10 @@ import {Navigation, Router} from '@angular/router';
 import {NetworksModel} from '../networks/shared/networks.model';
 import {DeviceTypePermSearchModel} from '../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import {LocationModel} from '../locations/shared/locations.model';
+import {LocationsService} from '../locations/shared/locations.service';
+import {NetworksService} from '../networks/shared/networks.service';
+import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
+import {DeviceTypeBaseModel} from '../../metadata/device-types-overview/shared/device-type.model';
 
 
 const tabs = [{label: 'Online', state: 'connected'}, {label: 'Offline', state: 'disconnected'}, {
@@ -64,13 +68,17 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     selectedTagTransformed = '';
     selectedTagType = '';
     routerNetwork: NetworksModel | null = null;
-    routerDeviceType: DeviceTypePermSearchModel | null = null;
+    routerDeviceType: DeviceTypeBaseModel | null = null;
     routerLocation: LocationModel | null = null;
     activeIndex = 0;
     animationDone = true;
     tabs: { label: string, state: string }[] = tabs;
     searchInitialized = false;
     searchText = '';
+
+    locationOptions: LocationModel[] = [];
+    networkOptions: NetworksModel[] = [];
+    deviceTypeOptions: DeviceTypeBaseModel[] = [];
 
     private limitInit = 54;
     private limit = this.limitInit;
@@ -84,6 +92,9 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                 private keycloakService: KeycloakService,
                 private permissionsDialogService: PermissionsDialogService,
                 private dialogsService: DialogsService,
+                private locationsService: LocationsService,
+                private networksService: NetworksService,
+                private deviceTypesService: DeviceTypeService,
                 public snackBar: MatSnackBar,
                 private router: Router) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
@@ -91,6 +102,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.loadFilterOptions();
         this.initSearchAndGetDevices();
     }
 
@@ -165,7 +177,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                 const state = navigation.extras.state as DeviceInstancesRouterState;
                 switch (state.type) {
                     case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
-                        this.routerDeviceType = state.value as DeviceTypePermSearchModel;
+                        this.routerDeviceType = state.value as DeviceTypeBaseModel;
                         break;
                     case DeviceInstancesRouterStateTypesEnum.NETWORK:
                         this.routerNetwork = state.value as NetworksModel;
@@ -280,5 +292,49 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.limit = limit;
         this.offset = this.deviceInstances.length;
+    }
+
+    private loadFilterOptions() {
+        this.locationsService.listLocations(100, 0, 'name', 'asc').subscribe(value => {
+            this.locationOptions = value;
+        });
+        this.networksService.listNetworks(100, 0, 'name', 'asc').subscribe(value => {
+            this.networkOptions = value;
+        });
+        this.deviceInstancesService.listUsedDeviceTypeIds().subscribe(deviceTypeIds => {
+            this.deviceTypesService.getDeviceTypeListByIds(deviceTypeIds).subscribe(deviceTypes => {
+                this.deviceTypeOptions = deviceTypes;
+            });
+        });
+    }
+
+    filterByDeviceType(dt: DeviceTypeBaseModel) {
+        this.resetTag();
+        this.routerLocation = null;
+        this.routerNetwork = null;
+        this.routerDeviceType = null;
+
+        this.routerDeviceType = dt;
+        this.getDeviceInstances(true);
+    }
+
+    filterByLocation(location: LocationModel) {
+        this.resetTag();
+        this.routerLocation = null;
+        this.routerNetwork = null;
+        this.routerDeviceType = null;
+
+        this.routerLocation = location;
+        this.getDeviceInstances(true);
+    }
+
+    filterByNetwork(network: NetworksModel) {
+        this.resetTag();
+        this.routerLocation = null;
+        this.routerNetwork = null;
+        this.routerDeviceType = null;
+
+        this.routerNetwork = network;
+        this.getDeviceInstances(true);
     }
 }

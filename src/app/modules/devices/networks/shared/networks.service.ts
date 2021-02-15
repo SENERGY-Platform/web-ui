@@ -38,12 +38,46 @@ export class NetworksService {
                 public snackBar: MatSnackBar) {
     }
 
-    getNetworks(searchText: string, limit: number, offset: number, value: string, order: string): Observable<NetworksModel[]> {
-        return this.http.get<NetworksModel[]>
-        (environment.apiAggregatorUrl + '/hubs?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order +
-            (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText))).pipe(
+    searchNetworks(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
+        }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection,
+            'search=' + encodeURIComponent(searchText)
+        ].join('&');
+
+        return this.http.get<NetworksModel[]>(
+            environment.permissionSearchUrl + '/v2/hubs?' + params).pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworks', []))
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', []))
+        );
+    }
+
+    listNetworks(limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
+        }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection
+        ].join('&');
+
+        return this.http.get<NetworksModel[]>(
+            environment.permissionSearchUrl + '/v2/hubs?' + params).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', []))
         );
     }
 

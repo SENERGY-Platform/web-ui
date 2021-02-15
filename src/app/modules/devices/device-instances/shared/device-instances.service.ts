@@ -55,6 +55,20 @@ export class DeviceInstancesService {
                 private utilService: UtilService) {
     }
 
+    listUsedDeviceTypeIds(): Observable<string[]> {
+        return this.http.post<{ term: string }[]>(
+            environment.permissionSearchUrl + '/v2/query', {
+                resource: 'devices',
+                term_aggregate: 'features.device_type_id'
+            }).pipe(
+            map(resp => resp || []),
+            map((list) => {
+                return list.map(value => value.term);
+            }),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'listUsedDeviceTypeIds()', []))
+        );
+    }
+
     getDeviceListByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
         return this.http.post<DeviceInstancesBaseModel[]>(
             environment.permissionSearchUrl + '/v2/query', {
