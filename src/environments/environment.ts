@@ -71,6 +71,7 @@ export const environment = {
     importDeployUrl: 'http://localhost',
     importTypeIdUbaStation: 'urn:infai:ses:import-type:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     importTypeIdDwdPollen: 'urn:infai:ses:import-type:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    importTypeIdYrForecast: 'urn:infai:ses:import-type:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
 };
 
 /*

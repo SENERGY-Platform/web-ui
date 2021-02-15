@@ -80,6 +80,7 @@ export const environment = {
   importDeployUrl: '${process.env.IMPORT_DEPLOY_URL}',
   importTypeIdUbaStation: '${process.env.IMPORT_TYPE_ID_UBA_STATIONS}',
   importTypeIdDwdPollen: '${process.env.IMPORT_TYPE_ID_DWD_POLLEN}',
+  importTypeIdYrForecast: '${process.env.IMPORT_TYPE_ID_YR_FORECAST}',
 };
 `;
 

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+/** @deprecated */
 export interface DWDPollenForecast {
     forecast: DWDSinglePollenForecast[];
     next_update?: Date;
 }
 
+/** @deprecated */
 export interface DWDSinglePollenForecast {
     name: string;
     today: string;

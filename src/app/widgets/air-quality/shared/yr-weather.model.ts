@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/** @deprecated */
 export interface YrWeatherModel {
     weatherdata: {
         location: {
@@ -56,11 +57,13 @@ export interface YrWeatherModel {
     cacheUntil?: Date;
 }
 
+/** @deprecated */
 export interface YrLink {
     _id: string;
     _url: string;
 }
 
+/** @deprecated */
 export interface YrForecast {
     _from: string;
     _to: string;

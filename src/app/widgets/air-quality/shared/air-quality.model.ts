@@ -27,12 +27,15 @@ export interface AirQualityPropertiesModel {
     ubaStation?: (UBAStation);
     ubaInfo?: AirQualityImportExportModel;
     dwdPollenInfo?: AirQualityImportExportModel;
+    yrInfo?: AirQualityImportExportModel;
     formatted_address?: (string);
     measurements?: (MeasurementModel[]);
     /** @deprecated */
     dwd_partregion_name?: (string);
     pollen?: (MeasurementModel[]);
+    /** @deprecated */
     weather?: (YrWeatherModel);
+    /** @deprecated */
     yrPath?: string;
 }
 
@@ -87,4 +90,5 @@ export interface AirQualityImportExportModel {
 
 export enum AirQualityExternalProvider {
     UBA,
+    Yr,
 }

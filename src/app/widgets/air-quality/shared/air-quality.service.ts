@@ -103,7 +103,8 @@ export class AirQualityService {
                         array.push({id: id || '', fields: [{name: column, math: measurement.math || ''}]});
 
                     }
-                    if (measurement.has_outside || measurement.provider === AirQualityExternalProvider.UBA) {
+                    if (measurement.has_outside || measurement.provider === AirQualityExternalProvider.UBA
+                        || measurement.provider === AirQualityExternalProvider.Yr) {
                         const id = (measurement.outsideExport ? measurement.outsideExport.ID : '');
                         const column = measurement.outsideData.column ? measurement.outsideData.column.Name : '';
                         const fields: ChartsExportRequestPayloadQueriesFieldsModel[] = [];

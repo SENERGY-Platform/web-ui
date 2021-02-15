@@ -26,6 +26,7 @@ import * as X2JS from 'x2js';
 @Injectable({
     providedIn: 'root'
 })
+/** @deprecated */
 export class YrWeatherService {
 
     x2js: X2JS;
@@ -35,10 +36,12 @@ export class YrWeatherService {
         this.x2js = new X2JS();
     }
 
+    /** @deprecated */
     getYrPath(geoname: Geoname): string {
         return '/place/' + geoname.countryName + '/' + geoname.adminName1 + '/' + geoname.name;
     }
 
+    /** @deprecated */
     getYrForecast(yrPath: string): Observable<YrWeatherModel> {
         return new Observable<YrWeatherModel>(obs => {
             this.http.get(environment.yrUrl +
@@ -61,6 +64,7 @@ export class YrWeatherService {
         });
     }
 
+    /** @deprecated */
     convertXMLtoJSON(xml: string): string {
         return this.x2js.xml2js(xml);
     }

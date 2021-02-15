@@ -41,6 +41,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     pollenWarnings = 0;
     pollenCriticals = 0;
     inDetailView = false;
+    /** @deprecated */
     ubaComponents: UBAComponent[] = [];
     dwdPollenForecast: DWDPollenForecast = {forecast: []};
     dwdPollenForecastResponse: any = undefined;
@@ -92,7 +93,9 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                 if (this.widget.properties.dwd_partregion_name !== undefined) { // legacy
                     observables.push(this.updateDWDData());
                 }
-                observables.push(this.checkYrUpdate());
+                if (this.widget.properties.yrPath !== undefined) { // legacy
+                    observables.push(this.checkYrUpdate());
+                }
                 forkJoin(observables).subscribe(_ => {
                     this.createAdvice();
                     this.ready = true;
@@ -324,6 +327,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
         }
     }
 
+    /** @deprecated */
     private checkYrUpdate(): Observable<any> {
         if (this.widget.properties.location && !this.widget.properties.weather) {
             return this.updateYrData();
@@ -342,6 +346,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
         return of(null);
     }
 
+    /** @deprecated */
     private updateYrData(): Observable<any> {
         if (!this.widget.properties.yrPath) {
             return of(null);

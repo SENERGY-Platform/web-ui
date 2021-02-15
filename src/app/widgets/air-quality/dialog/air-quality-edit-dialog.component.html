@@ -45,12 +45,6 @@
                 <div *ngIf="!hasValidUBAStation()" class="small-error-text color-warn">
                     No <span matTooltip="Umweltbundesamt">UBA</span> station within {{maxUBADistance}} km!
                 </div>
-                <div *ngIf="!this.yrPath" class="small-error-text color-warn">
-                    Can't get weather forecast for this location!
-                </div>
-                <div *ngIf="this.yrPath" class="small-error-text color-accent">
-                    Weather forecast available
-                </div>
             </div>
             <div *ngIf="changeLocation">
                 <div *ngIf="autoLocationFailed" class="small-error-text color-warn">
