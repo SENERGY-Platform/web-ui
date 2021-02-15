@@ -54,7 +54,7 @@ export class NetworksService {
         ].join('&');
 
         return this.http.get<NetworksModel[]>(
-            environment.permissionSearchUrl + '/v2/hubs?' + params).pipe(
+            environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', []))
         );
@@ -75,7 +75,7 @@ export class NetworksService {
         ].join('&');
 
         return this.http.get<NetworksModel[]>(
-            environment.permissionSearchUrl + '/v2/hubs?' + params).pipe(
+            environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', []))
         );

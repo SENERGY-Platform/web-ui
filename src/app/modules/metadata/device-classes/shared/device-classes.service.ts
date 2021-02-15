@@ -32,20 +32,28 @@ export class DeviceClassesService {
                 private errorHandlerService: ErrorHandlerService) {
     }
 
-    getDeviceClasses(query: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceClassesPermSearchModel[]> {
-        if (query) {
-            return this.http.get<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/device-classes/' +
-                encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'getDeviceClasses(search)', []))
-            );
-        } else {
-            return this.http.get<DeviceClassesPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/device-classes/r/' +
-                limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'getDeviceClasses(list)', []))
-            );
+    getDeviceClasses(query: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<DeviceClassesPermSearchModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
         }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection,
+        ];
+        if (query) {
+            params.push('search=' + encodeURIComponent(query));
+        }
+
+        return this.http.get<DeviceClassesPermSearchModel[]>(
+            environment.permissionSearchUrl + '/v3/resources/device-classes?' + params.join('&')).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'getAspects(search)', []))
+        );
     }
 
     updateDeviceClasses(deviceClass: DeviceTypeDeviceClassModel): Observable<DeviceTypeDeviceClassModel | null> {

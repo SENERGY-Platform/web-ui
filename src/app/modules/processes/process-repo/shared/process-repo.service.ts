@@ -23,6 +23,7 @@ import {Observable, timer} from 'rxjs';
 import {ProcessModel} from './process.model';
 import {DesignerProcessModel} from '../../designer/shared/designer.model';
 import {ProcessRepoConditionsModel} from './process-repo-conditions.model';
+import {DeviceTypeBaseModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 
 @Injectable({
@@ -41,35 +42,22 @@ export class ProcessRepoService {
     }
 
     getProcessModels(query: string, limit: number, offset: number, feature: string, order: string, conditions: ProcessRepoConditionsModel | null): Observable<ProcessModel[]> {
-        if (conditions) {
-            if (query) {
-                return this.http.post<ProcessModel[]>(environment.permissionSearchUrl + '/jwt/search/processmodel/' +
-                    encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order, conditions).pipe(
-                    map(resp => resp || []),
-                    catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(search)', []))
-                );
-            } else {
-                return this.http.post<ProcessModel[]>(environment.permissionSearchUrl + '/jwt/list/processmodel/r/' +
-                    limit + '/' + offset + '/' + feature + '/' + order, conditions).pipe(
-                    map(resp => resp || []),
-                    catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(list)', []))
-                );
-            }
-        } else {
-            if (query) {
-                return this.http.get<ProcessModel[]>(environment.permissionSearchUrl + '/jwt/search/processmodel/' +
-                    encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                    map(resp => resp || []),
-                    catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(search)', []))
-                );
-            } else {
-                return this.http.get<ProcessModel[]>(environment.permissionSearchUrl + '/jwt/list/processmodel/r/' +
-                    limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                    map(resp => resp || []),
-                    catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(list)', []))
-                );
-            }
-        }
+        return this.http.post<ProcessModel[]>(
+            environment.permissionSearchUrl + '/v3/query', {
+                resource: 'processmodel',
+                find: {
+                    search: query,
+                    limit: limit,
+                    offset: offset,
+                    rights: 'r',
+                    sort_by: feature,
+                    sort_desc: order !== 'asc',
+                    filter: conditions
+                },
+            }).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'getProcessModels(search)', []))
+        );
     }
 
     getProcessModel(id: string): Observable<DesignerProcessModel | null> {
@@ -109,7 +97,7 @@ export class ProcessRepoService {
     }
 
     private checkForProcessModelWithRetries(id: string, shouldIdExists: boolean, maxRetries: number, intervalInMs: number): Observable<boolean> {
-        return this.http.get<boolean>(environment.permissionSearchUrl + '/jwt/check/processmodel/' + id + '/r/bool').pipe(
+        return this.http.get<boolean>(environment.permissionSearchUrl + '/v3/resources/processmodel/' + id + '/access?rights=r').pipe(
             map(data => {
                 if (data === !shouldIdExists) {
                     throw Error('');

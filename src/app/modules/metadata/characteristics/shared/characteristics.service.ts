@@ -53,9 +53,23 @@ export class CharacteristicsService {
     }
 
 
-    getCharacteristicByConceptId(conceptId: string, limit: number, offset: number, feature: string, order: string): Observable<CharacteristicsPermSearchModel[]> {
-        return this.http.get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/select/characteristics/concept_id/' + conceptId + '/r/' +
-            limit + '/' + offset + '/' + feature + '/' + order).pipe(
+    getCharacteristicByConceptId(conceptId: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<CharacteristicsPermSearchModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
+        }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection,
+            'filter=' + encodeURIComponent('concept_id:' + conceptId)
+        ];
+
+        return this.http.get<CharacteristicsPermSearchModel[]>(
+            environment.permissionSearchUrl + '/v3/resources/characteristics?' + params.join('&')).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristicByConceptId', []))
         );
@@ -67,20 +81,28 @@ export class CharacteristicsService {
         );
     }
 
-    getCharacteristics(query: string, limit: number, offset: number, feature: string, order: string): Observable<CharacteristicsPermSearchModel[]> {
-        if (query) {
-            return this.http.get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/characteristics/' +
-                encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristics(search)', []))
-            );
-        } else {
-            return this.http.get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/characteristics/r/' +
-                limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristics(list)', []))
-            );
+    getCharacteristics(query: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<CharacteristicsPermSearchModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
         }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection,
+        ];
+        if (query) {
+            params.push('search=' + encodeURIComponent(query));
+        }
+
+        return this.http.get<CharacteristicsPermSearchModel[]>(
+            environment.permissionSearchUrl + '/v3/resources/characteristics?' + params.join('&')).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristics(search)', []))
+        );
     }
 
 }

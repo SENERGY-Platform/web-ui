@@ -266,6 +266,9 @@ export class LocationsEditComponent implements OnInit {
     }
 
     private updateDevicesForm(deviceIds: string[]) {
+        if (!deviceIds) {
+            return;
+        }
         const fromCache: DeviceInstancesBaseModel[] = [];
         const idsForRepoSearch: string[] = [];
         for (const id of deviceIds) {
@@ -302,6 +305,9 @@ export class LocationsEditComponent implements OnInit {
     }
 
     private updateDeviceGroupsForm(deviceGroupIds: string[]) {
+        if (!deviceGroupIds) {
+            return;
+        }
         const fromCache: DeviceGroupModel[] = [];
         const idsForRepoSearch: string[] = [];
         for (const id of deviceGroupIds) {

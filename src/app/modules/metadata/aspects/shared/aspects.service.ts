@@ -22,6 +22,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {DeviceTypeAspectModel, DeviceTypeCharacteristicsModel} from '../../device-types-overview/shared/device-type.model';
 import {AspectsPermSearchModel} from './aspects-perm-search.model';
+import {LocationModel} from '../../../devices/locations/shared/locations.model';
 
 @Injectable({
     providedIn: 'root'
@@ -32,20 +33,28 @@ export class AspectsService {
                 private errorHandlerService: ErrorHandlerService) {
     }
 
-    getAspects(query: string, limit: number, offset: number, feature: string, order: string): Observable<AspectsPermSearchModel[]> {
-        if (query) {
-            return this.http.get<AspectsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/aspects/' +
-                encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(AspectsService.name, 'getAspects(search)', []))
-            );
-        } else {
-            return this.http.get<AspectsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/aspects/r/' +
-                limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(AspectsService.name, 'getAspects(list)', []))
-            );
+    getAspects(query: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<AspectsPermSearchModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
         }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection,
+        ];
+        if (query) {
+            params.push('search=' + encodeURIComponent(query));
+        }
+
+        return this.http.get<AspectsPermSearchModel[]>(
+            environment.permissionSearchUrl + '/v3/resources/aspects?' + params.join('&')).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(AspectsService.name, 'getAspects(search)', []))
+        );
     }
 
     updateAspects(aspect: DeviceTypeAspectModel): Observable<DeviceTypeAspectModel | null> {

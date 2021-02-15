@@ -39,7 +39,7 @@ export class ImportTypesService {
     }
 
     listImportTypes(search: string, limit: number | undefined, offset: number | undefined, sort: string): Observable<ImportTypePermissionSearchModel[]> {
-        let url = environment.permissionSearchUrl + '/v2/import-types?';
+        let url = environment.permissionSearchUrl + '/v3/resources/import-types?';
         if (search.length > 0) {
             url += '&search=' + search;
         }

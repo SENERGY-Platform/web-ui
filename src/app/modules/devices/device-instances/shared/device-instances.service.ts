@@ -57,7 +57,7 @@ export class DeviceInstancesService {
 
     listUsedDeviceTypeIds(): Observable<string[]> {
         return this.http.post<{ term: string }[]>(
-            environment.permissionSearchUrl + '/v2/query', {
+            environment.permissionSearchUrl + '/v3/query', {
                 resource: 'devices',
                 term_aggregate: 'features.device_type_id'
             }).pipe(
@@ -71,7 +71,7 @@ export class DeviceInstancesService {
 
     getDeviceListByIds(ids: string[]): Observable<DeviceInstancesBaseModel[]> {
         return this.http.post<DeviceInstancesBaseModel[]>(
-            environment.permissionSearchUrl + '/v2/query', {
+            environment.permissionSearchUrl + '/v3/query', {
                 resource: 'devices',
                 list_ids: {
                     ids: ids,
@@ -287,7 +287,7 @@ export class DeviceInstancesService {
     }
 
     getDeviceInstancesByIds(ids: string[]): Observable<DeviceInstancesPermSearchModel[]> {
-        return this.http.post<DeviceInstancesPermSearchModel[] | null>(environment.permissionSearchUrl + '/v2/query',
+        return this.http.post<DeviceInstancesPermSearchModel[] | null>(environment.permissionSearchUrl + '/v3/query',
             {resource: 'devices', list_ids: {ids: ids}}).pipe(map(res => res || []));
     }
 }

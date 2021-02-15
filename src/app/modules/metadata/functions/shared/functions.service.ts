@@ -32,20 +32,28 @@ export class FunctionsService {
                 private errorHandlerService: ErrorHandlerService) {
     }
 
-    getFunctions(query: string, limit: number, offset: number, feature: string, order: string): Observable<FunctionsPermSearchModel[]> {
-        if (query) {
-            return this.http.get<FunctionsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/functions/' +
-                encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(search)', []))
-            );
-        } else {
-            return this.http.get<FunctionsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/functions/r/' +
-                limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(list)', []))
-            );
+    getFunctions(query: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<FunctionsPermSearchModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
         }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection,
+        ];
+        if (query) {
+            params.push('search=' + encodeURIComponent(query));
+        }
+
+        return this.http.get<FunctionsPermSearchModel[]>(
+            environment.permissionSearchUrl + '/v3/resources/functions?' + params.join('&')).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(search)', []))
+        );
     }
 
     getFunction(functionId: string): Observable<DeviceTypeFunctionModel | null> {

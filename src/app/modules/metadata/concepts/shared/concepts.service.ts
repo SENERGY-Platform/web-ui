@@ -83,20 +83,28 @@ export class ConceptsService {
         );
     }
 
-    getConcepts(query: string, limit: number, offset: number, feature: string, order: string): Observable<ConceptsPermSearchModel[]> {
-        if (query) {
-            return this.http.get<ConceptsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/concepts/' +
-                encodeURIComponent(query) + '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(search)', []))
-            );
-        } else {
-            return this.http.get<ConceptsPermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/concepts/r/' +
-                limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(list)', []))
-            );
+    getConcepts(query: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<ConceptsPermSearchModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
         }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection,
+        ];
+        if (query) {
+            params.push('search=' + encodeURIComponent(query));
+        }
+
+        return this.http.get<ConceptsPermSearchModel[]>(
+            environment.permissionSearchUrl + '/v3/resources/concepts?' + params.join('&')).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(search)', []))
+        );
     }
 
 }

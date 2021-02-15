@@ -51,7 +51,7 @@ export class DeviceTypeService {
 
     getDeviceTypeListByIds(ids: string[]): Observable<DeviceTypeBaseModel[]> {
         return this.http.post<DeviceTypeBaseModel[]>(
-            environment.permissionSearchUrl + '/v2/query', {
+            environment.permissionSearchUrl + '/v3/query', {
                 resource: 'device-types',
                 list_ids: {
                     ids: ids,
@@ -100,18 +100,28 @@ export class DeviceTypeService {
             }));
     }
 
-    getDeviceTypes(searchText: string, limit: number, offset: number, feature: string, order: string): Observable<DeviceTypePermSearchModel[]> {
-        if (searchText === '') {
-            return this.http.get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/jwt/list/device-types/r/' +
-                limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes: list', [])));
-        } else {
-            return this.http.get<DeviceTypePermSearchModel[]>(environment.permissionSearchUrl + '/jwt/search/device-types/' + searchText +
-                '/r/' + limit + '/' + offset + '/' + feature + '/' + order).pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes: search', [])));
+    getDeviceTypes(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<DeviceTypePermSearchModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
         }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+        const params = [
+            'limit=' + limit,
+            'offset=' + offset,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection,
+        ];
+        if (searchText) {
+            params.push('search=' + encodeURIComponent(searchText));
+        }
+
+        return this.http.get<DeviceTypePermSearchModel[]>(
+            environment.permissionSearchUrl + '/v3/resources/device-types?' + params.join('&')).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceTypes(search)', []))
+        );
     }
 
     getDeviceTypeSkeleton(typeId: string, serviceId: string): Observable<BpmnSkeletonModel | null> {

@@ -49,7 +49,7 @@ export class LocationsService {
         ].join('&');
 
         return this.http.get<LocationModel[]>(
-            environment.permissionSearchUrl + '/v2/locations?' + params).pipe(
+            environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', []))
         );
@@ -70,7 +70,7 @@ export class LocationsService {
         ].join('&');
 
         return this.http.get<LocationModel[]>(
-            environment.permissionSearchUrl + '/v2/locations?' + params).pipe(
+            environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', []))
         );
