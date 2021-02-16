@@ -20,8 +20,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {DWDPollenForecast, DWDSinglePollenForecast, NameValuePair} from './dwd-pollen.model';
-import {environment} from 'src/environments/environment';
+import {NameValuePair} from './dwd-pollen.model';
 
 @Injectable({
     providedIn: 'root'
@@ -71,62 +70,6 @@ export class DWDPollenService {
                 .pipe(map(resp => resp || []),
                     catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPollenArea', {}))
                 );
-    }
-
-    /** @deprecated */
-    extractPollenArea(lat: number, lon: number, pollenAreaResponse: any): string {
-        let area = ' ';
-        // @ts-ignore
-        pollenAreaResponse['features']?.forEach(feature => {
-            // @ts-ignore
-            feature['geometry']['coordinates'].forEach(poly => {
-                let inside = false;
-                const x = lon, y = lat;
-                for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-                    const xi = poly[i][0], yi = poly[i][1];
-                    const xj = poly[j][0], yj = poly[j][1];
-
-                    const intersect = ((yi > y) !== (yj > y))
-                        && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                    if (intersect) { inside = !inside; }
-                }
-                if (inside) {
-                    area = feature['properties']['GEN'];
-                }
-            });
-        });
-        return area;
-    }
-
-    /** @deprecated */
-    getPollenForecast(): Observable<any> {
-        return this.http.get<any>(
-                    environment.dwdOpenUrl + '/climate_environment/health/alerts/s31fg.json')
-                    .pipe(map(resp => resp || []),
-                        catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPollenForecast', {}))
-                    );
-    }
-
-    /** @deprecated */
-    extractPollenForecast(partregion_name: string, pollenForecastResponse: any): DWDPollenForecast {
-        // @ts-ignore
-        const areaForecast = pollenForecastResponse['content'].find(region => region['partregion_name'] === partregion_name);
-        const pollen = areaForecast['Pollen'];
-        const arr: DWDSinglePollenForecast[] = [];
-        Object.keys(pollen).forEach(key => {
-           const singlePollenForecast: DWDSinglePollenForecast = {
-               name: key,
-               today: pollen[key]['today'],
-               tomorrow: pollen[key]['tomorrow'],
-               dayafter_to: pollen[key]['dayafter_to'],
-           };
-           arr.push(singlePollenForecast);
-        });
-        const forecast: DWDPollenForecast = {
-            forecast: arr,
-            next_update: pollenForecastResponse['next_update'],
-        };
-        return forecast;
     }
 
     getNameValuePairs(): NameValuePair[] {

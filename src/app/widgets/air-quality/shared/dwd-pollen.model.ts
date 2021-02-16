@@ -14,20 +14,6 @@
  * limitations under the License.
  */
 
-/** @deprecated */
-export interface DWDPollenForecast {
-    forecast: DWDSinglePollenForecast[];
-    next_update?: Date;
-}
-
-/** @deprecated */
-export interface DWDSinglePollenForecast {
-    name: string;
-    today: string;
-    tomorrow: string;
-    dayafter_to: string;
-}
-
 export interface NameValuePair {
     name: string;
     value: number;

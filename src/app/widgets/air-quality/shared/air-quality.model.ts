@@ -14,29 +14,17 @@
  * limitations under the License.
  */
 
-import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {ExportModel, ExportValueModel} from '../../../modules/exports/shared/export.model';
-import {UBAStation} from './uba.model';
-import {DWDSinglePollenForecast} from './dwd-pollen.model';
-import {YrWeatherModel} from './yr-weather.model';
 
 
 export interface AirQualityPropertiesModel {
     location?: (Location);
-    /** @deprecated */
-    ubaStation?: (UBAStation);
     ubaInfo?: AirQualityImportExportModel;
     dwdPollenInfo?: AirQualityImportExportModel;
     yrInfo?: AirQualityImportExportModel;
     formatted_address?: (string);
     measurements?: (MeasurementModel[]);
-    /** @deprecated */
-    dwd_partregion_name?: (string);
     pollen?: (MeasurementModel[]);
-    /** @deprecated */
-    weather?: (YrWeatherModel);
-    /** @deprecated */
-    yrPath?: string;
 }
 
 export interface MeasurementModel {
@@ -57,7 +45,6 @@ export interface MeasurementModel {
     data: (SensorDataModel);
     outsideData: (SensorDataModel);
     boundaries: (BoundaryModel);
-    pollenData?: (DWDSinglePollenForecast);
 }
 
 export interface SensorDataModel {

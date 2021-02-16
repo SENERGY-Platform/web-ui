@@ -334,7 +334,6 @@ export class AirQualityEditDialogComponent implements OnInit {
     ];
     pollenLevel: NameValuePair[];
     pollenSelected: string[] = [];
-    yrPath = '';
     geonamesSearchResults: Observable<Geoname[]>;
     searchFormControl = new FormControl();
     importInstances: ImportInstancesModel[] = [];
@@ -424,8 +423,6 @@ export class AirQualityEditDialogComponent implements OnInit {
                     this.pollenSelected.push(polle.name_html);
                 }
             });
-            this.ubaStationSelected = widget.properties.ubaStation ? widget.properties.ubaStation : this.ubaStationSelected;
-            this.yrPath = widget.properties.yrPath ? widget.properties.yrPath : this.yrPath;
         }));
     }
 
@@ -445,10 +442,7 @@ export class AirQualityEditDialogComponent implements OnInit {
             this.widget.properties.location = this.location;
             this.widget.properties.formatted_address = this.formatted_address;
             this.widget.name = this.name;
-            this.widget.properties.ubaStation = undefined; // overrides legacy widgets
-            this.widget.properties.dwd_partregion_name = undefined; // overrides legacy widgets
             this.widget.properties.pollen = this.pollen;
-            this.widget.properties.yrPath = undefined; // overrides legacy widgets
 
             this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
                 if (resp.message === 'OK') {

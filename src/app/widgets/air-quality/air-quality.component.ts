@@ -22,13 +22,8 @@ import {AirQualityService} from './shared/air-quality.service';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {forkJoin, Observable, of, Subscription} from 'rxjs';
 import {UBAService} from './shared/uba.service';
-import {UBAComponent, UBAData} from './shared/uba.model';
-import {DWDPollenForecast} from './shared/dwd-pollen.model';
 import {DWDPollenService} from './shared/dwd-pollen.service';
-import {YrWeatherService} from './shared/yr-weather.service';
-import {SensorDataModel} from './shared/air-quality.model';
 import {map} from 'rxjs/internal/operators';
-import {catchError} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-air-quality',
@@ -41,10 +36,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     pollenWarnings = 0;
     pollenCriticals = 0;
     inDetailView = false;
-    /** @deprecated */
-    ubaComponents: UBAComponent[] = [];
-    dwdPollenForecast: DWDPollenForecast = {forecast: []};
-    dwdPollenForecastResponse: any = undefined;
     pros: string[] = [];
     cons: string[] = [];
 
@@ -58,7 +49,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                 private ubaService: UBAService,
                 private dwdPollenService: DWDPollenService,
                 private dashboardService: DashboardService,
-                private yrWeatherService: YrWeatherService) {
+    ) {
     }
 
     ngOnInit() {
@@ -87,15 +78,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                 this.ready = false;
                 const observables: Observable<any>[] = [];
                 observables.push(this.updateMeasurements());
-                if (this.widget.properties.ubaStation !== undefined) { // legacy
-                    observables.push(this.updateUbaData());
-                }
-                if (this.widget.properties.dwd_partregion_name !== undefined) { // legacy
-                    observables.push(this.updateDWDData());
-                }
-                if (this.widget.properties.yrPath !== undefined) { // legacy
-                    observables.push(this.checkYrUpdate());
-                }
                 forkJoin(observables).subscribe(_ => {
                     this.createAdvice();
                     this.ready = true;
@@ -106,18 +88,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
 
     clicked() {
         this.inDetailView = !this.inDetailView;
-    }
-
-    /** @deprecated */
-    private mergeUbaData(ubaData: UBAData[]) {
-        ubaData.forEach(uba => {
-            if (this.widget.properties.measurements) {
-                const index = this.widget.properties.measurements.findIndex(m => m.short_name === uba.short_name);
-                if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
-                    this.widget.properties.measurements[index].outsideData.value = uba.value;
-                }
-            }
-        });
     }
 
     isWidgetConfigured(): boolean {
@@ -205,13 +175,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                 }
             }
         }
-        if (this.widget.properties.weather && this.widget.properties.measurements) {
-            const now = this.widget.properties.weather.weatherdata.forecast.tabular.time[0];
-            const nextHour = this.widget.properties.weather.weatherdata.forecast.tabular.time[1];
-            if (Number(now.precipitation._value) + Number(nextHour.precipitation._value) > 0) {
-                this.cons.push('It might be raining soon');
-            }
-        }
     }
 
     private updateMeasurements(): Observable<any> {
@@ -256,119 +219,5 @@ export class AirQualityComponent implements OnInit, OnDestroy {
             }
         }));
 
-    }
-
-    /** @deprecated */
-    private updateUbaData(): Observable<any> {
-        if (this.widget.properties.ubaStation) {
-            const station = this.widget.properties.ubaStation;
-            if (this.ubaComponents.length === 0) {
-                return this.ubaService.getUBAComponents().pipe(map(components => {
-                    this.ubaComponents = components;
-                    this.ubaService.getUBAData(station.station_id, this.ubaComponents).subscribe(resp => {
-                        this.mergeUbaData(resp);
-                    });
-                }));
-            } else {
-                return this.ubaService.getUBAData(station.station_id, this.ubaComponents).pipe(map(resp => {
-                    this.mergeUbaData(resp);
-                }));
-            }
-        } else {
-            return of(null);
-        }
-    }
-
-    /** @deprecated */
-    private updateDWDData(): Observable<any> {
-        if (!this.widget.properties.dwd_partregion_name || !this.widget.properties.pollen) {
-            return of(null);
-        }
-        this.pollenWarnings = 0;
-        this.pollenCriticals = 0;
-        const dwd_partregion_name = this.widget.properties.dwd_partregion_name;
-        if (this.dwdPollenForecastResponse === undefined ||
-            (this.dwdPollenForecast.next_update !== undefined && new Date() > this.dwdPollenForecast.next_update)) {
-            return this.dwdPollenService.getPollenForecast().pipe(map(resp => {
-                this.dwdPollenForecastResponse = resp;
-                this.dwdPollenForecast = this.dwdPollenService.extractPollenForecast(dwd_partregion_name, resp);
-                this.dwdPollenForecast.forecast.forEach(name => {
-                    if (this.widget.properties.pollen) {
-                        const index = this.widget.properties.pollen.findIndex(value => value.short_name === name.name);
-                        if (index !== -1) {
-                            const value = name.today;
-                            let data: SensorDataModel;
-                            if (value.length > 1) {
-                                const first = Number(value.charAt(0));
-                                const second = Number(value.charAt(2));
-                                data = {value: (first + second) / 2};
-                                this.widget.properties.pollen[index].outsideData = data;
-                            } else {
-                                data = {value: Number(value)};
-                                this.widget.properties.pollen[index].outsideData = data;
-                            }
-                            this.widget.properties.pollen[index].pollenData = name;
-
-                            this.widget.properties.pollen[index].is_critical = false;
-                            this.widget.properties.pollen[index].is_warning = false;
-                            if (data.value >= this.widget.properties.pollen[index].boundaries.critical.upper) {
-                                this.widget.properties.pollen[index].is_critical = true;
-                                this.pollenCriticals++;
-                            } else if (data.value >= this.widget.properties.pollen[index].boundaries.warn.upper) {
-                                this.widget.properties.pollen[index].is_warning = true;
-                                this.pollenWarnings++;
-                            }
-                        }
-                    }
-                });
-            }));
-        } else {
-            return of(null);
-        }
-    }
-
-    /** @deprecated */
-    private checkYrUpdate(): Observable<any> {
-        if (this.widget.properties.location && !this.widget.properties.weather) {
-            return this.updateYrData();
-        }
-        if (this.widget.properties.location && this.widget.properties.weather &&
-            this.widget.properties.weather.cacheUntil) {
-            const cacheDateString = (this.widget.properties.weather || {cacheUntil: ''}).cacheUntil;
-            let cacheDate: Date = new Date();
-            if (typeof cacheDateString === 'string') {
-                cacheDate = new Date(cacheDate);
-            }
-            if (cacheDate <= new Date()) {
-                return this.updateYrData();
-            }
-        }
-        return of(null);
-    }
-
-    /** @deprecated */
-    private updateYrData(): Observable<any> {
-        if (!this.widget.properties.yrPath) {
-            return of(null);
-        }
-        return this.yrWeatherService.getYrForecast(this.widget.properties.yrPath)
-            .pipe(map(model => {
-                this.widget.properties.weather = model;
-                if (this.widget.properties.measurements) {
-                    let index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
-                    if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
-                        this.widget.properties.measurements[index].outsideData.value =
-                            Number(model.weatherdata.forecast.tabular.time[0].temperature._value);
-                    }
-                    index = this.widget.properties.measurements.findIndex(m => m.short_name === 'Pressure');
-                    if (index !== -1 && !this.widget.properties.measurements[index].has_outside) {
-                        this.widget.properties.measurements[index].outsideData.value =
-                            Number(model.weatherdata.forecast.tabular.time[0].pressure._value);
-                    }
-                }
-            }), catchError((error) => {
-                console.error('Air Quality Widget: Could not load Yr data', error);
-                return of(null);
-            }));
     }
 }
