@@ -26,5 +26,5 @@ export interface ChartsExportSeriesModel {
 export interface ChartsExportColumnsModel {
     columns: string[];
     name: string;
-    values: (string | number)[][];
+    values: (string | number | boolean)[][];
 }

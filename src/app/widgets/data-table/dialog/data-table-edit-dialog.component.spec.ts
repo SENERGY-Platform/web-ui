@@ -99,6 +99,7 @@ describe('DataTableEditDialogComponent', () => {
             TimePath: 'struct.path',
         } as ExportModel;
         exportServiceSpy.prepareDeviceServiceExport.and.returnValue([exampleExport]);
+        exportServiceSpy.getExportTags.and.returnValue(of({}));
 
         deploymentsServiceSpy.v2postDeployments.and.returnValue(of({status: 200, id: uuid()}));
         deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(of({
@@ -136,6 +137,8 @@ describe('DataTableEditDialogComponent', () => {
         }]));
         dataTableHelperServiceSpy.getOperator.and.returnValue({outputs: [{name: 'opValueName', type: 'string'}]});
         dataTableHelperServiceSpy.getServiceValues.and.returnValue([]);
+        dataTableHelperServiceSpy.preloadExportTags.and.returnValue(of(new Map()));
+        dataTableHelperServiceSpy.getExportTags.and.returnValue(of(new Map()));
 
 
         processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
@@ -293,6 +296,7 @@ describe('DataTableEditDialogComponent', () => {
                                 exportValuePath: 'struct.Time',
                                 exportValueName: 'Time',
                                 exportCreatedByWidget: true,
+                                exportTagSelection: null,
                                 unit: null,
                                 elementDetails: {
                                     elementType: 0,

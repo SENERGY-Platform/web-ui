@@ -33,6 +33,7 @@ import {
 } from '../../metadata/device-types-overview/shared/device-type.model';
 import {DeviceInstancesModel} from '../../devices/device-instances/shared/device-instances.model';
 import {DeviceInstancesUpdateModel} from '../../devices/device-instances/shared/device-instances-update.model';
+import {PathOption} from "../../data/flow-repo/shared/path-options.service";
 
 @Injectable({
     providedIn: 'root'
@@ -220,5 +221,13 @@ export class ExportService {
         return {path, precision};
     }
 
-
+    getExportTags(exportId: string): Observable<Map<string, string[]>> {
+       return this.http.get<any>(environment.influxAPIURL + '/v2/tags/' + exportId).pipe(map(res => {
+           const m = new Map<string, string[]>();
+           for (const key of Object.keys(res)) {
+               m.set(key, res[key]);
+           }
+           return m;
+       }));
+    }
 }

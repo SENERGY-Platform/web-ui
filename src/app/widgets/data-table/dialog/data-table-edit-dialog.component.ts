@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterContentChecked, ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
@@ -187,6 +187,7 @@ export class DataTableEditDialogComponent implements OnInit {
             exportValuePath: [undefined],
             exportValueName: [undefined],
             exportCreatedByWidget: [undefined],
+            exportTagSelection: [undefined],
             unit: [undefined],
             warning: this.fb.group({
                 enabled: [false],
@@ -280,6 +281,10 @@ export class DataTableEditDialogComponent implements OnInit {
                 warnGroup.get('lowerBoundary')?.enable();
                 warnGroup.get('upperBoundary')?.enable();
             }
+        });
+
+        newGroup.get('exportId')?.valueChanges.subscribe(exportId => {
+            this.dataTableHelperService.preloadExportTags(exportId).subscribe();
         });
 
         if (measurement !== undefined) {
@@ -592,7 +597,10 @@ export class DataTableEditDialogComponent implements OnInit {
         this.addNewMeasurement();
         const newIndex = this.getElements().length - 1;
         this.getElement(newIndex).patchValue(this.getElement(index).value);
-        this.getElement(newIndex).patchValue({id: uuid(), exportValuePath: this.getElement(index).get('exportValuePath')?.value});
+        this.getElement(newIndex).patchValue({
+            id: uuid(),
+            exportValuePath: this.getElement(index).get('exportValuePath')?.value
+        });
         this.step = newIndex;
     }
 
@@ -895,5 +903,28 @@ export class DataTableEditDialogComponent implements OnInit {
 
     private setReady() {
         this.ready = this.numReady === this.numReadyNeeded;
+    }
+
+    getTags(tab: AbstractControl): Map<string, { value: string, parent: string }[]> {
+        const expId = tab.get('exportId')?.value;
+        if (expId === undefined) {
+            return new Map();
+        }
+        return this.dataTableHelperService.getExportTags(expId);
+    }
+
+    getTagOptionDisabledFunction(tab: AbstractControl): ((option: { value: string, parent: string }) => boolean) {
+        return ((option: { value: string, parent: string }) => {
+            const selection = tab.get('exportTagSelection')?.value as string[];
+            if (selection === null || selection === undefined || Object.keys(selection).length === 0) {
+                return false;
+            }
+            const existing = selection.find(s => s.startsWith(option.parent) && this.getTagValue(option) !== s);
+            return existing !== undefined;
+        });
+    }
+
+    getTagValue(a: { value: string, parent: string }): string {
+        return a.parent + '!' + a.value;
     }
 }

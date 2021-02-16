@@ -178,7 +178,7 @@ export class ChartsExportService {
         }
         const dataTable = new ChartDataTableModel([header]);
 
-        series.values.forEach((item: (string | number)[]) => {
+        series.values.forEach((item: (string | number | boolean)[]) => {
                 const dataPoint: (Date | number) [] = [new Date(<string>item[0])];
                 indices.forEach(resp => {
                     let value = item[resp.index];

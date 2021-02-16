@@ -33,6 +33,7 @@ import {
 } from '../../charts/export/shared/charts-export-request-payload.model';
 import {ExportService} from '../../../modules/exports/shared/export.service';
 import {ImportInstancesService} from '../../../modules/imports/import-instances/shared/import-instances.service';
+import {ExportDataService} from '../../shared/export-data.service';
 
 @Injectable({
     providedIn: 'root'
@@ -51,8 +52,9 @@ export class AirQualityService {
                 private dashboardService: DashboardService,
                 private errorHandlerService: ErrorHandlerService,
                 private exportService: ExportService,
+                private exportDataService: ExportDataService,
                 private importInstancesService: ImportInstancesService,
-                private http: HttpClient) {
+    ) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
@@ -153,7 +155,7 @@ export class AirQualityService {
                 requestPayload.queries = array;
 
 
-                this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries?include_empty_columns=true'), requestPayload)
+                this.exportDataService.query(requestPayload)
                     .subscribe(model => {
                         const values = model.results[0].series[0].values;
                         if (values.length === 0) {
@@ -193,7 +195,7 @@ export class AirQualityService {
         }
     }
 
-    private mapValuesIntoMeasurements(m: Map<number, number>, values: (string | number)[][], widget: WidgetModel,
+    private mapValuesIntoMeasurements(m: Map<number, number>, values: (string | number | boolean)[][], widget: WidgetModel,
                                       property: string, inside: boolean) {
 
         m.forEach((measurementIndex, columnIndex) => {

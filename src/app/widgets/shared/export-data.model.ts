@@ -16,8 +16,8 @@
 
 
 export interface TimeValuePairModel {
-    time: string;
-    value: string | number | boolean;
+    time: string | null;
+    value: string | number | boolean | null;
 }
 
 export interface LastValuesRequestElementModel {

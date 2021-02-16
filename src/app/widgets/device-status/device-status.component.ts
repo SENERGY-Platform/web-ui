@@ -109,7 +109,7 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
         this.configured = true;
     }
 
-    private convert(status: string | number | boolean): { icon: string, color: string } {
+    private convert(status: string | number | boolean | null): { icon: string, color: string } {
         const convertRules: DeviceStatusConfigConvertRuleModel[] | undefined = this.widget.properties.convertRules;
         if (convertRules) {
             for (let i = 0; i < convertRules.length; i++) {

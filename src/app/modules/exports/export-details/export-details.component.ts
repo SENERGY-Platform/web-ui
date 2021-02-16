@@ -75,7 +75,7 @@ export class ExportDetailsComponent implements OnInit {
         return this.exportDataService.getLastValues(this.lastValuesRequestElementModels).pipe(map(pairs => {
             this.export.Values.forEach((_, index) => {
                 this.export.Values[index].LastValue = pairs[index].value;
-                this.export.Values[index].LastTimeStamp = pairs[index].time;
+                this.export.Values[index].LastTimeStamp = '' + pairs[index].time;
             });
         }));
     }

@@ -83,7 +83,7 @@ export class MultiValueService {
                         if (measurements[i].type === 'Boolean' && measurements[i].data == null) {
                             measurements[i].data = 'False';
                         }
-                        measurements[i].time = pairs[i].time;
+                        measurements[i].time = '' + pairs[i].time;
                     });
                     observer.next(widget);
                     observer.complete();

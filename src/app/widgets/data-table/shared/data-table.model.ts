@@ -41,6 +41,7 @@ export interface DataTableElementModel {
     exportValuePath: string;
     exportValueName: string;
     exportCreatedByWidget: boolean;
+    exportTagSelection?: string[];
     unit?: string;
     warning?: DataTableElementWarningModel;
     elementDetails: {

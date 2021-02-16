@@ -138,29 +138,29 @@
                             <td formGroupName="device">
                                 <mat-form-field color="accent">
                                     <senergy-select-search formControlName="aspectId" [required]="true"
-                                                placeholder="Choose Aspect"
-                                                [options]="dataTableHelperService.getAspectsWithMeasuringFunction()"
-                                                useOptionViewProperty="name"
-                                                useOptionValueProperty="id">
+                                                           placeholder="Choose Aspect"
+                                                           [options]="dataTableHelperService.getAspectsWithMeasuringFunction()"
+                                                           useOptionViewProperty="name"
+                                                           useOptionValueProperty="id">
                                     </senergy-select-search>
                                 </mat-form-field>
                             </td>
                             <td formGroupName="device">
                                 <mat-form-field color="accent">
                                     <senergy-select-search formControlName="functionId" [required]="true"
-                                                placeholder="Choose Function" [compareWith]="compareStrings"
-                                                [options]="getFunctions(tab)" useOptionValueProperty="id"
-                                                useOptionViewProperty="name">
+                                                           placeholder="Choose Function" [compareWith]="compareStrings"
+                                                           [options]="getFunctions(tab)" useOptionValueProperty="id"
+                                                           useOptionViewProperty="name">
                                     </senergy-select-search>
                                 </mat-form-field>
                             </td>
                             <td formGroupName="device">
                                 <mat-form-field color="accent">
                                     <senergy-select-search [compareWith]="compareStrings"
-                                                formControlName="deviceId" placeholder="Choose Device"
-                                                [required]="true" [options]="getSelectables(tab)"
-                                                useOptionViewProperty="device.name"
-                                                useOptionValueProperty="device.id">
+                                                           formControlName="deviceId" placeholder="Choose Device"
+                                                           [required]="true" [options]="getSelectables(tab)"
+                                                           useOptionViewProperty="device.name"
+                                                           useOptionValueProperty="device.id">
                                     </senergy-select-search>
                                 </mat-form-field>
                             </td>
@@ -169,18 +169,19 @@
                             <td formGroupName="elementDetails">
                                 <mat-form-field color="accent" formGroupName="device">
                                     <senergy-select-search formControlName="serviceId" [required]="true"
-                                                placeholder="Choose Service" [compareWith]="compareStrings"
-                                                [options]="getServices(tab)" useOptionValueProperty="id"
-                                                useOptionViewProperty="name">
+                                                           placeholder="Choose Service" [compareWith]="compareStrings"
+                                                           [options]="getServices(tab)" useOptionValueProperty="id"
+                                                           useOptionViewProperty="name">
                                     </senergy-select-search>
                                 </mat-form-field>
                             </td>
                             <td>
                                 <mat-form-field color="accent">
                                     <senergy-select-search formControlName="exportValuePath" [required]="true"
-                                                placeholder="Choose Value" [compareWith]="compareStrings"
-                                                [options]="getServiceValues(tab)" useOptionViewProperty="Name"
-                                                useOptionValueProperty="Path">
+                                                           placeholder="Choose Value" [compareWith]="compareStrings"
+                                                           [options]="getServiceValues(tab)"
+                                                           useOptionViewProperty="Name"
+                                                           useOptionValueProperty="Path">
                                     </senergy-select-search>
                                 </mat-form-field>
                             </td>
@@ -189,27 +190,28 @@
                             <td formGroupName="elementDetails">
                                 <mat-form-field color="accent" formGroupName="pipeline">
                                     <senergy-select-search formControlName="pipelineId" [required]="true"
-                                                placeholder="Choose Pipeline" [compareWith]="compareStrings"
-                                                [options]="dataTableHelperService.getPipelines()"
-                                                useOptionValueProperty="id" useOptionViewProperty="name">
+                                                           placeholder="Choose Pipeline" [compareWith]="compareStrings"
+                                                           [options]="dataTableHelperService.getPipelines()"
+                                                           useOptionValueProperty="id" useOptionViewProperty="name">
                                     </senergy-select-search>
                                 </mat-form-field>
                             </td>
                             <td formGroupName="elementDetails">
                                 <mat-form-field color="accent" formGroupName="pipeline">
                                     <senergy-select-search formControlName="operatorId" [required]="true"
-                                                placeholder="Choose Operator" [compareWith]="compareStrings"
-                                                [options]="getOperators(tab)" useOptionValueProperty="id"
-                                                [getOptionViewValue]="getOperatorViewValue">
+                                                           placeholder="Choose Operator" [compareWith]="compareStrings"
+                                                           [options]="getOperators(tab)" useOptionValueProperty="id"
+                                                           [getOptionViewValue]="getOperatorViewValue">
                                     </senergy-select-search>
                                 </mat-form-field>
                             </td>
                             <td>
                                 <mat-form-field color="accent">
                                     <senergy-select-search formControlName="exportValuePath" [required]="true"
-                                                placeholder="Choose Value" [compareWith]="compareStrings"
-                                                [options]="getOperatorValues(tab)" useOptionValueProperty="Path"
-                                                useOptionViewProperty="Name">
+                                                           placeholder="Choose Value" [compareWith]="compareStrings"
+                                                           [options]="getOperatorValues(tab)"
+                                                           useOptionValueProperty="Path"
+                                                           useOptionViewProperty="Name">
                                     </senergy-select-search>
                                 </mat-form-field>
                             </td>
@@ -217,9 +219,22 @@
                         <tr>
                             <td>
                                 <mat-form-field color="accent">
-                                    <senergy-select-search formControlName="exportId" [required]="true" [compareWith]="compareStrings"
-                                                placeholder="Choose Export" [options]="getExports(tab)"
-                                                useOptionViewProperty="Name" useOptionValueProperty="ID">
+                                    <senergy-select-search formControlName="exportId" [required]="true"
+                                                           [compareWith]="compareStrings"
+                                                           placeholder="Choose Export" [options]="getExports(tab)"
+                                                           useOptionViewProperty="Name" useOptionValueProperty="ID">
+                                    </senergy-select-search>
+                                </mat-form-field>
+                            </td>
+
+                            <td *ngIf="tab.get('exportId')?.value !== undefined && getTags(tab).size > 0">
+                                <mat-form-field color="accent">
+                                    <senergy-select-search placeholder="Choose Tags" [multiple]="true"
+                                                           [options]="getTags(tab)"
+                                                           formControlName="exportTagSelection"
+                                                           [getOptionDisabled]="getTagOptionDisabledFunction(tab)"
+                                                           [getOptionValue]="getTagValue"
+                                                           useOptionViewProperty="value">
                                     </senergy-select-search>
                                 </mat-form-field>
                             </td>

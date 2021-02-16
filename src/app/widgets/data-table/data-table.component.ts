@@ -21,13 +21,19 @@ import {Subscription} from 'rxjs';
 import {MatTable} from '@angular/material/table';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DataTableEditDialogComponent} from './dialog/data-table-edit-dialog.component';
-import {LastValuesRequestElementModel, TimeValuePairModel} from '../shared/export-data.model';
+import {TimeValuePairModel} from '../shared/export-data.model';
 import {DeviceStatusConfigConvertRuleModel} from '../device-status/shared/device-status-properties.model';
 import {ExportDataService} from '../shared/export-data.service';
 import {DataTableOrderEnum, ExportValueTypes} from './shared/data-table.model';
 import {DecimalPipe} from '@angular/common';
 import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {Sort, SortDirection} from '@angular/material/sort';
+import {
+    ChartsExportRequestPayloadModel,
+    ChartsExportRequestPayloadQueriesFieldsModel,
+    ChartsExportRequestPayloadQueriesModel
+} from '../charts/export/shared/charts-export-request-payload.model';
+import {map} from 'rxjs/internal/operators';
 
 
 interface DataTableComponentItem {
@@ -161,14 +167,48 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
                 const elements = this.widget.properties.dataTable?.elements;
                 if (elements) {
-                    const queries: LastValuesRequestElementModel[] = [];
-                    elements.forEach(element => {
-                        if (element.exportId && element.exportValuePath) {
-                            queries.push({measurement: element.exportId, columnName: element.exportValueName});
-                        }
-                    });
+                    const requestPayload: ChartsExportRequestPayloadModel = {
+                        time: {
+                            last: '500000w', // arbitrary high number
+                            end: undefined,
+                            start: undefined
+                        },
+                        group: {
+                            type: undefined,
+                            time: ''
+                        },
+                        queries: [],
+                        limit: 1
+                    };
+                    const array: ChartsExportRequestPayloadQueriesModel[] = [];
+                    let fieldCounter = 0; // TODO ??
+                    const m = new Map<number, number>();
 
-                    this.exportDataService.getLastValues(queries).subscribe(res => {
+                    elements.forEach((element, index) => {
+                        const fields: ChartsExportRequestPayloadQueriesFieldsModel[] = [];
+                        m.set(index, ++fieldCounter);
+                        fields.push({name: element.exportValueName, math: ''});
+                        element.exportTagSelection?.forEach(tagFilter => {
+                            fields.push({name: tagFilter.split('!')[0], math: '', filterType: '=', filterValue: tagFilter.split('!')[1]});
+                            fieldCounter++;
+                        });
+                        array.push({id: element.exportId, fields: fields});
+                    });
+                    requestPayload.queries = array;
+                    this.exportDataService.query(requestPayload)
+                        .pipe(map(model => {
+                            const values = model.results[0].series[0].values;
+                            const res: TimeValuePairModel[] = [];
+                            m.forEach(columnIndex => {
+                                const dataRow = values.find(row => row[columnIndex] !== null);
+                                if (dataRow === undefined) {
+                                    res.push({time: null, value: null});
+                                } else {
+                                    res.push({time: '' + dataRow[0], value: dataRow[columnIndex]});
+                                }
+                            });
+                            return res;
+                        })).subscribe(res => {
                         this.items = [];
                         res.forEach((pair: TimeValuePairModel, index: number) => {
                             let v = pair.value;
@@ -183,7 +223,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                 icon: convert.icon,
                                 color: convert.color,
                                 class: '',
-                                time: pair.time
+                                time: '' + pair.time,
                             };
                             if (v !== null && item.icon === '') {
                                 if ((elements[index].valueType === ExportValueTypes.INTEGER
@@ -198,8 +238,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
                             const warn = elements[index].warning;
                             if (warn !== undefined && warn.enabled) {
-                                if ((warn.upperBoundary !== undefined && v > warn.upperBoundary)
-                                    || (warn.lowerBoundary !== undefined && v < warn.lowerBoundary)) {
+                                if ((warn.upperBoundary !== undefined && v !== null && v > warn.upperBoundary)
+                                    || (warn.lowerBoundary !== undefined && v !== null && v < warn.lowerBoundary)) {
                                     item.class = 'color-warn';
                                 }
                             }
@@ -249,7 +289,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
         }
     }
 
-    private convert(status: string | number | boolean, type: ExportValueTypes): { icon: string, color: string } {
+    private convert(status: string | number | boolean | null, type: ExportValueTypes): { icon: string, color: string } {
         const convertRules: DeviceStatusConfigConvertRuleModel[] | undefined = this.widget.properties.dataTable?.convertRules;
         if (convertRules) {
             for (let i = 0; i < convertRules.length; i++) {
@@ -265,7 +305,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
                             if (status === JSON.parse(convertRules[i].status)) {
                                 return {icon: convertRules[i].icon, color: convertRules[i].color};
                             }
-                        } catch (_) {} // happens when rule is not parsable, no problem
+                        } catch (_) {
+                        } // happens when rule is not parsable, no problem
                         break;
                     }
                     case ExportValueTypes.FLOAT:
