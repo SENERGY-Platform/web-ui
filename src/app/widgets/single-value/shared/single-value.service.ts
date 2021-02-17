@@ -24,6 +24,11 @@ import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashb
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ExportDataService} from '../../shared/export-data.service';
+import {
+    ChartsExportRequestPayloadModel
+} from '../../charts/export/shared/charts-export-request-payload.model';
+import {map} from 'rxjs/internal/operators';
+import {TimeValuePairModel} from '../../shared/export-data.model';
 
 @Injectable({
     providedIn: 'root'
@@ -52,14 +57,36 @@ export class SingleValueService {
         });
     }
 
-    getSingleValue(widget: WidgetModel): Observable<SingleValueModel> { // .
+    getSingleValue(widget: WidgetModel): Observable<SingleValueModel> {
         return new Observable<SingleValueModel>((observer) => {
             const m = widget.properties.measurement;
             const name = widget.properties.vAxis ? widget.properties.vAxis.Name : '';
             if (m) {
-                this.exportDataService.getLastValues(
-                    [{measurement: m.id, columnName: name, math: widget.properties.math}]
-                ).subscribe(pairs => {
+                const requestPayload: ChartsExportRequestPayloadModel = {
+                    time: {
+                        last: '500000w', // arbitrary high number
+                        end: undefined,
+                        start: undefined
+                    },
+                    queries: [{
+                        fields: [{name: name, math: widget.properties.math || ''}],
+                        id: m.id,
+                    }],
+                    limit: 1,
+                } as ChartsExportRequestPayloadModel;
+                if (widget.properties.group !== undefined) {
+                    requestPayload.group = widget.properties.group;
+                }
+                this.exportDataService.query(requestPayload, false)
+                    .pipe(map(model => {
+                            const values = model.results[0].series[0].values;
+                            const res: TimeValuePairModel[] = [];
+                            if (values.length === 1 && values[0].length === 2) {
+                                res.push({time: '' + values[0][0], value: values[0][1]});
+                            }
+                            return res;
+                        })
+                    ).subscribe(pairs => {
                     let value: any = '';
                     let type = widget.properties.type || '';
                     if (pairs.length === 0) {

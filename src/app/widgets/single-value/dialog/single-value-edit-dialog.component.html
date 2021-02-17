@@ -30,7 +30,8 @@
             <mat-error *ngIf="formControl.hasError('valid') === false">
                 Please make a selection!
             </mat-error>
-            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="optionSelected($event)" (closed)="autoCompleteClosed()">
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
+                              (optionSelected)="optionSelected($event)" (closed)="autoCompleteClosed()">
                 <mat-option *ngFor="let option of filteredExports | async" [value]="option">
                     {{option.name}}
                 </mat-option>
@@ -41,7 +42,8 @@
             <tr>
                 <td>
                     <mat-form-field color="accent">
-                        <mat-select [(value)]="widget.properties.vAxis" [disabled]="vAxisValues.length < 2" placeholder="Value" [compareWith]="compare">
+                        <mat-select [(value)]="widget.properties.vAxis" [disabled]="vAxisValues.length < 2"
+                                    placeholder="Value" [compareWith]="compare">
                             <mat-option *ngFor="let vAxisValue of vAxisValues" [value]="vAxisValue">
                                 {{vAxisValue.Name}}
                             </mat-option>
@@ -70,21 +72,42 @@
                 <td>
                     <mat-form-field color="accent" hintLabel="For use in Angular pipes">
                         <mat-label>Format</mat-label>
-                        <input type="text" matInput placeholder="Format" [(ngModel)]="format" [disabled]="type === 'String'">
+                        <input type="text" matInput placeholder="Format" [(ngModel)]="format"
+                               [disabled]="type === 'String'">
                     </mat-form-field>
                 </td>
             </tr>
             <tr>
-                <mat-form-field color="accent">
-                    <mat-label>Math</mat-label>
-                    <input type="text" matInput [(ngModel)]="math">
-                </mat-form-field>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-select placeholder="Group Type" [(ngModel)]="group.type">
+                            <mat-option [value]="">none</mat-option>
+                            <mat-option *ngFor="let t of groupTypes" [value]="t">
+                                {{t}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Group time</mat-label>
+                        <input type="string" matInput [(ngModel)]="group.time">
+                    </mat-form-field>
+                </td>
             </tr>
             <tr>
-                <mat-form-field color="accent">
-                    <mat-label>Max. font size (px)</mat-label>
-                    <input type="number" matInput [(ngModel)]="threshold">
-                </mat-form-field>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Math</mat-label>
+                        <input type="text" matInput [(ngModel)]="math">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field color="accent">
+                        <mat-label>Max. font size (px)</mat-label>
+                        <input type="number" matInput [(ngModel)]="threshold">
+                    </mat-form-field>
+                </td>
             </tr>
         </table>
     </div>
