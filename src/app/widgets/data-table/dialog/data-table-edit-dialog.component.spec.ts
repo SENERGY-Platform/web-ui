@@ -287,6 +287,7 @@ describe('DataTableEditDialogComponent', () => {
                         order: DataTableOrderEnum.TimeAsc,
                         valueAlias: 'alias',
                         refreshTime: 10,
+                        valuesPerElement: 1,
                         elements: [
                             {
                                 id: 'known-test-id',

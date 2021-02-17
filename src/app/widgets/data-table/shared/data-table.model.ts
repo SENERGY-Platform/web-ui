@@ -24,6 +24,7 @@ export interface DataTablePropertiesModel {
     valueAlias: string;
     refreshTime: number;
     convertRules: DataTableConfigConvertRuleModel[];
+    valuesPerElement?: number;
 }
 
 export interface DataTableConfigConvertRuleModel {

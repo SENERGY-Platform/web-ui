@@ -82,6 +82,7 @@ export class DataTableEditDialogComponent implements OnInit {
         refreshTime: [undefined],
         elements: this.fb.array([]),
         convertRules: this.fb.array([]),
+        valuesPerElement: [1, Validators.min(1)],
     });
 
     constructor(private dialogRef: MatDialogRef<DataTableEditDialogComponent>,
@@ -153,6 +154,7 @@ export class DataTableEditDialogComponent implements OnInit {
                 order: widget.properties.dataTable?.order || this.orderValues.Default,
                 valueAlias: widget.properties.dataTable?.valueAlias,
                 refreshTime: widget.properties.dataTable?.refreshTime || 60,
+                valuesPerElement: widget.properties.dataTable?.valuesPerElement || 1,
             });
 
             const convertRules = widget.properties.dataTable?.convertRules || [];

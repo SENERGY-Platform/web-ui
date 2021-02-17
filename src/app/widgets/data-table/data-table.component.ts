@@ -178,11 +178,12 @@ export class DataTableComponent implements OnInit, OnDestroy {
                             time: ''
                         },
                         queries: [],
-                        limit: 1
+                        limit: this.widget.properties.dataTable?.valuesPerElement || 1,
                     };
                     const array: ChartsExportRequestPayloadQueriesModel[] = [];
-                    let fieldCounter = 0; // TODO ??
+                    let fieldCounter = 0;
                     const m = new Map<number, number>();
+                    const resIndexToElementIndex: number[] = [];
 
                     elements.forEach((element, index) => {
                         const fields: ChartsExportRequestPayloadQueriesFieldsModel[] = [];
@@ -199,25 +200,25 @@ export class DataTableComponent implements OnInit, OnDestroy {
                         .pipe(map(model => {
                             const values = model.results[0].series[0].values;
                             const res: TimeValuePairModel[] = [];
-                            m.forEach(columnIndex => {
-                                const dataRow = values.find(row => row[columnIndex] !== null);
-                                if (dataRow === undefined) {
-                                    res.push({time: null, value: null});
-                                } else {
+                            m.forEach((columnIndex, elementIndex) => {
+                                const dataRows = values.filter(row => row[columnIndex] !== null);
+                                dataRows.forEach(dataRow => {
+                                    resIndexToElementIndex.push(elementIndex);
                                     res.push({time: '' + dataRow[0], value: dataRow[columnIndex]});
-                                }
+                                });
                             });
                             return res;
                         })).subscribe(res => {
                         this.items = [];
-                        res.forEach((pair: TimeValuePairModel, index: number) => {
+                        res.forEach((pair: TimeValuePairModel, resIndex: number) => {
+                            const elementIndex = resIndexToElementIndex[resIndex];
                             let v = pair.value;
                             if (v === true || v === false) {
                                 v = v as unknown as string;
                             }
-                            const convert = this.convert(v, elements[index].valueType);
+                            const convert = this.convert(v, elements[elementIndex].valueType);
                             const item: DataTableComponentItem = {
-                                name: elements[index].name,
+                                name: elements[elementIndex].name,
                                 status: v,
                                 value: v,
                                 icon: convert.icon,
@@ -226,17 +227,17 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                 time: '' + pair.time,
                             };
                             if (v !== null && item.icon === '') {
-                                if ((elements[index].valueType === ExportValueTypes.INTEGER
-                                    || elements[index].valueType === ExportValueTypes.FLOAT)
-                                    && elements[index].format !== undefined && elements[index].format !== null && elements[index].format !== '') {
-                                    item.status = this.decimalPipe.transform(v, elements[index].format);
+                                if ((elements[elementIndex].valueType === ExportValueTypes.INTEGER
+                                    || elements[elementIndex].valueType === ExportValueTypes.FLOAT)
+                                    && elements[elementIndex].format !== undefined && elements[elementIndex].format !== null && elements[elementIndex].format !== '') {
+                                    item.status = this.decimalPipe.transform(v, elements[elementIndex].format);
                                 }
-                                if (elements[index].unit) {
-                                    item.status += ' ' + elements[index].unit;
+                                if (elements[elementIndex].unit) {
+                                    item.status += ' ' + elements[elementIndex].unit;
                                 }
                             }
 
-                            const warn = elements[index].warning;
+                            const warn = elements[elementIndex].warning;
                             if (warn !== undefined && warn.enabled) {
                                 if ((warn.upperBoundary !== undefined && v !== null && v > warn.upperBoundary)
                                     || (warn.lowerBoundary !== undefined && v !== null && v < warn.lowerBoundary)) {
