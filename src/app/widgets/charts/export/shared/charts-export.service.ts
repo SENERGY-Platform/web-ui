@@ -15,15 +15,10 @@
  */
 
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {ChartsModel} from '../../shared/charts.model';
 import {ElementSizeService} from '../../../../core/services/element-size.service';
-import {catchError} from 'rxjs/internal/operators';
-import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
-import {environment} from '../../../../../environments/environment';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {ChartsExportColumnsModel, ChartsExportModel} from './charts-export.model';
 import {ChartDataTableModel} from '../../../../core/components/chart/chart-data-table.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
@@ -32,11 +27,10 @@ import {WidgetModel, WidgetPropertiesModels} from '../../../../modules/dashboard
 import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ErrorModel} from '../../../../core/model/error.model';
 import {ChartsExportPropertiesModel, ChartsExportVAxesModel} from './charts-export-properties.model';
-import {
-    ChartsExportRequestPayloadModel, ChartsExportRequestPayloadQueriesFieldsModel,
-    ChartsExportRequestPayloadQueriesModel, ChartsExportRequestPayloadTimeModel,
-} from './charts-export-request-payload.model';
+import {ChartsExportRequestPayloadGroupModel} from './charts-export-request-payload.model';
 import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
+import {ExportDataService} from '../../../shared/export-data.service';
+import {QueriesRequestElementModel, QueriesRequestTimeModel} from '../../../shared/export-data.model';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -45,7 +39,7 @@ const customColor = '#4484ce'; // /* cc */
 })
 export class ChartsExportService {
 
-    constructor(private http: HttpClient,
+    constructor(private exportDataService: ExportDataService,
                 private elementSizeService: ElementSizeService,
                 private errorHandlerService: ErrorHandlerService,
                 private dialog: MatDialog,
@@ -68,117 +62,87 @@ export class ChartsExportService {
         });
     }
 
-    getData(properties: WidgetPropertiesModels): Observable<ChartsExportModel | { error: string }> {
+    getData(properties: WidgetPropertiesModels): Observable<any[][] | null> {
         const widgetProperties = <ChartsExportPropertiesModel>properties;
-        const requestPayload: ChartsExportRequestPayloadModel = {
-            time: {} as ChartsExportRequestPayloadTimeModel,
-            group: {
-                type: undefined,
-                time: ''
-            },
-            queries: []
-        };
+        const time: QueriesRequestTimeModel = {};
+        let group: ChartsExportRequestPayloadGroupModel | undefined;
 
         if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Relative && widgetProperties.time) {
-            requestPayload.time.last = widgetProperties.time.last;
+            time.last = widgetProperties.time.last;
         }
 
         if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute && widgetProperties.time) {
-            requestPayload.time.start = new Date(<string>widgetProperties.time.start).toISOString();
-            requestPayload.time.end = new Date(<string>widgetProperties.time.end).toISOString();
+            time.start = new Date(<string>widgetProperties.time.start).toISOString();
+            time.end = new Date(<string>widgetProperties.time.end).toISOString();
         }
 
         if (widgetProperties.group && widgetProperties.group.type !== undefined && widgetProperties.group.type !== '') {
-            requestPayload.group = widgetProperties.group;
+            group = widgetProperties.group;
         }
+        const elements: QueriesRequestElementModel[] = [];
 
         if (widgetProperties.vAxes) {
-            const array: ChartsExportRequestPayloadQueriesModel[] = [];
             widgetProperties.vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
-
-                const newField: ChartsExportRequestPayloadQueriesFieldsModel = {
-                    name: vAxis.valueName,
-                    math: vAxis.math,
-                    filterType: vAxis.filterType
+                const newField: QueriesRequestElementModel = {
+                    measurement: vAxis.instanceId,
+                    columns: [{
+                        name: vAxis.valueName,
+                        math: vAxis.math !== '' ? vAxis.math : undefined,
+                        groupType: group?.type !== null ? group?.type : undefined,
+                    }],
+                    groupTime: group?.time !== '' ? group?.time : undefined,
+                    time: time,
                 };
-                newField.filterValue = vAxis.valueType === 'string' ? vAxis.filterValue : Number(vAxis.filterValue);
-
-                if (this.canAppendField(array, vAxis, newField)) {
-                    array[array.length - 1].fields.push(newField);
-                } else {
-                    array.push({id: vAxis.instanceId, fields: [newField]});
+                if (vAxis.filterType !== undefined) {
+                    newField.filters = [{
+                        column: vAxis.valueName,
+                        type: vAxis.filterType,
+                        value: vAxis.valueType === 'string' ? vAxis.filterValue : Number(vAxis.filterValue),
+                    }];
                 }
-
+                elements.push(newField);
             });
-            requestPayload.queries = array;
         }
 
-        return this.http.post<ChartsExportModel>((environment.influxAPIURL + '/queries?include_empty_columns=false'), requestPayload).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {error: 'error'}))
-        );
+        return this.exportDataService.v2QueryAsTable(elements);
     }
 
     getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
-            this.getData(widget.properties).subscribe((resp: (ChartsExportModel | ErrorModel)) => {
-                if (this.errorHandlerService.checkIfErrorExists(resp)) {
-                    observer.next(resp);
+            this.getData(widget.properties).subscribe((resp: (any[][] | null)) => {
+                if (resp === null) {
+                    // no data
+                    observer.next(this.setProcessInstancesStatusValues(
+                        widget,
+                        new ChartDataTableModel([[]])));
                 } else {
-                    if (resp.results[0].series[0].values.length === 0) {
-                        // no data
-                        observer.next(this.setProcessInstancesStatusValues(
-                            widget,
-                            new ChartDataTableModel([[]])));
-                    } else {
-                        observer.next(this.setProcessInstancesStatusValues(
-                            widget,
-                            this.setData(resp.results[0].series[0], widget.properties.vAxes || [])));
-                    }
+                    observer.next(this.setProcessInstancesStatusValues(
+                        widget,
+                        this.setData(resp, widget.properties.vAxes || [])));
                 }
                 observer.complete();
             });
         });
     }
 
-    /**
-     * Multiple filters are AND connected. To avoid applying mutliple filters, canAppendField checks
-     * if the current query already has a filter definition or if this field has a filter definition.
-     * Only if no filters are involved true will be returned.
-     */
-    private canAppendField(array: ChartsExportRequestPayloadQueriesModel[], vAxis: ChartsExportVAxesModel, appender: ChartsExportRequestPayloadQueriesFieldsModel): boolean {
-        if ((appender.filterValue !== undefined && appender.filterValue !== null && !isNaN(<number>appender.filterValue))
-            || (appender.filterType !== undefined && appender.filterType !== null)) {
-            return false;
-        }
-        if (array.length > 0 && array[array.length - 1].id === vAxis.instanceId) {
-            let hasFilteredField = false;
-            array[array.length - 1].fields
-                .forEach(field => hasFilteredField =
-                    (field.filterValue === undefined || field.filterValue === null || isNaN(<number>appender.filterValue))
-                    && (field.filterType === undefined || field.filterType === null) ?
-                        hasFilteredField : true);
-            return !hasFilteredField;
-        }
-        return false;
-    }
-
-    private setData(series: ChartsExportColumnsModel, vAxes: ChartsExportVAxesModel[]): ChartDataTableModel {
-        const indices: { index: number, math: string, conversions: { from: string, to: number }[],
+    private setData(series: any[][], vAxes: ChartsExportVAxesModel[]): ChartDataTableModel {
+        const indices: {index: number, conversions: { from: string, to: number }[],
             conversionDefault?: number, type: string}[] = [];
         const header: string[] = ['time'];
         if (vAxes) {
-            vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
-                const index = series.columns.indexOf(vAxis.instanceId + '.' + vAxis.valueName + vAxis.math.trim() + (vAxis.filterType || '') + (vAxis.filterValue || ''));
-                if (index !== -1) {
-                    indices.push({index: index, math: vAxis.math, conversions: vAxis.conversions || [],
-                        conversionDefault: vAxis.conversionDefault, type: vAxis.valueType});
+            vAxes.forEach((vAxis: ChartsExportVAxesModel, index) => {
+                if (series.findIndex(a => a[index + 1] !== null) !== -1) {
+                    indices.push({
+                        index: index + 1, conversions: vAxis.conversions || [],
+                        conversionDefault: vAxis.conversionDefault, type: vAxis.valueType
+                    });
                     header.push(vAxis.valueAlias || vAxis.valueName);
                 }
             });
         }
         const dataTable = new ChartDataTableModel([header]);
 
-        series.values.forEach((item: (string | number | boolean)[]) => {
+        series.forEach((item: (string | number | boolean)[]) => {
                 const dataPoint: (Date | number) [] = [new Date(<string>item[0])];
                 indices.forEach(resp => {
                     let value = item[resp.index];

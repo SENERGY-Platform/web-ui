@@ -25,3 +25,31 @@ export interface LastValuesRequestElementModel {
     columnName: string;
     math?: string;
 }
+
+export interface QueriesRequestElementModel {
+    columns: QueriesRequestColumnModel[];
+    filters?: QueriesRequestFilterModel [];
+    groupTime?: string;
+    limit?: number;
+    measurement: string;
+    time?: QueriesRequestTimeModel;
+}
+
+export interface QueriesRequestColumnModel {
+    groupType?: string;
+    math?: string;
+    name: string;
+}
+
+export interface QueriesRequestFilterModel {
+    column: string;
+    math?: string;
+    type: string;
+    value: any;
+}
+
+export interface QueriesRequestTimeModel {
+    end?: string;
+    last?: string;
+    start?: string;
+}
