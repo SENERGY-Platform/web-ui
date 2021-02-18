@@ -182,7 +182,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                         filters: filters.length > 0 ? filters : undefined});
 
                     });
-                    this.exportDataService.v2Query(requestPayload)
+                    this.exportDataService.query(requestPayload)
                         .pipe(map(values => {
                             const res: TimeValuePairModel[] = [];
                             m.forEach((columnIndex, elementIndex) => {

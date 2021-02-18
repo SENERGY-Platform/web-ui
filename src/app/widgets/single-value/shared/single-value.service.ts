@@ -73,7 +73,7 @@ export class SingleValueService {
                 } else {
                     requestPayload.limit = 1;
                 }
-                this.exportDataService.v2Query([requestPayload]).subscribe(pairs => {
+                this.exportDataService.query([requestPayload]).subscribe(pairs => {
                     pairs = pairs[0];
                     let value: any = '';
                     let type = widget.properties.type || '';

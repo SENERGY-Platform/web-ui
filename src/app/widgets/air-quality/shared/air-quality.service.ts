@@ -140,7 +140,7 @@ export class AirQualityService {
                         });
                     });
                 }
-                this.exportDataService.v2Query(requestPayload)
+                this.exportDataService.query(requestPayload)
                     .subscribe(values => {
                         this.mapValuesIntoMeasurements(insideMap, values, widget, 'measurements', true);
                         this.mapValuesIntoMeasurements(outsideMap, values, widget, 'measurements', false);

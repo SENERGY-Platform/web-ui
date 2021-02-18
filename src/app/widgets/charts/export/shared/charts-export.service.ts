@@ -104,7 +104,7 @@ export class ChartsExportService {
             });
         }
 
-        return this.exportDataService.v2QueryAsTable(elements);
+        return this.exportDataService.queryAsTable(elements);
     }
 
     getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {

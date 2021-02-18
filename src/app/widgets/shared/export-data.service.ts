@@ -34,19 +34,11 @@ export class ExportDataService {
         return this.http.post<TimeValuePairModel[]>(environment.influxAPIURL + '/v2/last-values', requestElements);
     }
 
-    query(payload: ChartsExportRequestPayloadModel, include_empty_columns = true): Observable<ChartsExportModel> {
-        let url = environment.influxAPIURL + '/queries';
-        if (include_empty_columns) {
-            url += '?include_empty_columns=true';
-        }
-        return this.http.post<ChartsExportModel>(url, payload);
-    }
-
-    v2Query(query: QueriesRequestElementModel[]): Observable<any[][][]> {
+    query(query: QueriesRequestElementModel[]): Observable<any[][][]> {
         return this.http.post<any[][][]>(environment.influxAPIURL + '/v2/queries?format=per_query', query);
     }
 
-    v2QueryAsTable(query: QueriesRequestElementModel[]): Observable<any[][] | null> {
+    queryAsTable(query: QueriesRequestElementModel[]): Observable<any[][] | null> {
         return this.http.post<any[][] | null>(environment.influxAPIURL + '/v2/queries?format=table', query);
     }
 }
