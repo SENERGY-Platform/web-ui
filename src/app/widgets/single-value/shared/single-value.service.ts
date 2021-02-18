@@ -24,11 +24,7 @@ import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashb
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ExportDataService} from '../../shared/export-data.service';
-import {
-    ChartsExportRequestPayloadModel
-} from '../../charts/export/shared/charts-export-request-payload.model';
-import {map} from 'rxjs/internal/operators';
-import {TimeValuePairModel} from '../../shared/export-data.model';
+import {QueriesRequestElementModel} from '../../shared/export-data.model';
 
 @Injectable({
     providedIn: 'root'
@@ -62,38 +58,30 @@ export class SingleValueService {
             const m = widget.properties.measurement;
             const name = widget.properties.vAxis ? widget.properties.vAxis.Name : '';
             if (m) {
-                const requestPayload: ChartsExportRequestPayloadModel = {
-                    time: {
-                        last: '500000w', // arbitrary high number
-                        end: undefined,
-                        start: undefined
-                    },
-                    queries: [{
-                        fields: [{name: name, math: widget.properties.math || ''}],
-                        id: m.id,
+                const requestPayload: QueriesRequestElementModel = {
+                    measurement: m.id,
+                    columns: [{
+                        name: name,
+                        math: widget.properties.math !== '' ? widget.properties.math : undefined,
                     }],
-                    limit: 1,
-                } as ChartsExportRequestPayloadModel;
-                if (widget.properties.group !== undefined) {
-                    requestPayload.group = widget.properties.group;
+                };
+                if (widget.properties.group !== undefined && widget.properties.group.time !== ''
+                    && widget.properties.group.type !== undefined && widget.properties.group.type !== '') {
+                    requestPayload.time = {last: widget.properties.group.time};
+                    requestPayload.columns[0].groupType = widget.properties.group.type;
+                    requestPayload.groupTime = widget.properties.group.time;
+                } else {
+                    requestPayload.limit = 1;
                 }
-                this.exportDataService.query(requestPayload, false)
-                    .pipe(map(model => {
-                            const values = model.results[0].series[0].values;
-                            const res: TimeValuePairModel[] = [];
-                            if (values.length === 1 && values[0].length === 2) {
-                                res.push({time: '' + values[0][0], value: values[0][1]});
-                            }
-                            return res;
-                        })
-                    ).subscribe(pairs => {
+                this.exportDataService.v2Query([requestPayload]).subscribe(pairs => {
+                    pairs = pairs[0];
                     let value: any = '';
                     let type = widget.properties.type || '';
                     if (pairs.length === 0) {
                         type = 'String';
                         value = 'N/A';
                     } else {
-                        value = pairs[0].value;
+                        value = pairs[0][1];
                     }
                     const svm: SingleValueModel = {
                         type: type,
