@@ -28,7 +28,7 @@ export interface LastValuesRequestElementModel {
 
 export interface QueriesRequestElementModel {
     columns: QueriesRequestColumnModel[];
-    filters?: QueriesRequestFilterModel [];
+    filters?: QueriesRequestFilterModel[];
     groupTime?: string;
     limit?: number;
     measurement: string;
