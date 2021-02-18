@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Injectable} from "@angular/core";
-import {GoogleChartComponent} from "ng2-google-charts";
+import {Injectable} from '@angular/core';
+import {GoogleChartComponent} from 'ng2-google-charts';
 
 @Injectable({
     providedIn: 'root'
@@ -27,8 +27,8 @@ export class ChartsService {
 
     // Workaround to prevent Google Charts Library from causing memory leaks
     releaseResources(chartComponent: GoogleChartComponent) {
-        if (chartComponent) {
-            let chart = chartComponent.wrapper.getChart();
+        if (chartComponent && chartComponent.wrapper) {
+            const chart = chartComponent.wrapper.getChart();
 
             if (chart) {
                 try {

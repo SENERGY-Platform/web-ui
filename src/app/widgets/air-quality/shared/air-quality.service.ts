@@ -16,24 +16,17 @@
 
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {AirQualityPropertiesModel, AirQualityExternalProvider, MeasurementModel} from './air-quality.model';
+import {AirQualityExternalProvider, AirQualityPropertiesModel, MeasurementModel} from './air-quality.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {AirQualityEditDialogComponent} from '../dialog/air-quality-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {environment} from '../../../../environments/environment';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {HttpClient} from '@angular/common/http';
-import {ChartsExportModel} from '../../charts/export/shared/charts-export.model';
-import {
-    ChartsExportRequestPayloadModel,
-    ChartsExportRequestPayloadQueriesFieldsModel,
-    ChartsExportRequestPayloadQueriesModel
-} from '../../charts/export/shared/charts-export-request-payload.model';
 import {ExportService} from '../../../modules/exports/shared/export.service';
 import {ImportInstancesService} from '../../../modules/imports/import-instances/shared/import-instances.service';
 import {ExportDataService} from '../../shared/export-data.service';
+import {QueriesRequestElementModel} from '../../shared/export-data.model';
 
 @Injectable({
     providedIn: 'root'
@@ -77,23 +70,9 @@ export class AirQualityService {
     readAllData(widget: WidgetModel): Observable<WidgetModel> {
         return new Observable<WidgetModel>((observer) => {
             if (widget.properties.measurements) {
-                const requestPayload: ChartsExportRequestPayloadModel = {
-                    time: {
-                        last: '500000w', // arbitrary high number
-                        end: undefined,
-                        start: undefined
-                    },
-                    group: {
-                        type: undefined,
-                        time: ''
-                    },
-                    queries: [],
-                    limit: 1
-                };
+                const requestPayload: QueriesRequestElementModel[] = [];
 
                 const measurements = widget.properties.measurements;
-                const array: ChartsExportRequestPayloadQueriesModel[] = [];
-                let fieldCounter = 0;
                 const insideMap = new Map<number, number>();
                 const outsideMap = new Map<number, number>();
                 const pollenMap = new Map<number, number>();
@@ -101,34 +80,44 @@ export class AirQualityService {
                     if (measurement.is_enabled) {
                         const id = (measurement.export ? measurement.export.ID : '');
                         const column = measurement.data.column ? measurement.data.column.Name : '';
-                        insideMap.set(++fieldCounter, index);
-                        array.push({id: id || '', fields: [{name: column, math: measurement.math || ''}]});
+                        insideMap.set(requestPayload.length, index);
+                        requestPayload.push({
+                            measurement: id || '',
+                            columns: [{name: column, math: measurement.math || undefined}],
+                            limit: 1,
+                        });
 
                     }
                     if (measurement.has_outside || measurement.provider === AirQualityExternalProvider.UBA
                         || measurement.provider === AirQualityExternalProvider.Yr) {
                         const id = (measurement.outsideExport ? measurement.outsideExport.ID : '');
                         const column = measurement.outsideData.column ? measurement.outsideData.column.Name : '';
-                        const fields: ChartsExportRequestPayloadQueriesFieldsModel[] = [];
-                        fields.push({name: column, math: measurement.outsideMath || ''});
-                        outsideMap.set(++fieldCounter, index);
+                        outsideMap.set(requestPayload.length, index);
                         if (measurement.provider === AirQualityExternalProvider.UBA) {
-                            fields.push({
-                                name: 'measurement',
-                                filterType: '=',
-                                filterValue: measurement.short_name,
-                                math: ''
+                            requestPayload.push({
+                                measurement: id || '',
+                                columns: [{name: column}],
+                                filters: [
+                                    {
+                                        column: 'measurement',
+                                        type: '=',
+                                        value: measurement.short_name,
+                                    },
+                                    {
+                                        column: 'station_id',
+                                        type: '=',
+                                        value: widget.properties.ubaInfo?.stationId || '',
+                                    }
+                                ],
+                                limit: 1,
                             });
-                            fieldCounter++;
-                            fields.push({
-                                name: 'station_id',
-                                filterType: '=',
-                                filterValue: widget.properties.ubaInfo?.stationId || '',
-                                math: ''
+                        } else {
+                            requestPayload.push({
+                                measurement: id || '', columns:
+                                    [{name: column, math: measurement.outsideMath || undefined}],
+                                limit: 1,
                             });
-                            fieldCounter++;
                         }
-                        array.push({id: id || '', fields: fields});
                     }
                 });
                 if (widget.properties.dwdPollenInfo?.exportId !== undefined) {
@@ -136,33 +125,23 @@ export class AirQualityService {
                         if (!p.is_enabled || widget.properties.dwdPollenInfo?.exportId === undefined) {
                             return;
                         }
-                        const fields: ChartsExportRequestPayloadQueriesFieldsModel[] = [];
-                        fields.push({
-                            name: 'today',
-                            math: '',
+                        pollenMap.set(requestPayload.length, index);
+                        requestPayload.push({
+                            measurement: widget.properties.dwdPollenInfo.exportId,
+                            columns: [{name: 'today'}],
+                            filters: [
+                                {
+                                    column: 'pollen',
+                                    type: '=',
+                                    value: p.short_name,
+                                },
+                            ],
+                            limit: 1,
                         });
-                        pollenMap.set(++fieldCounter, index);
-                        fields.push({
-                            name: 'pollen',
-                            math: '',
-                            filterType: '=',
-                            filterValue: p.short_name,
-                        });
-                        fieldCounter++;
-                        array.push({id: widget.properties.dwdPollenInfo.exportId, fields: fields});
                     });
                 }
-                requestPayload.queries = array;
-
-
-                this.exportDataService.query(requestPayload)
-                    .subscribe(model => {
-                        const values = model.results[0].series[0].values;
-                        if (values.length === 0) {
-                            observer.next(widget);
-                            observer.complete();
-                            return;
-                        }
+                this.exportDataService.v2Query(requestPayload)
+                    .subscribe(values => {
                         this.mapValuesIntoMeasurements(insideMap, values, widget, 'measurements', true);
                         this.mapValuesIntoMeasurements(outsideMap, values, widget, 'measurements', false);
                         this.mapValuesIntoMeasurements(pollenMap, values, widget, 'pollen', false);
@@ -195,24 +174,28 @@ export class AirQualityService {
         }
     }
 
-    private mapValuesIntoMeasurements(m: Map<number, number>, values: (string | number | boolean)[][], widget: WidgetModel,
+    private mapValuesIntoMeasurements(m: Map<number, number>, values: any[][][], widget: WidgetModel,
                                       property: string, inside: boolean) {
-
         m.forEach((measurementIndex, columnIndex) => {
-            values.forEach(val => {
-                // @ts-ignore
-                if (val[columnIndex] !== null && widget.properties[property] !== undefined) {
-                    if (inside) {
-                        // @ts-ignore
-                        widget.properties[property][measurementIndex].data.value =
-                            Math.round(Number(val[columnIndex]) * 100) / 100;
-                    } else {
-                        // @ts-ignore
-                        widget.properties[property][measurementIndex].outsideData.value =
-                            Math.round(Number(val[columnIndex]) * 100) / 100;
-                    }
+            if (inside) {
+                if (values[columnIndex][0] !== undefined) {
+                    // @ts-ignore
+                    widget.properties[property][measurementIndex].data.value =
+                        Math.round(Number(values[columnIndex][0][1]) * 100) / 100;
+                } else {
+                    // @ts-ignore
+                    widget.properties[property][measurementIndex].data.value = undefined;
                 }
-            });
+            } else {
+                if (values[columnIndex][0] !== undefined) {
+                    // @ts-ignore
+                    widget.properties[property][measurementIndex].outsideData.value =
+                        Math.round(Number(values[columnIndex][0][1]) * 100) / 100;
+                } else {
+                    // @ts-ignore
+                    widget.properties[property][measurementIndex].outsideData.value = undefined;
+                }
+            }
         });
     }
 }
