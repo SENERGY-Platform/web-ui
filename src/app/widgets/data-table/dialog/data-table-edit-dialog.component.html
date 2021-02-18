@@ -57,7 +57,8 @@
                 <td>
                     <mat-form-field color="accent">
                         <mat-label>Values per Element</mat-label>
-                        <input type="number" matInput placeholder="Values per Element" formControlName="valuesPerElement">
+                        <input type="number" matInput placeholder="Values per Element"
+                               formControlName="valuesPerElement">
                     </mat-form-field>
                 </td>
             </tr>
@@ -257,6 +258,19 @@
                                 <mat-form-field color="accent" hintLabel="For use in Angular pipes">
                                     <mat-label>Format</mat-label>
                                     <input type="text" matInput placeholder="Format" formControlName="format">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <senergy-select-search placeholder="Group Type" [options]="groupTypes"
+                                                           [noneView]="'none'" formControlName="groupType">
+                                    </senergy-select-search>
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <mat-label>Group time</mat-label>
+                                    <input type="text" matInput formControlName="groupTime">
                                 </mat-form-field>
                             </td>
                         </tr>

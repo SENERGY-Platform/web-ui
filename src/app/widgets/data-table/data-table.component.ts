@@ -28,11 +28,6 @@ import {DataTableOrderEnum, ExportValueTypes} from './shared/data-table.model';
 import {DecimalPipe} from '@angular/common';
 import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {Sort, SortDirection} from '@angular/material/sort';
-import {
-    ChartsExportRequestPayloadModel,
-    ChartsExportRequestPayloadQueriesFieldsModel,
-    ChartsExportRequestPayloadQueriesModel
-} from '../charts/export/shared/charts-export-request-payload.model';
 import {map} from 'rxjs/internal/operators';
 
 
@@ -177,16 +172,37 @@ export class DataTableComponent implements OnInit, OnDestroy {
                         element.exportTagSelection?.forEach(tagFilter => {
                             filters.push({column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1]});
                         });
-                        requestPayload.push({measurement: element.exportId, columns: [{name: element.exportValueName}],
-                            limit: this.widget.properties.dataTable?.valuesPerElement || 1,
-                        filters: filters.length > 0 ? filters : undefined});
+                        const requestElement: QueriesRequestElementModel = {
+                            measurement: element.exportId,
+                            columns: [{name: element.exportValueName}],
+                            filters: filters.length > 0 ? filters : undefined
+                        };
 
+                        if (element.groupTime !== undefined && element.groupTime !== '' && element.groupTime !== null
+                            && element.groupType !== undefined && element.groupType !== '' && element.groupType !== null) {
+                            // get digit part as number, multiply by valuesPerElement and append the unit
+                            const digits = element.groupTime.match(/(\d+)/);
+                            const unit =  element.groupTime.match(/(\D+)/);
+                            const last = '' +
+                                Number(digits !== null && digits.length > 0 ? digits[0] : 0)
+                                * (this.widget.properties.dataTable?.valuesPerElement || 1)
+                                + (unit !== null && unit.length > 0 ? unit[0] : '');
+
+                            requestElement.time = {last: last};
+                            requestElement.columns[0].groupType = element.groupType;
+                            requestElement.groupTime = element.groupTime;
+                        } else {
+                            requestElement.limit = this.widget.properties.dataTable?.valuesPerElement || 1;
+                        }
+                        requestPayload.push(requestElement);
                     });
                     this.exportDataService.query(requestPayload)
                         .pipe(map(values => {
                             const res: TimeValuePairModel[] = [];
                             m.forEach((columnIndex, elementIndex) => {
-                                const dataRows = values[columnIndex];
+                                let dataRows = values[columnIndex];
+                                // sometimes an extra value if given by influx
+                                dataRows = dataRows.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1);
                                 dataRows.forEach(dataRow => {
                                     resIndexToElementIndex.push(elementIndex);
                                     res.push({time: '' + dataRow[0], value: dataRow[1]});
@@ -214,7 +230,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
                             if (v !== null && item.icon === '') {
                                 if ((elements[elementIndex].valueType === ExportValueTypes.INTEGER
                                     || elements[elementIndex].valueType === ExportValueTypes.FLOAT)
-                                    && elements[elementIndex].format !== undefined && elements[elementIndex].format !== null && elements[elementIndex].format !== '') {
+                                    && elements[elementIndex].format !== undefined && elements[elementIndex].format !== null
+                                    && elements[elementIndex].format !== '') {
                                     item.status = this.decimalPipe.transform(v, elements[elementIndex].format);
                                 }
                                 if (elements[elementIndex].unit) {

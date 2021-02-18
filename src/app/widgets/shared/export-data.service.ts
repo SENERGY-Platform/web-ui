@@ -19,8 +19,6 @@ import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {LastValuesRequestElementModel, QueriesRequestElementModel, TimeValuePairModel} from './export-data.model';
 import {HttpClient} from '@angular/common/http';
-import {ChartsExportModel} from '../charts/export/shared/charts-export.model';
-import {ChartsExportRequestPayloadModel} from '../charts/export/shared/charts-export-request-payload.model';
 
 @Injectable({
     providedIn: 'root'

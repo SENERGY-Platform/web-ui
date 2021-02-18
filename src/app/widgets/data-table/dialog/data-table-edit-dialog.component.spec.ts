@@ -298,6 +298,8 @@ describe('DataTableEditDialogComponent', () => {
                                 exportValueName: 'Time',
                                 exportCreatedByWidget: true,
                                 exportTagSelection: null,
+                                groupType: null,
+                                groupTime: null,
                                 unit: null,
                                 elementDetails: {
                                     elementType: 0,
