@@ -293,6 +293,23 @@
             </td>
         </ng-container>
 
+        <ng-container matColumnDef="tags">
+            <th mat-header-cell *matHeaderCellDef>Tags</th>
+            <td mat-cell *matCellDef="let element">
+                <mat-form-field color="accent">
+                    <senergy-select-search placeholder="Choose Tags" [multiple]="true"
+                                           [disabled]="getTags(element).size === 0"
+                                           [options]="getTags(element)"
+                                           [getOptionDisabled]="getTagOptionDisabledFunction(element)"
+                                           [getOptionValue]="getTagValue"
+                                           [(ngModel)]="element.tagSelection"
+                                           useOptionViewProperty="value">
+                    </senergy-select-search>
+                </mat-form-field>
+            </td>
+        </ng-container>
+
+
         <ng-container matColumnDef="displayOnSecondVAxis">
             <th mat-header-cell *matHeaderCellDef>Use second Y-Axis</th>
             <td mat-cell *matCellDef="let element">

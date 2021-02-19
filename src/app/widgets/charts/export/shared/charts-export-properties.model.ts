@@ -54,6 +54,7 @@ export interface ChartsExportVAxesModel {
     color: string;
     filterType?:  '=' | '<>' | '!=' | '>' | '>=' | '<' | '<=';
     filterValue?: number | string;
+    tagSelection?: string[];
     isDuplicate?: boolean;
     displayOnSecondVAxis?: boolean;
     conversions?: {from: string; to: number}[];

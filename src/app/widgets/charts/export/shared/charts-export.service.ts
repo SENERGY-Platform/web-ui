@@ -30,7 +30,11 @@ import {ChartsExportPropertiesModel, ChartsExportVAxesModel} from './charts-expo
 import {ChartsExportRequestPayloadGroupModel} from './charts-export-request-payload.model';
 import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
 import {ExportDataService} from '../../../shared/export-data.service';
-import {QueriesRequestElementModel, QueriesRequestTimeModel} from '../../../shared/export-data.model';
+import {
+    QueriesRequestElementModel,
+    QueriesRequestFilterModel,
+    QueriesRequestTimeModel
+} from '../../../shared/export-data.model';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -93,12 +97,19 @@ export class ChartsExportService {
                     groupTime: group?.time !== '' ? group?.time : undefined,
                     time: time,
                 };
+                const filters: QueriesRequestFilterModel[] = [];
+                vAxis.tagSelection?.forEach(tagFilter => {
+                    filters.push({column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1]});
+                });
                 if (vAxis.filterType !== undefined) {
-                    newField.filters = [{
+                    filters.push({
                         column: vAxis.valueName,
                         type: vAxis.filterType,
                         value: vAxis.valueType === 'string' ? vAxis.filterValue : Number(vAxis.filterValue),
-                    }];
+                    });
+                }
+                if (filters.length > 0) {
+                    newField.filters = filters;
                 }
                 elements.push(newField);
             });
