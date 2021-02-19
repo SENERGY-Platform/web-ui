@@ -31,6 +31,7 @@ import {DialogsService} from '../../core/services/dialogs.service';
 import {ProcessSchedulerService} from '../../widgets/process-scheduler/shared/process-scheduler.service';
 import {DataTableService} from '../../widgets/data-table/shared/data-table.service';
 import {AirQualityService} from '../../widgets/air-quality/shared/air-quality.service';
+import {ActivatedRoute, Router} from '@angular/router';
 
 const grids = new Map([
     ['xs', 1],
@@ -66,7 +67,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 private processSchedulerService: ProcessSchedulerService,
                 private dataTableService: DataTableService,
                 private airQualityService: AirQualityService,
-                private deviceStatusService: DeviceStatusService) {
+                private deviceStatusService: DeviceStatusService,
+                private route: ActivatedRoute,
+                private router: Router) {
     }
 
     ngOnInit() {
@@ -112,6 +115,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     setTabIndex(index: number): void {
         this.zoomedWidgetIndex = null;
+        if (index !== this.activeTabIndex) {
+            let url = '/dashboard/';
+            if (index !== 0) {
+                url += this.dashboards[index].id;
+            }
+            this.router.navigateByUrl(url);
+        }
         this.activeTabIndex = index;
         if (this.options.api === undefined) {
             this.initDragAndDropOptions();
@@ -221,6 +231,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.dashboardService.getDashboards().subscribe((dashboards: DashboardModel[]) => {
                 this.dashboards = dashboards;
                 this.dashboardsRetrieved = true;
+                this.route.url.subscribe(url => {
+                    const id = url[url.length - 1].toString();
+                    const idx = this.dashboards.findIndex(d => d.id === id);
+                    if (idx === -1) {
+                        this.setTabIndex(0);
+                    } else {
+                        this.setTabIndex(idx);
+                    }
+                });
             }
         );
 
