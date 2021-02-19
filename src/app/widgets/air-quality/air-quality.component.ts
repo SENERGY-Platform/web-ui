@@ -126,11 +126,13 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                                 this.pros.push(measurement.name_html + ' is better outside: ' + outsideValue + measurement.unit_html);
                             } else if (outsideValue > measurement.data.value) {
                                 this.cons.push(measurement.name_html + ' is worse outside: ' + outsideValue + measurement.unit_html);
+                                this.pros = this.pros.filter(c => !c.startsWith(measurement.name_html));
                             }
                         } else if (measurement.data && measurement.data.value &&
                             measurement.data.value < measurement.boundaries.warn.lower) { // too low inside
                             if (outsideValue < measurement.data.value) {
                                 this.cons.push(measurement.name_html + ' is worse outside: ' + outsideValue + measurement.unit_html);
+                                this.pros = this.pros.filter(c => !c.startsWith(measurement.name_html));
                             } else if (outsideValue > measurement.data.value) {
                                 this.pros.push(measurement.name_html + ' is better outside: ' + outsideValue + measurement.unit_html);
                             }
