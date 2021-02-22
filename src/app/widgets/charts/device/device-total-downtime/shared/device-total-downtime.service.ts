@@ -65,7 +65,11 @@ export class DeviceTotalDowntimeService {
     getTotalDowntime(widgetId: string): Observable<ChartsModel> {
         return new Observable<ChartsModel>((observer) => {
             this.deviceInstancesService.getDeviceHistory7d().subscribe((devices: DeviceInstancesHistoryModel[]) => {
-                observer.next(this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(devices)));
+                if (devices.length === 0) {
+                    observer.next(this.setDevicesTotalDowntimeChartValues(widgetId, new ChartDataTableModel([[]])));
+                } else {
+                    observer.next(this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(devices)));
+                }
                 observer.complete();
             });
         });
@@ -87,7 +91,8 @@ export class DeviceTotalDowntimeService {
                     actions: ['dragToZoom', 'rightClickToReset'],
                     axis: 'horizontal',
                     keepInBounds: true,
-                    maxZoomIn: 0.001},
+                    maxZoomIn: 0.001
+                },
                 colors: [customColor],
             }
         );

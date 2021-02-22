@@ -21,7 +21,7 @@
             <div>Please configure widget!</div>
         </div>
         <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
-        <div *ngIf="configured && dataReady" class="table-container" fxLayout="column" fxFill>
+        <div *ngIf="configured && dataReady && items.length > 0" class="table-container" fxLayout="column" fxFill>
             <table mat-table [matSortActive]="matSortActive" [matSortDirection]="matSortDirection" matSortDisableClear
                    [dataSource]="items" matSort (matSortChange)="matSortChange($event)">
                 <ng-container matColumnDef="name">
@@ -50,6 +50,7 @@
                 <tr mat-row *matRowDef="let m; columns: ['name', 'value', 'time'];"></tr>
             </table>
         </div>
+        <senergy-no-data [showIf]="configured && dataReady && items.length === 0"></senergy-no-data>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>
