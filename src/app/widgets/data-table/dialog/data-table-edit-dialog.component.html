@@ -137,6 +137,7 @@
                                 <mat-radio-group formControlName="elementType" fxLayout="row">
                                     <mat-radio-button [value]="elementTypes.DEVICE" fxFlex>Device</mat-radio-button>
                                     <mat-radio-button [value]="elementTypes.PIPELINE" fxFlex>Pipeline</mat-radio-button>
+                                    <mat-radio-button [value]="elementTypes.IMPORT" fxFlex>Import</mat-radio-button>
                                 </mat-radio-group>
                             </td>
                         </tr>
@@ -223,11 +224,41 @@
                                 </mat-form-field>
                             </td>
                         </tr>
+                        <tr *ngIf="isImport(tab)">
+                            <td formGroupName="elementDetails">
+                                <mat-form-field color="accent" formGroupName="import">
+                                    <senergy-select-search formControlName="typeId" [required]="true"
+                                                           placeholder="Choose Type"
+                                                           [options]="dataTableHelperService.getImportTypes()"
+                                                           useOptionValueProperty="id" useOptionViewProperty="name">
+                                    </senergy-select-search>
+                                </mat-form-field>
+                            </td>
+                            <td formGroupName="elementDetails">
+                                <mat-form-field color="accent" formGroupName="import">
+                                    <senergy-select-search formControlName="instanceId" [required]="true"
+                                                           placeholder="Choose Instance"
+                                                           [options]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
+                                                           useOptionValueProperty="id"
+                                                           useOptionViewProperty="name">
+                                    </senergy-select-search>
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field color="accent">
+                                    <senergy-select-search formControlName="exportValuePath" [required]="true"
+                                                           placeholder="Choose Value"
+                                                           [options]="dataTableHelperService.getImportTypeValues(tab.get('elementDetails.import.typeId')?.value)"
+                                                           useOptionValueProperty="Path"
+                                                           useOptionViewProperty="Name">
+                                    </senergy-select-search>
+                                </mat-form-field>
+                            </td>
+                        </tr>
                         <tr>
                             <td>
                                 <mat-form-field color="accent">
                                     <senergy-select-search formControlName="exportId" [required]="true"
-                                                           [compareWith]="compareStrings"
                                                            placeholder="Choose Export" [options]="getExports(tab)"
                                                            useOptionViewProperty="Name" useOptionValueProperty="ID">
                                     </senergy-select-search>

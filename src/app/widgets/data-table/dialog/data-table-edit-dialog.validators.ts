@@ -141,6 +141,12 @@ export function elementDetailsValidator(): ValidatorFn {
                     // ['device', 'requestDevice'], will be filled automatically
                     // ['device', 'scheduleId'], will be filled automatically
                 ]);
+
+            case DataTableElementTypesEnum.IMPORT:
+                return getAndCheckValues(control, [
+                    ['import', 'typeId'],
+                    ['import', 'instanceId'],
+                ]);
             default:
                 control.setErrors({'unknown elementType': elementType.value});
                 return {'unknown elementType': elementType.value};

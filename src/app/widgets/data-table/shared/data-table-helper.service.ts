@@ -29,14 +29,20 @@ import {forkJoin, Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {
     ExportModel,
-    ExportResponseModel,
-    ExportValueCharacteristicModel
+    ExportValueCharacteristicModel, ExportValueModel
 } from '../../../modules/exports/shared/export.model';
 import {PipelineRegistryService} from '../../../modules/data/pipeline-registry/shared/pipeline-registry.service';
 import {PipelineModel} from '../../../modules/data/pipeline-registry/shared/pipeline.model';
 import {OperatorModel} from '../../../modules/data/operator-repo/shared/operator.model';
 import {OperatorRepoService} from '../../../modules/data/operator-repo/shared/operator-repo.service';
 import {ExportValueTypes} from './data-table.model';
+import {ImportInstancesService} from '../../../modules/imports/import-instances/shared/import-instances.service';
+import {ImportTypesService} from '../../../modules/imports/import-types/shared/import-types.service';
+import {ImportInstancesModel} from '../../../modules/imports/import-instances/shared/import-instances.model';
+import {
+    ImportTypeModel,
+    ImportTypePermissionSearchModel
+} from '../../../modules/imports/import-types/shared/import-types.model';
 
 @Injectable({
     providedIn: 'root'
@@ -53,6 +59,10 @@ export class DataTableHelperService {
     aspectFunctionsCache = new Map<String, DeviceTypeFunctionModel[]>();
     operatorCache = new Map<String, OperatorModel>();
     serviceExportValueCache = new Map<String, ExportValueCharacteristicModel[]>();
+    importInstances: ImportInstancesModel[] = [];
+    importTypes: ImportTypePermissionSearchModel[] = [];
+    fullImportTypes = new Map<string, ImportTypeModel>();
+    importTypeValues = new Map<string, ExportValueModel[]>();
 
     constructor(
         private exportService: ExportService,
@@ -60,6 +70,8 @@ export class DataTableHelperService {
         private deviceInstancesService: DeviceInstancesService,
         private pipelineRegistryService: PipelineRegistryService,
         private operatorRepoService: OperatorRepoService,
+        private importInstancesService: ImportInstancesService,
+        private importTypesService: ImportTypesService,
     ) {
     }
 
@@ -89,12 +101,18 @@ export class DataTableHelperService {
         this.aspectFunctionsCache = new Map<String, DeviceTypeFunctionModel[]>();
         this.operatorCache = new Map<String, OperatorModel>();
         this.serviceExportValueCache = new Map<String, ExportValueCharacteristicModel[]>();
+        this.importInstances = [];
+        this.importTypes = [];
+        this.fullImportTypes = new Map<string, ImportTypeModel>();
+        this.importTypeValues = new Map<string, ExportValueModel[]>();
 
         const obs: Observable<any>[] = [];
         obs.push(this.preloadExports());
         obs.push(this.preloadAspectsWithMeasuringFunction());
         obs.push(this.preloadPipelines());
         obs.push(this.preloadAllOperators());
+        obs.push(this.preloadImportInstances());
+        obs.push(this.preloadImportTypes());
 
         return forkJoin(obs).pipe(map(() => null));
     }
@@ -224,7 +242,10 @@ export class DataTableHelperService {
         return collection;
     }
 
-    preloadExportTags(exportId: string): Observable<Map<string, { value: string, parent: string }[]>> {
+    preloadExportTags(exportId: string | null): Observable<Map<string, { value: string, parent: string }[]>> {
+        if (exportId === null) {
+            return of(new Map());
+        }
         if (this.exportTagCache?.get(exportId) !== undefined) {
             return of(this.getExportTags(exportId));
         }
@@ -241,6 +262,68 @@ export class DataTableHelperService {
 
     getExportTags(exportId: string): Map<string, { value: string, parent: string }[]> {
         return this.exportTagCache?.get(exportId) || new Map();
+    }
+
+    preloadImportInstances(): Observable<ImportInstancesModel[]> {
+        return this.importInstancesService.listImportInstances('', undefined, undefined, 'name.asc')
+            .pipe(map(instances => {
+                this.importInstances = instances;
+                return instances;
+            }));
+    }
+
+    preloadImportTypes(): Observable<ImportTypePermissionSearchModel[]> {
+        return this.importTypesService.listImportTypes('', undefined, undefined, 'name.asc')
+            .pipe(map(types => {
+                this.importTypes = types;
+                return types;
+            }));
+    }
+
+    getImportTypes(): ImportTypePermissionSearchModel[] {
+        return this.importTypes;
+    }
+
+    preloadFullImportType(id: string | null): Observable<ImportTypeModel | undefined> {
+        if (id === null) {
+            return of(undefined);
+        }
+        if (this.fullImportTypes.has(id)) {
+            return of(this.fullImportTypes.get(id));
+        }
+        return this.importTypesService.getImportType(id).pipe(map(t => {
+            this.fullImportTypes.set(id, t);
+            return t;
+        }));
+    }
+
+    getFullImportType(id: string): ImportTypeModel | undefined {
+        return this.fullImportTypes.get(id);
+    }
+
+    getImportInstancesOfType(id: string | null | undefined): ImportInstancesModel[] {
+        if (id === undefined || id === null) {
+            return [];
+        }
+        return this.importInstances.filter(i => i.import_type_id === id);
+    }
+
+    getImportTypeValues(id: string): ExportValueModel[] {
+        if (this.importTypeValues.has(id)) {
+            return this.importTypeValues.get(id) || [];
+        }
+        const type = this.fullImportTypes.get(id);
+        if (type === undefined) {
+            return [];
+        }
+        const values = this.importTypesService.parseImportTypeExportValues(type);
+        this.importTypeValues.set(id, values);
+        return values;
+    }
+
+    getExportsOfImportInstance(instanceId: string, path: string): ExportModel[] {
+        return this.exportCache?.filter(e => e.FilterType === 'import_id' && e.Filter === instanceId
+            && e.Values.findIndex(v => v.Path === path) !== -1) || [];
     }
 }
 

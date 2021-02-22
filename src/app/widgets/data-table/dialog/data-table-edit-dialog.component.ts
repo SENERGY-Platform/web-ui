@@ -214,12 +214,16 @@ export class DataTableEditDialogComponent implements OnInit {
                     pipelineId: [undefined],
                     operatorId: [undefined],
                 }),
+                import: this.fb.group({
+                    typeId: [undefined],
+                    instanceId: [undefined],
+                }),
             }, {validators: [elementDetailsValidator()]}),
         }, {validators: [exportValidator()]});
 
         // Init valueChanges listeners
         newGroup.get('elementDetails')?.get('elementType')?.valueChanges
-            .subscribe(elementType => this.enableDisableElementDevicePipelineFields(newGroup, elementType));
+            .subscribe(elementType => this.enableDisableElementDetailsFields(newGroup, elementType));
 
         newGroup.get('elementDetails')?.get('device')?.get('aspectId')?.valueChanges
             .subscribe(aspectId => {
@@ -257,6 +261,9 @@ export class DataTableEditDialogComponent implements OnInit {
 
         newGroup.get('elementDetails')?.get('pipeline')?.get('operatorId')?.valueChanges
             .subscribe(() => this.onOperatorSelected(newGroup));
+
+        newGroup.get('elementDetails.import.typeId')?.valueChanges
+            .subscribe(id => this.dataTableHelperService.preloadFullImportType(id).subscribe());
 
         newGroup.get('exportValuePath')?.valueChanges
             .subscribe(() => this.onExportValueSelected(newGroup));
@@ -399,6 +406,10 @@ export class DataTableEditDialogComponent implements OnInit {
         return element.get('elementDetails')?.get('elementType')?.value === this.elementTypes.PIPELINE;
     }
 
+    isImport(element: AbstractControl): boolean {
+        return element.get('elementDetails')?.get('elementType')?.value === this.elementTypes.IMPORT;
+    }
+
     getFunctions(element: AbstractControl): DeviceTypeFunctionModel[] {
         if (!this.ready) {
             return [];
@@ -511,6 +522,9 @@ export class DataTableEditDialogComponent implements OnInit {
                         }
                     }
                 }
+            } else if (this.isImport(element)) {
+                exports = this.dataTableHelperService
+                    .getExportsOfImportInstance(element.get('elementDetails.import.instanceId')?.value, exportValuePath);
             }
         }
 
@@ -674,6 +688,9 @@ export class DataTableEditDialogComponent implements OnInit {
             case this.elementTypes.DEVICE:
                 values = this.getServiceValues(element);
                 break;
+            case this.elementTypes.IMPORT:
+                values = this.dataTableHelperService.getImportTypeValues(element.get('elementDetails.import.typeId')?.value);
+                break;
             default:
                 throw new Error('DataTableEditDialogComponent:onExportValueSelected:Unknown type');
                 return;
@@ -694,15 +711,22 @@ export class DataTableEditDialogComponent implements OnInit {
         });
     }
 
-    private enableDisableElementDevicePipelineFields(element: AbstractControl, elementType: DataTableElementTypesEnum) {
+    private enableDisableElementDetailsFields(element: AbstractControl, elementType: DataTableElementTypesEnum) {
         switch (elementType) {
             case this.elementTypes.PIPELINE:
                 element.get('elementDetails')?.get('device')?.disable();
                 element.get('elementDetails')?.get('pipeline')?.enable();
+                element.get('elementDetails')?.get('import')?.disable();
                 break;
             case this.elementTypes.DEVICE:
                 element.get('elementDetails')?.get('pipeline')?.disable();
                 element.get('elementDetails')?.get('device')?.enable();
+                element.get('elementDetails')?.get('import')?.disable();
+                break;
+            case this.elementTypes.IMPORT:
+                element.get('elementDetails')?.get('pipeline')?.disable();
+                element.get('elementDetails')?.get('device')?.disable();
+                element.get('elementDetails')?.get('import')?.enable();
                 break;
         }
     }
@@ -766,6 +790,9 @@ export class DataTableEditDialogComponent implements OnInit {
                     break;
                 case this.elementTypes.PIPELINE:
                     preparedExport = this.preparePipelineOperatorExport(element);
+                    break;
+                case this.elementTypes.IMPORT:
+                    preparedExport = this.prepareImportExport(element);
                     break;
             }
             preparedExport.Name = 'Widget: ' + this.formGroup.get('name')?.value;
@@ -931,5 +958,26 @@ export class DataTableEditDialogComponent implements OnInit {
 
     getTagValue(a: { value: string, parent: string }): string {
         return a.parent + '!' + a.value;
+    }
+
+    private prepareImportExport(element: AbstractControl): ExportModel {
+        const type = this.dataTableHelperService.getFullImportType(element.get('elementDetails.import.typeId')?.value);
+        const values = this.dataTableHelperService.getImportTypeValues(element.get('elementDetails.import.typeId')?.value);
+        const instance = this.dataTableHelperService.getImportInstancesOfType(element.get('elementDetails.import.typeId')?.value)
+            .find(i => i.id === element.get('elementDetails.import.instanceId')?.value);
+        if (instance === undefined || type === undefined) {
+            throw new Error('undefined values');
+        }
+        return {
+            TimePath: 'time',
+            Values: values,
+            EntityName: instance.id,
+            Filter: instance.id,
+            FilterType: 'import_id',
+            ServiceName: type.name,
+            Topic: instance.kafka_topic,
+            Offset: 'smallest',
+            Generated: true
+        } as ExportModel;
     }
 }

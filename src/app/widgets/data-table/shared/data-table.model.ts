@@ -62,12 +62,17 @@ export interface DataTableElementModel {
             pipelineId: string;
             operatorId: string;
         },
+        import?: {
+            typeId: string;
+            instanceId: string;
+        },
     };
 }
 
 export enum DataTableElementTypesEnum {
     DEVICE,
     PIPELINE,
+    IMPORT,
 }
 
 export interface DataTableElementWarningModel {
