@@ -86,6 +86,7 @@ export enum ExportValueTypes {
     FLOAT = 'float',
     STRING = 'string',
     BOOLEAN = 'bool',
+    STRING_JSON = 'string_json',
 }
 
 export enum DataTableOrderEnum {

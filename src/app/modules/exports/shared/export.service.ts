@@ -46,6 +46,7 @@ export class ExportService {
     typeFloat = 'https://schema.org/Float';
     typeBoolean = 'https://schema.org/Boolean';
     typeStructure = 'https://schema.org/StructuredValue';
+    typeList = 'https://schema.org/ItemList';
 
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
@@ -138,6 +139,9 @@ export class ExportService {
                             break;
                         case this.typeBoolean:
                             type = 'bool';
+                            break;
+                        case this.typeList:
+                            type = 'string_json';
                             break;
 
                     }

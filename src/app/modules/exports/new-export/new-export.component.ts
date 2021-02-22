@@ -72,13 +72,15 @@ export class NewExportComponent implements OnInit {
         'float',
         'string',
         'int',
-        'bool'
+        'bool',
+        'string_json'
     ];
 
     typeString = 'https://schema.org/Text';
     typeInteger = 'https://schema.org/Integer';
     typeFloat = 'https://schema.org/Float';
     typeBoolean = 'https://schema.org/Boolean';
+    typeList = 'https://schema.org/ItemList';
 
     id = null as any;
 
@@ -394,6 +396,9 @@ export class NewExportComponent implements OnInit {
                         break;
                     case this.typeBoolean:
                         type = 'bool';
+                        break;
+                    case this.typeList:
+                        type = 'string_json';
                         break;
 
                 }

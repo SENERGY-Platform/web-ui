@@ -85,6 +85,8 @@ export class DataTableHelperService {
                 return ExportValueTypes.FLOAT;
             case 'https://schema.org/Boolean':
                 return ExportValueTypes.BOOLEAN;
+            case 'https://schema.org/ItemList':
+                return ExportValueTypes.STRING_JSON;
             default:
                 return '';
         }

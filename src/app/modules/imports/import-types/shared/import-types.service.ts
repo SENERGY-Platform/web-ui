@@ -33,6 +33,7 @@ export class ImportTypesService {
     FLOAT = 'https://schema.org/Float';
     BOOLEAN = 'https://schema.org/Boolean';
     STRUCTURE = 'https://schema.org/StructuredValue';
+    LIST = 'https://schema.org/ItemList';
     types: Map<string, string> = new Map();
 
     constructor(private http: HttpClient) {
@@ -92,6 +93,7 @@ export class ImportTypesService {
         this.types.set(this.INTEGER, 'int');
         this.types.set(this.FLOAT, 'float');
         this.types.set(this.BOOLEAN, 'bool');
+        this.types.set(this.LIST, 'string_json');
 
         let exportContent = importType.output.sub_content_variables?.find(sub => sub.name === 'value' && sub.type === this.STRUCTURE);
         if (exportContent === undefined) {
