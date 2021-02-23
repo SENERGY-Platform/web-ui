@@ -22,6 +22,9 @@
                 <mat-icon>close</mat-icon>
             </button>
         </mat-form-field>
+        <button class="refresh" matTooltip="Show generated" mat-icon-button color="accent" (click)="toggleExcludeGenerated()">
+        <mat-icon>{{excludeGenerated ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
         <button mat-icon-button (click)="reload()" color="accent" class="refresh">
             <mat-icon>refresh</mat-icon>
         </button>
@@ -39,15 +42,38 @@
         <table mat-table matSortDisableClear
                [dataSource]="instances" matSort
                (matSortChange)="matSortChange($event)"
-               matSortActive="name" matSortDirection="asc">
+               matSortActive="updated_at" matSortDirection="desc">
             <ng-container matColumnDef="name">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
-                <td mat-cell *matCellDef="let m">{{m.name}}</td>
+                <td mat-cell *matCellDef="let m" [ngClass]="{'auto-generated-cell': m.generated}">
+
+                    <div fxLayout="row">
+                        <div>
+                            {{m.name}}
+                        </div>
+                        <div class="auto-generated">
+                            <mat-icon *ngIf="m.generated === true" matTooltip="Generated Instance"
+                                      mat-list-icon>
+                                auto_awesome
+                            </mat-icon>
+                        </div>
+                    </div>
+                </td>
             </ng-container>
             <ng-container matColumnDef="image">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef>Image</th>
                 <td mat-cell *matCellDef="let m">
                     {{m.image}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="created_at">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Created at</th>
+                <td mat-cell *matCellDef="let element"> {{ element.created_at |  date:'dd.MM.yyyy - HH:mm'}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="updated_at">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Updated at</th>
+                <td mat-cell *matCellDef="let element"> {{ element.updated_at |  date:'dd.MM.yyyy - HH:mm'}}
                 </td>
             </ng-container>
             <ng-container matColumnDef="export">
@@ -77,9 +103,9 @@
 
 
             <tr mat-header-row
-                *matHeaderRowDef="['name', 'image', 'export', 'edit', 'delete']; sticky: true"></tr>
+                *matHeaderRowDef="['name', 'image', 'created_at', 'updated_at', 'export', 'edit', 'delete']; sticky: true"></tr>
             <tr mat-row
-                *matRowDef="let m; columns: ['name', 'image', 'export', 'edit', 'delete'];"></tr>
+                *matRowDef="let m; columns: ['name', 'image', 'created_at', 'updated_at', 'export', 'edit', 'delete'];"></tr>
         </table>
     </div>
 </div>

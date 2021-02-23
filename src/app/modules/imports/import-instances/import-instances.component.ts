@@ -46,10 +46,11 @@ export class ImportInstancesComponent implements OnInit {
     instances: ImportInstancesModel[] = [];
     searchControl = new FormControl('');
     dataReady = false;
-    sort = 'name.asc';
+    sort = 'updated_at.desc';
     limitInit = 100;
     limit = this.limitInit;
     offset = 0;
+    excludeGenerated = localStorage.getItem('import.instances.excludeGenerated') === 'true';
 
     ngOnInit(): void {
         this.load();
@@ -90,7 +91,9 @@ export class ImportInstancesComponent implements OnInit {
     }
 
     load() {
-        this.importInstancesService.listImportInstances(this.searchControl.value, this.limit, this.offset, this.sort).subscribe(inst => {
+        this.importInstancesService.listImportInstances(this.searchControl.value, this.limit, this.offset, this.sort,
+            this.excludeGenerated).subscribe(inst => {
+
             this.instances.push(...inst);
             if (this.table !== undefined) {
                 this.table.renderRows();
@@ -128,5 +131,11 @@ export class ImportInstancesComponent implements OnInit {
                     this.router.navigateByUrl('exports/details/' + val.ID);
                 }
             });
+    }
+
+    toggleExcludeGenerated() {
+        this.excludeGenerated = !this.excludeGenerated;
+        localStorage.setItem('import.instances.excludeGenerated', '' + this.excludeGenerated);
+        this.reload();
     }
 }

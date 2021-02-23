@@ -26,4 +26,7 @@ export interface ImportInstancesModel {
     kafka_topic: string;
     configs: ImportInstanceConfigModel[];
     restart: boolean;
+    generated: boolean;
+    created_at: Date;
+    updated_at: Date;
 }

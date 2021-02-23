@@ -52,6 +52,9 @@ describe('ImportInstancesComponent', () => {
         restart: true,
         configs: [],
         image: 'test-image',
+        created_at: new Date(),
+        updated_at: new Date(),
+        generated: false,
     };
 
     const importInstancesServiceSpy: Spy<ImportInstancesService> = createSpyFromClass(ImportInstancesService);

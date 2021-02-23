@@ -28,7 +28,8 @@ export class ImportInstancesService {
     constructor(private http: HttpClient) {
     }
 
-    listImportInstances(search: string, limit: number | undefined, offset: number | undefined, sort: string):
+    listImportInstances(search: string, limit: number | undefined, offset: number | undefined, sort: string,
+                        excludeGenerated: boolean = false):
         Observable<ImportInstancesModel[]> {
 
         let url = environment.importDeployUrl + '/instances?';
@@ -43,6 +44,9 @@ export class ImportInstancesService {
         }
         if (sort.length > 0) {
             url += '&sort=' + sort;
+        }
+        if (excludeGenerated) {
+            url += '&exclude_generated=true';
         }
         return this.http.get<ImportInstancesModel[]>(url)
             .pipe(map(types => types || []));

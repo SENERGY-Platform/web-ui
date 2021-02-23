@@ -612,6 +612,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                 }
             ],
             import_type_id: environment.importTypeIdUbaStation,
+            generated: true,
         } as ImportInstancesModel);
     }
 
@@ -837,6 +838,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                 }
             ],
             import_type_id: environment.importTypeIdDwdPollen,
+            generated: true,
         } as ImportInstancesModel);
     }
 
@@ -882,6 +884,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                 },
             ],
             import_type_id: environment.importTypeIdYrForecast,
+            generated: true,
         } as ImportInstancesModel);
     }
 
