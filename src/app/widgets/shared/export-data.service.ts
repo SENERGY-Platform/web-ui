@@ -36,7 +36,10 @@ export class ExportDataService {
         return this.http.post<any[][][]>(environment.influxAPIURL + '/v2/queries?format=per_query', query);
     }
 
-    queryAsTable(query: QueriesRequestElementModel[]): Observable<any[][] | null> {
-        return this.http.post<any[][] | null>(environment.influxAPIURL + '/v2/queries?format=table', query);
+    queryAsTable(query: QueriesRequestElementModel[], orderColumnIndex: Number = 0, orderDirection: 'asc' | 'desc' = 'desc')
+        : Observable<any[][] | null> {
+
+        return this.http.post<any[][] | null>(environment.influxAPIURL + '/v2/queries?format=table&order_column_index='
+            + orderColumnIndex + '&order_direction=' + orderDirection, query);
     }
 }
