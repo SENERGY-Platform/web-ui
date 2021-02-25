@@ -38,8 +38,8 @@ export class ImportDeployEditDialogComponent implements OnInit {
         kafka_topic: {value: '', disabled: true},
         configs: this.fb.array([]),
         restart: true,
-        created_at: '',
-        updated_at: '',
+        created_at: undefined,
+        updated_at: undefined,
         generated: false,
     });
 
