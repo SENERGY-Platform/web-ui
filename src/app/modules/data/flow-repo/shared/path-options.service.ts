@@ -25,6 +25,8 @@ import {
     DeviceTypeContentVariableModel,
     DeviceTypeServiceModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
+import {ImportTypeContentVariableModel, ImportTypeModel} from '../../../imports/import-types/shared/import-types.model';
+import {ImportInstancesModel} from '../../../imports/import-instances/shared/import-instances.model';
 
 export interface PathOption {
     service_id: string;
@@ -79,14 +81,26 @@ export class PathOptionsService {
         return pathOptions;
     }
 
-    private getPathOptionsRecursive(parentPath: string, pathArray: string[], contentVariable: DeviceTypeContentVariableModel,
+    getPathOptionsLocalImport(type: ImportTypeModel, instance: ImportInstancesModel,
+                        characteristic_id_filter: string[] = []): PathOption {
+        const pathOption: PathOption = {service_id: instance.kafka_topic, json_path: []};
+        type.output.sub_content_variables?.forEach(sub => {
+            this.getPathOptionsRecursive('', pathOption.json_path,
+                sub, characteristic_id_filter);
+        });
+        return pathOption;
+    }
+
+    private getPathOptionsRecursive(parentPath: string, pathArray: string[],
+                                    contentVariable: DeviceTypeContentVariableModel | ImportTypeContentVariableModel,
                                     characteristic_id_filter: string[]) {
         const path = (parentPath.length > 0 ? parentPath + '.' : '') + contentVariable.name;
         if (contentVariable.characteristic_id !== undefined
             && characteristic_id_filter.findIndex(c => c === contentVariable.characteristic_id) !== -1) {
             pathArray.push(path);
         }
-        contentVariable.sub_content_variables?.forEach(sub => this.getPathOptionsRecursive(path, pathArray, sub, characteristic_id_filter));
+        contentVariable.sub_content_variables?.forEach((sub: DeviceTypeContentVariableModel | ImportTypeContentVariableModel) =>
+            this.getPathOptionsRecursive(path, pathArray, sub, characteristic_id_filter));
     }
 
 }
