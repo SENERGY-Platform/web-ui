@@ -273,7 +273,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     }
 
     editContentVariable(sub: ImportTypeContentVariableModel) {
-        this.openDialog(sub).subscribe(val => {
+        this.openDialog(sub, false, !this.isTopLevel(sub)).subscribe(val => {
             if (val !== undefined) {
                 if (!this.isComplex(val)) {
                     val.sub_content_variables?.forEach(child => this.deleteContentVariable(child));
@@ -303,7 +303,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     }
 
     addOutput() {
-        this.openDialog(undefined).subscribe(val => {
+        this.openDialog(undefined, false, false).subscribe(val => {
             if (val !== undefined) {
                 const data = this.dataSource.data;
                 data.push(val);
@@ -312,12 +312,15 @@ export class ImportTypesCreateEditComponent implements OnInit {
         });
     }
 
-    private openDialog(content: ImportTypeContentVariableModel | undefined, infoOnly = false): Observable<ImportTypeContentVariableModel | undefined> {
+    private openDialog(content: ImportTypeContentVariableModel | undefined, infoOnly = false, nameTimeAllowed = true)
+        : Observable<ImportTypeContentVariableModel | undefined> {
+
         const config: MatDialogConfig = {
             data: {
                 typeConceptCharacteristics: this.typeConceptCharacteristics,
                 content: content,
                 infoOnly: infoOnly,
+                nameTimeAllowed: nameTimeAllowed,
             },
             minHeight: '400px',
         };
@@ -355,5 +358,9 @@ export class ImportTypesCreateEditComponent implements OnInit {
 
     isComplex(node: ImportTypeContentVariableModel): boolean {
         return node.type === ImportTypesCreateEditComponent.STRUCTURE || node.type === ImportTypesCreateEditComponent.LIST;
+    }
+
+    private isTopLevel(sub: ImportTypeContentVariableModel): boolean {
+        return this.dataSource.data.indexOf(sub) !== -1;
     }
 }

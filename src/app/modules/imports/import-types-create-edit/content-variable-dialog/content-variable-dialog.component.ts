@@ -16,8 +16,25 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ImportTypeContentVariableModel} from '../../import-types/shared/import-types.model';
-import {FormBuilder, Validators} from '@angular/forms';
+import {AbstractControl, FormBuilder, ValidationErrors, Validators} from '@angular/forms';
 import {DeviceTypeCharacteristicsModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+
+function notNamedTimeAndNotEmpty(control: AbstractControl): ValidationErrors | null  {
+    if (control.value === '') {
+        const err = {'notNamedTimeAndNotEmpty': 'Name required'};
+        control.setErrors(err);
+        return err;
+    }
+    if (control.value === 'time') {
+        const err = {'notNamedTimeAndNotEmpty': 'Name time not allowed at this level'};
+        // necessary for analytics pipelines
+        control.setErrors(err);
+        return err;
+    }
+    control.setErrors(null);
+    return null;
+}
+
 
 @Component({
     selector: 'senergy-import-content-variable-dialog',
@@ -52,13 +69,17 @@ export class ContentVariableDialogComponent implements OnInit {
     constructor(@Inject(MAT_DIALOG_DATA) public data: {
                     content?: ImportTypeContentVariableModel,
                     typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>>,
-                    infoOnly: boolean
+                    infoOnly: boolean,
+                    nameTimeAllowed: boolean,
                 },
                 private fb: FormBuilder, private dialogRef: MatDialogRef<ContentVariableDialogComponent>) {
     }
 
 
     ngOnInit(): void {
+        if (!this.data.nameTimeAllowed) {
+            this.form.get('name')?.setValidators([notNamedTimeAndNotEmpty]);
+        }
         if (this.data.content !== undefined) {
             this.form.patchValue(this.data.content);
         } else {
@@ -92,5 +113,13 @@ export class ContentVariableDialogComponent implements OnInit {
     getConceptCharacteristics(): Map<string, DeviceTypeCharacteristicsModel[]> {
         const type = this.form.get('type')?.value;
         return this.data.typeConceptCharacteristics.get(type) || new Map();
+    }
+
+    nameHint(): string {
+        const errors = this.form.get('name')?.errors;
+        if (errors === undefined || errors === null || errors['notNamedTimeAndNotEmpty'] === undefined) {
+            return '';
+        }
+        return errors['notNamedTimeAndNotEmpty'];
     }
 }
