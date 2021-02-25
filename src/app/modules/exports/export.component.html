@@ -38,8 +38,8 @@
     </button>
 </div>
 
-<div class="layout-margin" [hidden]="!ready || (exports.length === 0 && ready)">
-    <div class="mat-elevation-z1">
+<div class="layout-margin">
+    <div class="mat-elevation-z1" [hidden]="!ready || (exports.length === 0 && ready)">
         <div class="table-container">
             <table #sort="matSort" mat-table [dataSource]="exportsDataSource" matSort
                    matSortActive="created_at"
@@ -172,9 +172,9 @@
                        [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear()"
                        showFirstLastButtons></mat-paginator>
     </div>
-    <div *ngIf="totalCount === 0">No export instances found.</div>
-    <button mat-fab class="fab" routerLink="new" matTooltip="Start new Export">
-        <mat-icon>add</mat-icon>
-    </button>
+    <div *ngIf="exports.length === 0 && ready">No export instances found.</div>
 </div>
+<button mat-fab class="fab" routerLink="new" matTooltip="Start new Export">
+    <mat-icon>add</mat-icon>
+</button>
 <senergy-spinner [show]="!ready"></senergy-spinner>
