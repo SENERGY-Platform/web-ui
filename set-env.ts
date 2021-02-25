@@ -75,6 +75,7 @@ export const environment = {
   getTemperatureFunctionId: '${process.env.GET_TEMPERATURE_FUNCTION_ID}',
   getPressureFunctionId: '${process.env.GET_PRESSURE_FUNCTION_ID}',
   getCo2FunctionId: '${process.env.GET_C02_FUNCTION_ID}',
+  getTimestampFunctionId: '${process.env.GET_TIMESTAMP_FUNCTION_ID}',
   aspectAirId: '${process.env.ASPECT_AIR_ID}',
   importRepoUrl: '${process.env.IMPORT_REPO_URL}',
   importDeployUrl: '${process.env.IMPORT_DEPLOY_URL}',

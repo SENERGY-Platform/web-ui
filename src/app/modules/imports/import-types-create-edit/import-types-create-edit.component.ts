@@ -170,7 +170,12 @@ export class ImportTypesCreateEditComponent implements OnInit {
             }
         });
         this.functionsService.getFunctions('', 10000, 0, 'name', 'asc')
-            .subscribe(functions => this.functions = functions, err => {
+            .subscribe(functions => {
+                this.functions = functions;
+                if (!this.editMode) {
+                    this.form.patchValue({function_ids: [environment.getTimestampFunctionId]});
+                }
+            }, err => {
                 console.log(err);
                 this.snackBar.open('Error loading functions', 'OK', {duration: 3000});
                 this.navigateToList();
