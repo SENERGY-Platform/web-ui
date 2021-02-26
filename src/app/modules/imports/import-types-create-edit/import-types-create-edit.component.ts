@@ -172,7 +172,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
         this.functionsService.getFunctions('', 10000, 0, 'name', 'asc')
             .subscribe(functions => {
                 this.functions = functions;
-                if (!this.editMode) {
+                if (!this.editMode && !this.detailsMode) {
                     this.form.patchValue({function_ids: [environment.getTimestampFunctionId]});
                 }
             }, err => {
