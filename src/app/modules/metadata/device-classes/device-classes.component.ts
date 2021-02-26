@@ -131,7 +131,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             deviceClass: {
-                id: 'urn:infai:ses:device-class' + uuid(),
+                id: 'urn:infai:ses:device-class:' + uuid(),
                 image: '',
                 name: '',
             }   as DeviceTypeDeviceClassModel

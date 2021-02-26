@@ -131,7 +131,7 @@ export class AspectsComponent implements OnInit, OnDestroy {
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             aspect: {
-                id: 'urn:infai:ses:aspect' + uuid(),
+                id: 'urn:infai:ses:aspect:' + uuid(),
                 name: '',
             }   as DeviceTypeAspectModel
         };
