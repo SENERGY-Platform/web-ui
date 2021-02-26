@@ -73,7 +73,7 @@ export class DataTableEditDialogComponent implements OnInit {
     ready = false;
     saving = false;
     icons: string[] = [
-        'power', 'power_off', 'toggle_on', 'toggle_off', 'sensor_door', 'meeting_room', 'tv', 'tv_off', 'flash_on', 'flash_off', 'emoji_objects', 'check_circle_outline', 'highlight_off'
+        'power', 'power_off', 'toggle_on', 'toggle_off', 'sensor_window', 'sensor_door', 'meeting_room', 'tv', 'tv_off', 'flash_on', 'flash_off', 'emoji_objects', 'check_circle_outline', 'highlight_off'
     ];
     groupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median'];
     formGroup = this.fb.group({
