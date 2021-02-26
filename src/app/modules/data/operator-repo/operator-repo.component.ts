@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {OperatorModel} from './shared/operator.model';
 import {OperatorRepoService} from './shared/operator-repo.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {PermissionsService} from '../../permissions/shared/permissions.service';
-
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
+import {MatPaginator} from "@angular/material/paginator";
+import {SelectionModel} from "@angular/cdk/collections";
+import {MatTableDataSource} from "@angular/material/table";
+import {MatSort} from "@angular/material/sort";
+import {startWith, switchMap} from "rxjs/internal/operators";
+import {merge} from "rxjs/index";
 
 @Component({
     selector: 'senergy-operator-repo',
@@ -41,73 +37,60 @@ const grids = new Map([
 })
 export class OperatorRepoComponent implements OnInit, OnDestroy {
 
+    @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
+    @ViewChild('sort', {static: false}) sort!: MatSort;
+
+    selection = new SelectionModel<OperatorModel>(true, []);
+    displayedColumns: string[] = ['select', 'pub', 'name', 'image', 'details', 'edit', 'delete'];
+    totalCount = 0;
+
     operators = [] as OperatorModel[];
+    operatorsDataSource = new MatTableDataSource<OperatorModel>();
     ready = false;
-    gridCols = 0;
-    sortAttributes = [new SortModel('Name', 'name', 'asc')];
+
     userId: string | Error = '';
     shareUser = '';
 
     private searchText = '';
-    private limitInit = 54;
-    private limit = this.limitInit;
-    private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
+    private operatorSub: Subscription = new Subscription();
 
     constructor(private operatorRepoService: OperatorRepoService,
                 protected auth: AuthorizationService,
                 private searchbarService: SearchbarService,
                 public snackBar: MatSnackBar,
                 private dialogsService: DialogsService,
-                private responsiveService: ResponsiveService,
                 protected permission: PermissionsService
     ) {
     }
 
     ngOnInit() {
         this.userId = this.auth.getUserId();
-        this.initGridCols();
         this.initSearchAndGetOperators();
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
-    }
-
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.setRepoItemsParams(this.limitInit);
-            this.getOperators(false);
-        }
-    }
-
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getOperators(true);
+        this.operatorSub.unsubscribe();
     }
 
     deleteOperator(operator: OperatorModel) {
         this.dialogsService.openDeleteDialog('operator').afterClosed().subscribe((operatorDelete: boolean) => {
             if (operatorDelete) {
-                const index = this.operators.indexOf(operator);
-                if (index > -1) {
-                    this.operators.splice(index, 1);
-                }
-                this.operatorRepoService.deleteOeprator(operator).subscribe(() => {
+                this.ready = false;
+                this.operatorRepoService.deleteOperator(operator).subscribe(() => {
                     this.snackBar.open('Operator deleted', undefined, {
                         duration: 2000,
                     });
-                    this.setRepoItemsParams(1);
-                    this.getOperators(false);
+                    this.getOperators(true);
                 });
             }
         });
 
     }
+
     getOperatorUser(id: string | undefined) {
-        if (id  !== undefined) {
+        if (id !== undefined) {
             this.permission.getUserById(id).subscribe((item) => {
                 this.shareUser = item.username;
             });
@@ -116,27 +99,33 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
 
     private getOperators(reset: boolean) {
         if (reset) {
-            this.setRepoItemsParams(this.limitInit);
             this.reset();
         }
-        this.operatorRepoService.getOperators(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).
-        subscribe((resp: { operators: OperatorModel[] }) => {
-            if (resp.operators.length !== this.limit) {
-                this.allDataLoaded = true;
+        this.operatorsDataSource.sort = this.sort;
+        this.sort.sortChange.subscribe(() => {
+                this.paginator.pageIndex = 0;
+                this.selectionClear();
             }
-            for (const operator of resp.operators) {
-                operator.editable = operator.userId === this.userId;
-                this.operators.push(operator);
+        );
+
+        this.operatorSub = merge(this.sort.sortChange, this.paginator.page).pipe(startWith({}), switchMap(() => {
+            this.ready = false;
+            return this.operatorRepoService.getOperators(this.searchText, this.paginator.pageSize, this.paginator.pageSize * this.paginator.pageIndex, this.sort.active, this.sort.direction);
+        })).subscribe((resp: { operators: OperatorModel[], totalCount: number }) => {
+            if (resp.operators.length > 0) {
+                this.operators = resp.operators;
+                this.operators.forEach(operator => operator.editable = operator.userId === this.userId);
+                this.operatorsDataSource.data = this.operators;
+
+                this.totalCount = resp.totalCount;
             }
             this.ready = true;
         });
     }
 
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
+    private reset() {
+        this.operators = [];
+        this.ready = false;
     }
 
     private initSearchAndGetOperators() {
@@ -146,16 +135,52 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         });
     }
 
-    private setRepoItemsParams(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.operators.length;
+    selectionClear(): void {
+        this.selection.clear();
     }
 
-    private reset() {
-        this.operators = [];
-        this.offset = 0;
-        this.allDataLoaded = false;
-        this.ready = false;
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.operatorsDataSource.connect().value.length;
+        return numSelected <= currentViewed && numSelected !== 0;
     }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.operatorsDataSource.connect().value.forEach(row => {
+
+                    if (row.editable) {
+                        this.selection.select(row);
+                    }
+                }
+            );
+        }
+    }
+
+    deleteMultipleItems(): void {
+        this.dialogsService.openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' operators' : ' operator')).afterClosed().subscribe(
+            (deleteOperators: boolean) => {
+
+                if (deleteOperators) {
+                    this.ready = false;
+
+                    let operatorIDs: string[] = [];
+
+                    this.selection.selected.forEach((exp: OperatorModel) => {
+                            if (exp._id !== undefined) {
+                                operatorIDs.push(exp._id)
+                            }
+                        }
+                    );
+
+                    this.operatorRepoService.deleteOperators(operatorIDs).subscribe(() => {
+                        this.getOperators(true);
+                        this.selectionClear();
+                    });
+                }
+            });
+    }
+
 }

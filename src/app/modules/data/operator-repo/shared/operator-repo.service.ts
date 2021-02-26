@@ -21,6 +21,7 @@ import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {OperatorModel} from './operator.model';
 import {Observable} from 'rxjs';
+import {ExportService} from "../../../exports/shared/export.service";
 
 @Injectable({
     providedIn: 'root'
@@ -30,12 +31,15 @@ export class OperatorRepoService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
     }
 
-    getOperators(search: string, limit: number, offset: number, feature: string, order: string): Observable<{operators: OperatorModel[]}> {
-        return this.http.get<{operators: OperatorModel[]}>
+    getOperators(search: string, limit: number, offset: number, feature: string, order: string): Observable<{ operators: OperatorModel[], totalCount: number }> {
+        return this.http.get<{ operators: OperatorModel[], totalCount: number }>
         (environment.operatorRepoUrl + '/operator?limit=' + limit + '&offset=' + offset + '&sort=' + feature +
             ':' + order + (search ? ('&search=' + search) : '')).pipe(
             map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'getOperators: Error', {operators: []}))
+            catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'getOperators: Error', {
+                operators: [],
+                totalCount: 0
+            }))
         );
 
     }
@@ -44,8 +48,7 @@ export class OperatorRepoService {
         return this.http.get<OperatorModel>
         (environment.operatorRepoUrl + '/operator/' + id).pipe(
             map(resp => resp),
-            catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'getOperator: Error', null))
-        );
+            catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'getOperator: Error', null)));
 
     }
 
@@ -55,7 +58,7 @@ export class OperatorRepoService {
                 catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'putOperator: Error', {}))
             );
         } else {
-            const id  = operator._id;
+            const id = operator._id;
             delete operator._id;
             return this.http.post<{}>(environment.operatorRepoUrl + '/operator/' + id + '/', operator).pipe(
                 catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'postOperator: Error', {}))
@@ -63,9 +66,22 @@ export class OperatorRepoService {
         }
     }
 
-    deleteOeprator (operator: OperatorModel): Observable<{}>{
+    deleteOperator(operator: OperatorModel): Observable<{}> {
         return this.http.delete(environment.operatorRepoUrl + '/operator/' + operator._id + '/').pipe(
             catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'deleteOperator: Error', {}))
+        );
+    }
+
+    deleteOperators(operators: String[]): Observable<{ status: number }> {
+        return this.http.request('DELETE', environment.operatorRepoUrl + '/operator', {
+            body: operators,
+            responseType: 'text',
+            observe: 'response'
+        }).pipe(
+            map(resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'deleteOperators: Error', {status: 404}))
         );
     }
 }

@@ -14,75 +14,124 @@
   ~ limitations under the License.
   -->
 
-<div class="operator-repo-container">
-    <div fxLayout="column">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-    </div>
-    <div class="operator-repo-scroll">
-        <div infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.operator-repo-scroll'"
-             [fromRoot]="true"
-             (scrolled)="onScroll()">
-            <div class="layout-margin" fxLayout="column">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="280px" gutterSize="16px"
-                               *ngIf="operators.length > 0">
-                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of operators">
-                        <mat-card>
-                            <mat-card-header>
-                                <mat-card-title-group>
-                                    <mat-card-title>{{item.name}}</mat-card-title>
-                                    <mat-icon color="accent" (mouseover)="getOperatorUser(item.userId)" class="header-icon" *ngIf="item.pub == true && item.editable == false" matTooltip="shared by {{shareUser}}">
-                                        public
-                                    </mat-icon>
-                                    <mat-icon color="accent" class="header-icon" *ngIf="item.pub == true && item.editable == true" matTooltip="published">
-                                        check_box
-                                    </mat-icon>
-                                </mat-card-title-group>
-                            </mat-card-header>
-                            <mat-card-content>
-                                <div fxLayout="column">
-                                    <mat-list fxLayoutAlign="center center">
-                                        <div fxFill fxLayout="column">
-                                            <mat-list-item>
-                                                <mat-icon mat-list-icon>cloud_circle</mat-icon>
-                                                <h3 mat-line matTooltip="{{item.image}}">{{item.image}}</h3>
-                                                <p mat-line>Image</p>
-                                            </mat-list-item>
-                                            <mat-list-item>
-                                                <mat-icon mat-list-icon>description</mat-icon>
-                                                <h3 mat-line matTooltip="{{item.description}}">{{item.description || 'no description'}}</h3>
-                                                <p mat-line>Description</p>
-                                            </mat-list-item>
-                                        </div>
-                                    </mat-list>
-                                </div>
-                            </mat-card-content>
-                            <mat-card-actions>
-                                <div fxFlex></div>
-                                <button mat-icon-button color="accent" routerLink="op/{{item._id}}">
-                                    <mat-icon *ngIf="item.editable == true">edit</mat-icon>
-                                    <mat-icon *ngIf="item.editable == false">info</mat-icon>
-                                </button>
-                                <button *ngIf="item.editable == true" mat-icon-button color="accent" (click)="deleteOperator(item)">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </mat-card-actions>
-                        </mat-card>
-                    </mat-grid-tile>
-                </mat-grid-list>
-                <button mat-fab class="fab" routerLink="op" matTooltip="Register new Operator">
-                    <mat-icon>add</mat-icon>
-                </button>
-                <div *ngIf="operators.length === 0 && ready">No operator instances found.</div>
-                <senergy-spinner [elementCount]="operators.length" [show]="!ready"></senergy-spinner>
-            </div>
-        </div>
-    </div>
+<div fxLayout="column">
+    <senergy-searchbar fxFlex></senergy-searchbar>
 </div>
+
+<div class="layout-margin">
+    <div class="mat-elevation-z1" [hidden]="!ready || (operators.length === 0 && ready)">
+        <div class="table-container">
+            <table #sort="matSort" mat-table [dataSource]="operatorsDataSource" matSort
+                   matSortActive="name"
+                   matSortDirection="asc" matSortDisableClear>
+
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef>
+                        <mat-checkbox (change)="$event ? masterToggle() : null"
+                                      [checked]="selection.hasValue() && isAllSelected()"
+                                      [indeterminate]="selection.hasValue() && !isAllSelected()">
+                        </mat-checkbox>
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                        <mat-checkbox (click)="$event.stopPropagation()"
+                                      (change)="$event ? selection.toggle(row) : null"
+                                      [checked]="selection.isSelected(row)" [disabled]="row.editable == false">
+                        </mat-checkbox>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="pub">
+                    <th mat-header-cell *matHeaderCellDef>Access</th>
+                    <td mat-cell *matCellDef="let element">
+                        <mat-icon color="accent" (mouseover)="getOperatorUser(element.userId)"
+                                  *ngIf="element.pub == true && element.editable == false"
+                                  matTooltip="Shared by {{shareUser}}">
+                            share
+                        </mat-icon>
+                        <mat-icon color="accent" *ngIf="element.pub == true && element.editable == true"
+                                  matTooltip="Public">
+                            public
+                        </mat-icon>
+                        <mat-icon color="accent" *ngIf="element.pub == null"
+                                  matTooltip="Owner">
+                            person
+                        </mat-icon>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                    <td mat-cell *matCellDef="let element">
+                        <div>
+                            {{element.name}}
+                        </div>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="image">
+                    <th mat-header-cell *matHeaderCellDef>Image</th>
+                    <td mat-cell *matCellDef="let element" class="truncate-cell" matTooltip="{{element.image}}">
+                        {{element.image}}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="details">
+                    <th mat-header-cell *matHeaderCellDef>Details</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button color="accent" routerLink="op/{{element._id}}"
+                                matTooltip="{{element.description}}">
+                            <mat-icon>info</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="edit">
+                    <th mat-header-cell *matHeaderCellDef>Edit</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button color="accent" routerLink="op/{{element._id}}"
+                                [disabled]="element.editable == false" matTooltip="Edit">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="delete">
+                    <th mat-header-cell *matHeaderCellDef>Delete</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button [disabled]="element.editable == false" mat-icon-button color="accent"
+                                (click)="deleteOperator(element)" matTooltip="Delete">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="header-delete-all">
+                    <th mat-header-cell *matHeaderCellDef colspan="10">
+                        <div fxLayout="row">
+                            <div fxLayoutAlign="center center">You have
+                                selected {{selection.selected.length}} items
+                            </div>
+                            <button matTooltip="Delete" mat-icon-button color="accent"
+                                    (click)="deleteMultipleItems()">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </th>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
+                    [hidden]="selection.selected.length === 0"></tr>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </div>
+        <mat-paginator #paginator [length]="totalCount" [pageSize]="20"
+                       [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear()"
+                       showFirstLastButtons></mat-paginator>
+    </div>
+    <div *ngIf="operators.length === 0 && ready">No operator instances found.</div>
+</div>
+<button mat-fab class="fab" routerLink="op" matTooltip="Register new Operator">
+    <mat-icon>add</mat-icon>
+</button>
+<senergy-spinner [show]="!ready"></senergy-spinner>

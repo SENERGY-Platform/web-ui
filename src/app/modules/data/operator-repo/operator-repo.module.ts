@@ -33,10 +33,11 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {MatInputModule} from '@angular/material/input';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSelectModule} from '@angular/material/select';
+import {MatPaginatorModule} from "@angular/material/paginator";
 
 
-const operator = {path: 'data/operator-repo/op', pathMatch: 'full', component: OperatorComponent, data: { header: 'Analytics' }};
-const operatorEdit = {path: 'data/operator-repo/op/:id', pathMatch: 'full', component: OperatorComponent, data: { header: 'Analytics' }};
+const operator = {path: 'data/operator-repo/op', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' }};
+const operatorEdit = {path: 'data/operator-repo/op/:id', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' }};
 
 @NgModule({
     imports: [
@@ -44,6 +45,7 @@ const operatorEdit = {path: 'data/operator-repo/op/:id', pathMatch: 'full', comp
         CoreModule,
         CommonModule,
         MatGridListModule,
+        MatPaginatorModule,
         MatIconModule,
         MatTooltipModule,
         MatDividerModule,
