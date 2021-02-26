@@ -114,7 +114,10 @@ export class DeviceInstancesGridComponent implements OnInit {
                 const exports: ExportModel[] = [];
                 deviceType.services.forEach(service => {
                     const newExports = this.exportService.prepareDeviceServiceExport(device, service);
-                    newExports.forEach(singleExport => singleExport.Description = 'Created at device overview');
+                    newExports.forEach(singleExport => {
+                        singleExport.Description = 'Created at device overview';
+                        singleExport.Generated = false;
+                    });
                     exports.push(...newExports);
                 });
                 if (exports.length > 0) {
