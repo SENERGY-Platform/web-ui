@@ -21,7 +21,6 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {FunctionsService} from '../../metadata/functions/shared/functions.service';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {AspectsService} from '../../metadata/aspects/shared/aspects.service';
 import {of} from 'rxjs';
@@ -42,17 +41,18 @@ import {environment} from '../../../../environments/environment';
 import {ImportTypeModel} from '../import-types/shared/import-types.model';
 import {ImportTypesComponent} from '../import-types/import-types.component';
 import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
+import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
 
 describe('ImportTypesCreateEditComponent', () => {
     let component: ImportTypesCreateEditComponent;
     let fixture: ComponentFixture<ImportTypesCreateEditComponent>;
-    const functionsServiceSpy: Spy<FunctionsService> = createSpyFromClass(FunctionsService);
+    const deviceTypeService: Spy<DeviceTypeService> = createSpyFromClass(DeviceTypeService);
     const aspectsServiceSpy: Spy<AspectsService> = createSpyFromClass(AspectsService);
     const conceptsServiceSpy: Spy<ConceptsService> = createSpyFromClass(ConceptsService);
     const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
 
 
-    functionsServiceSpy.getFunctions.and.returnValue(of([]));
+    deviceTypeService.getMeasuringFunctions.and.returnValue(of([]));
     aspectsServiceSpy.getAspects.and.returnValue(of([]));
     conceptsServiceSpy.getConceptsWithCharacteristics.and.returnValue(of([]));
     const testType: ImportTypeModel = {
@@ -174,7 +174,7 @@ describe('ImportTypesCreateEditComponent', () => {
                 WidgetModule,
             ],
             providers: [
-                {provide: FunctionsService, useValue: functionsServiceSpy},
+                {provide: DeviceTypeService, useValue: deviceTypeService},
                 {provide: AspectsService, useValue: aspectsServiceSpy},
                 {provide: ImportTypesService, useValue: importTypesServiceSpy},
                 {provide: ConceptsService, useValue: conceptsServiceSpy},

@@ -35,7 +35,11 @@ import {Observable} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {convertPunctuation, TypeValueValidator} from '../validators/type-value-validator';
 import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
-import {DeviceTypeCharacteristicsModel} from '../../metadata/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeFunctionModel
+} from '../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from "../../metadata/device-types-overview/shared/device-type.service";
 
 @Component({
     selector: 'senergy-import-types-create-edit',
@@ -53,7 +57,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 private dialog: MatDialog,
                 private changeDetectorRef: ChangeDetectorRef,
                 private snackBar: MatSnackBar,
-                private functionsService: FunctionsService) {
+                private deviceTypeService: DeviceTypeService) {
     }
 
     static STRING = 'https://schema.org/Text';
@@ -67,7 +71,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     id: string | null = null;
     editMode = false;
     detailsMode = false;
-    functions: FunctionsPermSearchModel[] = [];
+    functions: DeviceTypeFunctionModel[] = [];
     aspects: AspectsPermSearchModel[] = [];
     typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>> = new Map();
 
@@ -169,7 +173,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 });
             }
         });
-        this.functionsService.getFunctions('', 10000, 0, 'name', 'asc')
+        this.deviceTypeService.getMeasuringFunctions()
             .subscribe(functions => {
                 this.functions = functions;
                 if (!this.editMode && !this.detailsMode) {
