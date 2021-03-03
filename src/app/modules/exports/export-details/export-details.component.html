@@ -15,10 +15,10 @@
   -->
 
 <div class="main-panel">
+    <div class="button-header background-color-accent">
+        <button mat-icon-button routerLink="/exports" matTooltip="Back"><mat-icon>arrow_back</mat-icon></button>
+    </div>
     <div fxLayout="column" class="layout-margin">
-        <div fxLayout="row" fxLayoutAlign="start center" style="margin-bottom:8px;">
-            <button mat-raised-button color="accent" routerLink="/exports">back</button>
-        </div>
         <mat-card *ngIf="ready" style="margin-bottom:8px;">
             <mat-card-header>
                 <mat-card-title>{{export.Name}}</mat-card-title>

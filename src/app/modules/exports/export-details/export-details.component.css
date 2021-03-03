@@ -84,3 +84,10 @@ mat-grid-list {
 .mat-cell {
     padding: 0 8px;
 }
+
+.button-header {
+    padding-left: 16px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    overflow: hidden;
+}
