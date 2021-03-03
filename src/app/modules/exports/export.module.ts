@@ -45,9 +45,9 @@ import {MatSortModule} from '@angular/material/sort';
 import {MatExpansionModule} from '@angular/material/expansion';
 
 const dataExport = {path: 'exports', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' }};
-const exp = {path: 'exports/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'Exports' }};
-const exportEdit = {path: 'exports/edit/:id', pathMatch: 'full', component: NewExportComponent, data: { header: 'Exports' }};
-const details = {path: 'exports/details/:id', pathMatch: 'full', component: ExportDetailsComponent, data: { header: 'Exports' }};
+const exp = {path: 'exports/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'New Export' }};
+const exportEdit = {path: 'exports/edit/:id', pathMatch: 'full', component: NewExportComponent, data: { header: 'Edit Export' }};
+const details = {path: 'exports/details/:id', pathMatch: 'full', component: ExportDetailsComponent, data: { header: 'Export Details' }};
 
 @NgModule({
     imports: [
