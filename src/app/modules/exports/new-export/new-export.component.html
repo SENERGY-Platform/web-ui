@@ -15,6 +15,9 @@
   -->
 
 <div class="main-panel">
+    <div class="button-header background-color-accent">
+        <button mat-icon-button routerLink="/exports" matTooltip="Back"><mat-icon>arrow_back</mat-icon></button>
+    </div>
     <div fxLayout="column" class="layout-margin" *ngIf="ready">
         <mat-radio-group [(ngModel)]="selector" (ngModelChange)="exportTypeChanged()" class="radio-group">
             <mat-radio-button class="radio-button" value="device">Gerät</mat-radio-button>

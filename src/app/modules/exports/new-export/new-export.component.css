@@ -90,3 +90,10 @@ mat-grid-list {
 .operator-accordion .mat-expansion-panel .mat-expansion-panel-header {
     padding-left: 0.75em;
 }
+
+.button-header {
+    padding-left: 8px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    overflow: hidden;
+}
