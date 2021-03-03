@@ -60,11 +60,6 @@ mat-grid-list {
     z-index: 100;
 }
 
-.radio-group {
-    display: inline-flex;
-    flex-direction: column;
-}
-
 .radio-button {
     margin: 5px;
 }
@@ -96,4 +91,14 @@ mat-grid-list {
     padding-top: 7px;
     padding-bottom: 7px;
     overflow: hidden;
+}
+
+.source-label {
+    padding-right: 4px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.source-container {
+    padding-bottom: 1.34375em;
 }
