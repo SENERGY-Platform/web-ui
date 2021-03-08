@@ -83,3 +83,12 @@ gridster-item {
 .highlight {
   box-shadow:  0px 0px 2px 2px;
 }
+
+.tab-label-drag {
+  border-style: dashed;
+  border-width: 1px;
+}
+
+.tab-label {
+  margin: 1px;
+}

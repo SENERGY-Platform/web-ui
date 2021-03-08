@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ResponsiveService} from '../../core/services/responsive.service';
 import {DashboardService} from './shared/dashboard.service';
 import {DashboardModel} from './shared/dashboard.model';
@@ -22,8 +22,8 @@ import {WidgetModel} from './shared/dashboard-widget.model';
 import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
 import {DashboardManipulationEnum} from './shared/dashboard-manipulation.enum';
 import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
-import {DisplayGrid, GridsterConfig, GridType} from 'angular-gridster2';
-import {forkJoin, Observable, Subscription} from 'rxjs';
+import {DisplayGrid, GridsterConfig, GridsterItem, GridType} from 'angular-gridster2';
+import {forkJoin, Observable, of, Subscription} from 'rxjs';
 import {DashboardTypesEnum} from './shared/dashboard-types.enum';
 import {DeviceStatusService} from '../../widgets/device-status/shared/device-status.service';
 import {moveItemInArray} from '@angular/cdk/drag-drop';
@@ -32,6 +32,7 @@ import {ProcessSchedulerService} from '../../widgets/process-scheduler/shared/pr
 import {DataTableService} from '../../widgets/data-table/shared/data-table.service';
 import {AirQualityService} from '../../widgets/air-quality/shared/air-quality.service';
 import {ActivatedRoute, Router} from '@angular/router';
+import {MatTabGroup} from '@angular/material/tabs';
 
 const grids = new Map([
     ['xs', 1],
@@ -60,6 +61,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     dashSubscription = new Subscription;
     inDragMode = false;
     dragModeDisabled = false;
+    dragging = false;
+    mouseHoverHeaderIndex  = -1;
+    @ViewChild(MatTabGroup, {static: false}) matTabGroup !: MatTabGroup;
 
     constructor(private responsiveService: ResponsiveService,
                 private dashboardService: DashboardService,
@@ -167,8 +171,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     private initDragAndDrop() {
         if (this.options.draggable) {
-            this.options.draggable.stop = () => {
+            this.options.draggable.start = () => {
                 setTimeout(() => {
+                    this.dragging = true;
+                    console.log(true); // TODO
+                }, 0);
+            };
+            this.options.draggable.stop = (item: GridsterItem, _, event: MouseEvent) => {
+                setTimeout(() => {
+                    this.dragging = false;
+                    if (this.moveWidgetToDashboardIfNeeded(item, event)) {
+                        return;
+                    }
                     let reorder = false;
                     let swapIndex1 = 0;
                     let swapIndex2 = 0;
@@ -414,6 +428,61 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.zoomedWidgetIndex = null;
             setTimeout(() => this.dashboardService.reloadAllWidgets(), 0);
         }
+    }
+
+    moveWidgetToDashboard(id: String, toIndex: number): Observable<any> {
+        if (toIndex < 0 || toIndex > this.dashboards.length - 1) {
+            console.error('Invalid index ' + toIndex);
+            return of(null);
+        }
+        if (toIndex === this.activeTabIndex) {
+            console.error('Invalid index ' + toIndex + '. Widget already on this dashboard.');
+            return of(null);
+        }
+        const index = this.dashboards[this.activeTabIndex].widgets.findIndex(widget => widget.id === id);
+        if (index === -1) {
+            console.error('Can\'t find widget with id ' + id + ' on current dashboard');
+            return of(null);
+        }
+        const widgets = this.dashboards[this.activeTabIndex].widgets.splice(index, 1);
+        if (widgets.length !== 1) {
+            console.error('Unexpected number of widgets spliced');
+            return of(null);
+        }
+        if (this.dashboards[toIndex].widgets === undefined) {
+            this.dashboards[toIndex].widgets = [];
+        }
+        this.dashboards[toIndex].widgets.push(widgets[0]);
+        const obs: Observable<any>[] = [];
+        obs.push(this.dashboardService.updateDashboard(this.dashboards[this.activeTabIndex]));
+        obs.push(this.dashboardService.updateDashboard(this.dashboards[toIndex]));
+        return forkJoin(obs);
+    }
+
+    private moveWidgetToDashboardIfNeeded(item: GridsterItem, $event: MouseEvent): boolean {
+        const headers = this.matTabGroup._elementRef.nativeElement.children[0].children[1].children[0].children[0].children;
+        for (let i = 0; i < headers.length - 1; i++) { // last index is new dashboard button
+            const rect: DOMRect = headers[i].getBoundingClientRect();
+            if (i !== this.activeTabIndex && $event.x < rect.right && $event.x > rect.left
+                && $event.y > rect.top && $event.y < rect.bottom) {
+                this.moveWidgetToDashboard(item.id, i).subscribe();
+                this.reorderWidgets();
+                this.setTabIndex(i);
+                this.reorderWidgets();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    mouseEnterHeader(i: number) {
+        if (this.activeTabIndex !== i) {
+            this.mouseHoverHeaderIndex = i;
+        }
+    }
+
+    mouseLeaveHeader() {
+        this.mouseHoverHeaderIndex = -1;
     }
 }
 

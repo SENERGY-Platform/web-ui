@@ -19,13 +19,18 @@
     <mat-tab-group backgroundColor="accent" color="primary" (animationDone)="initAllWidgets()"
                    (selectedIndexChange)="setTabIndex($event)" [(selectedIndex)]="activeTabIndex"
                    dynamicHeight="true" headerPosition="above">
-        <mat-tab *ngFor="let dashboard of dashboards"
-                 label="{{dashboard.name}}">
-
+        <mat-tab *ngFor="let dashboard of dashboards; let i=index">
+            <ng-template mat-tab-label>
+                <span (mouseenter)="mouseEnterHeader(i)" (mouseleave)="mouseLeaveHeader()"
+                       [ngClass]="dragging && mouseHoverHeaderIndex === i ? 'tab-label-drag' : 'tab-label'"> <!-- TODO -->
+                    {{dashboard.name}}
+                </span>
+            </ng-template>
             <div fxFill fxLayout="column" *ngIf="dashboard === dashboards[activeTabIndex]">
 
                 <div *ngIf="zoomedWidgetIndex === null" fxLayout="row" fxLayoutAlign="end center">
-                    <button mat-icon-button [matMenuTriggerFor]="refresh" color="accent" matTooltip="set widget refresh time">
+                    <button mat-icon-button [matMenuTriggerFor]="refresh" color="accent"
+                            matTooltip="set widget refresh time">
                         <mat-icon>refresh</mat-icon>
                     </button>
                     <mat-menu #refresh="matMenu" [overlapTrigger]="false" xPosition="before">

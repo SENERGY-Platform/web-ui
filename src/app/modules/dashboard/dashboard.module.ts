@@ -36,6 +36,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatOptionModule} from '@angular/material/core';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {DragDropModule} from "@angular/cdk/drag-drop";
 
 
 @NgModule({
@@ -57,7 +58,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
         FormsModule,
         GridsterModule,
         MatTooltipModule,
-        ReactiveFormsModule,
+        ReactiveFormsModule, DragDropModule,
     ],
     declarations: [
         DashboardComponent,
