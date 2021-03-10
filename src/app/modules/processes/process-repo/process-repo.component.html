@@ -37,9 +37,10 @@
                  [infiniteScrollDistance]="1"
                  [infiniteScrollThrottle]="50"
                  [scrollWindow]="false"
-                 (scrolled)="onScroll()">
+                 (scrolled)="onScroll()"
+                 #mainPanel>
                 <div class="layout-margin" fxLayout="column" *ngIf="animationDone" [formGroup]="formGroup">
-                    <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px" formArrayName="repoItems"
+                    <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px" formArrayName="repoItems"
                                    *ngIf="repoItems.length > 0">
                         <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
                                        [formGroupName]="i">

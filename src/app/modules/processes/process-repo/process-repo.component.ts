@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {forkJoin, Observable, Subscription} from 'rxjs/index';
+import {forkJoin, Observable, Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {KeycloakService} from 'keycloak-angular';
 import {ResponsiveService} from '../../../core/services/responsive.service';
@@ -50,7 +50,7 @@ const sortingAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel(
     styleUrls: ['./process-repo.component.css']
 })
 
-export class ProcessRepoComponent implements OnInit, OnDestroy {
+export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     formGroup: FormGroup = new FormGroup({repoItems: new FormArray([])});
     activeIndex = 0;
     gridCols = 0;
@@ -61,6 +61,7 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     searchInitialized = false;
     searchText = '';
     selectedItems: ProcessModel[] = [];
+    rowHeight = 282;
 
     private limitInit = 54;
     private limit = this.limitInit;
@@ -68,6 +69,10 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
+    private gridColChangeTimeout: number | undefined;
+    private knownMainPanelOffsetHeight = 0;
+
+    @ViewChild('mainPanel', {static: false}) mainPanel!: ElementRef;
 
     constructor(private sanitizer: DomSanitizer,
                 private utilService: UtilService,
@@ -86,6 +91,12 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initGridCols();
+    }
+
+    ngAfterViewInit() {
+        this.knownMainPanelOffsetHeight = this.mainPanel.nativeElement.offsetHeight;
+        this.limitInit = this.maxItemsDisplayed;
+        this.limit = this.limitInit;
         this.initSearchAndGetDevices();
     }
 
@@ -225,7 +236,12 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
+            const gridCols = grids.get(mqAlias) || 0;
+            if (gridCols > this.gridCols) {
+                clearTimeout(this.gridColChangeTimeout);
+                this.gridColChangeTimeout = this.adjustForResize(2);
+            }
+            this.gridCols = gridCols;
         });
     }
 
@@ -337,6 +353,25 @@ export class ProcessRepoComponent implements OnInit, OnDestroy {
 
     private showSnackBarSuccess(text: string): void {
         this.snackBar.open(text + ' successfully.', undefined, {duration: 2000});
+    }
+
+    private get maxItemsDisplayed(): number {
+        return ((this.gridCols) * Math.ceil(this.knownMainPanelOffsetHeight / this.rowHeight));
+    }
+
+    private adjustForResize(timeout: number): number {
+        return window.setTimeout(() => {
+            if (this.mainPanel.nativeElement.offsetHeight === this.knownMainPanelOffsetHeight) {
+                // redrawing might be unfinished even after gridCols have been changed.
+                // Wait for resize of DOM element to be finished before determining the number of items to load.
+                this.gridColChangeTimeout = this.adjustForResize(timeout * timeout);
+            } else {
+                this.knownMainPanelOffsetHeight = this.mainPanel.nativeElement.offsetHeight;
+                this.limitInit = this.maxItemsDisplayed;
+                this.setRepoItemsParams(this.repoItems.length + this.limitInit);
+                this.getRepoItems(false);
+            }
+        }, timeout);
     }
 
 }

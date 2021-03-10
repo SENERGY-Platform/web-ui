@@ -33,7 +33,7 @@
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         </div>
     </div>
-    <div class="deployments-scroll">
+    <div class="deployments-scroll" #mainPanel>
         <div infiniteScroll
              [infiniteScrollDistance]="1"
              [infiniteScrollThrottle]="50"
@@ -41,7 +41,7 @@
              [fromRoot]="true"
              (scrolled)="onScroll()">
             <div class="layout-margin" fxLayout="column" [formGroup]="formGroup">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px" formArrayName="repoItems"
+                <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px" formArrayName="repoItems"
                                *ngIf="repoItems.length > 0">
                     <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
                                    [formGroupName]="i">

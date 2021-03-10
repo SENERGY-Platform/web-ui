@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {forkJoin, Observable, Subscription} from 'rxjs/index';
+import {forkJoin, Observable, Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
@@ -29,7 +29,7 @@ import {environment} from '../../../../environments/environment';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deployments-missing-dependencies-dialog.component';
-import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {CamundaVariable} from './shared/deployments-definition.model';
 import {DeploymentsStartParameterDialogComponent} from './dialogs/deployments-start-parameter-dialog.component';
@@ -48,7 +48,7 @@ const grids = new Map([
     styleUrls: ['./deployments.component.css']
 })
 
-export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
+export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDestroy {
     formGroup: FormGroup = new FormGroup({repoItems: new FormArray([])});
     gridCols = 0;
     sortAttributes = [new SortModel('Date', 'deploymentTime', 'desc'), new SortModel('Name', 'name', 'asc')];
@@ -63,8 +63,13 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     private getAllSub = new Subscription();
     private allDataLoaded = false;
     private source = 'sepl';
+    private gridColChangeTimeout: number | undefined;
+    private knownMainPanelOffsetHeight = 0;
     showGenerated = false;
     selectedItems: DeploymentsModel[] = [];
+    rowHeight = 282;
+
+    @ViewChild('mainPanel', {static: false}) mainPanel!: ElementRef;
 
     constructor(private sanitizer: DomSanitizer,
                 private utilService: UtilService,
@@ -80,8 +85,13 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.filterItems(this.showGenerated);
         this.initGridCols();
+    }
+
+    ngAfterViewInit() {
+        this.knownMainPanelOffsetHeight = this.mainPanel.nativeElement.offsetHeight;
+        this.limitInit = this.maxItemsDisplayed;
+        this.limit = this.limitInit;
         this.initSearchAndGetDevices();
     }
 
@@ -216,7 +226,11 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
+            const gridCols = grids.get(mqAlias) || 0;
+            if (gridCols > this.gridCols) {
+                this.gridColChangeTimeout = this.adjustForResize(2);
+            }
+            this.gridCols = gridCols;
         });
     }
 
@@ -303,5 +317,24 @@ export class ProcessDeploymentsComponent implements OnInit, OnDestroy {
 
     private showSnackBarSuccess(text: string): void {
         this.snackBar.open(text + ' successfully.', undefined, {duration: 2000});
+    }
+
+    private get maxItemsDisplayed(): number {
+        return ((this.gridCols) * Math.ceil(this.knownMainPanelOffsetHeight / this.rowHeight));
+    }
+
+    private adjustForResize(timeout: number): number {
+        return window.setTimeout(() => {
+            if (this.mainPanel.nativeElement.offsetHeight === this.knownMainPanelOffsetHeight) {
+                // redrawing might be unfinished even after gridCols have been changed.
+                // Wait for resize of DOM element to be finished before determining the number of items to load.
+                this.gridColChangeTimeout = this.adjustForResize(timeout * timeout);
+            } else {
+                this.knownMainPanelOffsetHeight = this.mainPanel.nativeElement.offsetHeight;
+                this.limitInit = this.maxItemsDisplayed;
+                this.setRepoItemsParams(this.repoItems.length + this.limitInit);
+                this.getRepoItems(false);
+            }
+        }, timeout);
     }
 }
