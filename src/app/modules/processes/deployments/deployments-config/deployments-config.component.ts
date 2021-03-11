@@ -275,7 +275,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     displayParameter(value: string): boolean {
         const matches = value.match(/^\${.*}$/);
-        console.log(matches);
         return !(matches && matches.length);
     }
 

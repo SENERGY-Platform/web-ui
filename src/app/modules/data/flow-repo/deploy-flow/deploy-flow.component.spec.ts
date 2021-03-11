@@ -25,10 +25,9 @@ import {CoreModule} from '../../../../core/core.module';
 import {AuthorizationService} from '../../../../core/services/authorization.service';
 import {AuthorizationServiceMock} from '../../../../core/services/authorization.service.mock';
 import {DialogsService} from '../../../../core/services/dialogs.service';
-import {ActivatedRoute, RouterModule} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
-import {ImportTypesComponent} from "../../../imports/import-types/import-types.component";
-import {of} from "rxjs";
+import {of} from 'rxjs';
 
 describe('DeployFlowComponent', () => {
     let component: DeployFlowComponent;

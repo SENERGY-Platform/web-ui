@@ -28,7 +28,7 @@ import {DialogsService} from '../../../../../core/services/dialogs.service';
 import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
-describe('DeployFlowComponent', () => {
+describe('DeployFlowClassicComponent', () => {
   let component: DeployFlowClassicComponent;
   let fixture: ComponentFixture<DeployFlowClassicComponent>;
 
@@ -64,6 +64,6 @@ describe('DeployFlowComponent', () => {
   });
 
   it('should parse inputs', () => {
-    console.log(component.selectedValues);
+    expect(component.selectedValues).toBeTruthy();
   });
 });

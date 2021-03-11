@@ -58,13 +58,15 @@ describe('DeploymentsService', () => {
   it('should start with number parameter', inject([DeploymentsService, HttpTestingController], (service: DeploymentsService, http: HttpTestingController) => {
     const parameter = new Map<string, CamundaVariable>([['foo', {value: 42, type: 'Long'}]]);
     service.startDeploymentWithParameter('deplid', parameter).subscribe(() => {});
-    http.expectOne(environment.processServiceUrl + '/deployment/deplid/start?foo=42');
+    const r = http.expectOne(environment.processServiceUrl + '/deployment/deplid/start?foo=42');
+    expect(r.cancelled).toBeFalse();
   }));
 
   it('should start with string parameter', inject([DeploymentsService, HttpTestingController], (service: DeploymentsService, http: HttpTestingController) => {
     const parameter = new Map<string, CamundaVariable>([['foo', {value: 'bar', type: 'String'}]]);
     service.startDeploymentWithParameter('deplid', parameter).subscribe(() => {});
-    http.expectOne(environment.processServiceUrl + '/deployment/deplid/start?foo=%22bar%22');
+    const r = http.expectOne(environment.processServiceUrl + '/deployment/deplid/start?foo=%22bar%22');
+    expect(r.cancelled).toBeFalse();
   }));
 
   it('should start with multiple parameter', inject([DeploymentsService, HttpTestingController], (service: DeploymentsService, http: HttpTestingController) => {
@@ -73,7 +75,8 @@ describe('DeploymentsService', () => {
         ['batz', {value: 42, type: 'long'}]
     ]);
     service.startDeploymentWithParameter('deplid', parameter).subscribe(() => {});
-    http.expectOne(environment.processServiceUrl + '/deployment/deplid/start?foo=%22bar%22&batz=42');
+    const r = http.expectOne(environment.processServiceUrl + '/deployment/deplid/start?foo=%22bar%22&batz=42');
+    expect(r.cancelled).toBeFalse();
   }));
 
 });

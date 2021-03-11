@@ -28,7 +28,6 @@ export class AppComponent implements OnInit {
     }
 
     ngOnInit() {
-        console.log('App Init');
         localStorage.clear();
         const sub = this.keycloak.getKeycloakInstance().subject;
         if (sub !== undefined) {
