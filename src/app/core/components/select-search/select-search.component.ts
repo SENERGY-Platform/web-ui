@@ -30,7 +30,7 @@ import {
 import {MatSelect, MatSelectChange} from '@angular/material/select';
 import {MatFormFieldControl} from '@angular/material/form-field';
 import {Observable, Subject} from 'rxjs';
-import {ControlValueAccessor, FormControl, NgControl} from '@angular/forms';
+import {ControlValueAccessor, FormControl, FormControlName, NgControl} from '@angular/forms';
 import {coerceBooleanProperty} from '@angular/cdk/coercion';
 import {ErrorStateMatcher, MatOption} from '@angular/material/core';
 import {MatInput} from '@angular/material/input';
@@ -57,11 +57,17 @@ export function useProperty(property: string): ((option: any) => any) {
 })
 export class SelectSearchComponent implements MatFormFieldControl<any>, ControlValueAccessor, OnDestroy, AfterViewInit, OnInit {
 
-    constructor(@Optional() @Self() public ngControl: NgControl,
-    ) {
+    constructor(@Optional() @Self() public ngControl: NgControl) {
         if (this.ngControl != null) {
             this.ngControl.valueAccessor = this;
         }
+    }
+
+    get errorState() {
+        if (!this.select) {
+            return false;
+        }
+        return this.select.ngControl.errors !== null && !!this.select.ngControl.touched;
     }
 
     @Input()
@@ -179,7 +185,20 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     static nextId = 0;
     _disabled = false;
 
-    @Input() required = false;
+    _required = false;
+
+    @Input()
+    get required() {
+        return this._required;
+    }
+
+    set required(dis) {
+        this._required = dis;
+        if (this.select) {
+            this.select.required = coerceBooleanProperty(dis);
+        }
+    }
+
     @Input() multiple = false;
 
     _autoSelectSingleElement = false;
@@ -192,7 +211,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() noneView = '';
 
     readonly controlType: string = 'select-autocomplete';
-    readonly errorState: boolean = this.select?.errorState || false;
+    //readonly errorState: boolean = this.select?.errorState || false;
     readonly focused: boolean = this.select?.focused;
 
     readonly stateChanges = new Subject<void>();
