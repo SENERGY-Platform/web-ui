@@ -39,6 +39,8 @@ import {ImportInstancesModel} from '../../imports/import-instances/shared/import
 import {ImportTypeContentVariableModel, ImportTypeModel} from '../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../imports/import-types/shared/import-types.service';
 import {map} from 'rxjs/internal/operators';
+import {FormArray, FormBuilder, FormControl, ValidationErrors, Validators} from "@angular/forms";
+import * as _ from 'lodash';
 
 @Component({
     selector: 'senergy-new-export',
@@ -48,22 +50,33 @@ import {map} from 'rxjs/internal/operators';
 
 export class NewExportComponent implements OnInit {
 
-    ready = false;
+    exportForm = this.fb.group({
+        selector: ['', Validators.required],
+        name: ['', Validators.required],
+        description: '',
+        device: [null, Validators.required],
+        service: [{
+            value: null,
+            disabled: true
+        }, Validators.required],
+        timePath: {value: '', disabled: true},
+        allMessages: false,
+        import: [{value: null, disabled: true}, Validators.required],
+        operator: [{value: null, disabled: true}, Validators.required],
+        pipeline: [{value: null, disabled: true}, Validators.required],
+        exportValues: this.fb.array([] as ExportValueModel[])
+    });
+
+    ready = true;
     export = {} as ExportModel;
-    selector = 'device';
-    service = {} as DeviceTypeServiceModel;
-    device = {} as DeviceInstancesModel;
     deviceType = {} as DeviceTypeModel;
-    pipeline = {} as PipelineModel;
     operator = {} as PipelineOperatorModel;
     devices: DeviceInstancesModel [] = [];
     pipelines: PipelineModel [] = [];
     paths = new Map<string, string | undefined>();
-    allMessages = true;
     image: SafeHtml = {};
     showImage = false;
     imports: ImportInstancesModel[] = [];
-    import = {} as ImportInstancesModel;
     importTypes: Map<string, ImportTypeModel> = new Map();
 
     timeSuggest = '';
@@ -84,7 +97,6 @@ export class NewExportComponent implements OnInit {
 
     id = null as any;
 
-
     constructor(
         private route: ActivatedRoute,
         private pipelineRegistryService: PipelineRegistryService,
@@ -97,11 +109,24 @@ export class NewExportComponent implements OnInit {
         public snackBar: MatSnackBar,
         private importInstancesService: ImportInstancesService,
         private importTypesService: ImportTypesService,
+        private fb: FormBuilder
     ) {
         this.id = this.route.snapshot.paramMap.get('id');
+
+        if (this.id) {
+            this.ready = false;
+        }
+
+        this.exportForm.patchValue({selector: 'device'});
     }
 
     ngOnInit() {
+        if (this.id) {
+            this.exportForm.controls['selector'].disable({onlySelf: true, emitEvent: false});
+        }
+
+        this.onChanges();
+
         const array: Observable<(DeviceInstancesModel[] | PipelineModel[] | ImportInstancesModel[])>[] = [];
 
         array.push(this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc'));
@@ -113,16 +138,23 @@ export class NewExportComponent implements OnInit {
             this.pipelines = response [1] as PipelineModel[];
             this.imports = response[2] as ImportInstancesModel[];
             setTimeout(() => {
-                const id = this.route.snapshot.paramMap.get('id');
-                if (id !== null) {
-                    this.exportService.getExport(id).subscribe((exp: ExportModel | null) => {
+                if (this.id !== null) {
+                    this.exportService.getExport(this.id).subscribe((exp: ExportModel | null) => {
                         if (exp !== null) {
+                            this.exportForm.patchValue({
+                                name: exp.Name,
+                                description: exp.Description,
+                                timePath: exp.TimePath
+                            });
+                            if (exp.Offset === 'smallest') {
+                                this.exportForm.patchValue({allMessages: true});
+                            }
                             if (exp.FilterType === 'deviceId') {
-                                this.selector = 'device';
+                                this.exportForm.patchValue({selector: 'device'});
                                 setTimeout(() => {
                                     this.devices.forEach(device => {
                                         if (device.id === exp.Filter) {
-                                            this.device = device;
+                                            this.exportForm.patchValue({device: device});
                                             this.deviceTypeService.getDeviceType(device.device_type.id)
                                                 .subscribe((resp: DeviceTypeModel | null) => {
                                                     if (resp !== null) {
@@ -130,7 +162,7 @@ export class NewExportComponent implements OnInit {
                                                         this.deviceType.services.forEach(service => {
                                                             // @ts-ignore
                                                             if (service.id === exp.Topic.replace(/_/g, ':')) {
-                                                                this.service = service;
+                                                                this.exportForm.patchValue({service: service});
                                                                 service.outputs.forEach((out: DeviceTypeContentModel) => {
                                                                     const pathString = 'value';
                                                                     this.traverseDataStructure(pathString, out.content_variable);
@@ -143,11 +175,11 @@ export class NewExportComponent implements OnInit {
                                     });
                                 });
                             } else if (exp.FilterType === 'operatorId') {
-                                this.selector = 'pipe';
+                                this.exportForm.patchValue({selector: 'pipe'})
                                 this.pipelines.forEach(pipeline => {
                                     if (pipeline.id === exp.Filter.split(':')[0]) {
-                                        this.pipeline = pipeline;
-                                        this.pipeline.operators.forEach(operator => {
+                                        this.exportForm.patchValue({pipeline: pipeline});
+                                        this.exportForm.value.pipeline.operators.forEach((operator: PipelineOperatorModel) => {
                                             if (operator.id === exp.Filter.split(':')[1]) {
                                                 this.operator = operator;
                                                 this.updateImage(this.operator.id);
@@ -169,11 +201,11 @@ export class NewExportComponent implements OnInit {
                                     duration: 5000,
                                     verticalPosition: 'top',
                                 });
-                                this.selector = 'pipe';
+                                this.exportForm.patchValue({selector: 'pipe'});
                                 this.pipelines.forEach(pipeline => {
                                     if (pipeline.id === exp.Filter) {
-                                        this.pipeline = pipeline;
-                                        if (this.pipeline.operators.length === 1) {
+                                        this.exportForm.patchValue({pipeline: pipeline});
+                                        if (this.exportForm.value.pipeline.operators.length === 1) {
                                             this.operator = pipeline.operators[0];
                                             this.operatorRepoService.getOperator(this.operator.operatorId)
                                                 .subscribe((resp: OperatorModel | null) => {
@@ -188,9 +220,10 @@ export class NewExportComponent implements OnInit {
                                     }
                                 });
                             } else if (exp.FilterType === 'import_id') {
-                                this.selector = 'import';
-                                this.import = this.imports.find(i => i.id === exp.Filter) || {} as ImportInstancesModel;
-                                this.getImportType(this.import.import_type_id).subscribe(type => {
+                                this.exportForm.patchValue({selector: 'import'});
+                                let importInstance: ImportInstancesModel = this.imports.find(i => i.id === exp.Filter) || {} as ImportInstancesModel;
+                                this.exportForm.patchValue({import: importInstance});
+                                this.getImportType(this.exportForm.value.import.import_type_id).subscribe(type => {
                                     type.output.sub_content_variables?.forEach(output => this.traverseDataStructure('', output));
                                 });
                             }
@@ -199,84 +232,210 @@ export class NewExportComponent implements OnInit {
                     });
                 }
             }, 0);
+            this.ready = true;
         });
-        this.ready = true;
     }
 
-    startExport() {
-        const self = this;
-        if (this.selector === 'device') {
-            this.export.EntityName = this.device.name;
-            this.export.Filter = this.device.id;
-            this.export.FilterType = 'deviceId';
-            this.export.ServiceName = this.service.name;
-            this.export.Topic = this.service.id.replace(/#/g, '_').replace(/:/g, '_');
-        } else if (this.selector === 'pipe') {
-            this.export.EntityName = this.operator.id;
-            this.export.Filter = this.pipeline.id + ':' + this.operator.id;
-            this.export.FilterType = 'operatorId';
-            this.export.ServiceName = this.operator.name;
-            this.export.Topic = 'analytics-' + this.operator.name;
-        }
-        if (this.allMessages) {
-            this.export.Offset = 'smallest';
-        } else {
-            this.export.Offset = 'largest';
-        }
-        if (this.route.snapshot.paramMap.get('id') !== null) {
-            this.ready = false;
-            this.exportService.editExport(this.id, this.export).subscribe((response) => {
-                if (response.status === 200) {
-                    self.router.navigate(['/exports']);
-                    self.snackBar.open('Export updated', undefined, {
-                        duration: 2000,
-                    });
-                } else {
-                    this.snackBar.open('Export could not be updated', undefined, {
-                        duration: 2000,
-                    });
-                }
-                this.ready = true;
-            });
-        } else {
-            this.exportService.startPipeline(this.export).subscribe(function () {
-                self.router.navigate(['/exports']);
-                self.snackBar.open('Export created', undefined, {
-                    duration: 2000,
+    onSubmit() {
+        if (this.exportForm.valid) {
+            const self = this;
+
+            this.export.Name = this.exportForm.value.name;
+            this.export.Description = this.exportForm.value.description;
+            this.export.TimePath = this.exportForm.value.timePath;
+
+            if (this.exportForm.value.selector === 'device') {
+                this.export.EntityName = this.exportForm.value.device.name;
+                this.export.Filter = this.exportForm.value.device.id;
+                this.export.FilterType = 'deviceId';
+                this.export.ServiceName = this.exportForm.value.service.name;
+                this.export.Topic = this.exportForm.value.service.id.replace(/#/g, '_').replace(/:/g, '_');
+            } else if (this.exportForm.value.selector === 'pipe') {
+                this.export.EntityName = this.operator.id;
+                this.export.Filter = this.exportForm.value.pipeline.id + ':' + this.operator.id;
+                this.export.FilterType = 'operatorId';
+                this.export.ServiceName = this.operator.name;
+                this.export.Topic = 'analytics-' + this.operator.name;
+            }
+
+            if (this.exportForm.value.allMessages) {
+                this.export.Offset = 'smallest';
+            } else {
+                this.export.Offset = 'largest';
+            }
+            if (this.route.snapshot.paramMap.get('id') !== null) {
+                this.ready = false;
+                this.exportService.editExport(this.id, this.export).subscribe((response) => {
+                    if (response.status === 200) {
+                        self.router.navigate(['/exports']);
+                        self.snackBar.open('Export updated', undefined, {
+                            duration: 2000,
+                        });
+                    } else {
+                        this.snackBar.open('Export could not be updated', undefined, {
+                            duration: 2000,
+                        });
+                    }
+                    this.ready = true;
                 });
-            });
+            } else {
+                this.exportService.startPipeline(this.export).subscribe(function () {
+                    self.router.navigate(['/exports']);
+                    self.snackBar.open('Export created', undefined, {
+                        duration: 2000,
+                    });
+                });
+            }
         }
+        this.exportForm.markAllAsTouched();
     }
 
-    exportTypeChanged() {
-        this.resetVars();
-        this.export = {} as ExportModel;
-        this.device = {} as DeviceInstancesModel;
-        this.service = {} as DeviceTypeServiceModel;
-        this.deviceType = {} as DeviceTypeModel;
-        this.pipeline = {} as PipelineModel;
-        this.operator = {} as PipelineOperatorModel;
-        this.import = {} as ImportInstancesModel;
-    }
+    onChanges(): void {
+        if (this.exportForm) {
+            if (this.exportForm.get('selector')) {
+                this.exportForm.get('selector')!.valueChanges.subscribe(selection => {
+                    if (selection === 'device') {
+                        this.exportForm.controls['device'].enable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['service'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['pipeline'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['operator'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['import'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['timePath'].disable({onlySelf: true, emitEvent: false});
+                    } else if (selection === 'pipe') {
+                        this.exportForm.controls['device'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['service'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['pipeline'].enable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['operator'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['import'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['timePath'].disable({onlySelf: true, emitEvent: false});
+                    } else if (selection === 'import') {
+                        this.exportForm.controls['device'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['service'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['pipeline'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['operator'].disable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['import'].enable({onlySelf: true, emitEvent: false});
+                        this.exportForm.controls['timePath'].disable({onlySelf: true, emitEvent: false});
+                    }
 
-    deviceChanged(device: DeviceInstancesModel) {
-        if (this.device !== device) {
-            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((resp: DeviceTypeModel | null) => {
-                if (resp !== null) {
-                    this.deviceType = resp;
-                }
-            });
-            this.resetVars();
+                    if (!this.id) {
+                        this.resetVars();
+                        this.exportForm.reset({selector: selection}, {onlySelf: false, emitEvent: false});
+                        this.exportForm.markAsUntouched();
+
+                        this.export = {} as ExportModel;
+                        this.deviceType = {} as DeviceTypeModel;
+                        this.operator = {} as PipelineOperatorModel;
+                    }
+
+                });
+            }
+            if (this.exportForm.get('device')) {
+                this.exportForm.get('device')!.valueChanges.subscribe((device: DeviceInstancesModel) => {
+                    if (!_.isEmpty(device)) {
+                        if (this.exportForm.value.device !== device) {
+                            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((resp: DeviceTypeModel | null) => {
+                                if (resp !== null) {
+                                    this.deviceType = resp;
+                                    this.exportForm.controls.service.enable();
+                                }
+                            });
+                            if (!this.id || (this.id && this.export.FilterType !== 'device')) {
+                                this.resetVars();
+                            }
+                        }
+                    }
+                });
+            }
+            if (this.exportForm.get('service')) {
+                this.exportForm.get('service')!.valueChanges.subscribe((service: DeviceTypeServiceModel) => {
+                    if (!_.isEmpty(service)) {
+                        this.resetVars();
+                        const pathString = 'value';
+                        service.outputs.forEach((out: DeviceTypeContentModel) => {
+                            this.traverseDataStructure(pathString, out.content_variable);
+                        });
+                        this.exportForm.controls.timePath.enable();
+                        this.autofillValues();
+                    }
+                });
+            }
+            if (this.exportForm.get('pipeline')) {
+                this.exportForm.get('pipeline')!.valueChanges.subscribe((pipe: PipelineModel) => {
+                    this.exportForm.patchValue({operator: null, timePath: null});
+                    this.operator = {} as PipelineOperatorModel;
+
+                    if (!_.isEmpty(pipe)) {
+                        this.exportForm.controls['operator'].enable({onlySelf: true, emitEvent: false});
+                    } else {
+                        this.exportForm.controls['operator'].disable({onlySelf: true, emitEvent: false})
+                    }
+                    this.exportForm.value.pipeline = pipe;
+                    this.resetVars();
+                    if (typeof this.exportForm.value.pipeline.image === 'string') {
+                        const parser = new DOMParser();
+                        const svg = parser.parseFromString(this.exportForm.value.pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+                        // @ts-ignore
+                        const viewbox = svg.getAttribute('viewbox').split(' ');
+                        svg.setAttribute('height', viewbox[3]);
+                        this.image = this.sanitizer.bypassSecurityTrustHtml(
+                            new XMLSerializer().serializeToString(svg));
+                        if (pipe.operators.length === 1) {
+                            this.operator = pipe.operators[0];
+                            this.operatorChanged(this.operator);
+                        }
+                    }
+                });
+            }
+
+            if (this.exportForm.get('import')) {
+                this.exportForm.get('import')!.valueChanges.subscribe((i: ImportInstancesModel) => {
+                    this.resetVars();
+                    if (!_.isEmpty(i)) {
+                        this.exportForm.controls['timePath'].enable({onlySelf: true, emitEvent: false});
+                    } else {
+                        this.exportForm.controls['timePath'].disable({onlySelf: true, emitEvent: false});
+                    }
+                    this.getImportType(i.import_type_id).subscribe(type => {
+                        type.output.sub_content_variables?.forEach(output => this.traverseDataStructure('', output));
+                        this.autofillValues();
+                    });
+                    this.export.Filter = i.id;
+                    this.export.Topic = i.kafka_topic;
+                    this.export.FilterType = 'import_id';
+                    this.export.EntityName = i.name;
+                    this.export.ServiceName = i.import_type_id;
+
+                });
+            }
+
+            if (this.exportForm.get('timePath')) {
+                this.exportForm.get('timePath')!.valueChanges.subscribe(path => {
+                    if (path !== '' && path !== null) {
+                        // ensure value not also exported
+                        const i = this.exportValues.controls.findIndex(v => v.value.Path === path);
+                        if (i !== -1) {
+                            this.exportValues.removeAt(i);
+                        }
+
+                        if (!_.isEmpty(this.exportForm.value.service)) {
+                            if (this.exportForm.value.selector === 'device' && this.paths.has(path) && this.exportForm.value.service.outputs.length === 1) {
+                                const values = this.exportService.addCharacteristicToDeviceTypeContentVariable(this.exportForm.value.service.outputs[0].content_variable);
+                                const selectedValue = values.find(v => v.Path === path);
+                                if (selectedValue !== undefined && selectedValue.characteristicId === environment.timeStampCharacteristicUnixSecondsId) {
+                                    this.export.TimePrecision = 's';
+                                } else {
+                                    this.export.TimePrecision = undefined; //  No precision for iso string, nanos or unknown
+                                }
+                            } else {
+                                this.export.TimePrecision = undefined; //  No precision for or unknown or pipeline
+                            }
+                        }
+
+                        this.autofillValues();
+                    }
+                });
+            }
         }
-    }
-
-    serviceChanged(service: DeviceTypeServiceModel) {
-        this.resetVars();
-        const pathString = 'value';
-        service.outputs.forEach((out: DeviceTypeContentModel) => {
-            this.traverseDataStructure(pathString, out.content_variable);
-        });
-        this.autofillValues();
     }
 
     traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel | ImportTypeContentVariableModel) {
@@ -286,7 +445,7 @@ export class NewExportComponent implements OnInit {
             }
             pathString += field.name;
             if (field.sub_content_variables !== undefined && field.sub_content_variables !== null) {
-                field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel |  ImportTypeContentVariableModel) => {
+                field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel | ImportTypeContentVariableModel) => {
                     this.traverseDataStructure(pathString, innerField);
                 });
             }
@@ -303,32 +462,14 @@ export class NewExportComponent implements OnInit {
         }
     }
 
-    pipelineChanged(pipe: PipelineModel) {
-        this.pipeline = pipe;
-        this.resetVars();
-        if (typeof this.pipeline.image === 'string') {
-            const parser = new DOMParser();
-            const svg = parser.parseFromString(this.pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
-            // @ts-ignore
-            const viewbox = svg.getAttribute('viewbox').split(' ');
-            svg.setAttribute('height', viewbox[3]);
-            this.image = this.sanitizer.bypassSecurityTrustHtml(
-                new XMLSerializer().serializeToString(svg));
-            if (pipe.operators.length === 1) {
-                this.operator = pipe.operators[0];
-                this.operatorChanged(this.operator);
-            }
-        }
-    }
-
-    operatorSelectChanged (opened: boolean) {
+    operatorSelectChanged(opened: boolean) {
         opened ? this.showImage = true : this.showImage = false;
     }
 
     updateImage(id: string) {
-        if (typeof this.pipeline.image === 'string') {
+        if (typeof this.exportForm.value.pipeline.image === 'string') {
             const parser = new DOMParser();
-            const svg = parser.parseFromString(this.pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+            const svg = parser.parseFromString(this.exportForm.value.pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
             // @ts-ignore
             const viewbox = svg.getAttribute('viewbox').split(' ');
             svg.setAttribute('height', viewbox[3]);
@@ -350,6 +491,8 @@ export class NewExportComponent implements OnInit {
 
     operatorChanged(operator: PipelineOperatorModel) {
         this.resetVars();
+        this.exportForm.patchValue({operator: operator, timePath: null});
+        this.exportForm.controls['timePath'].enable({onlySelf: true, emitEvent: false});
         this.updateImage(operator.id);
         this.operatorRepoService.getOperator(operator.operatorId).subscribe((resp: OperatorModel | null) => {
             if (resp !== null && resp.outputs !== undefined) {
@@ -358,33 +501,35 @@ export class NewExportComponent implements OnInit {
                 });
             }
             this.paths.set('time', 'string');
+            this.exportForm.patchValue({timePath: 'time'});
             this.autofillValues();
         });
     }
 
-    addValue() {
-        if (this.export.Values === undefined) {
-            this.export.Values = [];
-        }
-        this.export.Values.push({} as ExportValueModel);
+    get exportValues(): FormArray {
+        return this.exportForm.get('exportValues') as FormArray
     }
 
-    deleteValue(value: ExportValueModel) {
-        if (this.export.Values !== undefined) {
-            const index = this.export.Values.indexOf(value);
-            if (index > -1) {
-                this.export.Values.splice(index, 1);
-            }
-        }
+    addValue(name?: string, path?: string, type?: string, tag?: boolean) {
+        this.exportValues.push(this.fb.group({
+            Name: name || '',
+            Path: path || '',
+            Type: type || '',
+            Tag: tag || false
+        }));
+    }
+
+    deleteValue(index: number) {
+        this.exportValues.removeAt(index);
     }
 
     pathChanged(id: number) {
         if (id !== undefined) {
-            if (this.export.Values[id].Tag) {
-                this.export.Values[id].Type = 'string';
+            if (this.exportValues.at(id).value.Tag) {
+                this.exportValues.at(id).patchValue({Type: 'string'});
             } else {
-                let type = this.paths.get(this.export.Values[id].Path);
-                switch (this.paths.get(this.export.Values[id].Path)) {
+                let type = this.paths.get(this.exportValues.at(id).value.Path);
+                switch (this.paths.get(this.exportValues.at(id).value.Path)) {
                     case this.typeString:
                         type = 'string';
                         break;
@@ -402,63 +547,45 @@ export class NewExportComponent implements OnInit {
                         break;
 
                 }
-                // @ts-ignore
-                this.export.Values[id].Type = type;
+
+                this.exportValues.at(id).patchValue({Type: type});
             }
         }
     }
 
     resetVars() {
         this.paths.clear();
-        this.export.Values = [];
+        this.exportValues.clear();
     }
 
     autofillValues() {
-        if (this.selector === 'pipe' || this.selector === 'import') {
-            this.export.TimePath = 'time';
-        } else if (this.selector === 'device') {
-            this.export.TimePath = this.timeSuggest;
+        if (this.exportForm.value.timePath === '' || this.exportForm.value.timePath === null) {
+            if (this.exportForm.value.selector === 'pipe' || this.exportForm.value.selector === 'import') {
+                this.exportForm.patchValue({timePath: 'time'}, {onlySelf: true, emitEvent: false});
+            } else if (this.exportForm.value.selector === 'device') {
+                this.exportForm.patchValue({timePath: this.timeSuggest}, {onlySelf: true, emitEvent: false});
+            }
         }
-        if (this.selector === 'import') {
-            const importType = this.importTypes.get(this.import.import_type_id);
+        if (this.exportForm.value.selector === 'import') {
+            const importType = this.importTypes.get(this.exportForm.value.import.import_type_id);
             if (importType !== undefined) {
-                this.export.Values = this.importTypesService.parseImportTypeExportValues(importType);
-                this.export.Values.forEach((_, index) => this.pathChanged(index));
+                this.exportValues.clear();
+                const values = this.importTypesService.parseImportTypeExportValues(importType);
+                values.forEach(value => this.addValue(value.Name, value.Path, value.Type, value.Tag));
+                this.exportValues.controls.forEach((_, index) => this.pathChanged(index));
             } else {
-                this.export.Values = [];
+                this.exportValues.clear();
             }
         } else {
             const hasAmbiguousNames = this.hasAmbiguousNames();
-            this.export.Values = [];
+            this.exportValues.clear();
             this.paths.forEach((_type, path) => {
-                if (this.export.TimePath !== path) { // don't add path if it's selected as time
-                    this.addValue();
-                    const index = this.export.Values.length - 1;
-                    this.export.Values[index].Name = hasAmbiguousNames ? path : path.slice(path.lastIndexOf('.') + 1);
-                    this.export.Values[index].Path = path;
+                if (this.exportForm.value.timePath !== path && path !== 'time') { // don't add path if it's selected as time
+                    this.addValue(hasAmbiguousNames ? path : path.slice(path.lastIndexOf('.') + 1), path);
+                    const index = this.exportValues.controls.length - 1;
                     this.pathChanged(index);
                 }
             });
-        }
-    }
-
-    onTimePathSelected(path: string) {
-        // ensure value not also exported
-        const i = this.export.Values.findIndex(v => v.Path === this.export.TimePath);
-        if (i !== -1) {
-            this.export.Values.splice(i, 1);
-        }
-
-        if (this.selector === 'device' && this.paths.has(path) && this.service.outputs.length === 1) {
-            const values = this.exportService.addCharacteristicToDeviceTypeContentVariable(this.service.outputs[0].content_variable);
-            const selectedValue = values.find(v => v.Path === path);
-            if (selectedValue !== undefined && selectedValue.characteristicId === environment.timeStampCharacteristicUnixSecondsId) {
-                this.export.TimePrecision = 's';
-            } else {
-                this.export.TimePrecision = undefined; //  No precision for iso string, nanos or unknown
-            }
-        } else {
-            this.export.TimePrecision = undefined; //  No precision for or unknown or pipeline
         }
     }
 
@@ -479,19 +606,6 @@ export class NewExportComponent implements OnInit {
         return Array.from(this.paths.keys());
     }
 
-    importChanged(i: ImportInstancesModel) {
-        this.resetVars();
-        this.getImportType(i.import_type_id).subscribe(type => {
-            type.output.sub_content_variables?.forEach(output => this.traverseDataStructure('', output));
-            this.autofillValues();
-        });
-        this.export.Filter = i.id;
-        this.export.Topic = i.kafka_topic;
-        this.export.FilterType = 'import_id';
-        this.export.EntityName = i.name;
-        this.export.ServiceName = i.import_type_id;
-    }
-
     private getImportType(id: string): Observable<ImportTypeModel> {
         const importType = this.importTypes.get(id);
         if (importType !== undefined) {
@@ -510,7 +624,7 @@ export class NewExportComponent implements OnInit {
 
                 const rect: DOMRect = operatorNode.getBoundingClientRect();
                 if ($event.x < rect.right && $event.x > rect.left && $event.y > rect.top && $event.y < rect.bottom) {
-                    const clickedOperator = this.pipeline.operators.find(o => o.id === operatorNode.attributes['model-id'].value);
+                    const clickedOperator = this.exportForm.value.pipeline.operators.find((o: PipelineOperatorModel) => o.id === operatorNode.attributes['model-id'].value);
                     if (clickedOperator !== undefined) {
                         this.operator = clickedOperator;
                         this.operatorChanged(this.operator);

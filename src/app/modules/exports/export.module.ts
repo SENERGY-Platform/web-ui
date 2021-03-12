@@ -20,7 +20,7 @@ import {RouterModule} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {CoreModule} from '../../core/core.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NewExportComponent} from './new-export/new-export.component';
 import {ExportDetailsComponent} from './export-details/export-details.component';
 import {MatGridListModule} from '@angular/material/grid-list';
@@ -67,6 +67,7 @@ const details = {path: 'exports/details/:id', pathMatch: 'full', component: Expo
         MatDialogModule,
         MatInputModule,
         FormsModule,
+        ReactiveFormsModule,
         MatCheckboxModule,
         MatSelectModule,
         MatRadioModule,

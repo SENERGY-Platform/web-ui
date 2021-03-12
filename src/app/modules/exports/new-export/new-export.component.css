@@ -18,39 +18,8 @@
     margin: 8px;
 }
 
-mat-grid-tile-footer {
-    background-color: white !important;
-    height: 68px !important;
-    color: black !important;
-}
-
-mat-grid-list {
-    margin-bottom: 100px;
-}
-
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.background {
-    background-image: url('/src/img/background_deviceTypes.png');
-    background-size: contain;
-}
-
-.device-icon {
-    top: 40px;
-    max-height: 100px;
-    max-width: 200px;
-    margin: auto;
-    display: block;
-    position: relative;
-}
-
 .main-panel {
-    height: calc(100% - 64px);
-    overflow-y: auto;
+    padding-bottom: 150px;
 }
 
 .fab {
@@ -73,17 +42,41 @@ mat-grid-list {
 }
 
 .operator-accordion {
-    border: 1px solid rgba(0,0,0,.12);
-    margin-bottom: 1em;
+    border: 1px solid rgba(0, 0, 0, .12);
+    border-radius: 6px;
+    margin-bottom: 1.34375em;
+}
+
+.operator-accordion-error {
+    border: 2px solid #ce612e;
+    margin-bottom: 0;
+}
+
+.operator-titel {
+    font-size: 14px !important;
+}
+
+.operator-titel-error {
+    color: #ce612e;
 }
 
 .operator-accordion .mat-expansion-panel {
-    margin-bottom: 0!important;
-    background-color: #fafafa;
+    margin-bottom: 0 !important;
+    background-color: transparent;
 }
 
 .operator-accordion .mat-expansion-panel .mat-expansion-panel-header {
     padding-left: 0.75em;
+}
+
+.operator-error {
+    font-size: 75%;
+    font-weight: 400;
+    padding-left: 10px;
+    margin-top: 0.6666666667em;
+    margin-bottom: 0.3333333em;
+    line-height: 1.125;
+    color: #ce612e;
 }
 
 .button-header {
@@ -101,4 +94,8 @@ mat-grid-list {
 
 .source-container {
     padding-bottom: 1.34375em;
+}
+
+.button-footer {
+    margin-top: 8px;
 }
