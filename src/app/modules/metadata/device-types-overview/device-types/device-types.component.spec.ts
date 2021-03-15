@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import {RouterTestingModule} from '@angular/router/testing';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {DeviceTypesComponent} from './device-types.component';
@@ -147,15 +147,15 @@ describe('DeviceTypesComponent', () => {
         fixture.detectChanges();
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
     }));
 
-    it('should create the app', async(() => {
+    it('should create the app', waitForAsync(() => {
         init('', '');
         expect(component).toBeTruthy();
     }));
 
-    it('init create', async(() => {
+    it('init create', waitForAsync(() => {
         init('', 'create');
         expect(component.id).toBe('');
         expect(component.queryParamFunction).toBe('create');
@@ -169,7 +169,7 @@ describe('DeviceTypesComponent', () => {
         expect(component.services.length).toBe(0);
     }));
 
-    it('init copy', async(() => {
+    it('init copy', waitForAsync(() => {
         init('device_id_4711', 'copy');
 
         expect(component.id).toBe('device_id_4711');
@@ -240,7 +240,7 @@ describe('DeviceTypesComponent', () => {
         expect(component.services.length).toBe(1);
     }));
 
-    it('check save with copy', async(() => {
+    it('check save with copy', waitForAsync(() => {
         init('device_id_4711', 'copy');
         component.save();
         expect(component.secondFormGroup.getRawValue().services).toEqual([{
@@ -293,7 +293,7 @@ describe('DeviceTypesComponent', () => {
 
     }));
 
-    it('check save with edit', async(() => {
+    it('check save with edit', waitForAsync(() => {
         init('device_id_4711', 'edit');
         const inputs =  component.inputOutputArray(component.services.controls[0], 'inputs');
         component.deleteContentVariable(inputs[0], [0, 1])

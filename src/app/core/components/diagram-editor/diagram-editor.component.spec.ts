@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { DiagramEditorComponent } from './diagram-editor.component';
 
@@ -22,7 +22,7 @@ describe('DiagramEditorComponent', () => {
   let component: DiagramEditorComponent;
   let fixture: ComponentFixture<DiagramEditorComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ DiagramEditorComponent ]
     })

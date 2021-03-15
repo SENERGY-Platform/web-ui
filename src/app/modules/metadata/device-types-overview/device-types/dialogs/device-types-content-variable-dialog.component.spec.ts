@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import {DeviceTypesContentVariableDialogComponent} from './device-types-content-variable-dialog.component';
 import {CoreModule} from '../../../../../core/core.module';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
@@ -56,16 +56,16 @@ describe('DeviceTypesContentVariableDialog', () => {
         fixture.detectChanges();
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
     }));
 
-    it('should create the app', async(() => {
+    it('should create the app', waitForAsync(() => {
         const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
         init(contentVariable, [], []);
         expect(component).toBeTruthy();
     }));
 
-    it('create primitive Type', async(() => {
+    it('create primitive Type', waitForAsync(() => {
         init({} as DeviceTypeContentVariableModel, [], []);
         expect(component.isPrimitiveType()).toBe(true);
         expect(component.typeOptionsControl.value).toBe('primitive');
@@ -96,7 +96,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         });
     }));
 
-    it('edit primitive Type', async(() => {
+    it('edit primitive Type', waitForAsync(() => {
         const contentVariable: DeviceTypeContentVariableModel = {
             indices: [0, 1, 0],
             id: 'id1',
@@ -123,7 +123,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         });
     }));
 
-    it('create non-primitive Type', async(() => {
+    it('create non-primitive Type', waitForAsync(() => {
         const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
         init(contentVariable, [], []);
         component.typeOptionsControl.setValue('non-primitive');
@@ -148,7 +148,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         });
     }));
 
-    it('edit non-primitive Type', async(() => {
+    it('edit non-primitive Type', waitForAsync(() => {
         const contentVariable: DeviceTypeContentVariableModel = {
             id: 'id2',
             name: 'testStruct',
@@ -181,7 +181,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         });
     }));
 
-    it('init concepts and characteristics', async(() => {
+    it('init concepts and characteristics', waitForAsync(() => {
         const functionIds: string[] = ['urn:infai:ses:concept:ebfeabb3', 'func_id_2'];
         init({} as DeviceTypeContentVariableModel, functionIds, [{
             id: 'urn:infai:ses:concept:ebfeabb3',

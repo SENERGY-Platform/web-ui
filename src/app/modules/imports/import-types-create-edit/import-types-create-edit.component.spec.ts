@@ -151,11 +151,11 @@ describe('ImportTypesCreateEditComponent', () => {
             imports: [
                 CoreModule,
                 RouterModule.forRoot([{
-                    path: 'imports/types/list',
-                    pathMatch: 'full',
-                    component: ImportTypesComponent,
-                    data: {header: 'Import Types'}
-                }]),
+        path: 'imports/types/list',
+        pathMatch: 'full',
+        component: ImportTypesComponent,
+        data: { header: 'Import Types' }
+    }], { relativeLinkResolution: 'legacy' }),
                 ReactiveFormsModule,
                 HttpClientModule,
                 MatDialogModule,

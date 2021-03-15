@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import {OperatorRepoComponent} from './operator-repo.component';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {OperatorRepoService} from './shared/operator-repo.service';
@@ -34,7 +34,7 @@ class MockOperatorRepoService {
 describe('OperatorRepoComponent', () => {
   let fixture: ComponentFixture<OperatorRepoComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, MatIconModule, MatSortModule, MatPaginatorModule],
       declarations: [ OperatorRepoComponent ],

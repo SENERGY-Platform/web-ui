@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {RouterTestingModule} from '@angular/router/testing';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
@@ -49,7 +49,7 @@ describe('DashboardComponent', () => {
     const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService);
     const deviceStatusServiceSpy: Spy<DeviceStatusService> = createSpyFromClass<DeviceStatusService>(DeviceStatusService);
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
 
         responsiveServiceSpy.observeMqAlias.and.nextOneTimeWith('md');
         dashboardServiceSpy.getDashboards.and.nextOneTimeWith([{
@@ -90,11 +90,11 @@ describe('DashboardComponent', () => {
         fixture.detectChanges();
     }));
 
-    it('should create the app', async(() => {
+    it('should create the app', waitForAsync(() => {
         expect(component).toBeTruthy();
     }));
 
-    it('should toggle dragMode', async(() => {
+    it('should toggle dragMode', waitForAsync(() => {
         component.toggleDragMode();
         expect(component.inDragMode).toBeTrue();
         component.toggleDragMode();

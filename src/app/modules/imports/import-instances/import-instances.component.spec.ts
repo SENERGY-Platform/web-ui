@@ -75,7 +75,7 @@ describe('ImportInstancesComponent', () => {
             declarations: [ImportInstancesComponent],
             imports: [
                 CoreModule,
-                RouterModule.forRoot([]),
+                RouterModule.forRoot([], { relativeLinkResolution: 'legacy' }),
                 ReactiveFormsModule,
                 HttpClientModule,
                 MatDialogModule,

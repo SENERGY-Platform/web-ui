@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import {DeviceStatusEditDialogComponent} from './device-status-edit-dialog.component';
 import {CoreModule} from '../../../core/core.module';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -63,7 +63,7 @@ describe('DeviceStatusEditDialogComponent', () => {
     const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService);
     const deviceTypeServiceeSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
 
         exportServiceSpy.startPipeline.and.returnValue(of({ID: 'export_id_123'} as ExportModel));
         const exampleExport: ExportModel = {
@@ -156,11 +156,11 @@ describe('DeviceStatusEditDialogComponent', () => {
         fixture.detectChanges();
     }));
 
-    it('should create the app', async(() => {
+    it('should create the app', waitForAsync(() => {
         expect(component).toBeTruthy();
     }));
 
-    it('check the first dialog init', async(() => {
+    it('check the first dialog init', waitForAsync(() => {
         expect(component.widgetOld).toEqual({name: 'test', properties: {}} as WidgetModel);
         expect(component.widgetNew).toEqual({name: 'test', properties: {}} as WidgetModel);
         expect((component.formGroup.get('name') as FormControl).value).toBe('test');
@@ -176,7 +176,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.widgetId).toBe('widgetId-1');
     }));
 
-    it('add empty element', async(() => {
+    it('add empty element', waitForAsync(() => {
         component.addElement({} as DeviceStatusElementModel);
         expect(component.elements.length).toBe(1);
         expect(component.elements[0]).toEqual({
@@ -197,7 +197,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.serviceExportValueArray.length).toBe(0);
     }));
 
-    it('select aspect', async(() => {
+    it('select aspect', waitForAsync(() => {
         component.addElement({} as DeviceStatusElementModel);
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         expect(component.funcArray[0].length).toBe(1);
@@ -223,7 +223,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         });
     }));
 
-    it('select aspect, function', async(() => {
+    it('select aspect, function', waitForAsync(() => {
         component.addElement({} as DeviceStatusElementModel);
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
@@ -248,7 +248,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         });
     }));
 
-    it('select aspect, function, device', async(() => {
+    it('select aspect, function, device', waitForAsync(() => {
         component.addElement({} as DeviceStatusElementModel);
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
@@ -282,7 +282,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         });
     }));
 
-    it('select aspect, function, device, value', async(() => {
+    it('select aspect, function, device, value', waitForAsync(() => {
         component.addElement({} as DeviceStatusElementModel);
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
@@ -323,7 +323,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         });
     }));
 
-    it('delete element', async(() => {
+    it('delete element', waitForAsync(() => {
         component.addElement({} as DeviceStatusElementModel);
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
@@ -341,7 +341,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(component.widgetId).toBe('widgetId-1');
     }));
 
-    it('save element', async(() => {
+    it('save element', waitForAsync(() => {
         component.addElement({} as DeviceStatusElementModel);
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
@@ -362,7 +362,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
     }));
 
-    it('save element without process deployment', async(() => {
+    it('save element without process deployment', waitForAsync(() => {
         component.addElement({} as DeviceStatusElementModel);
         component.elementsControl.at(0).patchValue({'aspectId': component.aspects[0].id});
         component.elementsControl.at(0).patchValue({'function': component.funcArray[0][0]});
@@ -383,7 +383,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
     }));
 
-    it('check if header exists', async(() => {
+    it('check if header exists', waitForAsync(() => {
         const header = <HTMLHeadElement>fixture.debugElement.query(By.css('h2')).nativeElement;
         expect(header.innerHTML).toBe('Edit Device Status');
     }));

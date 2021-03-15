@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { DeviceInstancesComponent } from './device-instances.component';
 import {MatDialogModule} from '@angular/material/dialog';
@@ -34,7 +34,7 @@ describe('DeviceInstancesComponent', () => {
   let component: DeviceInstancesComponent;
   let fixture: ComponentFixture<DeviceInstancesComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [MatDialogModule, HttpClientTestingModule, MatSnackBarModule, CoreModule, MatTabsModule, InfiniteScrollModule, DevicesModule],
       declarations: [ DeviceInstancesComponent ],

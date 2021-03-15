@@ -78,7 +78,7 @@ describe('ImportTypesComponent', () => {
             declarations: [ImportTypesComponent],
             imports: [
                 CoreModule,
-                RouterModule.forRoot([]),
+                RouterModule.forRoot([], { relativeLinkResolution: 'legacy' }),
                 MatDialogModule,
                 MatSnackBarModule,
                 FlexModule,

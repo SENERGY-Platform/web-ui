@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {TestBed, async, ComponentFixture} from '@angular/core/testing';
+import { TestBed, ComponentFixture, waitForAsync } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import {CoreModule} from './core/core.module';
 import {KeycloakService} from 'keycloak-angular';

@@ -56,7 +56,7 @@ export class DataTableService {
         return observables;
     }
 
-    deleteElement(element: DataTableElementModel, shouldSubscribe: boolean = true): Observable<any>[] | void {
+    deleteElement(element: DataTableElementModel, shouldSubscribe: boolean = true): Observable<any>[] {
         const observables: Observable<any>[] = [];
         if (element.exportCreatedByWidget) {
             observables.push(this.exportService.stopPipeline({ID: element.exportId} as ExportModel));
@@ -69,7 +69,7 @@ export class DataTableService {
         }
         if (shouldSubscribe) {
             observables.forEach(o => o.subscribe());
-            return;
+            return [];
         } else {
             return observables;
         }

@@ -54,7 +54,7 @@
                                         *ngFor="let item of element.task.parameter | keyvalue; trackBy:trackByFn">
                                         <mat-form-field class="full-width" color="accent" *ngIf="displayParameter(item.value)">
                                             <input type="text" matInput placeholder="{{item.key}}"
-                                                   [formControlName]="item.key">
+                                                   [formControlName]="'' + item.key">
                                         </mat-form-field>
                                     </td>
                                     <td formArrayName="configurables"

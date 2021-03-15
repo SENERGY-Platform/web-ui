@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {async, TestBed} from '@angular/core/testing';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 import {CoreModule} from '../../../core/core.module';
 import {RouterTestingModule} from '@angular/router/testing';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
@@ -74,7 +74,7 @@ describe('DataTableEditDialogComponent', () => {
     };
 
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         exportServiceSpy = createSpyFromClass(ExportService);
         deploymentsServiceSpy = createSpyFromClass<DeploymentsService>(DeploymentsService);
         matDialogRefSpy
@@ -183,14 +183,14 @@ describe('DataTableEditDialogComponent', () => {
         }).compileComponents();
     }));
 
-    it('should create the app', async(() => {
+    it('should create the app', waitForAsync(() => {
         const fixture = TestBed.createComponent(DataTableEditDialogComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();
     }));
 
-    it('check the first dialog init', async(() => {
+    it('check the first dialog init', waitForAsync(() => {
         dataTableHelperServiceSpy.getAspectsWithMeasuringFunction.and.returnValue([]);
         dataTableHelperServiceSpy.getMeasuringFunctionsOfAspect.and.returnValue([]);
         dataTableHelperServiceSpy.getDevicesOfFunctionAndAspect.and.returnValue([]);
@@ -239,7 +239,7 @@ describe('DataTableEditDialogComponent', () => {
     }));
 
 
-    it('should fill device data, create deployment, create schedule, create export', async(() => {
+    it('should fill device data, create deployment, create schedule, create export', waitForAsync(() => {
         const fixture = TestBed.createComponent(DataTableEditDialogComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -331,7 +331,7 @@ describe('DataTableEditDialogComponent', () => {
         ]);
     }));
 
-    it('should enable warnings for int types', async(() => {
+    it('should enable warnings for int types', waitForAsync(() => {
         dataTableHelperServiceSpy.getServiceValues.and.returnValue([{
             Name: 'Time',
             Path: 'struct.Time',
@@ -345,7 +345,7 @@ describe('DataTableEditDialogComponent', () => {
         expect(element?.get('warning')?.enabled).toBe(true);
     }));
 
-    it('should not always create deployments and schedules', async(() => {
+    it('should not always create deployments and schedules', waitForAsync(() => {
         const serviceMockEvent = {
             id: 'service_1',
             outputs: [{
@@ -378,7 +378,7 @@ describe('DataTableEditDialogComponent', () => {
         expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(0);
     }));
 
-    it('should not always create exports', async(() => {
+    it('should not always create exports', waitForAsync(() => {
         dataTableHelperServiceSpy.getExportsForDeviceAndValue.and.returnValue([{ID: 'existing-exportId'}]);
         const fixture = TestBed.createComponent(DataTableEditDialogComponent);
         component = fixture.componentInstance;
@@ -389,7 +389,7 @@ describe('DataTableEditDialogComponent', () => {
         expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
     }));
 
-    it('should copy, move and delete elements', async(() => {
+    it('should copy, move and delete elements', waitForAsync(() => {
         const fixture = TestBed.createComponent(DataTableEditDialogComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -419,7 +419,7 @@ describe('DataTableEditDialogComponent', () => {
 
     }));
 
-    it('should fill pipeline data and create export', async(() => {
+    it('should fill pipeline data and create export', waitForAsync(() => {
         const fixture = TestBed.createComponent(DataTableEditDialogComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
