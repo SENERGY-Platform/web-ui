@@ -133,15 +133,23 @@ export class DeploymentsConfigInitializerService {
 
     private initSelectionFormGroup(selection: V2DeploymentsPreparedSelectionModel, disable: boolean): FormGroup {
         const selectedOptionIndex = this.getSelectedOptionIndex(selection);
-        return this._formBuilder.group({
+        const group = this._formBuilder.group({
             filter_criteria: selection.filter_criteria,
             selection_options: this.initSelectionFormArray(selection.selection_options),
             selection_options_index: selectedOptionIndex,
             selected_device_id: [{value: selection.selected_device_id, disabled: disable}],
             selected_service_id: [{value: selection.selected_service_id, disabled: disable}],
             selected_device_group_id: [{value: selection.selected_device_group_id, disabled: disable}],
+            selected_import_id: [{value: selection.selected_import_id, disabled: disable}],
+            selected_path_option: [{value: undefined, disabled: disable}],
+            selected_path: [{value: selection.selected_path, disabled: disable}],
+            selected_characteristic_id: [{value: selection.selected_characteristic_id, disabled: disable}],
             show: false
         });
+        group.get('selected_path_option')?.valueChanges.subscribe((option: { path: string, characteristicId: string }) =>
+            group.patchValue({selected_path: option.path, selected_characteristic_id: option.characteristicId})
+        );
+        return group;
     }
 
     private initParameterFormGroup(parameter: any): FormGroup {
@@ -168,8 +176,10 @@ export class DeploymentsConfigInitializerService {
     private  initDeviceSelectionOptionGroup(selectionOption: V2DeploymentsPreparedSelectionOptionModel): FormGroup {
         return this._formBuilder.group({
             device: [selectionOption.device],
-            services: this._formBuilder.array(selectionOption.services),
+            services: selectionOption.services !== null ? this._formBuilder.array(selectionOption.services) : null,
             device_group: [selectionOption.device_group],
+            import: selectionOption.import,
+            importType: selectionOption.importType,
         });
     }
 

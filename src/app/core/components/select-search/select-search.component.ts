@@ -311,8 +311,12 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             }
             let filtered: any[] = [];
             if (Array.isArray(this.options) && this.options.find) {
-                filtered = this.options.filter(option =>
-                    this.getOptionViewValue(option).toLowerCase().indexOf(this.searchControl.value.toLowerCase()) !== -1);
+                filtered = this.options.filter(option => {
+                    if (this.getOptionViewValue(option) === null) {
+                        return false;
+                    }
+                    return this.getOptionViewValue(option).toLowerCase().indexOf(this.searchControl.value.toLowerCase()) !== -1;
+                });
 
                 // append selected options if not already included
                 const addOptionByValue = (optionValue: any) => {

@@ -101,6 +101,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                         selected_device_id: '',
                         selected_service_id: '',
                         selected_device_group_id: null,
+                        selected_import_id: null,
+                        selected_characteristic_id: null,
+                        selected_path: null,
+                        selected_path_option: undefined,
                         selection_options: [
                             {
                                 device: {
@@ -111,7 +115,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                                     name: 'setOnService'
                                 }],
-                                device_group: null
+                                device_group: null,
+                                import: null,
+                                importType: null,
                             },
                             {
                                 device: {
@@ -126,7 +132,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                         id: '87d5e964-b9c7-4e86-8d66-3bc9302c934e',
                                         name: 'setOnService2'
                                     }],
-                                device_group: null
+                                device_group: null,
+                                import: null,
+                                importType: null,
                             }
 
                         ]
@@ -136,7 +144,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
             executable: true,
             id: '',
             name: 'Lampe_ein'
-        } as V2DeploymentsPreparedModel;
+        };
         deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(simpleProcess));
         deploymentsServiceSpy.getConfigurables.and.returnValue(of(null));
         initSpies();
@@ -174,6 +182,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                         selected_device_id: 'urn:infai:ses:device:7fbd37f6-ff3b-46ae-8805-3ca89766893b',
                         selected_service_id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                         selected_device_group_id: null,
+                        selected_import_id: null,
+                        selected_characteristic_id: null,
+                        selected_path: null,
+                        selected_path_option: undefined,
                         show: false,
                         selection_options_index: 0,
                         selection_options: [
@@ -186,7 +198,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                                     name: 'setOnService'
                                 }],
-                                device_group: null
+                                device_group: null,
+                                import: null,
+                                importType: null,
                             },
                             {
                                 device: {
@@ -201,7 +215,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                         id: '87d5e964-b9c7-4e86-8d66-3bc9302c934e',
                                         name: 'setOnService2'
                                     }],
-                                device_group: null
+                                device_group: null,
+                                import: null,
+                                importType: null,
                             }
                         ]
                     },
@@ -211,7 +227,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
             executable: true,
             id: '',
             name: 'Lampe_ein'
-        } as V2DeploymentsPreparedModel);
+        });
 
         // set device id of seconde device in selectionOption => selectionOptionIndex = 1
         if (selectedDeviceIdControl) {
@@ -246,6 +262,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                         selected_device_group_id: null,
                         show: true,
                         selection_options_index: 1,
+                        selected_import_id: null,
+                        selected_characteristic_id: null,
+                        selected_path: null,
+                        selected_path_option: undefined,
                         selection_options: [
                             {
                                 device: {
@@ -256,7 +276,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                                     name: 'setOnService'
                                 }],
-                                device_group: null
+                                device_group: null,
+                                import: null,
+                                importType: null,
                             },
                             {
                                 device: {
@@ -271,7 +293,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                         id: '87d5e964-b9c7-4e86-8d66-3bc9302c934e',
                                         name: 'setOnService2'
                                     }],
-                                device_group: null
+                                device_group: null,
+                                import: null,
+                                importType: null,
                             }
                         ]
                     },
@@ -281,7 +305,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
             executable: true,
             id: '',
             name: 'Lampe_ein'
-        } as V2DeploymentsPreparedModel);
+        });
     });
 
     it('test lane process and auto selection of device and services', () => {
@@ -357,6 +381,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             'selected_device_id': null,
                             'selected_service_id': null,
                             'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                         }
                     }
                 },
@@ -440,6 +468,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             'selected_device_id': null,
                             'selected_service_id': null,
                             'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                         }
                     }
                 },
@@ -518,7 +550,11 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             ],
                             'selected_device_id': null,
                             'selected_service_id': null,
-                            'selected_device_group_id': null
+                            'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                         }
                     }
                 }
@@ -583,7 +619,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOnService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -596,7 +634,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOnService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -609,12 +649,18 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOnService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 }
                             ],
                             selected_device_id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
                             selected_service_id: 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
                             selected_device_group_id: null,
+                            selected_import_id: null,
+                            selected_characteristic_id: null,
+                            selected_path: null,
+                            selected_path_option: undefined,
                             show: false,
                             selection_options_index: 2
                         }
@@ -669,7 +715,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setColorService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -682,7 +730,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setColorService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -695,12 +745,18 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setColorService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 }
                             ],
                             selected_device_id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
                             selected_service_id: 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
                             selected_device_group_id: null,
+                            selected_import_id: null,
+                            selected_characteristic_id: null,
+                            selected_path: null,
+                            selected_path_option: undefined,
                             show: false,
                             selection_options_index: 2
                         }
@@ -751,7 +807,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOffService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -764,7 +822,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOffService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -777,12 +837,18 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOffService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 }
                             ],
                             selected_device_id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
                             selected_service_id: 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
                             selected_device_group_id: null,
+                            selected_import_id: null,
+                            selected_characteristic_id: null,
+                            selected_path: null,
+                            selected_path_option: undefined,
                             show: false,
                             selection_options_index: 2
                         }
@@ -880,6 +946,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             'selected_device_id': null,
                             'selected_service_id': null,
                             'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                         }
                     }
                 },
@@ -971,6 +1041,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             'selected_device_id': null,
                             'selected_service_id': null,
                             'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                         }
                     }
                 },
@@ -1057,7 +1131,11 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             ],
                             'selected_device_id': null,
                             'selected_service_id': null,
-                            'selected_device_group_id': null
+                            'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                         }
                     }
                 }
@@ -1117,7 +1195,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOnService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -1130,7 +1210,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOnService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -1143,7 +1225,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOnService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: null,
@@ -1151,12 +1235,18 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: {
                                         id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                                         name: 'group1'
-                                    }
+                                    },
+                                    import: null,
+                                    importType: null,
                                 }
                             ],
                             selected_device_id: null,
                             selected_service_id: null,
                             selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                            selected_import_id: null,
+                            selected_characteristic_id: null,
+                            selected_path: null,
+                            selected_path_option: undefined,
                             show: false,
                             selection_options_index: 3
                         }
@@ -1211,7 +1301,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setColorService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -1224,7 +1316,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setColorService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -1237,7 +1331,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setColorService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: null,
@@ -1245,12 +1341,18 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: {
                                         id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                                         name: 'group1'
-                                    }
+                                    },
+                                    import: null,
+                                    importType: null,
                                 }
                             ],
                             selected_device_id: null,
                             selected_service_id: null,
                             selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                            selected_import_id: null,
+                            selected_characteristic_id: null,
+                            selected_path: null,
+                            selected_path_option: undefined,
                             show: false,
                             selection_options_index: 3
                         }
@@ -1301,7 +1403,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOffService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -1314,7 +1418,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOffService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: {
@@ -1327,7 +1433,9 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             name: 'setOffService'
                                         }
                                     ],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null,
                                 },
                                 {
                                     device: null,
@@ -1335,12 +1443,18 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: {
                                         id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                                         name: 'group1'
-                                    }
+                                    },
+                                    import: null,
+                                    importType: null,
                                 }
                             ],
                             selected_device_id: null,
                             selected_service_id: null,
                             selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
+                            selected_import_id: null,
+                            selected_characteristic_id: null,
+                            selected_path: null,
+                            selected_path_option: undefined,
                             show: false,
                             selection_options_index: 3
                         }
@@ -1350,6 +1464,6 @@ describe('ProcessDeploymentsConfigComponent', () => {
             executable: true,
             id: '',
             name: 'Lamp_in_Lane'
-        } as V2DeploymentsPreparedModel);
+        });
     });
 });

@@ -32,6 +32,17 @@ import {
 } from '../shared/deployments-prepared-v2.model';
 import {FlowRepoService} from '../../../data/flow-repo/shared/flow-repo.service';
 import {FlowModel} from '../../../data/flow-repo/shared/flow.model';
+import {FunctionsPermSearchModel} from '../../../metadata/functions/shared/functions-perm-search.model';
+import {FunctionsService} from '../../../metadata/functions/shared/functions.service';
+import {forkJoin, Observable} from 'rxjs';
+import {ConceptsService} from '../../../metadata/concepts/shared/concepts.service';
+import {
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeContentVariableModel
+} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {map} from 'rxjs/internal/operators';
+import {ImportTypeContentVariableModel, ImportTypeModel} from '../../../imports/import-types/shared/import-types.model';
+import {ImportTypesService} from '../../../imports/import-types/shared/import-types.service';
 
 
 @Component({
@@ -51,6 +62,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     flowList: FlowModel[] = [];
     ready = false;
     optionGroups: Map<number, Map<string, V2DeploymentsPreparedSelectionOptionModel[]>> = new Map();
+    functions: FunctionsPermSearchModel[] = [];
+    functionCharacteristics: Map<string, DeviceTypeCharacteristicsModel[]> = new Map();
+    importTypes: Map<string, ImportTypeModel> = new Map();
+    functionImportTypePathOptions: Map<string, { path: string, characteristicId: string }[]> = new Map();
 
     constructor(private _formBuilder: FormBuilder,
                 private processRepoService: ProcessRepoService,
@@ -59,30 +74,91 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 private snackBar: MatSnackBar,
                 private router: Router,
                 private deploymentsConfigInitializerService: DeploymentsConfigInitializerService,
-                private flowRepoService: FlowRepoService) {
+                private flowRepoService: FlowRepoService,
+                private conceptsService: ConceptsService,
+                private functionsService: FunctionsService,
+                private importTypesService: ImportTypesService,
+    ) {
         this.getRouterParams();
         this.getFlows();
     }
 
     ngOnInit() {
         if (this.processId !== '') {
-            this.deploymentsService.getPreparedDeployments(this.processId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
-                this.initOptionGroups(deployment);
-                this.initFormGroup(deployment);
+            const s1 = this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').pipe(map(f => this.functions = f));
+            const s2 = this.deploymentsService.getPreparedDeployments(this.processId)
+                .pipe(map((deployment: V2DeploymentsPreparedModel | null) => {
+                    this.deployment = deployment;
+                    this.initOptionGroups(deployment);
+                    this.initFormGroup(deployment);
+                }));
+            forkJoin([s1, s2]).subscribe(() => {
+                const subs: Observable<any>[] = [];
+                this.deployment?.elements.forEach(element => {
+                    if (element.message_event?.selection.filter_criteria.function_id !== undefined
+                        && element.message_event.selection.filter_criteria.function_id !== null
+                        && !this.functionCharacteristics.has(element.message_event.selection.filter_criteria.function_id)) {
+                        const functionId = element.message_event?.selection.filter_criteria.function_id;
+                        this.functionCharacteristics.set(functionId, []);
+                        const conceptId = this.functions.find(fu => fu.id === functionId)?.concept_id;
+                        if (conceptId !== undefined) {
+                            subs.push(this.conceptsService.getConceptWithCharacteristics(conceptId)
+                                .pipe(map(concept => this.functionCharacteristics.set(functionId, concept?.characteristics || []))));
+                        }
+                    }
+                    element.message_event?.selection.selection_options?.forEach(o => {
+                        if (o.import !== null && !this.importTypes.has(o.import.import_type_id)) {
+                            const importTypeId = o.import.import_type_id;
+                            this.importTypes.set(importTypeId, {} as ImportTypeModel);
+                            subs.push(this.importTypesService.getImportType(importTypeId).pipe(map(it => {
+                                this.importTypes.set(importTypeId, it);
+                            })));
+                        }
+                    });
+                });
+                forkJoin(subs).subscribe(() => {
+                    this.functionCharacteristics.forEach((characteristics, functionId) => {
+                        this.importTypes.forEach((importType, importTypeId) => {
+                            const key = functionId + importTypeId;
+                            if (!this.functionImportTypePathOptions.has(key)) {
+                                this.functionImportTypePathOptions.set(key,
+                                    this.getPathOptionsLocalImport(importType, characteristics.map(c => c.id || '')));
+                            }
+                        });
+                    });
+                });
+                this.ready = true;
+                console.log(this); // TODO
+            });
+        } else if (this.deploymentId !== '') {
+            this.deploymentsService.v2getDeployments(this.deploymentId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
+                if (deployment) {
+                    deployment.id = '';
+                    this.initOptionGroups(deployment);
+                    this.initFormGroup(deployment);
+                    this.deployment = deployment;
+                    this.ready = true;
+                } else {
+                    this.snackBar.open('Error while copying the deployment! Probably old version', undefined, {duration: 2000});
+                }
             });
         } else {
-            if (this.deploymentId !== '') {
-                this.deploymentsService.v2getDeployments(this.deploymentId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
-                    if (deployment) {
-                        deployment.id = '';
-                        this.initOptionGroups(deployment);
-                        this.initFormGroup(deployment);
-                    } else {
-                        this.snackBar.open('Error while copying the deployment! Probably old version', undefined, {duration: 2000});
-                    }
-                });
-            }
+            this.router.navigateByUrl('processes/repository');
         }
+
+        /* TODO
+        Load functions
+        For Functions that are in deployment.elements[*].message_event?.selection.filter_criteria.function_id
+            Load Characteristics of Functions Concept
+        On Selected
+            If Import
+                Load ImportType
+                Parse ImportType for matching pathes with matching characteristics
+                Auto-Select if only one possibility
+                On User Path Selection
+                    Patch selected_characteristic_id
+         */
+
     }
 
     initFormGroup(deployment: V2DeploymentsPreparedModel | null): void {
@@ -90,7 +166,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             this.deployment = deployment;
             this.deploymentFormGroup = this.deploymentsConfigInitializerService.initFormGroup(this.deployment);
             this.selectedServiceIdchangeListener();
-            this.ready = true;
         }
     }
 
@@ -99,7 +174,17 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     save(): void {
-        this.deploymentsService.v2postDeployments(this.deploymentFormGroup.getRawValue()).subscribe((resp: { status: number }) => {
+        const raw: V2DeploymentsPreparedModel = this.deploymentFormGroup.getRawValue();
+        raw?.elements?.forEach((element: V2DeploymentsPreparedElementModel) => {
+            if (element.message_event?.selection?.selection_options !== undefined) {
+                element.message_event.selection.selection_options = [];
+            }
+            if (element.task?.selection?.selection_options !== undefined) {
+                element.task.selection.selection_options = [];
+            }
+            delete (element.task?.selection as any).selected_path_option;
+        });
+        this.deploymentsService.v2postDeployments(raw).subscribe((resp: { status: number }) => {
             if (resp.status === 200) {
                 this.snackBar.open('Deployment stored successfully.', undefined, {duration: 2000});
             } else {
@@ -148,24 +233,24 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
         const that = this;
 
-        const setOption = function(elementIndex: number) {
+        const setOption = function (elementIndex: number) {
             const selectedDeviceGroupId = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_device_group_id');
             const selectedDeviceId = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_device_id');
+            const selectedImportId = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_import_id');
             if (option && option.device_group) {
-                if (selectedDeviceGroupId) {
-                    selectedDeviceGroupId.patchValue(option.device_group.id);
-                }
-                if (selectedDeviceId) {
-                    selectedDeviceId.patchValue(null);
-                }
+                selectedDeviceGroupId?.patchValue(option.device_group.id);
+                selectedDeviceId?.patchValue(null);
+                selectedImportId?.patchValue(null);
             }
             if (option && option.device) {
-                if (selectedDeviceGroupId) {
-                    selectedDeviceGroupId.patchValue(null);
-                }
-                if (selectedDeviceId) {
-                    selectedDeviceId.patchValue(option.device.id);
-                }
+                selectedDeviceGroupId?.patchValue(null);
+                selectedDeviceId?.patchValue(option.device.id);
+                selectedImportId?.patchValue(null);
+            }
+            if (option && option.import) {
+                selectedDeviceGroupId?.patchValue(null);
+                selectedDeviceId?.patchValue(null);
+                selectedImportId?.patchValue(option.import.id);
             }
             that.setSelectedServiceId(elementIndex, selectionOptionIndex, elementType);
         };
@@ -226,14 +311,25 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             if (element.message_event?.selection.selection_options === undefined) {
                 return -1;
             }
-            return element.message_event?.selection.selection_options.findIndex(o =>
+            const idx = element.message_event?.selection.selection_options.findIndex(o =>
                 (o.device && o.device.id === option.device?.id)
-                || o.device_group && (o.device_group.id === option.device_group?.id));
+                || (o.device_group && (o.device_group.id === option.device_group?.id))
+                || (o.import && (o.import.id === option.import?.id)));
+            return idx;
         };
     }
 
     getViewValue(option: any): string {
-        return (option.device && option.device.name) || (option.device_group && option.device_group.name);
+        if (option.device) {
+            return option.device.name;
+        }
+        if (option.device_group) {
+            return option.device_group.name;
+        }
+        if (option.import) {
+            return option.import.name;
+        }
+        return '';
     }
 
     private getRouterParams(): void {
@@ -248,10 +344,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     private getOption(element: V2DeploymentsPreparedElementModel, selectionOptionIndex: number): V2DeploymentsPreparedSelectionOptionModel | null {
-        if ( element.task && element.task.selection.selection_options ) {
+        if (element.task && element.task.selection.selection_options) {
             return element.task.selection.selection_options[selectionOptionIndex];
         }
-        if ( element.message_event && element.message_event.selection.selection_options ) {
+        if (element.message_event && element.message_event.selection.selection_options) {
             return element.message_event.selection.selection_options[selectionOptionIndex];
         }
         return null;
@@ -282,17 +378,22 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     private getOptionGroups(selection_options: V2DeploymentsPreparedSelectionOptionModel[]): Map<string, V2DeploymentsPreparedSelectionOptionModel[]> {
         const devices: V2DeploymentsPreparedSelectionOptionModel[] = [];
         const deviceGroups: V2DeploymentsPreparedSelectionOptionModel[] = [];
-        for (const option of selection_options ) {
+        const imports: V2DeploymentsPreparedSelectionOptionModel[] = [];
+        for (const option of selection_options) {
             if (option.device) {
                 devices.push(option);
             }
             if (option.device_group) {
                 deviceGroups.push(option);
             }
+            if (option.import) {
+                imports.push(option);
+            }
         }
         const result = new Map<string, V2DeploymentsPreparedSelectionOptionModel[]>();
         result.set('Devices', devices);
         result.set('Device-Groups', deviceGroups);
+        result.set('Imports', imports);
         return result;
     }
 
@@ -306,6 +407,44 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                     this.optionGroups.set(index, this.getOptionGroups(element.message_event.selection.selection_options));
                 }
             });
+        }
+    }
+
+    private getPathOptionsLocalImport(type: ImportTypeModel,
+                                      characteristic_id_filter: string[] = []): { path: string, characteristicId: string }[] {
+        const paths: { path: string, characteristicId: string }[] = [];
+        type.output.sub_content_variables?.forEach(sub => {
+            this.getPathOptionsRecursive('', paths,
+                sub, characteristic_id_filter);
+        });
+        return paths;
+    }
+
+    private getPathOptionsRecursive(parentPath: string, pathArray: { path: string, characteristicId: string }[],
+                                    contentVariable: DeviceTypeContentVariableModel | ImportTypeContentVariableModel,
+                                    characteristic_id_filter: string[]) {
+        const path = (parentPath.length > 0 ? parentPath + '.' : '') + contentVariable.name;
+        if (contentVariable.characteristic_id !== undefined
+            && characteristic_id_filter.findIndex(c => c === contentVariable.characteristic_id) !== -1) {
+            pathArray.push({path, characteristicId: contentVariable.characteristic_id});
+        }
+        contentVariable.sub_content_variables?.forEach((sub: DeviceTypeContentVariableModel | ImportTypeContentVariableModel) =>
+            this.getPathOptionsRecursive(path, pathArray, sub, characteristic_id_filter));
+    }
+
+    getPathOptions(elementIndex: number): { path: string, characteristicId: string }[] {
+        const element = (this.deploymentFormGroup.get('elements') as FormArray).at(elementIndex);
+        if (element.get('message_event.selection.selected_import_id')?.value !== null
+            && element.get('message_event.selection.selected_import_id')?.value !== undefined) {
+            const idx = element.get('message_event.selection.selection_options_index')?.value;
+            if (idx === undefined) {
+                return [];
+            }
+            const key = '' + element.get('message_event.selection.filter_criteria')?.value.function_id
+                + element.get('message_event.selection.selection_options')?.value[idx].import.import_type_id;
+            return this.functionImportTypePathOptions.get(key) || [];
+        } else {
+            return [];
         }
     }
 }

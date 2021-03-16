@@ -34,7 +34,7 @@ describe('DeploymentsConfigInitializerService', () => {
     }));
 
     it('init FormControl with Lane Deployment, disable device and service selection for 2 out of 3 tasks', inject([DeploymentsConfigInitializerService], (service: DeploymentsConfigInitializerService) => {
-        const deployment: V2DeploymentsPreparedModel = {
+        const deployment: any = {
             id: '',
             name: 'Lamp_in_Lane',
             description: 'test_description',
@@ -75,7 +75,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -88,7 +90,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -101,12 +105,18 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 }
                             ],
                             'selected_device_id': null,
                             'selected_service_id': null,
                             'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                         }
                     }
                 },
@@ -158,7 +168,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -171,7 +183,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -184,12 +198,18 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 }
                             ],
                             'selected_device_id': null,
                             'selected_service_id': null,
                             'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                         }
                     }
                 },
@@ -237,7 +257,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -250,7 +272,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -263,19 +287,25 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 }
                             ],
                             'selected_device_id': null,
                             'selected_service_id': null,
                             'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                         }
                     }
                 }
             ],
             executable: true,
         };
-        const initValues: V2DeploymentsPreparedModel = {
+        const initValues: any = {
             id: '',
             name: 'Lamp_in_Lane',
             description: 'test_description',
@@ -316,7 +346,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -329,7 +361,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -342,13 +376,19 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 }
                             ],
                             'selection_options_index': -1,
                             'selected_device_id': null,
                             'selected_service_id': null,
                             'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                             'show': false,
                         }
                     }
@@ -402,7 +442,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -415,7 +457,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -428,13 +472,19 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 }
                             ],
                             'selection_options_index': -1,
                             'selected_device_id': null,
                             'selected_service_id': null,
                             'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                             'show': false,
                         }
                     }
@@ -484,7 +534,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -497,7 +549,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 },
                                 {
                                     'device': {
@@ -510,13 +564,19 @@ describe('DeploymentsConfigInitializerService', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'import': null,
+                                    'importType': null
                                 }
                             ],
                             'selection_options_index': -1,
                             'selected_device_id': null,
                             'selected_service_id': null,
                             'selected_device_group_id': null,
+                            'selected_import_id': null,
+                            'selected_characteristic_id': null,
+                            'selected_path': null,
+                            'selected_path_option': undefined,
                             'show': false,
                         }
                     }
@@ -567,6 +627,9 @@ describe('DeploymentsConfigInitializerService', () => {
                             selected_device_id: null,
                             selected_service_id: null,
                             selected_device_group_id: null,
+                            selected_import_id: null,
+                            selected_characteristic_id: null,
+                            selected_path: null,
                             selection_options: [
                                 {
                                     device: {
@@ -578,7 +641,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                                             name: 'setOnService'
                                         }],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null
                                 }]
                         }
                     },
@@ -587,7 +652,7 @@ describe('DeploymentsConfigInitializerService', () => {
             ],
             executable: true,
         };
-        const initValues: V2DeploymentsPreparedModel = {
+        const initValues: any = {
             id: '',
             name: 'message_event',
             description: 'test_description',
@@ -620,6 +685,10 @@ describe('DeploymentsConfigInitializerService', () => {
                             selected_device_id: null,
                             selected_service_id: null,
                             selected_device_group_id: null,
+                            selected_import_id: null,
+                            selected_characteristic_id: null,
+                            selected_path: null,
+                            selected_path_option: undefined,
                             selection_options: [
                                 {
                                     device: {
@@ -631,7 +700,9 @@ describe('DeploymentsConfigInitializerService', () => {
                                             id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                                             name: 'setOnService'
                                         }],
-                                    device_group: null
+                                    device_group: null,
+                                    import: null,
+                                    importType: null
                                 }]
                         }
                     },

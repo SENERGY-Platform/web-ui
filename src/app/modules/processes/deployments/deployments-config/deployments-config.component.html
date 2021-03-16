@@ -23,7 +23,8 @@
                 </mat-form-field>
                 <mat-form-field class="full-width" color="accent">
                     <textarea type="text" matInput placeholder="Process Description"
-                              formControlName="description" cdkTextareaAutosize #autosize="cdkTextareaAutosize"></textarea>
+                              formControlName="description" cdkTextareaAutosize
+                              #autosize="cdkTextareaAutosize"></textarea>
                 </mat-form-field>
                 <div formArrayName="elements" *ngIf="elements.length > 0">
                     <div [formGroupName]="elementIndex"
@@ -34,25 +35,28 @@
                                     <td formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent">
                                             <senergy-select-search placeholder="{{element.name}}" [required]="true"
-                                                        formControlName="selection_options_index"
-                                                        [options]="optionGroups.get(elementIndex) || []"
-                                                        [getOptionValue]="getTaskIndex(element)"
-                                                        (selectionChange)="changeTaskSelectionOption(elementIndex, $event.value)"
-                                                        [getOptionViewValue]="getViewValue">
+                                                                   formControlName="selection_options_index"
+                                                                   [options]="optionGroups.get(elementIndex) || []"
+                                                                   [getOptionValue]="getTaskIndex(element)"
+                                                                   (selectionChange)="changeTaskSelectionOption(elementIndex, $event.value)"
+                                                                   [getOptionViewValue]="getViewValue">
                                             </senergy-select-search>
                                         </mat-form-field>
 
                                         <mat-form-field class="full-width" color="accent"
                                                         *ngIf="element.task.selection.show === true">
-                                            <senergy-select-search placeholder="Service" [required]="true" formControlName="selected_service_id"
-                                                        [options]="element.task.selection.selection_options[element.task.selection.selection_options_index || 0].services"
-                                                        useOptionValueProperty="id" useOptionViewProperty="name">
+                                            <senergy-select-search placeholder="Service" [required]="true"
+                                                                   formControlName="selected_service_id"
+                                                                   [options]="element.task.selection.selection_options[element.task.selection.selection_options_index || 0].services || []"
+                                                                   useOptionValueProperty="id"
+                                                                   useOptionViewProperty="name">
                                             </senergy-select-search>
                                         </mat-form-field>
                                     </td>
                                     <td formGroupName="parameter"
                                         *ngFor="let item of element.task.parameter | keyvalue; trackBy:trackByFn">
-                                        <mat-form-field class="full-width" color="accent" *ngIf="displayParameter(item.value)">
+                                        <mat-form-field class="full-width" color="accent"
+                                                        *ngIf="displayParameter(item.value)">
                                             <input type="text" matInput placeholder="{{item.key}}"
                                                    [formControlName]="'' + item.key">
                                         </mat-form-field>
@@ -91,20 +95,30 @@
                                         <mat-form-field class="full-width" color="accent"
                                                         *ngIf="element.message_event.selection.show === true">
                                             <senergy-select-search placeholder="Service" [required]="true"
-                                                        formControlName="selected_service_id"
-                                                        [options]="element.message_event.selection.selection_options[element.message_event.selection.selection_options_index || 0].services"
-                                                        useOptionViewProperty="name"
-                                                        useOptionValueProperty="id">
+                                                                   formControlName="selected_service_id"
+                                                                   [options]="element.message_event.selection.selection_options[element.message_event.selection.selection_options_index || 0].services || []"
+                                                                   useOptionViewProperty="name"
+                                                                   useOptionValueProperty="id">
+                                            </senergy-select-search>
+                                        </mat-form-field>
+
+                                        <mat-form-field class="full-width" color="accent"
+                                         [fxShow]="getPathOptions(elementIndex).length > 1">
+                                            <senergy-select-search placeholder="Path" [required]="true"
+                                                                   formControlName="selected_path_option"
+                                                                   [autoSelectSingleElement]="true"
+                                                                   [options]="getPathOptions(elementIndex)"
+                                                                   useOptionViewProperty="path">
                                             </senergy-select-search>
                                         </mat-form-field>
                                     </td>
                                     <td>
                                         <mat-form-field class="full-width" color="accent">
                                             <senergy-select-search placeholder="Flow Id" [required]="true"
-                                                        formControlName="flow_id"
-                                                        [options]="flowList"
-                                                        useOptionValueProperty="_id"
-                                                        useOptionViewProperty="name">
+                                                                   formControlName="flow_id"
+                                                                   [options]="flowList"
+                                                                   useOptionValueProperty="_id"
+                                                                   useOptionViewProperty="name">
                                             </senergy-select-search>
                                         </mat-form-field>
                                     </td>
