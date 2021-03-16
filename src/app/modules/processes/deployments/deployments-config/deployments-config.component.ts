@@ -145,20 +145,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         } else {
             this.router.navigateByUrl('processes/repository');
         }
-
-        /* TODO
-        Load functions
-        For Functions that are in deployment.elements[*].message_event?.selection.filter_criteria.function_id
-            Load Characteristics of Functions Concept
-        On Selected
-            If Import
-                Load ImportType
-                Parse ImportType for matching pathes with matching characteristics
-                Auto-Select if only one possibility
-                On User Path Selection
-                    Patch selected_characteristic_id
-         */
-
     }
 
     initFormGroup(deployment: V2DeploymentsPreparedModel | null): void {
