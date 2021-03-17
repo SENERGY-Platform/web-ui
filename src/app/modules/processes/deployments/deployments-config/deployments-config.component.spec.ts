@@ -24,10 +24,13 @@ import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {DevicesModule} from '../../../devices/devices.module';
 import {KeycloakService} from 'keycloak-angular';
 import {MockKeycloakService} from '../../../../core/services/keycloak.mock';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ProcessDeploymentsConfigComponent} from './deployments-config.component';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
-import {V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel} from '../shared/deployments-prepared-v2.model';
+import {
+    V2DeploymentsPreparedConfigurableModel,
+    V2DeploymentsPreparedModel
+} from '../shared/deployments-prepared-v2.model';
 import {DeploymentsService} from '../shared/deployments.service';
 import {of} from 'rxjs';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -45,14 +48,6 @@ describe('ProcessDeploymentsConfigComponent', () => {
     const deploymentsServiceSpy: Spy<DeploymentsService> = createSpyFromClass<DeploymentsService>(DeploymentsService);
 
     function initSpies(): void {
-        routerSpy.getCurrentNavigation.and.returnValues({
-            extras: {
-                state: {
-                    processId: '4711',
-                    deploymentId: ''
-                }
-            }
-        });
 
         TestBed.configureTestingModule({
             imports: [MatDialogModule, HttpClientTestingModule, MatSnackBarModule, CoreModule, MatTabsModule, InfiniteScrollModule, DevicesModule, MatFormFieldModule, ReactiveFormsModule,
@@ -64,7 +59,16 @@ describe('ProcessDeploymentsConfigComponent', () => {
             declarations: [ProcessDeploymentsConfigComponent],
             providers: [{provide: KeycloakService, useClass: MockKeycloakService},
                 {provide: Router, useValue: routerSpy},
-                {provide: DeploymentsService, useValue: deploymentsServiceSpy}]
+                {provide: DeploymentsService, useValue: deploymentsServiceSpy},
+                {
+                    provide: ActivatedRoute, useValue: {
+                        snapshot: {
+                            queryParams: {
+                                processId: '4711'
+                            },
+                        }
+                    }
+                }]
         }).compileComponents();
         fixture = TestBed.createComponent(ProcessDeploymentsConfigComponent);
         component = fixture.componentInstance;
@@ -155,7 +159,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
         }
         component.changeTaskSelectionOption(0, 0);
         expect(component.processId).toBe('4711');
-        expect(component.deploymentId).toBe('');
+        expect(component.deploymentId).toBeUndefined();
         expect(component.deploymentFormGroup.getRawValue()).toEqual({
             description: 'no description',
             diagram: {
@@ -860,9 +864,6 @@ describe('ProcessDeploymentsConfigComponent', () => {
             name: 'Lamp_in_Lane'
         } as V2DeploymentsPreparedModel);
     });
-
-
-
 
 
     it('test lane process auto selection of device-group', () => {

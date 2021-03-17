@@ -180,12 +180,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     copyDeployment(deploymentId: string): void {
-        this.router.navigateByUrl('/processes/deployments/config', {
-            state: {
-                processId: '',
-                deploymentId: deploymentId
-            }
-        });
+        this.router.navigateByUrl('/processes/deployments/config?deploymentId=' + deploymentId);
     }
 
     countCheckboxes(): void {

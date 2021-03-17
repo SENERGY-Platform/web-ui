@@ -184,7 +184,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     deployProcess(processId: string): void {
-        this.router.navigateByUrl('/processes/deployments/config', {state: {processId: processId, deploymentId: ''}});
+        this.router.navigateByUrl('/processes/deployments/config?processId=' + processId);
     }
 
     setIndex(event: number) {

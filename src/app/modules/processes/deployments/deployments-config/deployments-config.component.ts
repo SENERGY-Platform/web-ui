@@ -15,7 +15,7 @@
  */
 
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {Navigation, Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
@@ -55,8 +55,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     @ViewChild('autosize', {static: false}) autosize!: CdkTextareaAutosize;
 
-    processId = '';
-    deploymentId = '';
+    processId: string| undefined;
+    deploymentId: string| undefined;
     deployment: V2DeploymentsPreparedModel | null = null;
     deploymentFormGroup!: FormGroup;
     flowList: FlowModel[] = [];
@@ -73,6 +73,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 private deploymentsService: DeploymentsService,
                 private snackBar: MatSnackBar,
                 private router: Router,
+                private route: ActivatedRoute,
                 private deploymentsConfigInitializerService: DeploymentsConfigInitializerService,
                 private flowRepoService: FlowRepoService,
                 private conceptsService: ConceptsService,
@@ -84,7 +85,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     ngOnInit() {
-        if (this.processId !== '') {
+        if (this.processId !== undefined) {
             const s1 = this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').pipe(map(f => this.functions = f));
             const s2 = this.deploymentsService.getPreparedDeployments(this.processId)
                 .pipe(map((deployment: V2DeploymentsPreparedModel | null) => {
@@ -128,9 +129,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                     });
                 });
                 this.ready = true;
-                console.log(this); // TODO
             });
-        } else if (this.deploymentId !== '') {
+        } else if (this.deploymentId !== undefined) {
             this.deploymentsService.v2getDeployments(this.deploymentId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
                 if (deployment) {
                     deployment.id = '';
@@ -319,14 +319,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     private getRouterParams(): void {
-        const navigation: Navigation | null = this.router.getCurrentNavigation();
-        if (navigation !== null) {
-            if (navigation.extras.state !== undefined) {
-                const params = navigation.extras.state as { processId: string, deploymentId: string };
-                this.processId = params.processId;
-                this.deploymentId = params.deploymentId;
-            }
-        }
+        this.processId = this.route.snapshot.queryParams.processId;
+        this.deploymentId = this.route.snapshot.queryParams.deploymentId;
     }
 
     private getOption(element: V2DeploymentsPreparedElementModel, selectionOptionIndex: number): V2DeploymentsPreparedSelectionOptionModel | null {
@@ -427,7 +421,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 return [];
             }
             const key = '' + element.get('message_event.selection.filter_criteria')?.value.function_id
-                + element.get('message_event.selection.selection_options')?.value[idx].import.import_type_id;
+                + element.get('message_event.selection.selection_options')?.value[idx]?.import.import_type_id;
             return this.functionImportTypePathOptions.get(key) || [];
         } else {
             return [];

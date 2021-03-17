@@ -173,7 +173,7 @@ export class DeploymentsConfigInitializerService {
         return this._formBuilder.array(array);
     }
 
-    private  initDeviceSelectionOptionGroup(selectionOption: V2DeploymentsPreparedSelectionOptionModel): FormGroup {
+    private initDeviceSelectionOptionGroup(selectionOption: V2DeploymentsPreparedSelectionOptionModel): FormGroup {
         return this._formBuilder.group({
             device: [selectionOption.device],
             services: selectionOption.services !== null ? this._formBuilder.array(selectionOption.services) : null,
@@ -219,6 +219,9 @@ export class DeploymentsConfigInitializerService {
                 selection.selected_device_group_id &&
                 selection.selected_device_group_id === option.device_group.id
             ) {
+                result = index;
+            }
+            if (option.import && selection.selected_import_id && selection.selected_import_id === option.import.id) {
                 result = index;
             }
         });
