@@ -14,12 +14,12 @@
   ~ limitations under the License.
   -->
 
+<div class="button-header background-color-accent">
+    <button mat-icon-button routerLink="/exports" matTooltip="Back">
+        <mat-icon>arrow_back</mat-icon>
+    </button>
+</div>
 <form [formGroup]="exportForm" (submit)="onSubmit()">
-    <div class="button-header background-color-accent">
-        <button mat-icon-button routerLink="/exports" matTooltip="Back">
-            <mat-icon>arrow_back</mat-icon>
-        </button>
-    </div>
     <div class="main-panel">
         <mat-card class="layout-margin" *ngIf="ready">
             <div fxLayout="column">
