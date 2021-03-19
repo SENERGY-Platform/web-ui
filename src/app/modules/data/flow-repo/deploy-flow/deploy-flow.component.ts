@@ -20,8 +20,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ParseModel} from '../shared/parse.model';
 import {
     DeviceInstancesModel,
-    DeviceSelectablesWithGroupsAndImportsModel,
-    DeviceSelectablesWithGroupsModel
+    DeviceSelectablesFullModel,
 } from '../../../devices/device-instances/shared/device-instances.model';
 import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
 import {
@@ -107,7 +106,7 @@ export class DeployFlowComponent implements OnInit {
     pipelines: PipelineModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     aspectFunctions = new Map<string, DeviceTypeFunctionModel[]>();
-    selectables = new Map<string, DeviceSelectablesWithGroupsModel[]>();
+    selectables = new Map<string, DeviceSelectablesFullModel[]>();
     selectablesCharacteristics = new Map<string, Map<string, CustomSelectable[]>>();
     deviceGroupDevices = new Map<string, string[]>();
     serviceOptions: Map<string, Map<string, Map<string, Map<string, Map<string, { path: string; service_id: string; }[]>>>>> = new Map();
@@ -425,11 +424,11 @@ export class DeployFlowComponent implements OnInit {
             }));
     }
 
-    private loadSelectables(aspect_id: string, function_id: string): Observable<DeviceSelectablesWithGroupsAndImportsModel[]> {
+    private loadSelectables(aspect_id: string, function_id: string): Observable<DeviceSelectablesFullModel[]> {
         if (this.selectables.has(aspect_id + function_id)) {
             return of(this.selectables.get(aspect_id + function_id) || []);
         }
-        return this.deviceInstanceService.getDeviceSelectionsWithGroupsAndImports([{
+        return this.deviceInstanceService.getDeviceSelectionsFull([{
             function_id,
             aspect_id
         }], true).pipe(map(selectables => {

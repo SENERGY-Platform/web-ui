@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ImportInstancesModel} from "../../../imports/import-instances/shared/import-instances.model";
-import {ImportTypePermissionSearchModel} from "../../../imports/import-types/shared/import-types.model";
+import {ImportInstancesModel} from '../../../imports/import-instances/shared/import-instances.model';
+import {ImportTypeModel} from '../../../imports/import-types/shared/import-types.model';
 
 export interface V2DeploymentsPreparedModel {
     id: string;
@@ -106,7 +106,8 @@ export interface V2DeploymentsPreparedSelectionOptionModel {
     services: V2DeploymentsPreparedServiceModel[] | null;
     device_group: V2DeploymentsPreparedGroupModel | null;
     import: ImportInstancesModel | null;
-    importType: ImportTypePermissionSearchModel | null;
+    importType: ImportTypeModel | null;
+    servicePathOptions?: Map<string, {path: string, characteristicId: string}[]>;
 }
 
 export interface V2DeploymentsPreparedServiceModel {

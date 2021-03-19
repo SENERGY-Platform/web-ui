@@ -32,17 +32,6 @@ import {
 } from '../shared/deployments-prepared-v2.model';
 import {FlowRepoService} from '../../../data/flow-repo/shared/flow-repo.service';
 import {FlowModel} from '../../../data/flow-repo/shared/flow.model';
-import {FunctionsPermSearchModel} from '../../../metadata/functions/shared/functions-perm-search.model';
-import {FunctionsService} from '../../../metadata/functions/shared/functions.service';
-import {forkJoin, Observable} from 'rxjs';
-import {ConceptsService} from '../../../metadata/concepts/shared/concepts.service';
-import {
-    DeviceTypeCharacteristicsModel,
-    DeviceTypeContentVariableModel
-} from '../../../metadata/device-types-overview/shared/device-type.model';
-import {map} from 'rxjs/internal/operators';
-import {ImportTypeContentVariableModel, ImportTypeModel} from '../../../imports/import-types/shared/import-types.model';
-import {ImportTypesService} from '../../../imports/import-types/shared/import-types.service';
 
 
 @Component({
@@ -55,17 +44,13 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     @ViewChild('autosize', {static: false}) autosize!: CdkTextareaAutosize;
 
-    processId: string| undefined;
-    deploymentId: string| undefined;
+    processId: string | undefined;
+    deploymentId: string | undefined;
     deployment: V2DeploymentsPreparedModel | null = null;
-    deploymentFormGroup!: FormGroup;
+    deploymentFormGroup = this.deploymentsConfigInitializerService.initFormGroup({} as V2DeploymentsPreparedModel);
     flowList: FlowModel[] = [];
     ready = false;
     optionGroups: Map<number, Map<string, V2DeploymentsPreparedSelectionOptionModel[]>> = new Map();
-    functions: FunctionsPermSearchModel[] = [];
-    functionCharacteristics: Map<string, DeviceTypeCharacteristicsModel[]> = new Map();
-    importTypes: Map<string, ImportTypeModel> = new Map();
-    functionImportTypePathOptions: Map<string, { path: string, characteristicId: string }[]> = new Map();
 
     constructor(private _formBuilder: FormBuilder,
                 private processRepoService: ProcessRepoService,
@@ -76,9 +61,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 private route: ActivatedRoute,
                 private deploymentsConfigInitializerService: DeploymentsConfigInitializerService,
                 private flowRepoService: FlowRepoService,
-                private conceptsService: ConceptsService,
-                private functionsService: FunctionsService,
-                private importTypesService: ImportTypesService,
     ) {
         this.getRouterParams();
         this.getFlows();
@@ -86,50 +68,13 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     ngOnInit() {
         if (this.processId !== undefined) {
-            const s1 = this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').pipe(map(f => this.functions = f));
-            const s2 = this.deploymentsService.getPreparedDeployments(this.processId)
-                .pipe(map((deployment: V2DeploymentsPreparedModel | null) => {
+            this.deploymentsService.getPreparedDeployments(this.processId)
+                .subscribe((deployment: V2DeploymentsPreparedModel | null) => {
                     this.deployment = deployment;
                     this.initOptionGroups(deployment);
                     this.initFormGroup(deployment);
-                }));
-            forkJoin([s1, s2]).subscribe(() => {
-                const subs: Observable<any>[] = [];
-                this.deployment?.elements.forEach(element => {
-                    if (element.message_event?.selection.filter_criteria.function_id !== undefined
-                        && element.message_event.selection.filter_criteria.function_id !== null
-                        && !this.functionCharacteristics.has(element.message_event.selection.filter_criteria.function_id)) {
-                        const functionId = element.message_event?.selection.filter_criteria.function_id;
-                        this.functionCharacteristics.set(functionId, []);
-                        const conceptId = this.functions.find(fu => fu.id === functionId)?.concept_id;
-                        if (conceptId !== undefined) {
-                            subs.push(this.conceptsService.getConceptWithCharacteristics(conceptId)
-                                .pipe(map(concept => this.functionCharacteristics.set(functionId, concept?.characteristics || []))));
-                        }
-                    }
-                    element.message_event?.selection.selection_options?.forEach(o => {
-                        if (o.import !== null && !this.importTypes.has(o.import.import_type_id)) {
-                            const importTypeId = o.import.import_type_id;
-                            this.importTypes.set(importTypeId, {} as ImportTypeModel);
-                            subs.push(this.importTypesService.getImportType(importTypeId).pipe(map(it => {
-                                this.importTypes.set(importTypeId, it);
-                            })));
-                        }
-                    });
+                    this.ready = true;
                 });
-                forkJoin(subs).subscribe(() => {
-                    this.functionCharacteristics.forEach((characteristics, functionId) => {
-                        this.importTypes.forEach((importType, importTypeId) => {
-                            const key = functionId + importTypeId;
-                            if (!this.functionImportTypePathOptions.has(key)) {
-                                this.functionImportTypePathOptions.set(key,
-                                    this.getPathOptionsLocalImport(importType, characteristics.map(c => c.id || '')));
-                            }
-                        });
-                    });
-                });
-                this.ready = true;
-            });
         } else if (this.deploymentId !== undefined) {
             this.deploymentsService.v2getDeployments(this.deploymentId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
                 if (deployment) {
@@ -390,41 +335,53 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
     }
 
-    private getPathOptionsLocalImport(type: ImportTypeModel,
-                                      characteristic_id_filter: string[] = []): { path: string, characteristicId: string }[] {
-        const paths: { path: string, characteristicId: string }[] = [];
-        type.output.sub_content_variables?.forEach(sub => {
-            this.getPathOptionsRecursive('', paths,
-                sub, characteristic_id_filter);
-        });
-        return paths;
-    }
-
-    private getPathOptionsRecursive(parentPath: string, pathArray: { path: string, characteristicId: string }[],
-                                    contentVariable: DeviceTypeContentVariableModel | ImportTypeContentVariableModel,
-                                    characteristic_id_filter: string[]) {
-        const path = (parentPath.length > 0 ? parentPath + '.' : '') + contentVariable.name;
-        if (contentVariable.characteristic_id !== undefined
-            && characteristic_id_filter.findIndex(c => c === contentVariable.characteristic_id) !== -1) {
-            pathArray.push({path, characteristicId: contentVariable.characteristic_id});
-        }
-        contentVariable.sub_content_variables?.forEach((sub: DeviceTypeContentVariableModel | ImportTypeContentVariableModel) =>
-            this.getPathOptionsRecursive(path, pathArray, sub, characteristic_id_filter));
-    }
-
     getPathOptions(elementIndex: number): { path: string, characteristicId: string }[] {
         const element = (this.deploymentFormGroup.get('elements') as FormArray).at(elementIndex);
-        if (element.get('message_event.selection.selected_import_id')?.value !== null
-            && element.get('message_event.selection.selected_import_id')?.value !== undefined) {
-            const idx = element.get('message_event.selection.selection_options_index')?.value;
-            if (idx === undefined) {
-                return [];
-            }
-            const key = '' + element.get('message_event.selection.filter_criteria')?.value.function_id
-                + element.get('message_event.selection.selection_options')?.value[idx]?.import.import_type_id;
-            return this.functionImportTypePathOptions.get(key) || [];
-        } else {
+
+        const selection_options_index = element.get('message_event.selection.selection_options_index')?.value;
+
+        if (selection_options_index === undefined || selection_options_index === null) {
             return [];
         }
+        const selectedOption = (element.get('message_event.selection.selection_options') as FormArray).at(selection_options_index);
+
+        if (selectedOption === undefined || selectedOption === null) {
+            return [];
+        }
+        const selected_service_id = element.get('message_event.selection.selected_service_id')?.value;
+        const importTypeId =  selectedOption.get('importType')?.value?.id;
+
+        let options: { path: string, characteristicId: string }[] = [];
+        if (!(selected_service_id === undefined || selected_service_id === null)) {
+            options = selectedOption.get('servicePathOptions')?.value.get(selected_service_id) || [];
+        }
+        if (!(importTypeId === undefined || importTypeId === null)) {
+            options = selectedOption.get('servicePathOptions')?.value.get(importTypeId) || [];
+        }
+        if (options.length === 0) {
+            element.get('message_event.selection')?.patchValue({
+                selected_path_option: null,
+                selected_path: null,
+                selected_characteristic_id: null,
+            });
+        } else if (options.length === 1)  {
+            element.get('message_event.selection')?.patchValue({
+                selected_path_option: options[0],
+                selected_path: options[0].path,
+                selected_characteristic_id: options[0].characteristicId,
+            });
+        }
+        return options;
+    }
+
+    getServiceOptions(elementIndex: number) {
+        const element = (this.deploymentFormGroup.get('elements') as FormArray).at(elementIndex);
+        const selection_options_index = element.get('message_event.selection.selection_options_index')?.value;
+        const selectedOption = (element?.get('message_event.selection.selection_options') as FormArray).at(selection_options_index);
+        const options = selectedOption?.get('services')?.value || [];
+        if (options.length === 0) {
+            element.get('message_event.selection')?.patchValue({selected_service_id: null});
+        }
+        return options;
     }
 }

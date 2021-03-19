@@ -77,7 +77,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -92,7 +93,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -107,7 +109,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selected_device_id': null,
@@ -170,7 +173,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -185,7 +189,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -200,7 +205,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selected_device_id': null,
@@ -259,7 +265,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -274,7 +281,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -289,7 +297,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selected_device_id': null,
@@ -348,7 +357,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -363,7 +373,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -378,7 +389,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selection_options_index': -1,
@@ -444,7 +456,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -459,7 +472,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -474,7 +488,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selection_options_index': -1,
@@ -536,7 +551,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -551,7 +567,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -566,7 +583,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                     ],
                                     'device_group': null,
                                     'import': null,
-                                    'importType': null
+                                    'importType': null,
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selection_options_index': -1,
@@ -643,7 +661,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                         }],
                                     device_group: null,
                                     import: null,
-                                    importType: null
+                                    importType: null,
+                                    servicePathOptions: new Map(),
                                 }]
                         }
                     },
@@ -702,7 +721,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                         }],
                                     device_group: null,
                                     import: null,
-                                    importType: null
+                                    importType: null,
+                                    servicePathOptions: new Map(),
                                 }]
                         }
                     },

@@ -20,14 +20,12 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, share} from 'rxjs/internal/operators';
 import {
-    DeviceInstancesModel,
     DeviceFilterCriteriaModel,
-    DeviceSelectablesModel,
     DeviceInstancesBaseModel,
-    DeviceSelectablesWithGroupsModel,
+    DeviceInstancesModel,
     DeviceInstancesPermSearchModel,
-    DeviceSelectablesWithImportsModel,
-    DeviceSelectablesWithGroupsAndImportsModel
+    DeviceSelectablesFullModel,
+    DeviceSelectablesModel
 } from './device-instances.model';
 import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel} from './device-instances-history.model';
@@ -193,34 +191,31 @@ export class DeviceInstancesService {
 
     }
 
-    getDeviceSelectionsWithGroups(criteria: DeviceFilterCriteriaModel[], completeServices: boolean,
-                                  protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined)
-        : Observable<DeviceSelectablesWithGroupsModel[]> {
+    getDeviceSelectionsFull(criteria: DeviceFilterCriteriaModel[], completeServices: boolean,
+                            protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined)
+        : Observable<DeviceSelectablesFullModel[]> {
 
         return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter,
-            true) as Observable<DeviceSelectablesWithGroupsModel[]>;
-    }
-
-    getDeviceSelectionsWithImports(criteria: DeviceFilterCriteriaModel[], completeServices: boolean,
-                                  protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined)
-        : Observable<DeviceSelectablesWithImportsModel[]> {
-
-        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter,
-            false, true) as Observable<DeviceSelectablesWithImportsModel[]>;
-    }
-
-    getDeviceSelectionsWithGroupsAndImports(criteria: DeviceFilterCriteriaModel[], completeServices: boolean,
-                                   protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined)
-        : Observable<DeviceSelectablesWithGroupsAndImportsModel[]> {
-
-        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter,
-            true, true) as Observable<DeviceSelectablesWithGroupsAndImportsModel[]>;
+            true, true).pipe(map((selectables) => {
+                selectables = selectables as DeviceSelectablesFullModel[];
+                selectables.forEach((s: any) => {
+                    if (s.servicePathOptions === undefined) {
+                        return;
+                    }
+                    const m = new Map<string, {path: string, characteristicId: string}[]>();
+                    for (const key of Object.keys(s.servicePathOptions)) {
+                        m.set(key, s.servicePathOptions[key]);
+                    }
+                    s.servicePathOptions = m;
+                });
+                return selectables;
+        }));
     }
 
     private getDeviceSelectionsInternal(criteria: DeviceFilterCriteriaModel[], completeServices: boolean,
                                         protocolBlocklist ?: string[] | null | undefined, interactionFilter ?: string | null | undefined,
                                         includeGroups?: boolean, includeImports?: boolean)
-        : Observable<DeviceSelectablesWithGroupsModel[] | DeviceSelectablesModel[]> {
+        : Observable<DeviceSelectablesFullModel[] | DeviceSelectablesModel[]> {
 
         let path = '/selectables';
         if (completeServices) {

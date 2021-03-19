@@ -25,10 +25,7 @@ import {CamundaVariable, DeploymentsDefinitionModel} from './deployments-definit
 import {DeploymentsMissingDependenciesModel} from './deployments-missing-dependencies.model';
 import {DeploymentsPreparedModel} from './deployments-prepared.model';
 import {V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
-import {DashboardModel} from '../../../dashboard/shared/dashboard.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardEditDialogComponent} from '../../../dashboard/dialogs/dashboard-edit-dialog.component';
-import {DashboardManipulationEnum} from '../../../dashboard/shared/dashboard-manipulation.enum';
+import {MatDialog} from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root'
@@ -142,7 +139,22 @@ export class DeploymentsService {
 
     getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null> {
         return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/prepared-deployments/' + processId).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null))
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null)),
+            map(deployment => {
+                deployment?.elements.forEach(element => {
+                    element.message_event?.selection.selection_options.forEach((option: any) => {
+                        if (option.servicePathOptions === undefined) {
+                            return;
+                        }
+                        const m = new Map<string, {path: string, characteristicId: string}[]>();
+                        for (const key of Object.keys(option.servicePathOptions)) {
+                            m.set(key, option.servicePathOptions[key]);
+                        }
+                        option.servicePathOptions = m;
+                    });
+                });
+                return deployment;
+            })
         );
     }
 

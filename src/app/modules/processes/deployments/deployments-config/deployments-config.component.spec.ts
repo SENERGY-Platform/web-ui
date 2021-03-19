@@ -122,6 +122,12 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                 device_group: null,
                                 import: null,
                                 importType: null,
+                                servicePathOptions: {
+                                   'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9': [{
+                                       path: 'value.root.value',
+                                       characteristicId: 'testCharacteristic'
+                                   }]
+                                },
                             },
                             {
                                 device: {
@@ -139,6 +145,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                 device_group: null,
                                 import: null,
                                 importType: null,
+                                servicePathOptions: null,
                             }
 
                         ]
@@ -205,6 +212,12 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                 device_group: null,
                                 import: null,
                                 importType: null,
+                                servicePathOptions: {
+                                    'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9': [{
+                                        path: 'value.root.value',
+                                        characteristicId: 'testCharacteristic'
+                                    }]
+                                },
                             },
                             {
                                 device: {
@@ -222,6 +235,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                 device_group: null,
                                 import: null,
                                 importType: null,
+                                servicePathOptions: null,
                             }
                         ]
                     },
@@ -283,6 +297,12 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                 device_group: null,
                                 import: null,
                                 importType: null,
+                                servicePathOptions: {
+                                    'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9': [{
+                                        path: 'value.root.value',
+                                        characteristicId: 'testCharacteristic'
+                                    }]
+                                },
                             },
                             {
                                 device: {
@@ -300,6 +320,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                 device_group: null,
                                 import: null,
                                 importType: null,
+                                servicePathOptions: null,
                             }
                         ]
                     },
@@ -353,7 +374,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -366,7 +388,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -379,7 +402,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selected_device_id': null,
@@ -440,7 +464,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -453,7 +478,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -466,7 +492,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selected_device_id': null,
@@ -523,7 +550,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -536,7 +564,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -549,7 +578,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selected_device_id': null,
@@ -626,6 +656,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -641,6 +672,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -656,6 +688,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 }
                             ],
                             selected_device_id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
@@ -722,6 +755,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -737,6 +771,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -752,6 +787,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 }
                             ],
                             selected_device_id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
@@ -814,6 +850,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -829,6 +866,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -844,6 +882,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 }
                             ],
                             selected_device_id: 'urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2',
@@ -907,7 +946,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -920,7 +960,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -933,7 +974,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOnService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': null,
@@ -941,7 +983,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     'device_group': {
                                         'id': 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                                         'name': 'group1'
-                                    }
+                                    },
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selected_device_id': null,
@@ -1002,7 +1045,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -1015,7 +1059,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -1028,7 +1073,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setColorService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': null,
@@ -1036,7 +1082,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     'device_group': {
                                         'id': 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                                         'name': 'group1'
-                                    }
+                                    },
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selected_device_id': null,
@@ -1093,7 +1140,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -1106,7 +1154,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': {
@@ -1119,7 +1168,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                             'name': 'setOffService'
                                         }
                                     ],
-                                    'device_group': null
+                                    'device_group': null,
+                                    'servicePathOptions': null,
                                 },
                                 {
                                     'device': null,
@@ -1127,7 +1177,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     'device_group': {
                                         'id': 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                                         'name': 'group1'
-                                    }
+                                    },
+                                    'servicePathOptions': null,
                                 }
                             ],
                             'selected_device_id': null,
@@ -1199,6 +1250,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -1214,6 +1266,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -1229,6 +1282,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: null,
@@ -1239,6 +1293,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     },
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 }
                             ],
                             selected_device_id: null,
@@ -1305,6 +1360,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -1320,6 +1376,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -1335,6 +1392,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: null,
@@ -1345,6 +1403,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     },
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 }
                             ],
                             selected_device_id: null,
@@ -1407,6 +1466,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -1422,6 +1482,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: {
@@ -1437,6 +1498,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     device_group: null,
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 },
                                 {
                                     device: null,
@@ -1447,6 +1509,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                                     },
                                     import: null,
                                     importType: null,
+                                    servicePathOptions: null,
                                 }
                             ],
                             selected_device_id: null,

@@ -19,8 +19,8 @@ import {
     PermissionsModel
 } from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import {DeviceTypeServiceModel} from '../../../metadata/device-types-overview/shared/device-type.model';
-import {ImportInstancesModel} from "../../../imports/import-instances/shared/import-instances.model";
-import {ImportTypeModel} from "../../../imports/import-types/shared/import-types.model";
+import {ImportInstancesModel} from '../../../imports/import-instances/shared/import-instances.model';
+import {ImportTypeModel} from '../../../imports/import-types/shared/import-types.model';
 
 export interface DeviceInstancesBaseModel {
     id: string;
@@ -54,23 +54,7 @@ export interface DeviceSelectablesModel {
     services: DeviceTypeServiceModel[];
 }
 
-export interface DeviceSelectablesWithGroupsModel {
-    device?: DeviceInstancesPermSearchModel;
-    services?: DeviceTypeServiceModel[];
-    device_group?: {
-        id: string;
-        name: string;
-    };
-}
-
-export interface DeviceSelectablesWithImportsModel {
-    device?: DeviceInstancesPermSearchModel;
-    services?: DeviceTypeServiceModel[];
-    import?: ImportInstancesModel;
-    importType?: ImportTypeModel;
-}
-
-export interface DeviceSelectablesWithGroupsAndImportsModel {
+export interface DeviceSelectablesFullModel {
     device?: DeviceInstancesPermSearchModel;
     services?: DeviceTypeServiceModel[];
     import?: ImportInstancesModel;
@@ -79,4 +63,5 @@ export interface DeviceSelectablesWithGroupsAndImportsModel {
         id: string;
         name: string;
     };
+    servicePathOptions?: Map<string, {path: string, characteristicId: string}>;
 }

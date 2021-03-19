@@ -93,10 +93,11 @@
                                         </mat-form-field>
 
                                         <mat-form-field class="full-width" color="accent"
-                                                        *ngIf="element.message_event.selection.show === true">
+                                                        [fxShow]="element.message_event.selection.show === true">
                                             <senergy-select-search placeholder="Service" [required]="true"
                                                                    formControlName="selected_service_id"
-                                                                   [options]="element.message_event.selection.selection_options[element.message_event.selection.selection_options_index || 0].services || []"
+                                                                   [autoSelectSingleElement]="true"
+                                                                   [options]="getServiceOptions(elementIndex)"
                                                                    useOptionViewProperty="name"
                                                                    useOptionValueProperty="id">
                                             </senergy-select-search>

@@ -146,8 +146,11 @@ export class DeploymentsConfigInitializerService {
             selected_characteristic_id: [{value: selection.selected_characteristic_id, disabled: disable}],
             show: false
         });
-        group.get('selected_path_option')?.valueChanges.subscribe((option: { path: string, characteristicId: string }) =>
-            group.patchValue({selected_path: option.path, selected_characteristic_id: option.characteristicId})
+        group.get('selected_path_option')?.valueChanges.subscribe((option: { path: string, characteristicId: string } | null) => {
+                if (option !== null) {
+                    group.patchValue({selected_path: option.path, selected_characteristic_id: option.characteristicId});
+                }
+            }
         );
         return group;
     }
@@ -180,6 +183,7 @@ export class DeploymentsConfigInitializerService {
             device_group: [selectionOption.device_group],
             import: selectionOption.import,
             importType: selectionOption.importType,
+            servicePathOptions: selectionOption.servicePathOptions
         });
     }
 
