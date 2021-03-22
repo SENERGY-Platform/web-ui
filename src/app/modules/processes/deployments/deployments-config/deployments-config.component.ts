@@ -113,7 +113,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             if (element.task?.selection?.selection_options !== undefined) {
                 element.task.selection.selection_options = [];
             }
-            delete (element.task?.selection as any).selected_path_option;
+            delete (element.task?.selection as any)?.selected_path_option;
         });
         this.deploymentsService.v2postDeployments(raw).subscribe((resp: { status: number }) => {
             if (resp.status === 200) {
