@@ -17,7 +17,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../../../environments/environment';
-import {Observable, timer} from 'rxjs';
+import {Observable, of, timer} from 'rxjs';
 import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {DeploymentsModel} from './deployments.model';
@@ -97,6 +97,75 @@ export class DeploymentsFogService {
     getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null> {
         return this.http.get<V2DeploymentsPreparedConfigurableModel[]>(environment.configurablesUrl + '?characteristicId=' + characteristicId + '&serviceIds=' + serviceId).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getConfigurables', null))
+        );
+    }
+
+    // lists
+
+    getAll(query: string, limit: number, offset: number, feature: string, order: string, _: string): Observable<DeploymentsModel[]> {
+        let url = environment.processSyncUrl +
+            '/deployments?sort=' + feature + '.' + order +
+            '&limit=' + limit +
+            '&offset=' + offset +
+            '&network_id=' + encodeURIComponent(this.hubId);
+
+        if (query) {
+            url += '&search=' + encodeURIComponent(query);
+        }
+        return this.http.get<DeploymentsModel[]>(url).pipe(
+            map(resp => resp || []),
+            map(list => list.map(element => {
+                element.online = true;
+                return element;
+            })),
+            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getAll', []))
+        );
+    }
+
+    checkForDeletedDeploymentWithRetries(_: string, __: number, ___: number): Observable<boolean> {
+        return of(true);
+    }
+
+    getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable>|null> {
+        const url = environment.processSyncUrl + '/deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(deploymentId) + '/metadata';
+        return this.http.get<DeploymentsFogMetadataModel>(url).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getDeploymentInputParameters', null)),
+            map(metadata => {
+                if (!metadata) {
+                    return metadata;
+                }
+                return metadata.process_parameter;
+            })
+        );
+    }
+
+    startDeploymentWithParameter(deploymentId: string, parameter: Map<string, CamundaVariable>): Observable<any | null> {
+        const queryParts: string[] = [];
+        parameter.forEach((value, key) => {
+            queryParts.push(key + '=' + encodeURIComponent(JSON.stringify(value.value)));
+        });
+        return this.http.get<any>(environment.processSyncUrl + '/deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(deploymentId) +
+            '/start?' + queryParts.join('&')).pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'startDeploymentWithParameter', null))
+        );
+    }
+
+    startDeployment(deploymentId: string): Observable<any | null> {
+        return this.http.get<any>(environment.processSyncUrl + '/deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(deploymentId) + '/start').pipe(
+            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'startDeployment', null))
+        );
+    }
+
+
+    v2deleteDeployment(deploymentId: string): Observable<{ status: number }> {
+        return this.http.delete(environment.processSyncUrl + '/deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(deploymentId), {
+            responseType: 'text',
+            observe: 'response'
+        }).pipe(
+            map(resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'v2deleteDeployment', {status: 500}))
         );
     }
 }

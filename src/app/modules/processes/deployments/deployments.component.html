@@ -23,6 +23,13 @@
                     *ngIf="selectedItems.length > 0 && ready">
                 <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn">delete</mat-icon>
             </button>
+            <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment" color="accent">
+                <mat-icon>device_hub</mat-icon>
+            </button>
+            <mat-menu #deploymentEnvironment="matMenu">
+                <button mat-menu-item (click)="selectHub(null)">Senergy-Platform</button>
+                <button mat-menu-item *ngFor="let hub of hubList" (click)="selectHub(hub)">{{hub.name}}</button>
+            </mat-menu>
             <button matTooltip="show generated" mat-icon-button color="accent" (click)="filterItems(true)" *ngIf="!this.showGenerated">
                 <mat-icon>visibility</mat-icon>
             </button>

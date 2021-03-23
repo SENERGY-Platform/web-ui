@@ -19,6 +19,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DeploymentsService} from '../shared/deployments.service';
 import {CamundaVariable} from '../shared/deployments-definition.model';
 import {HttpErrorResponse} from '@angular/common/http';
+import {Observable} from 'rxjs';
 
 @Component({
     templateUrl: './deployments-start-parameter-dialog.component.html',
@@ -32,9 +33,19 @@ export class DeploymentsStartParameterDialogComponent {
 
     starting = false;
 
+    deploymentsService: {
+        startDeploymentWithParameter(deploymentId: string, parameter: Map<string, CamundaVariable>): Observable<any | null>
+    };
+
     constructor(private dialogRef: MatDialogRef<DeploymentsStartParameterDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                @Inject(MAT_DIALOG_DATA) data: { deploymentId: string, parameter: Map<string, CamundaVariable> }) {
+                @Inject(MAT_DIALOG_DATA) data: {
+                    deploymentId: string,
+                    parameter: Map<string, CamundaVariable>,
+                    deploymentService: {
+                        startDeploymentWithParameter(deploymentId: string, parameter: Map<string, CamundaVariable>): Observable<any | null>
+                    }
+                }) {
+        this.deploymentsService = data.deploymentService;
         this.parameter = data.parameter;
         this.deploymentId = data.deploymentId;
         this.err = null;

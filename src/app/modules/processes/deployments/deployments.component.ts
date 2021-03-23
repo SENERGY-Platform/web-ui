@@ -33,6 +33,9 @@ import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {CamundaVariable} from './shared/deployments-definition.model';
 import {DeploymentsStartParameterDialogComponent} from './dialogs/deployments-start-parameter-dialog.component';
+import {DeploymentsFogFactory} from './shared/deployments-fog.service';
+import {HubModel, NetworksModel} from '../../devices/networks/shared/networks.model';
+import {NetworksService} from '../../devices/networks/shared/networks.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -68,23 +71,39 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     showGenerated = false;
     selectedItems: DeploymentsModel[] = [];
     rowHeight = 282;
+    hubList: NetworksModel[] = [];
+
+    deploymentsService: {
+        getAll(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]>
+        checkForDeletedDeploymentWithRetries(id: string, maxRetries: number, intervalInMs: number): Observable<boolean>
+        getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable>|null>
+        startDeployment(deploymentId: string): Observable<any | null>
+        v2deleteDeployment(deploymentId: string): Observable<{ status: number }>
+    };
 
     @ViewChild('mainPanel', {static: false}) mainPanel!: ElementRef;
 
     constructor(private sanitizer: DomSanitizer,
                 private utilService: UtilService,
                 private searchbarService: SearchbarService,
-                private deploymentsService: DeploymentsService,
+                private platformDeploymentsService: DeploymentsService,
                 private responsiveService: ResponsiveService,
                 private snackBar: MatSnackBar,
                 private clipboardService: ClipboardService,
                 private router: Router,
                 private dialogsService: DialogsService,
                 private dialog: MatDialog,
-                private _formBuilder: FormBuilder) {
+                private fogDeploymentsFactory: DeploymentsFogFactory,
+                private _formBuilder: FormBuilder,
+                private hubsService: NetworksService
+    ) {
+        this.deploymentsService = platformDeploymentsService;
     }
 
     ngOnInit() {
+        this.hubsService.listNetworks(100, 0 , 'name', 'asc').subscribe(result => {
+            this.hubList = result;
+        });
         this.initGridCols();
     }
 
@@ -112,6 +131,15 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.getRepoItems(true);
     }
 
+    selectHub(hub: NetworksModel | null) {
+        if (hub) {
+            this.deploymentsService = this.fogDeploymentsFactory.withHubId(hub.id);
+        } else {
+            this.deploymentsService = this.platformDeploymentsService;
+        }
+        this.getRepoItems(true);
+    }
+
     run(deploymentId: string): void {
         this.deploymentsService.getDeploymentInputParameters(deploymentId).subscribe((parameter) => {
             if (parameter && parameter.size) {
@@ -132,6 +160,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
+            deploymentService: this.deploymentsService,
             deploymentId: deploymentId,
             parameter: parameter
         };
