@@ -32,6 +32,10 @@ import {
 } from '../shared/deployments-prepared-v2.model';
 import {FlowRepoService} from '../../../data/flow-repo/shared/flow-repo.service';
 import {FlowModel} from '../../../data/flow-repo/shared/flow.model';
+import {Observable} from 'rxjs';
+import {DeploymentsFogFactory} from '../shared/deployments-fog.service';
+import {HubModel, NetworksModel} from '../../../devices/networks/shared/networks.model';
+import {NetworksService} from '../../../devices/networks/shared/networks.service';
 
 
 @Component({
@@ -51,22 +55,50 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     flowList: FlowModel[] = [];
     ready = false;
     optionGroups: Map<number, Map<string, V2DeploymentsPreparedSelectionOptionModel[]>> = new Map();
+    deploymentsService: {
+        getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null>
+        v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null>
+        v2postDeployments(deployment: V2DeploymentsPreparedModel): Observable<{ status: number, id: string }>
+        getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null>
+    };
+    selectedHubForm: FormControl = new FormControl(null);
+    hubList: NetworksModel[] = [];
 
     constructor(private _formBuilder: FormBuilder,
                 private processRepoService: ProcessRepoService,
                 private utilService: UtilService,
-                private deploymentsService: DeploymentsService,
+                private platformDeploymentsService: DeploymentsService,
                 private snackBar: MatSnackBar,
                 private router: Router,
                 private route: ActivatedRoute,
                 private deploymentsConfigInitializerService: DeploymentsConfigInitializerService,
                 private flowRepoService: FlowRepoService,
+                private deploymentFogFactory: DeploymentsFogFactory,
+                private hubsService: NetworksService
     ) {
         this.getRouterParams();
         this.getFlows();
+        this.deploymentsService = platformDeploymentsService;
     }
 
     ngOnInit() {
+        this.hubsService.listNetworks(100, 0 , 'name', 'asc').subscribe(result => {
+            this.hubList.push({id: '', name: 'Platform', device_local_ids: null, log_state: true});
+            this.hubList.push(...result);
+        });
+        this.setDeployment();
+        this.selectedHubForm.valueChanges.subscribe((value: HubModel) => {
+            if (value && value.id && value.id !== '') {
+                this.deploymentsService = this.deploymentFogFactory.withHubId(value.id);
+            } else {
+                this.deploymentsService = this.platformDeploymentsService;
+            }
+            this.setDeployment();
+        });
+    }
+
+    setDeployment() {
+        this.ready = false;
         if (this.processId !== undefined) {
             this.deploymentsService.getPreparedDeployments(this.processId)
                 .subscribe((deployment: V2DeploymentsPreparedModel | null) => {

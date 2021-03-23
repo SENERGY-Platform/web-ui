@@ -82,6 +82,8 @@ export const environment = {
   importTypeIdUbaStation: '${process.env.IMPORT_TYPE_ID_UBA_STATIONS}',
   importTypeIdDwdPollen: '${process.env.IMPORT_TYPE_ID_DWD_POLLEN}',
   importTypeIdYrForecast: '${process.env.IMPORT_TYPE_ID_YR_FORECAST}',
+  processFogDeploymentUrl: '${process.env.PROCESS_FOG_DEPLOYMENT_URL}',
+  processSyncUrl: '${process.env.PROCESS_SYNC_URL}',
 };
 `;
 
