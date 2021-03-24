@@ -36,6 +36,7 @@ import {DeploymentsStartParameterDialogComponent} from './dialogs/deployments-st
 import {DeploymentsFogFactory} from './shared/deployments-fog.service';
 import {HubModel, NetworksModel} from '../../devices/networks/shared/networks.model';
 import {NetworksService} from '../../devices/networks/shared/networks.service';
+import {DeploymentsFogModel} from './shared/deployments-fog.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -72,6 +73,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     selectedItems: DeploymentsModel[] = [];
     rowHeight = 282;
     hubList: NetworksModel[] = [];
+    hub: NetworksModel | undefined | null;
 
     deploymentsService: {
         getAll(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]>
@@ -132,6 +134,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     selectHub(hub: NetworksModel | null) {
+        this.hub = hub;
         if (hub) {
             this.deploymentsService = this.fogDeploymentsFactory.withHubId(hub.id);
         } else {
@@ -173,7 +176,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     navigateToMonitorSection(deployment: DeploymentsModel, activeTab: number) {
-        this.router.navigateByUrl('/processes/monitor', {state: {deployment: deployment, activeTab: activeTab}});
+        this.router.navigateByUrl('/processes/monitor', {state: {deployment: deployment, activeTab: activeTab, hub: this.hub}});
     }
 
     deleteDeployment(deployment: DeploymentsModel): void {

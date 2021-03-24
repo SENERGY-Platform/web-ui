@@ -110,6 +110,10 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         } else {
             this.monitorService = this.plattformMonitorService;
         }
+    }
+
+    selectHubWithReload(hub: NetworksModel | null) {
+        this.selectHub(hub);
         this.reload();
     }
 
@@ -275,9 +279,12 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         const navigation: Navigation | null = this.router.getCurrentNavigation();
         if (navigation !== null) {
             if (navigation.extras.state !== undefined) {
-                const params = navigation.extras.state as {deployment: DeploymentsModel, activeTab: number};
+                const params = navigation.extras.state as {deployment: DeploymentsModel, activeTab: number, hub?: NetworksModel};
                 this.selectedDeployment = params.deployment;
                 this.activeIndex = params.activeTab;
+                if (params.hub) {
+                    this.selectHub(params.hub);
+                }
             }
         }
     }
