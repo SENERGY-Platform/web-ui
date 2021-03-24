@@ -107,7 +107,8 @@ export class DeploymentsFogService {
             '/deployments?sort=' + feature + '.' + order +
             '&limit=' + limit +
             '&offset=' + offset +
-            '&network_id=' + encodeURIComponent(this.hubId);
+            '&network_id=' + encodeURIComponent(this.hubId) +
+            '&extended=true';
 
         if (query) {
             url += '&search=' + encodeURIComponent(query);
