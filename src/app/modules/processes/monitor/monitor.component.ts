@@ -17,7 +17,7 @@
 import {map, startWith, switchMap} from 'rxjs/operators';
 
 import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {merge, Subscription} from 'rxjs';
+import {merge, Observable, Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {MonitorService} from './shared/monitor.service';
 import {MonitorProcessModel} from './shared/monitor-process.model';
@@ -29,6 +29,9 @@ import {DeploymentsModel} from '../deployments/shared/deployments.model';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
+import {NetworksService} from '../../devices/networks/shared/networks.service';
+import {NetworksModel} from '../../devices/networks/shared/networks.model';
+import {MonitorFogFactory, MonitorFogService} from './shared/monitor-fog.service';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -63,14 +66,30 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     private reloadFinishedSub: EventEmitter<boolean> = new EventEmitter();
     private reloadRunningSub: EventEmitter<boolean> = new EventEmitter();
 
+    hubList: NetworksModel[] = [];
+
+    private monitorService: {
+        deleteInstances(id: string): Observable<string>
+        deleteMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]>
+        stopInstances(id: string): Observable<string>
+        getFilteredHistoryInstances(filter: string, searchtype: string, searchvalue: string, limit: number, offset: number, value: string, order: string): Observable<MonitorProcessTotalModel>
+        openDetailsDialog(id: string): void
+    };
+
     constructor(private searchbarService: SearchbarService,
-                private monitorService: MonitorService,
+                private plattformMonitorService: MonitorService,
                 private dialogsService: DialogsService,
-                private router: Router) {
+                private router: Router,
+                private hubsService: NetworksService,
+                private fogMonitorFactory: MonitorFogFactory) {
+        this.monitorService = plattformMonitorService;
         this.getRouterParams();
     }
 
     ngOnInit() {
+        this.hubsService.listNetworks(100, 0 , 'name', 'asc').subscribe(result => {
+            this.hubList = result;
+        });
         this.initSearch();
     }
 
@@ -83,6 +102,15 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         this.searchSub.unsubscribe();
         this.finishedSub.unsubscribe();
         this.runningSub.unsubscribe();
+    }
+
+    selectHub(hub: NetworksModel | null) {
+        if (hub) {
+            this.monitorService = this.fogMonitorFactory.withHubId(hub.id);
+        } else {
+            this.monitorService = this.plattformMonitorService;
+        }
+        this.reload();
     }
 
     isAllSelected() {

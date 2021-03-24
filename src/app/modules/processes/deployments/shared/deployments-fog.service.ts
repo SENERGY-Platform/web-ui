@@ -17,13 +17,11 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../../../environments/environment';
-import {Observable, of, timer} from 'rxjs';
-import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
+import {Observable, of} from 'rxjs';
+import {catchError, map} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {DeploymentsModel} from './deployments.model';
-import {CamundaVariable, DeploymentsDefinitionModel} from './deployments-definition.model';
-import {DeploymentsMissingDependenciesModel} from './deployments-missing-dependencies.model';
-import {DeploymentsPreparedModel} from './deployments-prepared.model';
+import {CamundaVariable} from './deployments-definition.model';
 import {V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
 import {MatDialog} from '@angular/material/dialog';
 import {DeploymentsFogMetadataModel, DeploymentsFogModel} from './deployments-fog.model';

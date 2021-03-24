@@ -23,6 +23,13 @@
                 <senergy-searchbar fxFlex [searchTextIn]="searchText" [disable]="selectedDeployment !== null"></senergy-searchbar>
                 <div fxLayout="row">
                     <div fxFlex></div>
+                    <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment" color="accent">
+                        <mat-icon>device_hub</mat-icon>
+                    </button>
+                    <mat-menu #deploymentEnvironment="matMenu">
+                        <button mat-menu-item (click)="selectHub(null)">Senergy-Platform</button>
+                        <button mat-menu-item *ngFor="let hub of hubList" (click)="selectHub(hub)">{{hub.name}}</button>
+                    </mat-menu>
                     <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
                         <mat-chip [removable]="true" (removed)="removeChip()" color="accent"
                                   selected>{{selectedDeployment.name}}
@@ -77,6 +84,13 @@
                 <senergy-searchbar fxFlex [searchTextIn]="searchText" [disable]="selectedDeployment !== null"></senergy-searchbar>
                 <div fxLayout="row">
                     <div fxFlex></div>
+                    <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment" color="accent">
+                        <mat-icon>device_hub</mat-icon>
+                    </button>
+                    <mat-menu #deploymentEnvironment="matMenu">
+                        <button mat-menu-item (click)="selectHub(null)">Senergy-Platform</button>
+                        <button mat-menu-item *ngFor="let hub of hubList" (click)="selectHub(hub)">{{hub.name}}</button>
+                    </mat-menu>
                     <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
                         <mat-chip [removable]="true" (removed)="removeChip()" color="accent"
                                   selected>{{selectedDeployment.name}}
