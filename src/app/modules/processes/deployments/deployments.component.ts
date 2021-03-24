@@ -329,6 +329,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                     offline_reasons: repoItem.offline_reasons,
                     online: repoItem.online,
                     image: this.provideImg(repoItem.diagram),
+                    sync: repoItem.sync,
                     selected: false,
                 }
             ));

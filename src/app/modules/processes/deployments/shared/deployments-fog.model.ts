@@ -17,9 +17,12 @@
 import {SyncModel} from '../../sync/shared/process-sync.model';
 import {CamundaVariable} from './deployments-definition.model';
 import {V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
+import {DeploymentsModel} from './deployments.model';
 
 export interface DeploymentsFogMetadataModel extends SyncModel {
     camunda_deployment_id: string;
     process_parameter: Map<string, CamundaVariable>;
     deployment_model: V2DeploymentsPreparedModel;
 }
+
+export interface DeploymentsFogModel extends DeploymentsModel, SyncModel {}

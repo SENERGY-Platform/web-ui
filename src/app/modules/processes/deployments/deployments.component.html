@@ -73,7 +73,9 @@
                                         <mat-icon>warning</mat-icon>
                                     </button>
                                     <div fxFlex></div>
-                                    <button mat-icon-button matTooltip="Run" color="accent"
+                                    <mat-icon *ngIf="item.value.sync" color="warn" class="icon-spin" matTooltip="waiting for sync with hub">sync</mat-icon>
+                                    <button *ngIf="!item.value.sync"
+                                            mat-icon-button matTooltip="Run" color="accent"
                                             (click)="run(item.value.id)">
                                         <mat-icon>play_arrow</mat-icon>
                                     </button>

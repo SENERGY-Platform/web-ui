@@ -26,7 +26,7 @@ import {DeploymentsMissingDependenciesModel} from './deployments-missing-depende
 import {DeploymentsPreparedModel} from './deployments-prepared.model';
 import {V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
 import {MatDialog} from '@angular/material/dialog';
-import {DeploymentsFogMetadataModel} from './deployments-fog.model';
+import {DeploymentsFogMetadataModel, DeploymentsFogModel} from './deployments-fog.model';
 
 @Injectable({
     providedIn: 'root'
@@ -113,10 +113,11 @@ export class DeploymentsFogService {
         if (query) {
             url += '&search=' + encodeURIComponent(query);
         }
-        return this.http.get<DeploymentsModel[]>(url).pipe(
+        return this.http.get<DeploymentsFogModel[]>(url).pipe(
             map(resp => resp || []),
             map(list => list.map(element => {
                 element.online = true;
+                element.sync = element.is_placeholder || element.marked_for_delete;
                 return element;
             })),
             catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getAll', []))
