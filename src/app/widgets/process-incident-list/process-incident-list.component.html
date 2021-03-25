@@ -25,7 +25,7 @@
                             (click)="navigateToMonitorSection(incident)">
                         <mat-icon class="fix-position">warnings</mat-icon>
                     </button>
-                    <h4 mat-line class="drag-handler">{{incident.deployment_name}}</h4>
+                    <h4 mat-line class="drag-handler" [matTooltip]="incident.error_message">{{incident.deployment_name}}</h4>
                     <p mat-line class="drag-handler"> {{incident.time | date:'dd.MM.yyyy, HH:mm'}} </p>
                 </mat-list-item>
             </mat-list>
