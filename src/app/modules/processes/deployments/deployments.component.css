@@ -112,3 +112,7 @@ mat-grid-list {
         transform: rotate(-359deg);
     }
 }
+
+.hub-selected {
+    background: rgba(0,0,0,.06);
+}

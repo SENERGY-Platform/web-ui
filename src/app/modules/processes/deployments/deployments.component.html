@@ -27,8 +27,8 @@
                 <mat-icon>device_hub</mat-icon>
             </button>
             <mat-menu #deploymentEnvironment="matMenu">
-                <button mat-menu-item (click)="selectHub(null)">Senergy-Platform</button>
-                <button mat-menu-item *ngFor="let hub of hubList" (click)="selectHub(hub)">{{hub.name}}</button>
+                <button mat-menu-item [ngClass]="{'hub-selected': !hub}" (click)="selectHub(null)">Senergy-Platform</button>
+                <button mat-menu-item *ngFor="let h of hubList" [ngClass]="{'hub-selected': hub?.id === h.id}" (click)="selectHub(h)">{{h.name}}</button>
             </mat-menu>
             <button matTooltip="show generated" mat-icon-button color="accent" (click)="filterItems(true)" *ngIf="!this.showGenerated">
                 <mat-icon>visibility</mat-icon>

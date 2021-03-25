@@ -67,6 +67,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     private reloadRunningSub: EventEmitter<boolean> = new EventEmitter();
 
     hubList: NetworksModel[] = [];
+    hub: NetworksModel | undefined | null;
 
     private monitorService: {
         deleteInstances(id: string): Observable<string>
@@ -105,6 +106,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     selectHub(hub: NetworksModel | null) {
+        this.hub = hub;
         if (hub) {
             this.monitorService = this.fogMonitorFactory.withHubId(hub.id);
         } else {

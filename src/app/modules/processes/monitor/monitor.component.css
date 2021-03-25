@@ -43,3 +43,7 @@ table {
 .offset {
     margin-right: 8px;
 }
+
+.hub-selected {
+    background: rgba(0,0,0,.06);
+}
