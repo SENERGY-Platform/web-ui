@@ -52,6 +52,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatTreeModule} from '@angular/material/tree';
 import {DeviceTypesContentVariableDialogComponent} from './device-types/dialogs/device-types-content-variable-dialog.component';
+import {WidgetModule} from '../../../widgets/widget.module';
 
 const devicetypes = {path: 'metadata/devicetypesoverview/devicetypes', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Device Types' }};
 const devicetypesEdit = {path: 'metadata/devicetypesoverview/devicetypes/:id', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Device Types' }};
@@ -90,6 +91,7 @@ const devicetypesEdit = {path: 'metadata/devicetypesoverview/devicetypes/:id', p
         MatRadioModule,
         RouterModule.forChild([devicetypes, devicetypesEdit]),
         MatTreeModule,
+        WidgetModule,
     ],
     declarations: [
         DeviceTypesComponent,

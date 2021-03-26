@@ -13,7 +13,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="device-type-container">
+<senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+<div class="device-type-container" *ngIf="ready">
     <mat-horizontal-stepper>
         <mat-step [stepControl]="firstFormGroup">
             <form [formGroup]="firstFormGroup">
@@ -151,14 +152,12 @@
                                     <div fxLayout="row" [fxShow]="inOut.show === true">
                                         <div fxFlex>
                                             <mat-form-field class="full-width" color="accent">
-                                                <mat-select placeholder="Serialization"
-                                                            formControlName="serialization" [required]="inOut.dataSource && inOut.dataSource.data.length > 0">
-                                                    <mat-option>-- None --</mat-option>
-                                                    <mat-option *ngFor="let serialization of serializations"
-                                                                [value]="serialization">
-                                                        {{serialization}}
-                                                    </mat-option>
-                                                </mat-select>
+                                                <senergy-select-search
+                                                    [options]="serializations"
+                                                    placeholder="Serialization"
+                                                    formControlName="serialization"
+                                                    [required]="inOut.dataSource && inOut.dataSource.data.length > 0"
+                                                    noneView="-- None --"></senergy-select-search>
                                             </mat-form-field>
                                             <div *ngIf="inOut.dataSource">
                                                 <button mat-raised-button color="accent"
