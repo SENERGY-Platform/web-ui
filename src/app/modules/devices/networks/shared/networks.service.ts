@@ -38,6 +38,15 @@ export class NetworksService {
                 public snackBar: MatSnackBar) {
     }
 
+    getNetworksWithLogState(searchText: string, limit: number, offset: number, value: string, order: string): Observable<NetworksModel[]> {
+        return this.http.get<NetworksModel[]>
+        (environment.apiAggregatorUrl + '/hubs?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order +
+            (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText))).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworks', []))
+        );
+    }
+
     searchNetworks(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksModel[]> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
