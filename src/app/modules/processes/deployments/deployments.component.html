@@ -69,7 +69,7 @@
                                     </mat-checkbox>
                                     <button *ngIf="!item.value.online" mat-icon-button
                                             matTooltip="Missing Dependencies"
-                                            class="mat-warn" (click)="showMissingDependencies(item.value.id)">
+                                            class="mat-warn" (click)="showOfflineReasons(item.value.offline_reasons)">
                                         <mat-icon>warning</mat-icon>
                                     </button>
                                     <div fxFlex></div>

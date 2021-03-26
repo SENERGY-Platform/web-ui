@@ -20,6 +20,7 @@ import {DeploymentsService} from '../shared/deployments.service';
 import {
     DeploymentsMissingDependenciesModel
 } from '../shared/deployments-missing-dependencies.model';
+import {DeploymentsOfflineReasonsModel} from '../shared/deployments.model';
 
 @Component({
     templateUrl: './deployments-missing-dependencies-dialog.component.html',
@@ -27,18 +28,13 @@ import {
 })
 export class DeploymentsMissingDependenciesDialogComponent {
 
-    displayedColumns: string[] = ['name', 'device_id'];
-    missingDependencies: DeploymentsMissingDependenciesModel | null = null;
+    displayedColumns: string[] = ['description', 'id'];
+    missingDependencies: DeploymentsOfflineReasonsModel[] | null = null;
 
     constructor(private dialogRef: MatDialogRef<DeploymentsMissingDependenciesDialogComponent>,
                 private deploymentsService: DeploymentsService,
-                @Inject(MAT_DIALOG_DATA) data: { id: string }) {
-
-        this.deploymentsService.getMissingDependencies(data.id).subscribe((missingDependencies: DeploymentsMissingDependenciesModel | null) => {
-            if (missingDependencies != null) {
-                this.missingDependencies = missingDependencies;
-            }
-        });
+                @Inject(MAT_DIALOG_DATA) data: { reasons: DeploymentsOfflineReasonsModel[] }) {
+        this.missingDependencies = data.reasons;
     }
 
     close(): void {

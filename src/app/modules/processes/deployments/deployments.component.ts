@@ -22,7 +22,7 @@ import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';
 import {DeploymentsService} from './shared/deployments.service';
-import {DeploymentsModel} from './shared/deployments.model';
+import {DeploymentsModel, DeploymentsOfflineReasonsModel} from './shared/deployments.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ClipboardService} from 'ngx-clipboard';
 import {environment} from '../../../../environments/environment';
@@ -202,11 +202,11 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         });
     }
 
-    showMissingDependencies(id: string): void {
+    showOfflineReasons(reasons: DeploymentsOfflineReasonsModel[]): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
-            id: id
+            reasons: reasons
         };
         this.dialog.open(DeploymentsMissingDependenciesDialogComponent, dialogConfig);
     }
@@ -329,7 +329,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                     definition_id: repoItem.definition_id,
                     deploymentTime: repoItem.deploymentTime,
                     diagram: repoItem.diagram,
-                    offline_reasons: repoItem.offline_reasons,
+                    offline_reasons: this._formBuilder.array(repoItem.offline_reasons || []),
                     online: repoItem.online,
                     image: this.provideImg(repoItem.diagram),
                     sync: repoItem.sync,

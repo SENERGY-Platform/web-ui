@@ -18,30 +18,32 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../../../environments/environment';
 import {Observable, of} from 'rxjs';
-import {catchError, map} from 'rxjs/internal/operators';
+import {catchError, map, mergeMap} from 'rxjs/internal/operators';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {DeploymentsModel} from './deployments.model';
 import {CamundaVariable} from './deployments-definition.model';
 import {V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
 import {MatDialog} from '@angular/material/dialog';
 import {DeploymentsFogMetadataModel, DeploymentsFogModel} from './deployments-fog.model';
+import {NetworksService} from '../../../devices/networks/shared/networks.service';
+import {NetworksModel} from '../../../devices/networks/shared/networks.model';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DeploymentsFogFactory {
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private networksService: NetworksService) {
     }
 
     withHubId(hubId: string): DeploymentsFogService {
-        return new DeploymentsFogService(hubId, this.http, this.errorHandlerService, this.dialog);
+        return new DeploymentsFogService(hubId, this.http, this.errorHandlerService, this.networksService);
     }
 }
 
 export class DeploymentsFogService {
 
-    constructor(private hubId: string, private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {
+    constructor(private hubId: string, private http: HttpClient, private errorHandlerService: ErrorHandlerService, private networksService: NetworksService) {
     }
 
     getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null> {
@@ -111,14 +113,34 @@ export class DeploymentsFogService {
         if (query) {
             url += '&search=' + encodeURIComponent(query);
         }
-        return this.http.get<DeploymentsFogModel[]>(url).pipe(
-            map(resp => resp || []),
-            map(list => list.map(element => {
-                element.online = true;
-                element.sync = element.is_placeholder || element.marked_for_delete;
-                return element;
-            })),
-            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getAll', []))
+
+        return this.networksService.getNetworksWithLogState('', 1000, 0, 'name', 'asc').pipe(
+            mergeMap(networks => {
+                const networkState = new Map<string, NetworksModel>();
+                networks.forEach(value => {
+                    networkState.set(value.id, value);
+                });
+                return this.http.get<DeploymentsFogModel[]>(url).pipe(
+                    map(resp => resp || []),
+                    map(list => list.map(element => {
+                        const network = networkState.get(element.network_id);
+                        // element.online = !!network?.log_state; // only online hubs are online
+                        element.online = !(network?.log_state === false); // hubs without state are online
+
+                        if (!element.online) {
+                            element.offline_reasons = [{
+                                id: network?.id || '',
+                                type: 'network_offline',
+                                description: network?.name + ' offline',
+                                additional_info: {name: ''}
+                            }];
+                        }
+                        element.sync = element.is_placeholder || element.marked_for_delete;
+                        return element;
+                    })),
+                    catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getAll', []))
+                );
+            })
         );
     }
 
