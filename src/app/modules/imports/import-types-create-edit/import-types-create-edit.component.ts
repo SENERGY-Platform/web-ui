@@ -22,8 +22,6 @@ import {
     ImportTypeModel
 } from '../import-types/shared/import-types.model';
 import {ImportTypesService} from '../import-types/shared/import-types.service';
-import {FunctionsService} from '../../metadata/functions/shared/functions.service';
-import {FunctionsPermSearchModel} from '../../metadata/functions/shared/functions-perm-search.model';
 import {AspectsService} from '../../metadata/aspects/shared/aspects.service';
 import {AspectsPermSearchModel} from '../../metadata/aspects/shared/aspects-perm-search.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -39,7 +37,7 @@ import {
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel
 } from '../../metadata/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from "../../metadata/device-types-overview/shared/device-type.service";
+import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
 
 @Component({
     selector: 'senergy-import-types-create-edit',
@@ -74,6 +72,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     functions: DeviceTypeFunctionModel[] = [];
     aspects: AspectsPermSearchModel[] = [];
     typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>> = new Map();
+    characteristics: Map<string, DeviceTypeCharacteristicsModel> = new Map();
 
 
     types: { id: string; name: string }[] = [
@@ -194,6 +193,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
         this.conceptsService.getConceptsWithCharacteristics()
             .subscribe(concepts => concepts.forEach(concept => {
                     concept.characteristics.forEach(characteristic => {
+                        this.saveFlattenedCharacteristics(characteristic);
                         const m = this.typeConceptCharacteristics.get(characteristic.type);
                         let arr = m?.get(concept.name);
                         if (arr === undefined) {
@@ -288,6 +288,8 @@ export class ImportTypesCreateEditComponent implements OnInit {
                     val.sub_content_variables?.forEach(child => this.deleteContentVariable(child));
                     val.sub_content_variables = [];
                 }
+                this.autoFillContent(val);
+                console.log(val); // TODO
                 sub = val;
                 const data = this.dataSource.data;
                 this.dataSource.data = [];
@@ -299,6 +301,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     addSubContentVariable(sub: ImportTypeContentVariableModel) {
         this.openDialog(undefined).subscribe(val => {
             if (val !== undefined) {
+                this.autoFillContent(val);
                 if (sub.sub_content_variables === null || sub.sub_content_variables === undefined) {
                     sub.sub_content_variables = [val];
                 } else {
@@ -314,6 +317,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     addOutput() {
         this.openDialog(undefined, false, false).subscribe(val => {
             if (val !== undefined) {
+                this.autoFillContent(val);
                 const data = this.dataSource.data;
                 data.push(val);
                 this.dataSource.data = data; // forces redraw
@@ -371,5 +375,31 @@ export class ImportTypesCreateEditComponent implements OnInit {
 
     private isTopLevel(sub: ImportTypeContentVariableModel): boolean {
         return this.dataSource.data.indexOf(sub) !== -1;
+    }
+
+    private saveFlattenedCharacteristics(characteristic: DeviceTypeCharacteristicsModel) {
+        this.characteristics.set(characteristic.id || '', characteristic);
+        characteristic.sub_characteristics?.forEach(sub => this.saveFlattenedCharacteristics(sub));
+    }
+
+    private autoFillContent(content: ImportTypeContentVariableModel, overrideId?: string) {
+        if (content === undefined || (content.sub_content_variables !== undefined && content.sub_content_variables !== null
+            && content.sub_content_variables?.length > 0)
+            || (content.characteristic_id.length === 0 && overrideId === undefined)) {
+            return;
+        }
+        content.sub_content_variables = [];
+        const characteristic = this.characteristics.get(overrideId || content.characteristic_id);
+        characteristic?.sub_characteristics?.forEach(subCharacteristic => {
+            const sub: ImportTypeContentVariableModel = {
+                name: subCharacteristic.name,
+                characteristic_id: '', // can't validate sub-characteristics with id
+                type: subCharacteristic.type,
+                use_as_tag: false,
+                sub_content_variables: [],
+            };
+            this.autoFillContent(sub, subCharacteristic.id);
+            content.sub_content_variables?.push(sub);
+        });
     }
 }
