@@ -197,8 +197,12 @@ export class DeviceTypesComponent implements OnInit {
         inOut.patchValue({'show': !inOut.value.show});
     }
 
-    trackByFn(index: any) {
+    trackByIndex(index: any) {
         return index;
+    }
+
+    trackById(_: number, element: any) {
+        return element.id;
     }
 
     functionType(serviceFormGroup: AbstractControl): DeviceTypeFunctionType {
