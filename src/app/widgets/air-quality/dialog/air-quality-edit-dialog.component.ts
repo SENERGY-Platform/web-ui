@@ -438,6 +438,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         observables.push(this.prepareUbaSave());
         observables.push(this.prepareYrSave());
         forkJoin(observables).subscribe(_ => {
+            this.widget.properties.version = 3;
             this.widget.properties.measurements = this.measurements;
             this.widget.properties.location = this.location;
             this.widget.properties.formatted_address = this.formatted_address;
@@ -603,8 +604,6 @@ export class AirQualityEditDialogComponent implements OnInit {
     }
 
     private generateUbaImportInstance(stationId: string): Observable<ImportInstancesModel> {
-        this.widget.properties.version = this.widget.properties?.version === undefined || this.widget.properties.version > 3
-            ? 3 : this.widget.properties.version;
         return this.importInstancesService.saveImportInstance({
             name: 'AirQuality Widget: ' + this.name + ' (station ' + stationId + ')',
             configs: [
