@@ -603,6 +603,8 @@ export class AirQualityEditDialogComponent implements OnInit {
     }
 
     private generateUbaImportInstance(stationId: string): Observable<ImportInstancesModel> {
+        this.widget.properties.version = this.widget.properties?.version === undefined || this.widget.properties.version > 3
+            ? 3 : this.widget.properties.version;
         return this.importInstancesService.saveImportInstance({
             name: 'AirQuality Widget: ' + this.name + ' (station ' + stationId + ')',
             configs: [
@@ -662,10 +664,8 @@ export class AirQualityEditDialogComponent implements OnInit {
                 this.widget.properties.ubaInfo.importInstanceId = instance.id;
                 const matchingExports = this.getExportsOfImports(ubaInstances);
                 matchingExports.filter(e => e.Values.filter(v =>
-                    (v.Path === 'value.measurement' && v.Name === 'measurement')
-                    || (v.Path === 'value.value' && v.Name === 'value')
-                    || (v.Path === 'value.meta.station_id' && v.Name === 'station_id')
-                ).length === 3);
+                    (v.Path === 'value.meta.station_id' && v.Name === 'station_id')
+                ).length === 1);
                 if (matchingExports.length === 0) {
                     this.helperGenerateUbaExport(instance, obs);
                 } else {
@@ -719,7 +719,8 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.measurements.forEach(m => {
             if (m.provider === AirQualityExternalProvider.UBA && !m.has_outside) {
                 m.outsideExport = exp;
-                m.outsideData.column = exp.Values.find(v => v.Path === 'value.value');
+                m.outsideData.column = exp.Values.find(v => v.Path === 'value.measurements.' + m.short_name
+                    + '.' + m.short_name + '_value');
             }
         });
     }

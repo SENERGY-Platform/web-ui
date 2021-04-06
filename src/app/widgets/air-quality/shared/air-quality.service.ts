@@ -94,23 +94,26 @@ export class AirQualityService {
                         const column = measurement.outsideData.column ? measurement.outsideData.column.Name : '';
                         outsideMap.set(requestPayload.length, index);
                         if (measurement.provider === AirQualityExternalProvider.UBA) {
-                            requestPayload.push({
+                            const ubaColumn = {
                                 measurement: id || '',
                                 columns: [{name: column}],
                                 filters: [
                                     {
-                                        column: 'measurement',
-                                        type: '=',
-                                        value: measurement.short_name,
-                                    },
-                                    {
                                         column: 'station_id',
                                         type: '=',
                                         value: widget.properties.ubaInfo?.stationId || '',
-                                    }
+                                    },
                                 ],
                                 limit: 1,
-                            });
+                            };
+                            if (widget.properties.version === undefined || widget.properties.version < 3) {
+                                ubaColumn.filters.push({
+                                    column: 'measurement',
+                                    type: '=',
+                                    value: measurement.short_name,
+                                });
+                            }
+                            requestPayload.push(ubaColumn);
                         } else {
                             requestPayload.push({
                                 measurement: id || '', columns:

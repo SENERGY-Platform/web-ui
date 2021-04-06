@@ -25,6 +25,7 @@ export interface AirQualityPropertiesModel {
     formatted_address?: (string);
     measurements?: (MeasurementModel[]);
     pollen?: (MeasurementModel[]);
+    version?: number;
 }
 
 export interface MeasurementModel {
