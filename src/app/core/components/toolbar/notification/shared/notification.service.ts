@@ -38,7 +38,6 @@ export class NotificationService implements OnDestroy {
                 private http: HttpClient,
                 private authorizationService: AuthorizationService,
                 private dialog: MatDialog) {
-        this.notificationEmitter.subscribe(v => console.log(v)); // TODO
         this.initWs();
     }
 
