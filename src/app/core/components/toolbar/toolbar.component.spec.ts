@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {ToolbarComponent} from './toolbar.component';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -29,14 +29,14 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {NotificationService} from './notification/shared/notification.service';
-import {of} from 'rxjs';
+import {EventEmitter} from '@angular/core';
 
-describe('ToolbarComponent', () => {
+describe('ToolbarComponent', () => { // TODO
     let component: ToolbarComponent;
     let fixture: ComponentFixture<ToolbarComponent>;
 
     const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService);
-    notificationServiceSpy.getNotifications.and.returnValue(of([]));
+    notificationServiceSpy.notificationEmitter = new EventEmitter();
 
     beforeEach((() => {
         TestBed.configureTestingModule({
@@ -55,5 +55,97 @@ describe('ToolbarComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should correctly display unread notification counter', () => {
+        notificationServiceSpy.notificationEmitter.emit([
+            {
+                _id: '0',
+                isRead: false,
+                message: '',
+                title: '',
+                created_at: null,
+                userId: '',
+            },
+            {
+                _id: '1',
+                isRead: true,
+                message: '',
+                title: '',
+                created_at: null,
+                userId: '',
+            },
+            {
+                _id: '2',
+                isRead: false,
+                message: '',
+                title: '',
+                created_at: null,
+                userId: '',
+            }
+        ]);
+        expect(component.unreadCounter).toBe(2);
+        notificationServiceSpy.notificationEmitter.emit([
+            {
+                _id: '0',
+                isRead: true,
+                message: '',
+                title: '',
+                created_at: null,
+                userId: '',
+            },
+            {
+                _id: '1',
+                isRead: true,
+                message: '',
+                title: '',
+                created_at: null,
+                userId: '',
+            },
+            {
+                _id: '2',
+                isRead: false,
+                message: '',
+                title: '',
+                created_at: null,
+                userId: '',
+            }
+        ]);
+        expect(component.unreadCounter).toBe(1);
+        notificationServiceSpy.notificationEmitter.emit([
+            {
+                _id: '0',
+                isRead: false,
+                message: '',
+                title: '',
+                created_at: null,
+                userId: '',
+            },
+            {
+                _id: '1',
+                isRead: true,
+                message: '',
+                title: '',
+                created_at: null,
+                userId: '',
+            },
+            {
+                _id: '2',
+                isRead: false,
+                message: '',
+                title: '',
+                created_at: null,
+                userId: '',
+            },
+            {
+                _id: '3',
+                isRead: false,
+                message: '',
+                title: '',
+                created_at: null,
+                userId: '',
+            }
+        ]);
+        expect(component.unreadCounter).toBe(3);
     });
 });

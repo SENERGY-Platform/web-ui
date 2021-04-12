@@ -21,7 +21,7 @@
     </div>
     <div class="container">
         <mat-accordion multi="true">
-            <mat-expansion-panel *ngFor="let n of notifications; let index = index" (opened)="setRead(index, true)">
+            <mat-expansion-panel *ngFor="let n of notifications; let index = index; trackBy: trackById" (opened)="setRead(index, true)">
                 <mat-expansion-panel-header class="right-aligned-header">
                     <mat-panel-title>
                         {{n.title}}

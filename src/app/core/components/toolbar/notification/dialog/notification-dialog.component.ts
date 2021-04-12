@@ -40,16 +40,14 @@ export class NotificationDialogComponent implements OnInit {
     }
 
     deleteMessage(index: number) {
-        this.notificationService.deleteNotification(this.notifications[index]).subscribe(() => {
-            this.notifications.splice(index, 1);
-        });
+        this.notificationService.deleteNotification(this.notifications[index]).subscribe();
     }
 
     setRead(index: number, status: boolean) {
         const n = this.notifications[index];
         if (n.isRead !== status) {
             n.isRead = status;
-            this.notificationService.updateNotification(n).subscribe(() => this.notifications[index] = n);
+            this.notificationService.updateNotification(n).subscribe();
         }
     }
 
@@ -66,4 +64,9 @@ export class NotificationDialogComponent implements OnInit {
             this.setRead(i, true);
         }
     }
+
+    trackById(_: number, a: NotificationModel): string {
+        return a._id;
+    }
+
 }

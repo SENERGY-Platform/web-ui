@@ -14,41 +14,43 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import {EventEmitter, Injectable, OnDestroy, Output} from '@angular/core';
 import {Observable} from 'rxjs';
-import {NotificationModel, NotificationServiceResponse, NotificationUpdateModel} from './notification.model';
+import {NotificationModel, NotificationUpdateModel} from './notification.model';
 import {environment} from '../../../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
-import {DeploymentsService} from '../../../../../modules/processes/deployments/shared/deployments.service';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../services/error-handler.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {NotificationDialogComponent} from '../dialog/notification-dialog.component';
+import {AuthorizationService} from '../../../../services/authorization.service';
+import {webSocket, WebSocketSubject} from 'rxjs/webSocket';
 
 @Injectable({
     providedIn: 'root'
 })
+export class NotificationService implements OnDestroy {
+    @Output() notificationEmitter: EventEmitter<NotificationModel[]> = new EventEmitter();
 
-
-export class NotificationService {
+    private webSocketSubject: WebSocketSubject<any> | undefined;
+    private notifications: NotificationModel[] = [];
 
     constructor(private errorHandlerService: ErrorHandlerService,
                 private http: HttpClient,
+                private authorizationService: AuthorizationService,
                 private dialog: MatDialog) {
+        this.notificationEmitter.subscribe(v => console.log(v)); // TODO
+        this.initWs();
     }
 
-    getNotifications(): Observable<NotificationModel[]> {
-        return this.http.get<NotificationServiceResponse>(environment.notificationsUrl)
-            .pipe(map(resp => resp.notifications || []),
-                catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getNotifications', []))
-            );
+    ngOnDestroy() {
+        this.webSocketSubject?.complete();
     }
 
-    openDialog(notifications: NotificationModel[]): Observable<void> {
+    openDialog(): Observable<void> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            notifications: notifications,
+            notifications: this.notifications,
             notificationService: this,
         };
         dialogConfig.minWidth = '700px';
@@ -69,6 +71,51 @@ export class NotificationService {
             created_at: notification.created_at,
         };
         return this.http.post(environment.notificationsUrl + '/' + notification._id, n);
+    }
+
+    private initWs() {
+        this.webSocketSubject?.complete();
+        this.webSocketSubject = webSocket(environment.notificationsWebsocketUrl);
+        this.webSocketSubject.subscribe((msg: {type: string, payload: string | NotificationModel | NotificationModel[]}) => {
+            switch (msg.type) {
+                case 'please reauthenticate':
+                    this.authenticateWs();
+                    break;
+                case 'authentication confirmed':
+                    this.webSocketSubject?.next({type: 'refresh'});
+                    break;
+                case 'notification list':
+                    this.notifications = msg.payload as NotificationModel[];
+                    this.notificationEmitter.emit(this.notifications);
+                    break;
+                case 'put notification':
+                    const n = msg.payload as NotificationModel;
+                    const idx = this.notifications.findIndex(no => no._id === n._id);
+                    if (idx === -1) {
+                        this.notifications.push(n);
+                    } else {
+                        this.notifications[idx] = n;
+                    }
+                    this.notificationEmitter.emit(this.notifications);
+                    break;
+                case 'delete notification':
+                    const id = msg.payload as string;
+                    const indx = this.notifications.findIndex(no => id === no._id);
+                    if (indx !== -1) {
+                        this.notifications.splice(indx, 1);
+                    }
+                    this.notificationEmitter.emit(this.notifications);
+                    break;
+                default:
+                    console.log('received unknown message from notification websocket', msg);
+            }
+        }, () => setTimeout(() => this.initWs(), 5000), () => setTimeout(() => this.initWs(), 5000));
+        this.webSocketSubject.next('client hello');
+        this.authenticateWs();
+    }
+
+    private authenticateWs() {
+        this.authorizationService.getToken().then(token => this.webSocketSubject?.next({type: 'authentication', payload: token}));
     }
 
 }

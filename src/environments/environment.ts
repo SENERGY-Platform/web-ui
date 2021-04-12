@@ -51,6 +51,7 @@ export const environment = {
     geonamesUrl: 'http://localhost',
     yrUrl: 'http://localhost',
     notificationsUrl: 'http://localhost',
+    notificationsWebsocketUrl: 'ws://localhost',
     configurablesUrl: 'http://localhost',
     marshallerUrl: 'http://localhost',
     /** Semantic Keys **/

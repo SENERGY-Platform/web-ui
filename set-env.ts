@@ -61,6 +61,7 @@ export const environment = {
   geonamesUrl: '${process.env.GEONAMES_URL}',
   yrUrl: '${process.env.YR_URL}',
   notificationsUrl: '${process.env.NOTIFICATION_SERVICE_URL}',
+  notificationsWebsocketUrl: '${process.env.NOTIFICATION_SERVICE_WEBSOCKET_URL}',
   configurablesUrl: '${process.env.CONFIGURABLES_URL}',
   marshallerUrl: '${process.env.MARSHALLER_URL}',
   timeStampCharacteristicId: '${process.env.TIMESTAMP_CHARACTERISTIC_ID}',

@@ -22,7 +22,6 @@ import {AuthorizationService} from '../../services/authorization.service';
 import {SettingsDialogService} from '../../../modules/settings/shared/settings-dialog.service';
 import {NotificationService} from './notification/shared/notification.service';
 import {NotificationModel} from './notification/shared/notification.model';
-import {interval} from 'rxjs';
 
 @Component({
     selector: 'senergy-toolbar',
@@ -47,9 +46,10 @@ export class ToolbarComponent implements OnInit {
     ngOnInit() {
         this.setHeader();
         this.initUser();
-        this.updateNotifications();
-        interval(60 * 1000).subscribe(_ => {
-            this.updateNotifications();
+        this.notificationService.notificationEmitter.subscribe(n => {
+            this.unreadCounter = 0;
+            this.notifications = n;
+            this.notifications.forEach(no => !no.isRead ? this.unreadCounter++ : null);
         });
     }
 
@@ -94,15 +94,7 @@ export class ToolbarComponent implements OnInit {
         });
     }
 
-    private updateNotifications() {
-        this.notificationService.getNotifications().subscribe( nots => {
-            this.notifications = nots;
-            this.unreadCounter = 0;
-            this.notifications.forEach(n => !n.isRead ? this.unreadCounter++ : null);
-        });
-    }
-
     openNotificationsDialog() {
-        this.notificationService.openDialog(this.notifications).subscribe(() => this.updateNotifications());
+        this.notificationService.openDialog().subscribe();
     }
 }
