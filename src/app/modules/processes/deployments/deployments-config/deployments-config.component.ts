@@ -387,10 +387,20 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
         let options: { path: string, characteristicId: string }[] = [];
         if (!(selected_service_id === undefined || selected_service_id === null)) {
-            options = selectedOption.get('servicePathOptions')?.value.get(selected_service_id) || [];
+            const servicePathOptions = selectedOption.get('servicePathOptions')?.value;
+            if (servicePathOptions) {
+                options = servicePathOptions[selected_service_id] || [];
+            } else {
+                options = [];
+            }
         }
         if (!(importTypeId === undefined || importTypeId === null)) {
-            options = selectedOption.get('servicePathOptions')?.value.get(importTypeId) || [];
+            const servicePathOptions = selectedOption.get('servicePathOptions')?.value;
+            if (servicePathOptions) {
+                options = servicePathOptions[importTypeId] || [];
+            } else {
+                options = [];
+            }
         }
         if (options.length === 0) {
             element.get('message_event.selection')?.patchValue({
