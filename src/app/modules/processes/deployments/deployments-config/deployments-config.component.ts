@@ -83,8 +83,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     ngOnInit() {
         this.hubsService.listNetworks(100, 0 , 'name', 'asc').subscribe(result => {
-            this.hubList.push({id: '', name: 'Platform', device_local_ids: null, log_state: true});
-            this.hubList.push(...result);
+            if (result && result.length > 0) {
+                this.hubList.push({id: '', name: 'Platform', device_local_ids: null, log_state: true});
+                this.hubList.push(...result);
+            }
         });
         this.setDeployment();
         this.selectedHubForm.valueChanges.subscribe((value: HubModel) => {
