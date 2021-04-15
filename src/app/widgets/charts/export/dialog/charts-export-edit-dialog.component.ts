@@ -41,7 +41,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     exportList: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
     widgetId: string;
-    chartTypes = ['LineChart', 'ColumnChart'];
+    chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart'];
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
     groupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median'];
