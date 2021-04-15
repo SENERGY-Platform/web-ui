@@ -243,6 +243,7 @@ export class NewExportComponent implements OnInit {
             this.export.Name = this.exportForm.value.name;
             this.export.Description = this.exportForm.value.description;
             this.export.TimePath = this.exportForm.value.timePath;
+            this.export.Values = this.exportForm.value.exportValues;
 
             if (this.exportForm.value.selector === 'device') {
                 this.export.EntityName = this.exportForm.value.device.name;
