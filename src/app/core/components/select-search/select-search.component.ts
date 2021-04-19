@@ -166,6 +166,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             this.optionsGroups = this.getOptionsGroup('');
             this.searchControl.valueChanges.subscribe((val: string) => this.optionsGroups = this.getOptionsGroup(val));
         }
+        this.resetSearchIfNoResults();
         this.selectSingleElement();
     }
 
@@ -290,7 +291,12 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     @Input() getOptionValue: ((option: any) => any) = a => a;
     @Input() getOptionClass: ((option: any) => string) = _ => '';
-    @Input() getOptionViewValue: ((option: any) => string) = a => a as string;
+    @Input() getOptionViewValue: ((option: any) => string) = a => {
+        if (typeof a === 'string') {
+            return a;
+        }
+        return 'undefined';
+    }
     @Input() getOptionDisabled: ((option: any) => boolean) = _ => false;
 
     onContainerClick(_: MouseEvent): void {
@@ -390,10 +396,14 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         if ($event && !this.select.selected) {
             this.searchInput.focus();
         }
+        if (!$event) {
+            this.resetSearchIfNoResults();
+        }
         this.openedChange.emit($event);
     }
 
     close() {
+        this.resetSearchIfNoResults();
         this.select?.close();
     }
 
@@ -480,6 +490,24 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             this.value = toWrite;
             this.selectionChanged({source: this.select, value: toWrite});
             this.ngControl?.reset(this.value);
+        }
+    }
+
+    private resetSearchIfNoResults() {
+        if (this.options === undefined) {
+            this.resetSearch();
+            return;
+        }
+        if (this.withGroups && this.optionsGroups?.size === 0) {
+            this.resetSearch();
+            return;
+        }
+        if (!this.withGroups) {
+            this.getOptions().subscribe(o => {
+                if (Array.isArray(o) && o.length === 0) {
+                    this.resetSearch();
+                }
+            });
         }
     }
 }
