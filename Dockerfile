@@ -18,7 +18,8 @@ RUN npm install $SOURCE
 
 # copy sourcecode and build
 COPY . .
-RUN npm run config -- --environment=prod
+RUN sed 's/production: false/production: true/' src/environments/environment.ts > src/environments/environment.prod.ts
+#RUN npm run config -- --environment=prod
 RUN node --max_old_space_size=8192 $(npm bin)/ng build --prod
 
 ## STAGE 2: Run nginx to serve application ##
@@ -27,5 +28,6 @@ FROM nginx
 COPY --from=builder /tmp/workspace/dist/senergy-web-ui/ /usr/share/nginx/html/
 COPY --from=builder /tmp/workspace/dist/senergy-web-ui/assets/nginx-custom.conf /etc/nginx/conf.d/default.conf
 RUN chmod -R a+r /usr/share/nginx/html
+CMD ["/bin/sh",  "-c",  "envsubst < /usr/share/nginx/html/assets/env.template.js > /usr/share/nginx/html/assets/env.js && exec nginx -g 'daemon off;'"]
 
 EXPOSE 80

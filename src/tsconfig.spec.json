@@ -9,7 +9,8 @@
   },
   "files": [
     "test.ts",
-    "polyfills.ts"
+    "polyfills.ts",
+    "assets/env.js"
   ],
   "include": [
     "**/*.spec.ts",
