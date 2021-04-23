@@ -36,6 +36,8 @@ import {Observable} from 'rxjs';
 import {DeploymentsFogFactory} from '../shared/deployments-fog.service';
 import {HubModel, NetworksModel} from '../../../devices/networks/shared/networks.model';
 import {NetworksService} from '../../../devices/networks/shared/networks.service';
+import {OperatorRepoService} from '../../../data/operator-repo/shared/operator-repo.service';
+import {OperatorModel} from '../../../data/operator-repo/shared/operator.model';
 
 
 @Component({
@@ -53,6 +55,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     deployment: V2DeploymentsPreparedModel | null = null;
     deploymentFormGroup = this.deploymentsConfigInitializerService.initFormGroup({} as V2DeploymentsPreparedModel);
     flowList: FlowModel[] = [];
+    operatorImageList: {_id?: string, name: string}[] = [];
+    handlerList: {_id?: string, name: string}[] = [];
     ready = false;
     optionGroups: Map<number, Map<string, V2DeploymentsPreparedSelectionOptionModel[]>> = new Map();
     deploymentsService: {
@@ -73,15 +77,18 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 private route: ActivatedRoute,
                 private deploymentsConfigInitializerService: DeploymentsConfigInitializerService,
                 private flowRepoService: FlowRepoService,
+                private operatorRepoService: OperatorRepoService,
                 private deploymentFogFactory: DeploymentsFogFactory,
                 private hubsService: NetworksService
     ) {
         this.getRouterParams();
         this.getFlows();
+        this.getOperators();
         this.deploymentsService = platformDeploymentsService;
     }
 
     ngOnInit() {
+        this.handlerList = this.flowList;
         this.hubsService.listNetworks(100, 0 , 'name', 'asc').subscribe(result => {
             if (result && result.length > 0) {
                 this.hubList.push({id: '', name: 'Platform', device_local_ids: null, log_state: true});
@@ -91,8 +98,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         this.setDeployment();
         this.selectedHubForm.valueChanges.subscribe((value: HubModel) => {
             if (value && value.id && value.id !== '') {
+                this.handlerList = this.operatorImageList;
                 this.deploymentsService = this.deploymentFogFactory.withHubId(value.id);
             } else {
+                this.handlerList = this.flowList;
                 this.deploymentsService = this.platformDeploymentsService;
             }
             this.setDeployment();
@@ -315,6 +324,22 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     private getFlows(): void {
         this.flowRepoService.getFlows('', 9999, 0, 'name', 'asc').subscribe((resp: { flows: FlowModel[] }) => {
             this.flowList = resp.flows;
+            this.handlerList = this.flowList; // initial value of list befor user selects different deployment destination
+        });
+    }
+
+    private getOperators(): void {
+        this.operatorRepoService.getOperators('', 9999, 0, 'name', 'asc').subscribe((resp: { operators: OperatorModel[] }) => {
+            const newList: {_id?: string, name: string}[] = [];
+            resp.operators.forEach(value => {
+                if ( (value.deploymentType === 'local' || value.deploymentType === 'both') && ( value.name || value.image) ) {
+                    newList.push({
+                        _id: value.image,
+                        name: value.name || value.image || 'undefined'
+                    });
+                }
+            });
+            this.operatorImageList = newList;
         });
     }
 

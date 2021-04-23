@@ -78,8 +78,8 @@
     window["env"]["importTypeIdDwdPollen"] = "${IMPORT_TYPE_ID_DWD_POLLEN}";
     window["env"]["importTypeIdYrForecast"] = "${IMPORT_TYPE_ID_YR_FORECAST}";
 
-    window["env"]["processFogDeploymentUrl"] = "${PROCESS_SYNC_URL}";
-    window["env"]["processSyncUrl"] = "${PROCESS_FOG_DEPLOYMENT_URL}";
+    window["env"]["processFogDeploymentUrl"] = "${PROCESS_FOG_DEPLOYMENT_URL}";
+    window["env"]["processSyncUrl"] = "${PROCESS_SYNC_URL}";
 
     window["env"]["iotRepoUrl"] = "${IOT_REPO_URL}";
 
