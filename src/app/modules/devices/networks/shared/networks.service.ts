@@ -90,6 +90,14 @@ export class NetworksService {
         );
     }
 
+    listSyncNetworks(): Observable<NetworksModel[]> {
+        return this.http.get<NetworksModel[]>(
+            environment.processSyncUrl + '/networks').pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'listSyncNetworks(search)', []))
+        );
+    }
+
     changeName(hubId: string, hubName: string): Observable<HubModel | null> {
         return this.http.put<HubModel>(
             environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hubId) + '/name',

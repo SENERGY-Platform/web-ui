@@ -103,7 +103,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     ngOnInit() {
-        this.hubsService.listNetworks(100, 0 , 'name', 'asc').subscribe(result => {
+        this.hubsService.listSyncNetworks().subscribe(result => {
             this.hubList = result;
         });
         this.initGridCols();
