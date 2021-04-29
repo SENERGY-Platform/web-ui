@@ -163,7 +163,7 @@ export class ChartsExportService {
                     } else if (resp.type === 'string' && resp.conversionDefault !== undefined) {
                         value = resp.conversionDefault;
                     }
-                    dataPoint.push(value as number);
+                    dataPoint.push(Math.fround(value as number));
                 });
                 dataTable.data.push(dataPoint);
             }
