@@ -174,7 +174,7 @@
     </div>
     <div *ngIf="exports.length === 0 && ready">No export instances found.</div>
 </div>
-<button mat-fab class="fab" routerLink="new" matTooltip="Start new Export">
+<button mat-fab class="fab" routerLink="/exports/new" matTooltip="Start new Export">
     <mat-icon>add</mat-icon>
 </button>
 <senergy-spinner [show]="!ready"></senergy-spinner>
