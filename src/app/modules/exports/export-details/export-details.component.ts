@@ -15,13 +15,19 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {ExportModel} from '../shared/export.model';
+import {Location} from '@angular/common';
+import {ExportModel, ExportValueBaseModel} from '../shared/export.model';
 import {ActivatedRoute} from '@angular/router';
 import {ExportService} from '../shared/export.service';
 import {ExportDataService} from '../../../widgets/shared/export-data.service';
 import {LastValuesRequestElementModel} from '../../../widgets/shared/export-data.model';
 import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
+import {BrokerExportService} from '../shared/broker-export.service';
+import {AuthorizationService} from '../../../core/services/authorization.service';
+import {environment} from '../../../../environments/environment';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {ClipboardService} from 'ngx-clipboard';
 
 
 @Component({
@@ -32,19 +38,38 @@ import {Observable} from 'rxjs';
 
 export class ExportDetailsComponent implements OnInit {
 
+    id: string | null = null;
+    userId: string | null = null;
+    userName: string | null = null;
+    baseTopic: string|null = null;
+    brokerUrl = environment.brokerExportBroker;
     ready = false;
     export = {} as ExportModel;
     displayedColumns: string[] = ['Name', 'Path', 'Type', 'LastValue', 'LastTimeStamp'];
     lastValuesReady = false;
     lastValuesRequestElementModels: LastValuesRequestElementModel[] = [];
 
-    constructor(private route: ActivatedRoute, private exportService: ExportService, private exportDataService: ExportDataService) {
+    constructor(private route: ActivatedRoute,
+                private location: Location,
+                private snackBar: MatSnackBar,
+                private clipboardService: ClipboardService,
+                private exportService: ExportService,
+                private authorizationService: AuthorizationService,
+                private brokerExportService: BrokerExportService,
+                private exportDataService: ExportDataService) {
     }
 
     ngOnInit() {
-        const id = this.route.snapshot.paramMap.get('id');
-        if (id !== null) {
-            this.exportService.getExport(id).subscribe((resp: ExportModel | null) => {
+        this.id = this.route.snapshot.paramMap.get('id');
+        if (this.id !== null) {
+            if (this.brokerMode) {
+                this.displayedColumns = ['Name', 'Path', 'CopyClipboard'];
+                this.authorizationService.getUserName().then(name => this.userName = name);
+                this.userId = localStorage.getItem('sub');
+                this.baseTopic = 'export/' + this.userId + '/' + this.id;
+            }
+            const obs = (this.brokerMode ? this.brokerExportService : this.exportService).getExport(this.id);
+            obs.subscribe((resp: ExportModel | null) => {
                 if (resp !== null) {
                     this.export = resp;
                 }
@@ -59,8 +84,11 @@ export class ExportDetailsComponent implements OnInit {
                         }
                     }
                 );
-
-                this.getLatestValues().subscribe(() => this.lastValuesReady = true);
+                if (!this.brokerMode) {
+                    this.getLatestValues().subscribe(() => this.lastValuesReady = true);
+                } else {
+                    this.lastValuesReady = true;
+                }
                 this.ready = true;
             });
         }
@@ -79,4 +107,18 @@ export class ExportDetailsComponent implements OnInit {
             });
         }));
     }
+
+    goBack() {
+        this.location.back();
+    }
+
+    get brokerMode(): boolean {
+        return this.id?.startsWith(BrokerExportService.ID_PREFIX) || false;
+    }
+
+    copyClipboard(element: ExportValueBaseModel) {
+        this.clipboardService.copyFromContent(this.baseTopic + '/' + element.Name);
+        this.snackBar.open('Topic copied to clipboard', undefined, {
+            duration: 2000,
+        });    }
 }

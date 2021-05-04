@@ -16,7 +16,7 @@
 
 <div class="main-panel">
     <div class="button-header background-color-accent">
-        <button mat-icon-button routerLink="/exports" matTooltip="Back"><mat-icon>arrow_back</mat-icon></button>
+        <button mat-icon-button (click)="goBack()" matTooltip="Back"><mat-icon>arrow_back</mat-icon></button>
     </div>
     <div fxLayout="column" class="layout-margin">
         <mat-card *ngIf="ready" style="margin-bottom:8px;">
@@ -42,23 +42,40 @@
                         <p mat-line>{{export.EntityName}} </p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
-                    <mat-list-item>
+                    <mat-list-item *ngIf="!brokerMode">
                         <mat-icon mat-list-icon>folder</mat-icon>
                         <h4 mat-line>Measurement</h4>
                         <p mat-line>{{export.Measurement}} </p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
-                    <mat-list-item>
+                    <mat-list-item *ngIf="!brokerMode">
                         <mat-icon mat-list-icon>alarm</mat-icon>
                         <h4 mat-line>TimePath</h4>
                         <p mat-line>{{export.TimePath}}</p>
+                        <mat-divider></mat-divider>
+                    </mat-list-item>
+                    <mat-list-item *ngIf="brokerMode">
+                        <mat-icon mat-list-icon>topic</mat-icon>
+                        <h4 mat-line>Base Topic</h4>
+                        <p mat-line>{{baseTopic}}</p>
+                        <mat-divider></mat-divider>
+                    </mat-list-item>
+                    <mat-list-item *ngIf="brokerMode">
+                        <mat-icon mat-list-icon>call_split</mat-icon>
+                        <h4 mat-line>Broker</h4>
+                        <p mat-line>{{brokerUrl}}</p>
+                        <mat-divider></mat-divider>
+                    </mat-list-item>
+                    <mat-list-item *ngIf="brokerMode">
+                        <mat-icon mat-list-icon>vpn_key</mat-icon>
+                        <h4 mat-line>Credentials</h4>
+                        <p mat-line>Username: {{userName}}<br>Password: Your SENERGY password</p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
                     <mat-list-item>
                         <mat-icon mat-list-icon>date_range</mat-icon>
                         <h4 mat-line>CreatedAt</h4>
                         <p mat-line>{{export.CreatedAt | date:'dd.MM.yyyy - HH:mm' }}</p>
-                        <mat-divider></mat-divider>
                     </mat-list-item>
                 </mat-list>
             </mat-card-content>
@@ -67,7 +84,7 @@
             <mat-card-header class="full-width">
                 <mat-card-title>Values</mat-card-title>
                 <span class="fill-remaining-space"></span>
-                <button mat-icon-button color="accent" class="refreshValueButton" (click)="refreshValues()">
+                <button mat-icon-button color="accent" class="refreshValueButton" (click)="refreshValues()" *ngIf="!brokerMode">
                     <mat-icon>refresh</mat-icon>
                 </button>
             </mat-card-header>
@@ -76,7 +93,7 @@
                     <div fxLayout="row">
                         <table mat-table [dataSource]="export.Values">
                             <ng-container matColumnDef="Name">
-                                <th mat-header-cell *matHeaderCellDef> Name</th>
+                                <th mat-header-cell *matHeaderCellDef> {{brokerMode ? 'Subtopic' : 'Name'}}</th>
                                 <td mat-cell *matCellDef="let element"> {{element.Name}} </td>
                             </ng-container>
                             <ng-container matColumnDef="Path">
@@ -95,6 +112,12 @@
                                 <th mat-header-cell *matHeaderCellDef> LastTimeStamp</th>
                                 <td mat-cell *matCellDef="let element"> {{element.LastTimeStamp !== 'null' ?
                                     (element.LastTimeStamp |  date:'dd.MM.yyyy - HH:mm:ss') : ''}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="CopyClipboard">
+                                <th mat-header-cell *matHeaderCellDef> Copy</th>
+                                <td mat-cell *matCellDef="let element">
+                                    <button mat-icon-button matTooltip="Copy topic to clipboard" (click)="copyClipboard(element)"><mat-icon>copy_all</mat-icon></button>
+                                </td>
                             </ng-container>
                             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>

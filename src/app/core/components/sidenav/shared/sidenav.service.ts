@@ -50,7 +50,10 @@ export class SidenavService {
             new SidenavPageModel('Monitor', 'link', 'search', '/processes/monitor')
         ]));
 
-        sections.push(new SidenavSectionModel('Exports', 'link', 'west', '/exports', []));
+        sections.push(new SidenavSectionModel('Exports', 'toggle', 'west', '/exports', [
+            new SidenavPageModel('Database', 'link', 'folder_special', '/exports/db'),
+            new SidenavPageModel('Broker', 'link', 'call_split', '/exports/broker'),
+        ]));
 
         sections.push(new SidenavSectionModel('Analytics', 'toggle', 'bar_chart', '/data', [
             new SidenavPageModel('Operators', 'link', 'storage', '/data/operator-repo'),

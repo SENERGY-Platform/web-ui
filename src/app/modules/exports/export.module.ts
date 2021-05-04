@@ -44,14 +44,15 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSortModule} from '@angular/material/sort';
 import {MatExpansionModule} from '@angular/material/expansion';
 
-const dataExport = {path: 'exports', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' }};
 const exp = {path: 'exports/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'New Export' }};
+const dataExport = {path: 'exports/db', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' }};
 const exportEdit = {path: 'exports/edit/:id', pathMatch: 'full', component: NewExportComponent, data: { header: 'Edit Export' }};
 const details = {path: 'exports/details/:id', pathMatch: 'full', component: ExportDetailsComponent, data: { header: 'Export Details' }};
+const brokerDataExport = {path: 'exports/broker', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' }};
 
 @NgModule({
     imports: [
-        RouterModule.forChild([dataExport, exp, exportEdit, details]),
+        RouterModule.forChild([dataExport, exp, exportEdit, details, brokerDataExport]),
         CoreModule,
         CommonModule,
         MatGridListModule,

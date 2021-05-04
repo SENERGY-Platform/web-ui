@@ -33,6 +33,8 @@ export const environment = {
     processSchedulerUrl: env.processSchedulerUrl || 'http://localhost',
     operatorRepoUrl: env.operatorRepoUrl || 'http://localhost',
     exportService: env.exportService || 'http://localhost',
+    brokerExportServiceUrl: env.brokerExportServiceUrl || 'http://localhost',
+    brokerExportBroker: env.brokerExportBroker || 'localhost:1883',
     influxAPIURL: env.influxAPIURL || 'http://localhost',
     pipelineRegistryUrl: env.pipelineRegistryUrl || 'http://localhost',
     flowRepoUrl: env.flowRepoUrl || 'http://localhost',

@@ -15,7 +15,7 @@
   -->
 
 <div class="button-header background-color-accent">
-    <button mat-icon-button routerLink="/exports" matTooltip="Back">
+    <button mat-icon-button (click)="goBack()" matTooltip="Back">
         <mat-icon>arrow_back</mat-icon>
     </button>
 </div>
@@ -29,6 +29,13 @@
                         <mat-radio-button class="radio-button" value="device">Device</mat-radio-button>
                         <mat-radio-button class="radio-button" value="pipe">Pipeline</mat-radio-button>
                         <mat-radio-button class="radio-button" value="import">Import</mat-radio-button>
+                    </mat-radio-group>
+                </div>
+                <div fxLayout="row" class="source-container">
+                    <div class="source-label">Target:</div>
+                    <mat-radio-group formControlName="targetSelector" class="radio-group">
+                        <mat-radio-button class="radio-button" [value]="targetDb">Database</mat-radio-button>
+                        <mat-radio-button class="radio-button" [value]="targetBroker">Broker</mat-radio-button>
                     </mat-radio-group>
                 </div>
                 <mat-form-field fxFill color="accent" appearance="outline">
@@ -118,7 +125,7 @@
                     clicking on it.
                 </div>
 
-                <mat-form-field fxFill color="accent" appearance="outline">
+                <mat-form-field fxFill color="accent" appearance="outline" *ngIf="exportForm.getRawValue().targetSelector === targetDb">
                     <mat-label>Time Path</mat-label>
                     <senergy-select-search formControlName="timePath" [options]="getPathsKeyOptions()">
                     </senergy-select-search>
@@ -130,7 +137,7 @@
                      fxLayout="row" class="layout-margin">
                     <div [formGroupName]="key" fxFlex fxLayoutAlign="center center">
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                            <mat-label>Name</mat-label>
+                            <mat-label>{{exportForm.getRawValue().targetSelector === targetDb ? 'Name' : 'Topic'}}</mat-label>
                             <input #input matInput formControlName="Name" placeholder="Name"/>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
@@ -149,7 +156,8 @@
                             </mat-select>
                         </mat-form-field>
                         <mat-checkbox formControlName="Tag" (ngModelChange)="pathChanged(key)"
-                                      class="inline layout-margin pad-right">Tag
+                                      class="inline layout-margin pad-right"
+                                      *ngIf="exportForm.getRawValue().targetSelector === targetDb">Tag
                         </mat-checkbox>
                         <button mat-icon-button>
                             <mat-icon (click)="deleteValue(key)" color="warn" class="inline">

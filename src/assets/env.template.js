@@ -34,6 +34,8 @@
     window["env"]["pipelineRegistryUrl"] = "${PIPELINE_REGISTRY_URL}";
     window["env"]["influxAPIURL"] = "${INFLUX_API_URL}";
     window["env"]["exportService"] = "${EXPORT_SERVICE}";
+    window["env"]["brokerExportServiceUrl"] = "${BROKER_EXPORT_SERVICE_URL}";
+    window["env"]["brokerExportBroker"] = "${BROKER_EXPORT_BROKER}";
     window["env"]["flowRepoUrl"] = "${FLOW_REPO_URL}";
     window["env"]["flowEngineUrl"] = "${FLOW_ENGINE_URL}";
     window["env"]["flowParserUrl"] = "${FLOW_PARSER_URL}";

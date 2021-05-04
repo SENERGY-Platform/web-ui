@@ -24,11 +24,13 @@ import {ResponsiveService} from '../../core/services/responsive.service';
 import {ClipboardService} from 'ngx-clipboard';
 import {merge, Subscription} from 'rxjs';
 import {SearchbarService} from '../../core/components/searchbar/shared/searchbar.service';
-import {SelectionModel} from "@angular/cdk/collections";
-import {MatTableDataSource} from "@angular/material/table";
-import {MatSort} from "@angular/material/sort";
-import {MatPaginator} from "@angular/material/paginator";
-import {startWith, switchMap} from "rxjs/internal/operators";
+import {SelectionModel} from '@angular/cdk/collections';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import {MatPaginator} from '@angular/material/paginator';
+import {startWith, switchMap} from 'rxjs/internal/operators';
+import {BrokerExportService} from './shared/broker-export.service';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
     selector: 'senergy-export',
@@ -58,23 +60,33 @@ export class ExportComponent implements OnInit, OnDestroy {
 
     private exportSub: Subscription = new Subscription();
 
+    public brokerMode = false;
+
     constructor(private exportService: ExportService,
                 public snackBar: MatSnackBar,
                 private dialogsService: DialogsService,
                 private searchbarService: SearchbarService,
                 private responsiveService: ResponsiveService,
+                private brokerExportService: BrokerExportService,
+                private route: ActivatedRoute,
                 private clipboardService: ClipboardService) {
     }
 
     ngOnInit() {
-        if (localStorage.getItem('data.exports.search') !== null) {
-            this.searchText = <string>localStorage.getItem('data.exports.search');
-        }
-        if (localStorage.getItem('data.exports.searchField') !== null) {
-            this.searchField = <string>localStorage.getItem('data.exports.searchField');
-        }
+        this.route.url.subscribe(url => {
+            if (url[url.length - 1]?.toString() === 'broker') {
+                this.brokerMode = true;
+                this.displayedColumns = ['select', 'filter_type', 'name', 'description', 'created_at', 'updated_at', 'info', 'edit', 'delete'];
+            }
+            if (localStorage.getItem('data.exports.search') !== null) {
+                this.searchText = <string>localStorage.getItem('data.exports.search');
+            }
+            if (localStorage.getItem('data.exports.searchField') !== null) {
+                this.searchField = <string>localStorage.getItem('data.exports.searchField');
+            }
 
-        this.initSearchAndGetExports();
+            this.initSearchAndGetExports();
+        });
     }
 
     ngOnDestroy() {
@@ -86,7 +98,8 @@ export class ExportComponent implements OnInit, OnDestroy {
         this.dialogsService.openDeleteDialog('export').afterClosed().subscribe((deleteExport: boolean) => {
             if (deleteExport) {
                 this.ready = false;
-                this.exportService.stopPipeline(exp).subscribe((response) => {
+                const obs = this.brokerMode ? this.brokerExportService.stopPipeline(exp) : this.exportService.stopPipeline(exp);
+                obs.subscribe((response) => {
                     if (response.status === 204) {
                         this.snackBar.open('Export deleted', undefined, {
                             duration: 2000,
@@ -134,7 +147,14 @@ export class ExportComponent implements OnInit, OnDestroy {
 
         this.exportSub = merge(this.sort.sortChange, this.paginator.page).pipe(startWith({}), switchMap(() => {
             this.ready = false;
-            return this.exportService.getExports(
+            return this.brokerMode ? this.brokerExportService.getExports(
+                this.searchText,
+                this.paginator.pageSize, this.paginator.pageSize * this.paginator.pageIndex,
+                this.sort.active,
+                this.sort.direction,
+                (this.showGenerated ? undefined : false),
+                this.searchField
+            ) : this.exportService.getExports(
                 this.searchText,
                 this.paginator.pageSize, this.paginator.pageSize * this.paginator.pageIndex,
                 this.sort.active,
@@ -194,16 +214,16 @@ export class ExportComponent implements OnInit, OnDestroy {
                 if (deleteExports) {
                     this.ready = false;
 
-                    let exportIDs: string[] = [];
+                    const exportIDs: string[] = [];
 
                     this.selection.selected.forEach((exp: ExportModel) => {
                             if (exp.ID !== undefined) {
-                                exportIDs.push(exp.ID)
+                                exportIDs.push(exp.ID);
                             }
                         }
                     );
-
-                    this.exportService.stopPipelines(exportIDs).subscribe(() => {
+                    const obs = this.brokerMode ? this.brokerExportService.stopPipelines(exportIDs) : this.exportService.stopPipelines(exportIDs);
+                    obs.subscribe(() => {
                         this.paginator.pageIndex = 0;
                         this.getExports(true);
                         this.selectionClear();

@@ -88,7 +88,7 @@ export class ImportTypesService {
             .pipe(delay(this.eventualConsistencyDelay));
     }
 
-    parseImportTypeExportValues(importType: ImportTypeModel): ExportValueModel[] {
+    parseImportTypeExportValues(importType: ImportTypeModel, includeComplex = false): ExportValueModel[] {
         this.types.set(this.STRING, 'string');
         this.types.set(this.INTEGER, 'int');
         this.types.set(this.FLOAT, 'float');
@@ -100,17 +100,17 @@ export class ImportTypesService {
             exportContent = importType.output;
         }
         const values: ExportValueModel[] = [];
-        this.fillValuesAndTags(values, exportContent, '');
+        this.fillValuesAndTags(values, exportContent, '', includeComplex);
         return values;
     }
 
     private fillValuesAndTags(values: ExportValueModel[],
-                              content: ImportTypeContentVariableModel, parentPath: string) {
-        if ((content.sub_content_variables === null || content.sub_content_variables.length === 0)
+                              content: ImportTypeContentVariableModel, parentPath: string, includeComplex = false) {
+        if (includeComplex || (content.sub_content_variables === null || content.sub_content_variables.length === 0)
             && this.types.has(content.type)) { // can only export primitive types
             const model = {
                 Name: content.name,
-                Path: parentPath + '.' + content.name,
+                Path: parentPath + (parentPath === '' ? '' : '.') + content.name,
                 Type: this.types.get(content.type),
                 Tag: content.use_as_tag && content.type === this.STRING,
             } as ExportValueModel;
@@ -126,9 +126,10 @@ export class ImportTypesService {
                 } as ExportValueModel;
                 values.push(tag);
             }
-        } else {
+        }
+        if (content.sub_content_variables !== null && content.sub_content_variables.length > 0) {
             const path = parentPath === '' ? content.name : parentPath + '.' + content.name;
-            content.sub_content_variables?.forEach(sub => this.fillValuesAndTags(values, sub, path));
+            content.sub_content_variables?.forEach(sub => this.fillValuesAndTags(values, sub, path, includeComplex));
         }
     }
 }
