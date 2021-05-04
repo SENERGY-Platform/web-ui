@@ -289,7 +289,6 @@ export class ImportTypesCreateEditComponent implements OnInit {
                     val.sub_content_variables = [];
                 }
                 this.autoFillContent(val);
-                console.log(val); // TODO
                 sub = val;
                 const data = this.dataSource.data;
                 this.dataSource.data = [];

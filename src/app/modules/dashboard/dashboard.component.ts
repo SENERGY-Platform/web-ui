@@ -174,7 +174,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.options.draggable.start = () => {
                 setTimeout(() => {
                     this.dragging = true;
-                    console.log(true); // TODO
                 }, 0);
             };
             this.options.draggable.stop = (item: GridsterItem, _, event: MouseEvent) => {
