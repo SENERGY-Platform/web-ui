@@ -28,6 +28,6 @@ FROM nginx
 COPY --from=builder /tmp/workspace/dist/senergy-web-ui/ /usr/share/nginx/html/
 COPY --from=builder /tmp/workspace/dist/senergy-web-ui/assets/nginx-custom.conf /etc/nginx/conf.d/default.conf
 RUN chmod -R a+r /usr/share/nginx/html
-CMD ["/bin/sh",  "-c",  "envsubst < /usr/share/nginx/html/assets/env.template.js > /usr/share/nginx/html/assets/env.js && exec nginx -g 'daemon off;'"]
+CMD ["/bin/sh",  "-c",  "envsubst < /usr/share/nginx/html/assets/env.init.template.js > /usr/share/nginx/html/assets/env.init.js && envsubst < /usr/share/nginx/html/assets/env.template.js > /usr/share/nginx/html/assets/env.js && exec nginx -g 'daemon off;'"]
 
 EXPOSE 80

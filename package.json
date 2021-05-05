@@ -4,8 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start_dev": "env-cmd envsub src/assets/env.template.js src/assets/env.js && NODE_OPTIONS=\"--max-old-space-size=8192\" ng serve",
-    "start_dev_win": "env-cmd envsub src\\assets\\env.template.js src\\assets\\env.js && node --max_old_space_size=8192 ./node_modules/@angular/cli/bin/ng serve",
+    "start_dev": "env-cmd envsub src/assets/env.init.template.js src/assets/env.init.js && env-cmd envsub src/assets/env.template.js src/assets/env.js && NODE_OPTIONS=\"--max-old-space-size=8192\" ng serve",
+    "start_dev_win": "env-cmd envsub src\\assets\\env.init.template.js src\\assets\\env.init.js && env-cmd envsub src\\assets\\env.template.js src\\assets\\env.js && node --max_old_space_size=8192 ./node_modules/@angular/cli/bin/ng serve",
     "build": "ng build",
     "test": "NODE_OPTIONS=\"--max-old-space-size=8192\" ng test",
     "lint": "ng lint",
