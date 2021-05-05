@@ -133,7 +133,7 @@
                                     </td>
                                     <td>
                                         <mat-form-field class="full-width" color="accent">
-                                            <input type="text" matInput placeholder="Value"
+                                            <input type="text" matInput placeholder="Value {{characteristicNames.get(element.message_event.selection.filter_criteria.characteristic_id || '')}} as JSON"
                                                    formControlName="value">
                                         </mat-form-field>
                                     </td>

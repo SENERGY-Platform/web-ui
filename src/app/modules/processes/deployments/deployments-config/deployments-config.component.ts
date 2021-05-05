@@ -38,6 +38,7 @@ import {HubModel, NetworksModel} from '../../../devices/networks/shared/networks
 import {NetworksService} from '../../../devices/networks/shared/networks.service';
 import {OperatorRepoService} from '../../../data/operator-repo/shared/operator-repo.service';
 import {OperatorModel} from '../../../data/operator-repo/shared/operator.model';
+import {CharacteristicsService} from '../../../metadata/characteristics/shared/characteristics.service';
 
 
 @Component({
@@ -67,6 +68,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     };
     selectedHubForm: FormControl = new FormControl(null);
     hubList: NetworksModel[] = [];
+    characteristicNames: Map<string, string> = new Map();
 
     constructor(private _formBuilder: FormBuilder,
                 private processRepoService: ProcessRepoService,
@@ -79,7 +81,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 private flowRepoService: FlowRepoService,
                 private operatorRepoService: OperatorRepoService,
                 private deploymentFogFactory: DeploymentsFogFactory,
-                private hubsService: NetworksService
+                private hubsService: NetworksService,
+                private characteristicsService: CharacteristicsService
     ) {
         this.getRouterParams();
         this.getFlows();
@@ -117,6 +120,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                     this.initOptionGroups(deployment);
                     this.initFormGroup(deployment);
                     this.ready = true;
+                    this.loadCharacteristicNames(deployment);
                 });
         } else if (this.deploymentId !== undefined) {
             this.deploymentsService.v2getDeployments(this.deploymentId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
@@ -126,6 +130,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                     this.initFormGroup(deployment);
                     this.deployment = deployment;
                     this.ready = true;
+                    this.loadCharacteristicNames(deployment);
                 } else {
                     this.snackBar.open('Error while copying the deployment! Probably old version', undefined, {duration: 2000});
                 }
@@ -452,5 +457,19 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             element.get('message_event.selection')?.patchValue({selected_service_id: null});
         }
         return options;
+    }
+
+    private loadCharacteristicNames(deployment: V2DeploymentsPreparedModel | null) {
+        if (!deployment) {
+            return;
+        }
+        deployment.elements.forEach(element => {
+            const characteristicId = element.message_event?.selection?.filter_criteria?.characteristic_id;
+            if (characteristicId && !this.characteristicNames.has(characteristicId)) {
+                this.characteristicsService.getCharacteristic(characteristicId).subscribe(value => {
+                    this.characteristicNames.set(characteristicId, value.name);
+                });
+            }
+        });
     }
 }
