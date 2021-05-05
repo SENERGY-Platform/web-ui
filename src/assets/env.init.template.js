@@ -19,9 +19,9 @@
     if (envLocation.length === 0) {
         envLocation = 'assets/env.js'
     }
-    document.write('<script src="'+envLocation+'" type="text/javascript"></script>');
+    document.write('<script src="'+envLocation+'" type="text/javascript" async="false"></script>');
     envOverride = "${ENV_OVERRIDE}";
     if (envOverride.length > 0) {
-        document.write('<script src="'+envOverride+'" type="text/javascript"></script>');
+        document.write('<script src="'+envOverride+'" type="text/javascript" async="false"></script>');
     }
 })(this);
