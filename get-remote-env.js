@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-(function () {
-    envLocation = "${ENV_URL}";
-    if (envLocation.length === 0) {
-        envLocation = 'assets/env.js'
-    }
-    document.write('<script src="'+envLocation+'" type="text/javascript" async="false"></script>');
-    envOverride = "${ENV_OVERRIDE}";
-    if (envOverride.length > 0) {
-        document.write('<script src="'+envOverride+'" type="text/javascript" async="false"></script>');
-    }
-})(this);
+const url = process.env.ENV_URL
+const http = url.startsWith('https') ? require('https') :  require('http');
+const fs = require('fs');
+
+const file = fs.createWriteStream("env.remote.js");
+http.get(url, function(response) {
+    response.pipe(file);
+});
