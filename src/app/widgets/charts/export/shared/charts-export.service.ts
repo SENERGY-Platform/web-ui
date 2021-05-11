@@ -154,9 +154,13 @@ export class ChartsExportService {
         const dataTable = new ChartDataTableModel([header]);
 
         series.forEach((item: (string | number | boolean)[]) => {
-                const dataPoint: (Date | number) [] = [new Date(<string>item[0])];
+                const dataPoint: (Date | number | null) [] = [new Date(<string>item[0])];
                 indices.forEach(resp => {
                     let value = item[resp.index];
+                    if (value === null || value === undefined) {
+                        dataPoint.push(null);
+                        return;
+                    }
                     const matchingRule = resp.conversions.find(rule => rule.from === value);
                     if (matchingRule !== undefined) {
                         value = matchingRule.to;
@@ -221,7 +225,7 @@ export class ChartsExportService {
                 interpolateNulls: true,
             });
         if (widget.properties.chartType === 'ColumnChart'
-            && dataTable.data.slice(1).findIndex(column => column.slice(1).findIndex(val => val < 0) !== -1) === -1 // all values >= 0 ?
+            && dataTable.data.slice(1).findIndex(column => column.slice(1).findIndex(val => val || 0 < 0) !== -1) === -1 // all values >= 0 ?
             && chartModel.options?.vAxis?.viewWindow !== undefined) {
 
             chartModel.options.vAxis.viewWindow.min = 0;

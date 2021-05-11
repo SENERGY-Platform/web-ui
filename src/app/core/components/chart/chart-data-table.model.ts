@@ -16,7 +16,7 @@
 
 export class ChartDataTableModel {
     constructor(
-        public data: (Date | string | number | {role: string}) [][],
+        public data: (Date | string | number | {role: string} | null) [][],
     ) {
     }
 }
