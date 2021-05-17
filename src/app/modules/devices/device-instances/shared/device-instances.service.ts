@@ -132,6 +132,13 @@ export class DeviceInstancesService {
         );
     }
 
+    deleteDeviceInstances(ids: string[]): Observable<DeviceInstancesUpdateModel | null> {
+        return this.http.request<DeviceInstancesUpdateModel>('DELETE', environment.deviceManagerUrl + '/devices',
+            {body: ids}).pipe(
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstances', null))
+        );
+    }
+
     getDeviceInstancesByTag(tagType: string, tag: string, feature: string, order: string, limit: number, offset: number): Observable<DeviceInstancesModel[]> {
         return this.http.get<DeviceInstancesModel[]>
         (environment.apiAggregatorUrl + '/devices?limit=' + limit + '&offset=' + offset + '&sort=' + feature + '.' + order + '&' + tagType + '=' + tag).pipe(

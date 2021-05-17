@@ -53,7 +53,9 @@ export class NetworksDeleteDialogComponent implements OnInit {
         this.ready = false;
         const ids = this.deviceSelection.selected.map(p => p.id);
         const obs: Observable<any>[] = [];
-        ids.forEach(id => obs.push(this.deviceInstancesService.deleteDeviceInstance(id)));
+        if (ids.length > 0) {
+            obs.push(this.deviceInstancesService.deleteDeviceInstances(ids));
+        }
         obs.push(this.networksService.delete(this.data.networkId));
         forkJoin(obs).subscribe(resps => {
             const ok = resps.findIndex((r: any) =>  r === null || r.status === 500) === -1;
