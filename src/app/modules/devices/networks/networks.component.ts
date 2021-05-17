@@ -24,11 +24,13 @@ import {Subscription} from 'rxjs';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {
     DeviceInstancesRouterState,
     DeviceInstancesRouterStateTypesEnum
 } from '../device-instances/device-instances.component';
+import {MatDialog} from '@angular/material/dialog';
+import {NetworksDeleteDialogComponent} from './dialogs/networks-delete-dialog.component';
+import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -63,7 +65,9 @@ export class NetworksComponent implements OnInit, OnDestroy {
                 private networksService: NetworksService,
                 private router: Router,
                 private dialogsService: DialogsService,
-                private snackBar: MatSnackBar) {
+                private dialog: MatDialog,
+                private deviceInstancesService: DeviceInstancesService,
+                ) {
     }
 
     ngOnInit() {
@@ -101,21 +105,18 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     delete(network: NetworksModel) {
-        this.dialogsService.openDeleteDialog('hub').afterClosed().subscribe((deleteNetwork: boolean) => {
-            if (deleteNetwork) {
-                this.networksService.delete(network.id).subscribe((resp: {status: number}) => {
-                    if (resp.status === 200) {
-                        this.networks.splice(this.networks.indexOf(network), 1);
-                        this.snackBar.open('Hub deleted successfully.', undefined, {duration: 2000});
-                        this.setRepoItemsParams(1);
-                        setTimeout(() => {
-                            this.getNetworks(false);
-                        }, 1000);
-                    } else {
-                        this.snackBar.open('Error while deleting the hub!', undefined, {duration: 2000});
-                    }
-                });
-            }
+        this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, 'name', 'asc', network.id, null).subscribe(devices => {
+            this.dialog.open(NetworksDeleteDialogComponent, {data: {networkId: network.id, devices: devices}, minWidth: '300px'})
+                .afterClosed().subscribe((deleteNetwork: boolean) => {
+
+                if (deleteNetwork) {
+                    this.networks.splice(this.networks.indexOf(network), 1);
+                    this.setRepoItemsParams(1);
+                    setTimeout(() => {
+                        this.getNetworks(false);
+                    }, 1000);
+                }
+            });
         });
     }
 

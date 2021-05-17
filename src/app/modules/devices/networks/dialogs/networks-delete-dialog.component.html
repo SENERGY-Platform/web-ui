@@ -1,0 +1,69 @@
+<!--
+  ~ Copyright 2021 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<h2 mat-dialog-title>Delete Hub</h2>
+
+<mat-dialog-content class="content">
+    <span *ngIf="data.devices.length === 0">
+        Should the hub be deleted?
+    </span>
+    <table #table mat-table
+           [dataSource]="data.devices" matSort *ngIf="data.devices.length > 0">
+        <ng-container matColumnDef="check">
+            <th mat-header-cell *matHeaderCellDef class="master-checkbox">
+                <mat-checkbox [checked]="deviceSelection.selected.length === data.devices.length"
+                              [indeterminate]="deviceSelection.selected.length !== data.devices.length && deviceSelection.selected.length > 0"
+                              (change)="masterCheckboxed($event)"></mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let m">
+                <mat-checkbox (change)="checkboxed(m, $event)" [checked]="deviceSelection.isSelected(m)">
+                </mat-checkbox>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let m">
+                {{m.name}}
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Device Type</th>
+            <td mat-cell *matCellDef="let m">
+                {{m.device_type.name}}
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="local_id">
+            <th mat-header-cell *matHeaderCellDef>Local ID</th>
+            <td mat-cell *matCellDef="let m">
+                {{m.local_id}}
+            </td>
+        </ng-container>
+
+        <tr mat-header-row
+            *matHeaderRowDef="['check', 'name', 'type', 'local_id']; sticky: true"></tr>
+        <tr mat-row
+            *matRowDef="let m; columns: ['check', 'name', 'type', 'local_id'];"></tr>
+    </table>
+
+</mat-dialog-content>
+
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="primary" (click)="close(false)">Abort</button>
+    <span fxFlex class="button-spacer"></span>
+    <button mat-raised-button color="accent" (click)="save()" [disabled]="!this.ready">
+        Delete Hub{{data.devices.length > 0 ? ' and selected Devices' : ''}}
+    </button>
+</mat-dialog-actions>
