@@ -46,5 +46,5 @@ Thumbs.db
 /src/environments/environment.dev.js
 /src/environments/environment.prod.ts
 /src/assets/env.js
-
+/src/assets/env.json
 set-env.js

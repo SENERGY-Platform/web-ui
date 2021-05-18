@@ -19,10 +19,10 @@ import {APP_INITIALIZER, LOCALE_ID, NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {CoreModule} from './core/core.module';
-import {AppRoutingModule} from './/app-routing.module';
+import {AppRoutingModule} from './app-routing.module';
 import {HttpClientModule} from '@angular/common/http';
 import {KeycloakAngularModule, KeycloakService} from 'keycloak-angular';
-import {keycloakInitializerService} from './core/services/keycloak-initializer.service';
+import {initializerService} from './core/services/initializer.service';
 import {DevicesModule} from './modules/devices/devices.module';
 import {DashboardModule} from './modules/dashboard/dashboard.module';
 import {DataModule} from './modules/data/data.module';
@@ -34,7 +34,7 @@ import {registerLocaleData} from '@angular/common';
 import {SettingsModule} from './modules/settings/settings.module';
 import {ClipboardModule} from 'ngx-clipboard';
 import {ImportsModule} from './modules/imports/imports.module';
-import {MetadataModule} from "./modules/metadata/metadata.module";
+import {MetadataModule} from './modules/metadata/metadata.module';
 
 registerLocaleData(localeDe);
 
@@ -62,7 +62,7 @@ registerLocaleData(localeDe);
     providers: [
         {
             provide: APP_INITIALIZER,
-            useFactory: keycloakInitializerService,
+            useFactory: initializerService,
             multi: true,
             deps: [KeycloakService]
         },

@@ -13,7 +13,5 @@
 :: limitations under the License.
 
 @echo off
-env-cmd node get-remote-env.js
 env-cmd envsub src\assets\env.template.js src\assets\env.js
-type env.remote.js src\assets\env.js > src\assets\env.js
-del env.remote.js
+env-cmd envsub src\assets\env.template.json src\assets\env.json

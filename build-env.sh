@@ -15,8 +15,4 @@
 # limitations under the License.
 
 envsubst < $1/assets/env.template.js > $1/assets/env.js # build env.js
-# INSERT REMOTE
-if [ ! -v ${ENV_URL} ]; then
-  curl -s -o /tmp/env.remote.js $ENV_URL
-  sed -i -e '/\/\/ REMOTE/r /tmp/env.remote.js' $1/assets/env.js #insert content from remote env.js
-fi
+envsubst < $1/assets/env.template.json > $1/assets/env.json # build env.json
