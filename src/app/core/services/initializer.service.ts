@@ -59,7 +59,6 @@ export function loadEnv(keycloak: KeycloakService, url: string): Promise<unknown
                     }
                     (environment as any)[s[0]] = s[1];
                 });
-                console.log(JSON.parse(JSON.stringify(environment))); // TODO
             });
     });
 }
