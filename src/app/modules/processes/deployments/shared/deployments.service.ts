@@ -70,13 +70,6 @@ export class DeploymentsService {
         );
     }
 
-    getDefinition(deploymentId: string): Observable<DeploymentsDefinitionModel[]> {
-        return this.http.get<DeploymentsDefinitionModel[]>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/definition').pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDefinition', []))
-        );
-    }
-
     getMissingDependencies(id: string): Observable<DeploymentsMissingDependenciesModel | null> {
         return this.http.get<DeploymentsMissingDependenciesModel>(environment.processDeploymentUrl + '/dependencies/' + encodeURIComponent(id)).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getMissingDependencies', null))
@@ -113,18 +106,6 @@ export class DeploymentsService {
             '/start?' + queryParts.join('&'));
     }
 
-    deleteDeployment(deploymentId: string): Observable<{ status: number }> {
-        return this.http.delete(environment.processDeploymentUrl + '/deployments/' + encodeURIComponent(deploymentId), {
-            responseType: 'text',
-            observe: 'response'
-        }).pipe(
-            map(resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'deleteDeployment', {status: 500}))
-        );
-    }
-
     v2deleteDeployment(deploymentId: string): Observable<{ status: number }> {
         return this.http.delete(environment.processDeploymentUrl + '/v2/deployments/' + encodeURIComponent(deploymentId), {
             responseType: 'text',
@@ -158,21 +139,9 @@ export class DeploymentsService {
         );
     }
 
-    getPreparedDeploymentsByXml(xml: string, svg: string): Observable<DeploymentsPreparedModel | null> {
-        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/prepared-deployments', {'xml': xml, 'svg': svg}).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null))
-        );
-    }
-
     v2getPreparedDeploymentsByXml(xml: string, svg: string): Observable<V2DeploymentsPreparedModel | null> {
         return this.http.post<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/prepared-deployments', {'xml': xml, 'svg': svg}).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null))
-        );
-    }
-
-    getDeployments(deploymentId: string): Observable<DeploymentsPreparedModel | null> {
-        return this.http.get<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments/' + deploymentId).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeployments', null))
         );
     }
 
@@ -185,15 +154,6 @@ export class DeploymentsService {
     getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null> {
         return this.http.get<V2DeploymentsPreparedConfigurableModel[]>(environment.configurablesUrl + '?characteristicId=' + characteristicId + '&serviceIds=' + serviceId).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getConfigurables', null))
-        );
-    }
-
-    postDeployments(deployment: DeploymentsPreparedModel, source: string = 'sepl'): Observable<{ status: number, id: string }> {
-        return this.http.post<DeploymentsPreparedModel>(environment.processDeploymentUrl + '/deployments?source=' + source, deployment, {observe: 'response'}).pipe(
-            map(resp => {
-                return {status: resp.status, id: resp.body ? resp.body.id : ''};
-            }),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'postDeployments', {status: 500, id: ''}))
         );
     }
 

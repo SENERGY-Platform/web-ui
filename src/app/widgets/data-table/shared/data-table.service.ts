@@ -62,7 +62,7 @@ export class DataTableService {
             observables.push(this.exportService.stopPipeline({ID: element.exportId} as ExportModel));
         }
         if (element.elementDetails.device?.deploymentId) {
-            observables.push(this.deploymentsService.deleteDeployment(element.elementDetails.device?.deploymentId));
+            observables.push(this.deploymentsService.v2deleteDeployment(element.elementDetails.device?.deploymentId));
         }
         if (element.elementDetails.device?.scheduleId) {
             observables.push(this.processSchedulerService.deleteSchedule(element.elementDetails.device?.scheduleId));
