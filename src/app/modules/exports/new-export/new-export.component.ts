@@ -58,6 +58,11 @@ export class NewExportComponent implements OnInit {
     exportForm = this.fb.group({
         selector: ['', Validators.required],
         targetSelector: [this.targetDb, Validators.required],
+        customBrokerEnabled: [''],
+        customMqttBroker: undefined,
+        customMqttUser: undefined,
+        customMqttPassword: undefined,
+        customMqttBaseTopic: undefined,
         name: ['', Validators.required],
         description: '',
         device: [null, Validators.required],
@@ -157,7 +162,12 @@ export class NewExportComponent implements OnInit {
                             this.exportForm.patchValue({
                                 name: exp.Name,
                                 description: exp.Description,
-                                timePath: exp.TimePath
+                                timePath: exp.TimePath,
+                                customBrokerEnabled: exp.CustomMqttBroker !== undefined && exp.CustomMqttBroker !== null,
+                                customMqttBroker: exp.CustomMqttBroker,
+                                customMqttUser: exp.CustomMqttUser,
+                                customMqttPassword: exp.CustomMqttPassword,
+                                customMqttBaseTopic: exp.CustomMqttBaseTopic,
                             });
                             if (exp.Offset === 'smallest') {
                                 this.exportForm.patchValue({allMessages: true});
@@ -259,6 +269,10 @@ export class NewExportComponent implements OnInit {
             this.export.Description = this.exportForm.value.description;
             this.export.TimePath = this.exportForm.value.timePath;
             this.export.Values = this.exportForm.value.exportValues;
+            this.export.CustomMqttBroker = this.exportForm.value.customMqttBroker;
+            this.export.CustomMqttUser = this.exportForm.value.customMqttUser;
+            this.export.CustomMqttPassword = this.exportForm.value.customMqttPassword;
+            this.export.CustomMqttBaseTopic = this.exportForm.value.customMqttBaseTopic;
 
             if (this.exportForm.value.selector === 'device') {
                 this.export.EntityName = this.exportForm.value.device.name;
@@ -285,7 +299,7 @@ export class NewExportComponent implements OnInit {
                     .editExport(this.id, this.export);
                 obs.subscribe((response) => {
                     if (response.status === 200) {
-                        self.router.navigate(['/exports' + (self.id?.startsWith(BrokerExportService.ID_PREFIX) ? 'broker' : 'db')]);
+                        self.router.navigate(['/exports', self.id?.startsWith(BrokerExportService.ID_PREFIX) ? 'broker' : 'db']);
                         self.snackBar.open('Export updated', undefined, {
                             duration: 2000,
                         });
@@ -300,8 +314,8 @@ export class NewExportComponent implements OnInit {
                 const obs = (this.exportForm.get('targetSelector')?.value === this.targetDb ?
                     this.exportService : this.brokerExportService).startPipeline(this.export);
                 obs.subscribe(function () {
-                    self.router.navigate(['/exports/' + (self.exportForm.get('targetSelector')?.value === self.targetDb
-                        ? 'db' : 'broker')]);
+                    self.router.navigate(['/exports', self.exportForm.get('targetSelector')?.value === self.targetDb
+                        ? 'db' : 'broker']);
                     self.snackBar.open('Export created', undefined, {
                         duration: 2000,
                     });
@@ -350,7 +364,35 @@ export class NewExportComponent implements OnInit {
 
                 });
             }
-            this.exportForm.get('targetSelector')?.valueChanges.subscribe(() => this.autofillValues());
+            this.exportForm.get('targetSelector')?.valueChanges.subscribe(target => {
+                if (target === this.targetDb) {
+                    this.exportForm.patchValue({
+                        customBrokerEnabled: false,
+                        customMqttBroker: undefined,
+                        customMqttUser: undefined,
+                        customMqttPassword: undefined,
+                        customMqttBaseTopic: undefined,
+                    });
+                }
+                this.autofillValues();
+            });
+            this.exportForm.get('customBrokerEnabled')?.valueChanges.subscribe(customBrokerEnabled => {
+                if (!customBrokerEnabled) {
+                    this.exportForm.patchValue({
+                        customMqttBroker: undefined,
+                        customMqttUser: undefined,
+                        customMqttPassword: undefined,
+                        customMqttBaseTopic: undefined,
+                    });
+                } else {
+                    this.exportForm.patchValue({
+                        customMqttBroker: '',
+                        customMqttUser: '',
+                        customMqttPassword: '',
+                        customMqttBaseTopic: '',
+                    });
+                }
+            });
             if (this.exportForm.get('device')) {
                 this.exportForm.get('device')!.valueChanges.subscribe((device: DeviceInstancesModel) => {
                     if (!_.isEmpty(device)) {

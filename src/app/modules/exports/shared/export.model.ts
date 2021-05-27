@@ -39,6 +39,10 @@ export interface ExportModel {
     Values: ExportValueModel [];
     CreatedAt: string;
     UpdatedAt: string;
+    CustomMqttBroker?: string;
+    CustomMqttBaseTopic?: string;
+    CustomMqttUser?: string;
+    CustomMqttPassword?: string;
 }
 
 export interface ExportValueBaseModel {

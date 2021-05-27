@@ -91,3 +91,8 @@ mat-grid-list {
     padding-bottom: 7px;
     overflow: hidden;
 }
+
+.pw {
+    max-width: fit-content;
+    min-width: 145px;
+}

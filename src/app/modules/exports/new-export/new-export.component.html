@@ -38,6 +38,27 @@
                         <mat-radio-button class="radio-button" [value]="targetBroker">Broker</mat-radio-button>
                     </mat-radio-group>
                 </div>
+                <div fxLayout="row" class="source-container" *ngIf="exportForm.controls.targetSelector.value === targetBroker">
+                    <mat-slide-toggle formControlName="customBrokerEnabled">Custom Broker</mat-slide-toggle>
+                </div>
+                <div fxLayout="column" class="source-container" *ngIf="exportForm.controls.customBrokerEnabled.value">
+                    <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label>Mqtt Broker Address</mat-label>
+                        <input matInput formControlName="customMqttBroker" placeholder="Broker"/>
+                    </mat-form-field>
+                    <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label>Mqtt User</mat-label>
+                        <input matInput formControlName="customMqttUser" placeholder="User"/>
+                    </mat-form-field>
+                    <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label>Mqtt Password</mat-label>
+                        <input matInput formControlName="customMqttPassword" placeholder="Password"/>
+                    </mat-form-field>
+                    <mat-form-field fxFill color="accent" appearance="outline">
+                        <mat-label>Mqtt Base Topic</mat-label>
+                        <input matInput formControlName="customMqttBaseTopic" placeholder="Base Topic"/>
+                    </mat-form-field>
+                </div>
                 <mat-form-field fxFill color="accent" appearance="outline">
                     <mat-label>Name</mat-label>
                     <input matInput formControlName="name" placeholder="Name" required="true"/>

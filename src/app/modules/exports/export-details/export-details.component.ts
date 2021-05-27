@@ -48,6 +48,7 @@ export class ExportDetailsComponent implements OnInit {
     displayedColumns: string[] = ['Name', 'Path', 'Type', 'LastValue', 'LastTimeStamp'];
     lastValuesReady = false;
     lastValuesRequestElementModels: LastValuesRequestElementModel[] = [];
+    showPassword = false;
 
     constructor(private route: ActivatedRoute,
                 private location: Location,
@@ -73,8 +74,10 @@ export class ExportDetailsComponent implements OnInit {
                 if (resp !== null) {
                     this.export = resp;
                 }
+                this.baseTopic = this.export.CustomMqttBroker !== undefined ? this.export?.CustomMqttBaseTopic?.slice(0,
+                    this.export?.CustomMqttBaseTopic?.length - 1) || '' : this.baseTopic;
 
-                this.export?.Values.forEach(value => {
+                this.export?.Values?.forEach(value => {
                         if (this.export?.Measurement !== undefined) {
                             this.lastValuesRequestElementModels.push({
                                 measurement: this.export?.Measurement,
@@ -116,8 +119,18 @@ export class ExportDetailsComponent implements OnInit {
         return this.id?.startsWith(BrokerExportService.ID_PREFIX) || false;
     }
 
+    get password(): string {
+        return this.showPassword ?
+            (this.export?.CustomMqttPassword !== undefined ? this.export?.CustomMqttPassword : 'Your SENERGY password') :
+            '●●●●●';
+    }
+
+    togglePasswordVisibility() {
+        this.showPassword = !this.showPassword;
+    }
+
     copyClipboard(element: ExportValueBaseModel) {
-        this.clipboardService.copyFromContent(this.baseTopic + '/' + element.Name);
+        this.clipboardService.copyFromContent(((this.baseTopic || '').length > 0 ? this.baseTopic + '/' : '') + element.Name);
         this.snackBar.open('Topic copied to clipboard', undefined, {
             duration: 2000,
         });    }

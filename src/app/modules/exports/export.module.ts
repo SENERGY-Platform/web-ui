@@ -43,6 +43,7 @@ import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSortModule} from '@angular/material/sort';
 import {MatExpansionModule} from '@angular/material/expansion';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 
 const exp = {path: 'exports/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'New Export' }};
 const dataExport = {path: 'exports/db', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' }};
@@ -77,6 +78,7 @@ const brokerDataExport = {path: 'exports/broker', pathMatch: 'full', component: 
         MatCardModule,
         MatTableModule,
         MatExpansionModule,
+        MatSlideToggleModule,
     ],
     declarations: [
         ExportComponent,

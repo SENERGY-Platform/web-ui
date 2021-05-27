@@ -63,13 +63,19 @@
                     <mat-list-item *ngIf="brokerMode">
                         <mat-icon mat-list-icon>call_split</mat-icon>
                         <h4 mat-line>Broker</h4>
-                        <p mat-line>{{brokerUrl}}</p>
+                        <p mat-line>{{export?.CustomMqttBroker || brokerUrl}}</p>
                         <mat-divider></mat-divider>
                     </mat-list-item>
                     <mat-list-item *ngIf="brokerMode">
                         <mat-icon mat-list-icon>vpn_key</mat-icon>
                         <h4 mat-line>Credentials</h4>
-                        <p mat-line>Username: {{userName}}<br>Password: Your SENERGY password</p>
+                        <div mat-line>
+                        <div>Username: {{export?.CustomMqttUser !== undefined ? export?.CustomMqttUser : userName}}</div>
+                        <div class="pw" (mouseenter)="togglePasswordVisibility()" (mouseleave)="togglePasswordVisibility()">
+                            Password: {{password}}
+                        </div>
+                        </div>
+
                         <mat-divider></mat-divider>
                     </mat-list-item>
                     <mat-list-item>
