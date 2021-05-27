@@ -26,6 +26,7 @@ import {MonitorDetailsDialogComponent} from '../dialogs/monitor-details-dialog.c
 import {MonitorProcessTotalModel} from './monitor-process-total.model';
 import {ProcessIncidentsService} from '../../incidents/shared/process-incidents.service';
 import {ProcessIncidentsModel} from '../../incidents/shared/process-incidents.model';
+import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 
 @Injectable({
     providedIn: 'root'
@@ -68,17 +69,15 @@ export class MonitorService {
     }
 
     stopMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]> {
-
-            const array: Observable<string>[] = [];
-
-            processes.forEach((process: MonitorProcessModel) => {
-                array.push(this.stopInstances(process.id));
-            });
-
-            return forkJoin(array).pipe(
-                catchError(this.errorHandlerService.handleError(MonitorService.name, 'stopMultipleInstances', []))
-            );
-        }
+        const ids: string[] = [];
+        processes.forEach((process: MonitorProcessModel) => {
+            ids.push(process.id);
+        });
+        return this.http.request('DELETE', environment.processServiceUrl + '/v2/process-instances', {responseType: 'text', body: ids}).pipe().pipe(
+            map(value => [value]),
+            catchError(this.errorHandlerService.handleError(MonitorService.name, 'stopInstances', ['error']))
+        );
+    }
 
     deleteInstances(id: string): Observable<string> {
         return this.http.delete
@@ -88,15 +87,13 @@ export class MonitorService {
     }
 
     deleteMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]> {
-
-        const array: Observable<string>[] = [];
-
+        const ids: string[] = [];
         processes.forEach((process: MonitorProcessModel) => {
-            array.push(this.deleteInstances(process.id));
+            ids.push(process.id);
         });
-
-        return forkJoin(array).pipe(
-            catchError(this.errorHandlerService.handleError(MonitorService.name, 'deleteMultipleInstances', []))
+        return this.http.request('DELETE', environment.processServiceUrl + '/v2/history/process-instances', {responseType: 'text', body: ids}).pipe(
+            map(value => [value]),
+            catchError(this.errorHandlerService.handleError(MonitorService.name, 'deleteInstances', ['error']))
         );
     }
 
