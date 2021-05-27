@@ -44,8 +44,9 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();
     dataSourceRunning = new MatTableDataSource<MonitorProcessModel>();
     displayedColumnsFinished: string[] = ['select', 'definitionName', 'id', 'startTime', 'endTime', 'duration', 'info', 'delete'];
-    displayedColumnsRunning: string[] = ['definitionName', 'id', 'startTime', 'action'];
+    displayedColumnsRunning: string[] = ['select', 'definitionName', 'id', 'startTime', 'action'];
     selection = new SelectionModel<MonitorProcessModel>(true, []);
+    selectionRunning = new SelectionModel<MonitorProcessModel>(true, []);
     activeIndex = 0;
     totalCountFinished = 0;
     totalCountRunning = 0;
@@ -73,6 +74,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         deleteInstances(id: string): Observable<string>
         deleteMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]>
         stopInstances(id: string): Observable<string>
+        stopMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]>
         getFilteredHistoryInstances(filter: string, searchtype: string, searchvalue: string, limit: number, offset: number, value: string, order: string): Observable<MonitorProcessTotalModel>
         openDetailsDialog(id: string): void
     };
@@ -123,6 +125,20 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         const numSelected = this.selection.selected.length;
         const currentViewed = this.dataSourceFinished.connect().value.length;
         return numSelected === currentViewed;
+    }
+
+    isAllSelectedRunning() {
+        const numSelected = this.selectionRunning.selected.length;
+        const currentViewed = this.dataSourceRunning.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggleRunning() {
+        if (this.isAllSelectedRunning()) {
+            this.selectionClearRunning();
+        } else {
+            this.dataSourceRunning.connect().value.forEach(row => this.selectionRunning.select(row));
+        }
     }
 
     masterToggle() {
@@ -181,6 +197,20 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             });
     }
 
+    deleteMultipleItemsRunning(): void {
+            this.dialogsService.openDeleteDialog(this.selectionRunning.selected.length + ' process(es)').afterClosed().subscribe(
+                (processesDelete: boolean) => {
+                    if (processesDelete) {
+                        this.isLoadingResultsRunning = true;
+                        this.monitorService.stopMultipleInstances(this.selectionRunning.selected).subscribe(() => {
+                            this.paginatorRunning.pageIndex = 0;
+                            this.reload();
+                            this.selectionClearRunning();
+                        });
+                    }
+                });
+        }
+
     stop(element: MonitorProcessModel): void {
         this.monitorService.stopInstances(element.id).subscribe((resp: string) => {
             if (resp === 'ok') {
@@ -193,6 +223,10 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     selectionClear(): void {
         this.selection.clear();
+    }
+
+    selectionClearRunning(): void {
+        this.selectionRunning.clear();
     }
 
     removeChip(): void {

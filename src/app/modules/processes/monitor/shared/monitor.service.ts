@@ -67,6 +67,19 @@ export class MonitorService {
         );
     }
 
+    stopMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]> {
+
+            const array: Observable<string>[] = [];
+
+            processes.forEach((process: MonitorProcessModel) => {
+                array.push(this.stopInstances(process.id));
+            });
+
+            return forkJoin(array).pipe(
+                catchError(this.errorHandlerService.handleError(MonitorService.name, 'stopMultipleInstances', []))
+            );
+        }
+
     deleteInstances(id: string): Observable<string> {
         return this.http.delete
         (environment.processServiceUrl + '/history/process-instance/' + id, {responseType: 'text'}).pipe(
