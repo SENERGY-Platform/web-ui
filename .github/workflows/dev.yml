@@ -37,3 +37,7 @@ jobs:
           tags: |
             smartenergyplatform/web-ui:dev
             ghcr.io/senergy-platform/web-ui:dev
+      - name: Deploy
+        uses: wei/curl@v1
+        with:
+          args: -X POST -u ${{ secrets.RANCHER_TOKEN }} ${{ secrets.RANCHER_URL }}${{ secrets.RANCHER_SERVICE }}?action=redeploy
