@@ -634,6 +634,9 @@ export class NewExportComponent implements OnInit {
             }
         }
         if (this.exportForm.value.selector === 'import') {
+            if (this.exportForm.value.import === null || this.exportForm.value.import === undefined) {
+                return;
+            }
             const importType = this.importTypes.get(this.exportForm.value.import.import_type_id);
             if (importType !== undefined) {
                 this.exportValues.clear();
