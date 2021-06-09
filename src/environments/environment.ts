@@ -27,7 +27,7 @@ export const environment = {
     keycloakUrl: env.keycloakUrl || 'http://localhost',
     configUrl: env.configUrl || 'http://localhost',
     theme: env.theme || 'senergy',
-    title: env.title || 'SENRGY',
+    title: env.title || 'SENERGY',
     /** URLs **/
     processDeploymentUrl: 'http://localhost',
     processServiceUrl: 'http://localhost',
