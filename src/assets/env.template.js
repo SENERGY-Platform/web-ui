@@ -20,3 +20,5 @@ window["env"]["keyCloakRealm"] = "${KEYCLOACK_REALM}";
 window["env"]["keyCloakClientId"] = "${KEYCLOACK_CLIENT_ID}";
 window["env"]["keycloakUrl"] = "${KEYCLOACK_URL}";
 window["env"]["configUrl"] = "${CONFIG_URL}";
+window["env"]["theme"] = "${THEME}";
+window["env"]["title"] = "${TITLE}";

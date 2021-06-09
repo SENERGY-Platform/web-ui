@@ -20,7 +20,7 @@
     </button>
     <a routerLink="/dashboard" (click)="resetSidenav()" class="image-wrapper" fxHide fxShow.gt-sm>
         <img class="logo"
-             src="src/img/SENERGY_LOGO-bunt_horizontal_medium_boldBulb130.svg">
+             src="{{getLogoUrl()}}">
     </a>
     <div class="mat-h4 color-accent">{{header}}</div>
     <span class="fill-remaining-space"></span>

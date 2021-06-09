@@ -26,6 +26,8 @@ export const environment = {
     keyCloakClientId: env.keyCloakClientId || 'frontend',
     keycloakUrl: env.keycloakUrl || 'http://localhost',
     configUrl: env.configUrl || 'http://localhost',
+    theme: env.theme || 'senergy',
+    title: env.title || 'SENRGY',
     /** URLs **/
     processDeploymentUrl: 'http://localhost',
     processServiceUrl: 'http://localhost',

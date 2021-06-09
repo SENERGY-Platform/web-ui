@@ -16,6 +16,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {KeycloakService} from 'keycloak-angular';
+import {ThemingService} from './core/services/theming.service';
 
 @Component({
   selector: 'senergy-root',
@@ -24,7 +25,7 @@ import {KeycloakService} from 'keycloak-angular';
 })
 export class AppComponent implements OnInit {
 
-    constructor(protected keycloak: KeycloakService) {
+    constructor(protected keycloak: KeycloakService, private themingService: ThemingService) {
     }
 
     ngOnInit() {
@@ -33,5 +34,6 @@ export class AppComponent implements OnInit {
         if (sub !== undefined) {
             localStorage.setItem('sub', sub);
         }
+        this.themingService.applyTheme();
     }
 }

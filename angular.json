@@ -30,7 +30,21 @@
             ],
             "styles": [
               "src/styles.css",
-              "src/theme.scss",
+              {
+                "input": "src/themes/lll.scss",
+                "bundleName": "lll",
+                "inject": false
+              },
+              {
+                "input": "src/themes/senergy.scss",
+                "bundleName": "senergy",
+                "inject": false
+              },
+              {
+                "input": "src/themes/platonam.scss",
+                "bundleName": "platonam",
+                "inject": false
+              },
               "node_modules/bpmn-js/dist/assets/diagram-js.css",
               "node_modules/bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css",
               "node_modules/bpmn-js-properties-panel/styles/properties.less",

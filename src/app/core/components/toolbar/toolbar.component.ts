@@ -22,6 +22,7 @@ import {AuthorizationService} from '../../services/authorization.service';
 import {SettingsDialogService} from '../../../modules/settings/shared/settings-dialog.service';
 import {NotificationService} from './notification/shared/notification.service';
 import {NotificationModel} from './notification/shared/notification.model';
+import {ThemingService} from "../../services/theming.service";
 
 @Component({
     selector: 'senergy-toolbar',
@@ -40,6 +41,7 @@ export class ToolbarComponent implements OnInit {
                 private activatedRoute: ActivatedRoute,
                 private authorizationService: AuthorizationService,
                 private settingsDialogService: SettingsDialogService,
+                private themingService: ThemingService,
                 private notificationService: NotificationService) {
     }
 
@@ -96,5 +98,9 @@ export class ToolbarComponent implements OnInit {
 
     openNotificationsDialog() {
         this.notificationService.openDialog().subscribe();
+    }
+
+    getLogoUrl(): string {
+        return this.themingService.getToolbarLogoUrl();
     }
 }
