@@ -419,7 +419,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         if (!(selected_service_id === undefined || selected_service_id === null)) {
             const servicePathOptions = selectedOption.get('servicePathOptions')?.value;
             if (servicePathOptions) {
-                options = servicePathOptions[selected_service_id] || [];
+                options = servicePathOptions.get(selected_service_id) || [];
             } else {
                 options = [];
             }
@@ -427,7 +427,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         if (!(importTypeId === undefined || importTypeId === null)) {
             const servicePathOptions = selectedOption.get('servicePathOptions')?.value;
             if (servicePathOptions) {
-                options = servicePathOptions[importTypeId] || [];
+                options = servicePathOptions.get(importTypeId) || [];
             } else {
                 options = [];
             }
