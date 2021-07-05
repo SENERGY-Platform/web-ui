@@ -441,7 +441,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                     } else if (this.select.selected?.value === this.getOptionValue(option)) {
                         return true;
                     }
-                    return this.getOptionViewValue(option).toLowerCase().indexOf(search.toLowerCase()) !== -1;
+                    return k.toLowerCase().indexOf(search.toLowerCase()) !== -1
+                        || this.getOptionViewValue(option).toLowerCase().indexOf(search.toLowerCase()) !== -1;
                 });
                 if (filtered.length > 0) {
                     r.set(k, filtered);
