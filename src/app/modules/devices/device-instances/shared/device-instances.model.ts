@@ -31,7 +31,7 @@ export interface DeviceInstancesBaseModel {
     id: string;
     local_id: string;
     name: string;
-    attributes: Attribute[];
+    attributes?: Attribute[];
 }
 
 export interface DeviceInstancesIntermediateModel extends DeviceInstancesBaseModel {

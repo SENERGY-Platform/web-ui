@@ -48,6 +48,9 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     }
 
     removeAttr(i: number) {
+        if (!this.device.attributes) {
+            this.device.attributes = [];
+        }
         this.device.attributes.splice(i, 1);
     }
 
