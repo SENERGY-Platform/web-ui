@@ -22,10 +22,16 @@ import {DeviceTypeServiceModel} from '../../../metadata/device-types-overview/sh
 import {ImportInstancesModel} from '../../../imports/import-instances/shared/import-instances.model';
 import {ImportTypeModel} from '../../../imports/import-types/shared/import-types.model';
 
+export interface Attribute {
+    key: string;
+    value: string;
+}
+
 export interface DeviceInstancesBaseModel {
     id: string;
     local_id: string;
     name: string;
+    attributes: Attribute[];
 }
 
 export interface DeviceInstancesIntermediateModel extends DeviceInstancesBaseModel {

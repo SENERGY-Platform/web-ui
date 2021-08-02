@@ -36,6 +36,25 @@
         <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="Local ID" [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}">
         </mat-form-field>
+
+        <mat-expansion-panel class="attributes">
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    Attributes
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div *ngFor="let attr of device.attributes; let i = index" class="attribute">
+                <mat-form-field class="third-width" color="accent">
+                    <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}">
+                </mat-form-field>
+                =
+                <mat-form-field class="third-width" color="accent">
+                    <input matInput placeholder="Value" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}">
+                </mat-form-field>
+                <button mat-stroked-button color="accent" (click)="removeAttr(i)"><mat-icon>remove</mat-icon></button>
+            </div>
+            <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+        </mat-expansion-panel>
     </form>
 </mat-dialog-content>
 

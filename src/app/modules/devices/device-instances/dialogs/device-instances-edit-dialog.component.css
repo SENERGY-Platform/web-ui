@@ -24,6 +24,20 @@
     width: 100%;
 }
 
+.third-width {
+    width: 33%;
+}
+
+.attributes {
+    margin-bottom: 5px;
+}
+
+.attribute {
+    justify-content: space-between;
+    display: flex;
+    align-items: baseline;
+}
+
 mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }

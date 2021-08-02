@@ -120,6 +120,7 @@ export class DeviceInstancesDialogService {
             local_id: deviceOut.local_id,
             name: deviceOut.name,
             device_type_id: deviceOut.device_type.id,
+            attributes: deviceOut.attributes
         };
     }
 }

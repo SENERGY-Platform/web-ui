@@ -46,4 +46,15 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     save(): void {
         this.dialogRef.close(this.device);
     }
+
+    removeAttr(i: number) {
+        this.device.attributes.splice(i, 1);
+    }
+
+    addAttr() {
+        if (!this.device.attributes) {
+            this.device.attributes = [];
+        }
+        this.device.attributes.push({key: '', value: ''});
+    }
 }
