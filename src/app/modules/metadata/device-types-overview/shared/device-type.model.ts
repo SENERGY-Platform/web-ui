@@ -21,6 +21,12 @@ export interface DeviceTypeBaseModel {
     id: string;
     name: string;
     description: string;
+    attributes?: Attribute[];
+}
+
+export interface Attribute {
+    key: string;
+    value: string;
 }
 
 export interface DeviceTypeModel extends DeviceTypeBaseModel {

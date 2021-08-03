@@ -16,6 +16,7 @@
 
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {
+    Attribute,
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeContentModel,
@@ -65,6 +66,7 @@ export class DeviceTypesComponent implements OnInit {
 
     firstFormGroup!: FormGroup;
     secondFormGroup: FormGroup = new FormGroup({services: new FormArray([])});
+    attrFormGroup: FormGroup = new FormGroup({attributes: new FormArray([])});
     editable = false;
     deviceTypeFunctionType = functionTypes;
     measuringFunctions: DeviceTypeFunctionModel[] = [];
@@ -116,6 +118,7 @@ export class DeviceTypesComponent implements OnInit {
             id: this.firstFormGroup.getRawValue().id, // use getRawValue because control is disabled
             name: this.firstFormGroup.value.name,
             description: this.firstFormGroup.value.description,
+            attributes: this.attrFormGroup.getRawValue().attributes,
             services: this.secondFormGroup.getRawValue().services,
             device_class_id: this.firstFormGroup.value.device_class_id,
         };
@@ -329,6 +332,7 @@ export class DeviceTypesComponent implements OnInit {
     private initFormControls() {
         this.initFirstFormGroup({} as DeviceTypeModel);
         this.initSecondFormGroup({} as DeviceTypeModel);
+        this.initAttrFormGroup({} as DeviceTypeModel);
     }
 
     private loadDataIfIdExists(): Observable<any> {
@@ -337,6 +341,7 @@ export class DeviceTypesComponent implements OnInit {
                 if (deviceType !== null) {
                     this.initFirstFormGroup(deviceType);
                     this.initSecondFormGroup(deviceType);
+                    this.initAttrFormGroup(deviceType);
                 }
 
                 // after loading data and init first and second form group
@@ -370,6 +375,14 @@ export class DeviceTypesComponent implements OnInit {
             formGroup.controls['functionType'].valueChanges.subscribe(() => {
                 formGroup.controls['function_ids'].setValue([]);
             });
+        });
+    }
+
+    private initAttrFormGroup(deviceType: DeviceTypeModel) {
+        this.attrFormGroup = this._formBuilder.group({
+            attributes: this._formBuilder.array(deviceType.attributes ?
+                deviceType.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) :
+                [], Validators.required)
         });
     }
 
@@ -427,6 +440,21 @@ export class DeviceTypesComponent implements OnInit {
                     disabled: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true
                 }, Validators.required],
                 aspect_ids: [deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : [], Validators.required],
+            });
+        }
+    }
+
+    private createAttrGroup(attribute: Attribute): FormGroup {
+        const disabled = !this.editable;
+        if (disabled) {
+            return this._formBuilder.group({
+                key: [{value: attribute.key, disabled: true}],
+                value: [{value: attribute.value, disabled: true}],
+            });
+        } else {
+            return this._formBuilder.group({
+                key: [attribute.key],
+                value: [attribute.value],
             });
         }
     }
@@ -634,5 +662,19 @@ export class DeviceTypesComponent implements OnInit {
             }
         });
         return list;
+    }
+
+    get attributes(): FormArray {
+        return this.attrFormGroup.get('attributes') as FormArray;
+    }
+
+    removeAttr(i: number) {
+        const formArray = <FormArray>this.attrFormGroup.controls['attributes'];
+        formArray.removeAt(i);
+    }
+
+    addAttr() {
+        const formArray = <FormArray>this.attrFormGroup.controls['attributes'];
+        formArray.push(this.createAttrGroup({} as Attribute));
     }
 }

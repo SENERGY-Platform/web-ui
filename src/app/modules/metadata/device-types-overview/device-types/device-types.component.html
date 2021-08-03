@@ -43,6 +43,25 @@
                     </table>
                 </div>
             </form>
+            <form [formGroup]="attrFormGroup">
+                <div class="divider">
+                    Attributes
+                    <mat-divider></mat-divider>
+                </div>
+                <div formArrayName="attributes">
+                    <div [formGroupName]="i" *ngFor="let _ of attributes.controls; let i = index" class="attribute">
+                        <mat-form-field class="third-width" color="accent">
+                            <input matInput placeholder="Key" formControlName="key">
+                        </mat-form-field>
+                        =
+                        <mat-form-field class="third-width" color="accent">
+                            <input matInput placeholder="Value" formControlName="value" >
+                        </mat-form-field>
+                        <button mat-stroked-button color="accent" (click)="removeAttr(i)" [disabled]="!editable"><mat-icon>remove</mat-icon></button>
+                    </div>
+                    <button mat-stroked-button color="accent" (click)="addAttr()" [disabled]="!editable">Add Attribute</button>
+                </div>
+            </form>
         </mat-step>
         <mat-step [stepControl]="secondFormGroup">
             <form [formGroup]="secondFormGroup">

@@ -71,3 +71,18 @@ table {
     margin-bottom: 0;
     list-style-type: none;
 }
+
+.third-width {
+    width: 33%;
+}
+
+.attribute {
+    justify-content: space-between;
+    display: flex;
+    align-items: baseline;
+}
+
+.divider {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
