@@ -61,6 +61,7 @@ export const environment = {
     notificationsWebsocketUrl: 'ws://localhost',
     configurablesUrl: 'http://localhost',
     marshallerUrl: 'http://localhost',
+    waitingRoomUrl: 'http://localhost',
     /** Semantic Keys **/
     timeStampCharacteristicId: 'urn:infai:ses:characteristic:xxxxxx-xxxx-xxxxx-xxxx',
     timeStampCharacteristicUnixSecondsId: 'urn:infai:ses:characteristic:xxxxxx-xxxx-xxxxx-xxxx',
@@ -83,7 +84,7 @@ export const environment = {
     importTypeIdYrForecast: 'urn:infai:ses:import-type:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     processFogDeploymentUrl: 'http://localhost',
     processSyncUrl: 'http://localhost',
-    equivalentProtocolSegments: '[]',
+    equivalentProtocolSegments: '[]'
 };
 
 /*

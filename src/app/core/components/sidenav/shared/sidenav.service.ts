@@ -66,7 +66,8 @@ export class SidenavService {
             new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'),
             new SidenavPageModel('Hubs', 'link', 'device_hub', '/devices/networks'),
             new SidenavPageModel('Devices', 'link', 'important_devices', '/devices/deviceinstances'),
-            new SidenavPageModel('Device Groups', 'link', 'group_work', '/devices/devicegroups')
+            new SidenavPageModel('Device Groups', 'link', 'group_work', '/devices/devicegroups'),
+            new SidenavPageModel('Waiting Room', 'link', 'chair', '/devices/waiting-room'),
         ]));
 
         sections.push(new SidenavSectionModel('Imports', 'toggle', 'east', '/imports', [

@@ -63,6 +63,7 @@ import {LocationsEditComponent} from './locations/edit/locations-edit.component'
 import {DeviceGroupsPipelineHelperDialogComponent} from './device-groups/edit/device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 import {DeviceGroupsSelectDialogComponent} from './device-groups/dialog/device-groups-select-dialog.component';
 import {NetworksDeleteDialogComponent} from './networks/dialogs/networks-delete-dialog.component';
+import {WaitingRoomComponent} from './waiting-room/waiting-room.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Hubs'}};
 const deviceInstances = {
@@ -96,6 +97,13 @@ const locations = {
     component: LocationsComponent,
     data: {header: 'Locations'}
 };
+const waitingRoom = {
+    path: 'devices/waiting-room',
+    pathMatch: 'full',
+    component: WaitingRoomComponent,
+    data: {header: 'Waiting-Room'}
+};
+
 const locationsCreate = {
     path: 'devices/locations/edit',
     pathMatch: 'full',
@@ -143,6 +151,7 @@ const locationsEdit = {
         MatProgressSpinnerModule,
         RouterModule.forChild([
             locations,
+            waitingRoom,
             locationsCreate,
             locationsEdit,
             networks,
@@ -169,6 +178,7 @@ const locationsEdit = {
         LocationsComponent,
         LocationsEditComponent,
         DeviceGroupsPipelineHelperDialogComponent,
+        WaitingRoomComponent
     ],
 })
 
