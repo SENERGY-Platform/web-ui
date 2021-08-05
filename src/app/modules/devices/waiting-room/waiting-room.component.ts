@@ -41,7 +41,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     @ViewChild('sort', {static: false}) sort!: MatSort;
 
     selection = new SelectionModel<WaitingDeviceModel>(true, []);
-    displayedColumns: string[] = ['select', 'local_id', 'name', 'created_at', 'updated_at', 'info', 'edit', 'use', 'delete'];
+    displayedColumns: string[] = ['select', 'name', 'created_at', 'updated_at', 'info', 'edit', 'use', 'delete'];
     totalCount = 0;
 
     devices: WaitingDeviceModel[] = [] as WaitingDeviceModel[];
