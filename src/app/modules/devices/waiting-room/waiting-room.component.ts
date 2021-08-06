@@ -187,7 +187,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
             if (deleteExport) {
                 this.ready = false;
                 this.waitingRoomService.deleteDevice(local_id).subscribe((response) => {
-                    if (response.status === 204) {
+                    if (response.status < 300) {
                         this.snackBar.open('Device deleted', undefined, {
                             duration: 2000,
                         });
@@ -208,7 +208,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
             if (deleteExport) {
                 this.ready = false;
                 this.waitingRoomService.useDevice(local_id).subscribe((response) => {
-                    if (response.status === 204) {
+                    if (response.status < 300) {
                         this.snackBar.open('Device used', undefined, {
                             duration: 2000,
                         });
