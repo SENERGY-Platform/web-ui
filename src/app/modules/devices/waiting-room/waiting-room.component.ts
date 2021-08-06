@@ -17,7 +17,7 @@
 
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {MatDialog} from '@angular/material/dialog';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
@@ -29,6 +29,12 @@ import {MatTableDataSource} from '@angular/material/table';
 import {WaitingDeviceListModel, WaitingDeviceModel} from './shared/waiting-room.model';
 import {startWith, switchMap} from 'rxjs/internal/operators';
 import {WaitingRoomService} from './shared/waiting-room.service';
+import {DeviceInstancesModel} from '../device-instances/shared/device-instances.model';
+import {DeviceInstancesEditDialogComponent} from '../device-instances/dialogs/device-instances-edit-dialog.component';
+import {DeviceInstancesUpdateModel} from '../device-instances/shared/device-instances-update.model';
+import {WaitingRoomDeviceEditDialogComponent} from './dialogs/waiting-room-device-edit-dialog.component';
+import {ExportModel} from '../../exports/shared/export.model';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 
 @Component({
@@ -58,7 +64,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
                 private searchbarService: SearchbarService,
                 private waitingRoomService: WaitingRoomService,
                 private snackBar: MatSnackBar,
-                private router: Router
+                private dialogsService: DialogsService,
     ) {
     }
 
@@ -102,7 +108,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
                 this.paginator.pageSize, this.paginator.pageSize * this.paginator.pageIndex,
                 this.sort.active,
                 this.sort.direction,
-                (this.showHidden ? undefined : false)
+                this.showHidden
             );
         })).subscribe(
             (resp: WaitingDeviceListModel | null) => {
@@ -137,5 +143,137 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         } else {
             this.devicesDataSource.connect().value.forEach(row => this.selection.select(row));
         }
+    }
+
+    openDetailsDialog(device: WaitingDeviceModel) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {
+            device: JSON.parse(JSON.stringify(device)),      // create copy of object
+            disabled: true
+        };
+
+        const editDialogRef = this.dialog.open(WaitingRoomDeviceEditDialogComponent, dialogConfig);
+    }
+
+    openEditDialog(device: DeviceInstancesModel): void {
+
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {
+            device: JSON.parse(JSON.stringify(device)),      // create copy of object
+            disabled: false
+        };
+
+        const editDialogRef = this.dialog.open(WaitingRoomDeviceEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((deviceOut: WaitingDeviceModel) => {
+            if (deviceOut !== undefined) {
+                this.waitingRoomService.updateDevice(deviceOut).subscribe(
+                    (deviceResp: WaitingDeviceModel | null) => {
+                        if (deviceResp === null) {
+                            this.snackBar.open('Error while updating the device!', undefined, {duration: 2000});
+                        } else {
+                            Object.assign(device, deviceOut);
+                            this.snackBar.open('Device updated successfully.', undefined, {duration: 2000});
+                        }
+                    });
+            }
+        });
+    }
+
+    deleteDevice(local_id: string) {
+        this.dialogsService.openDeleteDialog('device').afterClosed().subscribe((deleteExport: boolean) => {
+            if (deleteExport) {
+                this.ready = false;
+                this.waitingRoomService.deleteDevice(local_id).subscribe((response) => {
+                    if (response.status === 204) {
+                        this.snackBar.open('Device deleted', undefined, {
+                            duration: 2000,
+                        });
+                        this.getDevices(true);
+                    } else {
+                        this.snackBar.open('Device could not be deleted', undefined, {
+                            duration: 2000,
+                        });
+                    }
+                    this.ready = true;
+                });
+            }
+        });
+    }
+
+    useDevice(local_id: string) {
+        this.dialogsService.openConfirmDialog('Use Device', 'Do you really want to transfer this device to Device-Instances?').afterClosed().subscribe((deleteExport: boolean) => {
+            if (deleteExport) {
+                this.ready = false;
+                this.waitingRoomService.useDevice(local_id).subscribe((response) => {
+                    if (response.status === 204) {
+                        this.snackBar.open('Device used', undefined, {
+                            duration: 2000,
+                        });
+                        this.getDevices(true);
+                    } else {
+                        this.snackBar.open('Device could not be used', undefined, {
+                            duration: 2000,
+                        });
+                    }
+                    this.ready = true;
+                });
+            }
+        });
+    }
+
+    deleteMultipleItems(): void {
+        this.dialogsService.openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : ' device')).afterClosed().subscribe(
+            (deleteDevice: boolean) => {
+
+                if (deleteDevice) {
+                    this.ready = false;
+
+                    const deviceIds: string[] = [];
+
+                    this.selection.selected.forEach((exp: WaitingDeviceModel) => {
+                            if (exp.local_id !== undefined) {
+                                deviceIds.push(exp.local_id);
+                            }
+                        }
+                    );
+                    this.waitingRoomService.deleteMultipleDevices(deviceIds).subscribe(() => {
+                        this.paginator.pageIndex = 0;
+                        this.getDevices(true);
+                        this.selectionClear();
+
+                        this.ready = true;
+                    });
+                }
+            });
+    }
+
+    useMultipleItems(): void {
+        const text = 'Do you really want to transfer ' + this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : 'this device') + ' to Device-Instances?';
+        this.dialogsService.openConfirmDialog('Use Devices', text).afterClosed().subscribe(
+            (deleteDevice: boolean) => {
+
+                if (deleteDevice) {
+                    this.ready = false;
+
+                    const deviceIds: string[] = [];
+
+                    this.selection.selected.forEach((exp: WaitingDeviceModel) => {
+                            if (exp.local_id !== undefined) {
+                                deviceIds.push(exp.local_id);
+                            }
+                        }
+                    );
+                    this.waitingRoomService.useMultipleDevices(deviceIds).subscribe(() => {
+                        this.paginator.pageIndex = 0;
+                        this.getDevices(true);
+                        this.selectionClear();
+
+                        this.ready = true;
+                    });
+                }
+            });
     }
 }

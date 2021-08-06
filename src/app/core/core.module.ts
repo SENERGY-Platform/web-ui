@@ -50,6 +50,7 @@ import {MatListModule} from '@angular/material/list';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatSelectModule} from '@angular/material/select';
 import {SelectSearchComponent} from './components/select-search/select-search.component';
+import {ConfirmDialogComponent} from './dialogs/confirm-dialog.component';
 
 
 @NgModule({
@@ -88,7 +89,7 @@ import {SelectSearchComponent} from './components/select-search/select-search.co
         ShortInputVariableNamePipe,
         ShortInputVariableValuePipe,
         DeleteDialogComponent,
-        DeleteDialogComponent,
+        ConfirmDialogComponent,
         WidgetNoDataComponent,
         NotificationDialogComponent,
         SelectSearchComponent,

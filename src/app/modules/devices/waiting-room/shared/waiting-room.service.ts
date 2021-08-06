@@ -24,7 +24,7 @@ import {LocationModel} from '../../locations/shared/locations.model';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ExportResponseModel} from '../../../exports/shared/export.model';
-import {WaitingDeviceListModel} from './waiting-room.model';
+import {WaitingDeviceListModel, WaitingDeviceModel} from './waiting-room.model';
 
 @Injectable({
     providedIn: 'root'
@@ -33,6 +33,48 @@ export class WaitingRoomService {
     constructor(private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService,
                 private snackBar: MatSnackBar) {
+    }
+
+    updateDevice(device: WaitingDeviceModel): Observable<WaitingDeviceModel | null> {
+        return this.http.put<WaitingDeviceModel>(environment.waitingRoomUrl + '/devices/' + encodeURIComponent(device.local_id), device).pipe(
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'updateDevice', null))
+        );
+    }
+
+    useDevice(localId: string): Observable<{status: number}> {
+        return this.http.post(environment.waitingRoomUrl + '/used/devices/' + encodeURIComponent(localId), null, {responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'useDevice', {status: 404}))
+        );
+    }
+
+    useMultipleDevices(deviceIds: string[]): Observable<{status: number}> {
+        return this.http.request('DELETE', environment.waitingRoomUrl + '/used/devices', {body: deviceIds, responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'useMultipleDevices: Error', {status: 404}))
+        );
+    }
+
+    deleteDevice(localId: string): Observable<{status: number}> {
+        return this.http.delete(environment.waitingRoomUrl + '/devices/' + encodeURIComponent(localId), {responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'deleteDevice', {status: 404}))
+        );
+    }
+
+    deleteMultipleDevices(deviceIds: string[]): Observable<{status: number}> {
+        return this.http.request('DELETE', environment.waitingRoomUrl + '/devices', {body: deviceIds, responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'deleteMultipleDevices: Error', {status: 404}))
+        );
     }
 
     searchDevices(search?: string, limit?: number, offset?: number, sort?: string, order?: string, showHidden?: boolean): Observable<WaitingDeviceListModel | null> {
@@ -51,7 +93,14 @@ export class WaitingRoomService {
 
         return this.http.get<WaitingDeviceListModel>(url)
             .pipe(
-                map((resp: WaitingDeviceListModel) => resp || []),
+                map((resp: WaitingDeviceListModel) => resp || {
+                    result: [],
+                    total: 0
+                } as WaitingDeviceListModel),
+                map((resp: WaitingDeviceListModel) => {
+                    resp.result = resp.result ? resp.result : [];
+                    return resp;
+                }),
                 catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'searchDevices: Error', null)
                 )
             );
