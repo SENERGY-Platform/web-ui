@@ -102,7 +102,7 @@ const waitingRoom = {
     path: 'devices/waiting-room',
     pathMatch: 'full',
     component: WaitingRoomComponent,
-    data: {header: 'Waiting-Room'}
+    data: {header: 'Waiting Room'}
 };
 
 const locationsCreate = {
