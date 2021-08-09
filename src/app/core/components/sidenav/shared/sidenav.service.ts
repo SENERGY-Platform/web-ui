@@ -18,6 +18,10 @@ import {EventEmitter, Injectable, Output} from '@angular/core';
 
 import {SidenavSectionModel} from './sidenav-section.model';
 import {SidenavPageModel} from './sidenav-page.model';
+import {HttpClient} from '@angular/common/http';
+import {ErrorHandlerService} from '../../../services/error-handler.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {WaitingRoomService} from '../../../../modules/devices/waiting-room/shared/waiting-room.service';
 
 @Injectable({
     providedIn: 'root',
@@ -28,6 +32,9 @@ export class SidenavService {
 
     private isToggled = false;
     private section = '';
+
+    constructor(private waitingRoomService: WaitingRoomService) {
+    }
 
     toggle(sidenavOpen: boolean): void {
         this.isToggled = sidenavOpen;
@@ -62,12 +69,20 @@ export class SidenavService {
             new SidenavPageModel('Pipelines', 'link', 'analytics', '/data/pipelines')
         ]));
 
+
+        const waitingRoom = new SidenavPageModel('Waiting Room', 'link', 'chair', '/devices/waiting-room', '42');
+        this.waitingRoomService.searchDevices('', 1, 0, 'name', 'asc', false).subscribe(value => {
+            if (value) {
+                waitingRoom.badge = String(value.total);
+            }
+        });
+
         sections.push(new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', [
             new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'),
             new SidenavPageModel('Hubs', 'link', 'device_hub', '/devices/networks'),
             new SidenavPageModel('Devices', 'link', 'important_devices', '/devices/deviceinstances'),
             new SidenavPageModel('Device Groups', 'link', 'group_work', '/devices/devicegroups'),
-            new SidenavPageModel('Waiting Room', 'link', 'chair', '/devices/waiting-room'),
+            waitingRoom
         ]));
 
         sections.push(new SidenavSectionModel('Imports', 'toggle', 'east', '/imports', [
@@ -86,8 +101,6 @@ export class SidenavService {
 
         return sections;
     }
-
-    constructor() { }
 }
 
 

@@ -41,12 +41,16 @@
                 <ul [ngClass]="{'toggled': isSectionOpen(section)}"
                     class="menu-toggle-list">
                     <li *ngFor="let page of section.pages">
-                            <button mat-button
-                                    routerLink="{{page.state}}" routerLinkActive="background-color-sidenav"
-                                    (click)="closeSidenav()" class="md-button-toggle">
-                                <mat-icon>{{page.icon}}</mat-icon>
-                                {{page.name}}
-                            </button>
+                        <button mat-button
+                                routerLink="{{page.state}}" routerLinkActive="background-color-sidenav"
+                                (click)="closeSidenav()" class="md-button-toggle">
+                            <mat-icon matBadge="{{page.badge}}"
+                                      [matBadgeHidden]="!page.badge || page.badge == ''"
+                                      matBadgePosition="below before"
+                                      matBadgeSize="small"
+                                      matBadgeColor="accent">{{page.icon}}</mat-icon>
+                            {{page.name}}
+                        </button>
                     </li>
                 </ul>
             </li>
