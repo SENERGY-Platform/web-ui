@@ -47,7 +47,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     @ViewChild('sort', {static: false}) sort!: MatSort;
 
     selection = new SelectionModel<WaitingDeviceModel>(true, []);
-    displayedColumns: string[] = ['select', 'name', 'created_at', 'updated_at', 'info', 'edit', 'use', 'delete'];
+    displayedColumns: string[] = ['select', 'name', 'created_at', 'updated_at', 'info', 'edit', 'use', 'toggle_hide', 'delete'];
     totalCount = 0;
 
     devices: WaitingDeviceModel[] = [] as WaitingDeviceModel[];
@@ -183,8 +183,8 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     }
 
     deleteDevice(local_id: string) {
-        this.dialogsService.openDeleteDialog('device').afterClosed().subscribe((deleteExport: boolean) => {
-            if (deleteExport) {
+        this.dialogsService.openDeleteDialog('device').afterClosed().subscribe((deleteDevice: boolean) => {
+            if (deleteDevice) {
                 this.ready = false;
                 this.waitingRoomService.deleteDevice(local_id).subscribe((response) => {
                     if (response.status < 300) {
@@ -204,8 +204,8 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     }
 
     useDevice(local_id: string) {
-        this.dialogsService.openConfirmDialog('Use Device', 'Do you really want to transfer this device to Device-Instances?').afterClosed().subscribe((deleteExport: boolean) => {
-            if (deleteExport) {
+        this.dialogsService.openConfirmDialog('Use Device', 'Do you really want to transfer this device to Device-Instances?').afterClosed().subscribe((useDevice: boolean) => {
+            if (useDevice) {
                 this.ready = false;
                 this.waitingRoomService.useDevice(local_id).subscribe((response) => {
                     if (response.status < 300) {
@@ -224,7 +224,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         });
     }
 
-    deleteMultipleItems(): void {
+    deleteMultipleDevices(): void {
         this.dialogsService.openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : ' device')).afterClosed().subscribe(
             (deleteDevice: boolean) => {
 
@@ -250,12 +250,12 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
             });
     }
 
-    useMultipleItems(): void {
+    useMultipleDevices(): void {
         const text = 'Do you really want to transfer ' + this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : 'this device') + ' to Device-Instances?';
         this.dialogsService.openConfirmDialog('Use Devices', text).afterClosed().subscribe(
-            (deleteDevice: boolean) => {
+            (useDevice: boolean) => {
 
-                if (deleteDevice) {
+                if (useDevice) {
                     this.ready = false;
 
                     const deviceIds: string[] = [];
@@ -275,5 +275,123 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
                     });
                 }
             });
+    }
+
+    hideDevice(local_id: string) {
+        this.dialogsService.openConfirmDialog('Hide Device', 'Do you really want to hide this device?').afterClosed().subscribe((hideDevice: boolean) => {
+            if (hideDevice) {
+                this.ready = false;
+                this.waitingRoomService.hideDevice(local_id).subscribe((response) => {
+                    if (response.status < 300) {
+                        this.snackBar.open('Device hidden', undefined, {
+                            duration: 2000,
+                        });
+                        this.getDevices(true);
+                    } else {
+                        this.snackBar.open('Device could not be hidden', undefined, {
+                            duration: 2000,
+                        });
+                    }
+                    this.ready = true;
+                });
+            }
+        });
+    }
+
+    hideMultipleDevices(): void {
+        const text = 'Do you really want to hide ' + this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : 'this device') + '?';
+        this.dialogsService.openConfirmDialog('Hide Devices', text).afterClosed().subscribe(
+            (ok: boolean) => {
+
+                if (ok) {
+                    this.ready = false;
+
+                    const deviceIds: string[] = [];
+
+                    this.selection.selected.forEach((exp: WaitingDeviceModel) => {
+                            if (exp.local_id !== undefined) {
+                                deviceIds.push(exp.local_id);
+                            }
+                        }
+                    );
+                    this.waitingRoomService.hideMultipleDevices(deviceIds).subscribe(() => {
+                        this.paginator.pageIndex = 0;
+                        this.getDevices(true);
+                        this.selectionClear();
+
+                        this.ready = true;
+                    });
+                }
+            });
+    }
+
+    showDevice(local_id: string) {
+        this.dialogsService.openConfirmDialog('Hide Device', 'Do you really want to show this device?').afterClosed().subscribe((hideDevice: boolean) => {
+            if (hideDevice) {
+                this.ready = false;
+                this.waitingRoomService.showDevice(local_id).subscribe((response) => {
+                    if (response.status < 300) {
+                        this.snackBar.open('Device shown', undefined, {
+                            duration: 2000,
+                        });
+                        this.getDevices(true);
+                    } else {
+                        this.snackBar.open('Device could not be shown', undefined, {
+                            duration: 2000,
+                        });
+                    }
+                    this.ready = true;
+                });
+            }
+        });
+    }
+
+    showMultipleDevices(): void {
+        const text = 'Do you really want to show ' + this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : 'this device') + '?';
+        this.dialogsService.openConfirmDialog('Show Devices', text).afterClosed().subscribe(
+            (ok: boolean) => {
+
+                if (ok) {
+                    this.ready = false;
+
+                    const deviceIds: string[] = [];
+
+                    this.selection.selected.forEach((exp: WaitingDeviceModel) => {
+                            if (exp.local_id !== undefined) {
+                                deviceIds.push(exp.local_id);
+                            }
+                        }
+                    );
+                    this.waitingRoomService.showMultipleDevices(deviceIds).subscribe(() => {
+                        this.paginator.pageIndex = 0;
+                        this.getDevices(true);
+                        this.selectionClear();
+
+                        this.ready = true;
+                    });
+                }
+            });
+    }
+
+    get selectedContainsShown(): boolean {
+        let result = false;
+        this.selection.selected.forEach((device: WaitingDeviceModel) => {
+                if (!device.hidden) {
+                    result = true;
+                }
+            }
+        );
+        return result;
+    }
+
+    get selectedContainsHidden(): boolean {
+        let result = false;
+        this.selection.selected.forEach((device: WaitingDeviceModel) => {
+                if (device.hidden) {
+                    result = true;
+                }
+            }
+        );
+        return result;
     }
 }

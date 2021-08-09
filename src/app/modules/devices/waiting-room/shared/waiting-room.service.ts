@@ -36,13 +36,15 @@ export class WaitingRoomService {
     }
 
     updateDevice(device: WaitingDeviceModel): Observable<WaitingDeviceModel | null> {
-        return this.http.put<WaitingDeviceModel>(environment.waitingRoomUrl + '/devices/' + encodeURIComponent(device.local_id), device).pipe(
+        const url = environment.waitingRoomUrl + '/devices/' + encodeURIComponent(device.local_id);
+        return this.http.put<WaitingDeviceModel>(url, device).pipe(
             catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'updateDevice', null))
         );
     }
 
     useDevice(localId: string): Observable<{status: number}> {
-        return this.http.post(environment.waitingRoomUrl + '/used/devices/' + encodeURIComponent(localId), null, {responseType: 'text', observe: 'response'}).pipe(
+        const url = environment.waitingRoomUrl + '/used/devices/' + encodeURIComponent(localId);
+        return this.http.post(url, null, {responseType: 'text', observe: 'response'}).pipe(
             map( resp => {
                 return {status: resp.status};
             }),
@@ -51,7 +53,7 @@ export class WaitingRoomService {
     }
 
     useMultipleDevices(deviceIds: string[]): Observable<{status: number}> {
-        return this.http.request('DELETE', environment.waitingRoomUrl + '/used/devices', {body: deviceIds, responseType: 'text', observe: 'response'}).pipe(
+        return this.http.request('POST', environment.waitingRoomUrl + '/used/devices', {body: deviceIds, responseType: 'text', observe: 'response'}).pipe(
             map( resp => {
                 return {status: resp.status};
             }),
@@ -106,4 +108,41 @@ export class WaitingRoomService {
             );
     }
 
+    hideDevice(localId: string): Observable<{status: number}> {
+        const url = environment.waitingRoomUrl + '/hidden/devices/' + encodeURIComponent(localId);
+        return this.http.put(url, null, {responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'hideDevice', {status: 404}))
+        );
+    }
+
+    hideMultipleDevices(deviceIds: string[]): Observable<{status: number}> {
+        return this.http.request('PUT', environment.waitingRoomUrl + '/hidden/devices', {body: deviceIds, responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'hideMultipleDevices: Error', {status: 404}))
+        );
+    }
+
+    showDevice(localId: string): Observable<{status: number}> {
+       const url = environment.waitingRoomUrl + '/shown/devices/' + encodeURIComponent(localId);
+        return this.http.put(url, null, {responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'showDevice', {status: 404}))
+        );
+    }
+
+    showMultipleDevices(deviceIds: string[]): Observable<{status: number}> {
+        return this.http.request('PUT', environment.waitingRoomUrl + '/shown/devices', {body: deviceIds, responseType: 'text', observe: 'response'}).pipe(
+            map( resp => {
+                return {status: resp.status};
+            }),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'showMultipleDevices: Error', {status: 404}))
+        );
+    }
 }
