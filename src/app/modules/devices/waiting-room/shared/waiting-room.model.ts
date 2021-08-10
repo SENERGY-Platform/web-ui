@@ -37,7 +37,7 @@ export interface WaitingDeviceListModel {
 
 export interface WaitingRoomEvent {
     type: string;
-    payload: string | WaitingDeviceModel | null | undefined;
+    payload: string | null | undefined;
 }
 
 export const WaitingRoomEventTypeError = 'error';

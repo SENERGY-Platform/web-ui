@@ -178,6 +178,13 @@ export class WaitingRoomService {
             this.authorizationService.getToken().then(token => ws?.next({type: WaitingRoomEventTypeAuth, payload: token}));
         };
 
+        const useFallback = () => {
+            if (!fallbackUsed && fallback) {
+                fallbackUsed = true;
+                fallback();
+            }
+        };
+
         let subscription: Subscription | null;
         const init = () => {
             subscription?.unsubscribe();
@@ -199,16 +206,14 @@ export class WaitingRoomService {
                         break;
                     case WaitingRoomEventTypeError:
                         console.error('ERROR:', msg);
+                        useFallback();
                         break;
                     default:
                         events.emit(msg);
                 }
             }, (err: any) => {
                 console.error('ERROR:', err);
-                if (!fallbackUsed && fallback) {
-                    fallbackUsed = true;
-                    fallback();
-                }
+                useFallback();
                 setTimeout(() => {
                     init();
                 }, 5000);
