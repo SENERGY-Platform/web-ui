@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {EventEmitter, Injectable, Output} from '@angular/core';
+import {EventEmitter, Injectable, OnDestroy, Output} from '@angular/core';
 
 import {SidenavSectionModel} from './sidenav-section.model';
 import {SidenavPageModel} from './sidenav-page.model';
@@ -22,18 +22,26 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../services/error-handler.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {WaitingRoomService} from '../../../../modules/devices/waiting-room/shared/waiting-room.service';
+import {debounceTime} from 'rxjs/internal/operators';
+import {WaitingRoomEventTypeAuthOk, WaitingRoomEventTypeError} from '../../../../modules/devices/waiting-room/shared/waiting-room.model';
 
 @Injectable({
     providedIn: 'root',
 })
-export class SidenavService {
+export class SidenavService implements OnDestroy {
     @Output() toggleChanged: EventEmitter<boolean> = new EventEmitter();
     @Output() sectionChanged: EventEmitter<string> = new EventEmitter();
 
     private isToggled = false;
     private section = '';
+    private waitingRoomEventCloser ?: () => void;
 
-    constructor(private waitingRoomService: WaitingRoomService) {
+    constructor(private waitingRoomService: WaitingRoomService) {}
+
+    ngOnDestroy() {
+        if (this.waitingRoomEventCloser) {
+            this.waitingRoomEventCloser();
+        }
     }
 
     toggle(sidenavOpen: boolean): void {
@@ -70,10 +78,22 @@ export class SidenavService {
         ]));
 
 
-        const waitingRoom = new SidenavPageModel('Waiting Room', 'link', 'chair', '/devices/waiting-room', '42');
-        this.waitingRoomService.searchDevices('', 1, 0, 'name', 'asc', false).subscribe(value => {
-            if (value) {
-                waitingRoom.badge = String(value.total);
+        const waitingRoom = new SidenavPageModel('Waiting Room', 'link', 'chair', '/devices/waiting-room', '');
+        const refreshWaitingRoom = () => {
+            this.waitingRoomService.searchDevices('', 1, 0, 'name', 'asc', false).subscribe(value => {
+                if (value && value.total > 0) {
+                    waitingRoom.badge = String(value.total);
+                }
+            });
+        };
+
+        this.waitingRoomService.events(closer => {
+            this.waitingRoomEventCloser = closer;
+        }, () => {
+            refreshWaitingRoom();
+        }).pipe(debounceTime(1000)).subscribe(msg => {
+            if (msg.type === WaitingRoomEventTypeAuthOk || this.waitingRoomService.eventIsUpdate(msg)) {
+                refreshWaitingRoom();
             }
         });
 

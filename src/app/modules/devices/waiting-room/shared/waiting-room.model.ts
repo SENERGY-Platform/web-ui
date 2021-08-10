@@ -34,3 +34,16 @@ export interface WaitingDeviceListModel {
     total: number;
     result: WaitingDeviceModel[];
 }
+
+export interface WaitingRoomEvent {
+    type: string;
+    payload: string | WaitingDeviceModel | null | undefined;
+}
+
+export const WaitingRoomEventTypeError = 'error';
+export const WaitingRoomEventTypeSet = 'update_set';
+export const WaitingRoomEventTypeDelete = 'update_delete';
+export const WaitingRoomEventTypeUse = 'update_use';
+export const WaitingRoomEventTypeAuthRequest = 'auth_request';
+export const WaitingRoomEventTypeAuth = 'auth';
+export const WaitingRoomEventTypeAuthOk = 'auth_ok';

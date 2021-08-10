@@ -15,16 +15,30 @@
  */
 
 
-import {Injectable} from '@angular/core';
+import {EventEmitter, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {Observable} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {LocationModel} from '../../locations/shared/locations.model';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {ExportResponseModel} from '../../../exports/shared/export.model';
-import {WaitingDeviceListModel, WaitingDeviceModel} from './waiting-room.model';
+import {
+    WaitingDeviceListModel,
+    WaitingDeviceModel,
+    WaitingRoomEvent,
+    WaitingRoomEventTypeAuth,
+    WaitingRoomEventTypeAuthOk,
+    WaitingRoomEventTypeAuthRequest,
+    WaitingRoomEventTypeError,
+    WaitingRoomEventTypeSet,
+    WaitingRoomEventTypeDelete,
+    WaitingRoomEventTypeUse
+} from './waiting-room.model';
+import {AuthorizationService} from '../../../../core/services/authorization.service';
+import {webSocket, WebSocketSubject} from 'rxjs/webSocket';
+import {NotificationModel} from '../../../../core/components/toolbar/notification/shared/notification.model';
 
 @Injectable({
     providedIn: 'root'
@@ -32,7 +46,7 @@ import {WaitingDeviceListModel, WaitingDeviceModel} from './waiting-room.model';
 export class WaitingRoomService {
     constructor(private http: HttpClient,
                 private errorHandlerService: ErrorHandlerService,
-                private snackBar: MatSnackBar) {
+                private authorizationService: AuthorizationService) {
     }
 
     updateDevice(device: WaitingDeviceModel): Observable<WaitingDeviceModel | null> {
@@ -144,5 +158,70 @@ export class WaitingRoomService {
             }),
             catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'showMultipleDevices: Error', {status: 404}))
         );
+    }
+
+    events(closerSetter: (closer: () => void) => void, fallback?: () => void): Observable<WaitingRoomEvent> {
+        const events: EventEmitter<WaitingRoomEvent> = new EventEmitter();
+
+        if ( environment.waitingRoomWsUrl === '' ) {
+            if (fallback) {
+                fallback();
+            }
+            return events;
+        }
+
+        let fallbackUsed = false;
+
+        let ws: WebSocketSubject<WaitingRoomEvent>;
+
+        const auth = () => {
+            this.authorizationService.getToken().then(token => ws?.next({type: WaitingRoomEventTypeAuth, payload: token}));
+        };
+
+        let subscription: Subscription | null;
+        const init = () => {
+            subscription?.unsubscribe();
+            subscription = null;
+            ws?.complete();
+            ws = webSocket<WaitingRoomEvent>(environment.waitingRoomWsUrl);
+            closerSetter(() => {
+                subscription?.unsubscribe();
+                subscription = null;
+                ws?.complete();
+            });
+            subscription = ws.subscribe((msg: WaitingRoomEvent) => {
+                switch (msg.type) {
+                    case WaitingRoomEventTypeAuthRequest:
+                        auth();
+                        break;
+                    case WaitingRoomEventTypeAuthOk:
+                        events.emit(msg);
+                        break;
+                    case WaitingRoomEventTypeError:
+                        console.error('ERROR:', msg);
+                        break;
+                    default:
+                        events.emit(msg);
+                }
+            }, (err: any) => {
+                console.error('ERROR:', err);
+                if (!fallbackUsed && fallback) {
+                    fallbackUsed = true;
+                    fallback();
+                }
+                setTimeout(() => {
+                    init();
+                }, 5000);
+            }, () => setTimeout(() => init(), 5000));
+            auth();
+        };
+        init();
+        return events;
+    }
+
+    eventIsUpdate(msg: WaitingRoomEvent) {
+        return msg.type === WaitingRoomEventTypeSet ||
+            msg.type === WaitingRoomEventTypeDelete ||
+            msg.type === WaitingRoomEventTypeUse;
     }
 }
