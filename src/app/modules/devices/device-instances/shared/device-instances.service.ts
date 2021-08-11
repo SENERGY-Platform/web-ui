@@ -105,7 +105,7 @@ export class DeviceInstancesService {
 
     getDeviceInstancesByState(searchText: string, state: string, value: string, order: string): Observable<DeviceInstancesModel[]> {
         return this.http.get<DeviceInstancesModel[]>
-        (environment.apiAggregatorUrl + '/devices?state=' + state + '&sort=' + value + '.' + order +
+        (environment.apiAggregatorUrl + '/devices?limit=10000&state=' + state + '&sort=' + value + '.' + order +
             (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText))).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByState: no search', []))
