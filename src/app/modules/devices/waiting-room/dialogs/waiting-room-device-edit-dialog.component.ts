@@ -16,9 +16,10 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {WaitingDeviceModel} from '../shared/waiting-room.model';
-import {DeviceTypeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {Attribute, WaitingDeviceModel} from '../shared/waiting-room.model';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
+import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {DeviceTypeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './waiting-room-device-edit-dialog.component.html',
@@ -27,13 +28,17 @@ import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/
 export class WaitingRoomDeviceEditDialogComponent implements OnInit {
     device: WaitingDeviceModel;
     deviceType: DeviceTypeModel = {} as DeviceTypeModel;
-    disabled: boolean;
+    useDialog: boolean;
+    attrFormGroup: FormGroup = new FormGroup({attributes: new FormArray([])});
+    initiallyExpanded = false;
 
-    constructor(private dialogRef: MatDialogRef<WaitingRoomDeviceEditDialogComponent>,
+    constructor(private _formBuilder: FormBuilder,
+                private dialogRef: MatDialogRef<WaitingRoomDeviceEditDialogComponent>,
                 private deviceTypeService: DeviceTypeService,
-                @Inject(MAT_DIALOG_DATA) private data: { device: WaitingDeviceModel, disabled: boolean }) {
+                @Inject(MAT_DIALOG_DATA) private data: { device: WaitingDeviceModel, useDialog: boolean,  }) {
         this.device = data.device;
-        this.disabled = data.disabled;
+        this.useDialog = data.useDialog;
+        this.initAttrFormGroup();
         deviceTypeService.getDeviceType(data.device.device_type_id).subscribe(dt => {
             if (dt) {
                this.deviceType = dt;
@@ -49,20 +54,46 @@ export class WaitingRoomDeviceEditDialogComponent implements OnInit {
     }
 
     save(): void {
+        this.device.attributes = this.attrFormGroup.getRawValue().attributes;
         this.dialogRef.close(this.device);
     }
 
-    removeAttr(i: number) {
-        if (!this.device.attributes) {
-            this.device.attributes = [];
+    private initAttrFormGroup() {
+        this.attrFormGroup = this._formBuilder.group({
+            attributes: this._formBuilder.array(this.device.attributes ?
+                this.device.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : [])
+        });
+        this.initiallyExpanded = this.attrFormGroup.invalid;
+    }
+
+    private createAttrGroup(attribute: Attribute): FormGroup {
+        let result: FormGroup;
+        if (this.useDialog) {
+            result = this._formBuilder.group({
+                key: [{disabled: false, value: attribute.key}, Validators.required],
+                value: [{disabled: false, value: attribute.value}, Validators.required],
+            });
+        } else {
+            result = this._formBuilder.group({
+                key: [{disabled: false, value: attribute.key}, Validators.required],
+                value: [attribute.value],
+            });
         }
-        this.device.attributes.splice(i, 1);
+        result.markAllAsTouched();
+        return result;
+    }
+
+    get attributes(): FormArray {
+        return this.attrFormGroup.get('attributes') as FormArray;
+    }
+
+    removeAttr(i: number) {
+        const formArray = <FormArray>this.attrFormGroup.controls['attributes'];
+        formArray.removeAt(i);
     }
 
     addAttr() {
-        if (!this.device.attributes) {
-            this.device.attributes = [];
-        }
-        this.device.attributes.push({key: '', value: ''});
+        const formArray = <FormArray>this.attrFormGroup.controls['attributes'];
+        formArray.push(this.createAttrGroup({key: '', value: ''} as Attribute));
     }
 }

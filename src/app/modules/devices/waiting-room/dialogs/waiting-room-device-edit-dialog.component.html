@@ -14,8 +14,8 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title *ngIf="!disabled">Edit Device</h2>
-<h2 mat-dialog-title *ngIf="disabled">Device</h2>
+<h2 mat-dialog-title *ngIf="!useDialog">Edit Device</h2>
+<h2 mat-dialog-title *ngIf="useDialog">Use Device</h2>
 <mat-dialog-content>
     <form class="form">
         <mat-form-field class="full-width" color="accent">
@@ -28,35 +28,38 @@
             <input matInput placeholder="Devicetype Name" disabled value="{{deviceType.name}}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
-            <input matInput placeholder="Name" [disabled]="disabled"  [(ngModel)]="device.name" [ngModelOptions]="{standalone: true}">
+            <input matInput placeholder="Name" required [(ngModel)]="device.name" [ngModelOptions]="{standalone: true}" #name="ngModel">
         </mat-form-field>
 
-        <mat-checkbox class="checkbox-margin" [disabled]="disabled" [(ngModel)]="device.hidden" [ngModelOptions]="{standalone: true}">Hide</mat-checkbox>
+        <mat-checkbox class="checkbox-margin" *ngIf="!useDialog" [(ngModel)]="device.hidden" [ngModelOptions]="{standalone: true}">Hide</mat-checkbox>
 
-        <mat-expansion-panel class="attributes">
+        <mat-expansion-panel class="attributes" [expanded]="initiallyExpanded">
             <mat-expansion-panel-header>
                 <mat-panel-title>
                     Attributes
                 </mat-panel-title>
             </mat-expansion-panel-header>
-            <div *ngFor="let attr of device.attributes; let i = index" class="attribute">
-                <mat-form-field class="third-width" color="accent">
-                    <input matInput placeholder="Key" [disabled]="disabled"  [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}">
-                </mat-form-field>
-                =
-                <mat-form-field class="third-width" color="accent">
-                    <input matInput placeholder="Value" [disabled]="disabled"  [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}">
-                </mat-form-field>
-                <button mat-stroked-button color="accent" [disabled]="disabled"  (click)="removeAttr(i)"><mat-icon>remove</mat-icon></button>
-            </div>
-            <button mat-stroked-button color="accent" [disabled]="disabled"  (click)="addAttr()">Add Attribute</button>
+            <form [formGroup]="attrFormGroup">
+                <div formArrayName="attributes">
+                    <div [formGroupName]="i" *ngFor="let _ of attributes.controls; let i = index" class="attribute">
+                        <mat-form-field class="third-width" color="accent">
+                            <input matInput placeholder="Key" formControlName="key">
+                        </mat-form-field>
+                        =
+                        <mat-form-field class="third-width" color="accent">
+                            <input matInput placeholder="Value" formControlName="value" >
+                        </mat-form-field>
+                        <button mat-stroked-button color="accent" (click)="removeAttr(i)"><mat-icon>remove</mat-icon></button>
+                    </div>
+                    <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+                </div>
+            </form>
         </mat-expansion-panel>
     </form>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
-    <button mat-raised-button color="accent" *ngIf="disabled" (click)="close()">Close</button>
-    <button mat-raised-button color="primary" *ngIf="!disabled" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" *ngIf="!disabled" (click)="save()">Save</button>
+    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+    <button mat-raised-button color="accent" [disabled]="attributes.invalid || name.invalid" (click)="save()">{{useDialog ? "Use" : "Save"}}</button>
 </mat-dialog-actions>
 

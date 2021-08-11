@@ -30,10 +30,7 @@ import {WaitingDeviceListModel, WaitingDeviceModel} from './shared/waiting-room.
 import {startWith, switchMap} from 'rxjs/internal/operators';
 import {WaitingRoomService} from './shared/waiting-room.service';
 import {DeviceInstancesModel} from '../device-instances/shared/device-instances.model';
-import {DeviceInstancesEditDialogComponent} from '../device-instances/dialogs/device-instances-edit-dialog.component';
-import {DeviceInstancesUpdateModel} from '../device-instances/shared/device-instances-update.model';
 import {WaitingRoomDeviceEditDialogComponent} from './dialogs/waiting-room-device-edit-dialog.component';
-import {ExportModel} from '../../exports/shared/export.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
 
 
@@ -151,7 +148,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             device: JSON.parse(JSON.stringify(device)),      // create copy of object
-            disabled: false
+            useDialog: false
         };
 
         const editDialogRef = this.dialog.open(WaitingRoomDeviceEditDialogComponent, dialogConfig);
@@ -192,23 +189,41 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         });
     }
 
-    useDevice(local_id: string) {
-        this.dialogsService.openConfirmDialog('Use Device', 'Do you really want to transfer this device to Device-Instances?').afterClosed().subscribe((useDevice: boolean) => {
-            if (useDevice) {
+    useDevice(device: WaitingDeviceModel) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {
+            device: JSON.parse(JSON.stringify(device)),      // create copy of object
+            useDialog: true
+        };
+
+        const editDialogRef = this.dialog.open(WaitingRoomDeviceEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((deviceOut: WaitingDeviceModel) => {
+            if (deviceOut !== undefined) {
                 this.ready = false;
-                this.waitingRoomService.useDevice(local_id).subscribe((response) => {
-                    if (response.status < 300) {
-                        this.snackBar.open('Device used', undefined, {
-                            duration: 2000,
-                        });
-                        this.getDevices(true);
-                    } else {
-                        this.snackBar.open('Device could not be used', undefined, {
-                            duration: 2000,
-                        });
-                    }
-                    this.ready = true;
-                });
+                this.waitingRoomService.updateDevice(deviceOut).subscribe(
+                    (deviceResp: WaitingDeviceModel | null) => {
+                        if (deviceResp === null) {
+                            this.ready = true;
+                            this.snackBar.open('Error while updating the device!', undefined, {duration: 2000});
+                        } else {
+                            Object.assign(device, deviceOut);
+                            this.waitingRoomService.useDevice(device.local_id).subscribe((response) => {
+                                this.ready = true;
+                                if (response.status < 300) {
+                                    this.snackBar.open('Device used', undefined, {
+                                        duration: 2000,
+                                    });
+                                    this.getDevices(true);
+                                } else {
+                                    this.snackBar.open('Device could not be used', undefined, {
+                                        duration: 2000,
+                                    });
+                                }
+                            });
+                        }
+                    });
             }
         });
     }

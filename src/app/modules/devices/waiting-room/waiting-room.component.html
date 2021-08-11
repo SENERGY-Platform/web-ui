@@ -87,7 +87,7 @@
                 <ng-container matColumnDef="use">
                     <th mat-header-cell *matHeaderCellDef>Use</th>
                     <td mat-cell *matCellDef="let element">
-                        <button matTooltip="use device" mat-icon-button color="accent" (click)="useDevice(element.local_id)">
+                        <button matTooltip="use device" mat-icon-button color="accent" (click)="useDevice(element)">
                             <mat-icon>play_arrow</mat-icon>
                         </button>
                     </td>
