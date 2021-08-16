@@ -103,9 +103,12 @@ export class DeviceInstancesService {
 
     }
 
-    getDeviceInstancesByState(searchText: string, state: string, value: string, order: string): Observable<DeviceInstancesModel[]> {
+    getDeviceInstancesByState(searchText: string, state: string, limit: number, offset: number, value: string, order: string): Observable<DeviceInstancesModel[]> {
         return this.http.get<DeviceInstancesModel[]>
-        (environment.apiAggregatorUrl + '/devices?limit=10000&state=' + state + '&sort=' + value + '.' + order +
+        (environment.apiAggregatorUrl + '/devices?state=' + state +
+            '&sort=' + value + '.' + order +
+            '&limit=' + limit +
+            '&offset=' + offset +
             (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText))).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByState: no search', []))
@@ -147,9 +150,13 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceInstancesByTagAndState(tagType: string, tag: string, feature: string, order: string, state: string): Observable<DeviceInstancesModel[]> {
+    getDeviceInstancesByTagAndState(tagType: string, tag: string, limit: number, offset: number, feature: string, order: string, state: string): Observable<DeviceInstancesModel[]> {
         return this.http.get<DeviceInstancesModel[]>
-        (environment.apiAggregatorUrl + '/devices?sort=' + feature + '.' + order + '&' + tagType + '=' + tag + '&state=' + state).pipe(
+        (environment.apiAggregatorUrl + '/devices?sort=' + feature + '.' + order +
+            '&' + tagType + '=' + tag +
+            '&state=' + state +
+            '&limit=' + limit +
+            '&offset=' + offset).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByTagAndState', []))
         );

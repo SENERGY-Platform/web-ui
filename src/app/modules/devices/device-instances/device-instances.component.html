@@ -102,15 +102,22 @@
                                   (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
                 </div>
             </div>
-            <div class="main-panel-alternative">
-                <div *ngIf="activeIndex - 1 === i && animationDone">
-                    <senergy-device-instances-grid
-                            [deviceInstances]="deviceInstances"
-                            [ready]="ready"
-                            (tag)="getDevicesByTag($event)"
-                            (itemDeleted)="reloadElement($event)"></senergy-device-instances-grid>
+            <div class="main-panel-alternative panel-{{tab.label}}">
+                <div infiniteScroll
+                     [infiniteScrollDistance]="1"
+                     [infiniteScrollThrottle]="50"
+                     [infiniteScrollContainer]="'.panel-'+tab.label"
+                     [infiniteScrollDisabled]="!(activeIndex - 1 === i && animationDone)"
+                     [fromRoot]="true"
+                     (scrolled)="onScroll()">
+                    <div *ngIf="activeIndex - 1 === i && animationDone">
+                        <senergy-device-instances-grid
+                                [deviceInstances]="deviceInstances"
+                                [ready]="ready"
+                                (tag)="getDevicesByTag($event)"
+                                (itemDeleted)="reloadElement($event)"></senergy-device-instances-grid>
+                    </div>
                 </div>
-
             </div>
         </mat-tab>
     </mat-tab-group>

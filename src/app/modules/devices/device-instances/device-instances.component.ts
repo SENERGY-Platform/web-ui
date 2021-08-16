@@ -239,7 +239,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                         });
                 } else {
                     this.deviceInstancesService.getDeviceInstancesByState(
-                        this.searchText, tabs[this.activeIndex - 1].state, this.sortAttribute.value, this.sortAttribute.order).subscribe(
+                        this.searchText, tabs[this.activeIndex - 1].state, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
                         (deviceInstances: DeviceInstancesModel[]) => {
                             this.setDevices(deviceInstances);
                         });
@@ -252,7 +252,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                             this.setDevices(deviceInstances);
                         });
                 } else {
-                    this.deviceInstancesService.getDeviceInstancesByTagAndState(this.selectedTagType, this.selectedTag,
+                    this.deviceInstancesService.getDeviceInstancesByTagAndState(this.selectedTagType, this.selectedTag, this.limit, this.offset,
                         this.sortAttribute.value, this.sortAttribute.order, tabs[this.activeIndex - 1].state).subscribe(
                         (deviceInstances: DeviceInstancesModel[]) => {
                             this.setDevices(deviceInstances);
