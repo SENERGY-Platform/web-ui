@@ -20,7 +20,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs';
-import {HubModel, NetworksModel} from './networks.model';
+import {ApiAggregatorNetworksModel, HubModel, NetworksModel} from './networks.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {NetworksEditDialogComponent} from '../dialogs/networks-edit-dialog.component';
 import {NetworksHistoryModel} from './networks-history.model';
@@ -38,8 +38,8 @@ export class NetworksService {
                 public snackBar: MatSnackBar) {
     }
 
-    getNetworksWithLogState(searchText: string, limit: number, offset: number, value: string, order: string): Observable<NetworksModel[]> {
-        return this.http.get<NetworksModel[]>
+    getNetworksWithLogState(searchText: string, limit: number, offset: number, value: string, order: string): Observable<ApiAggregatorNetworksModel[]> {
+        return this.http.get<ApiAggregatorNetworksModel[]>
         (environment.apiAggregatorUrl + '/hubs?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order +
             (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText))).pipe(
             map(resp => resp || []),
@@ -48,6 +48,9 @@ export class NetworksService {
     }
 
     searchNetworks(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksModel[]> {
+        if (!searchText) {
+            return this.listNetworks(limit, offset, sortBy, sortDirection);
+        }
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
         }

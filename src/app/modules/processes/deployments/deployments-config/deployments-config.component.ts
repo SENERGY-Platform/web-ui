@@ -94,7 +94,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         this.handlerList = this.flowList;
         this.hubsService.listSyncNetworks().subscribe(result => {
             if (result && result.length > 0) {
-                this.hubList.push({id: '', name: 'Platform', device_local_ids: null, log_state: true});
+                this.hubList.push({id: '', name: 'Platform', device_local_ids: null});
                 this.hubList.push(...result);
             }
         });

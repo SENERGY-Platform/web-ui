@@ -46,7 +46,7 @@
                                     Devices: {{network.device_local_ids?.length || 0}}
                                 </div>
                                 <form fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
-                                    <senergy-state-icon [state]="network.log_state"></senergy-state-icon>
+                                    <senergy-state-icon [state]="network?.annotations?.connected"></senergy-state-icon>
                                     <div fxFlex></div>
                                     <div [fxLayoutAlign]="'start center'">
 

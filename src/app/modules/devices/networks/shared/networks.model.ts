@@ -17,8 +17,16 @@
 export interface NetworksModel {
     id: string;
     name: string;
-    log_state: boolean;
     device_local_ids: string[] | null;
+    annotations?: HubAnnotations;
+}
+
+export interface HubAnnotations {
+    connected?: boolean;
+}
+
+export interface ApiAggregatorNetworksModel extends NetworksModel {
+    log_state: boolean;
 }
 
 export interface HubModel {

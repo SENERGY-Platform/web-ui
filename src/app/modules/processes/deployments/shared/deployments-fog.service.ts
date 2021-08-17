@@ -124,8 +124,7 @@ export class DeploymentsFogService {
                     map(resp => resp || []),
                     map(list => list.map(element => {
                         const network = networkState.get(element.network_id);
-                        // element.online = !!network?.log_state; // only online hubs are online
-                        element.online = !(network?.log_state === false); // hubs without state are online
+                        element.online = !(network?.annotations?.connected === false); // hubs without state are online
 
                         if (!element.online) {
                             element.offline_reasons = [{

@@ -23,6 +23,6 @@ import {Component, Input} from '@angular/core';
 })
 export class StateIconComponent  {
 
-    @Input() state = false;
+    @Input() state: boolean | null | undefined = false;
 
 }
