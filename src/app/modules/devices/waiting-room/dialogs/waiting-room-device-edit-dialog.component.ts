@@ -30,7 +30,6 @@ export class WaitingRoomDeviceEditDialogComponent implements OnInit {
     deviceType: DeviceTypeModel = {} as DeviceTypeModel;
     useDialog: boolean;
     attrFormGroup: FormGroup = new FormGroup({attributes: new FormArray([])});
-    initiallyExpanded = false;
 
     constructor(private _formBuilder: FormBuilder,
                 private dialogRef: MatDialogRef<WaitingRoomDeviceEditDialogComponent>,
@@ -63,7 +62,6 @@ export class WaitingRoomDeviceEditDialogComponent implements OnInit {
             attributes: this._formBuilder.array(this.device.attributes ?
                 this.device.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : [])
         });
-        this.initiallyExpanded = this.attrFormGroup.invalid;
     }
 
     private createAttrGroup(attribute: Attribute): FormGroup {

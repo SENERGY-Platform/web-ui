@@ -28,12 +28,17 @@
     width: 33%;
 }
 
+.divider {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 .attributes {
     margin-bottom: 5px;
 }
 
 .attribute {
-    justify-content: space-between;
+    justify-content: space-around;
     display: flex;
     align-items: baseline;
 }

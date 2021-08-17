@@ -33,28 +33,27 @@
 
         <mat-checkbox class="checkbox-margin" *ngIf="!useDialog" [(ngModel)]="device.hidden" [ngModelOptions]="{standalone: true}">Hide</mat-checkbox>
 
-        <mat-expansion-panel class="attributes" [expanded]="initiallyExpanded">
-            <mat-expansion-panel-header>
-                <mat-panel-title>
-                    Attributes
-                </mat-panel-title>
-            </mat-expansion-panel-header>
-            <form [formGroup]="attrFormGroup">
-                <div formArrayName="attributes">
-                    <div [formGroupName]="i" *ngFor="let _ of attributes.controls; let i = index" class="attribute">
-                        <mat-form-field class="third-width" color="accent">
-                            <input matInput placeholder="Key" formControlName="key">
-                        </mat-form-field>
-                        =
-                        <mat-form-field class="third-width" color="accent">
-                            <input matInput placeholder="Value" formControlName="value" >
-                        </mat-form-field>
-                        <button mat-stroked-button color="accent" (click)="removeAttr(i)"><mat-icon>remove</mat-icon></button>
-                    </div>
-                    <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+        <form [formGroup]="attrFormGroup" class="attributes">
+            <div class="divider">
+                Attributes
+                <mat-divider></mat-divider>
+            </div>
+            <div formArrayName="attributes">
+                <div [formGroupName]="i" *ngFor="let _ of attributes.controls; let i = index" class="attribute">
+                    <mat-form-field class="third-width" color="accent">
+                        <input matInput placeholder="Key" formControlName="key">
+                    </mat-form-field>
+                    =
+                    <mat-form-field class="third-width" color="accent">
+                        <input matInput placeholder="Value" formControlName="value" >
+                    </mat-form-field>
+                    <button mat-icon-button color="accent" (click)="removeAttr(i)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
                 </div>
-            </form>
-        </mat-expansion-panel>
+                <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+            </div>
+        </form>
     </form>
 </mat-dialog-content>
 
