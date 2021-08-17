@@ -57,3 +57,7 @@ table {
 .auto-generated {
     margin-left: 8px;
 }
+
+.missing_aes_key_icon {
+    vertical-align: bottom;
+}

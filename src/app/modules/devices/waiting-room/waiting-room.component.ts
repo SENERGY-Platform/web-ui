@@ -52,6 +52,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     showHidden = localStorage.getItem('devices.waiting-room.showHidden') === 'true';
     ready = false;
 
+    public wmbusKeyAttributeKey = 'wmbus/key';
 
     private searchSub: Subscription = new Subscription();
     public searchText = '';
@@ -397,5 +398,12 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
             }
         );
         return result;
+    }
+
+    hasMissingAttribute(element: WaitingDeviceModel): boolean {
+        if (element.attributes) {
+            return element.attributes.some(value => value.key === this.wmbusKeyAttributeKey && !value.value);
+        }
+        return false;
     }
 }

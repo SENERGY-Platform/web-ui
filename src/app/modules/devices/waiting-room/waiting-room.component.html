@@ -59,7 +59,7 @@
                     <td mat-cell *matCellDef="let element">
                         <div fxLayout="row">
                             <div>
-                                {{element.name}}
+                                {{element.name}} <mat-icon class="missing_aes_key_icon" matTooltip="missing {{wmbusKeyAttributeKey}}" color="warn" *ngIf="hasMissingAttribute(element)">vpn_key</mat-icon>
                             </div>
                         </div>
                     </td>
