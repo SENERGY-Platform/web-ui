@@ -81,6 +81,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     }
 
     private reset() {
+        this.paginator.pageIndex = 0;
         this.devices = [];
         this.ready = false;
     }
