@@ -32,6 +32,8 @@ import {WaitingRoomService} from './shared/waiting-room.service';
 import {DeviceInstancesModel} from '../device-instances/shared/device-instances.model';
 import {WaitingRoomDeviceEditDialogComponent} from './dialogs/waiting-room-device-edit-dialog.component';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import {ConfirmDialogComponent} from '../../../core/dialogs/confirm-dialog.component';
+import {WaitingRoomMultiWmbusKeyEditDialogComponent} from './dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
 
 
 @Component({
@@ -40,6 +42,9 @@ import {DialogsService} from '../../../core/services/dialogs.service';
     styleUrls: ['./waiting-room.component.css']
 })
 export class WaitingRoomComponent implements OnInit, OnDestroy {
+    static wmbusKeyAttributeKey = 'wmbus/key';
+    public wmbusKeyAttributeKey = WaitingRoomComponent.wmbusKeyAttributeKey;
+
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
     @ViewChild('sort', {static: false}) sort!: MatSort;
 
@@ -51,8 +56,6 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     devicesDataSource = new MatTableDataSource<WaitingDeviceModel>();
     showHidden = localStorage.getItem('devices.waiting-room.showHidden') === 'true';
     ready = false;
-
-    public wmbusKeyAttributeKey = 'wmbus/key';
 
     private searchSub: Subscription = new Subscription();
     public searchText = '';
@@ -257,6 +260,50 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     }
 
     useMultipleDevices(): void {
+        if (this.selectionContainsMissingWmbusKey()) {
+            this.useMultipleDevicesWithWmbusKeyEditDialog();
+        } else {
+            this.useMultipleDevicesWithConfirmDialog();
+        }
+    }
+
+    useMultipleDevicesWithWmbusKeyEditDialog(): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            devices: this.selection.selected.filter(this.hasMissingAttribute)
+        };
+
+        const dialog = this.dialog.open(WaitingRoomMultiWmbusKeyEditDialogComponent, dialogConfig);
+        dialog.afterClosed().subscribe((devices: WaitingDeviceModel[]) => {
+            if (devices) {
+                this.ready = false;
+
+                this.waitingRoomService.updateMultipleDevices(devices).subscribe((devicesResp: WaitingDeviceModel[] | null) => {
+                    if (devicesResp === null) {
+                        this.ready = true;
+                        this.snackBar.open('Error while updating and using the devices!', undefined, {duration: 2000});
+                    } else {
+                        const deviceIds: string[] = [];
+                        this.selection.selected.forEach((device: WaitingDeviceModel) => {
+                                if (device.local_id !== undefined) {
+                                    deviceIds.push(device.local_id);
+                                }
+                            }
+                        );
+                        this.waitingRoomService.useMultipleDevices(deviceIds).subscribe(() => {
+                            this.paginator.pageIndex = 0;
+                            this.getDevices(true);
+                            this.selectionClear();
+                            this.ready = true;
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    useMultipleDevicesWithConfirmDialog(): void {
         const text = 'Do you really want to transfer ' + this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : 'this device') + ' to Device-Instances?';
         this.dialogsService.openConfirmDialog('Use Devices', text).afterClosed().subscribe(
             (useDevice: boolean) => {
@@ -401,9 +448,14 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         return result;
     }
 
+    selectionContainsMissingWmbusKey(): boolean {
+        return this.selection.selected.some(value => this.hasMissingAttribute(value));
+    }
+
+    // ctx: any = this to keep 'this' in closures
     hasMissingAttribute(element: WaitingDeviceModel): boolean {
         if (element.attributes) {
-            return element.attributes.some(value => value.key === this.wmbusKeyAttributeKey && !value.value);
+            return element.attributes.some(value => value.key === WaitingRoomComponent.wmbusKeyAttributeKey && !value.value);
         }
         return false;
     }

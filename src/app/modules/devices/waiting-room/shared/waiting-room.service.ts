@@ -56,6 +56,13 @@ export class WaitingRoomService {
         );
     }
 
+    updateMultipleDevices(devices: WaitingDeviceModel[]): Observable<WaitingDeviceModel[] | null> {
+        const url = environment.waitingRoomUrl + '/devices';
+        return this.http.put<WaitingDeviceModel[]>(url, devices).pipe(
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'updateMultipleDevices', null))
+        );
+    }
+
     useDevice(localId: string): Observable<{status: number}> {
         const url = environment.waitingRoomUrl + '/used/devices/' + encodeURIComponent(localId);
         return this.http.post(url, null, {responseType: 'text', observe: 'response'}).pipe(

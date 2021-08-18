@@ -65,6 +65,7 @@ import {DeviceGroupsSelectDialogComponent} from './device-groups/dialog/device-g
 import {NetworksDeleteDialogComponent} from './networks/dialogs/networks-delete-dialog.component';
 import {WaitingRoomComponent} from './waiting-room/waiting-room.component';
 import {WaitingRoomDeviceEditDialogComponent} from './waiting-room/dialogs/waiting-room-device-edit-dialog.component';
+import {WaitingRoomMultiWmbusKeyEditDialogComponent} from './waiting-room/dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
 
 const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Hubs'}};
 const deviceInstances = {
@@ -180,7 +181,8 @@ const locationsEdit = {
         LocationsEditComponent,
         DeviceGroupsPipelineHelperDialogComponent,
         WaitingRoomComponent,
-        WaitingRoomDeviceEditDialogComponent
+        WaitingRoomDeviceEditDialogComponent,
+        WaitingRoomMultiWmbusKeyEditDialogComponent
     ],
 })
 
