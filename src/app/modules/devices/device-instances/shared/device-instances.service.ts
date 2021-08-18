@@ -260,7 +260,7 @@ export class DeviceInstancesService {
 
     getDeviceHistory7d(): Observable<DeviceInstancesHistoryModel[]> {
         if (this.getDeviceHistoryObservable7d === null) {
-            this.getDeviceHistoryObservable7d = this.http.get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?log=7d').pipe(
+            this.getDeviceHistoryObservable7d = this.http.get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?limit=10000&log=7d').pipe(
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory7d', [])),
                 share()
@@ -271,7 +271,7 @@ export class DeviceInstancesService {
 
     getDeviceHistory1h(): Observable<DeviceInstancesHistoryModel[]> {
         if (this.getDeviceHistoryObservable1h === null) {
-            this.getDeviceHistoryObservable1h = this.http.get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?log=1h').pipe(
+            this.getDeviceHistoryObservable1h = this.http.get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?limit=10000&log=1h').pipe(
                 map(resp => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory1h', [])),
                 share()

@@ -128,7 +128,7 @@ export class NetworksService {
     }
 
     getNetworksHistory(duration: string): Observable<NetworksHistoryModel[]> {
-        return this.http.get<NetworksHistoryModel[]>(environment.apiAggregatorUrl + '/hubs?log=' + duration).pipe(
+        return this.http.get<NetworksHistoryModel[]>(environment.apiAggregatorUrl + '/hubs?limit=10000&log=' + duration).pipe(
             map(resp => resp || []),
             catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworksHistory', []))
         );
