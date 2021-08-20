@@ -56,6 +56,39 @@ export class FunctionsService {
         );
     }
 
+    getFunctionsAfter(query: string, limit: number, sortBy: string, sortDirection: string, after: FunctionsPermSearchModel): Observable<FunctionsPermSearchModel[]> {
+        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
+            sortDirection = 'asc';
+        }
+        if (sortBy === '' || sortBy === null || sortBy === undefined) {
+            sortBy = 'name';
+        }
+
+        let sortFieldValue = '';
+        switch (sortBy) {
+            case 'name': {
+                sortFieldValue = encodeURIComponent(JSON.stringify(after.name));
+            }
+        }
+
+        const params = [
+            'limit=' + limit,
+            'rights=r',
+            'sort=' + sortBy + '.' + sortDirection,
+            'after.id=' + after.id,
+            'after.sort_field_value=' + sortFieldValue
+        ];
+        if (query) {
+            params.push('search=' + encodeURIComponent(query));
+        }
+
+        return this.http.get<FunctionsPermSearchModel[]>(
+            environment.permissionSearchUrl + '/v3/resources/functions?' + params.join('&')).pipe(
+            map(resp => resp || []),
+            catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunctions(search)', []))
+        );
+    }
+
     getFunction(functionId: string): Observable<DeviceTypeFunctionModel | null> {
         return this.http.get<DeviceTypeFunctionModel>(environment.semanticRepoUrl + '/functions/' + functionId).pipe(
             catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunction', null))

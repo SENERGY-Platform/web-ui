@@ -161,15 +161,27 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             this.reset();
         }
 
-        this.functionsService.getFunctions(this.searchText, this.limit, this.offset, this.sortAttribute.value,
-            this.sortAttribute.order).subscribe(
-            (functions: FunctionsPermSearchModel[]) => {
-                if (functions.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
-                this.functions = this.functions.concat(functions);
-                this.ready = true;
-            });
+        if (this.functions && this.functions.length) {
+            this.functionsService.getFunctionsAfter(this.searchText, this.limit, this.sortAttribute.value,
+                this.sortAttribute.order, this.functions[this.functions.length - 1]).subscribe(
+                (functions: FunctionsPermSearchModel[]) => {
+                    if (functions.length !== this.limit) {
+                        this.allDataLoaded = true;
+                    }
+                    this.functions = this.functions.concat(functions);
+                    this.ready = true;
+                });
+        } else {
+            this.functionsService.getFunctions(this.searchText, this.limit, this.offset, this.sortAttribute.value,
+                this.sortAttribute.order).subscribe(
+                (functions: FunctionsPermSearchModel[]) => {
+                    if (functions.length !== this.limit) {
+                        this.allDataLoaded = true;
+                    }
+                    this.functions = this.functions.concat(functions);
+                    this.ready = true;
+                });
+        }
 
     }
 
