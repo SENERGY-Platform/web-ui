@@ -67,7 +67,7 @@ import {WaitingRoomComponent} from './waiting-room/waiting-room.component';
 import {WaitingRoomDeviceEditDialogComponent} from './waiting-room/dialogs/waiting-room-device-edit-dialog.component';
 import {WaitingRoomMultiWmbusKeyEditDialogComponent} from './waiting-room/dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
 
-const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Hubs'}};
+const networks = {path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: {header: 'Networks'}};
 const deviceInstances = {
     path: 'devices/deviceinstances',
     pathMatch: 'full',
@@ -78,19 +78,19 @@ const deviceGroups = {
     path: 'devices/devicegroups',
     pathMatch: 'full',
     component: DeviceGroupsComponent,
-    data: {header: 'Device Groups'}
+    data: {header: 'Groups'}
 };
 const deviceGroupsCreate = {
     path: 'devices/devicegroups/edit',
     pathMatch: 'full',
     component: DeviceGroupsEditComponent,
-    data: {header: 'Device Groups'}
+    data: {header: 'Groups'}
 };
 const deviceGroupsEdit = {
     path: 'devices/devicegroups/edit/:id',
     pathMatch: 'full',
     component: DeviceGroupsEditComponent,
-    data: {header: 'Device Groups'}
+    data: {header: 'Groups'}
 };
 
 const locations = {

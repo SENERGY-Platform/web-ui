@@ -64,13 +64,13 @@
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
                     <td mat-cell *matCellDef="let element">
                         <mat-icon *ngIf="element.FilterType === 'deviceId'" mat-list-icon matTooltip="Device" color="accent">
-                            important_devices
+                            sensors
                         </mat-icon>
                         <mat-icon *ngIf="element.FilterType === 'operatorId'" mat-list-icon matTooltip="Pipeline" color="accent">
                             analytics
                         </mat-icon>
                         <mat-icon *ngIf="element.FilterType === 'import_id'" mat-list-icon matTooltip="Import" color="accent">
-                            cloud_upload
+                            double_arrow
                         </mat-icon>
                     </td>
                 </ng-container>

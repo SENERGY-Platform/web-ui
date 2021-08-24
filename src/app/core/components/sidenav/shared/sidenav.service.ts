@@ -66,12 +66,12 @@ export class SidenavService implements OnDestroy {
         ]));
 
         sections.push(new SidenavSectionModel('Exports', 'toggle', 'west', '/exports', [
-            new SidenavPageModel('Database', 'link', 'folder_special', '/exports/db'),
+            new SidenavPageModel('Database', 'link', 'table_chart', '/exports/db'),
             new SidenavPageModel('Broker', 'link', 'call_split', '/exports/broker'),
         ]));
 
         sections.push(new SidenavSectionModel('Analytics', 'toggle', 'bar_chart', '/data', [
-            new SidenavPageModel('Operators', 'link', 'storage', '/data/operator-repo'),
+            new SidenavPageModel('Operators', 'link', 'code', '/data/operator-repo'),
             new SidenavPageModel('Designer', 'link', 'create', '/data/designer'),
             new SidenavPageModel('Flows', 'link', 'insights', '/data/flow-repo'),
             new SidenavPageModel('Pipelines', 'link', 'analytics', '/data/pipelines')
@@ -98,25 +98,25 @@ export class SidenavService implements OnDestroy {
         });
 
         sections.push(new SidenavSectionModel('Device Management', 'toggle', 'devices', '/devices', [
-            new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'),
-            new SidenavPageModel('Hubs', 'link', 'device_hub', '/devices/networks'),
-            new SidenavPageModel('Devices', 'link', 'important_devices', '/devices/deviceinstances'),
-            new SidenavPageModel('Device Groups', 'link', 'group_work', '/devices/devicegroups'),
-            waitingRoom
+            new SidenavPageModel('Networks', 'link', 'device_hub', '/devices/networks'),
+            waitingRoom,
+            new SidenavPageModel('Devices', 'link', 'sensors', '/devices/deviceinstances'),
+            new SidenavPageModel('Groups', 'link', 'group_work', '/devices/devicegroups'),
+            new SidenavPageModel('Locations', 'link', 'place', '/devices/locations')
         ]));
 
         sections.push(new SidenavSectionModel('Imports', 'toggle', 'east', '/imports', [
-            new SidenavPageModel('Types', 'link', 'storage', '/imports/types/list'),
-            new SidenavPageModel('Instances', 'link', 'cloud_upload', '/imports/instances')
+            new SidenavPageModel('Types', 'link', 'api', '/imports/types/list'),
+            new SidenavPageModel('Instances', 'link', 'double_arrow', '/imports/instances')
         ]));
 
-        sections.push(new SidenavSectionModel('Metadata', 'toggle', 'folder_open', '/metadata', [
+        sections.push(new SidenavSectionModel('Metadata', 'toggle', 'web_asset', '/metadata', [
             new SidenavPageModel('Device Classes', 'link', 'devices_other', '/metadata/deviceclasses'),
             new SidenavPageModel('Functions', 'link', 'functions', '/metadata/functions'),
             new SidenavPageModel('Aspects', 'link', 'wallpaper', '/metadata/aspects'),
             new SidenavPageModel('Concepts', 'link', 'category', '/metadata/concepts'),
             new SidenavPageModel('Characteristics', 'link', 'scatter_plot', '/metadata/characteristics'),
-            new SidenavPageModel('Device Types', 'link', 'devices', '/metadata/devicetypesoverview')
+            new SidenavPageModel('Device Types', 'link', 'important_devices', '/metadata/devicetypesoverview')
         ]));
 
         return sections;
