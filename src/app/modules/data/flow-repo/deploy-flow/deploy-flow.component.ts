@@ -1056,7 +1056,7 @@ export class DeployFlowComponent implements OnInit {
     }
 
     selectOperator($event: MouseEvent, pipeline: FormGroup) {
-        for (const operatorNode of ($event.target as any)?.childNodes[0]?.childNodes[0]?.childNodes || []) {
+        for (const operatorNode of ($event.target as any)?.nearestViewportElement?.childNodes[0]?.childNodes[1]?.childNodes || []) {
             if (operatorNode.attributes['data-type'] !== undefined &&
                 operatorNode.attributes['data-type'].value === 'senergy.NodeElement') {
 
