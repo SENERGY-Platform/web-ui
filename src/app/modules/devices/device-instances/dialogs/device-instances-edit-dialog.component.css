@@ -41,3 +41,8 @@
 mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
+
+.divider {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}

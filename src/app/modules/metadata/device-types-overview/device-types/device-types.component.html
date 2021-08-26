@@ -57,7 +57,9 @@
                         <mat-form-field class="third-width" color="accent">
                             <input matInput placeholder="Value" formControlName="value" >
                         </mat-form-field>
-                        <button mat-stroked-button color="accent" (click)="removeAttr(i)" [disabled]="!editable"><mat-icon>remove</mat-icon></button>
+                        <button mat-icon-button color="warn" [disabled]="!editable" (click)="removeAttr(i)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
                     </div>
                     <button mat-stroked-button color="accent" (click)="addAttr()" [disabled]="!editable">Add Attribute</button>
                 </div>
