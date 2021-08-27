@@ -21,7 +21,7 @@
                    (animationDone)="animation()">
         <mat-tab label="All">
             <div fxLayout="column">
-                <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
+                <senergy-searchbar fxFlex></senergy-searchbar>
                 <div fxLayout="row">
                     <div fxFlex></div>
                     <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
@@ -72,7 +72,7 @@
         </mat-tab>
         <mat-tab label="{{tab.label}}" *ngFor="let tab of tabs; let i = index">
             <div fxLayout="column">
-                <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
+                <senergy-searchbar fxFlex></senergy-searchbar>
                 <div fxLayout="row">
                     <div fxFlex></div>
                 <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">

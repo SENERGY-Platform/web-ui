@@ -54,6 +54,7 @@ export class ExportComponent implements OnInit, OnDestroy {
     url = environment.influxAPIURL;
 
     public searchText = '';
+    public initSearchText = '';
     public searchField = 'name';
     public searchFields = [['Name', 'name'], ['Gerätename', 'entity_name'], ['Beschreibung', 'description'], ['Service', 'service_name']];
     private searchSub: Subscription = new Subscription();
@@ -79,7 +80,7 @@ export class ExportComponent implements OnInit, OnDestroy {
                 this.displayedColumns = ['select', 'filter_type', 'name', 'description', 'created_at', 'updated_at', 'info', 'edit', 'delete'];
             }
             if (localStorage.getItem('data.exports.search') !== null) {
-                this.searchText = <string>localStorage.getItem('data.exports.search');
+                this.initSearchText = <string>localStorage.getItem('data.exports.search');
             }
             if (localStorage.getItem('data.exports.searchField') !== null) {
                 this.searchField = <string>localStorage.getItem('data.exports.searchField');

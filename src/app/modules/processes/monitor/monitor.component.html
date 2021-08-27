@@ -20,7 +20,7 @@
                    [(selectedIndex)]="activeIndex">
         <mat-tab label="Running">
             <div fxLayout="column">
-                <senergy-searchbar fxFlex [searchTextIn]="searchText" [disable]="selectedDeployment !== null"></senergy-searchbar>
+                <senergy-searchbar fxFlex [disable]="selectedDeployment !== null"></senergy-searchbar>
                 <div fxLayout="row">
                     <div fxFlex></div>
                     <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment" color="accent">
@@ -108,7 +108,7 @@
         </mat-tab>
         <mat-tab label="Finished">
             <div fxLayout="column">
-                <senergy-searchbar fxFlex [searchTextIn]="searchText" [disable]="selectedDeployment !== null"></senergy-searchbar>
+                <senergy-searchbar fxFlex [disable]="selectedDeployment !== null"></senergy-searchbar>
                 <div fxLayout="row">
                     <div fxFlex></div>
                     <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment" color="accent">
