@@ -14,37 +14,54 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {environment} from '../../../../../environments/environment';
-import {catchError, map} from 'rxjs/internal/operators';
-import {Observable} from 'rxjs';
-import {ApiAggregatorNetworksModel, HubModel, NetworksModel} from './networks.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {NetworksEditDialogComponent} from '../dialogs/networks-edit-dialog.component';
-import {NetworksHistoryModel} from './networks-history.model';
-import {NetworksClearDialogComponent} from '../dialogs/networks-clear-dialog.component';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { environment } from '../../../../../environments/environment';
+import { catchError, map } from 'rxjs/internal/operators';
+import { Observable } from 'rxjs';
+import { ApiAggregatorNetworksModel, HubModel, NetworksModel } from './networks.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { NetworksEditDialogComponent } from '../dialogs/networks-edit-dialog.component';
+import { NetworksHistoryModel } from './networks-history.model';
+import { NetworksClearDialogComponent } from '../dialogs/networks-clear-dialog.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class NetworksService {
+    constructor(
+        private http: HttpClient,
+        private errorHandlerService: ErrorHandlerService,
+        private dialog: MatDialog,
+        public snackBar: MatSnackBar,
+    ) {}
 
-    constructor(private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService,
-                private dialog: MatDialog,
-                public snackBar: MatSnackBar) {
-    }
-
-    getNetworksWithLogState(searchText: string, limit: number, offset: number, value: string, order: string): Observable<ApiAggregatorNetworksModel[]> {
-        return this.http.get<ApiAggregatorNetworksModel[]>
-        (environment.apiAggregatorUrl + '/hubs?limit=' + limit + '&offset=' + offset + '&sort=' + value + '.' + order +
-            (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText))).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworks', []))
-        );
+    getNetworksWithLogState(
+        searchText: string,
+        limit: number,
+        offset: number,
+        value: string,
+        order: string,
+    ): Observable<ApiAggregatorNetworksModel[]> {
+        return this.http
+            .get<ApiAggregatorNetworksModel[]>(
+                environment.apiAggregatorUrl +
+                    '/hubs?limit=' +
+                    limit +
+                    '&offset=' +
+                    offset +
+                    '&sort=' +
+                    value +
+                    '.' +
+                    order +
+                    (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText)),
+            )
+            .pipe(
+                map((resp) => resp || []),
+                catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworks', [])),
+            );
     }
 
     searchNetworks(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<NetworksModel[]> {
@@ -62,13 +79,12 @@ export class NetworksService {
             'offset=' + offset,
             'rights=r',
             'sort=' + sortBy + '.' + sortDirection,
-            'search=' + encodeURIComponent(searchText)
+            'search=' + encodeURIComponent(searchText),
         ].join('&');
 
-        return this.http.get<NetworksModel[]>(
-            environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', []))
+        return this.http.get<NetworksModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', [])),
         );
     }
 
@@ -79,58 +95,46 @@ export class NetworksService {
         if (sortBy === '' || sortBy === null || sortBy === undefined) {
             sortBy = 'name';
         }
-        const params = [
-            'limit=' + limit,
-            'offset=' + offset,
-            'rights=r',
-            'sort=' + sortBy + '.' + sortDirection
-        ].join('&');
+        const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection].join('&');
 
-        return this.http.get<NetworksModel[]>(
-            environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', []))
+        return this.http.get<NetworksModel[]>(environment.permissionSearchUrl + '/v3/resources/hubs?' + params).pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'searchNetworks(search)', [])),
         );
     }
 
     listSyncNetworks(): Observable<NetworksModel[]> {
-        return this.http.get<NetworksModel[]>(
-            environment.processSyncUrl + '/networks').pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'listSyncNetworks(search)', []))
+        return this.http.get<NetworksModel[]>(environment.processSyncUrl + '/networks').pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'listSyncNetworks(search)', [])),
         );
     }
 
     changeName(hubId: string, hubName: string): Observable<HubModel | null> {
-        return this.http.put<HubModel>(
-            environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hubId) + '/name',
-            '"' + hubName + '"'
-        ).pipe(
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'changeName', null)));
+        return this.http
+            .put<HubModel>(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hubId) + '/name', '"' + hubName + '"')
+            .pipe(catchError(this.errorHandlerService.handleError(NetworksService.name, 'changeName', null)));
     }
 
-    delete(networkId: string): Observable<{status: number}> {
-        return this.http.delete(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(networkId), {responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'delete', {status: 500}))
-        );
+    delete(networkId: string): Observable<{ status: number }> {
+        return this.http
+            .delete(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(networkId), { responseType: 'text', observe: 'response' })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(NetworksService.name, 'delete', { status: 500 })),
+            );
     }
 
     update(hub: HubModel): Observable<HubModel | null> {
-        return this.http.put<HubModel>(
-            environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hub.id),
-            hub)
-        .pipe(
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'update', null))
-        );
+        return this.http
+            .put<HubModel>(environment.deviceManagerUrl + '/hubs/' + encodeURIComponent(hub.id), hub)
+            .pipe(catchError(this.errorHandlerService.handleError(NetworksService.name, 'update', null)));
     }
 
     getNetworksHistory(duration: string): Observable<NetworksHistoryModel[]> {
         return this.http.get<NetworksHistoryModel[]>(environment.apiAggregatorUrl + '/hubs?limit=10000&log=' + duration).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworksHistory', []))
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(NetworksService.name, 'getNetworksHistory', [])),
         );
     }
 
@@ -158,13 +162,15 @@ export class NetworksService {
 
         editDialogRef.afterClosed().subscribe((clearNetwork: boolean) => {
             if (clearNetwork) {
-                this.update({id: network.id, name: network.name, hash: '', device_local_ids: []}).subscribe((respMessage: HubModel|null) => {
-                    if (respMessage) {
-                        this.snackBar.open('Hub cleared successfully.', undefined, {duration: 2000});
-                    } else {
-                        this.snackBar.open('Error while clearing the hub!', undefined, {duration: 2000});
-                    }
-                });
+                this.update({ id: network.id, name: network.name, hash: '', device_local_ids: [] }).subscribe(
+                    (respMessage: HubModel | null) => {
+                        if (respMessage) {
+                            this.snackBar.open('Hub cleared successfully.', undefined, { duration: 2000 });
+                        } else {
+                            this.snackBar.open('Error while clearing the hub!', undefined, { duration: 2000 });
+                        }
+                    },
+                );
             }
         });
     }

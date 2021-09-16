@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  templateUrl: './date-time-dialog.component.html',
-  styleUrls: ['./date-time-dialog.component.css']
+    templateUrl: './date-time-dialog.component.html',
+    styleUrls: ['./date-time-dialog.component.css'],
 })
 export class DateTimeDialogComponent implements OnInit {
     initial: string;
-    result = {iso: '', text: ''};
+    result = { iso: '', text: '' };
 
     constructor(
         private dialogRef: MatDialogRef<DateTimeDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: {initialDateTime: string}
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { initialDateTime: string },
     ) {
         this.initial = dialogParams.initialDateTime || '';
     }
 
-    update(updateEvent: {iso: string, text: string}) {
+    update(updateEvent: { iso: string; text: string }) {
         this.result = updateEvent;
     }
 

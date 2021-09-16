@@ -14,35 +14,24 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../modules/exports/shared/export.model';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {ExportService} from '../../../modules/exports/shared/export.service';
-import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {MultiValueMeasurement, MultiValueOrderEnum} from '../shared/multi-value.model';
-import {
-    AbstractControl,
-    FormArray,
-    FormBuilder,
-    FormControl,
-    FormGroup,
-    ValidationErrors,
-    ValidatorFn,
-    Validators
-} from '@angular/forms';
-import {emptyObjectValidator} from '../../../core/validators/empty-object.validator';
-
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../modules/exports/shared/export.model';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { ExportService } from '../../../modules/exports/shared/export.service';
+import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { MultiValueMeasurement, MultiValueOrderEnum } from '../shared/multi-value.model';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { emptyObjectValidator } from '../../../core/validators/empty-object.validator';
 
 @Component({
     templateUrl: './multi-value-edit-dialog.component.html',
     styleUrls: ['./multi-value-edit-dialog.component.css'],
 })
 export class MultiValueEditDialogComponent implements OnInit {
-
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
     widgetId: string;
@@ -54,15 +43,17 @@ export class MultiValueEditDialogComponent implements OnInit {
         name: ['', Validators.required],
         order: ['', Validators.required],
         valueAlias: [''],
-        measurements: this.fb.array([])
+        measurements: this.fb.array([]),
     });
 
-    constructor(private dialogRef: MatDialogRef<MultiValueEditDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                private dashboardService: DashboardService,
-                private exportService: ExportService,
-                private fb: FormBuilder,
-                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
+    constructor(
+        private dialogRef: MatDialogRef<MultiValueEditDialogComponent>,
+        private deploymentsService: DeploymentsService,
+        private dashboardService: DashboardService,
+        private exportService: ExportService,
+        private fb: FormBuilder,
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+    ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
     }
@@ -80,7 +71,7 @@ export class MultiValueEditDialogComponent implements OnInit {
             (this.formGroup.get('order') as FormControl).setValue(widget.properties.order || 0);
             (this.formGroup.get('valueAlias') as FormControl).setValue(widget.properties.valueAlias);
 
-            measurements.forEach(measurement => this.addMeasurement(measurement));
+            measurements.forEach((measurement) => this.addMeasurement(measurement));
 
             if (measurements.length === 0) {
                 this.addNewMeasurement();
@@ -112,12 +103,12 @@ export class MultiValueEditDialogComponent implements OnInit {
         }
 
         // Check if at least one boundary is set
-        const lowerHasValue = this.hasValue(lower);
-        const upperHasValue = this.hasValue(upper);
+        const lowerHasValue = MultiValueEditDialogComponent.hasValue(lower);
+        const upperHasValue = MultiValueEditDialogComponent.hasValue(upper);
         if (!lowerHasValue && !upperHasValue) {
-            lower.setErrors({'nothingSelected': true});
-            upper.setErrors({'nothingSelected': true});
-            return  {'nothingSelected': true};
+            lower.setErrors({ nothingSelected: true });
+            upper.setErrors({ nothingSelected: true });
+            return { nothingSelected: true };
         }
 
         // Check if only one value is set
@@ -132,16 +123,16 @@ export class MultiValueEditDialogComponent implements OnInit {
         const upperValue = Number(upper.value);
 
         if (lowerValue > upperValue) {
-            lower.setErrors({'lowerBiggerThanUpper': true});
-            upper.setErrors({'lowerBiggerThanUpper': true});
-            return  {'lowerBiggerThanUpper': true};
+            lower.setErrors({ lowerBiggerThanUpper: true });
+            upper.setErrors({ lowerBiggerThanUpper: true });
+            return { lowerBiggerThanUpper: true };
         }
 
         // Both lower and upper are set and lower is smaller than upper
         lower.setErrors(null);
         upper.setErrors(null);
         return null;
-    }
+    };
 
     mathValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
         let value = control.value as string;
@@ -151,19 +142,19 @@ export class MultiValueEditDialogComponent implements OnInit {
         value = value.replace(',', '.').replace(' ', '');
         const rx = new RegExp('^(\\+|-|\\*|/)\\d+((\\.|,)\\d+)?$');
         if (!rx.test(value)) {
-            return  {'mathInvalid': true};
+            return { mathInvalid: true };
         }
         return null;
-    }
+    };
 
-    private hasValue(control: FormControl) {
+    private static hasValue(control: FormControl) {
         return control.value !== null && control.value !== '';
     }
 
     addMeasurement(measurement: MultiValueMeasurement) {
         const disableNumberOperations = measurement.type === 'String' || measurement.type === '' || measurement.type === 'Boolean';
         const disableUnit = measurement.type === 'Boolean';
-        const warning_disabled = measurement.warning_enabled !== true;
+        const warningDisabled = measurement.warning_enabled !== true;
         let lower: any = measurement.lowerBoundary;
         let upper: any = measurement.upperBoundary;
         if (lower === Number.MIN_VALUE) {
@@ -176,23 +167,27 @@ export class MultiValueEditDialogComponent implements OnInit {
             name: [measurement.name, Validators.required],
             export: [measurement.export, emptyObjectValidator()],
             column: [measurement.column, emptyObjectValidator()],
-            unit: [{value: measurement.unit, disabled: disableUnit}],
+            unit: [{ value: measurement.unit, disabled: disableUnit }],
             type: [measurement.type, Validators.required],
             format: [measurement.format],
-            math: [{value: measurement.math, disabled: disableNumberOperations}, this.mathValidator],
-            warnings: this.fb.group({
-                warning_enabled: [{value: measurement.warning_enabled, disabled: disableNumberOperations}],
-                lowerBoundary: [{value: lower, disabled: warning_disabled}],
-                upperBoundary: [{value: upper, disabled: warning_disabled}]
-            }, {validators: [this.boundaryValidator]})
+            math: [{ value: measurement.math, disabled: disableNumberOperations }, this.mathValidator],
+            warnings: this.fb.group(
+                {
+                    warning_enabled: [{ value: measurement.warning_enabled, disabled: disableNumberOperations }],
+                    lowerBoundary: [{ value: lower, disabled: warningDisabled }],
+                    upperBoundary: [{ value: upper, disabled: warningDisabled }],
+                },
+                { validators: [this.boundaryValidator] },
+            ),
         });
 
         (newGroup.get('column') as FormControl).valueChanges.subscribe(() => {
             if (!(newGroup.get('name') as FormControl).valid && (newGroup.get('column') as FormControl).valid) {
                 newGroup.patchValue({
-                    'name': ((newGroup.get('export') as FormControl).value as ChartsExportMeasurementModel).name
-                        + ' - '
-                        + ((newGroup.get('column') as FormControl).value as ExportValueModel).Name
+                    name:
+                        ((newGroup.get('export') as FormControl).value as ChartsExportMeasurementModel).name +
+                        ' - ' +
+                        ((newGroup.get('column') as FormControl).value as ExportValueModel).Name,
                 });
             }
         });
@@ -203,10 +198,10 @@ export class MultiValueEditDialogComponent implements OnInit {
             const disableUnitChange = type === 'Boolean';
 
             if (disableNumberOperationsChange) {
-                const warn_group = (newGroup.get('warnings') as FormGroup);
+                const warnGroup = newGroup.get('warnings') as FormGroup;
 
-                (warn_group.get('warning_enabled') as FormControl).setValue(false);
-                (warn_group.get('warning_enabled') as FormControl).disable();
+                (warnGroup.get('warning_enabled') as FormControl).setValue(false);
+                (warnGroup.get('warning_enabled') as FormControl).disable();
 
                 (newGroup.get('math') as FormControl).setValue('');
                 (newGroup.get('math') as FormControl).disable();
@@ -215,7 +210,7 @@ export class MultiValueEditDialogComponent implements OnInit {
                 (newGroup.get('math') as FormControl).enable();
             }
 
-            const unitFormControl = (newGroup.get('unit') as FormControl);
+            const unitFormControl = newGroup.get('unit') as FormControl;
             if (disableUnitChange) {
                 unitFormControl.disable();
             } else {
@@ -223,23 +218,21 @@ export class MultiValueEditDialogComponent implements OnInit {
             }
         });
 
-
-
         ((newGroup.get('warnings') as FormGroup).get('warning_enabled') as FormControl).valueChanges.subscribe(() => {
-            const warn_group = newGroup.get('warnings');
-            if (warn_group === null) {
+            const warnGroup = newGroup.get('warnings');
+            if (warnGroup === null) {
                 return;
             }
-            const warning_enabled = (warn_group.get('warning_enabled') as FormControl).value === true;
+            const warningEnabled = (warnGroup.get('warning_enabled') as FormControl).value === true;
 
-            if (!warning_enabled) {
-                (warn_group.get('lowerBoundary') as FormControl).setValue('');
-                (warn_group.get('lowerBoundary') as FormControl).disable();
-                (warn_group.get('upperBoundary') as FormControl).setValue('');
-                (warn_group.get('upperBoundary') as FormControl).disable();
-            } else if (warning_enabled) {
-                (warn_group.get('lowerBoundary') as FormControl).enable();
-                (warn_group.get('upperBoundary') as FormControl).enable();
+            if (!warningEnabled) {
+                (warnGroup.get('lowerBoundary') as FormControl).setValue('');
+                (warnGroup.get('lowerBoundary') as FormControl).disable();
+                (warnGroup.get('upperBoundary') as FormControl).setValue('');
+                (warnGroup.get('upperBoundary') as FormControl).disable();
+            } else if (warningEnabled) {
+                (warnGroup.get('lowerBoundary') as FormControl).enable();
+                (warnGroup.get('upperBoundary') as FormControl).enable();
             }
         });
 
@@ -247,17 +240,16 @@ export class MultiValueEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: (ExportResponseModel | null)) => {
+        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
+                        this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values });
                     }
                 });
             }
         });
     }
-
 
     close(): void {
         this.dialogRef.close();
@@ -266,7 +258,7 @@ export class MultiValueEditDialogComponent implements OnInit {
     save(): void {
         const measurements: MultiValueMeasurement[] = [];
         this.getMeasurements().controls.forEach((control, index) => {
-            const warn_group = this.getWarningGroup(index);
+            const warnGroup = this.getWarningGroup(index);
             const m = {
                 name: (control.get('name') as FormControl).value,
                 type: (control.get('type') as FormControl).value,
@@ -275,9 +267,9 @@ export class MultiValueEditDialogComponent implements OnInit {
                 column: (control.get('column') as FormControl).value,
                 unit: (control.get('unit') as FormControl).value,
                 math: (control.get('math') as FormControl).value,
-                lowerBoundary: (warn_group.get('lowerBoundary') as FormControl).value || Number.MIN_VALUE,
-                upperBoundary: (warn_group.get('upperBoundary') as FormControl).value || Number.MAX_VALUE,
-                warning_enabled: (warn_group.get('warning_enabled') as FormControl).value,
+                lowerBoundary: (warnGroup.get('lowerBoundary') as FormControl).value || Number.MIN_VALUE,
+                upperBoundary: (warnGroup.get('upperBoundary') as FormControl).value || Number.MAX_VALUE,
+                warning_enabled: (warnGroup.get('warning_enabled') as FormControl).value,
             } as MultiValueMeasurement;
             measurements.push(m);
         });
@@ -301,7 +293,7 @@ export class MultiValueEditDialogComponent implements OnInit {
             unit: '',
             export: {} as ChartsExportMeasurementModel,
             math: '',
-            warning_enabled: false
+            warning_enabled: false,
         };
         this.addMeasurement(m);
         this.step = this.getMeasurements().controls.length - 1;
@@ -322,8 +314,8 @@ export class MultiValueEditDialogComponent implements OnInit {
 
     getBoundaryWarningTooltip(index: number): string {
         const wg = this.getWarningGroup(index);
-        const warning_enabled = wg.get('warning_enabled') as FormControl;
-        if (warning_enabled.value === true && wg.invalid) {
+        const warningEnabled = wg.get('warning_enabled') as FormControl;
+        if (warningEnabled.value === true && wg.invalid) {
             if (wg.getError('lowerBiggerThanUpper') !== undefined) {
                 return 'Lower boundary can\'t be bigger than upper boundary';
             }
@@ -331,7 +323,7 @@ export class MultiValueEditDialogComponent implements OnInit {
                 return 'Set at least one value';
             }
         }
-        if (warning_enabled.disabled && (this.getMeasurement(index).get('type') as FormControl).valid) {
+        if (warningEnabled.disabled && (this.getMeasurement(index).get('type') as FormControl).valid) {
             return 'Warnings don\'t work with String type';
         }
         return '';

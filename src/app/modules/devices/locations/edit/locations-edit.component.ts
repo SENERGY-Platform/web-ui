@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {LocationsService} from '../shared/locations.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {LocationModel} from '../shared/locations.model';
-import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
-import {debounceTime, delay} from 'rxjs/operators';
-import {DeviceInstancesService} from '../../device-instances/shared/device-instances.service';
-import {DeviceGroupModel} from '../../device-groups/shared/device-groups.model';
-import {DeviceGroupsService} from '../../device-groups/shared/device-groups.service';
-import {DeviceInstancesDialogService} from '../../device-instances/shared/device-instances-dialog.service';
-import {DeviceGroupsDialogService} from '../../device-groups/shared/device-groups-dialog.service';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { LocationsService } from '../shared/locations.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { LocationModel } from '../shared/locations.model';
+import { DeviceInstancesBaseModel } from '../../device-instances/shared/device-instances.model';
+import { debounceTime, delay } from 'rxjs/operators';
+import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
+import { DeviceGroupModel } from '../../device-groups/shared/device-groups.model';
+import { DeviceGroupsService } from '../../device-groups/shared/device-groups.service';
+import { DeviceInstancesDialogService } from '../../device-instances/shared/device-instances-dialog.service';
+import { DeviceGroupsDialogService } from '../../device-groups/shared/device-groups-dialog.service';
 
 @Component({
     selector: 'senergy-locations-edit',
     templateUrl: './locations-edit.component.html',
-    styleUrls: ['./locations-edit.component.css']
+    styleUrls: ['./locations-edit.component.css'],
 })
 export class LocationsEditComponent implements OnInit {
-
     id = '';
-    locationForm!: FormGroup;    // LocationModel
+    locationForm!: FormGroup; // LocationModel
 
-    devicesForm: FormControl = new FormControl([]);       // []DeviceInstancesBaseModel
+    devicesForm: FormControl = new FormControl([]); // []DeviceInstancesBaseModel
     deviceGroupsForm: FormControl = new FormControl([]);
 
     deviceCache: Map<string, DeviceInstancesBaseModel> = new Map<string, DeviceInstancesBaseModel>();
@@ -47,15 +46,17 @@ export class LocationsEditComponent implements OnInit {
     debounceTimeInMs = 500;
     rerouteAfterSaveDelayInMs = 2000;
 
-    constructor(private _formBuilder: FormBuilder,
-                private locationService: LocationsService,
-                private deviceService: DeviceInstancesService,
-                private deviceDialogService: DeviceInstancesDialogService,
-                private deviceGroupService: DeviceGroupsService,
-                private deviceGroupDialogService: DeviceGroupsDialogService,
-                private snackBar: MatSnackBar,
-                private route: ActivatedRoute,
-                private router: Router) {
+    constructor(
+        private _formBuilder: FormBuilder,
+        private locationService: LocationsService,
+        private deviceService: DeviceInstancesService,
+        private deviceDialogService: DeviceInstancesDialogService,
+        private deviceGroupService: DeviceGroupsService,
+        private deviceGroupDialogService: DeviceGroupsDialogService,
+        private snackBar: MatSnackBar,
+        private route: ActivatedRoute,
+        private router: Router,
+    ) {
         this.getRouterParams();
     }
 
@@ -74,9 +75,7 @@ export class LocationsEditComponent implements OnInit {
             idList.push(id);
 
             // filter duplicates
-            idList = idList.filter((item: string, index: number) => {
-                return idList.indexOf(item) === index;
-            });
+            idList = idList.filter((item: string, index: number) => idList.indexOf(item) === index);
 
             devicesFc.setValue(idList);
         } else {
@@ -91,9 +90,7 @@ export class LocationsEditComponent implements OnInit {
             idList.push(...ids);
 
             // filter duplicates
-            idList = idList.filter((item: string, index: number) => {
-                return idList.indexOf(item) === index;
-            });
+            idList = idList.filter((item: string, index: number) => idList.indexOf(item) === index);
 
             devicesFc.setValue(idList);
         } else {
@@ -124,9 +121,7 @@ export class LocationsEditComponent implements OnInit {
             idList.push(id);
 
             // filter duplicates
-            idList = idList.filter((item: string, index: number) => {
-                return idList.indexOf(item) === index;
-            });
+            idList = idList.filter((item: string, index: number) => idList.indexOf(item) === index);
 
             deviceGroupsFc.setValue(idList);
         } else {
@@ -141,9 +136,7 @@ export class LocationsEditComponent implements OnInit {
             idList.push(...ids);
 
             // filter duplicates
-            idList = idList.filter((item: string, index: number) => {
-                return idList.indexOf(item) === index;
-            });
+            idList = idList.filter((item: string, index: number) => idList.indexOf(item) === index);
 
             deviceGroupsFc.setValue(idList);
         } else {
@@ -167,8 +160,7 @@ export class LocationsEditComponent implements OnInit {
         }
     }
 
-    close(): void {
-    }
+    close(): void {}
 
     save(): void {
         this.saveLocation(this.getLocationFromForm());
@@ -181,7 +173,9 @@ export class LocationsEditComponent implements OnInit {
         // watch devices changes
         const devicesFc = this.locationForm.get('device_ids');
         if (devicesFc) {
-            devicesFc.valueChanges.subscribe(value => { that.updateDevicesForm(value); });
+            devicesFc.valueChanges.subscribe((value) => {
+                that.updateDevicesForm(value);
+            });
             this.updateDevicesForm(location.device_ids);
         } else {
             throw new Error('missing device_ids in locationForm');
@@ -190,7 +184,9 @@ export class LocationsEditComponent implements OnInit {
         // watch device groups changes
         const devicesGroupsFc = this.locationForm.get('device_group_ids');
         if (devicesGroupsFc) {
-            devicesGroupsFc.valueChanges.subscribe(value => { that.updateDeviceGroupsForm(value); });
+            devicesGroupsFc.valueChanges.subscribe((value) => {
+                that.updateDeviceGroupsForm(value);
+            });
             this.updateDeviceGroupsForm(location.device_group_ids);
         } else {
             throw new Error('missing device_ids in locationForm');
@@ -199,33 +195,38 @@ export class LocationsEditComponent implements OnInit {
 
     private createLocationFormGroup(location: LocationModel): FormGroup {
         return this._formBuilder.group({
-            id: [{value: location.id, disabled: true}],
+            id: [{ value: location.id, disabled: true }],
             name: [location.name, Validators.required],
             description: [location.description],
             image: [location.image],
             device_ids: [location.device_ids && location.device_ids.length > 0 ? location.device_ids : []],
-            device_group_ids: [location.device_group_ids && location.device_group_ids.length > 0 ? location.device_group_ids : []]
+            device_group_ids: [location.device_group_ids && location.device_group_ids.length > 0 ? location.device_group_ids : []],
         });
     }
 
-
     private saveLocation(location: LocationModel) {
         if (location.id === '' || location.id === undefined) {
-            this.locationService.createLocation(location).pipe(delay(this.rerouteAfterSaveDelayInMs)).subscribe((locationSaved: LocationModel | null) => {
-                this.showMessage(locationSaved);
-                this.reload(locationSaved);
-            });
+            this.locationService
+                .createLocation(location)
+                .pipe(delay(this.rerouteAfterSaveDelayInMs))
+                .subscribe((locationSaved: LocationModel | null) => {
+                    this.showMessage(locationSaved);
+                    this.reload(locationSaved);
+                });
         } else {
-            this.locationService.updateLocation(location).pipe(delay(this.rerouteAfterSaveDelayInMs)).subscribe((locationSaved: LocationModel | null) => {
-                this.showMessage(locationSaved);
-                this.reload(locationSaved);
-            });
+            this.locationService
+                .updateLocation(location)
+                .pipe(delay(this.rerouteAfterSaveDelayInMs))
+                .subscribe((locationSaved: LocationModel | null) => {
+                    this.showMessage(locationSaved);
+                    this.reload(locationSaved);
+                });
         }
     }
 
     private reload(location: LocationModel | null) {
         if (location) {
-            this.router.routeReuseStrategy.shouldReuseRoute = function () {
+            this.router.routeReuseStrategy.shouldReuseRoute = function() {
                 return false;
             };
             this.router.onSameUrlNavigation = 'reload';
@@ -235,9 +236,9 @@ export class LocationsEditComponent implements OnInit {
 
     private showMessage(locationSaved: LocationModel | null) {
         if (locationSaved) {
-            this.snackBar.open('Location saved successfully.', undefined, {duration: 2000});
+            this.snackBar.open('Location saved successfully.', undefined, { duration: 2000 });
         } else {
-            this.snackBar.open('Error while saving the device group!', undefined, {duration: 2000});
+            this.snackBar.open('Error while saving the device group!', undefined, { duration: 2000 });
         }
     }
 
@@ -255,11 +256,10 @@ export class LocationsEditComponent implements OnInit {
                 description: '',
                 image: '',
                 device_ids: [],
-                device_group_ids: []
+                device_group_ids: [],
             });
         }
     }
-
 
     private getLocationFromForm(): LocationModel {
         return this.locationForm.getRawValue();
@@ -291,7 +291,7 @@ export class LocationsEditComponent implements OnInit {
         };
 
         if (idsForRepoSearch.length) {
-            this.deviceService.getDeviceListByIds(idsForRepoSearch).subscribe(devices => {
+            this.deviceService.getDeviceListByIds(idsForRepoSearch).subscribe((devices) => {
                 for (const device of devices) {
                     this.deviceCache.set(device.id, device);
                 }
@@ -330,7 +330,7 @@ export class LocationsEditComponent implements OnInit {
         };
 
         if (idsForRepoSearch.length) {
-            this.deviceGroupService.getDeviceGroupListByIds(idsForRepoSearch).subscribe(groups => {
+            this.deviceGroupService.getDeviceGroupListByIds(idsForRepoSearch).subscribe((groups) => {
                 for (const group of groups) {
                     this.deviceGroupCache.set(group.id, group);
                 }
@@ -344,7 +344,7 @@ export class LocationsEditComponent implements OnInit {
     }
 
     selectAndAddDevices() {
-        this.deviceDialogService.openDeviceSelectDialog().subscribe(deviceIds => {
+        this.deviceDialogService.openDeviceSelectDialog().subscribe((deviceIds) => {
             if (deviceIds) {
                 this.addDevices(deviceIds);
             }
@@ -352,7 +352,7 @@ export class LocationsEditComponent implements OnInit {
     }
 
     selectAndAddGroups() {
-        this.deviceGroupDialogService.openDeviceGroupSelectDialog().subscribe(ids => {
+        this.deviceGroupDialogService.openDeviceGroupSelectDialog().subscribe((ids) => {
             if (ids) {
                 this.addDeviceGroups(ids);
             }

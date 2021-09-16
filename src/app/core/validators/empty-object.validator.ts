@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-import {AbstractControl, ValidatorFn} from '@angular/forms';
+import { AbstractControl, ValidatorFn } from '@angular/forms';
 
 /**
  * Validates the object in a FormControl and checks for the empty object {}.
  *
  * By setting errorOnEmpty to false, validation will return an error if the object is not empty (inverse behaviour).
+ *
  * @param errorOnEmpty true by default
  */
 export function emptyObjectValidator(errorOnEmpty: boolean = true): ValidatorFn {
-    return (control: AbstractControl): {[key: string]: any} | null => {
+    return (control: AbstractControl): { [key: string]: any } | null => {
         if (errorOnEmpty) {
             if (Object.entries(control.value).length === 0 && control.value.constructor === Object) {
-                return {'emptyModelValidator': true};
+                return { emptyModelValidator: true };
             }
             return null;
         } else {
             if (Object.entries(control.value).length === 0 && control.value.constructor === Object) {
-               return null;
+                return null;
             }
-            return {'emptyModelValidator': true};
+            return { emptyModelValidator: true };
         }
     };
 }

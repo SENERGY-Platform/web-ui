@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material/icon';
-import {DomSanitizer} from '@angular/platform-browser';
-import {AirQualityService} from './shared/air-quality.service';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {forkJoin, Observable, of, Subscription} from 'rxjs';
-import {UBAService} from './shared/uba.service';
-import {DWDPollenService} from './shared/dwd-pollen.service';
-import {map} from 'rxjs/internal/operators';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
+import { AirQualityService } from './shared/air-quality.service';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { forkJoin, Observable, of, Subscription } from 'rxjs';
+import { UBAService } from './shared/uba.service';
+import { DWDPollenService } from './shared/dwd-pollen.service';
+import { map } from 'rxjs/internal/operators';
 
 @Component({
     selector: 'senergy-air-quality',
@@ -43,14 +43,14 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private iconRegistry: MatIconRegistry,
-                private sanitizer: DomSanitizer,
-                private airRecommendationService: AirQualityService,
-                private ubaService: UBAService,
-                private dwdPollenService: DWDPollenService,
-                private dashboardService: DashboardService,
-    ) {
-    }
+    constructor(
+        private iconRegistry: MatIconRegistry,
+        private sanitizer: DomSanitizer,
+        private airRecommendationService: AirQualityService,
+        private ubaService: UBAService,
+        private dwdPollenService: DWDPollenService,
+        private dashboardService: DashboardService,
+    ) {}
 
     ngOnInit() {
         this.update();
@@ -78,7 +78,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                 this.ready = false;
                 const observables: Observable<any>[] = [];
                 observables.push(this.updateMeasurements());
-                forkJoin(observables).subscribe(_ => {
+                forkJoin(observables).subscribe((_) => {
                     this.createAdvice();
                     this.ready = true;
                 });
@@ -102,37 +102,41 @@ export class AirQualityComponent implements OnInit, OnDestroy {
             for (const measurement of this.widget.properties.measurements) {
                 if (measurement.is_enabled && measurement.data) {
                     if (measurement.is_warning) {
-                        this.pros.push(measurement.name_html + ' is warning inside: '
-                            + measurement.data.value + '&nbsp;' + measurement.unit_html);
+                        this.pros.push(
+                            measurement.name_html + ' is warning inside: ' + measurement.data.value + '&nbsp;' + measurement.unit_html,
+                        );
                     }
                     if (measurement.is_critical) {
-                        this.pros.push(measurement.name_html + ' is critical inside: '
-                            + measurement.data.value + '&nbsp;' + measurement.unit_html);
+                        this.pros.push(
+                            measurement.name_html + ' is critical inside: ' + measurement.data.value + '&nbsp;' + measurement.unit_html,
+                        );
                     }
                 }
                 if (!isNaN(measurement.outsideData.value) && measurement.outsideData.value !== null && measurement.short_name !== 'Hum.') {
                     const outsideValue = measurement.outsideData.value;
-                    if (outsideValue > measurement.boundaries.critical.upper
-                        || outsideValue < measurement.boundaries.critical.lower) {
+                    if (outsideValue > measurement.boundaries.critical.upper || outsideValue < measurement.boundaries.critical.lower) {
                         this.cons.push(measurement.name_html + ' is critical outside: ' + outsideValue + measurement.unit_html);
-                    } else if (outsideValue < measurement.boundaries.warn.lower
-                        || outsideValue > measurement.boundaries.warn.upper) {
+                    } else if (outsideValue < measurement.boundaries.warn.lower || outsideValue > measurement.boundaries.warn.upper) {
                         this.cons.push(measurement.name_html + ' is warning outside: ' + outsideValue + measurement.unit_html);
                     }
                     if (measurement.is_warning || measurement.is_critical) {
-                        if (measurement.data && measurement.data.value &&
-                            measurement.data.value > measurement.boundaries.warn.upper) { // too high inside
+                        if (measurement.data && measurement.data.value && measurement.data.value > measurement.boundaries.warn.upper) {
+                            // too high inside
                             if (outsideValue < measurement.data.value) {
                                 this.pros.push(measurement.name_html + ' is better outside: ' + outsideValue + measurement.unit_html);
                             } else if (outsideValue > measurement.data.value) {
                                 this.cons.push(measurement.name_html + ' is worse outside: ' + outsideValue + measurement.unit_html);
-                                this.pros = this.pros.filter(c => !c.startsWith(measurement.name_html));
+                                this.pros = this.pros.filter((c) => !c.startsWith(measurement.name_html));
                             }
-                        } else if (measurement.data && measurement.data.value &&
-                            measurement.data.value < measurement.boundaries.warn.lower) { // too low inside
+                        } else if (
+                            measurement.data &&
+                            measurement.data.value &&
+                            measurement.data.value < measurement.boundaries.warn.lower
+                        ) {
+                            // too low inside
                             if (outsideValue < measurement.data.value) {
                                 this.cons.push(measurement.name_html + ' is worse outside: ' + outsideValue + measurement.unit_html);
-                                this.pros = this.pros.filter(c => !c.startsWith(measurement.name_html));
+                                this.pros = this.pros.filter((c) => !c.startsWith(measurement.name_html));
                             } else if (outsideValue > measurement.data.value) {
                                 this.pros.push(measurement.name_html + ' is better outside: ' + outsideValue + measurement.unit_html);
                             }
@@ -141,8 +145,8 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                 }
             }
 
-            const humIndex = this.widget.properties.measurements.findIndex(m => m.short_name === 'Hum.');
-            const tempIndex = this.widget.properties.measurements.findIndex(m => m.short_name === 'Temp.');
+            const humIndex = this.widget.properties.measurements.findIndex((m) => m.short_name === 'Hum.');
+            const tempIndex = this.widget.properties.measurements.findIndex((m) => m.short_name === 'Temp.');
             if (humIndex !== -1 && tempIndex !== -1) {
                 const temp = this.widget.properties.measurements[tempIndex];
                 const hum = this.widget.properties.measurements[humIndex];
@@ -155,9 +159,11 @@ export class AirQualityComponent implements OnInit, OnDestroy {
                         this.cons.push(hum.name_html + ' could reach warning level');
                     }
                     if (hum.is_critical || hum.is_warning) {
-                        if (hum.data.value > hum.boundaries.warn.upper && relAfter < hum.data.value) { // too high inside
+                        if (hum.data.value > hum.boundaries.warn.upper && relAfter < hum.data.value) {
+                            // too high inside
                             this.pros.push(hum.name_html + ' would decrease');
-                        } else if (hum.data.value < hum.boundaries.warn.lower && relAfter > hum.data.value) { // too low inside
+                        } else if (hum.data.value < hum.boundaries.warn.lower && relAfter > hum.data.value) {
+                            // too low inside
                             this.pros.push(hum.name_html + ' would increase');
                         }
                     }
@@ -168,11 +174,13 @@ export class AirQualityComponent implements OnInit, OnDestroy {
             for (const pollen of this.widget.properties.pollen) {
                 if (pollen.is_enabled && pollen.data) {
                     if (pollen.is_critical) {
-                        this.cons.push(pollen.name_html + ' is critical outside: '
-                            + this.dwdPollenService.getNameForValue(pollen.outsideData.value));
+                        this.cons.push(
+                            pollen.name_html + ' is critical outside: ' + this.dwdPollenService.getNameForValue(pollen.outsideData.value),
+                        );
                     } else if (pollen.is_warning) {
-                        this.cons.push(pollen.name_html + ' has warning outside: '
-                            + this.dwdPollenService.getNameForValue(pollen.outsideData.value));
+                        this.cons.push(
+                            pollen.name_html + ' has warning outside: ' + this.dwdPollenService.getNameForValue(pollen.outsideData.value),
+                        );
                     }
                 }
             }
@@ -183,43 +191,52 @@ export class AirQualityComponent implements OnInit, OnDestroy {
         if (this.widget.properties.measurements === undefined) {
             return of(null);
         }
-        return this.airRecommendationService.readAllData(this.widget).pipe(map(widget => {
-            this.widget = widget;
-            widget.properties.measurements?.forEach((m, index) => {
-                if (this.widget.properties.measurements) {
-                    this.widget.properties.measurements[index].is_critical = false;
-                    this.widget.properties.measurements[index].is_warning = false;
-                    const value = m.data.value;
-                    if (value < this.widget.properties.measurements[index].boundaries.critical.lower
-                        || value > this.widget.properties.measurements[index].boundaries.critical.upper) {
-                        this.widget.properties.measurements[index].is_critical = true;
-                    } else if (value < this.widget.properties.measurements[index].boundaries.warn.lower
-                        || value > this.widget.properties.measurements[index].boundaries.warn.upper) {
-                        this.widget.properties.measurements[index].is_warning = true;
-                    }
-                }
-            });
-            if (this.widget.properties.dwdPollenInfo?.exportId !== undefined) {
-                this.pollenWarnings = 0;
-                this.pollenCriticals = 0;
-                widget.properties.pollen?.forEach((m, index) => {
-                    if (this.widget.properties.pollen) {
-                        this.widget.properties.pollen[index].is_critical = false;
-                        this.widget.properties.pollen[index].is_warning = false;
+        return this.airRecommendationService.readAllData(this.widget).pipe(
+            map((widget) => {
+                this.widget = widget;
+                widget.properties.measurements?.forEach((m, index) => {
+                    if (this.widget.properties.measurements) {
+                        this.widget.properties.measurements[index].is_critical = false;
+                        this.widget.properties.measurements[index].is_warning = false;
                         const value = m.data.value;
-                        if (value < this.widget.properties.pollen[index].boundaries.critical.lower
-                            || value > this.widget.properties.pollen[index].boundaries.critical.upper) {
-                            this.widget.properties.pollen[index].is_critical = true;
-                            this.pollenCriticals++;
-                        } else if (value < this.widget.properties.pollen[index].boundaries.warn.lower
-                            || value > this.widget.properties.pollen[index].boundaries.warn.upper) {
-                            this.widget.properties.pollen[index].is_warning = true;
-                            this.pollenWarnings++;
+                        if (
+                            value < this.widget.properties.measurements[index].boundaries.critical.lower ||
+                            value > this.widget.properties.measurements[index].boundaries.critical.upper
+                        ) {
+                            this.widget.properties.measurements[index].is_critical = true;
+                        } else if (
+                            value < this.widget.properties.measurements[index].boundaries.warn.lower ||
+                            value > this.widget.properties.measurements[index].boundaries.warn.upper
+                        ) {
+                            this.widget.properties.measurements[index].is_warning = true;
                         }
                     }
                 });
-            }
-        }));
-
+                if (this.widget.properties.dwdPollenInfo?.exportId !== undefined) {
+                    this.pollenWarnings = 0;
+                    this.pollenCriticals = 0;
+                    widget.properties.pollen?.forEach((m, index) => {
+                        if (this.widget.properties.pollen) {
+                            this.widget.properties.pollen[index].is_critical = false;
+                            this.widget.properties.pollen[index].is_warning = false;
+                            const value = m.data.value;
+                            if (
+                                value < this.widget.properties.pollen[index].boundaries.critical.lower ||
+                                value > this.widget.properties.pollen[index].boundaries.critical.upper
+                            ) {
+                                this.widget.properties.pollen[index].is_critical = true;
+                                this.pollenCriticals++;
+                            } else if (
+                                value < this.widget.properties.pollen[index].boundaries.warn.lower ||
+                                value > this.widget.properties.pollen[index].boundaries.warn.upper
+                            ) {
+                                this.widget.properties.pollen[index].is_warning = true;
+                                this.pollenWarnings++;
+                            }
+                        }
+                    });
+                }
+            }),
+        );
     }
 }

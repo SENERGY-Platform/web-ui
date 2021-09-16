@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Router} from '@angular/router';
-import {DialogsService} from '../../../core/services/dialogs.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Subscription } from 'rxjs';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { DialogsService } from '../../../core/services/dialogs.service';
 import uuid = util.uuid;
-import {util} from 'jointjs';
-import {LocationModel} from './shared/locations.model';
-import {LocationsService} from './shared/locations.service';
-import {DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum} from '../device-instances/device-instances.component';
+import { util } from 'jointjs';
+import { LocationModel } from './shared/locations.model';
+import { LocationsService } from './shared/locations.service';
+import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -40,7 +40,7 @@ const grids = new Map([
 @Component({
     selector: 'senergy-locations',
     templateUrl: './locations.component.html',
-    styleUrls: ['./locations.component.css']
+    styleUrls: ['./locations.component.css'],
 })
 export class LocationsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
@@ -57,15 +57,15 @@ export class LocationsComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private dialog: MatDialog,
-                private responsiveService: ResponsiveService,
-                private locationsService: LocationsService,
-                private searchbarService: SearchbarService,
-                private snackBar: MatSnackBar,
-                private router: Router,
-                private dialogsService: DialogsService
-    ) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private responsiveService: ResponsiveService,
+        private locationsService: LocationsService,
+        private searchbarService: SearchbarService,
+        private snackBar: MatSnackBar,
+        private router: Router,
+        private dialogsService: DialogsService,
+    ) {}
 
     ngOnInit() {
         this.initGridCols();
@@ -91,26 +91,29 @@ export class LocationsComponent implements OnInit, OnDestroy {
 
     showDevices(location: LocationModel) {
         this.router.navigate(['devices/deviceinstances'], {
-            state: {type: DeviceInstancesRouterStateTypesEnum.LOCATION, value: location} as DeviceInstancesRouterState,
+            state: { type: DeviceInstancesRouterStateTypesEnum.LOCATION, value: location } as DeviceInstancesRouterState,
         });
         return false;
     }
 
     deleteLocation(location: LocationModel): boolean {
-        this.dialogsService.openDeleteDialog('device group ' + location.name).afterClosed().subscribe((deleteDeviceClass: boolean) => {
-            if (deleteDeviceClass) {
-                this.locationsService.deleteLocation(location.id).subscribe((resp: boolean) => {
-                    if (resp === true) {
-                        this.locations.splice(this.locations.indexOf(location), 1);
-                        this.snackBar.open('Device-Group deleted successfully.', undefined, {duration: 2000});
-                        this.setLimitOffset(1);
-                        this.reloadLocations(false);
-                    } else {
-                        this.snackBar.open('Error while deleting the device-group!', undefined, {duration: 2000});
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('device group ' + location.name)
+            .afterClosed()
+            .subscribe((deleteDeviceClass: boolean) => {
+                if (deleteDeviceClass) {
+                    this.locationsService.deleteLocation(location.id).subscribe((resp: boolean) => {
+                        if (resp === true) {
+                            this.locations.splice(this.locations.indexOf(location), 1);
+                            this.snackBar.open('Device-Group deleted successfully.', undefined, { duration: 2000 });
+                            this.setLimitOffset(1);
+                            this.reloadLocations(false);
+                        } else {
+                            this.snackBar.open('Error while deleting the device-group!', undefined, { duration: 2000 });
+                        }
+                    });
+                }
+            });
         return false;
     }
 
@@ -143,15 +146,15 @@ export class LocationsComponent implements OnInit, OnDestroy {
             this.reset();
         }
 
-        this.locationsService.searchLocations(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-            (locations: LocationModel[]) => {
+        this.locationsService
+            .searchLocations(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .subscribe((locations: LocationModel[]) => {
                 if (locations.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.locations = this.locations.concat(locations);
                 this.ready = true;
             });
-
     }
 
     private reset() {
@@ -173,6 +176,4 @@ export class LocationsComponent implements OnInit, OnDestroy {
         this.limit = limit;
         this.offset = this.locations.length;
     }
-
-
 }

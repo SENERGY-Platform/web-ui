@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
-import {DashboardComponent} from './dashboard.component';
-import {CommonModule} from '@angular/common';
-import {FlexLayoutModule} from '@angular/flex-layout';
-import {DashboardNewDialogComponent} from './dialogs/dashboard-new-dialog.component';
-import {WidgetModule} from '../../widgets/widget.module';
-import {DashboardNewWidgetDialogComponent} from './dialogs/dashboard-new-widget-dialog.component';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {GridsterModule} from 'angular-gridster2';
-import {DashboardEditDialogComponent} from './dialogs/dashboard-edit-dialog.component';
-import {MatTabsModule} from '@angular/material/tabs';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatGridListModule} from '@angular/material/grid-list';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatSelectModule} from '@angular/material/select';
-import {MatOptionModule} from '@angular/material/core';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {DragDropModule} from "@angular/cdk/drag-drop";
-
+import { NgModule } from '@angular/core';
+import { DashboardComponent } from './dashboard.component';
+import { CommonModule } from '@angular/common';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { DashboardNewDialogComponent } from './dialogs/dashboard-new-dialog.component';
+import { WidgetModule } from '../../widgets/widget.module';
+import { DashboardNewWidgetDialogComponent } from './dialogs/dashboard-new-widget-dialog.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { GridsterModule } from 'angular-gridster2';
+import { DashboardEditDialogComponent } from './dialogs/dashboard-edit-dialog.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
-    imports: [MatTabsModule,
+    imports: [
+        MatTabsModule,
         MatIconModule,
         MatButtonModule,
         CommonModule,
@@ -58,14 +58,9 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
         FormsModule,
         GridsterModule,
         MatTooltipModule,
-        ReactiveFormsModule, DragDropModule,
+        ReactiveFormsModule,
+        DragDropModule,
     ],
-    declarations: [
-        DashboardComponent,
-        DashboardNewDialogComponent,
-        DashboardNewWidgetDialogComponent,
-        DashboardEditDialogComponent,
-    ],
+    declarations: [DashboardComponent, DashboardNewDialogComponent, DashboardNewWidgetDialogComponent, DashboardEditDialogComponent],
 })
-export class DashboardModule {
-}
+export class DashboardModule {}

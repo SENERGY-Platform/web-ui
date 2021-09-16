@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {environment} from '../../../environments/environment';
-import {LastValuesRequestElementModel, QueriesRequestElementModel, TimeValuePairModel} from './export-data.model';
-import {HttpClient} from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { LastValuesRequestElementModel, QueriesRequestElementModel, TimeValuePairModel } from './export-data.model';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ExportDataService {
-
-    constructor(private http: HttpClient) {
-    }
+    constructor(private http: HttpClient) {}
 
     getLastValues(requestElements: LastValuesRequestElementModel[]): Observable<TimeValuePairModel[]> {
         return this.http.post<TimeValuePairModel[]>(environment.influxAPIURL + '/v2/last-values', requestElements);
@@ -36,10 +34,18 @@ export class ExportDataService {
         return this.http.post<any[][][]>(environment.influxAPIURL + '/v2/queries?format=per_query', query);
     }
 
-    queryAsTable(query: QueriesRequestElementModel[], orderColumnIndex: Number = 0, orderDirection: 'asc' | 'desc' = 'desc')
-        : Observable<any[][] | null> {
-
-        return this.http.post<any[][] | null>(environment.influxAPIURL + '/v2/queries?format=table&order_column_index='
-            + orderColumnIndex + '&order_direction=' + orderDirection, query);
+    queryAsTable(
+        query: QueriesRequestElementModel[],
+        orderColumnIndex: number = 0,
+        orderDirection: 'asc' | 'desc' = 'desc',
+    ): Observable<any[][] | null> {
+        return this.http.post<any[][] | null>(
+            environment.influxAPIURL +
+                '/v2/queries?format=table&order_column_index=' +
+                orderColumnIndex +
+                '&order_direction=' +
+                orderDirection,
+            query,
+        );
     }
 }

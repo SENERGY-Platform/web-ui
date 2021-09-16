@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {ExportValueModel} from '../../../../modules/exports/shared/export.model';
-import {
-    ChartsExportRequestPayloadGroupModel,
-    ChartsExportRequestPayloadTimeModel
-} from './charts-export-request-payload.model';
+import { ExportValueModel } from '../../../../modules/exports/shared/export.model';
+import { ChartsExportRequestPayloadGroupModel, ChartsExportRequestPayloadTimeModel } from './charts-export-request-payload.model';
 
 export interface ChartsExportPropertiesModel {
     chartType?: string;
@@ -41,7 +38,7 @@ export interface ChartsExportPropertiesModel {
 export interface ChartsExportMeasurementModel {
     id: string;
     name: string;
-    values: ExportValueModel [];
+    values: ExportValueModel[];
 }
 
 export interface ChartsExportVAxesModel {
@@ -52,12 +49,11 @@ export interface ChartsExportVAxesModel {
     valueType: string;
     math: string;
     color: string;
-    filterType?:  '=' | '<>' | '!=' | '>' | '>=' | '<' | '<=';
+    filterType?: '=' | '<>' | '!=' | '>' | '>=' | '<' | '<=';
     filterValue?: number | string;
     tagSelection?: string[];
     isDuplicate?: boolean;
     displayOnSecondVAxis?: boolean;
-    conversions?: {from: string; to: number}[];
+    conversions?: { from: string; to: number }[];
     conversionDefault?: number;
 }
-

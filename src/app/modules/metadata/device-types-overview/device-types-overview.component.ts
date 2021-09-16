@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {DeviceTypeService} from './shared/device-type.service';
-import {DeviceTypePermSearchModel} from './shared/device-type-perm-search.model';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {DeviceInstancesService} from '../../devices/device-instances/shared/device-instances.service';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {Router} from '@angular/router';
-import {
-    DeviceInstancesRouterState,
-    DeviceInstancesRouterStateTypesEnum
-} from '../../devices/device-instances/device-instances.component';
-import {DeviceInstancesDialogService} from '../../devices/device-instances/shared/device-instances-dialog.service';
-import {DeviceTypeDeviceClassModel} from './shared/device-type.model';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Subscription } from 'rxjs';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { DeviceTypeService } from './shared/device-type.service';
+import { DeviceTypePermSearchModel } from './shared/device-type-perm-search.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { Router } from '@angular/router';
+import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../../devices/device-instances/device-instances.component';
+import { DeviceInstancesDialogService } from '../../devices/device-instances/shared/device-instances-dialog.service';
+import { DeviceTypeDeviceClassModel } from './shared/device-type.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -40,11 +37,10 @@ const grids = new Map([
     ['xl', 6],
 ]);
 
-
 @Component({
     selector: 'senergy-device-types',
     templateUrl: './device-types-overview.component.html',
-    styleUrls: ['./device-types-overview.component.css']
+    styleUrls: ['./device-types-overview.component.css'],
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
@@ -62,15 +58,16 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private searchbarService: SearchbarService,
-                private responsiveService: ResponsiveService,
-                private deviceTypeService: DeviceTypeService,
-                private snackBar: MatSnackBar,
-                private deviceInstancesService: DeviceInstancesService,
-                private dialogsService: DialogsService,
-                private router: Router,
-                private deviceInstancesDialogService: DeviceInstancesDialogService) {
-    }
+    constructor(
+        private searchbarService: SearchbarService,
+        private responsiveService: ResponsiveService,
+        private deviceTypeService: DeviceTypeService,
+        private snackBar: MatSnackBar,
+        private deviceInstancesService: DeviceInstancesService,
+        private dialogsService: DialogsService,
+        private router: Router,
+        private deviceInstancesDialogService: DeviceInstancesDialogService,
+    ) {}
 
     ngOnInit() {
         this.loadDeviceClasses();
@@ -97,45 +94,47 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     delete(deviceTypeInput: DeviceTypePermSearchModel) {
-        this.dialogsService.openDeleteDialog('device type: ' + deviceTypeInput.name).afterClosed().subscribe((deviceTypeDelete: boolean) => {
-            if (deviceTypeDelete) {
-                this.deviceTypeService.deleteDeviceType(encodeURIComponent(deviceTypeInput.id)).subscribe((deleted: boolean) => {
-                    if (deleted) {
-                        const index = this.deviceTypes.indexOf(deviceTypeInput);
-                        this.deviceTypes.splice(index, 1);
-                        this.snackBar.open('Device type deleted successfully.', '', {duration: 2000});
-                        this.setRepoItemsParams(1);
-                        this.getDeviceTypes();
-
-                    } else {
-                        this.snackBar.open('Error while deleting device type!', '', {duration: 2000});
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('device type: ' + deviceTypeInput.name)
+            .afterClosed()
+            .subscribe((deviceTypeDelete: boolean) => {
+                if (deviceTypeDelete) {
+                    this.deviceTypeService.deleteDeviceType(encodeURIComponent(deviceTypeInput.id)).subscribe((deleted: boolean) => {
+                        if (deleted) {
+                            const index = this.deviceTypes.indexOf(deviceTypeInput);
+                            this.deviceTypes.splice(index, 1);
+                            this.snackBar.open('Device type deleted successfully.', '', { duration: 2000 });
+                            this.setRepoItemsParams(1);
+                            this.getDeviceTypes();
+                        } else {
+                            this.snackBar.open('Error while deleting device type!', '', { duration: 2000 });
+                        }
+                    });
+                }
+            });
     }
 
     copyDeviceType(deviceTypeId: string): void {
         this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceTypeId], {
-            queryParams: {function: 'copy'},
+            queryParams: { function: 'copy' },
         });
     }
 
     editDeviceType(deviceTypeId: string): void {
         this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceTypeId], {
-            queryParams: {function: 'edit'},
+            queryParams: { function: 'edit' },
         });
     }
 
     detailsDeviceType(deviceTypeId: string): void {
         this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceTypeId], {
-            queryParams: {function: 'details'},
+            queryParams: { function: 'details' },
         });
     }
 
     createDeviceType(): void {
         this.router.navigate(['metadata/devicetypesoverview/devicetypes'], {
-            queryParams: {function: 'create'},
+            queryParams: { function: 'create' },
         });
     }
 
@@ -145,7 +144,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
 
     showDevices(deviceType: DeviceTypePermSearchModel) {
         this.router.navigate(['devices/deviceinstances'], {
-            state: {type: DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE, value: deviceType} as DeviceInstancesRouterState,
+            state: { type: DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE, value: deviceType } as DeviceInstancesRouterState,
         });
     }
 
@@ -168,9 +167,9 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     private getDeviceTypes() {
-        this.deviceTypeService.getDeviceTypes(this.searchText, this.limit, this.offset, this.sortAttribute.value,
-            this.sortAttribute.order).subscribe(
-            (deviceTypes: DeviceTypePermSearchModel[]) => {
+        this.deviceTypeService
+            .getDeviceTypes(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .subscribe((deviceTypes: DeviceTypePermSearchModel[]) => {
                 if (deviceTypes.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
@@ -195,10 +194,9 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     private loadDeviceClasses(): void {
-        this.deviceTypeService.getDeviceClasses().subscribe(
-            (deviceClasses: DeviceTypeDeviceClassModel[]) => {
-                this.deviceClasses = deviceClasses;
-            });
+        this.deviceTypeService.getDeviceClasses().subscribe((deviceClasses: DeviceTypeDeviceClassModel[]) => {
+            this.deviceClasses = deviceClasses;
+        });
     }
 
     private setRepoItemsParams(limit: number) {
@@ -206,5 +204,4 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.limit = limit;
         this.offset = this.deviceTypes.length;
     }
-
 }

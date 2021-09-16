@@ -48,7 +48,7 @@ export interface DataTableElementModel {
     unit?: string;
     warning?: DataTableElementWarningModel;
     elementDetails: {
-        elementType: DataTableElementTypesEnum,
+        elementType: DataTableElementTypesEnum;
         device?: {
             aspectId: string;
             functionId: string;
@@ -57,18 +57,19 @@ export interface DataTableElementModel {
             deploymentId?: string;
             requestDevice: boolean;
             scheduleId?: string;
-        },
+        };
         pipeline?: {
             pipelineId: string;
             operatorId: string;
-        },
+        };
         import?: {
             typeId: string;
             instanceId: string;
-        },
+        };
     };
 }
 
+// eslint-disable-next-line no-shadow
 export enum DataTableElementTypesEnum {
     DEVICE,
     PIPELINE,
@@ -81,6 +82,7 @@ export interface DataTableElementWarningModel {
     upperBoundary?: number;
 }
 
+// eslint-disable-next-line no-shadow
 export enum ExportValueTypes {
     INTEGER = 'int',
     FLOAT = 'float',
@@ -89,12 +91,13 @@ export enum ExportValueTypes {
     STRING_JSON = 'string_json',
 }
 
+// eslint-disable-next-line no-shadow
 export enum DataTableOrderEnum {
     Default = 0,
-    AlphabeticallyAsc= 1,
-    AlphabeticallyDesc = 2 ,
-    ValueAsc= 3,
-    ValueDesc = 4 ,
+    AlphabeticallyAsc = 1,
+    AlphabeticallyDesc = 2,
+    ValueAsc = 3,
+    ValueDesc = 4,
     TimeAsc = 5,
-    TimeDesc= 6,
+    TimeDesc = 6,
 }

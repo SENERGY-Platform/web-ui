@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {
-    WidgetModel
-} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {ProcessModelListService} from './shared/process-model-list.service';
-import {ProcessModelListModel} from './shared/process-model-list.model';
-import {Subscription} from 'rxjs';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { ProcessModelListService } from './shared/process-model-list.service';
+import { ProcessModelListModel } from './shared/process-model-list.model';
+import { Subscription } from 'rxjs';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 
 @Component({
     selector: 'senergy-process-model-list',
@@ -29,7 +27,6 @@ import {DashboardService} from '../../modules/dashboard/shared/dashboard.service
     styleUrls: ['./process-model-list.component.css'],
 })
 export class ProcessModelListComponent implements OnInit, OnDestroy {
-
     processes: ProcessModelListModel[] = [];
     ready = false;
     destroy = new Subscription();
@@ -38,9 +35,7 @@ export class ProcessModelListComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private processModelListService: ProcessModelListService,
-                private dashboardService: DashboardService) {
-    }
+    constructor(private processModelListService: ProcessModelListService, private dashboardService: DashboardService) {}
 
     ngOnInit() {
         this.getProcesses();

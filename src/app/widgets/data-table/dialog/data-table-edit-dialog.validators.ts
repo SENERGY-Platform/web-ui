@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-
-import {AbstractControl, FormControl, ValidationErrors, ValidatorFn} from '@angular/forms';
-import {DataTableElementTypesEnum} from '../shared/data-table.model';
-
+import { AbstractControl, FormControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { DataTableElementTypesEnum } from '../shared/data-table.model';
 
 export function boundaryValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -35,9 +33,9 @@ export function boundaryValidator(): ValidatorFn {
         const lowerHasValue = hasValue(lower);
         const upperHasValue = hasValue(upper);
         if (!lowerHasValue && !upperHasValue) {
-            lower.setErrors({'nothingSelected': true});
-            upper.setErrors({'nothingSelected': true});
-            return {'nothingSelected': true};
+            lower.setErrors({ nothingSelected: true });
+            upper.setErrors({ nothingSelected: true });
+            return { nothingSelected: true };
         }
 
         // Check if only one value is set
@@ -52,9 +50,9 @@ export function boundaryValidator(): ValidatorFn {
         const upperValue = Number(upper.value);
 
         if (lowerValue > upperValue) {
-            lower.setErrors({'lowerBiggerThanUpper': true});
-            upper.setErrors({'lowerBiggerThanUpper': true});
-            return {'lowerBiggerThanUpper': true};
+            lower.setErrors({ lowerBiggerThanUpper: true });
+            upper.setErrors({ lowerBiggerThanUpper: true });
+            return { lowerBiggerThanUpper: true };
         }
 
         // Both lower and upper are set and lower is smaller than upper
@@ -76,16 +74,16 @@ export function exportValidator(): ValidatorFn {
         const exportValuePath = control.get('exportValuePath');
 
         if (exportCreatedByWidget === null) {
-            return {'unknown formControl': 'exportCreatedByWidget'};
+            return { 'unknown formControl': 'exportCreatedByWidget' };
         }
         if (exportId === null) {
-            return {'unknown formControl': 'exportId'};
+            return { 'unknown formControl': 'exportId' };
         }
         if (exportValueName === null) {
-            return {'unknown formControl': 'exportValueName'};
+            return { 'unknown formControl': 'exportValueName' };
         }
         if (exportValuePath === null) {
-            return {'unknown formControl': 'exportValuePath'};
+            return { 'unknown formControl': 'exportValuePath' };
         }
 
         if (exportCreatedByWidget.value === true) {
@@ -95,20 +93,20 @@ export function exportValidator(): ValidatorFn {
             return null; // values will be filled automatically
         }
         if (!hasValue(exportId)) {
-            exportId.setErrors({'missing value': true});
-            return {'missing value': 'exportId'};
+            exportId.setErrors({ 'missing value': true });
+            return { 'missing value': 'exportId' };
         } else {
             exportId.setErrors(null);
         }
         if (!hasValue(exportValueName)) {
-            exportValueName.setErrors({'missing value': true});
-            return {'missing value': 'exportValueName'};
+            exportValueName.setErrors({ 'missing value': true });
+            return { 'missing value': 'exportValueName' };
         } else {
             exportValueName.setErrors(null);
         }
         if (!hasValue(exportValuePath)) {
-            exportValuePath.setErrors({'missing value': true});
-            return {'missing value': 'exportValuePath'};
+            exportValuePath.setErrors({ 'missing value': true });
+            return { 'missing value': 'exportValuePath' };
         } else {
             exportValuePath.setErrors(null);
         }
@@ -121,50 +119,49 @@ export function elementDetailsValidator(): ValidatorFn {
         const elementType = control.get('elementType');
 
         if (elementType === null) {
-            control.setErrors({'unknown formControl': 'elementType'});
-            return {'unknown formControl': 'elementType'};
+            control.setErrors({ 'unknown formControl': 'elementType' });
+            return { 'unknown formControl': 'elementType' };
         }
         switch (elementType.value) {
-            case DataTableElementTypesEnum.PIPELINE:
-                return getAndCheckValues(control, [
-                    ['pipeline', 'pipelineId'],
-                    ['pipeline', 'operatorId'],
-                ]);
+        case DataTableElementTypesEnum.PIPELINE:
+            return getAndCheckValues(control, [
+                ['pipeline', 'pipelineId'],
+                ['pipeline', 'operatorId'],
+            ]);
 
-            case DataTableElementTypesEnum.DEVICE:
-                return getAndCheckValues(control, [
-                    ['device', 'aspectId'],
-                    ['device', 'functionId'],
-                    ['device', 'deviceId'],
-                    ['device', 'serviceId'],
-                    // ['device', 'deploymentId'], will be filled automatically
-                    // ['device', 'requestDevice'], will be filled automatically
-                    // ['device', 'scheduleId'], will be filled automatically
-                ]);
+        case DataTableElementTypesEnum.DEVICE:
+            return getAndCheckValues(control, [
+                ['device', 'aspectId'],
+                ['device', 'functionId'],
+                ['device', 'deviceId'],
+                ['device', 'serviceId'],
+                // ['device', 'deploymentId'], will be filled automatically
+                // ['device', 'requestDevice'], will be filled automatically
+                // ['device', 'scheduleId'], will be filled automatically
+            ]);
 
-            case DataTableElementTypesEnum.IMPORT:
-                return getAndCheckValues(control, [
-                    ['import', 'typeId'],
-                    ['import', 'instanceId'],
-                ]);
-            default:
-                control.setErrors({'unknown elementType': elementType.value});
-                return {'unknown elementType': elementType.value};
-
+        case DataTableElementTypesEnum.IMPORT:
+            return getAndCheckValues(control, [
+                ['import', 'typeId'],
+                ['import', 'instanceId'],
+            ]);
+        default:
+            control.setErrors({ 'unknown elementType': elementType.value });
+            return { 'unknown elementType': elementType.value };
         }
     };
 }
 
 export function getAndCheckValue(control: AbstractControl, pathElements: string[]): ValidationErrors | undefined {
     let element: AbstractControl | null | undefined = control;
-    pathElements.forEach(pathElement => element = element?.get(pathElement));
+    pathElements.forEach((pathElement) => (element = element?.get(pathElement)));
     if (element === undefined) {
-        control.setErrors({'unknown formControl': pathElements.join('.')});
-        return {'unknown formControl': pathElements.join('.')};
+        control.setErrors({ 'unknown formControl': pathElements.join('.') });
+        return { 'unknown formControl': pathElements.join('.') };
     }
     if (!hasValue(element)) {
-        control.setErrors({'missing value':  pathElements.join('.')});
-        return {'missing value':  pathElements.join('.')};
+        control.setErrors({ 'missing value': pathElements.join('.') });
+        return { 'missing value': pathElements.join('.') };
     }
     return undefined;
 }

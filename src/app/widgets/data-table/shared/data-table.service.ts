@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {ExportModel} from '../../../modules/exports/shared/export.model';
-import {ExportService} from '../../../modules/exports/shared/export.service';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {ProcessSchedulerService} from '../../process-scheduler/shared/process-scheduler.service';
-import {DataTableElementModel} from './data-table.model';
-import {Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { ExportModel } from '../../../modules/exports/shared/export.model';
+import { ExportService } from '../../../modules/exports/shared/export.service';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
+import { DataTableElementModel } from './data-table.model';
+import { Observable } from 'rxjs';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DataTableService {
-
-    constructor(private dialog: MatDialog,
-                private dashboardService: DashboardService,
-                private exportService: ExportService,
-                private deploymentsService: DeploymentsService,
-                private processSchedulerService: ProcessSchedulerService) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private dashboardService: DashboardService,
+        private exportService: ExportService,
+        private deploymentsService: DeploymentsService,
+        private processSchedulerService: ProcessSchedulerService,
+    ) {}
 
     deleteElements(elements: DataTableElementModel[] | undefined): void {
         if (elements === undefined) {
             return;
         }
-        elements.forEach(element => {
+        elements.forEach((element) => {
             this.deleteElement(element);
         });
     }
@@ -50,7 +50,7 @@ export class DataTableService {
         if (elements === undefined) {
             return observables;
         }
-        elements.forEach(element => {
+        elements.forEach((element) => {
             observables.push(...this.deleteElement(element, false));
         });
         return observables;
@@ -59,7 +59,7 @@ export class DataTableService {
     deleteElement(element: DataTableElementModel, shouldSubscribe: boolean = true): Observable<any>[] {
         const observables: Observable<any>[] = [];
         if (element.exportCreatedByWidget) {
-            observables.push(this.exportService.stopPipeline({ID: element.exportId} as ExportModel));
+            observables.push(this.exportService.stopPipeline({ ID: element.exportId } as ExportModel));
         }
         if (element.elementDetails.device?.deploymentId) {
             observables.push(this.deploymentsService.v2deleteDeployment(element.elementDetails.device?.deploymentId));
@@ -68,11 +68,10 @@ export class DataTableService {
             observables.push(this.processSchedulerService.deleteSchedule(element.elementDetails.device?.scheduleId));
         }
         if (shouldSubscribe) {
-            observables.forEach(o => o.subscribe());
+            observables.forEach((o) => o.subscribe());
             return [];
         } else {
             return observables;
         }
     }
 }
-

@@ -31,20 +31,24 @@ export class DeviceInstancesExportDialogComponent implements OnInit {
     exports: ExportModel[] = [];
     formArray = new FormArray([]);
 
-    constructor(private dialogRef: MatDialogRef<DeviceInstancesExportDialogComponent>,
-                private exportService: ExportService,
-                private formBuilder: FormBuilder,
-                private snackBar: MatSnackBar,
-                private router: Router,
-                @Inject(MAT_DIALOG_DATA) private data: { exports: ExportModel[] }) {
+    constructor(
+        private dialogRef: MatDialogRef<DeviceInstancesExportDialogComponent>,
+        private exportService: ExportService,
+        private formBuilder: FormBuilder,
+        private snackBar: MatSnackBar,
+        private router: Router,
+        @Inject(MAT_DIALOG_DATA) private data: { exports: ExportModel[] },
+    ) {
         this.exports = data.exports;
     }
 
     ngOnInit() {
-        this.exports.forEach(singleExport => {
-            this.formArray.push(this.formBuilder.group({
-                name: this.formBuilder.control(singleExport.Name)
-            }));
+        this.exports.forEach((singleExport) => {
+            this.formArray.push(
+                this.formBuilder.group({
+                    name: this.formBuilder.control(singleExport.Name),
+                }),
+            );
         });
     }
 
@@ -60,16 +64,19 @@ export class DeviceInstancesExportDialogComponent implements OnInit {
                 obs.push(this.exportService.startPipeline(singleExport));
             }
         });
-        forkJoin(obs).subscribe(_ => {
-            const msg = 'Created ' + obs.length + ' export' + (obs.length !== 1 ? 's' : ''); // plural s
-            const snackBarRef = this.snackBar.open(msg, 'View', {duration: 5000});
-            snackBarRef.onAction().subscribe(() => this.router.navigateByUrl('exports'));
+        forkJoin(obs).subscribe(
+            (_) => {
+                const msg = 'Created ' + obs.length + ' export' + (obs.length !== 1 ? 's' : ''); // plural s
+                const snackBarRef = this.snackBar.open(msg, 'View', {duration: 5000});
+                snackBarRef.onAction().subscribe(() => this.router.navigateByUrl('exports'));
 
-            this.dialogRef.close();
-        }, err => {
-            console.error(err);
-            this.snackBar.open('Error creating exports', '', {duration: 2000});
-        });
+                this.dialogRef.close();
+            },
+            (err) => {
+                console.error(err);
+                this.snackBar.open('Error creating exports', '', {duration: 2000});
+            },
+        );
     }
 
     getFormGroup(index: number): FormGroup {
@@ -78,7 +85,10 @@ export class DeviceInstancesExportDialogComponent implements OnInit {
 
     toggle(i: number, state: boolean) {
         const fg = this.getFormGroup(i);
-        state ? fg.get('name')?.enable() :  fg.get('name')?.disable();
+        if (state) {
+            fg.get('name')?.enable();
+        } else {
+            fg.get('name')?.disable();
+        }
     }
-
 }

@@ -14,48 +14,44 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {ChartsModel} from '../../shared/charts.model';
-import {ElementSizeService} from '../../../../core/services/element-size.service';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {ChartDataTableModel} from '../../../../core/components/chart/chart-data-table.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
-import {ChartsExportEditDialogComponent} from '../dialog/charts-export-edit-dialog.component';
-import {WidgetModel, WidgetPropertiesModels} from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ErrorModel} from '../../../../core/model/error.model';
-import {ChartsExportPropertiesModel, ChartsExportVAxesModel} from './charts-export-properties.model';
-import {ChartsExportRequestPayloadGroupModel} from './charts-export-request-payload.model';
-import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
-import {ExportDataService} from '../../../shared/export-data.service';
-import {
-    QueriesRequestElementModel,
-    QueriesRequestFilterModel,
-    QueriesRequestTimeModel
-} from '../../../shared/export-data.model';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ChartsModel } from '../../shared/charts.model';
+import { ElementSizeService } from '../../../../core/services/element-size.service';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { ChartDataTableModel } from '../../../../core/components/chart/chart-data-table.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
+import { ChartsExportEditDialogComponent } from '../dialog/charts-export-edit-dialog.component';
+import { WidgetModel, WidgetPropertiesModels } from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { ErrorModel } from '../../../../core/model/error.model';
+import { ChartsExportPropertiesModel, ChartsExportVAxesModel } from './charts-export-properties.model';
+import { ChartsExportRequestPayloadGroupModel } from './charts-export-request-payload.model';
+import { ChartsExportRangeTimeTypeEnum } from './charts-export-range-time-type.enum';
+import { ExportDataService } from '../../../shared/export-data.service';
+import { QueriesRequestElementModel, QueriesRequestFilterModel, QueriesRequestTimeModel } from '../../../shared/export-data.model';
 
 const customColor = '#4484ce'; // /* cc */
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ChartsExportService {
-
-    constructor(private exportDataService: ExportDataService,
-                private elementSizeService: ElementSizeService,
-                private errorHandlerService: ErrorHandlerService,
-                private dialog: MatDialog,
-                private dashboardService: DashboardService) {
-    }
+    constructor(
+        private exportDataService: ExportDataService,
+        private elementSizeService: ElementSizeService,
+        private errorHandlerService: ErrorHandlerService,
+        private dialog: MatDialog,
+        private dashboardService: DashboardService,
+    ) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         const editDialogRef = this.dialog.open(ChartsExportEditDialogComponent, dialogConfig);
 
@@ -67,7 +63,7 @@ export class ChartsExportService {
     }
 
     getData(properties: WidgetPropertiesModels): Observable<any[][] | null> {
-        const widgetProperties = <ChartsExportPropertiesModel>properties;
+        const widgetProperties = properties as ChartsExportPropertiesModel;
         const time: QueriesRequestTimeModel = {};
         let group: ChartsExportRequestPayloadGroupModel | undefined;
 
@@ -76,8 +72,8 @@ export class ChartsExportService {
         }
 
         if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute && widgetProperties.time) {
-            time.start = new Date(<string>widgetProperties.time.start).toISOString();
-            time.end = new Date(<string>widgetProperties.time.end).toISOString();
+            time.start = new Date(widgetProperties.time.start as string).toISOString();
+            time.end = new Date(widgetProperties.time.end as string).toISOString();
         }
 
         if (widgetProperties.group && widgetProperties.group.type !== undefined && widgetProperties.group.type !== '') {
@@ -89,17 +85,19 @@ export class ChartsExportService {
             widgetProperties.vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
                 const newField: QueriesRequestElementModel = {
                     measurement: vAxis.instanceId,
-                    columns: [{
-                        name: vAxis.valueName,
-                        math: vAxis.math !== '' ? vAxis.math : undefined,
-                        groupType: group?.type !== null ? group?.type : undefined,
-                    }],
+                    columns: [
+                        {
+                            name: vAxis.valueName,
+                            math: vAxis.math !== '' ? vAxis.math : undefined,
+                            groupType: group?.type !== null ? group?.type : undefined,
+                        },
+                    ],
                     groupTime: group?.time !== '' ? group?.time : undefined,
-                    time: time,
+                    time,
                 };
                 const filters: QueriesRequestFilterModel[] = [];
-                vAxis.tagSelection?.forEach(tagFilter => {
-                    filters.push({column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1]});
+                vAxis.tagSelection?.forEach((tagFilter) => {
+                    filters.push({ column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1] });
                 });
                 if (vAxis.filterType !== undefined) {
                     filters.push({
@@ -120,16 +118,12 @@ export class ChartsExportService {
 
     getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
-            this.getData(widget.properties).subscribe((resp: (any[][] | null)) => {
+            this.getData(widget.properties).subscribe((resp: any[][] | null) => {
                 if (resp === null) {
                     // no data
-                    observer.next(this.setProcessInstancesStatusValues(
-                        widget,
-                        new ChartDataTableModel([[]])));
+                    observer.next(this.setProcessInstancesStatusValues(widget, new ChartDataTableModel([[]])));
                 } else {
-                    observer.next(this.setProcessInstancesStatusValues(
-                        widget,
-                        this.setData(resp, widget.properties.vAxes || [])));
+                    observer.next(this.setProcessInstancesStatusValues(widget, this.setData(resp, widget.properties.vAxes || [])));
                 }
                 observer.complete();
             });
@@ -137,15 +131,16 @@ export class ChartsExportService {
     }
 
     private setData(series: any[][], vAxes: ChartsExportVAxesModel[]): ChartDataTableModel {
-        const indices: {index: number, conversions: { from: string, to: number }[],
-            conversionDefault?: number, type: string}[] = [];
+        const indices: { index: number; conversions: { from: string; to: number }[]; conversionDefault?: number; type: string }[] = [];
         const header: string[] = ['time'];
         if (vAxes) {
             vAxes.forEach((vAxis: ChartsExportVAxesModel, index) => {
-                if (series.findIndex(a => a[index + 1] !== null) !== -1) {
+                if (series.findIndex((a) => a[index + 1] !== null) !== -1) {
                     indices.push({
-                        index: index + 1, conversions: vAxis.conversions || [],
-                        conversionDefault: vAxis.conversionDefault, type: vAxis.valueType
+                        index: index + 1,
+                        conversions: vAxis.conversions || [],
+                        conversionDefault: vAxis.conversionDefault,
+                        type: vAxis.valueType,
                     });
                     header.push(vAxis.valueAlias || vAxis.valueName);
                 }
@@ -154,29 +149,27 @@ export class ChartsExportService {
         const dataTable = new ChartDataTableModel([header]);
 
         series.forEach((item: (string | number | boolean)[]) => {
-                const dataPoint: (Date | number | null) [] = [new Date(<string>item[0])];
-                indices.forEach(resp => {
-                    let value = item[resp.index];
-                    if (value === null || value === undefined) {
-                        dataPoint.push(null);
-                        return;
-                    }
-                    const matchingRule = resp.conversions.find(rule => rule.from === value);
-                    if (matchingRule !== undefined) {
-                        value = matchingRule.to;
-                    } else if (resp.type === 'string' && resp.conversionDefault !== undefined) {
-                        value = resp.conversionDefault;
-                    }
-                    dataPoint.push(Math.fround(value as number));
-                });
-                dataTable.data.push(dataPoint);
-            }
-        );
+            const dataPoint: (Date | number | null)[] = [new Date(item[0] as string)];
+            indices.forEach((resp) => {
+                let value = item[resp.index];
+                if (value === null || value === undefined) {
+                    dataPoint.push(null);
+                    return;
+                }
+                const matchingRule = resp.conversions.find((rule) => rule.from === value);
+                if (matchingRule !== undefined) {
+                    value = matchingRule.to;
+                } else if (resp.type === 'string' && resp.conversionDefault !== undefined) {
+                    value = resp.conversionDefault;
+                }
+                dataPoint.push(Math.fround(value as number));
+            });
+            dataTable.data.push(dataPoint);
+        });
         return dataTable;
     }
 
     private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel): ChartsModel {
-
         const element = this.elementSizeService.getHeightAndWidthByElementId(widget.id, 5);
 
         // Remove all elements from color array that are missing in the dataTable
@@ -188,59 +181,63 @@ export class ChartsExportService {
                     deleteColorIndices.push(index);
                 }
             });
-            for (let i = deleteColorIndices.length - 1; i >= 0; i--) { // reverse transition ensures valid indices
+            for (let i = deleteColorIndices.length - 1; i >= 0; i--) {
+                // reverse transition ensures valid indices
                 colors.splice(deleteColorIndices[i], 1);
             }
         }
         const chartModel = new ChartsModel(
-            (widget.properties.chartType === undefined || widget.properties.chartType === '') ? 'LineChart' : widget.properties.chartType,
+            widget.properties.chartType === undefined || widget.properties.chartType === '' ? 'LineChart' : widget.properties.chartType,
             dataTable.data,
             {
-                chartArea: {width: element.widthPercentage, height: element.heightPercentage},
+                chartArea: { width: element.widthPercentage, height: element.heightPercentage },
                 colors,
                 hAxis: {
                     title: widget.properties.hAxisLabel,
-                    gridlines: {count: -1},
+                    gridlines: { count: -1 },
                     format: widget.properties.hAxisFormat,
-                    ticks: widget.properties.chartType === 'ColumnChart' ? dataTable.data.slice(1).map(x => x[0] as Date) : undefined,
+                    ticks: widget.properties.chartType === 'ColumnChart' ? dataTable.data.slice(1).map((x) => x[0] as Date) : undefined,
                 },
                 height: element.height,
                 width: element.width,
                 legend: 'none',
                 curveType: widget.properties.curvedFunction ? 'function' : '',
                 vAxis: {
-                    viewWindowMode: widget.properties.chartType !== 'ColumnChart' ?
-                        (element.height > 200 ? 'pretty' : 'maximized') : undefined,
+                    viewWindowMode:
+                        widget.properties.chartType !== 'ColumnChart' ? (element.height > 200 ? 'pretty' : 'maximized') : undefined,
                     viewWindow: {},
                 },
                 vAxes: {
-                    0: {title: widget.properties.vAxisLabel},
+                    0: { title: widget.properties.vAxisLabel },
                 },
                 explorer: {
                     actions: ['dragToZoom', 'rightClickToReset'],
                     axis: 'horizontal',
                     keepInBounds: true,
-                    maxZoomIn: 0.001
+                    maxZoomIn: 0.001,
                 },
                 interpolateNulls: true,
-            });
-        if (widget.properties.chartType === 'ColumnChart'
-            && dataTable.data.slice(1).findIndex(column => column.slice(1).findIndex(val => val || 0 < 0) !== -1) === -1 // all values >= 0 ?
-            && chartModel.options?.vAxis?.viewWindow !== undefined) {
-
+            },
+        );
+        if (
+            widget.properties.chartType === 'ColumnChart' &&
+            dataTable.data.slice(1).findIndex((column) => column.slice(1).findIndex((val) => val || 0 < 0) !== -1) === -1 && // all values >= 0 ?
+            chartModel.options?.vAxis?.viewWindow !== undefined
+        ) {
             chartModel.options.vAxis.viewWindow.min = 0;
         }
         const firstAxesSeries: number[] = [];
         const secondAxisSeries: number[] = [];
-        widget.properties.vAxes?.forEach((v, idx) => v.displayOnSecondVAxis === true ?
-            secondAxisSeries.push(idx) : firstAxesSeries.push(idx));
+        widget.properties.vAxes?.forEach((v, idx) =>
+            v.displayOnSecondVAxis === true ? secondAxisSeries.push(idx) : firstAxesSeries.push(idx),
+        );
         if (chartModel.options?.vAxes !== undefined && secondAxisSeries.length > 0) {
-            chartModel.options.vAxes['1'] = {title: widget.properties.secondVAxisLabel};
+            chartModel.options.vAxes['1'] = { title: widget.properties.secondVAxisLabel };
             chartModel.options.series = {};
-            // tslint:disable-next-line:no-non-null-assertion
-            firstAxesSeries.forEach(i => chartModel.options!.series[i] = {targetAxisIndex: 0});
-            // tslint:disable-next-line:no-non-null-assertion
-            secondAxisSeries.forEach(i => chartModel.options!.series[i] = {targetAxisIndex: 1});
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            firstAxesSeries.forEach((i) => (chartModel.options!.series[i] = { targetAxisIndex: 0 }));
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            secondAxisSeries.forEach((i) => (chartModel.options!.series[i] = { targetAxisIndex: 1 }));
         }
         return chartModel;
     }
@@ -252,8 +249,4 @@ export class ChartsExportService {
         });
         return array;
     }
-
 }
-
-
-

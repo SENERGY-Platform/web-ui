@@ -15,10 +15,5 @@
  */
 
 export class SortModel {
-    constructor(
-        public label: string,
-        public value: string,
-        public order: string,
-    ) {
-    }
+    constructor(public label: string, public value: string, public order: string) {}
 }

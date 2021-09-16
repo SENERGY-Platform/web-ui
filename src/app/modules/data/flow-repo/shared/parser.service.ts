@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {environment} from '../../../../../environments/environment';
-import {catchError, map} from 'rxjs/internal/operators';
-import {Observable} from 'rxjs';
-import {ParseModel} from './parse.model';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { environment } from '../../../../../environments/environment';
+import { catchError, map } from 'rxjs/internal/operators';
+import { Observable } from 'rxjs';
+import { ParseModel } from './parse.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ParserService {
-
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
-    }
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
     getInputs(id: string): Observable<ParseModel[]> {
-        return this.http.get<ParseModel[]>
-        (environment.flowParserUrl + '/flow/getinputs/' + id ).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(ParserService.name, 'getInputs: Error', []))
+        return this.http.get<ParseModel[]>(environment.flowParserUrl + '/flow/getinputs/' + id).pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(ParserService.name, 'getInputs: Error', [])),
         );
     }
 }

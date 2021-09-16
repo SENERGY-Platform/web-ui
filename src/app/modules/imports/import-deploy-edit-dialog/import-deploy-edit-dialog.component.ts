@@ -13,36 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ImportInstanceConfigModel, ImportInstancesModel} from '../import-instances/shared/import-instances.model';
-import {ImportInstancesService} from '../import-instances/shared/import-instances.service';
-import {ImportTypesService} from '../import-types/shared/import-types.service';
-import {ImportTypeConfigModel, ImportTypeModel} from '../import-types/shared/import-types.model';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {TypeValueValidator} from '../validators/type-value-validator';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ImportInstanceConfigModel, ImportInstancesModel } from '../import-instances/shared/import-instances.model';
+import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
+import { ImportTypesService } from '../import-types/shared/import-types.service';
+import { ImportTypeConfigModel, ImportTypeModel } from '../import-types/shared/import-types.model';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { typeValueValidator } from '../validators/type-value-validator';
 
 @Component({
     selector: 'senergy-import-deploy-dialog',
     templateUrl: './import-deploy-edit-dialog.component.html',
-    styleUrls: ['./import-deploy-edit-dialog.component.css']
+    styleUrls: ['./import-deploy-edit-dialog.component.css'],
 })
 export class ImportDeployEditDialogComponent implements OnInit {
-
     form = this.fb.group({
-        id: {value: '', disabled: true},
+        id: { value: '', disabled: true },
         name: ['', Validators.required],
-        import_type_id: {value: '', disabled: true},
-        image: {value: '', disabled: true},
-        kafka_topic: {value: '', disabled: true},
+        import_type_id: { value: '', disabled: true },
+        image: { value: '', disabled: true },
+        kafka_topic: { value: '', disabled: true },
         configs: this.fb.array([]),
         restart: true,
         created_at: undefined,
         updated_at: undefined,
         generated: false,
     });
-
 
     editMode = false;
 
@@ -56,12 +54,14 @@ export class ImportDeployEditDialogComponent implements OnInit {
 
     types: Map<string, string> = new Map();
 
-    constructor(@Inject(MAT_DIALOG_DATA) public data: ImportInstancesModel,
-                private fb: FormBuilder, private dialogRef: MatDialogRef<ImportDeployEditDialogComponent>,
-                private importTypesService: ImportTypesService,
-                private snackBar: MatSnackBar,
-                private importInstancesService: ImportInstancesService) {
-    }
+    constructor(
+        @Inject(MAT_DIALOG_DATA) public data: ImportInstancesModel,
+        private fb: FormBuilder,
+        private dialogRef: MatDialogRef<ImportDeployEditDialogComponent>,
+        private importTypesService: ImportTypesService,
+        private snackBar: MatSnackBar,
+        private importInstancesService: ImportInstancesService,
+    ) {}
 
     type: ImportTypeModel | undefined = undefined;
     ready = false;
@@ -77,52 +77,59 @@ export class ImportDeployEditDialogComponent implements OnInit {
 
         this.editMode = this.data.id !== undefined && this.data.id.length > 0;
         this.form.patchValue(this.data);
-        this.importTypesService.getImportType(this.data.import_type_id).subscribe(type => {
-            this.type = type;
-            this.type.configs.forEach(config => {
-                const group = this.newConfigGroupFromType(config);
+        this.importTypesService.getImportType(this.data.import_type_id).subscribe(
+            (type) => {
+                this.type = type;
+                this.type.configs.forEach((config) => {
+                    const group = this.newConfigGroupFromType(config);
 
-                const configured = this.data.configs?.find(instanceConfig => instanceConfig.name === config.name);
-                if (configured !== undefined) {
-                    if (config.type !== this.STRING) {
-                        group.patchValue({value: JSON.stringify(configured.value)});
-                    } else {
-                        group.patchValue({value: configured.value});
+                    const configured = this.data.configs?.find((instanceConfig) => instanceConfig.name === config.name);
+                    if (configured !== undefined) {
+                        if (config.type !== this.STRING) {
+                            group.patchValue({ value: JSON.stringify(configured.value) });
+                        } else {
+                            group.patchValue({ value: configured.value });
+                        }
                     }
-                }
-                (this.form.get('configs') as FormArray).push(group);
-            });
-            this.data.configs?.forEach(instanceConfig => {
-                const t = type.configs?.find(typeConfig => instanceConfig.name === typeConfig.name);
-                if (t === undefined) { // instance has more configs than type
-                    const group = this.newConfigGroupFromInstance(instanceConfig);
                     (this.form.get('configs') as FormArray).push(group);
+                });
+                this.data.configs?.forEach((instanceConfig) => {
+                    const t = type.configs?.find((typeConfig) => instanceConfig.name === typeConfig.name);
+                    if (t === undefined) {
+                        // instance has more configs than type
+                        const group = this.newConfigGroupFromInstance(instanceConfig);
+                        (this.form.get('configs') as FormArray).push(group);
+                    }
+                });
+                this.form.patchValue({ image: type.image });
+                if (this.data.restart === undefined) {
+                    this.form.patchValue({ restart: type.default_restart });
                 }
-            });
-            this.form.patchValue({image: type.image});
-            if (this.data.restart === undefined) {
-                this.form.patchValue({restart: type.default_restart});
-            }
-            this.configs = (this.form.get('configs') as FormArray).controls as FormGroup[];
-            this.ready = true;
-        }, err => {
-            console.error(err);
-            this.snackBar.open('Error loading import type', 'OK', {duration: 3000});
-            this.dialogRef.close();
-        });
+                this.configs = (this.form.get('configs') as FormArray).controls as FormGroup[];
+                this.ready = true;
+            },
+            (err) => {
+                console.error(err);
+                this.snackBar.open('Error loading import type', 'OK', { duration: 3000 });
+                this.dialogRef.close();
+            },
+        );
     }
 
     private newConfigGroupFromType(config: ImportTypeConfigModel): FormGroup {
-        const group = this.fb.group({
-            name: [config.name, Validators.required],
-            value: ['', Validators.required],
-            type: config.type,
-            description: config.description,
-        }, {validators: TypeValueValidator('type', 'value', false)});
+        const group = this.fb.group(
+            {
+                name: [config.name, Validators.required],
+                value: ['', Validators.required],
+                type: config.type,
+                description: config.description,
+            },
+            { validators: typeValueValidator('type', 'value', false) },
+        );
         if (config.type !== this.STRING) {
-            group.patchValue({value: JSON.stringify(config.default_value)});
+            group.patchValue({ value: JSON.stringify(config.default_value) });
         } else {
-            group.patchValue({value: config.default_value});
+            group.patchValue({ value: config.default_value });
         }
         return group;
     }
@@ -144,11 +151,13 @@ export class ImportDeployEditDialogComponent implements OnInit {
                 instance.configs[i] = config;
             }
         });
-        this.importInstancesService.saveImportInstance(instance)
-            .subscribe(() => this.dialogRef.close(true), err => {
+        this.importInstancesService.saveImportInstance(instance).subscribe(
+            () => this.dialogRef.close(true),
+            (err) => {
                 console.error(err);
-                this.snackBar.open('Error saving', 'OK', {duration: 3000});
-            });
+                this.snackBar.open('Error saving', 'OK', { duration: 3000 });
+            },
+        );
     }
 
     close() {

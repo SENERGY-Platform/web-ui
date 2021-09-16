@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     templateUrl: './confirm-dialog.component.html',
-    styleUrls: ['./confirm-dialog.component.css']
+    styleUrls: ['./confirm-dialog.component.css'],
 })
 export class ConfirmDialogComponent {
-
     text: string;
     title: string;
 
-    constructor(private dialogRef: MatDialogRef<ConfirmDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: {text: string, title: string}) {
+    constructor(private dialogRef: MatDialogRef<ConfirmDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { text: string; title: string }) {
         this.text = data.text;
         this.title = data.title;
     }

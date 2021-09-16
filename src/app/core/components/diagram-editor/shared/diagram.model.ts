@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-
 export interface DiagramModel {
-    cells: CellModel [];
+    cells: CellModel[];
 }
 
 export interface CellModel {

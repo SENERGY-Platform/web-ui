@@ -85,7 +85,7 @@ export const environment = {
     importTypeIdYrForecast: 'urn:infai:ses:import-type:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     processFogDeploymentUrl: 'http://localhost',
     processSyncUrl: 'http://localhost',
-    equivalentProtocolSegments: '[]'
+    equivalentProtocolSegments: '[]',
 };
 
 /*

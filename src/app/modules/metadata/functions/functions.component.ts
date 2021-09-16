@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Router} from '@angular/router';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {FunctionsPermSearchModel} from './shared/functions-perm-search.model';
-import {FunctionsService} from './shared/functions.service';
-import {DeviceTypeDeviceClassModel, DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
-import {FunctionsEditDialogComponent} from './dialog/functions-edit-dialog.component';
-import {FunctionsCreateDialogComponent} from './dialog/functions-create-dialog.component';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Subscription } from 'rxjs';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { FunctionsPermSearchModel } from './shared/functions-perm-search.model';
+import { FunctionsService } from './shared/functions.service';
+import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../device-types-overview/shared/device-type.model';
+import { FunctionsEditDialogComponent } from './dialog/functions-edit-dialog.component';
+import { FunctionsCreateDialogComponent } from './dialog/functions-create-dialog.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -40,7 +40,7 @@ const grids = new Map([
 @Component({
     selector: 'senergy-functions',
     templateUrl: './functions.component.html',
-    styleUrls: ['./functions.component.css']
+    styleUrls: ['./functions.component.css'],
 })
 export class FunctionsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
@@ -57,15 +57,15 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private dialog: MatDialog,
-                private responsiveService: ResponsiveService,
-                private functionsService: FunctionsService,
-                private searchbarService: SearchbarService,
-                private snackBar: MatSnackBar,
-                private router: Router,
-                private dialogsService: DialogsService
-    ) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private responsiveService: ResponsiveService,
+        private functionsService: FunctionsService,
+        private searchbarService: SearchbarService,
+        private snackBar: MatSnackBar,
+        private router: Router,
+        private dialogsService: DialogsService,
+    ) {}
 
     ngOnInit() {
         this.initGridCols();
@@ -93,7 +93,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
-            function: JSON.parse(JSON.stringify(inputFunction))         // create copy of object
+            function: JSON.parse(JSON.stringify(inputFunction)), // create copy of object
         };
 
         const editDialogRef = this.dialog.open(FunctionsEditDialogComponent, dialogConfig);
@@ -101,7 +101,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         editDialogRef.afterClosed().subscribe((newFunction: DeviceTypeFunctionModel) => {
             if (newFunction !== undefined) {
                 this.reset();
-                this.functionsService.updateFunction(newFunction).subscribe((func: (DeviceTypeFunctionModel | null)) => {
+                this.functionsService.updateFunction(newFunction).subscribe((func: DeviceTypeFunctionModel | null) => {
                     this.reloadAndShowSnackbar(func, 'updat');
                 });
             }
@@ -118,7 +118,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             console.log(newFunction);
             if (newFunction !== undefined) {
                 this.reset();
-                this.functionsService.createFunction(newFunction).subscribe((func: (DeviceTypeFunctionModel | null)) => {
+                this.functionsService.createFunction(newFunction).subscribe((func: DeviceTypeFunctionModel | null) => {
                     this.reloadAndShowSnackbar(func, 'sav');
                 });
             }
@@ -126,20 +126,23 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }
 
     deleteFunction(func: FunctionsPermSearchModel): void {
-        this.dialogsService.openDeleteDialog('function ' + func.name).afterClosed().subscribe((deleteFunction: boolean) => {
-            if (deleteFunction) {
-                this.functionsService.deleteFunction(func.id).subscribe((resp: boolean) => {
-                    if (resp === true) {
-                        this.functions.splice(this.functions.indexOf(func), 1);
-                        this.snackBar.open('Function deleted successfully.', undefined, {duration: 2000});
-                        this.setLimitOffset(1);
-                        this.reloadFunctions(false);
-                    } else {
-                        this.snackBar.open('Error while deleting the function!', undefined, {duration: 2000});
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('function ' + func.name)
+            .afterClosed()
+            .subscribe((deleteFunction: boolean) => {
+                if (deleteFunction) {
+                    this.functionsService.deleteFunction(func.id).subscribe((resp: boolean) => {
+                        if (resp === true) {
+                            this.functions.splice(this.functions.indexOf(func), 1);
+                            this.snackBar.open('Function deleted successfully.', undefined, { duration: 2000 });
+                            this.setLimitOffset(1);
+                            this.reloadFunctions(false);
+                        } else {
+                            this.snackBar.open('Error while deleting the function!', undefined, { duration: 2000 });
+                        }
+                    });
+                }
+            });
     }
 
     private initGridCols(): void {
@@ -162,9 +165,15 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         }
 
         if (this.functions && this.functions.length) {
-            this.functionsService.getFunctionsAfter(this.searchText, this.limit, this.sortAttribute.value,
-                this.sortAttribute.order, this.functions[this.functions.length - 1]).subscribe(
-                (functions: FunctionsPermSearchModel[]) => {
+            this.functionsService
+                .getFunctionsAfter(
+                    this.searchText,
+                    this.limit,
+                    this.sortAttribute.value,
+                    this.sortAttribute.order,
+                    this.functions[this.functions.length - 1],
+                )
+                .subscribe((functions: FunctionsPermSearchModel[]) => {
                     if (functions.length !== this.limit) {
                         this.allDataLoaded = true;
                     }
@@ -172,9 +181,9 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                     this.ready = true;
                 });
         } else {
-            this.functionsService.getFunctions(this.searchText, this.limit, this.offset, this.sortAttribute.value,
-                this.sortAttribute.order).subscribe(
-                (functions: FunctionsPermSearchModel[]) => {
+            this.functionsService
+                .getFunctions(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+                .subscribe((functions: FunctionsPermSearchModel[]) => {
                     if (functions.length !== this.limit) {
                         this.allDataLoaded = true;
                     }
@@ -182,7 +191,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                     this.ready = true;
                 });
         }
-
     }
 
     private reset() {
@@ -207,12 +215,11 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     private reloadAndShowSnackbar(func: DeviceTypeFunctionModel | null, text: string) {
         if (func === null) {
-            this.snackBar.open('Error while ' + text + 'ing the function!', undefined, {duration: 2000});
+            this.snackBar.open('Error while ' + text + 'ing the function!', undefined, { duration: 2000 });
             this.getFunctions(true);
         } else {
-            this.snackBar.open('Function ' + text + 'ed successfully.', undefined, {duration: 2000});
+            this.snackBar.open('Function ' + text + 'ed successfully.', undefined, { duration: 2000 });
             this.reloadFunctions(true);
         }
     }
-
 }

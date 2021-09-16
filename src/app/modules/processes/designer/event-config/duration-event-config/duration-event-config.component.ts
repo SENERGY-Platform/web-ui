@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output} from '@angular/core';
-import {FormControl, Validators} from '@angular/forms';
-import {DurationIso, DurationResult} from '../../shared/designer.model';
+import { Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
+import { DurationIso, DurationResult } from '../../shared/designer.model';
 import * as moment from 'moment';
 
 @Component({
     selector: 'senergy-duration-event-config',
     templateUrl: './duration-event-config.component.html',
-    styleUrls: ['./duration-event-config.component.css']
+    styleUrls: ['./duration-event-config.component.css'],
 })
 export class DurationEventConfigComponent implements OnInit {
-
     @Input() initial = '';
-    @Output() update =  new EventEmitter<DurationResult>();
+    @Output() update = new EventEmitter<DurationResult>();
 
     year = new FormControl(0, Validators.min(0));
     month = new FormControl(0, Validators.min(0));
@@ -36,9 +35,7 @@ export class DurationEventConfigComponent implements OnInit {
     minute = new FormControl(0, Validators.min(0));
     second = new FormControl(0, Validators.min(0));
 
-    constructor(@Inject(LOCALE_ID) private localeId: string) {
-
-    }
+    constructor(@Inject(LOCALE_ID) private localeId: string) {}
 
     ngOnInit() {
         if (this.initial) {
@@ -65,19 +62,19 @@ export class DurationEventConfigComponent implements OnInit {
     private getResult(): DurationResult {
         return this.setDurationNaturalText({
             iso: this.getDurationIsoResult(),
-            text: ''
+            text: '',
         });
     }
 
     private getDurationIsoResult(): DurationIso {
         return this.setIsoString({
             string: '',
-            year: <number>this.year.value,
-            month: <number>this.month.value,
-            day: <number>this.day.value,
-            hour: <number>this.hour.value,
-            minute: <number>this.minute.value,
-            second: <number>this.second.value,
+            year: this.year.value as number,
+            month: this.month.value as number,
+            day: this.day.value as number,
+            hour: this.hour.value as number,
+            minute: this.minute.value as number,
+            second: this.second.value as number,
         });
     }
 

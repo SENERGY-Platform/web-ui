@@ -14,44 +14,44 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {SidenavService} from '../sidenav/shared/sidenav.service';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
-import {filter, map, mergeMap} from 'rxjs/internal/operators';
-import {AuthorizationService} from '../../services/authorization.service';
-import {SettingsDialogService} from '../../../modules/settings/shared/settings-dialog.service';
-import {NotificationService} from './notification/shared/notification.service';
-import {NotificationModel} from './notification/shared/notification.model';
-import {ThemingService} from "../../services/theming.service";
+import { Component, OnInit } from '@angular/core';
+import { SidenavService } from '../sidenav/shared/sidenav.service';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { filter, map, mergeMap } from 'rxjs/internal/operators';
+import { AuthorizationService } from '../../services/authorization.service';
+import { SettingsDialogService } from '../../../modules/settings/shared/settings-dialog.service';
+import { NotificationService } from './notification/shared/notification.service';
+import { NotificationModel } from './notification/shared/notification.model';
+import { ThemingService } from '../../services/theming.service';
 
 @Component({
     selector: 'senergy-toolbar',
     templateUrl: './toolbar.component.html',
-    styleUrls: ['./toolbar.component.css']
+    styleUrls: ['./toolbar.component.css'],
 })
 export class ToolbarComponent implements OnInit {
-
     userName = '';
     header = '';
     notifications: NotificationModel[] = [];
     unreadCounter = 0;
 
-    constructor(private sidenavService: SidenavService,
-                private router: Router,
-                private activatedRoute: ActivatedRoute,
-                private authorizationService: AuthorizationService,
-                private settingsDialogService: SettingsDialogService,
-                private themingService: ThemingService,
-                private notificationService: NotificationService) {
-    }
+    constructor(
+        private sidenavService: SidenavService,
+        private router: Router,
+        private activatedRoute: ActivatedRoute,
+        private authorizationService: AuthorizationService,
+        private settingsDialogService: SettingsDialogService,
+        private themingService: ThemingService,
+        private notificationService: NotificationService,
+    ) {}
 
     ngOnInit() {
         this.setHeader();
         this.initUser();
-        this.notificationService.notificationEmitter.subscribe(n => {
+        this.notificationService.notificationEmitter.subscribe((n) => {
             this.unreadCounter = 0;
             this.notifications = n;
-            this.notifications.forEach(no => !no.isRead ? this.unreadCounter++ : null);
+            this.notifications.forEach((no) => (!no.isRead ? this.unreadCounter++ : null));
         });
     }
 
@@ -72,28 +72,30 @@ export class ToolbarComponent implements OnInit {
     }
 
     private initUser() {
-        this.authorizationService.getUserName().then(userName => this.userName = userName);
+        this.authorizationService.getUserName().then((userName) => (this.userName = userName));
     }
 
     private setHeader() {
-        this.router.events.pipe(
-            filter(event => event instanceof NavigationEnd),
-            map(() => {
-                const route = this.activatedRoute.firstChild;
-                let child = route;
-                while (child) {
-                    if (child.firstChild) {
-                        child = child.firstChild;
-                    } else {
-                        child = null;
+        this.router.events
+            .pipe(
+                filter((event) => event instanceof NavigationEnd),
+                map(() => {
+                    const route = this.activatedRoute.firstChild;
+                    let child = route;
+                    while (child) {
+                        if (child.firstChild) {
+                            child = child.firstChild;
+                        } else {
+                            child = null;
+                        }
                     }
-                }
-                return route;
-            }),
-            mergeMap((route: any) => route.data)
-        ).subscribe((data: any) => {
-            this.header = data.header;
-        });
+                    return route;
+                }),
+                mergeMap((route: any) => route.data),
+            )
+            .subscribe((data: any) => {
+                this.header = data.header;
+            });
     }
 
     openNotificationsDialog() {

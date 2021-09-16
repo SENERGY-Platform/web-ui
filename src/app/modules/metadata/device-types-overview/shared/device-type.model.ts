@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatTreeNestedDataSource} from '@angular/material/tree';
+import { NestedTreeControl } from '@angular/cdk/tree';
+import { MatTreeNestedDataSource } from '@angular/material/tree';
 
 export interface DeviceTypeBaseModel {
     id: string;
@@ -111,16 +111,15 @@ export interface DeviceTypeFunctionModel {
     concept_id: string;
 }
 
-
 export interface DeviceTypeFunctionType {
-   text: string;
-   rdf_type: string;
-   urn_part: string;
+    text: string;
+    rdf_type: string;
+    urn_part: string;
 }
 
 export const functionTypes: DeviceTypeFunctionType[] = [
-    {text: 'Controlling', rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction', urn_part: 'controlling-function'},
-    {text: 'Measuring', rdf_type: 'https://senergy.infai.org/ontology/MeasuringFunction', urn_part: 'measuring-function'},
+    { text: 'Controlling', rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction', urn_part: 'controlling-function' },
+    { text: 'Measuring', rdf_type: 'https://senergy.infai.org/ontology/MeasuringFunction', urn_part: 'measuring-function' },
 ];
 
 export interface DeviceTypeProtocolModel {
@@ -135,9 +134,9 @@ export interface DeviceTypeProtocolSegmentModel {
     name: string;
 }
 
+// eslint-disable-next-line no-shadow
 export enum DeviceTypeInteractionEnum {
-  Event = 'event',
-  Request = 'request',
-  EventAndRequest = 'event+request',
+    Event = 'event',
+    Request = 'request',
+    EventAndRequest = 'event+request',
 }
-

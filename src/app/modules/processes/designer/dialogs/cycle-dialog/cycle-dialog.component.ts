@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  templateUrl: './cycle-dialog.component.html',
-  styleUrls: ['./cycle-dialog.component.css']
+    templateUrl: './cycle-dialog.component.html',
+    styleUrls: ['./cycle-dialog.component.css'],
 })
 export class CycleDialogComponent implements OnInit {
     initial: string;
-    result = {cron: '', text: ''};
+    result = { cron: '', text: '' };
 
     constructor(
         private dialogRef: MatDialogRef<CycleDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: {initialCycle: string}
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { initialCycle: string },
     ) {
         this.initial = dialogParams.initialCycle || '* * * * * ?';
     }
 
-    update(updateEvent: {cron: string, text: string}) {
+    update(updateEvent: { cron: string; text: string }) {
         this.result = updateEvent;
     }
 

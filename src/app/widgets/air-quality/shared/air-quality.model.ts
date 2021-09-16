@@ -14,48 +14,47 @@
  * limitations under the License.
  */
 
-import {ExportModel, ExportValueModel} from '../../../modules/exports/shared/export.model';
-
+import { ExportModel, ExportValueModel } from '../../../modules/exports/shared/export.model';
 
 export interface AirQualityPropertiesModel {
-    location?: (Location);
+    location?: Location;
     ubaInfo?: AirQualityImportExportModel;
     dwdPollenInfo?: AirQualityImportExportModel;
     yrInfo?: AirQualityImportExportModel;
-    formatted_address?: (string);
-    measurements?: (MeasurementModel[]);
-    pollen?: (MeasurementModel[]);
+    formatted_address?: string;
+    measurements?: MeasurementModel[];
+    pollen?: MeasurementModel[];
     version?: number;
 }
 
 export interface MeasurementModel {
-    name_html: (string);
-    short_name: (string);
-    description_html?: (string);
-    is_enabled?: (boolean);
-    has_outside?: (boolean);
-    is_warning?: (boolean);
-    is_critical?: (boolean);
+    name_html: string;
+    short_name: string;
+    description_html?: string;
+    is_enabled?: boolean;
+    has_outside?: boolean;
+    is_warning?: boolean;
+    is_critical?: boolean;
     can_web?: boolean;
     provider?: AirQualityExternalProvider;
-    export?: (ExportModel);
+    export?: ExportModel;
     math?: string;
-    outsideExport?: (ExportModel);
+    outsideExport?: ExportModel;
     outsideMath?: string;
-    unit_html: (string);
-    data: (SensorDataModel);
-    outsideData: (SensorDataModel);
-    boundaries: (BoundaryModel);
+    unit_html: string;
+    data: SensorDataModel;
+    outsideData: SensorDataModel;
+    boundaries: BoundaryModel;
 }
 
 export interface SensorDataModel {
-    value: (number);
-    column?: (ExportValueModel);
+    value: number;
+    column?: ExportValueModel;
 }
 
 export interface BoundaryModel {
-    warn: (UpperLowerModel);
-    critical: (UpperLowerModel);
+    warn: UpperLowerModel;
+    critical: UpperLowerModel;
 }
 
 export interface UpperLowerModel {
@@ -76,6 +75,7 @@ export interface AirQualityImportExportModel {
     exportGenerated?: boolean;
 }
 
+// eslint-disable-next-line no-shadow
 export enum AirQualityExternalProvider {
     UBA,
     Yr,

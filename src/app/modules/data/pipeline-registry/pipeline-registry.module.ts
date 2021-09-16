@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
+import { NgModule } from '@angular/core';
 
-import {RouterModule} from '@angular/router';
-import {CommonModule} from '@angular/common';
-import {CoreModule} from '../../../core/core.module';
-import {PipelineDetailsComponent} from './pipeline-details/pipeline-details.component';
-import {MatExpansionModule} from '@angular/material/expansion';
-import {MatCardModule} from '@angular/material/card';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatListModule} from '@angular/material/list';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {FormsModule} from '@angular/forms';
-import {DeployFlowComponent} from '../flow-repo/deploy-flow/deploy-flow.component';
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { CoreModule } from '../../../core/core.module';
+import { PipelineDetailsComponent } from './pipeline-details/pipeline-details.component';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatListModule } from '@angular/material/list';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { FormsModule } from '@angular/forms';
+import { DeployFlowComponent } from '../flow-repo/deploy-flow/deploy-flow.component';
 
-
-const details = {path: 'data/pipelines/details/:id', pathMatch: 'full', component: PipelineDetailsComponent, data: { header: 'Analytics' }};
-const edit = {path: 'data/pipelines/edit/:id', pathMatch: 'full', component: DeployFlowComponent, data: { header: 'Analytics' }};
+const details = {
+    path: 'data/pipelines/details/:id',
+    pathMatch: 'full',
+    component: PipelineDetailsComponent,
+    data: { header: 'Analytics' },
+};
+const edit = { path: 'data/pipelines/edit/:id', pathMatch: 'full', component: DeployFlowComponent, data: { header: 'Analytics' } };
 
 @NgModule({
     imports: [
@@ -44,11 +48,8 @@ const edit = {path: 'data/pipelines/edit/:id', pathMatch: 'full', component: Dep
         MatButtonModule,
         MatListModule,
         MatCheckboxModule,
-        FormsModule
+        FormsModule,
     ],
-    declarations: [
-        PipelineDetailsComponent
-    ],
+    declarations: [PipelineDetailsComponent],
 })
-export class PipelineRegistryModule {
-}
+export class PipelineRegistryModule {}

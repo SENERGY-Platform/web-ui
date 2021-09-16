@@ -14,74 +14,72 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {HistoricDataConfig} from '../../shared/designer.model';
-import {ExportModel} from '../../../../exports/shared/export.model';
-import {ExportService} from '../../../../exports/shared/export.service';
-
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { HistoricDataConfig } from '../../shared/designer.model';
+import { ExportModel } from '../../../../exports/shared/export.model';
+import { ExportService } from '../../../../exports/shared/export.service';
 
 @Component({
-  templateUrl: './historic-data-config-dialog.component.html',
-  styleUrls: ['./historic-data-config-dialog.component.css']
+    templateUrl: './historic-data-config-dialog.component.html',
+    styleUrls: ['./historic-data-config-dialog.component.css'],
 })
 export class HistoricDataConfigDialogComponent implements OnInit {
     config: HistoricDataConfig;
     availableMeasurements: ExportModel[] = [];
-    readonly times =  [
+    readonly times = [
         {
-            'id': 'seconds',
-            'name': 'Seconds'
+            id: 'seconds',
+            name: 'Seconds',
         },
         {
-            'id': 'minutes',
-            'name': 'Minutes'
+            id: 'minutes',
+            name: 'Minutes',
         },
         {
-            'id': 'hours',
-            'name': 'Hours'
-        }
+            id: 'hours',
+            name: 'Hours',
+        },
     ];
     readonly availableActions = [
         {
-            'id': 'sum',
-            'name': 'Sum'
+            id: 'sum',
+            name: 'Sum',
         },
         {
-            'id': 'mean',
-            'name': 'Average'
+            id: 'mean',
+            name: 'Average',
         },
         {
-            'id': 'median',
-            'name': 'Median'
+            id: 'median',
+            name: 'Median',
         },
         {
-            'id': 'min',
-            'name': 'Minimum'
+            id: 'min',
+            name: 'Minimum',
         },
         {
-            'id': 'max',
-            'name': 'Maximum'
+            id: 'max',
+            name: 'Maximum',
         },
         {
-            'id': 'count',
-            'name': 'Value Count'
+            id: 'count',
+            name: 'Value Count',
         },
     ];
 
     constructor(
         private dialogRef: MatDialogRef<HistoricDataConfigDialogComponent>,
         private exportsService: ExportService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: {initial: HistoricDataConfig}
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { initial: HistoricDataConfig },
     ) {
-        this.config = dialogParams.initial || {dateInterval: {}, interval: {}, analysisAction: ''};
-        exportsService.getExports('', 9999, 0, 'name', 'asc').subscribe(value => {
+        this.config = dialogParams.initial || { dateInterval: {}, interval: {}, analysisAction: '' };
+        exportsService.getExports('', 9999, 0, 'name', 'asc').subscribe((value) => {
             if (value) {
                 this.availableMeasurements = value.instances;
             }
         });
     }
-
 
     ngOnInit() {}
 
@@ -93,7 +91,7 @@ export class HistoricDataConfigDialogComponent implements OnInit {
         const result: HistoricDataConfig = {
             analysisAction: this.config.analysisAction,
             interval: this.config.interval,
-            dateInterval: this.config.dateInterval
+            dateInterval: this.config.dateInterval,
         };
         this.dialogRef.close(result);
     }

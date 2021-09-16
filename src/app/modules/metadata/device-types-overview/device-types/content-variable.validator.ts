@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {AbstractControl, ValidatorFn} from '@angular/forms';
-import {DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel} from '../shared/device-type.model';
+import { AbstractControl, ValidatorFn } from '@angular/forms';
+import { DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel } from '../shared/device-type.model';
 
 export function contentVariableValidator(leafCharacteristics: DeviceTypeCharacteristicsModel[]): ValidatorFn {
-
     let errorMsg: null | string = null;
     const leafCharIds = leafCharacteristics.map((resp) => resp.id);
 
@@ -26,12 +25,14 @@ export function contentVariableValidator(leafCharacteristics: DeviceTypeCharacte
         if (type === undefined) {
             return 'Type is missing';
         } else {
-            if (type === 'https://schema.org/Text' ||
+            if (
+                type === 'https://schema.org/Text' ||
                 type === 'https://schema.org/Integer' ||
                 type === 'https://schema.org/Float' ||
                 type === 'https://schema.org/Boolean' ||
                 type === 'https://schema.org/StructuredValue' ||
-                type === 'https://schema.org/ItemList') {
+                type === 'https://schema.org/ItemList'
+            ) {
                 return null;
             } else {
                 return 'invalid Type! Use `https://schema.org/Text` or `Integer, Float, Boolean, StructuredValue, ItemList`';
@@ -106,20 +107,13 @@ export function contentVariableValidator(leafCharacteristics: DeviceTypeCharacte
             errorMsg = checkFields(contentVariable, null);
 
             if (errorMsg) {
-                return {'errorMsg': errorMsg};
+                return { errorMsg };
             } else {
                 return null;
             }
-
-
         } catch (e) {
-            return {'errorMsg': 'invalid json'};
+            return { errorMsg: 'invalid json' };
         }
         return null;
     };
-
-
 }
-
-
-

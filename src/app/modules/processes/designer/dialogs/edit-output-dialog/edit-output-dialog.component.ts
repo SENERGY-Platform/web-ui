@@ -14,30 +14,27 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {BpmnParameter} from '../../shared/designer.model';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { BpmnParameter } from '../../shared/designer.model';
 
 @Component({
-  templateUrl: './edit-output-dialog.component.html',
-  styleUrls: ['./edit-output-dialog.component.css']
+    templateUrl: './edit-output-dialog.component.html',
+    styleUrls: ['./edit-output-dialog.component.css'],
 })
 export class EditOutputDialogComponent implements OnInit {
+    outputs: BpmnParameter[];
 
-  outputs: BpmnParameter[];
+    constructor(
+        private dialogRef: MatDialogRef<EditOutputDialogComponent>,
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { outputs: BpmnParameter[] },
+    ) {
+        this.outputs = dialogParams.outputs;
+    }
 
-  constructor(
-      private dialogRef: MatDialogRef<EditOutputDialogComponent>,
-      @Inject(MAT_DIALOG_DATA) private dialogParams: {outputs: BpmnParameter[]}
-  ) {
-      this.outputs = dialogParams.outputs;
-  }
+    ngOnInit() {}
 
-  ngOnInit() {
-  }
-
-  close(): void {
-      this.dialogRef.close();
-  }
-
+    close(): void {
+        this.dialogRef.close();
+    }
 }

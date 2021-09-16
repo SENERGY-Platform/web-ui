@@ -56,10 +56,9 @@ interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
 @Component({
     selector: 'senergy-device-types',
     templateUrl: './device-types.component.html',
-    styleUrls: ['./device-types.component.css']
+    styleUrls: ['./device-types.component.css'],
 })
 export class DeviceTypesComponent implements OnInit {
-
     deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];
     protocols: DeviceTypeProtocolModel[] = [];
     interactionList: string[] = Object.values(DeviceTypeInteractionEnum);
@@ -80,15 +79,17 @@ export class DeviceTypesComponent implements OnInit {
     equivalentProtocolSegments: string[][] = [[]];
     ready = false;
 
-    constructor(private _formBuilder: FormBuilder,
-                private deviceTypeService: DeviceTypeService,
-                private dialog: MatDialog,
-                private snackBar: MatSnackBar,
-                private route: ActivatedRoute,
-                private deviceTypeHelperService: DeviceTypeHelperService,
-                private conceptsService: ConceptsService,
-                private router: Router,
-                private changeDetectorRef: ChangeDetectorRef) {
+    constructor(
+        private _formBuilder: FormBuilder,
+        private deviceTypeService: DeviceTypeService,
+        private dialog: MatDialog,
+        private snackBar: MatSnackBar,
+        private route: ActivatedRoute,
+        private deviceTypeHelperService: DeviceTypeHelperService,
+        private conceptsService: ConceptsService,
+        private router: Router,
+        private changeDetectorRef: ChangeDetectorRef,
+    ) {
         try {
             this.equivalentProtocolSegments = JSON.parse(environment.equivalentProtocolSegments);
         } catch (e) {
@@ -99,7 +100,7 @@ export class DeviceTypesComponent implements OnInit {
 
     ngOnInit() {
         this.initFormControls();
-        this.loadData().subscribe(_ => {
+        this.loadData().subscribe((_) => {
             this.ready = true;
             this.changeDetectorRef.detectChanges();
         });
@@ -111,7 +112,6 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     save(): void {
-
         this.cleanUpServices();
 
         const newDeviceType: DeviceTypeModel = {
@@ -124,13 +124,12 @@ export class DeviceTypesComponent implements OnInit {
         };
 
         this.saveDeviceType(newDeviceType);
-
     }
 
     addService() {
-        const formArray = <FormArray>this.secondFormGroup.controls['services'];
+        const formArray = this.secondFormGroup.controls['services'] as FormArray;
         formArray.push(this.createServiceGroup({} as DeviceTypeServiceModel));
-        const formGroup = <FormGroup>formArray.controls[formArray.length - 1];
+        const formGroup = formArray.controls[formArray.length - 1] as FormGroup;
         this.initProtocolIdChangeListener(formGroup);
         formGroup.controls['functionType'].valueChanges.subscribe(() => {
             if (formGroup.controls['functionType'].invalid) {
@@ -150,17 +149,18 @@ export class DeviceTypesComponent implements OnInit {
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: {} as DeviceTypeContentVariableModel,
-            functionConceptIds: functionConceptIds,
-            disabled: disabled,
+            functionConceptIds,
+            disabled,
             concepts: this.concepts,
         };
-        this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
-            (resp: DeviceTypeContentVariableModel | undefined) => {
+        this.dialog
+            .open(DeviceTypesContentVariableDialogComponent, dialogConfig)
+            .afterClosed()
+            .subscribe((resp: DeviceTypeContentVariableModel | undefined) => {
                 if (resp) {
                     this.refreshTree(inOut, this.deviceTypeHelperService.addTreeData(inOut.dataSource.data, resp, indices));
                 }
-            }
-        );
+            });
     }
 
     deleteContentVariable(inOut: DeviceTypeContentTreeModel, indices: number[]): void {
@@ -174,12 +174,14 @@ export class DeviceTypesComponent implements OnInit {
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: node,
-            functionConceptIds: functionConceptIds,
-            disabled: disabled,
+            functionConceptIds,
+            disabled,
             concepts: this.concepts,
         };
-        this.dialog.open(DeviceTypesContentVariableDialogComponent, dialogConfig).afterClosed().subscribe(
-            (resp: DeviceTypeContentVariableModel | undefined) => {
+        this.dialog
+            .open(DeviceTypesContentVariableDialogComponent, dialogConfig)
+            .afterClosed()
+            .subscribe((resp: DeviceTypeContentVariableModel | undefined) => {
                 if (resp && resp.indices) {
                     this.refreshTree(inOut, this.deviceTypeHelperService.updateTreeData(inOut.dataSource.data, resp, resp.indices));
                 }
@@ -187,7 +189,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     deleteService(deviceTypeService: DeviceTypeServiceModel) {
-        const control = <FormArray>this.secondFormGroup.controls['services'];
+        const control = this.secondFormGroup.controls['services'] as FormArray;
         control.removeAt(this.secondFormGroup.value.services.indexOf(deviceTypeService));
     }
 
@@ -197,7 +199,7 @@ export class DeviceTypesComponent implements OnInit {
 
     expand(serviceFormGroup: AbstractControl, formControlName: string, index: number): void {
         const inOut = this.inputOutput(serviceFormGroup, formControlName, index);
-        inOut.patchValue({'show': !inOut.value.show});
+        inOut.patchValue({show: !inOut.value.show});
     }
 
     trackByIndex(index: any) {
@@ -209,27 +211,27 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     functionType(serviceFormGroup: AbstractControl): DeviceTypeFunctionType {
-        return this.getServiceFormControl(serviceFormGroup, 'functionType').value;
+        return DeviceTypesComponent.getServiceFormControl(serviceFormGroup, 'functionType').value;
     }
 
     functionIds(serviceFormGroup: AbstractControl): string[] {
-        return this.getServiceFormControl(serviceFormGroup, 'function_ids').value;
+        return DeviceTypesComponent.getServiceFormControl(serviceFormGroup, 'function_ids').value;
     }
 
     aspectIds(serviceFormGroup: AbstractControl): string[] {
-        return this.getServiceFormControl(serviceFormGroup, 'aspect_ids').value;
+        return DeviceTypesComponent.getServiceFormControl(serviceFormGroup, 'aspect_ids').value;
     }
 
     inputOutputArray(serviceFormGroup: AbstractControl, formControlName: string): DeviceTypeContentTreeModel[] {
-        return this.getServiceFormArray(serviceFormGroup, formControlName).value;
+        return DeviceTypesComponent.getServiceFormArray(serviceFormGroup, formControlName).value;
     }
 
     inputOutput(serviceFormGroup: AbstractControl, formControlName: string, index: number): FormControl {
-        return this.getServiceFormArray(serviceFormGroup, formControlName).get([index]) as FormControl;
+        return DeviceTypesComponent.getServiceFormArray(serviceFormGroup, formControlName).get([index]) as FormControl;
     }
 
     serviceControl(serviceIndex: number): FormGroup {
-        return <FormGroup>this.services.at(serviceIndex);
+        return this.services.at(serviceIndex) as FormGroup;
     }
 
     getFunctionName(functionId: string, functionTypeText: string): string {
@@ -262,7 +264,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     getCustomTriggerFunction(service: AbstractControl): (options: MatOption | MatOption[]) => string {
-        return options => {
+        return (options) => {
             if (options === undefined) {
                 return '';
             }
@@ -272,8 +274,7 @@ export class DeviceTypesComponent implements OnInit {
             if (options.length > 0) {
                 let text = this.getFunctionName(this.functionIds(service)[0], this.functionType(service).text);
                 if (options.length > 1) {
-                    text += ' (+' + (options.length - 1) + (options.length === 2 ?
-                        ' other)' : ' others)');
+                    text += ' (+' + (options.length - 1) + (options.length === 2 ? ' other)' : ' others)');
                 }
                 return text;
             }
@@ -281,9 +282,8 @@ export class DeviceTypesComponent implements OnInit {
         };
     }
 
-
     getCustomTriggerAspect(service: AbstractControl): (options: MatOption | MatOption[]) => string {
-        return options => {
+        return (options) => {
             if (options === undefined) {
                 return '';
             }
@@ -293,8 +293,7 @@ export class DeviceTypesComponent implements OnInit {
             if (options.length > 0) {
                 let text = this.getAspectName(this.aspectIds(service)[0]);
                 if (options.length > 1) {
-                    text += ' (+' + (options.length - 1) + (options.length === 2 ?
-                        ' other)' : ' others)');
+                    text += ' (+' + (options.length - 1) + (options.length === 2 ? ' other)' : ' others)');
                 }
                 return text;
             }
@@ -303,20 +302,19 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private cleanUpServices() {
-        const services = <FormArray>this.secondFormGroup.controls['services'];
+        const services = this.secondFormGroup.controls['services'] as FormArray;
 
         for (let i = 0; i < services.length; i++) {
-            const formGroup = <FormGroup>services.controls[i];
-            this.cleanUpInputOutputs(<FormArray>formGroup.controls['inputs']);
-            this.cleanUpInputOutputs(<FormArray>formGroup.controls['outputs']);
+            const formGroup = services.controls[i] as FormGroup;
+            this.cleanUpInputOutputs(formGroup.controls['inputs'] as FormArray);
+            this.cleanUpInputOutputs(formGroup.controls['outputs'] as FormArray);
         }
     }
-
 
     private cleanUpInputOutputs(formArray: FormArray) {
         // loop from highest Index! Otherwise it could cause index problems
         for (let j = formArray.length - 1; j >= 0; j--) {
-            const inOutControl: FormGroup = <FormGroup>formArray.controls[j];
+            const inOutControl: FormGroup = formArray.controls[j] as FormGroup;
             const inOutContent: DeviceTypeContentTreeModel = inOutControl.value;
             if (!this.deviceTypeHelperService.checkIfContentExists(inOutContent.dataSource.data, inOutContent.serialization)) {
                 formArray.removeAt(j);
@@ -337,20 +335,22 @@ export class DeviceTypesComponent implements OnInit {
 
     private loadDataIfIdExists(): Observable<any> {
         if (this.id !== '') {
-            return this.deviceTypeService.getDeviceType(this.id).pipe(map((deviceType: DeviceTypeModel | null) => {
-                if (deviceType !== null) {
-                    this.initFirstFormGroup(deviceType);
-                    this.initSecondFormGroup(deviceType);
-                    this.initAttrFormGroup(deviceType);
-                }
+            return this.deviceTypeService.getDeviceType(this.id).pipe(
+                map((deviceType: DeviceTypeModel | null) => {
+                    if (deviceType !== null) {
+                        this.initFirstFormGroup(deviceType);
+                        this.initSecondFormGroup(deviceType);
+                        this.initAttrFormGroup(deviceType);
+                    }
 
-                // after loading data and init first and second form group
-                // delete ids if function is copy
+                    // after loading data and init first and second form group
+                    // delete ids if function is copy
 
-                if (this.queryParamFunction === 'copy') {
-                    this.deleteIds();
-                }
-            }));
+                    if (this.queryParamFunction === 'copy') {
+                        this.deleteIds();
+                    }
+                }),
+            );
         }
         return of(null);
     }
@@ -364,13 +364,14 @@ export class DeviceTypesComponent implements OnInit {
 
     private initSecondFormGroup(deviceType: DeviceTypeModel) {
         this.secondFormGroup = this._formBuilder.group({
-            services: this._formBuilder.array(deviceType.services ?
-                deviceType.services.map((elem: DeviceTypeServiceModel) => this.createServiceGroup(elem)) :
-                [], Validators.required)
+            services: this._formBuilder.array(
+                deviceType.services ? deviceType.services.map((elem: DeviceTypeServiceModel) => this.createServiceGroup(elem)) : [],
+                Validators.required,
+            ),
         });
-        const formArray = <FormArray>this.secondFormGroup.controls['services'];
+        const formArray = this.secondFormGroup.controls['services'] as FormArray;
         formArray.controls.forEach((control: AbstractControl) => {
-            const formGroup = <FormGroup>control;
+            const formGroup = control as FormGroup;
             this.initProtocolIdChangeListener(formGroup);
             formGroup.controls['functionType'].valueChanges.subscribe(() => {
                 formGroup.controls['function_ids'].setValue([]);
@@ -380,9 +381,10 @@ export class DeviceTypesComponent implements OnInit {
 
     private initAttrFormGroup(deviceType: DeviceTypeModel) {
         this.attrFormGroup = this._formBuilder.group({
-            attributes: this._formBuilder.array(deviceType.attributes ?
-                deviceType.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) :
-                [], Validators.required)
+            attributes: this._formBuilder.array(
+                deviceType.attributes ? deviceType.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : [],
+                Validators.required,
+            ),
         });
     }
 
@@ -415,14 +417,39 @@ export class DeviceTypesComponent implements OnInit {
                 description: [{disabled: true, value: deviceTypeService.description}],
                 protocol_id: [{disabled: true, value: deviceTypeService.protocol_id}, Validators.required],
                 interaction: [{disabled: true, value: deviceTypeService.interaction}, Validators.required],
-                inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : this._formBuilder.array([]),
-                outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : this._formBuilder.array([]),
-                functionType: [{disabled: true, value: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? this.getFunctionType(deviceTypeService.function_ids[0]) : {text: ''}}, Validators.required],
-                function_ids: [{
-                    value: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? deviceTypeService.function_ids : [],
-                    disabled: true || (deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true)
-                }, Validators.required],
-                aspect_ids: [{disabled: true, value: deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : []}, Validators.required],
+                inputs: deviceTypeService.inputs
+                    ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs)
+                    : this._formBuilder.array([]),
+                outputs: deviceTypeService.outputs
+                    ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs)
+                    : this._formBuilder.array([]),
+                functionType: [
+                    {
+                        disabled: true,
+                        value:
+                            deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0
+                                ? this.getFunctionType(deviceTypeService.function_ids[0])
+                                : {text: ''},
+                    },
+                    Validators.required,
+                ],
+                function_ids: [
+                    {
+                        value:
+                            deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0
+                                ? deviceTypeService.function_ids
+                                : [],
+                        disabled: true || (deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true),
+                    },
+                    Validators.required,
+                ],
+                aspect_ids: [
+                    {
+                        disabled: true,
+                        value: deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : [],
+                    },
+                    Validators.required,
+                ],
             });
         } else {
             return this._formBuilder.group({
@@ -432,14 +459,32 @@ export class DeviceTypesComponent implements OnInit {
                 description: [deviceTypeService.description],
                 protocol_id: [deviceTypeService.protocol_id, Validators.required],
                 interaction: [deviceTypeService.interaction, Validators.required],
-                inputs: deviceTypeService.inputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs) : this._formBuilder.array([]),
-                outputs: deviceTypeService.outputs ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs) : this._formBuilder.array([]),
-                functionType: [deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? this.getFunctionType(deviceTypeService.function_ids[0]) : {text: ''}, Validators.required],
-                function_ids: [{
-                    value: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? deviceTypeService.function_ids : [],
-                    disabled: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true
-                }, Validators.required],
-                aspect_ids: [deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : [], Validators.required],
+                inputs: deviceTypeService.inputs
+                    ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.inputs)
+                    : this._formBuilder.array([]),
+                outputs: deviceTypeService.outputs
+                    ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs)
+                    : this._formBuilder.array([]),
+                functionType: [
+                    deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0
+                        ? this.getFunctionType(deviceTypeService.function_ids[0])
+                        : {text: ''},
+                    Validators.required,
+                ],
+                function_ids: [
+                    {
+                        value:
+                            deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0
+                                ? deviceTypeService.function_ids
+                                : [],
+                        disabled: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true,
+                    },
+                    Validators.required,
+                ],
+                aspect_ids: [
+                    deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : [],
+                    Validators.required,
+                ],
             });
         }
     }
@@ -467,19 +512,20 @@ export class DeviceTypesComponent implements OnInit {
         }
     }
 
-    private createContent(protocolId: string, content: (DeviceTypeContentEditModel[] | undefined), useEquivalents = false): FormArray {
-
+    private createContent(protocolId: string, content: DeviceTypeContentEditModel[] | undefined, useEquivalents = false): FormArray {
         const array: FormGroup[] = [];
-        const protocolIndex = this.protocols.findIndex(protocol => protocol.id === protocolId);
+        const protocolIndex = this.protocols.findIndex((protocol) => protocol.id === protocolId);
         if (protocolIndex === -1) {
             console.error('Can\'t find matching protocol index');
         } else {
             this.protocols[protocolIndex].protocol_segments.forEach((protocolSegment: DeviceTypeProtocolSegmentModel) => {
                 if (content !== undefined) {
                     let itemMatch = false;
-                    const equivalentSegmentIds = this.equivalentProtocolSegments.find(equivalents => equivalents.find(segmentId => segmentId === protocolSegment.id));
+                    const equivalentSegmentIds = this.equivalentProtocolSegments.find((equivalents) =>
+                        equivalents.find((segmentId) => segmentId === protocolSegment.id),
+                    );
                     content.forEach((cont: DeviceTypeContentModel) => {
-                        const equivalentIndex = equivalentSegmentIds?.findIndex(segmentId => segmentId === cont.protocol_segment_id);
+                        const equivalentIndex = equivalentSegmentIds?.findIndex((segmentId) => segmentId === cont.protocol_segment_id);
                         const isEquivalent = equivalentIndex !== undefined && equivalentIndex !== -1;
                         if (cont.protocol_segment_id === protocolSegment.id || (useEquivalents && isEquivalent)) {
                             array.push(this.createContentGroup(cont, protocolSegment));
@@ -511,9 +557,9 @@ export class DeviceTypesComponent implements OnInit {
             name: [protocolSegment.name],
             serialization: disabled ? [{disabled: true, value: content.serialization}] : [content.serialization],
             protocol_segment_id: [protocolSegment.id],
-            show: [content.protocol_segment_id ? true : false],
-            dataSource: dataSource,
-            tree: content.tree ? content.tree : new NestedTreeControl<DeviceTypeContentVariableModel>(node => node.sub_content_variables),
+            show: [!!content.protocol_segment_id],
+            dataSource,
+            tree: content.tree ? content.tree : new NestedTreeControl<DeviceTypeContentVariableModel>((node) => node.sub_content_variables),
         });
         return g;
     }
@@ -534,7 +580,7 @@ export class DeviceTypesComponent implements OnInit {
 
     private reload(deviceType: DeviceTypeModel | null) {
         if (deviceType) {
-            this.router.routeReuseStrategy.shouldReuseRoute = function () {
+            this.router.routeReuseStrategy.shouldReuseRoute = function() {
                 return false;
             };
             this.router.onSameUrlNavigation = 'reload';
@@ -542,7 +588,6 @@ export class DeviceTypesComponent implements OnInit {
                 queryParams: {function: 'edit'},
             });
         }
-
     }
 
     private showMessage(deviceTypeSaved: DeviceTypeModel | null) {
@@ -559,36 +604,56 @@ export class DeviceTypesComponent implements OnInit {
         const array: Observable<DeviceTypeCharacteristicsModel[] | DeviceTypeProtocolModel[]>[] = [];
         array.push(this.deviceTypeService.getLeafCharacteristics());
         array.push(this.deviceTypeService.getProtocols(9999, 0, 'name', 'asc'));
-        observables.push(forkJoin(array).pipe(map(resp => {
-            this.leafCharacteristics = <DeviceTypeCharacteristicsModel[]>resp[0];
-            this.protocols = <DeviceTypeProtocolModel[]>resp[1];
-            return this.loadDataIfIdExists();
-        }), mergeAll()));
+        observables.push(
+            forkJoin(array).pipe(
+                map((resp) => {
+                    this.leafCharacteristics = resp[0] as DeviceTypeCharacteristicsModel[];
+                    this.protocols = resp[1] as DeviceTypeProtocolModel[];
+                    return this.loadDataIfIdExists();
+                }),
+                mergeAll(),
+            ),
+        );
 
-        observables.push(this.deviceTypeService.getDeviceClasses().pipe(map(
-            (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
-                this.deviceTypeDeviceClasses = deviceTypeDeviceClasses;
-            })));
+        observables.push(
+            this.deviceTypeService.getDeviceClasses().pipe(
+                map((deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
+                    this.deviceTypeDeviceClasses = deviceTypeDeviceClasses;
+                }),
+            ),
+        );
 
-        observables.push(this.deviceTypeService.getControllingFunctions().pipe(map(
-            (resp: DeviceTypeFunctionModel[]) => {
-                this.controllingFunctions = resp;
-            })));
+        observables.push(
+            this.deviceTypeService.getControllingFunctions().pipe(
+                map((resp: DeviceTypeFunctionModel[]) => {
+                    this.controllingFunctions = resp;
+                }),
+            ),
+        );
 
-        observables.push(this.deviceTypeService.getMeasuringFunctions().pipe(map(
-            (resp: DeviceTypeFunctionModel[]) => {
-                this.measuringFunctions = resp;
-            })));
+        observables.push(
+            this.deviceTypeService.getMeasuringFunctions().pipe(
+                map((resp: DeviceTypeFunctionModel[]) => {
+                    this.measuringFunctions = resp;
+                }),
+            ),
+        );
 
-        observables.push(this.deviceTypeService.getAspects().pipe(map(
-            (aspects: DeviceTypeAspectModel[]) => {
-                this.aspectList = aspects;
-            })));
+        observables.push(
+            this.deviceTypeService.getAspects().pipe(
+                map((aspects: DeviceTypeAspectModel[]) => {
+                    this.aspectList = aspects;
+                }),
+            ),
+        );
 
-        observables.push(this.conceptsService.getConceptsWithCharacteristics().pipe(map(
-            concepts => {
-                this.concepts = concepts;
-            })));
+        observables.push(
+            this.conceptsService.getConceptsWithCharacteristics().pipe(
+                map((concepts) => {
+                    this.concepts = concepts;
+                }),
+            ),
+        );
 
         return forkJoin(observables);
     }
@@ -600,13 +665,13 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private deleteIds(): void {
-        const emptyId = {'id': ''};
+        const emptyId = {id: ''};
         this.firstFormGroup.patchValue(emptyId);
-        const services = <FormArray>this.secondFormGroup.controls['services'];
+        const services = this.secondFormGroup.controls['services'] as FormArray;
         services.controls.forEach((service) => {
             service.patchValue(emptyId);
-            const outputs = <FormArray>service.get('outputs');
-            const inputs = <FormArray>service.get('inputs');
+            const outputs = service.get('outputs') as FormArray;
+            const inputs = service.get('inputs') as FormArray;
             this.clearContent(inputs);
             this.clearContent(outputs);
         });
@@ -614,10 +679,10 @@ export class DeviceTypesComponent implements OnInit {
 
     private clearContent(contents: FormArray) {
         if (contents) {
-            contents.controls.forEach(content => {
-                const contentFormGroup = <FormGroup>content;
-                contentFormGroup.patchValue({'id': ''});
-                const dataSourceControl = <FormControl>contentFormGroup.get('dataSource');
+            contents.controls.forEach((content) => {
+                const contentFormGroup = content;
+                contentFormGroup.patchValue({id: ''});
+                const dataSourceControl = contentFormGroup.get('dataSource');
                 if (dataSourceControl) {
                     if (dataSourceControl.value && dataSourceControl.value.data.length === 1) {
                         this.deviceTypeHelperService.removeField(dataSourceControl.value.data[0], 'id');
@@ -642,20 +707,20 @@ export class DeviceTypesComponent implements OnInit {
         return this.secondFormGroup.get('services') as FormArray;
     }
 
-    private getServiceFormControl(serviceFormGroup: AbstractControl, FormControlName: string): FormControl {
-        return serviceFormGroup.get(FormControlName) as FormControl;
+    private static getServiceFormControl(serviceFormGroup: AbstractControl, formControlName: string): FormControl {
+        return serviceFormGroup.get(formControlName) as FormControl;
     }
 
-    private getServiceFormArray(serviceFormGroup: AbstractControl, FormControlName: string): FormArray {
-        return serviceFormGroup.get(FormControlName) as FormArray;
+    private static getServiceFormArray(serviceFormGroup: AbstractControl, formControlName: string): FormArray {
+        return serviceFormGroup.get(formControlName) as FormArray;
     }
 
     private getFunctionConceptIds(functionIds: string[]): string[] {
         const list: string[] = [];
-        functionIds.forEach(functionId => {
-            let func = this.controllingFunctions.find(f => f.id === functionId);
+        functionIds.forEach((functionId) => {
+            let func = this.controllingFunctions.find((f) => f.id === functionId);
             if (func === undefined) {
-                func = this.measuringFunctions.find(f => f.id === functionId);
+                func = this.measuringFunctions.find((f) => f.id === functionId);
             }
             if (func !== undefined) {
                 list.push(func.concept_id);
@@ -669,12 +734,12 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     removeAttr(i: number) {
-        const formArray = <FormArray>this.attrFormGroup.controls['attributes'];
+        const formArray = this.attrFormGroup.controls['attributes'] as FormArray;
         formArray.removeAt(i);
     }
 
     addAttr() {
-        const formArray = <FormArray>this.attrFormGroup.controls['attributes'];
+        const formArray = this.attrFormGroup.controls['attributes'] as FormArray;
         formArray.push(this.createAttrGroup({} as Attribute));
     }
 }

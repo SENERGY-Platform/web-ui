@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {
-    WidgetModel
-} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {DevicesStateService} from './shared/devices-state.service';
-import {DevicesStateModel} from './shared/devices-state.model';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { DevicesStateService } from './shared/devices-state.service';
+import { DevicesStateModel } from './shared/devices-state.model';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
 import {
     DeviceInstancesRouterState,
-    DeviceInstancesRouterStateTypesEnum, DeviceInstancesRouterStateTabEnum
+    DeviceInstancesRouterStateTypesEnum,
+    DeviceInstancesRouterStateTabEnum,
 } from '../../modules/devices/device-instances/device-instances.component';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'senergy-devices-state',
@@ -34,8 +33,7 @@ import {Router} from '@angular/router';
     styleUrls: ['./devices-state.component.css'],
 })
 export class DevicesStateComponent implements OnInit, OnDestroy {
-
-    devicesStatus: DevicesStateModel = {count: 0, connected: 0, disconnected: 0, unknown: 0};
+    devicesStatus: DevicesStateModel = { count: 0, connected: 0, disconnected: 0, unknown: 0 };
     ready = false;
     destroy = new Subscription();
 
@@ -43,10 +41,7 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private devicesStateService: DevicesStateService,
-                private dashboardService: DashboardService,
-                private router: Router) {
-    }
+    constructor(private devicesStateService: DevicesStateService, private dashboardService: DashboardService, private router: Router) {}
 
     ngOnInit() {
         this.setDeviceStatus();
@@ -74,21 +69,21 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
 
     showOnlineDevices() {
         this.router.navigate(['devices/deviceinstances'], {
-            state: {tab: DeviceInstancesRouterStateTabEnum.ONLINE} as DeviceInstancesRouterState,
+            state: { tab: DeviceInstancesRouterStateTabEnum.ONLINE } as DeviceInstancesRouterState,
         });
         return false;
     }
 
     showOfflineDevices() {
         this.router.navigate(['devices/deviceinstances'], {
-            state: {tab: DeviceInstancesRouterStateTabEnum.OFFLINE} as DeviceInstancesRouterState,
+            state: { tab: DeviceInstancesRouterStateTabEnum.OFFLINE } as DeviceInstancesRouterState,
         });
         return false;
     }
 
     showUnknownDevices() {
         this.router.navigate(['devices/deviceinstances'], {
-            state: {tab: DeviceInstancesRouterStateTabEnum.UNKNOWN} as DeviceInstancesRouterState,
+            state: { tab: DeviceInstancesRouterStateTabEnum.UNKNOWN } as DeviceInstancesRouterState,
         });
         return false;
     }

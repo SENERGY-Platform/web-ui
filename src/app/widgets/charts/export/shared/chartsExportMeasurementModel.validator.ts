@@ -14,27 +14,35 @@
  * limitations under the License.
  */
 
-import {AbstractControl, ValidatorFn} from '@angular/forms';
+import { AbstractControl, ValidatorFn } from '@angular/forms';
 
 export function chartsExportMeasurementModelValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-        return isChartsExportMeasurementModel(control.value) ? null : {'isExport': {value: control.value}};
-    };
+    return (control: AbstractControl): { [key: string]: any } | null =>
+        isChartsExportMeasurementModel(control.value) ? null : { isExport: { value: control.value } };
 }
 
 export function isChartsExportMeasurementModel(test: any): boolean {
-    let isExport = test !== undefined && test !== null
-        && typeof test.id === 'string'
-        && 'name' in test && typeof test.name === 'string'
-        && 'values' in test && Array.isArray(test.values);
+    let isExport =
+        test !== undefined &&
+        test !== null &&
+        typeof test.id === 'string' &&
+        'name' in test &&
+        typeof test.name === 'string' &&
+        'values' in test &&
+        Array.isArray(test.values);
 
     if (isExport) {
         test.values.forEach((val: any) => {
             if (isExport) {
-                isExport = 'Name' in val && typeof val.Name === 'string'
-                    && 'Path' in val && typeof val.Path === 'string'
-                    && 'Type' in val && typeof val.Type === 'string'
-                    && 'InstanceID' in val && typeof val.InstanceID === 'string';
+                isExport =
+                    'Name' in val &&
+                    typeof val.Name === 'string' &&
+                    'Path' in val &&
+                    typeof val.Path === 'string' &&
+                    'Type' in val &&
+                    typeof val.Type === 'string' &&
+                    'InstanceID' in val &&
+                    typeof val.InstanceID === 'string';
             }
         });
     }

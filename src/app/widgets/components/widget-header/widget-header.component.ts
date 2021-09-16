@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnInit} from '@angular/core';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
+import { Component, Input, OnInit } from '@angular/core';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 
 @Component({
     selector: 'senergy-widget-header',
@@ -25,16 +25,12 @@ import {DashboardService} from '../../../modules/dashboard/shared/dashboard.serv
     styleUrls: ['./widget-header.component.css'],
 })
 export class WidgetHeaderComponent implements OnInit {
-
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private dashboardService: DashboardService) {
-    }
+    constructor(private dashboardService: DashboardService) {}
 
-    ngOnInit() {
-
-    }
+    ngOnInit() {}
 
     refresh() {
         this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, this.widget.id, this.widget);

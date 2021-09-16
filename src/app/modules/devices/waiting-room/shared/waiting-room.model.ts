@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 export interface Attribute {
     key: string;
     value: string;
@@ -40,10 +39,17 @@ export interface WaitingRoomEvent {
     payload: string | null | undefined;
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const WaitingRoomEventTypeError = 'error';
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const WaitingRoomEventTypeSet = 'update_set';
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const WaitingRoomEventTypeDelete = 'update_delete';
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const WaitingRoomEventTypeUse = 'update_use';
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const WaitingRoomEventTypeAuthRequest = 'auth_request';
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const WaitingRoomEventTypeAuth = 'auth';
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const WaitingRoomEventTypeAuthOk = 'auth_ok';

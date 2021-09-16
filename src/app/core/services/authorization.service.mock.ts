@@ -17,19 +17,16 @@
 import {Injectable} from '@angular/core';
 import {AuthorizationProfileModel} from '../components/authorization/authorization-profile.model';
 
-
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
-
 export class AuthorizationServiceMock {
-
     getUserId(): string | Error {
         return 'test';
     }
 
     getUserName(): Promise<string> {
-        return new Promise<string>(resolve => resolve('test'));
+        return new Promise<string>((resolve) => resolve('test'));
     }
 
     getProfile(): AuthorizationProfileModel {
@@ -41,9 +38,9 @@ export class AuthorizationServiceMock {
         } as AuthorizationProfileModel;
     }
 
-    /**
-    getToken(): Promise<string> {
-    }**/
+    /*
+     getToken(): Promise<string> {
+    }*/
 
     updateToken(): void {
     }
@@ -51,12 +48,12 @@ export class AuthorizationServiceMock {
     logout() {
     }
 
-    /**
+    /*
     changePasswort(password: string): Observable<null | { error: string }> {
-    }**/
+    }*/
 
-    /**
+    /*
     changeUserProfile(userProfile: AuthorizationUserProfileModel): Observable<null | { error: string }> {
 
-    }**/
+    }*/
 }

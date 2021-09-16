@@ -15,7 +15,7 @@
  */
 
 export interface SingleValueModel {
-    value: (number | string);
+    value: number | string;
     type: string;
 }
 
@@ -24,4 +24,3 @@ export interface SingleValuePropertiesModel {
     format?: string;
     math?: string;
 }
-

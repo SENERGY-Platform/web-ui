@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DeviceTypeCharacteristicsModel} from '../../device-types-overview/shared/device-type.model';
+import { DeviceTypeCharacteristicsModel } from '../../device-types-overview/shared/device-type.model';
 
 export interface ConceptsCharacteristicsModel {
     id: string;

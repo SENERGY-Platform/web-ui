@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
+import { NgModule } from '@angular/core';
 
-import {RouterModule} from '@angular/router';
-import {CommonModule} from '@angular/common';
-import {CoreModule} from '../../../core/core.module';
-import {FlexLayoutModule} from '@angular/flex-layout';
-import {OperatorComponent} from './operator/operator.component';
-import {FormsModule} from '@angular/forms';
-import {MatGridListModule} from '@angular/material/grid-list';
-import {MatIconModule} from '@angular/material/icon';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatListModule} from '@angular/material/list';
-import {MatButtonModule} from '@angular/material/button';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatInputModule} from '@angular/material/input';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatSelectModule} from '@angular/material/select';
-import {MatPaginatorModule} from "@angular/material/paginator";
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { CoreModule } from '../../../core/core.module';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { OperatorComponent } from './operator/operator.component';
+import { FormsModule } from '@angular/forms';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
-
-const operator = {path: 'data/operator-repo/op', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' }};
-const operatorEdit = {path: 'data/operator-repo/op/:id', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' }};
+const operator = { path: 'data/operator-repo/op', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' } };
+const operatorEdit = { path: 'data/operator-repo/op/:id', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' } };
 
 @NgModule({
     imports: [
@@ -57,12 +56,8 @@ const operatorEdit = {path: 'data/operator-repo/op/:id', pathMatch: 'full', comp
         MatInputModule,
         FormsModule,
         MatCheckboxModule,
-        MatSelectModule
-
+        MatSelectModule,
     ],
-    declarations: [
-        OperatorComponent
-    ],
+    declarations: [OperatorComponent],
 })
-export class OperatorRepoModule {
-}
+export class OperatorRepoModule {}

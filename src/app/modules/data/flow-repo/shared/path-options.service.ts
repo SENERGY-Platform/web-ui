@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {environment} from '../../../../../environments/environment';
-import {catchError} from 'rxjs/internal/operators';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {
-    DeviceTypeContentVariableModel,
-    DeviceTypeServiceModel
-} from '../../../metadata/device-types-overview/shared/device-type.model';
-import {ImportTypeContentVariableModel, ImportTypeModel} from '../../../imports/import-types/shared/import-types.model';
-import {ImportInstancesModel} from '../../../imports/import-instances/shared/import-instances.model';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { environment } from '../../../../../environments/environment';
+import { catchError } from 'rxjs/internal/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { DeviceTypeContentVariableModel, DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { ImportTypeContentVariableModel, ImportTypeModel } from '../../../imports/import-types/shared/import-types.model';
+import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
 
 export interface PathOption {
     service_id: string;
@@ -38,41 +35,59 @@ export interface PathOptionFull extends PathOption {
 }
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class PathOptionsService {
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
+    getPathOptions(
+        deviceTypeIds: string[],
+        functionId: string,
+        aspectId: string,
+        withoutEnvelope: boolean = false,
+        characteristicIdFilter: string[] = [],
+    ): Observable<Map<string, PathOption[]>> {
+        return this.http
+            .post<any>(environment.marshallerUrl + '/query/path-options', {
+                device_type_ids: deviceTypeIds,
+                function_id: functionId,
+                aspect_id: aspectId,
+                characteristic_id_filter: characteristicIdFilter,
+                without_envelope: withoutEnvelope,
+            })
+            .pipe(
+                map((obj) => {
+                    const m = new Map<string, PathOption[]>();
+                    for (const key of Object.keys(obj)) {
+                        m.set(key, obj[key]);
+                    }
+                    return m;
+                }),
+                catchError((_) =>
+                    this.errorHandlerService.handleError<Map<string, PathOption[]>>(
+                        'PathOptionsService',
+                        'getPathOptions',
+                        new Map<string, PathOption[]>(),
+                    ),
+                ),
+            );
     }
 
-    getPathOptions(deviceTypeIds: string[], functionId: string, aspectId: string, without_envelope: boolean = false,
-                   characteristic_id_filter: string[] = []): Observable<Map<string, PathOption[]>> {
-        return this.http.post<any>(environment.marshallerUrl + '/query/path-options', {
-            device_type_ids: deviceTypeIds,
-            function_id: functionId,
-            aspect_id: aspectId,
-            characteristic_id_filter: characteristic_id_filter,
-            without_envelope: without_envelope,
-        }).pipe(map(obj => {
-                const m = new Map<string, PathOption[]>();
-                for (const key of Object.keys(obj)) {
-                    m.set(key, obj[key]);
-                }
-                return m;
-            }),
-            catchError(_ => this.errorHandlerService.handleError<Map<string, PathOption[]>>(
-                'PathOptionsService', 'getPathOptions', new Map<string, PathOption[]>()))
-        );
-    }
-
-    getPathOptionsLocal(services: DeviceTypeServiceModel[], without_envelope: boolean = false,
-                        characteristic_id_filter: string[] = []): PathOptionFull[] {
+    getPathOptionsLocal(
+        services: DeviceTypeServiceModel[],
+        withoutEnvelope: boolean = false,
+        characteristicIdFilter: string[] = [],
+    ): PathOptionFull[] {
         const pathOptions: PathOptionFull[] = [];
-        services.forEach(service => {
-            const serviceOptions: PathOptionFull = {service_id: service.id, json_path: [], service: service};
-            service.outputs.forEach(output => {
-                this.getPathOptionsRecursive(!without_envelope ? 'value' : '', serviceOptions.json_path,
-                    output.content_variable, characteristic_id_filter);
+        services.forEach((service) => {
+            const serviceOptions: PathOptionFull = { service_id: service.id, json_path: [], service };
+            service.outputs.forEach((output) => {
+                this.getPathOptionsRecursive(
+                    !withoutEnvelope ? 'value' : '',
+                    serviceOptions.json_path,
+                    output.content_variable,
+                    characteristicIdFilter,
+                );
             });
             if (serviceOptions.json_path.length > 0) {
                 pathOptions.push(serviceOptions);
@@ -81,26 +96,29 @@ export class PathOptionsService {
         return pathOptions;
     }
 
-    getPathOptionsLocalImport(type: ImportTypeModel, instance: ImportInstancesModel,
-                        characteristic_id_filter: string[] = []): PathOption {
-        const pathOption: PathOption = {service_id: instance.kafka_topic, json_path: []};
-        type.output.sub_content_variables?.forEach(sub => {
-            this.getPathOptionsRecursive('', pathOption.json_path,
-                sub, characteristic_id_filter);
+    getPathOptionsLocalImport(type: ImportTypeModel, instance: ImportInstancesModel, characteristicIdFilter: string[] = []): PathOption {
+        const pathOption: PathOption = { service_id: instance.kafka_topic, json_path: [] };
+        type.output.sub_content_variables?.forEach((sub) => {
+            this.getPathOptionsRecursive('', pathOption.json_path, sub, characteristicIdFilter);
         });
         return pathOption;
     }
 
-    private getPathOptionsRecursive(parentPath: string, pathArray: string[],
-                                    contentVariable: DeviceTypeContentVariableModel | ImportTypeContentVariableModel,
-                                    characteristic_id_filter: string[]) {
+    private getPathOptionsRecursive(
+        parentPath: string,
+        pathArray: string[],
+        contentVariable: DeviceTypeContentVariableModel | ImportTypeContentVariableModel,
+        characteristicIdFilter: string[],
+    ) {
         const path = (parentPath.length > 0 ? parentPath + '.' : '') + contentVariable.name;
-        if (contentVariable.characteristic_id !== undefined
-            && characteristic_id_filter.findIndex(c => c === contentVariable.characteristic_id) !== -1) {
+        if (
+            contentVariable.characteristic_id !== undefined &&
+            characteristicIdFilter.findIndex((c) => c === contentVariable.characteristic_id) !== -1
+        ) {
             pathArray.push(path);
         }
         contentVariable.sub_content_variables?.forEach((sub: DeviceTypeContentVariableModel | ImportTypeContentVariableModel) =>
-            this.getPathOptionsRecursive(path, pathArray, sub, characteristic_id_filter));
+            this.getPathOptionsRecursive(path, pathArray, sub, characteristicIdFilter),
+        );
     }
-
 }

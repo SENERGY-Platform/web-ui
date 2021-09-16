@@ -199,12 +199,9 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         WidgetFooterComponent,
     ],
     providers: [
-        {provide: LOCALE_ID, useValue: 'de'},  // todo: language;
+        {provide: LOCALE_ID, useValue: 'de'}, // todo: language;
         DecimalPipe,
-    ]
-
+    ],
 })
-
 export class WidgetModule {
-
 }

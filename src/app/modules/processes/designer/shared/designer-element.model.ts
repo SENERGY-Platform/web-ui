@@ -33,9 +33,9 @@ export interface DesignerElementFlowNodeRefModel {
         values: {
             inputParameters: {
                 name: string;
-                value: string
+                value: string;
             }[];
-        }[]
+        }[];
     };
 }
 

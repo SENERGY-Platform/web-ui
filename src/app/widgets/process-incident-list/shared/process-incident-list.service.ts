@@ -1,12 +1,12 @@
 /*
  * Copyright 2020 InfAI (CC SES)
- *  
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {ProcessIncidentListEditDialogComponent} from '../dialogs/process-incident-list-edit-dialog.component';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { Injectable } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { ProcessIncidentListEditDialogComponent } from '../dialogs/process-incident-list-edit-dialog.component';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ProcessIncidentListService {
-
-    constructor(private dialog: MatDialog,
-                private dashboardService: DashboardService) {
-    }
+    constructor(private dialog: MatDialog, private dashboardService: DashboardService) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         const editDialogRef = this.dialog.open(ProcessIncidentListEditDialogComponent, dialogConfig);
 
@@ -45,6 +42,4 @@ export class ProcessIncidentListService {
             }
         });
     }
-
 }
-

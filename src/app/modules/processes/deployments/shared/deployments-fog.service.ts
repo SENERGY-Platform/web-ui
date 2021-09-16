@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {environment} from '../../../../../environments/environment';
-import {Observable, of} from 'rxjs';
-import {catchError, map, mergeMap} from 'rxjs/internal/operators';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {DeploymentsModel} from './deployments.model';
-import {CamundaVariable} from './deployments-definition.model';
-import {V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel} from './deployments-prepared-v2.model';
-import {MatDialog} from '@angular/material/dialog';
-import {DeploymentsFogMetadataModel, DeploymentsFogModel} from './deployments-fog.model';
-import {NetworksService} from '../../../devices/networks/shared/networks.service';
-import {NetworksModel} from '../../../devices/networks/shared/networks.model';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
+import { Observable, of } from 'rxjs';
+import { catchError, map, mergeMap } from 'rxjs/internal/operators';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { DeploymentsModel } from './deployments.model';
+import { CamundaVariable } from './deployments-definition.model';
+import { V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel } from './deployments-prepared-v2.model';
+import { MatDialog } from '@angular/material/dialog';
+import { DeploymentsFogMetadataModel, DeploymentsFogModel } from './deployments-fog.model';
+import { NetworksService } from '../../../devices/networks/shared/networks.service';
+import { NetworksModel } from '../../../devices/networks/shared/networks.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DeploymentsFogFactory {
-
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private networksService: NetworksService) {
-    }
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private networksService: NetworksService) {}
 
     withHubId(hubId: string): DeploymentsFogService {
         return new DeploymentsFogService(hubId, this.http, this.errorHandlerService, this.networksService);
@@ -42,21 +40,29 @@ export class DeploymentsFogFactory {
 }
 
 export class DeploymentsFogService {
-
-    constructor(private hubId: string, private http: HttpClient, private errorHandlerService: ErrorHandlerService, private networksService: NetworksService) {
-    }
+    constructor(
+        private hubId: string,
+        private http: HttpClient,
+        private errorHandlerService: ErrorHandlerService,
+        private networksService: NetworksService,
+    ) {}
 
     getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null> {
-        const url = environment.processFogDeploymentUrl + '/prepared-deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(processId);
+        const url =
+            environment.processFogDeploymentUrl +
+            '/prepared-deployments/' +
+            encodeURIComponent(this.hubId) +
+            '/' +
+            encodeURIComponent(processId);
         return this.http.get<V2DeploymentsPreparedModel>(url).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getPreparedDeployments', null)),
-            map(deployment => {
-                deployment?.elements.forEach(element => {
+            map((deployment) => {
+                deployment?.elements.forEach((element) => {
                     element.message_event?.selection.selection_options.forEach((option: any) => {
                         if (option.servicePathOptions === undefined) {
                             return;
                         }
-                        const m = new Map<string, {path: string, characteristicId: string}[]>();
+                        const m = new Map<string, { path: string; characteristicId: string }[]>();
                         for (const key of Object.keys(option.servicePathOptions)) {
                             m.set(key, option.servicePathOptions[key]);
                         }
@@ -64,50 +70,62 @@ export class DeploymentsFogService {
                     });
                 });
                 return deployment;
-            })
+            }),
         );
     }
 
     v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null> {
-        const url = environment.processSyncUrl + '/deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(deploymentId) + '/metadata';
+        const url =
+            environment.processSyncUrl +
+            '/deployments/' +
+            encodeURIComponent(this.hubId) +
+            '/' +
+            encodeURIComponent(deploymentId) +
+            '/metadata';
         return this.http.get<DeploymentsFogMetadataModel>(url).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'v2getDeployments', null)),
-            map(metadata => {
+            map((metadata) => {
                 if (!metadata) {
                     return metadata;
                 }
                 const deployment: V2DeploymentsPreparedModel = metadata.deployment_model;
                 deployment.id = metadata.camunda_deployment_id;
                 return deployment;
-            })
-        );
-    }
-
-    v2postDeployments(deployment: V2DeploymentsPreparedModel): Observable<{ status: number, id: string }> {
-        const url = environment.processFogDeploymentUrl + '/deployments/' + encodeURIComponent(this.hubId);
-        return this.http.post<V2DeploymentsPreparedModel>(url, deployment, {observe: 'response'}).pipe(
-            map(resp => {
-                return {status: resp.status, id: resp.body ? resp.body.id : ''};
             }),
-            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'v2postDeployments', {status: 500, id: ''}))
         );
     }
 
+    v2postDeployments(deployment: V2DeploymentsPreparedModel): Observable<{ status: number; id: string }> {
+        const url = environment.processFogDeploymentUrl + '/deployments/' + encodeURIComponent(this.hubId);
+        return this.http.post<V2DeploymentsPreparedModel>(url, deployment, { observe: 'response' }).pipe(
+            map((resp) => ({ status: resp.status, id: resp.body ? resp.body.id : '' })),
+            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'v2postDeployments', { status: 500, id: '' })),
+        );
+    }
 
     getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null> {
-        return this.http.get<V2DeploymentsPreparedConfigurableModel[]>(environment.configurablesUrl + '?characteristicId=' + characteristicId + '&serviceIds=' + serviceId).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getConfigurables', null))
-        );
+        return this.http
+            .get<V2DeploymentsPreparedConfigurableModel[]>(
+                environment.configurablesUrl + '?characteristicId=' + characteristicId + '&serviceIds=' + serviceId,
+            )
+            .pipe(catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getConfigurables', null)));
     }
 
     // lists
 
     getAll(query: string, limit: number, offset: number, feature: string, order: string, _: string): Observable<DeploymentsModel[]> {
-        let url = environment.processSyncUrl +
-            '/deployments?sort=' + feature + '.' + order +
-            '&limit=' + limit +
-            '&offset=' + offset +
-            '&network_id=' + encodeURIComponent(this.hubId) +
+        let url =
+            environment.processSyncUrl +
+            '/deployments?sort=' +
+            feature +
+            '.' +
+            order +
+            '&limit=' +
+            limit +
+            '&offset=' +
+            offset +
+            '&network_id=' +
+            encodeURIComponent(this.hubId) +
             '&extended=true';
 
         if (query) {
@@ -115,48 +133,58 @@ export class DeploymentsFogService {
         }
 
         return this.networksService.getNetworksWithLogState('', 1000, 0, 'name', 'asc').pipe(
-            mergeMap(networks => {
+            mergeMap((networks) => {
                 const networkState = new Map<string, NetworksModel>();
-                networks.forEach(value => {
+                networks.forEach((value) => {
                     networkState.set(value.id, value);
                 });
                 return this.http.get<DeploymentsFogModel[]>(url).pipe(
-                    map(resp => resp || []),
-                    map(list => list.map(element => {
-                        const network = networkState.get(element.network_id);
-                        element.online = !(network?.annotations?.connected === false); // hubs without state are online
+                    map((resp) => resp || []),
+                    map((list) =>
+                        list.map((element) => {
+                            const network = networkState.get(element.network_id);
+                            element.online = !(network?.annotations?.connected === false); // hubs without state are online
 
-                        if (!element.online) {
-                            element.offline_reasons = [{
-                                id: network?.id || '',
-                                type: 'network_offline',
-                                description: network?.name + ' offline',
-                                additional_info: {name: ''}
-                            }];
-                        }
-                        element.sync = element.is_placeholder || element.marked_for_delete;
-                        return element;
-                    })),
-                    catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getAll', []))
+                            if (!element.online) {
+                                element.offline_reasons = [
+                                    {
+                                        id: network?.id || '',
+                                        type: 'network_offline',
+                                        description: network?.name + ' offline',
+                                        additional_info: { name: '' },
+                                    },
+                                ];
+                            }
+                            element.sync = element.is_placeholder || element.marked_for_delete;
+                            return element;
+                        }),
+                    ),
+                    catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getAll', [])),
                 );
-            })
+            }),
         );
     }
 
-    checkForDeletedDeploymentWithRetries(_: string, __: number, ___: number): Observable<boolean> {
+    checkForDeletedDeploymentWithRetries(_: string, _1: number, _2: number): Observable<boolean> {
         return of(true);
     }
 
-    getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable>|null> {
-        const url = environment.processSyncUrl + '/deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(deploymentId) + '/metadata';
+    getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable> | null> {
+        const url =
+            environment.processSyncUrl +
+            '/deployments/' +
+            encodeURIComponent(this.hubId) +
+            '/' +
+            encodeURIComponent(deploymentId) +
+            '/metadata';
         return this.http.get<DeploymentsFogMetadataModel>(url).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getDeploymentInputParameters', null)),
-            map(metadata => {
+            map((metadata) => {
                 if (!metadata) {
                     return metadata;
                 }
                 return metadata.process_parameter;
-            })
+            }),
         );
     }
 
@@ -165,28 +193,44 @@ export class DeploymentsFogService {
         parameter.forEach((value, key) => {
             queryParts.push(key + '=' + encodeURIComponent(JSON.stringify(value.value)));
         });
-        return this.http.get<any>(environment.processSyncUrl + '/deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(deploymentId) +
-            '/start?' + queryParts.join('&')).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'startDeploymentWithParameter', null))
-        );
+        return this.http
+            .get<any>(
+                environment.processSyncUrl +
+                    '/deployments/' +
+                    encodeURIComponent(this.hubId) +
+                    '/' +
+                    encodeURIComponent(deploymentId) +
+                    '/start?' +
+                    queryParts.join('&'),
+            )
+            .pipe(catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'startDeploymentWithParameter', null)));
     }
 
     startDeployment(deploymentId: string): Observable<any | null> {
-        return this.http.get<any>(environment.processSyncUrl + '/deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(deploymentId) + '/start').pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'startDeployment', null))
-        );
+        return this.http
+            .get<any>(
+                environment.processSyncUrl +
+                    '/deployments/' +
+                    encodeURIComponent(this.hubId) +
+                    '/' +
+                    encodeURIComponent(deploymentId) +
+                    '/start',
+            )
+            .pipe(catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'startDeployment', null)));
     }
 
-
     v2deleteDeployment(deploymentId: string): Observable<{ status: number }> {
-        return this.http.delete(environment.processSyncUrl + '/deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(deploymentId), {
-            responseType: 'text',
-            observe: 'response'
-        }).pipe(
-            map(resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'v2deleteDeployment', {status: 500}))
-        );
+        return this.http
+            .delete(
+                environment.processSyncUrl + '/deployments/' + encodeURIComponent(this.hubId) + '/' + encodeURIComponent(deploymentId),
+                {
+                    responseType: 'text',
+                    observe: 'response',
+                },
+            )
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'v2deleteDeployment', { status: 500 })),
+            );
     }
 }

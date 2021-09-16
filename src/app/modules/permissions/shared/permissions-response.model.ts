@@ -17,5 +17,3 @@
 export interface PermissionsResponseModel {
     status: string;
 }
-
-

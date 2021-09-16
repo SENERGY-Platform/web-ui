@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-
+import { Component, Inject, OnInit } from '@angular/core';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     templateUrl: './process-scheduler-schedule-edit-dialog.component.html',
     styleUrls: ['./process-scheduler-schedule-edit-dialog.component.css'],
 })
 export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
-
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
     readAll = false;
 
-    constructor(private dialogRef: MatDialogRef<ProcessSchedulerScheduleEditDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                private dashboardService: DashboardService,
-                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
+    constructor(
+        private dialogRef: MatDialogRef<ProcessSchedulerScheduleEditDialogComponent>,
+        private deploymentsService: DeploymentsService,
+        private dashboardService: DashboardService,
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+    ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
     }
@@ -64,5 +64,4 @@ export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
             }
         });
     }
-
 }

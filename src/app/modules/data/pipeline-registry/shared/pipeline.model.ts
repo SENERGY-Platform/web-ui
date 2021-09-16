@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {SafeHtml} from '@angular/platform-browser';
-import {PipelineInputSelectionModel} from '../../flow-repo/deploy-flow/shared/pipeline-request.model';
+import { SafeHtml } from '@angular/platform-browser';
+import { PipelineInputSelectionModel } from '../../flow-repo/deploy-flow/shared/pipeline-request.model';
 
 export interface PipelineModel {
     id: string;
@@ -25,7 +25,7 @@ export interface PipelineModel {
     image: string | SafeHtml;
     createdAt: Date;
     updatedAt: Date;
-    operators: PipelineOperatorModel [];
+    operators: PipelineOperatorModel[];
     consumeAllMessages?: boolean;
     windowTime?: number;
     metrics?: boolean;
@@ -37,7 +37,7 @@ export interface PipelineOperatorModel {
     operatorId: string;
     name: string;
     deploymentType: string;
-    inputTopics: OperatorInputTopic [];
+    inputTopics: OperatorInputTopic[];
     inputSelections?: PipelineInputSelectionModel[];
     config?: Map<string, string>;
 }
@@ -46,8 +46,8 @@ export interface OperatorInputTopic {
     name: string;
     filterType: string;
     filterValue: string;
-    devices: string [];
-    mappings: InputTopicsMapping [];
+    devices: string[];
+    mappings: InputTopicsMapping[];
 }
 
 export interface InputTopicsMapping {

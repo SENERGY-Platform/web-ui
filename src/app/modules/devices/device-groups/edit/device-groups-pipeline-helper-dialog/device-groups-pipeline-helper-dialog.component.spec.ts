@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {DeviceGroupsPipelineHelperDialogComponent} from './device-groups-pipeline-helper-dialog.component';
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {RouterTestingModule} from '@angular/router/testing';
-import {MatTableModule} from '@angular/material/table';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatCheckboxModule} from '@angular/material/checkbox';
+import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups-pipeline-helper-dialog.component';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { RouterTestingModule } from '@angular/router/testing';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 describe('DeviceGroupsPipelineHelperDialogComponent', () => {
     let component: DeviceGroupsPipelineHelperDialogComponent;
@@ -30,26 +30,20 @@ describe('DeviceGroupsPipelineHelperDialogComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [DeviceGroupsPipelineHelperDialogComponent],
-            imports: [
-                MatDialogModule,
-                RouterTestingModule,
-                MatTableModule,
-                MatTooltipModule,
-                MatCheckboxModule,
-            ],
+            imports: [MatDialogModule, RouterTestingModule, MatTableModule, MatTooltipModule, MatCheckboxModule],
             providers: [
                 {
-                    provide: MAT_DIALOG_DATA, useValue: [],
+                    provide: MAT_DIALOG_DATA,
+                    useValue: [],
                 },
                 {
                     provide: MatDialogRef,
                     useValue: {
-                        close: (_: any) => null
-                    }
+                        close: (_: any) => null,
+                    },
                 },
-            ]
-        })
-            .compileComponents();
+            ],
+        }).compileComponents();
     });
 
     beforeEach(() => {

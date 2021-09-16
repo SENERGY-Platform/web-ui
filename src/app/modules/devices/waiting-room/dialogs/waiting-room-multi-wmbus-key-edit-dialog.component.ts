@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Attribute, WaitingDeviceModel} from '../shared/waiting-room.model';
-import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {DeviceTypeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Attribute, WaitingDeviceModel } from '../shared/waiting-room.model';
+import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DeviceTypeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './waiting-room-multi-wmbus-key-edit-dialog.component.html',
@@ -31,10 +31,12 @@ export class WaitingRoomMultiWmbusKeyEditDialogComponent implements OnInit {
 
     devices: WaitingDeviceModel[];
 
-    constructor(private _formBuilder: FormBuilder,
-                private dialogRef: MatDialogRef<WaitingRoomMultiWmbusKeyEditDialogComponent>,
-                private deviceTypeService: DeviceTypeService,
-                @Inject(MAT_DIALOG_DATA) private data: { devices: WaitingDeviceModel[]  }) {
+    constructor(
+        private _formBuilder: FormBuilder,
+        private dialogRef: MatDialogRef<WaitingRoomMultiWmbusKeyEditDialogComponent>,
+        private deviceTypeService: DeviceTypeService,
+        @Inject(MAT_DIALOG_DATA) private data: { devices: WaitingDeviceModel[] },
+    ) {
         if (data.devices) {
             this.devices = JSON.parse(JSON.stringify(data.devices));
         } else {
@@ -42,8 +44,7 @@ export class WaitingRoomMultiWmbusKeyEditDialogComponent implements OnInit {
         }
     }
 
-    ngOnInit() {
-    }
+    ngOnInit() {}
 
     close(): void {
         this.dialogRef.close();
@@ -55,14 +56,16 @@ export class WaitingRoomMultiWmbusKeyEditDialogComponent implements OnInit {
 
     isInvalid(): boolean {
         if (this.devices) {
-            return this.devices.some(value => this.hasMissingAttribute(value));
+            return this.devices.some((value) => this.hasMissingAttribute(value));
         }
         return true;
     }
 
     hasMissingAttribute(element: WaitingDeviceModel): boolean {
         if (element.attributes) {
-            return element.attributes.some(value => value.key === WaitingRoomMultiWmbusKeyEditDialogComponent.wmbusKeyAttributeKey && !value.value);
+            return element.attributes.some(
+                (value) => value.key === WaitingRoomMultiWmbusKeyEditDialogComponent.wmbusKeyAttributeKey && !value.value,
+            );
         }
         return false;
     }

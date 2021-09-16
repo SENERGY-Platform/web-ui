@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {KeycloakService} from 'keycloak-angular';
-import {Observable} from 'rxjs';
-import {environment} from '../../../environments/environment';
-import {catchError} from 'rxjs/operators';
-import {ErrorHandlerService} from './error-handler.service';
-import {HttpClient} from '@angular/common/http';
-import {AuthorizationProfileModel} from '../components/authorization/authorization-profile.model';
-import {AuthorizationUserProfileModel} from '../components/authorization/authorization-user-profile.model';
-
+import { Injectable } from '@angular/core';
+import { KeycloakService } from 'keycloak-angular';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { catchError } from 'rxjs/operators';
+import { ErrorHandlerService } from './error-handler.service';
+import { HttpClient } from '@angular/common/http';
+import { AuthorizationProfileModel } from '../components/authorization/authorization-profile.model';
+import { AuthorizationUserProfileModel } from '../components/authorization/authorization-user-profile.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
-
 export class AuthorizationService {
-
-    constructor(private keycloakService: KeycloakService,
-                private errorHandlerService: ErrorHandlerService,
-                private http: HttpClient) {
-    }
+    constructor(private keycloakService: KeycloakService, private errorHandlerService: ErrorHandlerService, private http: HttpClient) {}
 
     getUserId(): string | Error {
         const sub = localStorage.getItem('sub');
@@ -47,14 +41,15 @@ export class AuthorizationService {
 
     getUserName(): Promise<string> {
         return new Promise<string>((resolve, reject) => {
-            this.keycloakService.loadUserProfile()
+            this.keycloakService
+                .loadUserProfile()
                 .then(() => resolve(this.keycloakService.getUsername()))
                 .catch(() => reject(undefined));
         });
     }
 
     getProfile(): AuthorizationProfileModel {
-        const returnProfile: AuthorizationProfileModel = {email: '', firstName: '', lastName: '', username: ''};
+        const returnProfile: AuthorizationProfileModel = { email: '', firstName: '', lastName: '', username: '' };
         const profile = this.keycloakService.getKeycloakInstance().profile;
         if (profile) {
             returnProfile.email = profile.email || '';
@@ -66,9 +61,7 @@ export class AuthorizationService {
     }
 
     getToken(): Promise<string> {
-        return this.keycloakService.getToken().then((resp) => {
-            return 'bearer ' + resp;
-        });
+        return this.keycloakService.getToken().then((resp) => 'bearer ' + resp);
     }
 
     updateToken(): void {
@@ -80,15 +73,14 @@ export class AuthorizationService {
     }
 
     changePasswort(password: string): Observable<null | { error: string }> {
-        return this.http.put<null | { error: string }>(environment.usersServiceUrl + '/password',
-            {'password': password}).pipe(
-            catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changePasswort', {error: 'error'}))
-        );
+        return this.http
+            .put<null | { error: string }>(environment.usersServiceUrl + '/password', { password })
+            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changePasswort', { error: 'error' })));
     }
 
     changeUserProfile(userProfile: AuthorizationUserProfileModel): Observable<null | { error: string }> {
-        return this.http.put<null>(environment.usersServiceUrl + '/info', userProfile).pipe(
-            catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changeUserProfile', {error: 'error'}))
-        );
+        return this.http
+            .put<null>(environment.usersServiceUrl + '/info', userProfile)
+            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changeUserProfile', { error: 'error' })));
     }
 }

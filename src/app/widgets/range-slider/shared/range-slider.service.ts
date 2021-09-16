@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import {RangeSliderEditDialogComponent} from '../dialogs/range-slider-edit-dialog.component';
-import {HttpClient} from '@angular/common/http';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import { RangeSliderEditDialogComponent } from '../dialogs/range-slider-edit-dialog.component';
+import { HttpClient } from '@angular/common/http';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class RangeSliderService {
-
-
-    constructor(private dialog: MatDialog,
-                private http: HttpClient,
-                private dashboardService: DashboardService) {
-    }
+    constructor(private dialog: MatDialog, private http: HttpClient, private dashboardService: DashboardService) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
@@ -41,8 +36,8 @@ export class RangeSliderService {
         // dialogConfig.minWidth = '800px';
         // dialogConfig.minHeight = '600px';
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         const editDialogRef = this.dialog.open(RangeSliderEditDialogComponent, dialogConfig);
 
@@ -52,6 +47,4 @@ export class RangeSliderService {
             }
         });
     }
-
 }
-

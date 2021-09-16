@@ -14,42 +14,42 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {EnergyPredictionColumnModel, EnergyPredictionModel} from './energy-prediction.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {EnergyPredictionEditDialogComponent} from '../dialog/energy-prediction-edit-dialog.component';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {environment} from '../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {HttpClient} from '@angular/common/http';
-import {ChartsExportModel} from '../../charts/export/shared/charts-export.model';
-import {ChartsExportRequestPayloadModel} from '../../charts/export/shared/charts-export-request-payload.model';
-import {ExportDataService} from '../../shared/export-data.service';
-import {LastValuesRequestElementModel} from '../../shared/export-data.model';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { EnergyPredictionColumnModel, EnergyPredictionModel } from './energy-prediction.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { EnergyPredictionEditDialogComponent } from '../dialog/energy-prediction-edit-dialog.component';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { environment } from '../../../../environments/environment';
+import { catchError, map } from 'rxjs/operators';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { HttpClient } from '@angular/common/http';
+import { ChartsExportModel } from '../../charts/export/shared/charts-export.model';
+import { ChartsExportRequestPayloadModel } from '../../charts/export/shared/charts-export-request-payload.model';
+import { ExportDataService } from '../../shared/export-data.service';
+import { LastValuesRequestElementModel } from '../../shared/export-data.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class EnergyPredictionService {
-
-    constructor(private dialog: MatDialog,
-                private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService,
-                private exportDataService: ExportDataService) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private dashboardService: DashboardService,
+        private errorHandlerService: ErrorHandlerService,
+        private exportDataService: ExportDataService,
+    ) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.minWidth = '450px';
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         const editDialogRef = this.dialog.open(EnergyPredictionEditDialogComponent, dialogConfig);
 
@@ -60,10 +60,11 @@ export class EnergyPredictionService {
         });
     }
 
-    getPrediction(widget: WidgetModel): Observable<EnergyPredictionModel> { // .
+    getPrediction(widget: WidgetModel): Observable<EnergyPredictionModel> {
+        // .
         return new Observable<EnergyPredictionModel>((observer) => {
             const m = widget.properties.measurement;
-            const columns = widget.properties.columns || {} as EnergyPredictionColumnModel;
+            const columns = widget.properties.columns || ({} as EnergyPredictionColumnModel);
             if (m) {
                 const requestPayload: LastValuesRequestElementModel[] = [];
 
@@ -77,9 +78,9 @@ export class EnergyPredictionService {
                     columnName: columns.predictionTotal,
                     math: widget.properties.math,
                 });
-                requestPayload.push({measurement: m.id, columnName: columns.timestamp});
+                requestPayload.push({ measurement: m.id, columnName: columns.timestamp });
 
-                this.exportDataService.getLastValues(requestPayload).subscribe(pairs => {
+                this.exportDataService.getLastValues(requestPayload).subscribe((pairs) => {
                     if (pairs.length !== 3) {
                         observer.error('incomplete result');
                         observer.complete();
@@ -97,4 +98,3 @@ export class EnergyPredictionService {
         });
     }
 }
-

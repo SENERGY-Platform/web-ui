@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material/icon';
-import {DomSanitizer} from '@angular/platform-browser';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
-import {MatTable} from '@angular/material/table';
-import {DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel} from './shared/device-status-properties.model';
-import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
-import {DeviceStatusDialogService} from './shared/device-status-dialog.service';
-import {LastValuesRequestElementModel, TimeValuePairModel} from '../shared/export-data.model';
-import {ExportDataService} from '../shared/export-data.service';
-import {DeviceStatusItemModel} from './shared/device-status-item.model';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
+import { MatTable } from '@angular/material/table';
+import { DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel } from './shared/device-status-properties.model';
+import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
+import { DeviceStatusDialogService } from './shared/device-status-dialog.service';
+import { LastValuesRequestElementModel, TimeValuePairModel } from '../shared/export-data.model';
+import { ExportDataService } from '../shared/export-data.service';
+import { DeviceStatusItemModel } from './shared/device-status-item.model';
 
 @Component({
     selector: 'senergy-device-status',
@@ -34,7 +34,6 @@ import {DeviceStatusItemModel} from './shared/device-status-item.model';
     styleUrls: ['./device-status.component.css'],
 })
 export class DeviceStatusComponent implements OnInit, OnDestroy {
-
     configured = false;
     destroy = new Subscription();
     dataReady = false;
@@ -43,15 +42,16 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
-    @ViewChild(MatTable, {static: false}) table !: MatTable<any>;
+    @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
 
-    constructor(private iconRegistry: MatIconRegistry,
-                private sanitizer: DomSanitizer,
-                private deviceStatusDialogService: DeviceStatusDialogService,
-                private dashboardService: DashboardService,
-                private deploymentsService: DeploymentsService,
-                private exportDataService: ExportDataService) {
-    }
+    constructor(
+        private iconRegistry: MatIconRegistry,
+        private sanitizer: DomSanitizer,
+        private deviceStatusDialogService: DeviceStatusDialogService,
+        private dashboardService: DashboardService,
+        private deploymentsService: DeploymentsService,
+        private exportDataService: ExportDataService,
+    ) {}
 
     ngOnInit() {
         this.update();
@@ -77,11 +77,11 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                     const queries: LastValuesRequestElementModel[] = [];
                     elements.forEach((element: DeviceStatusElementModel) => {
                         if (element.exportId && element.exportValues) {
-                            queries.push({measurement: element.exportId, columnName: element.exportValues.Name});
+                            queries.push({ measurement: element.exportId, columnName: element.exportValues.Name });
                         }
                     });
 
-                    this.exportDataService.getLastValues(queries).subscribe(res => {
+                    this.exportDataService.getLastValues(queries).subscribe((res) => {
                         this.items = [];
                         res.forEach((pair: TimeValuePairModel, index: number) => {
                             let v = pair.value;
@@ -89,15 +89,19 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
                                 v = v as unknown as string;
                             }
                             const convert = this.convert(v);
-                            this.items.push({name: <string>elements[index].name, status: v, icon: convert.icon, color: convert.color, time: pair.time});
+                            this.items.push({
+                                name: elements[index].name as string,
+                                status: v,
+                                icon: convert.icon,
+                                color: convert.color,
+                                time: pair.time,
+                            });
                         });
                         this.dataReady = true;
                     });
                 } else {
                     this.dataReady = true;
                 }
-
-
             }
         });
     }
@@ -109,34 +113,32 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
         this.configured = true;
     }
 
-    private convert(status: string | number | boolean | null): { icon: string, color: string } {
+    private convert(status: string | number | boolean | null): { icon: string; color: string } {
         const convertRules: DeviceStatusConfigConvertRuleModel[] | undefined = this.widget.properties.convertRules;
         if (convertRules) {
             for (let i = 0; i < convertRules.length; i++) {
                 switch (typeof status) {
-                    case 'string': {
-                        if (status === convertRules[i].status) {
-                            return {icon: convertRules[i].icon, color: convertRules[i].color};
-                        }
-                        break;
+                case 'string': {
+                    if (status === convertRules[i].status) {
+                        return { icon: convertRules[i].icon, color: convertRules[i].color };
                     }
-                    case 'boolean': {
-                        if (status === JSON.parse(convertRules[i].status)) {
-                            return {icon: convertRules[i].icon, color: convertRules[i].color};
-                        }
-                        break;
-                    }
-                    case 'number': {
-                        if (status === parseInt(convertRules[i].status, 10)) {
-                            return {icon: convertRules[i].icon, color: convertRules[i].color};
-                        }
-                        break;
-                    }
+                    break;
                 }
-
+                case 'boolean': {
+                    if (status === JSON.parse(convertRules[i].status)) {
+                        return { icon: convertRules[i].icon, color: convertRules[i].color };
+                    }
+                    break;
+                }
+                case 'number': {
+                    if (status === parseInt(convertRules[i].status, 10)) {
+                        return { icon: convertRules[i].icon, color: convertRules[i].color };
+                    }
+                    break;
+                }
+                }
             }
         }
-        return {icon: '', color: ''};
+        return { icon: '', color: '' };
     }
-
 }

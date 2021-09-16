@@ -14,54 +14,58 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {FormBuilder, Validators} from '@angular/forms';
-import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {MatTable} from '@angular/material/table';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
-import {checkValueValidator} from './range-slider-edit-dialog.validators';
-
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { MatTable } from '@angular/material/table';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { CamundaVariable } from '../../../modules/processes/deployments/shared/deployments-definition.model';
+import { checkValueValidator } from './range-slider-edit-dialog.validators';
 
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
     styleUrls: ['./range-slider-edit-dialog.component.css'],
 })
 export class RangeSliderEditDialogComponent implements OnInit {
+    @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
 
-    @ViewChild(MatTable, {static: false}) table!: MatTable<DeploymentsModel>;
-
-    formGroup = this.formBuilder.group({
-        deployment: '',
-        parameter: '',
-        minValue: [{value: ''}, [Validators.required, Validators.min(0), Validators.max(100)]],
-        maxValue: [{value: ''}, [Validators.required, Validators.min(0), Validators.max(100)]],
-        unit: ''}, {validators: [checkValueValidator()]});
+    formGroup = this.formBuilder.group(
+        {
+            deployment: '',
+            parameter: '',
+            minValue: [{ value: '' }, [Validators.required, Validators.min(0), Validators.max(100)]],
+            maxValue: [{ value: '' }, [Validators.required, Validators.min(0), Validators.max(100)]],
+            unit: '',
+        },
+        { validators: [checkValueValidator()] },
+    );
 
     deployments: DeploymentsModel[] = [];
-    parametersMap: Map<string, CamundaVariable> =  new Map<string, CamundaVariable>();
+    parametersMap: Map<string, CamundaVariable> = new Map<string, CamundaVariable>();
     parameters: string[] = [];
 
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
 
-    constructor(private dialogRef: MatDialogRef<RangeSliderEditDialogComponent>,
-                private dashboardService: DashboardService,
-                private deploymentsService: DeploymentsService,
-                private formBuilder: FormBuilder,
-                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
+    constructor(
+        private dialogRef: MatDialogRef<RangeSliderEditDialogComponent>,
+        private dashboardService: DashboardService,
+        private deploymentsService: DeploymentsService,
+        private formBuilder: FormBuilder,
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+    ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
     }
 
     ngOnInit() {
         this.formGroup.get('deployment')?.valueChanges.subscribe((deployment: DeploymentsModel) => {
-            this.deploymentsService.getDeploymentInputParameters(deployment.id).subscribe(pars => {
+            this.deploymentsService.getDeploymentInputParameters(deployment.id).subscribe((pars) => {
                 if (pars !== null) {
                     this.parametersMap = pars;
                     this.parameters = [];
@@ -83,7 +87,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
                 parameter: this.widget.properties.selectedParameter,
                 minValue: this.widget.properties.selectedMinValue,
                 maxValue: this.widget.properties.selectedMaxValue,
-                unit: this.widget.properties.selectedUnit
+                unit: this.widget.properties.selectedUnit,
             });
         });
     }
@@ -115,5 +119,4 @@ export class RangeSliderEditDialogComponent implements OnInit {
     compareDeployments(first: DeploymentsModel, second: DeploymentsModel) {
         return first.id === second.id;
     }
-
 }

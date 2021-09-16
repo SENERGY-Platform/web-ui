@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import { Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     templateUrl: './device-types-new-device-class-dialog.component.html',
-    styleUrls: ['./device-types-new-device-class-dialog.component.css']
+    styleUrls: ['./device-types-new-device-class-dialog.component.css'],
 })
 export class DeviceTypesNewDeviceClassDialogComponent {
-
-    constructor(private dialogRef: MatDialogRef<DeviceTypesNewDeviceClassDialogComponent>) {
-    }
+    constructor(private dialogRef: MatDialogRef<DeviceTypesNewDeviceClassDialogComponent>) {}
 
     close(): void {
         this.dialogRef.close();
@@ -33,5 +31,4 @@ export class DeviceTypesNewDeviceClassDialogComponent {
     save(label: string): void {
         this.dialogRef.close(label);
     }
-
 }

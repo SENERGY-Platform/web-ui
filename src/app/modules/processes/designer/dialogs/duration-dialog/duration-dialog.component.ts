@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {DurationResult} from '../../shared/designer.model';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { DurationResult } from '../../shared/designer.model';
 
 @Component({
-  templateUrl: './duration-dialog.component.html',
-  styleUrls: ['./duration-dialog.component.css']
+    templateUrl: './duration-dialog.component.html',
+    styleUrls: ['./duration-dialog.component.css'],
 })
 export class DurationDialogComponent implements OnInit {
     initial: string;
-    result ?: DurationResult;
+    result?: DurationResult;
 
     constructor(
         private dialogRef: MatDialogRef<DurationDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: {initialDuration: string}
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { initialDuration: string },
     ) {
         this.initial = dialogParams.initialDuration || '';
     }

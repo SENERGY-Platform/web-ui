@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {ConceptsService} from '../../concepts/shared/concepts.service';
-import {ConceptsPermSearchModel} from '../../concepts/shared/concepts-perm-search.model';
-import {FunctionsPermSearchModel} from '../shared/functions-perm-search.model';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ConceptsService } from '../../concepts/shared/concepts.service';
+import { ConceptsPermSearchModel } from '../../concepts/shared/concepts-perm-search.model';
+import { FunctionsPermSearchModel } from '../shared/functions-perm-search.model';
 
 @Component({
     templateUrl: './functions-edit-dialog.component.html',
-    styleUrls: ['./functions-edit-dialog.component.css']
+    styleUrls: ['./functions-edit-dialog.component.css'],
 })
 export class FunctionsEditDialogComponent implements OnInit {
-
     functionFormGroup!: FormGroup;
 
     concepts: ConceptsPermSearchModel[] = [];
 
-    constructor(private conceptsService: ConceptsService,
-                private dialogRef: MatDialogRef<FunctionsEditDialogComponent>,
-                private _formBuilder: FormBuilder,
-                @Inject(MAT_DIALOG_DATA) data: { function: FunctionsPermSearchModel }) {
+    constructor(
+        private conceptsService: ConceptsService,
+        private dialogRef: MatDialogRef<FunctionsEditDialogComponent>,
+        private _formBuilder: FormBuilder,
+        @Inject(MAT_DIALOG_DATA) data: { function: FunctionsPermSearchModel },
+    ) {
         this.initFunctionFormGroup(data.function);
     }
 
@@ -58,11 +59,10 @@ export class FunctionsEditDialogComponent implements OnInit {
 
     private initFunctionFormGroup(func: FunctionsPermSearchModel): void {
         this.functionFormGroup = this._formBuilder.group({
-            id: [{value: func.id, disabled: true}],
+            id: [{ value: func.id, disabled: true }],
             name: [func.name, Validators.required],
             concept_id: func.concept_id,
             description: func.description,
         });
     }
-
 }

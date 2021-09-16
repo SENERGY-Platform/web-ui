@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
-import {DeviceInstancesModel} from '../shared/device-instances.model';
-import {DeviceInstancesService} from '../shared/device-instances.service';
-import {MatTable} from '@angular/material/table';
-import {FormControl} from '@angular/forms';
-import {debounceTime} from 'rxjs/internal/operators';
-import {Sort} from '@angular/material/sort';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
+import { DeviceInstancesModel } from '../shared/device-instances.model';
+import { DeviceInstancesService } from '../shared/device-instances.service';
+import { MatTable } from '@angular/material/table';
+import { FormControl } from '@angular/forms';
+import { debounceTime } from 'rxjs/internal/operators';
+import { Sort } from '@angular/material/sort';
 
 @Component({
     templateUrl: './device-instances-select-dialog.component.html',
     styleUrls: ['./device-instances-select-dialog.component.css'],
 })
 export class DeviceInstancesSelectDialogComponent implements OnInit {
-
-    @ViewChild(MatTable, {static: false}) table!: MatTable<DeviceInstancesModel>;
+    @ViewChild(MatTable, { static: false }) table!: MatTable<DeviceInstancesModel>;
 
     devices: DeviceInstancesModel[] = [];
     dataReady = false;
@@ -45,9 +43,8 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesSelectDialogComponent>,
-        private deviceInstancesService: DeviceInstancesService
-    ) {
-    }
+        private deviceInstancesService: DeviceInstancesService,
+    ) {}
 
     ngOnInit() {
         this.load();
@@ -61,13 +58,15 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
     }
 
     load() {
-        this.deviceInstancesService.getDeviceInstances(this.searchControl.value, this.limit, this.offset, this.sortBy, this.sortOrder).subscribe(devices => {
-            this.devices.push(...devices);
-            if (this.table !== undefined) {
-                this.table.renderRows();
-            }
-            this.dataReady = true;
-        });
+        this.deviceInstancesService
+            .getDeviceInstances(this.searchControl.value, this.limit, this.offset, this.sortBy, this.sortOrder)
+            .subscribe((devices) => {
+                this.devices.push(...devices);
+                if (this.table !== undefined) {
+                    this.table.renderRows();
+                }
+                this.dataReady = true;
+            });
     }
 
     reload() {
@@ -111,8 +110,6 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
             }
         }
         // remove duplicates
-        this.selectedDevices = this.selectedDevices.filter((item: string, index: number) => {
-            return this.selectedDevices.indexOf(item) === index;
-        });
+        this.selectedDevices = this.selectedDevices.filter((item: string, index: number) => this.selectedDevices.indexOf(item) === index);
     }
 }

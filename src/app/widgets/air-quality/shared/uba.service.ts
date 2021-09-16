@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {UBAComponent, UBAData, UBADataResponse, UBAMetaResponse, UBAStation, UBAStationResponse} from './uba.model';
-import {catchError, map} from 'rxjs/operators';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {HttpClient} from '@angular/common/http';
-import {environment} from '../../../../environments/environment';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { UBAComponent, UBAData, UBADataResponse, UBAMetaResponse, UBAStation, UBAStationResponse } from './uba.model';
+import { catchError, map } from 'rxjs/operators';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class UBAService {
-
-    constructor(private errorHandlerService: ErrorHandlerService,
-                private http: HttpClient) {
-    }
-
+    constructor(private errorHandlerService: ErrorHandlerService, private http: HttpClient) {}
 
     getUBAStations(): Observable<UBAStation[]> {
         const arr: UBAStation[] = [];
-        return new Observable<UBAStation[]>(obs => {
-            this.makeUBAStationsRequest().subscribe(response => {
+        return new Observable<UBAStation[]>((obs) => {
+            this.makeUBAStationsRequest().subscribe((response) => {
                 if (response.indices !== undefined && response.data !== undefined) {
                     const id = response.indices.indexOf('station id');
                     const code = response.indices.indexOf('station code');
@@ -55,9 +51,9 @@ export class UBAService {
                     const ssname = response.indices.indexOf('station setting name');
                     const sssname = response.indices.indexOf('station setting short name');
                     const stname = response.indices.indexOf('station type name');
-                    Object.keys(response.data).forEach(key => {
+                    Object.keys(response.data).forEach((key) => {
                         // @ts-ignore
-                        const sub = response.data ? <string[]>response.data[key] : <string[]>[];
+                        const sub = response.data ? response.data[key] as string[] : [];
 
                         const station: UBAStation = {
                             station_id: Number(sub[id]),
@@ -76,7 +72,7 @@ export class UBAService {
                             network_name: sub[nname],
                             station_setting_name: sub[ssname],
                             station_setting_short_name: sub[sssname],
-                            station_type_name: sub[stname]
+                            station_type_name: sub[stname],
                         };
                         arr.push(station);
                         return arr;
@@ -89,91 +85,114 @@ export class UBAService {
     }
 
     private makeUBAStationsRequest(): Observable<UBAStationResponse> {
-        return this.http.get<UBAStationResponse>(
-            environment.ubaUrl + '/air_data/v2/stations/json?date_from=' + this.getDateString()
-            + '&time_from=1&date_to=' + this.getDateString()
-            + '&lang=de&time_to=24')
-            .pipe(map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBAStationResponse))
+        return this.http
+            .get<UBAStationResponse>(
+                environment.ubaUrl +
+                    '/air_data/v2/stations/json?date_from=' +
+                    UBAService.getDateString() +
+                    '&time_from=1&date_to=' +
+                    UBAService.getDateString() +
+                    '&lang=de&time_to=24',
+            )
+            .pipe(
+                map((resp) => resp || []),
+                catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBAStationResponse)),
             );
     }
 
-
     getUBAComponents(): Observable<UBAComponent[]> {
-        return new Observable<UBAComponent[]>(obs => {
-            this.http.get<UBAMetaResponse>(
-                environment.ubaUrl + '/air_data/v2/meta/json?use=airquality&date_from=' + this.getDateString()
-                + '&time_from=1&date_to=' + this.getDateString()
-                + '&lang=de&time_to=24')
-                .pipe(map(resp => resp || []),
-                    catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBAMetaResponse))
-                ).subscribe(response => {
-                const arr: UBAComponent[] = [];
-                if (response.components !== undefined) {
-                    Object.keys(response.components).forEach(key => {
-                        // @ts-ignore
-                        const sub = response.components ? <string[]>response.components[key] : <string[]>[];
-                        const component: UBAComponent = {
-                            id: Number(sub[0]),
-                            short_name: sub[1],
-                            pretty_name: sub[2],
-                            unit: sub[3],
-                            friendly_name: sub[4]
-                        };
-                        arr.push(component);
-                        return arr;
-                    });
-                }
-                obs.next(arr);
-                obs.complete();
-            });
+        return new Observable<UBAComponent[]>((obs) => {
+            this.http
+                .get<UBAMetaResponse>(
+                    environment.ubaUrl +
+                        '/air_data/v2/meta/json?use=airquality&date_from=' +
+                        UBAService.getDateString() +
+                        '&time_from=1&date_to=' +
+                        UBAService.getDateString() +
+                        '&lang=de&time_to=24',
+                )
+                .pipe(
+                    map((resp) => resp || []),
+                    catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBAMetaResponse)),
+                )
+                .subscribe((response) => {
+                    const arr: UBAComponent[] = [];
+                    if (response.components !== undefined) {
+                        Object.keys(response.components).forEach((key) => {
+                            // @ts-ignore
+                            const sub = response.components ? response.components[key] as string[] : [];
+                            const component: UBAComponent = {
+                                id: Number(sub[0]),
+                                short_name: sub[1],
+                                pretty_name: sub[2],
+                                unit: sub[3],
+                                friendly_name: sub[4],
+                            };
+                            arr.push(component);
+                            return arr;
+                        });
+                    }
+                    obs.next(arr);
+                    obs.complete();
+                });
         });
     }
 
-    getUBAData(station_id: number, ubaComponents: UBAComponent[]): Observable<UBAData[]> {
+    getUBAData(stationId: number, ubaComponents: UBAComponent[]): Observable<UBAData[]> {
         const date = new Date();
-        return new Observable<UBAData[]>(obs => {
-            this.http.get<UBADataResponse>(
-                environment.ubaUrl + '/air_data/v2/airquality/json?date_from=' + this.getDateString() + '&date_to=' + this.getDateString()
-                + '&lang=de&time_to=' + date.getHours()
-                + '&time_from=' + (date.getHours() - 12 < 1 ? 1 : (date.getHours() - 12))
-                + '&station=' + station_id)
-                .pipe(map(resp => resp || []),
-                    catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBADataResponse))
-                ).subscribe(response => {
-                // @ts-ignore
-                const stationData = response.data[station_id];
-                const arr: UBAData[] = [];
-                if (stationData !== undefined) {
-                    const keys = Object.keys(stationData);
-                    const lastKey = keys[keys.length - 1];
-                    const currentData = stationData[lastKey];
-                    for (let i = 3; i < currentData.length; i++) {
-                        const componentData = currentData[i];
-                        const component = ubaComponents.find((comp: UBAComponent) => comp.id === componentData[0]);
-                        if (component !== undefined) {
-                            const data: UBAData = {
-                                short_name: component.short_name,
-                                value: componentData[1],
-                                unit: component.unit,
-                                timestamp: lastKey,
-                            };
-                            arr.push(data);
+        return new Observable<UBAData[]>((obs) => {
+            this.http
+                .get<UBADataResponse>(
+                    environment.ubaUrl +
+                        '/air_data/v2/airquality/json?date_from=' +
+                        UBAService.getDateString() +
+                        '&date_to=' +
+                        UBAService.getDateString() +
+                        '&lang=de&time_to=' +
+                        date.getHours() +
+                        '&time_from=' +
+                        (date.getHours() - 12 < 1 ? 1 : date.getHours() - 12) +
+                        '&station=' +
+                        stationId,
+                )
+                .pipe(
+                    map((resp) => resp || []),
+                    catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getData', {} as UBADataResponse)),
+                )
+                .subscribe((response) => {
+                    // @ts-ignore
+                    const stationData = response.data[stationId];
+                    const arr: UBAData[] = [];
+                    if (stationData !== undefined) {
+                        const keys = Object.keys(stationData);
+                        const lastKey = keys[keys.length - 1];
+                        const currentData = stationData[lastKey];
+                        for (let i = 3; i < currentData.length; i++) {
+                            const componentData = currentData[i];
+                            const component = ubaComponents.find((comp: UBAComponent) => comp.id === componentData[0]);
+                            if (component !== undefined) {
+                                const data: UBAData = {
+                                    short_name: component.short_name,
+                                    value: componentData[1],
+                                    unit: component.unit,
+                                    timestamp: lastKey,
+                                };
+                                arr.push(data);
+                            }
                         }
                     }
-                }
-                obs.next(arr);
-                obs.complete();
-            });
+                    obs.next(arr);
+                    obs.complete();
+                });
         });
     }
 
-    getUBAStationCapabilities(station_id: number): Observable<string[]> {
-        return new Observable<string[]>(obs => {
-            this.getUBAComponents().subscribe(components => {
-                this.getUBAData(station_id, components).subscribe(ubadata => {
+    getUBAStationCapabilities(stationId: number): Observable<string[]> {
+        return new Observable<string[]>((obs) => {
+            this.getUBAComponents().subscribe((components) => {
+                this.getUBAData(stationId, components).subscribe((ubadata) => {
                     const rv: string[] = [];
-                    ubadata.forEach(u => rv.push(u.short_name));
+                    ubadata.forEach((u) => rv.push(u.short_name));
                     obs.next(rv);
                     obs.complete();
                 });
@@ -181,12 +200,15 @@ export class UBAService {
         });
     }
 
-    private getDateString(): string {
+    private static getDateString(): string {
         const date = new Date();
         const month = date.getMonth() + 1; // Jan = 0
-        return date.getFullYear() + '-'
-            + (month < 10 ? ('0' + month) : month)
-            + '-' + (date.getDate() < 10 ? ('0' + date.getDate()) : date.getDate());
+        return (
+            date.getFullYear() +
+            '-' +
+            (month < 10 ? '0' + month : month) +
+            '-' +
+            (date.getDate() < 10 ? '0' + date.getDate() : date.getDate())
+        );
     }
 }
-

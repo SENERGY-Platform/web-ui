@@ -17,19 +17,19 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { NetworksService } from './networks.service';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 describe('NetworksService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, MatDialogModule, MatSnackBarModule],
-      providers: [NetworksService]
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule, MatDialogModule, MatSnackBarModule],
+            providers: [NetworksService],
+        });
     });
-  });
 
-  it('should be created', inject([NetworksService], (service: NetworksService) => {
-    expect(service).toBeTruthy();
-  }));
+    it('should be created', inject([NetworksService], (service: NetworksService) => {
+        expect(service).toBeTruthy();
+    }));
 });

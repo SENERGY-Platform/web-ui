@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {environment} from '../../../../environments/environment';
-import {catchError, map} from 'rxjs/internal/operators';
-import {Observable} from 'rxjs';
-import {
-    ExportModel,
-    ExportResponseModel,
-    ExportValueBaseModel,
-    ExportValueCharacteristicModel,
-    ExportValueModel
-} from './export.model';
-import {
-    DeviceTypeContentVariableModel,
-    DeviceTypeServiceModel
-} from '../../metadata/device-types-overview/shared/device-type.model';
-import {DeviceInstancesModel} from '../../devices/device-instances/shared/device-instances.model';
-import {DeviceInstancesUpdateModel} from '../../devices/device-instances/shared/device-instances-update.model';
-import {PathOption} from "../../data/flow-repo/shared/path-options.service";
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { environment } from '../../../../environments/environment';
+import { catchError, map } from 'rxjs/internal/operators';
+import { Observable } from 'rxjs';
+import { ExportModel, ExportResponseModel, ExportValueBaseModel, ExportValueCharacteristicModel, ExportValueModel } from './export.model';
+import { DeviceTypeContentVariableModel, DeviceTypeServiceModel } from '../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceInstancesModel } from '../../devices/device-instances/shared/device-instances.model';
+import { DeviceInstancesUpdateModel } from '../../devices/device-instances/shared/device-instances-update.model';
+import { PathOption } from '../../data/flow-repo/shared/path-options.service';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
-
 export class ExportService {
-
     typeString = 'https://schema.org/Text';
     typeInteger = 'https://schema.org/Integer';
     typeFloat = 'https://schema.org/Float';
@@ -48,74 +37,84 @@ export class ExportService {
     typeStructure = 'https://schema.org/StructuredValue';
     typeList = 'https://schema.org/ItemList';
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
-    }
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
-    getExports(search?: string, limit?: number, offset?: number, sort?: string, order?: string, generated?: boolean, searchField?: string):
-        Observable<ExportResponseModel | null> {
-        if (searchField === undefined || searchField === null){
+    getExports(
+        search?: string,
+        limit?: number,
+        offset?: number,
+        sort?: string,
+        order?: string,
+        generated?: boolean,
+        searchField?: string,
+    ): Observable<ExportResponseModel | null> {
+        if (searchField === undefined || searchField === null) {
             searchField = 'name';
         }
-        return this.http.get<ExportResponseModel>
-        (environment.exportService + '/instance?limit=' + limit + '&offset=' + offset + '&order=' + sort +
-            ':' + order + (search ? ('&search=' + searchField + ':' + search) : '') +
-            (generated !== undefined ? ('&generated=' + generated.valueOf()) : ''))
+        return this.http
+            .get<ExportResponseModel>(
+                environment.exportService +
+                    '/instance?limit=' +
+                    limit +
+                    '&offset=' +
+                    offset +
+                    '&order=' +
+                    sort +
+                    ':' +
+                    order +
+                    (search ? '&search=' + searchField + ':' + search : '') +
+                    (generated !== undefined ? '&generated=' + generated.valueOf() : ''),
+            )
             .pipe(
                 map((resp: ExportResponseModel) => resp || []),
-                catchError(this.errorHandlerService.handleError(ExportService.name, 'getExports: Error', null)
-                )
-        );
-
+                catchError(this.errorHandlerService.handleError(ExportService.name, 'getExports: Error', null)),
+            );
     }
 
     getExport(id: string): Observable<ExportModel | null> {
-        return this.http.get<ExportModel>
-        (environment.exportService + '/instance/' + id).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(ExportService.name, 'getExport: Error', null))
+        return this.http.get<ExportModel>(environment.exportService + '/instance/' + id).pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'getExport: Error', null)),
         );
-
     }
 
     startPipeline(exp: ExportModel): Observable<ExportModel> {
-        return this.http.post<ExportModel>(environment.exportService + '/instance', exp).pipe(
-            catchError(this.errorHandlerService.handleError(ExportService.name, 'startPipeline: Error', {} as ExportModel))
+        return this.http
+            .post<ExportModel>(environment.exportService + '/instance', exp)
+            .pipe(catchError(this.errorHandlerService.handleError(ExportService.name, 'startPipeline: Error', {} as ExportModel)));
+    }
+
+    editExport(id: string, exp: ExportModel): Observable<{ status: number }> {
+        return this.http.put(environment.exportService + '/instance/' + id, exp, { responseType: 'text', observe: 'response' }).pipe(
+            map((resp) => ({ status: resp.status })),
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'editExport: Error', { status: 400 })),
         );
     }
 
-    editExport(id: string, exp: ExportModel): Observable<{status: number}> {
-        return this.http.put(environment.exportService + '/instance/' + id, exp, {responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(ExportService.name, 'editExport: Error', {status: 400}))
-        );
-    }
-
-    stopPipeline(exp: ExportModel): Observable<{status: number}> {
+    stopPipeline(exp: ExportModel): Observable<{ status: number }> {
         return this.stopPipelineById(exp.ID || '');
     }
 
-    stopPipelineById(id: string): Observable<{status: number}> {
-        return this.http.delete(environment.exportService + '/instance/' + id, {responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipelineById: Error', {status: 404}))
+    stopPipelineById(id: string): Observable<{ status: number }> {
+        return this.http.delete(environment.exportService + '/instance/' + id, { responseType: 'text', observe: 'response' }).pipe(
+            map((resp) => ({ status: resp.status })),
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipelineById: Error', { status: 404 })),
         );
     }
 
-    stopPipelines(exp: String[]): Observable<{status: number}> {
-        return this.http.request('DELETE', environment.exportService + '/instances', {body: exp, responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipelines: Error', {status: 404}))
-        );
+    stopPipelines(exp: string[]): Observable<{ status: number }> {
+        return this.http
+            .request('DELETE', environment.exportService + '/instances', { body: exp, responseType: 'text', observe: 'response' })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(ExportService.name, 'stopPipelines: Error', { status: 404 })),
+            );
     }
 
-    prepareDeviceServiceExport(deviceInstancesModel: DeviceInstancesModel | DeviceInstancesUpdateModel,
-                               service: DeviceTypeServiceModel): ExportModel[] {
+    prepareDeviceServiceExport(
+        deviceInstancesModel: DeviceInstancesModel | DeviceInstancesUpdateModel,
+        service: DeviceTypeServiceModel,
+    ): ExportModel[] {
         const exports: ExportModel[] = [];
         service.outputs.forEach((output, index) => {
             const traverse = this.addCharacteristicToDeviceTypeContentVariable(output.content_variable);
@@ -124,26 +123,25 @@ export class ExportService {
 
             const exportValues: ExportValueModel[] = [];
 
-            traverse.forEach(trav => {
+            traverse.forEach((trav) => {
                 if (trav.Path !== timePath.path) {
                     let type = '';
                     switch (trav.Type) {
-                        case this.typeString:
-                            type = 'string';
-                            break;
-                        case this.typeFloat:
-                            type = 'float';
-                            break;
-                        case this.typeInteger:
-                            type = 'int';
-                            break;
-                        case this.typeBoolean:
-                            type = 'bool';
-                            break;
-                        case this.typeList:
-                            type = 'string_json';
-                            break;
-
+                    case this.typeString:
+                        type = 'string';
+                        break;
+                    case this.typeFloat:
+                        type = 'float';
+                        break;
+                    case this.typeInteger:
+                        type = 'int';
+                        break;
+                    case this.typeBoolean:
+                        type = 'bool';
+                        break;
+                    case this.typeList:
+                        type = 'string_json';
+                        break;
                     }
                     exportValues.push({
                         Name: hasAmbiguousNames ? trav.Path : trav.Name,
@@ -164,7 +162,7 @@ export class ExportService {
                 ServiceName: service.name,
                 Topic: service.id.replace(/#/g, '_').replace(/:/g, '_'),
                 Offset: 'largest',
-                Generated: true
+                Generated: true,
             } as ExportModel);
         });
         return exports;
@@ -174,9 +172,11 @@ export class ExportService {
         return this.addCharacteristicToDeviceTypeContentVariableRecursion('value', field, []);
     }
 
-    private addCharacteristicToDeviceTypeContentVariableRecursion(pathString: string,
-                                          field: DeviceTypeContentVariableModel,
-                                          array: ExportValueCharacteristicModel[]): ExportValueCharacteristicModel[] {
+    private addCharacteristicToDeviceTypeContentVariableRecursion(
+        pathString: string,
+        field: DeviceTypeContentVariableModel,
+        array: ExportValueCharacteristicModel[],
+    ): ExportValueCharacteristicModel[] {
         if (field.type === this.typeStructure && field.type !== undefined && field.type !== null) {
             pathString += '.' + field.name;
             if (field.sub_content_variables !== undefined) {
@@ -196,7 +196,7 @@ export class ExportService {
     }
 
     hasAmbiguousNames(values: ExportValueBaseModel[]): boolean {
-        const nameMap = new Map<String, null>();
+        const nameMap = new Map<string, null>();
         for (const value of values) {
             if (nameMap.has(value.Name)) {
                 return true;
@@ -206,12 +206,14 @@ export class ExportService {
         return false;
     }
 
-    getTimePath(traverse: ExportValueCharacteristicModel[]): {path: string, precision: string | undefined} {
+    getTimePath(traverse: ExportValueCharacteristicModel[]): { path: string; precision: string | undefined } {
         let path = '';
         let precision: string | undefined;
         traverse.forEach((t: ExportValueCharacteristicModel) => {
-            if (t.characteristicId === environment.timeStampCharacteristicId
-            || t.characteristicId === environment.timeStampCharacteristicUnixNanoSecondsId) {
+            if (
+                t.characteristicId === environment.timeStampCharacteristicId ||
+                t.characteristicId === environment.timeStampCharacteristicUnixNanoSecondsId
+            ) {
                 path = t.Path;
                 precision = undefined; // No precision for iso string or nanos
             } else if (t.characteristicId === environment.timeStampCharacteristicUnixSecondsId) {
@@ -222,16 +224,18 @@ export class ExportService {
                 precision = 'ms';
             }
         });
-        return {path, precision};
+        return { path, precision };
     }
 
     getExportTags(exportId: string): Observable<Map<string, string[]>> {
-       return this.http.get<any>(environment.influxAPIURL + '/v2/tags/' + exportId).pipe(map(res => {
-           const m = new Map<string, string[]>();
-           for (const key of Object.keys(res)) {
-               m.set(key, res[key]);
-           }
-           return m;
-       }));
+        return this.http.get<any>(environment.influxAPIURL + '/v2/tags/' + exportId).pipe(
+            map((res) => {
+                const m = new Map<string, string[]>();
+                for (const key of Object.keys(res)) {
+                    m.set(key, res[key]);
+                }
+                return m;
+            }),
+        );
     }
 }

@@ -14,35 +14,34 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
-import {PipelineModel} from './shared/pipeline.model';
-import {PipelineRegistryService} from './shared/pipeline-registry.service';
-import {FlowEngineService} from '../flow-repo/shared/flow-engine.service';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {MatTable} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { PipelineModel } from './shared/pipeline.model';
+import { PipelineRegistryService } from './shared/pipeline-registry.service';
+import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { MatTable } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     selector: 'senergy-pipeline-registry',
     templateUrl: './pipeline-registry.component.html',
-    styleUrls: ['./pipeline-registry.component.css']
+    styleUrls: ['./pipeline-registry.component.css'],
 })
-
 export class PipelineRegistryComponent implements OnInit, AfterViewInit {
-
-    pipes = [] as PipelineModel [];
+    pipes = [] as PipelineModel[];
     ready = false;
-    displayedColumns: string[] = ['id', 'name', 'createdat', 'updatedat', 'info',  'edit', 'delete'];
+    displayedColumns: string[] = ['id', 'name', 'createdat', 'updatedat', 'info', 'edit', 'delete'];
 
-    @ViewChild(MatTable, {static: false}) table!: MatTable<PipelineModel>;
-    @ViewChild(MatSort, {static: false}) sort!: MatSort;
+    @ViewChild(MatTable, { static: false }) table!: MatTable<PipelineModel>;
+    @ViewChild(MatSort, { static: false }) sort!: MatSort;
 
-    constructor(private pipelineRegistryService: PipelineRegistryService,
-                private flowEngineService: FlowEngineService,
-                public snackBar: MatSnackBar,
-                private dialogsService: DialogsService) {
-    }
+    constructor(
+        private pipelineRegistryService: PipelineRegistryService,
+        private flowEngineService: FlowEngineService,
+        public snackBar: MatSnackBar,
+        private dialogsService: DialogsService,
+    ) {}
 
     ngOnInit() {
         this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
@@ -62,25 +61,27 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     }
 
     deletePipeline(pipe: PipelineModel) {
-        this.dialogsService.openDeleteDialog('pipeline').afterClosed().subscribe((deletePipeline: boolean) => {
-            if (deletePipeline) {
-                this.ready = false;
-                this.flowEngineService.deletePipeline(pipe.id).subscribe();
-                const index = this.pipes.indexOf(pipe);
-                if (index > -1) {
-                    this.pipes.splice(index, 1);
+        this.dialogsService
+            .openDeleteDialog('pipeline')
+            .afterClosed()
+            .subscribe((deletePipeline: boolean) => {
+                if (deletePipeline) {
+                    this.ready = false;
+                    this.flowEngineService.deletePipeline(pipe.id).subscribe();
+                    const index = this.pipes.indexOf(pipe);
+                    if (index > -1) {
+                        this.pipes.splice(index, 1);
+                    }
+                    this.table.renderRows();
+                    this.ready = true;
+                    this.snackBar.open('Pipeline deleted', undefined, {
+                        duration: 2000,
+                    });
                 }
-                this.table.renderRows();
-                this.ready = true;
-                this.snackBar.open('Pipeline deleted', undefined, {
-                    duration: 2000,
-                });
-            }
-        });
-
+            });
     }
 
     isEditable(pipe: PipelineModel): boolean {
-        return pipe.operators.findIndex(op => op.inputSelections !== undefined && op.inputSelections.length > 0) !== -1;
+        return pipe.operators.findIndex((op) => op.inputSelections !== undefined && op.inputSelections.length > 0) !== -1;
     }
 }

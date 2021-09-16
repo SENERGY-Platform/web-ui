@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {MonitorProcessModel} from './monitor-process.model';
+import { MonitorProcessModel } from './monitor-process.model';
 
 export interface MonitorProcessTotalModel {
     data: MonitorProcessModel[];

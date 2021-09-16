@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AbstractControl, FormGroup, ValidatorFn} from '@angular/forms';
+import { AbstractControl, FormGroup, ValidatorFn } from '@angular/forms';
 
 export function checkValueValidator(): ValidatorFn {
-    return (control: AbstractControl): {[key: string]: any} | null => {
-        const { minValue, maxValue} = (control as FormGroup).controls;
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        const { minValue, maxValue } = (control as FormGroup).controls;
         if (minValue.value >= maxValue.value) {
-            return { 'checkValueValidator': true };
+            return { checkValueValidator: true };
         }
         return null;
     };

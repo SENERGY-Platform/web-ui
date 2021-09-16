@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {environment} from '../../../../../environments/environment';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/internal/operators';
-import {ImportInstancesModel} from './import-instances.model';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/internal/operators';
+import { ImportInstancesModel } from './import-instances.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ImportInstancesService {
+    constructor(private http: HttpClient) {}
 
-    constructor(private http: HttpClient) {
-    }
-
-    listImportInstances(search: string, limit: number | undefined, offset: number | undefined, sort: string,
-                        excludeGenerated: boolean = false):
-        Observable<ImportInstancesModel[]> {
-
+    listImportInstances(
+        search: string,
+        limit: number | undefined,
+        offset: number | undefined,
+        sort: string,
+        excludeGenerated: boolean = false,
+    ): Observable<ImportInstancesModel[]> {
         let url = environment.importDeployUrl + '/instances?';
         if (search.length > 0) {
             url += '&search=' + search;
@@ -48,8 +49,7 @@ export class ImportInstancesService {
         if (excludeGenerated) {
             url += '&exclude_generated=true';
         }
-        return this.http.get<ImportInstancesModel[]>(url)
-            .pipe(map(types => types || []));
+        return this.http.get<ImportInstancesModel[]>(url).pipe(map((types) => types || []));
     }
 
     deleteImportInstance(id: string): Observable<void> {

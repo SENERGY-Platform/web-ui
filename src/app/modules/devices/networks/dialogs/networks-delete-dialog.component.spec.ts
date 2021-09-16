@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {NetworksDeleteDialogComponent} from './networks-delete-dialog.component';
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {MatTableModule} from '@angular/material/table';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
-import {DeviceInstancesService} from '../../device-instances/shared/device-instances.service';
-import {NetworksService} from '../shared/networks.service';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { NetworksDeleteDialogComponent } from './networks-delete-dialog.component';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
+import { NetworksService } from '../shared/networks.service';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 const deviceInstancesServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass(DeviceInstancesService);
 const networksServiceSpy: Spy<NetworksService> = createSpyFromClass(NetworksService);
@@ -36,22 +36,17 @@ describe('NetworksDeleteDialogComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [NetworksDeleteDialogComponent],
-            imports: [
-                MatDialogModule,
-                MatTableModule,
-                MatTooltipModule,
-                MatCheckboxModule,
-                MatSnackBarModule,
-            ],
+            imports: [MatDialogModule, MatTableModule, MatTooltipModule, MatCheckboxModule, MatSnackBarModule],
             providers: [
                 {
-                    provide: MAT_DIALOG_DATA, useValue: {networkId: 'id', devices: []},
+                    provide: MAT_DIALOG_DATA,
+                    useValue: { networkId: 'id', devices: [] },
                 },
                 {
                     provide: MatDialogRef,
                     useValue: {
-                        close: (_: any) => null
-                    }
+                        close: (_: any) => null,
+                    },
                 },
                 {
                     provide: DeviceInstancesService,
@@ -61,9 +56,8 @@ describe('NetworksDeleteDialogComponent', () => {
                     provide: NetworksService,
                     useValue: networksServiceSpy,
                 },
-            ]
-        })
-            .compileComponents();
+            ],
+        }).compileComponents();
     });
 
     beforeEach(() => {

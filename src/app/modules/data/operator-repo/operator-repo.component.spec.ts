@@ -15,39 +15,48 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import {OperatorRepoComponent} from './operator-repo.component';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {OperatorRepoService} from './shared/operator-repo.service';
-import {AuthorizationService} from '../../../core/services/authorization.service';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {MatDialogModule} from '@angular/material/dialog';
-import {AuthorizationServiceMock} from '../../../core/services/authorization.service.mock';
-import {CoreModule} from '../../../core/core.module';
-import {MatIconModule} from '@angular/material/icon';
-import {MatSortModule} from '@angular/material/sort';
-import {MatPaginatorModule} from '@angular/material/paginator';
+import { OperatorRepoComponent } from './operator-repo.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { OperatorRepoService } from './shared/operator-repo.service';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { MatDialogModule } from '@angular/material/dialog';
+import { AuthorizationServiceMock } from '../../../core/services/authorization.service.mock';
+import { CoreModule } from '../../../core/core.module';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
-class MockOperatorRepoService {
-}
+class MockOperatorRepoService {}
 
 describe('OperatorRepoComponent', () => {
-  let fixture: ComponentFixture<OperatorRepoComponent>;
+    let fixture: ComponentFixture<OperatorRepoComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, MatIconModule, MatSortModule, MatPaginatorModule],
-      declarations: [ OperatorRepoComponent ],
-      providers: [
-        { provide: OperatorRepoService, useClass: MockOperatorRepoService },
-        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-          DialogsService
-      ]
+    beforeEach(
+        waitForAsync(() => {
+            TestBed.configureTestingModule({
+                imports: [
+                    HttpClientTestingModule,
+                    MatSnackBarModule,
+                    MatDialogModule,
+                    CoreModule,
+                    MatIconModule,
+                    MatSortModule,
+                    MatPaginatorModule,
+                ],
+                declarations: [OperatorRepoComponent],
+                providers: [
+                    { provide: OperatorRepoService, useClass: MockOperatorRepoService },
+                    { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                    DialogsService,
+                ],
+            });
+            fixture = TestBed.createComponent(OperatorRepoComponent);
+        }),
+    );
+
+    it('should create', () => {
+        expect(fixture).toBeTruthy();
     });
-    fixture = TestBed.createComponent(OperatorRepoComponent);
-  }));
-
-  it('should create', () => {
-    expect(fixture).toBeTruthy();
-  });
 });

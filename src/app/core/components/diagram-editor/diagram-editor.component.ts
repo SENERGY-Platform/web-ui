@@ -23,16 +23,15 @@ import uuid = util.uuid;
 @Component({
     selector: 'senergy-diagram-editor',
     templateUrl: './diagram-editor.component.html',
-    styleUrls: ['./diagram-editor.component.css']
+    styleUrls: ['./diagram-editor.component.css'],
 })
-
 export class DiagramEditorComponent implements AfterViewInit {
-
     private graph: any;
 
     idGenerated = uuid();
 
-    NodeElement: any = dia.Element.define('senergy.NodeElement',
+    NodeElement: any = dia.Element.define(
+        'senergy.NodeElement',
         {
             inPorts: [],
             outPorts: [],
@@ -41,18 +40,18 @@ export class DiagramEditorComponent implements AfterViewInit {
             operatorId: '',
             size: {
                 width: 150,
-                height: 100
+                height: 100,
             },
             attrs: {
                 '.': {
-                    magnet: false
+                    magnet: false,
                 },
                 header: {
                     refWidth: '100%',
                     refHeight: '20%',
                     strokeWidth: 2,
                     stroke: 'black',
-                    fill: 'white'
+                    fill: 'white',
                 },
                 body: {
                     refY: '20%',
@@ -60,7 +59,7 @@ export class DiagramEditorComponent implements AfterViewInit {
                     refHeight: '80%',
                     strokeWidth: 2,
                     stroke: 'black',
-                    fill: 'white'
+                    fill: 'white',
                 },
                 headerlabel: {
                     textVerticalAnchor: 'middle',
@@ -68,7 +67,7 @@ export class DiagramEditorComponent implements AfterViewInit {
                     refX: '50%',
                     refY: '10%',
                     fontSize: 10,
-                    fill: 'black'
+                    fill: 'black',
                 },
                 label: {
                     textVerticalAnchor: 'middle',
@@ -76,7 +75,7 @@ export class DiagramEditorComponent implements AfterViewInit {
                     refX: '50%',
                     refY: '50%',
                     fontSize: 14,
-                    fill: 'black'
+                    fill: 'black',
                 },
                 button: {
                     cursor: 'pointer',
@@ -84,105 +83,116 @@ export class DiagramEditorComponent implements AfterViewInit {
                     refWidth: '150%',
                     refHeight: '150%',
                     refX: '-25%',
-                    refY: '-25%'
+                    refY: '-25%',
                 },
                 buttonLabel: {
                     pointerEvents: 'none',
                     refX: '100%',
                     refY: 0,
                     textAnchor: 'middle',
-                    textVerticalAnchor: 'middle'
-                }
+                    textVerticalAnchor: 'middle',
+                },
             },
             ports: {
                 groups: {
-                    'in': {
+                    in: {
                         position: {
-                            name: 'left'
+                            name: 'left',
                         },
                         attrs: {
                             portLabel: {
-                                fill: '#000'
+                                fill: '#000',
                             },
                             portBody: {
                                 fill: '#fff',
                                 stroke: '#000',
                                 r: 10,
-                                magnet: true
-                            }
+                                magnet: true,
+                            },
                         },
                         label: {
                             position: {
                                 name: 'left',
                                 args: {
-                                    y: 10
-                                }
-                            }
-                        }
+                                    y: 10,
+                                },
+                            },
+                        },
                     },
-                    'out': {
+                    out: {
                         position: {
-                            name: 'right'
+                            name: 'right',
                         },
                         attrs: {
                             portLabel: {
-                                fill: '#000'
+                                fill: '#000',
                             },
                             portBody: {
                                 fill: '#fff',
                                 stroke: '#000',
                                 r: 10,
-                                magnet: true
-                            }
+                                magnet: true,
+                            },
                         },
                         label: {
                             position: {
                                 name: 'right',
                                 args: {
-                                    y: 10
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }, {
+                                    y: 10,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        {
             markup: [
                 {
                     tagName: 'rect',
                     selector: 'header',
-                }, {
+                },
+                {
                     tagName: 'rect',
                     selector: 'body',
-                }, {
+                },
+                {
                     tagName: 'text',
-                    selector: 'headerlabel'
-                }, {
+                    selector: 'headerlabel',
+                },
+                {
                     tagName: 'text',
-                    selector: 'label'
-                }, {
+                    selector: 'label',
+                },
+                {
                     tagName: 'rect',
-                    selector: 'button'
-                }, {
+                    selector: 'button',
+                },
+                {
                     tagName: 'text',
-                    selector: 'buttonLabel'
-                }],
-            portMarkup: [{
-                tagName: 'circle',
-                selector: 'portBody',
-            }],
-            portLabelMarkup: [{
-                tagName: 'text',
-                selector: 'portLabel',
-            }],
+                    selector: 'buttonLabel',
+                },
+            ],
+            portMarkup: [
+                {
+                    tagName: 'circle',
+                    selector: 'portBody',
+                },
+            ],
+            portLabelMarkup: [
+                {
+                    tagName: 'text',
+                    selector: 'portLabel',
+                },
+            ],
 
-            initialize: function () {
-                shapes.basic.Generic.prototype.initialize.apply(this, <any>arguments);
+            initialize() {
+                shapes.basic.Generic.prototype.initialize.apply(this, arguments as any);
                 this.updatePortItems();
             },
 
             // model,changed
-            updatePortItems: function () {
+            updatePortItems() {
                 // Make sure all ports are unique.
                 const inPorts = util.uniq(this.get('inPorts'));
                 const outPorts = util.uniq(this.get('outPorts'));
@@ -193,24 +203,20 @@ export class DiagramEditorComponent implements AfterViewInit {
                 this.prop('ports/items', inPortItems.concat(outPortItems));
             },
 
-            createPortItem: function (group: any, port: any) {
-
-                return {
-                    id: group + '-' + port,
-                    group: group,
-                    attrs: {
-                        portLabel: {
-                            text: port
-                        }
+            createPortItem: (group: any, port: any) => ({
+                id: group + '-' + port,
+                group,
+                attrs: {
+                    portLabel: {
+                        text: port
                     }
-                };
-            },
+                }
+            }),
 
-            createPortItems: function (group: any, ports: any) {
-
+            createPortItems(group: any, ports: any) {
                 return util.toArray(ports).map(this.createPortItem.bind(this, group));
-            }
-        }
+            },
+        },
     );
 
     paperWidth = 500;
@@ -237,25 +243,27 @@ export class DiagramEditorComponent implements AfterViewInit {
     setPaperWidth() {
         const paperWrap = document.getElementById('paper-wrap');
         if (paperWrap !== null) {
-
             this.paperWidth = paperWrap.offsetWidth;
         }
     }
 
     reinitializePaper() {
         const {standard, devs} = shapes;
-        this.graph = new dia.Graph({}, {
-            cellNamespace: {
-                standard,
-                devs,
-                senergy: {NodeElement: this.NodeElement}
-            }
-        });
+        this.graph = new dia.Graph(
+            {},
+            {
+                cellNamespace: {
+                    standard,
+                    devs,
+                    senergy: {NodeElement: this.NodeElement},
+                },
+            },
+        );
         this.paper = new dia.Paper({
             el: $('#' + this.idGenerated),
             model: this.graph,
             defaultLink: new dia.Link({
-                attrs: {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}}
+                attrs: {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}},
             }),
             width: this.paperWidth,
             height: 700,
@@ -264,7 +272,7 @@ export class DiagramEditorComponent implements AfterViewInit {
             snapLinks: true,
             drawGrid: {name: 'mesh'},
             embeddingMode: false,
-            validateConnection: function (sourceView, sourceMagnet, targetView, targetMagnet) {
+            validateConnection(sourceView, sourceMagnet, targetView, targetMagnet) {
                 // Prevent linking from input ports.
                 if (sourceMagnet && sourceMagnet.getAttribute('port-group') === 'in') {
                     return false;
@@ -274,7 +282,7 @@ export class DiagramEditorComponent implements AfterViewInit {
                 }
                 return targetMagnet && targetMagnet.getAttribute('port-group') === 'in';
             },
-            markAvailable: true
+            markAvailable: true,
         });
     }
 
@@ -292,7 +300,7 @@ export class DiagramEditorComponent implements AfterViewInit {
         node.attr({
             body: {
                 fill: '#4484ce',
-            }
+            },
         });
         this.graph.addCells([node]);
         this.graph.maxZIndex();
@@ -305,7 +313,7 @@ export class DiagramEditorComponent implements AfterViewInit {
         node.attr({
             body: {
                 fill: '#ddd',
-            }
+            },
         });
         this.graph.addCells([node]);
         this.graph.maxZIndex();
@@ -332,41 +340,39 @@ export class DiagramEditorComponent implements AfterViewInit {
         }
         const node = new this.NodeElement({
             type: 'senergy.NodeElement',
-            inPorts: inPorts,
-            outPorts: outPorts,
-            name: name,
-            image: image,
-            config: config,
-            operatorId: operatorId
+            inPorts,
+            outPorts,
+            name,
+            image,
+            config,
+            operatorId,
         });
         node.position(150, 50);
         node.attr({
             label: {
                 visibility: 'visible',
-                text: name
+                text: name,
             },
             headerlabel: {
-                text: operatorId
+                text: operatorId,
             },
             body: {
                 cursor: 'default',
-                visibility: 'visible'
+                visibility: 'visible',
             },
             button: {
                 event: 'element:button:pointerdown',
                 fill: 'orange',
                 stroke: 'black',
-                strokeWidth: 2
+                strokeWidth: 2,
             },
             buttonLabel: {
                 text: 'X', // fullwidth underscore
                 fill: 'black',
                 fontSize: 8,
-                fontWeight: 'bold'
-            }
+                fontWeight: 'bold',
+            },
         });
         return node;
     }
-
-
 }

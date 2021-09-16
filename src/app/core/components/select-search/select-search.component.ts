@@ -25,19 +25,19 @@ import {
     Optional,
     Output,
     Self,
-    ViewChild
+    ViewChild,
 } from '@angular/core';
-import {MatSelect, MatSelectChange} from '@angular/material/select';
-import {MatFormFieldControl} from '@angular/material/form-field';
-import {Observable, Subject} from 'rxjs';
-import {ControlValueAccessor, FormControl, FormControlName, NgControl} from '@angular/forms';
-import {coerceBooleanProperty} from '@angular/cdk/coercion';
-import {ErrorStateMatcher, MatOption} from '@angular/material/core';
-import {MatInput} from '@angular/material/input';
+import { MatSelect, MatSelectChange } from '@angular/material/select';
+import { MatFormFieldControl } from '@angular/material/form-field';
+import { Observable, Subject } from 'rxjs';
+import { ControlValueAccessor, FormControl, FormControlName, NgControl } from '@angular/forms';
+import { coerceBooleanProperty } from '@angular/cdk/coercion';
+import { ErrorStateMatcher, MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
 
-export function useProperty(property: string): ((option: any) => any) {
+export function useProperty(property: string): (option: any) => any {
     const properties = property.split('.');
-    return option => {
+    return (option) => {
         let obj = option;
         for (property of properties) {
             if (Object.keys(obj).indexOf(property) === -1) {
@@ -53,10 +53,9 @@ export function useProperty(property: string): ((option: any) => any) {
     selector: 'senergy-select-search',
     templateUrl: './select-search.component.html',
     styleUrls: ['./select-search.component.css'],
-    providers: [{provide: MatFormFieldControl, useExisting: SelectSearchComponent}],
+    providers: [{ provide: MatFormFieldControl, useExisting: SelectSearchComponent }],
 })
 export class SelectSearchComponent implements MatFormFieldControl<any>, ControlValueAccessor, OnDestroy, AfterViewInit, OnInit {
-
     constructor(@Optional() @Self() public ngControl: NgControl) {
         if (this.ngControl != null) {
             this.ngControl.valueAccessor = this;
@@ -119,7 +118,6 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     set customTrigger(dis) {
         this.select.customTrigger = dis;
-
     }
 
     get optionGroups() {
@@ -140,7 +138,6 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     set overlayDir(dis) {
         this.select.overlayDir = dis;
-
     }
 
     get panel() {
@@ -164,7 +161,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         this.withGroups = !Array.isArray(this.options);
         if (!Array.isArray(this.options)) {
             this.optionsGroups = this.getOptionsGroup('');
-            this.searchControl.valueChanges.subscribe((val: string) => this.optionsGroups = this.getOptionsGroup(val));
+            this.searchControl.valueChanges.subscribe((val: string) => (this.optionsGroups = this.getOptionsGroup(val)));
         }
         this.resetSearchIfNoResults();
         this.selectSingleElement();
@@ -204,7 +201,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     _autoSelectSingleElement = false;
 
-    @ViewChild(MatSelect, {static: false}) select!: MatSelect;
+    @ViewChild(MatSelect, { static: false }) select!: MatSelect;
 
     _options: any[] | Map<string, any[]> = [];
 
@@ -228,7 +225,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() disableRipple: boolean = this.select?.disableRipple;
     @Input() errorStateMatcher: ErrorStateMatcher = this.select?.errorStateMatcher;
     @Input()
-    panelClass: string | string[] | Set<string> | { [key: string]: any; } = this.select?.panelClass;
+    panelClass: string | string[] | Set<string> | { [key: string]: any } = this.select?.panelClass;
     @Input()
     placeholder: string = this.select?.placeholder;
     @Input()
@@ -250,7 +247,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     optionsGroups: Map<string, any> = new Map();
 
-    @ViewChild('searchInput', {static: false}) searchInput!: MatInput;
+    @ViewChild('searchInput', { static: false }) searchInput!: MatInput;
 
     ngOnInit() {
         if (this.useOptionViewProperty !== undefined) {
@@ -276,11 +273,11 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             this.writeValue(this.queuedWriteValue);
         }
         if (this.queuedOnChange.length > 0) {
-            this.queuedOnChange.forEach(fn => this.registerOnChange(fn));
+            this.queuedOnChange.forEach((fn) => this.registerOnChange(fn));
             this.queuedOnChange = [];
         }
         if (this.queuedOnTouched.length > 0) {
-            this.queuedOnTouched.forEach(fn => this.registerOnTouched(fn));
+            this.queuedOnTouched.forEach((fn) => this.registerOnTouched(fn));
             this.queuedOnTouched = [];
         }
     }
@@ -289,15 +286,15 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         this.stateChanges.complete();
     }
 
-    @Input() getOptionValue: ((option: any) => any) = a => a;
-    @Input() getOptionClass: ((option: any) => string) = _ => '';
-    @Input() getOptionViewValue: ((option: any) => string) = a => {
+    @Input() getOptionValue: (option: any) => any = (a) => a;
+    @Input() getOptionClass: (option: any) => string = (_) => '';
+    @Input() getOptionViewValue: (option: any) => string = (a) => {
         if (typeof a === 'string') {
             return a;
         }
         return 'undefined';
-    }
-    @Input() getOptionDisabled: ((option: any) => boolean) = _ => false;
+    };
+    @Input() getOptionDisabled: (option: any) => boolean = (_) => false;
 
     onContainerClick(_: MouseEvent): void {
         this.open();
@@ -309,7 +306,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     }
 
     getOptions(): Observable<any> {
-        return new Observable<any>(obs => {
+        return new Observable<any>((obs) => {
             if (!this.options) {
                 obs.next(this.options);
                 obs.complete();
@@ -317,7 +314,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             }
             let filtered: any[] = [];
             if (Array.isArray(this.options) && this.options.find) {
-                filtered = this.options.filter(option => {
+                filtered = this.options.filter((option) => {
                     if (this.getOptionViewValue(option) === null) {
                         return false;
                     }
@@ -330,7 +327,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                         console.error('Cant do that');
                         return;
                     }
-                    const option = this.options.find(optionC => this.getOptionValue(optionC) === optionValue);
+                    const option = this.options.find((optionC) => this.getOptionValue(optionC) === optionValue);
                     if (option === undefined) {
                         // Option got removed
                         return;
@@ -341,7 +338,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 };
                 if (this.select?.selected) {
                     if (Array.isArray(this.select.selected)) {
-                        this.select.selected?.forEach(sel => addOptionByValue(sel.value));
+                        this.select.selected?.forEach((sel) => addOptionByValue(sel.value));
                     } else {
                         addOptionByValue(this.select.selected.value);
                     }
@@ -362,7 +359,6 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         } else {
             this.queuedOnChange.push(fn);
         }
-
     }
 
     registerOnTouched(fn: any): void {
@@ -433,16 +429,18 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         if (this.options?.forEach && search.length > 0) {
             const r = new Map();
             this.options.forEach((v, k) => {
-                const filtered = v.filter(option => {
+                const filtered = v.filter((option) => {
                     if (Array.isArray(this.select.selected)) {
-                        if (this.select.selected.find(sel => sel.value === this.getOptionValue(option)) !== undefined) {
+                        if (this.select.selected.find((sel) => sel.value === this.getOptionValue(option)) !== undefined) {
                             return true;
                         }
                     } else if (this.select.selected?.value === this.getOptionValue(option)) {
                         return true;
                     }
-                    return k.toLowerCase().indexOf(search.toLowerCase()) !== -1
-                        || this.getOptionViewValue(option).toLowerCase().indexOf(search.toLowerCase()) !== -1;
+                    return (
+                        k.toLowerCase().indexOf(search.toLowerCase()) !== -1 ||
+                        this.getOptionViewValue(option).toLowerCase().indexOf(search.toLowerCase()) !== -1
+                    );
                 });
                 if (filtered.length > 0) {
                     r.set(k, filtered);
@@ -481,7 +479,6 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             if (singleValue !== undefined && !moreFound) {
                 toWrite = singleValue;
             }
-
         } else if (this.options.length === 1) {
             toWrite = this.options[0];
         }
@@ -489,7 +486,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             toWrite = this.getOptionValue(toWrite);
             toWrite = this.multiple ? [toWrite] : toWrite;
             this.value = toWrite;
-            this.selectionChanged({source: this.select, value: toWrite});
+            this.selectionChanged({ source: this.select, value: toWrite });
             this.ngControl?.reset(this.value);
         }
     }
@@ -504,7 +501,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             return;
         }
         if (!this.withGroups) {
-            this.getOptions().subscribe(o => {
+            this.getOptions().subscribe((o) => {
                 if (Array.isArray(o) && o.length === 0) {
                     this.resetSearch();
                 }

@@ -14,57 +14,56 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {forkJoin, Observable} from 'rxjs';
-import {catchError} from 'rxjs/internal/operators';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {PermissionsResourceModel} from './permissions-resource.model';
-import {PermissionsUserModel} from './permissions-user.model';
-import {PermissionsRightsModel} from './permissions-rights.model';
-import {PermissionsEditModel} from './permissions-edit.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {PermissionDialogComponent} from '../dialogs/permission/permission-dialog.component';
-import {PermissionsService} from './permissions.service';
-import {PermissionsResponseModel} from './permissions-response.model';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { forkJoin, Observable } from 'rxjs';
+import { catchError } from 'rxjs/internal/operators';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { PermissionsResourceModel } from './permissions-resource.model';
+import { PermissionsUserModel } from './permissions-user.model';
+import { PermissionsRightsModel } from './permissions-rights.model';
+import { PermissionsEditModel } from './permissions-edit.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { PermissionDialogComponent } from '../dialogs/permission/permission-dialog.component';
+import { PermissionsService } from './permissions.service';
+import { PermissionsResponseModel } from './permissions-response.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class PermissionsDialogService {
-
-    constructor(private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService,
-                private dialog: MatDialog,
-                private permissionsService: PermissionsService,
-                public snackBar: MatSnackBar) {
-    }
+    constructor(
+        private http: HttpClient,
+        private errorHandlerService: ErrorHandlerService,
+        private dialog: MatDialog,
+        private permissionsService: PermissionsService,
+        public snackBar: MatSnackBar,
+    ) {}
 
     openPermissionDialog(kind: string, id: string, name: string): void {
-
         const permissionsIn: PermissionsEditModel[] = [];
 
         this.permissionsService.getResourcePermissions(kind, id).subscribe((permissionsModel: PermissionsResourceModel) => {
             Object.entries(permissionsModel.user_rights).forEach((resp: (string | PermissionsRightsModel)[]) => {
                 permissionsIn.push({
-                    userId: <string>resp[0],
+                    userId: resp[0] as string,
                     userName: '',
-                    userRights: <PermissionsRightsModel>resp[1]
+                    userRights: resp[1] as PermissionsRightsModel,
                 });
             });
 
             Object.entries(permissionsModel.group_rights).forEach((resp: (string | PermissionsRightsModel)[]) => {
-                const role = <string>resp[0];
+                const role = resp[0] as string;
                 permissionsIn.push({
                     userId: '',
                     userName: role,
-                    userRights: <PermissionsRightsModel>resp[1],
-                    isRole: true
+                    userRights: resp[1] as PermissionsRightsModel,
+                    isRole: true,
                 });
             });
 
-            this.getUserNames(permissionsIn.filter(x => x.isRole !== true)).subscribe((users: PermissionsUserModel[]) => {
+            this.getUserNames(permissionsIn.filter((x) => x.isRole !== true)).subscribe((users: PermissionsUserModel[]) => {
                 users.forEach((user: PermissionsUserModel, index: number) => {
                     permissionsIn[index].userName = user.username;
                 });
@@ -77,7 +76,7 @@ export class PermissionsDialogService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            name: name,
+            name,
             permissions: permissionsIn,
         };
         const editDialogRef = this.dialog.open(PermissionDialogComponent, dialogConfig);
@@ -90,16 +89,13 @@ export class PermissionsDialogService {
     }
 
     private getUserNames(permissions: PermissionsEditModel[]): Observable<PermissionsUserModel[]> {
-
         const array: Observable<PermissionsUserModel>[] = [];
 
         permissions.forEach((permission: PermissionsEditModel) => {
             array.push(this.permissionsService.getUserById(permission.userId));
         });
 
-        return forkJoin(array).pipe(
-            catchError(this.errorHandlerService.handleError(PermissionsDialogService.name, 'getUserNames', []))
-        );
+        return forkJoin(array).pipe(catchError(this.errorHandlerService.handleError(PermissionsDialogService.name, 'getUserNames', [])));
     }
 
     private savePermDialogChanges(permissions: PermissionsEditModel[], kind: string, id: string): void {
@@ -121,14 +117,12 @@ export class PermissionsDialogService {
         });
 
         forkJoin(array).subscribe((responses: PermissionsResponseModel[]) => {
-            const countOk = responses.filter((response: PermissionsResponseModel) => {
-                return response.status === 'ok';
-            }).length;
+            const countOk = responses.filter((response: PermissionsResponseModel) => response.status === 'ok').length;
 
             if (countOk === responses.length) {
-                this.snackBar.open('Permission saved successfully.', '', {duration: 2000});
+                this.snackBar.open('Permission saved successfully.', '', { duration: 2000 });
             } else {
-                this.snackBar.open('Error while saving permission!', '', {duration: 2000});
+                this.snackBar.open('Error while saving permission!', '', { duration: 2000 });
             }
         });
     }

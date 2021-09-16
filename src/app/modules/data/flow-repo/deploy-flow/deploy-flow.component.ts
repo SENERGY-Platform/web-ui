@@ -14,47 +14,37 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {ParserService} from '../shared/parser.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ParseModel} from '../shared/parse.model';
-import {
-    DeviceInstancesModel,
-    DeviceSelectablesFullModel,
-} from '../../../devices/device-instances/shared/device-instances.model';
-import {DeviceInstancesService} from '../../../devices/device-instances/shared/device-instances.service';
+import { Component, OnInit } from '@angular/core';
+import { ParserService } from '../shared/parser.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ParseModel } from '../shared/parse.model';
+import { DeviceInstancesModel, DeviceSelectablesFullModel } from '../../../devices/device-instances/shared/device-instances.model';
+import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import {
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
-    DeviceTypeServiceModel
+    DeviceTypeServiceModel,
 } from '../../../metadata/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
-import {FlowEngineService} from '../shared/flow-engine.service';
-import {
-    NodeConfig,
-    NodeModel,
-    NodeValue,
-    PipelineInputSelectionModel,
-    PipelineRequestModel
-} from './shared/pipeline-request.model';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {first, map} from 'rxjs/operators';
-import {forkJoin, Observable, of} from 'rxjs';
-import {DeviceGroupsService} from '../../../devices/device-groups/shared/device-groups.service';
-import {PathOptionsService} from '../shared/path-options.service';
-import {AbstractControl, FormArray, FormBuilder, FormGroup} from '@angular/forms';
-import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
-import {MatOption} from '@angular/material/core';
-import {ConceptsService} from '../../../metadata/concepts/shared/concepts.service';
-import {OperatorInputTopic, PipelineModel, PipelineOperatorModel} from '../../pipeline-registry/shared/pipeline.model';
-import {PipelineRegistryService} from '../../pipeline-registry/shared/pipeline-registry.service';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {OperatorModel} from '../../operator-repo/shared/operator.model';
-import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
-import {ImportInstancesService} from '../../../imports/import-instances/shared/import-instances.service';
-import {ImportInstancesModel} from '../../../imports/import-instances/shared/import-instances.model';
-
+import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
+import { FlowEngineService } from '../shared/flow-engine.service';
+import { NodeConfig, NodeModel, NodeValue, PipelineInputSelectionModel, PipelineRequestModel } from './shared/pipeline-request.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { first, map } from 'rxjs/operators';
+import { forkJoin, Observable, of } from 'rxjs';
+import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
+import { PathOptionsService } from '../shared/path-options.service';
+import { AbstractControl, FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { DeviceTypePermSearchModel } from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
+import { MatOption } from '@angular/material/core';
+import { ConceptsService } from '../../../metadata/concepts/shared/concepts.service';
+import { OperatorInputTopic, PipelineModel, PipelineOperatorModel } from '../../pipeline-registry/shared/pipeline.model';
+import { PipelineRegistryService } from '../../pipeline-registry/shared/pipeline-registry.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { OperatorModel } from '../../operator-repo/shared/operator.model';
+import { OperatorRepoService } from '../../operator-repo/shared/operator-repo.service';
+import { ImportInstancesService } from '../../../imports/import-instances/shared/import-instances.service';
+import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
 
 interface CustomSelectable {
     id: string;
@@ -67,30 +57,29 @@ interface DeviceServicePath {
     topic: string;
 }
 
-
 @Component({
     selector: 'senergy-deploy-flow',
     templateUrl: './deploy-flow.component.html',
-    styleUrls: ['./deploy-flow.component.css']
+    styleUrls: ['./deploy-flow.component.css'],
 })
 export class DeployFlowComponent implements OnInit {
-
-    constructor(private parserService: ParserService,
-                private route: ActivatedRoute,
-                private router: Router,
-                public snackBar: MatSnackBar,
-                private deviceInstanceService: DeviceInstancesService,
-                private deviceTypeService: DeviceTypeService,
-                private deviceGroupsService: DeviceGroupsService,
-                private pathOptionsService: PathOptionsService,
-                private pipelineRegistryService: PipelineRegistryService,
-                private fb: FormBuilder,
-                private conceptsService: ConceptsService,
-                private sanitizer: DomSanitizer,
-                private operatorRepoService: OperatorRepoService,
-                private importInstancesService: ImportInstancesService,
-                private flowEngineService: FlowEngineService) {
-    }
+    constructor(
+        private parserService: ParserService,
+        private route: ActivatedRoute,
+        private router: Router,
+        public snackBar: MatSnackBar,
+        private deviceInstanceService: DeviceInstancesService,
+        private deviceTypeService: DeviceTypeService,
+        private deviceGroupsService: DeviceGroupsService,
+        private pathOptionsService: PathOptionsService,
+        private pipelineRegistryService: PipelineRegistryService,
+        private fb: FormBuilder,
+        private conceptsService: ConceptsService,
+        private sanitizer: DomSanitizer,
+        private operatorRepoService: OperatorRepoService,
+        private importInstancesService: ImportInstancesService,
+        private flowEngineService: FlowEngineService,
+    ) {}
 
     static DEVICE_KEY = 'Devices';
     static GROUP_KEY = 'Device Groups';
@@ -109,12 +98,11 @@ export class DeployFlowComponent implements OnInit {
     selectables = new Map<string, DeviceSelectablesFullModel[]>();
     selectablesCharacteristics = new Map<string, Map<string, CustomSelectable[]>>();
     deviceGroupDevices = new Map<string, string[]>();
-    serviceOptions: Map<string, Map<string, Map<string, Map<string, Map<string, { path: string; service_id: string; }[]>>>>> = new Map();
+    serviceOptions: Map<string, Map<string, Map<string, Map<string, Map<string, { path: string; service_id: string }[]>>>>> = new Map();
     services = new Map<string, DeviceTypeServiceModel>();
     functionCharacteristics: Map<string, DeviceTypeCharacteristicsModel[]> = new Map();
     operators: Map<string, OperatorModel> = new Map();
     importInstances: ImportInstancesModel[] = [];
-
 
     form = this.fb.group({
         name: '',
@@ -138,11 +126,12 @@ export class DeployFlowComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe(aspects => this.aspects = aspects);
-        this.pipelineRegistryService.getPipelines().subscribe(pipelines => this.pipelines = pipelines);
-        this.importInstancesService.listImportInstances('', undefined, undefined, 'name.asc')
-            .subscribe(instances => this.importInstances = instances);
-        this.route.url.subscribe(url => {
+        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe((aspects) => (this.aspects = aspects));
+        this.pipelineRegistryService.getPipelines().subscribe((pipelines) => (this.pipelines = pipelines));
+        this.importInstancesService
+            .listImportInstances('', undefined, undefined, 'name.asc')
+            .subscribe((instances) => (this.importInstances = instances));
+        this.route.url.subscribe((url) => {
             this.ready = false;
             this.resetForm();
             let id = this.route.snapshot.paramMap.get('id');
@@ -153,7 +142,8 @@ export class DeployFlowComponent implements OnInit {
             if (url[url.length - 2]?.path === 'edit') {
                 this.editMode = true;
                 this.pipelineRegistryService.getPipeline(id || '').subscribe((pipeline: PipelineModel | null) => {
-                    if (pipeline === null || pipeline.id.length === 0) { // does not 404
+                    if (pipeline === null || pipeline.id.length === 0) {
+                        // does not 404
                         this.snackBar.open('Unknown pipeline', undefined, {
                             duration: 2000,
                         });
@@ -170,28 +160,30 @@ export class DeployFlowComponent implements OnInit {
                         consume_all_msgs: pipeline.consumeAllMessages || false,
                     });
 
-                    this.parserService.getInputs(id).subscribe((parseModels: ParseModel []) => {
-                        this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc')
-                            .subscribe((devices: DeviceInstancesModel []) => {
+                    this.parserService.getInputs(id).subscribe((parseModels: ParseModel[]) => {
+                        this.deviceInstanceService
+                            .getDeviceInstances('', 9999, 0, 'name', 'asc')
+                            .subscribe((devices: DeviceInstancesModel[]) => {
                                 this.allDevices = devices;
                                 const observables: Observable<any>[] = [];
-                                parseModels.forEach(input => {
-                                    const operator = pipeline.operators.find(o => o.id === input.id);
-                                    observables.push(this.addNode(input,
-                                        operator?.inputSelections || [],
-                                        operator?.config, operator?.inputTopics));
+                                parseModels.forEach((input) => {
+                                    const operator = pipeline.operators.find((o) => o.id === input.id);
+                                    observables.push(
+                                        this.addNode(input, operator?.inputSelections || [], operator?.config, operator?.inputTopics),
+                                    );
                                 });
-                                forkJoin(observables).subscribe(_ => this.ready = true);
+                                forkJoin(observables).subscribe((_) => (this.ready = true));
                             });
                     });
                 });
             } else {
                 this.flowId = id || '';
-                this.parserService.getInputs(this.flowId).subscribe((resp: ParseModel []) => {
-                    this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc')
-                        .subscribe((devices: DeviceInstancesModel []) => {
+                this.parserService.getInputs(this.flowId).subscribe((resp: ParseModel[]) => {
+                    this.deviceInstanceService
+                        .getDeviceInstances('', 9999, 0, 'name', 'asc')
+                        .subscribe((devices: DeviceInstancesModel[]) => {
                             this.allDevices = devices;
-                            resp.forEach(input => {
+                            resp.forEach((input) => {
                                 this.addNode(input, []);
                             });
                         });
@@ -212,9 +204,12 @@ export class DeployFlowComponent implements OnInit {
         });
     }
 
-    private addNode(newNode: ParseModel, inputSelections: PipelineInputSelectionModel[], configs: Map<string, string> = new Map(),
-                    inputTopics: OperatorInputTopic[] = []): Observable<null[]> {
-
+    private addNode(
+        newNode: ParseModel,
+        inputSelections: PipelineInputSelectionModel[],
+        configs: Map<string, string> = new Map(),
+        inputTopics: OperatorInputTopic[] = [],
+    ): Observable<null[]> {
         const observables: Observable<null>[] = [];
         const node = this.fb.group({
             id: '',
@@ -233,28 +228,28 @@ export class DeployFlowComponent implements OnInit {
             });
             (node.get('configs') as FormArray).push(configGroup);
         });
-        newNode.inPorts?.forEach(input => {
+        newNode.inPorts?.forEach((input) => {
             const inputGroup = this.fb.group({
                 aspectId: '',
                 functionId: '',
                 characteristics: [],
                 selectableId: '',
-                filter: new Map<string, { serviceId: string, path: string }>(), // deviceId to serviceId and path
+                filter: new Map<string, { serviceId: string; path: string }>(), // deviceId to serviceId and path
                 devices: [],
                 deviceTypes: this.fb.array([]),
                 name: input,
                 pipelines: this.fb.array([]),
             });
-            inputGroup.get('aspectId')?.valueChanges.subscribe(aspectId => {
+            inputGroup.get('aspectId')?.valueChanges.subscribe((aspectId) => {
                 this.loadAspectFunctions(aspectId).subscribe();
                 inputGroup.patchValue({
                     functionId: '',
                 });
             });
-            inputGroup.get('functionId')?.valueChanges.subscribe(functionId => {
+            inputGroup.get('functionId')?.valueChanges.subscribe((functionId) => {
                 this.prepareSelectables(inputGroup).subscribe();
                 const aspectId = inputGroup.get('aspectId')?.value;
-                const func = this.aspectFunctions.get(aspectId)?.find(f => f.id === functionId);
+                const func = this.aspectFunctions.get(aspectId)?.find((f) => f.id === functionId);
                 if (func !== undefined) {
                     this.loadFunctionCharacteristics(func).subscribe();
                 }
@@ -262,40 +257,41 @@ export class DeployFlowComponent implements OnInit {
                     characteristics: [],
                 });
             });
-            inputGroup.get('characteristics')?.valueChanges.subscribe(_ => {
+            inputGroup.get('characteristics')?.valueChanges.subscribe((_) => {
                 this.prepareSelectables(inputGroup).subscribe();
                 inputGroup.patchValue({
                     selectableId: '',
                 });
             });
-            inputGroup.get('selectableId')?.valueChanges.subscribe(selectableId => {
+            inputGroup.get('selectableId')?.valueChanges.subscribe((selectableId) => {
                 inputGroup.patchValue({
-                    filter: new Map<string, { serviceId: string, path: string }>(), // deviceId to serviceId and path
+                    filter: new Map<string, { serviceId: string; path: string }>(), // deviceId to serviceId and path
                     devices: [],
                 });
                 (inputGroup.get('deviceTypes') as FormArray).clear();
                 this.selectableSelected(inputGroup, selectableId);
             });
-            inputGroup.get('devices')?.valueChanges.subscribe(_ => {
+            inputGroup.get('devices')?.valueChanges.subscribe((_) => {
                 const formArray = inputGroup.get('deviceTypes') as FormArray;
                 formArray.clear();
                 const deviceTypes = this.getDeviceTypes(inputGroup);
-                deviceTypes.forEach(deviceType => {
+                deviceTypes.forEach((deviceType) => {
                     const deviceTypeGroup = this.fb.group({
                         id: deviceType.id,
                         name: deviceType.name,
                         selection: [],
                     });
                     formArray.push(deviceTypeGroup);
-                    deviceTypeGroup.get('selection')?.valueChanges.subscribe(value =>
-                        this.servicePathSelected(inputGroup, deviceTypeGroup.get('id')?.value, value));
+                    deviceTypeGroup
+                        .get('selection')
+                        ?.valueChanges.subscribe((value) => this.servicePathSelected(inputGroup, deviceTypeGroup.get('id')?.value, value));
                     const serviceOptions = this.getServiceOptions(inputGroup, deviceTypeGroup.get('id')?.value);
                     let options = 0;
-                    serviceOptions.forEach(option => options += option.length);
+                    serviceOptions.forEach((option) => (options += option.length));
                     if (options < 2) {
-                        serviceOptions.forEach(option => {
+                        serviceOptions.forEach((option) => {
                             if (option.length === 1) {
-                                deviceTypeGroup.patchValue({selection: [option[0]]});
+                                deviceTypeGroup.patchValue({ selection: [option[0]] });
                             }
                         });
                         deviceTypeGroup.disable();
@@ -306,17 +302,16 @@ export class DeployFlowComponent implements OnInit {
             });
 
             // Fill previous pipeline selections
-            inputTopics.forEach(inputTopic => {
+            inputTopics.forEach((inputTopic) => {
                 if (inputTopic.filterType === 'OperatorId') {
                     const split = inputTopic.filterValue.split(':');
                     if (split.length !== 2) {
-                        console.error('Unexpected filterValue not in format operatorId:pipelineId',
-                            inputTopic.filterValue);
+                        console.error('Unexpected filterValue not in format operatorId:pipelineId', inputTopic.filterValue);
                         return;
                     }
                     const pipelineId = split[1];
                     const operatorId = split[0];
-                    inputTopic.mappings.forEach(mapping => {
+                    inputTopic.mappings.forEach((mapping) => {
                         if (mapping.dest === input) {
                             this.addPipeline(inputGroup, pipelineId, operatorId, mapping.source);
                         }
@@ -324,83 +319,90 @@ export class DeployFlowComponent implements OnInit {
                 }
             });
 
-            const inputSelection = inputSelections?.find(s => s.inputName === input);
+            const inputSelection = inputSelections?.find((s) => s.inputName === input);
             if (inputSelection !== undefined) {
-                observables.push(new Observable<null>(obs => {
-                    this.loadAspectFunctions(inputSelection.aspectId).subscribe(functions => {
-                        const selectedFunction = functions.find(f => f.id === inputSelection.functionId);
-                        if (selectedFunction !== undefined) {
-                            return this.loadFunctionCharacteristics(selectedFunction).subscribe(_ => {
-                                inputGroup.patchValue({
-                                    aspectId: inputSelection.aspectId,
-                                    functionId: inputSelection.functionId,
-                                    characteristics: inputSelection.characteristicIds,
-                                    selectableId: inputSelection.selectableId
-                                });
-                                return this.prepareSelectables(inputGroup).subscribe(__ => {
-                                    let o: Observable<any>;
-                                    if (inputSelection.selectableId?.startsWith(DeployFlowComponent.GROUP_PREFIX)) {
-                                        o = this.loadDeviceGroup(inputSelection.selectableId);
-                                    } else {
-                                        o = of(null);
-                                    }
-                                    return o.subscribe(___ => {
-                                        inputGroup.patchValue({
-                                            aspectId: inputSelection.aspectId,
-                                            functionId: inputSelection.functionId,
-                                            characteristics: inputSelection.characteristicIds,
-                                            selectableId: inputSelection.selectableId
-                                        });
-                                        this.getDeviceTypes(inputGroup).forEach(deviceType => {
-                                            if (!('service' in deviceType))  {
-                                                return;
-                                            }
-                                            const serviceIds: string[] = [];
-                                            if (!Array.isArray(deviceType.service)) {
-                                                serviceIds.push(deviceType.service);
-                                            } else {
-                                                serviceIds.push(...deviceType.service);
-                                            }
-                                            const matchingTopics = inputTopics?.filter(topic =>
-                                                serviceIds.includes(topic.name.replace(/_/g, ':')));
-                                            matchingTopics?.forEach(matchingTopic => {
-                                                const matchingInput = matchingTopic.mappings.find(mapping => mapping.dest === input);
-                                                if (matchingInput !== undefined) {
-                                                    const deviceTypeGroups = this.getSubElementAsGroupArray(inputGroup, 'deviceTypes');
-                                                    const matchingDeviceTypeGroup = deviceTypeGroups.find(deviceTypeGroup =>
-                                                        deviceTypeGroup.get('id')?.value === deviceType.id);
-                                                    let selections = matchingDeviceTypeGroup?.get('selection')?.value as
-                                                        { path: string; service_id: string; }[] | null;
-                                                    if (selections === null) {
-                                                        selections = [];
-                                                    }
-                                                    const serviceId = matchingTopic.name.replace(/_/g, ':');
-                                                    if (selections.findIndex(s => s.path === matchingInput.source
-                                                        && s.service_id === serviceId) === -1) {
-
-                                                        selections.push({
-                                                            service_id: serviceId,
-                                                            path: matchingInput.source
-                                                        });
-                                                        matchingDeviceTypeGroup?.patchValue({
-                                                            selection: selections,
-                                                        });
-                                                    }
-                                                }
+                observables.push(
+                    new Observable<null>((obs) => {
+                        this.loadAspectFunctions(inputSelection.aspectId).subscribe((functions) => {
+                            const selectedFunction = functions.find((f) => f.id === inputSelection.functionId);
+                            if (selectedFunction !== undefined) {
+                                return this.loadFunctionCharacteristics(selectedFunction).subscribe((_) => {
+                                    inputGroup.patchValue({
+                                        aspectId: inputSelection.aspectId,
+                                        functionId: inputSelection.functionId,
+                                        characteristics: inputSelection.characteristicIds,
+                                        selectableId: inputSelection.selectableId,
+                                    });
+                                    return this.prepareSelectables(inputGroup).subscribe((_1) => {
+                                        let o: Observable<any>;
+                                        if (inputSelection.selectableId?.startsWith(DeployFlowComponent.GROUP_PREFIX)) {
+                                            o = this.loadDeviceGroup(inputSelection.selectableId);
+                                        } else {
+                                            o = of(null);
+                                        }
+                                        return o.subscribe((_2) => {
+                                            inputGroup.patchValue({
+                                                aspectId: inputSelection.aspectId,
+                                                functionId: inputSelection.functionId,
+                                                characteristics: inputSelection.characteristicIds,
+                                                selectableId: inputSelection.selectableId,
                                             });
+                                            this.getDeviceTypes(inputGroup).forEach((deviceType) => {
+                                                if (!('service' in deviceType)) {
+                                                    return;
+                                                }
+                                                const serviceIds: string[] = [];
+                                                if (!Array.isArray(deviceType.service)) {
+                                                    serviceIds.push(deviceType.service);
+                                                } else {
+                                                    serviceIds.push(...deviceType.service);
+                                                }
+                                                const matchingTopics = inputTopics?.filter((topic) =>
+                                                    serviceIds.includes(topic.name.replace(/_/g, ':')),
+                                                );
+                                                matchingTopics?.forEach((matchingTopic) => {
+                                                    const matchingInput = matchingTopic.mappings.find((mapping) => mapping.dest === input);
+                                                    if (matchingInput !== undefined) {
+                                                        const deviceTypeGroups = this.getSubElementAsGroupArray(inputGroup, 'deviceTypes');
+                                                        const matchingDeviceTypeGroup = deviceTypeGroups.find(
+                                                            (deviceTypeGroup) => deviceTypeGroup.get('id')?.value === deviceType.id,
+                                                        );
+                                                        let selections = matchingDeviceTypeGroup?.get('selection')?.value as
+                                                            | { path: string; service_id: string }[]
+                                                            | null;
+                                                        if (selections === null) {
+                                                            selections = [];
+                                                        }
+                                                        const serviceId = matchingTopic.name.replace(/_/g, ':');
+                                                        if (
+                                                            selections.findIndex(
+                                                                (s) => s.path === matchingInput.source && s.service_id === serviceId,
+                                                            ) === -1
+                                                        ) {
+                                                            selections.push({
+                                                                service_id: serviceId,
+                                                                path: matchingInput.source,
+                                                            });
+                                                            matchingDeviceTypeGroup?.patchValue({
+                                                                selection: selections,
+                                                            });
+                                                        }
+                                                    }
+                                                });
+                                            });
+                                            obs.next(null);
+                                            obs.complete();
                                         });
-                                        obs.next(null);
-                                        obs.complete();
                                     });
                                 });
-                            });
-                        } else {
-                            obs.next(null);
-                            obs.complete();
-                        }
-                        return;
-                    });
-                }));
+                            } else {
+                                obs.next(null);
+                                obs.complete();
+                            }
+                            return;
+                        });
+                    }),
+                );
             }
             (node.get('inputs') as FormArray).push(inputGroup);
         });
@@ -417,176 +419,221 @@ export class DeployFlowComponent implements OnInit {
         if (this.aspectFunctions.has(aspectId)) {
             return of(this.aspectFunctions.get(aspectId) || []);
         }
-        return this.deviceTypeService.getAspectsMeasuringFunctions(aspectId)
-            .pipe(map(functions => {
+        return this.deviceTypeService.getAspectsMeasuringFunctions(aspectId).pipe(
+            map((functions) => {
                 this.aspectFunctions.set(aspectId, functions);
                 return functions;
-            }));
+            }),
+        );
     }
 
-    private loadSelectables(aspect_id: string, function_id: string): Observable<DeviceSelectablesFullModel[]> {
-        if (this.selectables.has(aspect_id + function_id)) {
-            return of(this.selectables.get(aspect_id + function_id) || []);
+    private loadSelectables(aspectId: string, functionId: string): Observable<DeviceSelectablesFullModel[]> {
+        if (this.selectables.has(aspectId + functionId)) {
+            return of(this.selectables.get(aspectId + functionId) || []);
         }
-        return this.deviceInstanceService.getDeviceSelectionsFull([{
-            function_id,
-            aspect_id
-        }], true).pipe(map(selectables => {
-            this.selectables.set(aspect_id + function_id, selectables);
-            return selectables;
-        }));
+        return this.deviceInstanceService
+            .getDeviceSelectionsFull(
+                [
+                    {
+                        function_id: functionId,
+                        aspect_id: aspectId,
+                    },
+                ],
+                true,
+            )
+            .pipe(
+                map((selectables) => {
+                    this.selectables.set(aspectId + functionId, selectables);
+                    return selectables;
+                }),
+            );
     }
 
     prepareSelectables(inputGroup: FormGroup): Observable<null> {
-        const aspect_id = inputGroup.get('aspectId')?.value;
-        const function_id = inputGroup.get('functionId')?.value;
+        const aspectId = inputGroup.get('aspectId')?.value;
+        const functionId = inputGroup.get('functionId')?.value;
         const characteristicIds = inputGroup.get('characteristics')?.value;
         const currentlySelected = inputGroup.get('selectableId')?.value;
 
-        if (function_id.length === 0 || characteristicIds === null || characteristicIds === undefined) {
-            inputGroup.patchValue({selectableId: null});
+        if (functionId.length === 0 || characteristicIds === null || characteristicIds === undefined) {
+            inputGroup.patchValue({ selectableId: null });
             return of(null);
         }
         const characteristicKey = DeployFlowComponent.stringArrayKey(characteristicIds);
-        if (this.selectablesCharacteristics.has(aspect_id + function_id + characteristicKey)) {
-            for (const selectable of this.selectablesCharacteristics.get(aspect_id + function_id + characteristicKey)?.values() || []) {
+        if (this.selectablesCharacteristics.has(aspectId + functionId + characteristicKey)) {
+            for (const selectable of this.selectablesCharacteristics.get(aspectId + functionId + characteristicKey)?.values() || []) {
                 if (selectable === currentlySelected) {
                     return of(null);
                 }
             }
             // previously selected, but now invalid
-            inputGroup.patchValue({selectableId: null});
+            inputGroup.patchValue({ selectableId: null });
             return of(null);
         }
         if (characteristicIds.length === 0) {
-            this.selectablesCharacteristics.set(aspect_id + function_id + characteristicKey, new Map());
-            inputGroup.patchValue({selectableId: null});
+            this.selectablesCharacteristics.set(aspectId + functionId + characteristicKey, new Map());
+            inputGroup.patchValue({ selectableId: null });
             return of(null);
         }
         // prepare serviceOptions
         const characteristicsKey = DeployFlowComponent.stringArrayKey(characteristicIds);
-        if (!this.serviceOptions.has(aspect_id)) {
-            this.serviceOptions.set(aspect_id, new Map());
+        if (!this.serviceOptions.has(aspectId)) {
+            this.serviceOptions.set(aspectId, new Map());
         }
-        if (!this.serviceOptions.get(aspect_id)?.get(function_id)) {
-            this.serviceOptions.get(aspect_id)?.set(function_id, new Map());
+        if (!this.serviceOptions.get(aspectId)?.get(functionId)) {
+            this.serviceOptions.get(aspectId)?.set(functionId, new Map());
         }
-        if (!this.serviceOptions.get(aspect_id)?.get(function_id)?.get(characteristicsKey)) {
-            this.serviceOptions.get(aspect_id)?.get(function_id)?.set(characteristicsKey, new Map());
+        if (!this.serviceOptions.get(aspectId)?.get(functionId)?.get(characteristicsKey)) {
+            this.serviceOptions.get(aspectId)?.get(functionId)?.set(characteristicsKey, new Map());
         }
-        return this.loadSelectables(aspect_id, function_id).pipe(map(selectables => {
-            const m: Map<string, CustomSelectable[]> = new Map();
-            m.set(DeployFlowComponent.DEVICE_KEY, []);
-            m.set(DeployFlowComponent.GROUP_KEY, []);
-            m.set(DeployFlowComponent.IMPORT_KEY, []);
-            selectables.forEach(selectable => {
-                if (selectable.device !== undefined && selectable.device !== null) {
-                    selectable.services?.forEach(service => {
-                        if (!this.services.has(service.id)) {
-                            this.services.set(service.id, service);
-                        }
-                    });
-                    const pathOptions = this.pathOptionsService.getPathOptionsLocal(selectable.services || [], false, characteristicIds);
-                    if (pathOptions.length > 0) {
-                        m.get(DeployFlowComponent.DEVICE_KEY)?.push({
-                            id: selectable.device.id, name: selectable.device.name
-                        });
-                    } else if (currentlySelected === selectable.device.id) {
-                        // previously selected, but now invalid
-                        inputGroup.patchValue({selectableId: null});
-                    }
-                    if (!this.serviceOptions.get(aspect_id)?.get(function_id)?.get(characteristicsKey)
-                        ?.get(selectable.device?.device_type_id || '')) {
-                        this.serviceOptions.get(aspect_id)?.get(function_id)?.get(characteristicsKey)
-                            ?.set(selectable.device?.device_type_id || '', new Map());
-                    }
-                    pathOptions.forEach(pathOption => {
-                        const options: { path: string; service_id: string; }[] = [];
-                        pathOption.json_path.forEach(path => options.push({path, service_id: pathOption.service_id}));
-                        this.serviceOptions.get(aspect_id)?.get(function_id)?.get(characteristicsKey)
-                            ?.get(selectable.device?.device_type_id || '')?.set(pathOption.service.name, options);
-                    });
-
-                } else if (selectable.device_group !== undefined && selectable.device_group !== null) {
-                    this.loadDeviceGroup(selectable.device_group.id).subscribe(groupDevices => {
-                        const matchingDevices = groupDevices.filter(deviceId => {
-                            const device = this.allDevices.find(d => d.id === deviceId);
-                            if (device === undefined) {
-                                return false;
+        return this.loadSelectables(aspectId, functionId).pipe(
+            map((selectables) => {
+                const m: Map<string, CustomSelectable[]> = new Map();
+                m.set(DeployFlowComponent.DEVICE_KEY, []);
+                m.set(DeployFlowComponent.GROUP_KEY, []);
+                m.set(DeployFlowComponent.IMPORT_KEY, []);
+                selectables.forEach((selectable) => {
+                    if (selectable.device !== undefined && selectable.device !== null) {
+                        selectable.services?.forEach((service) => {
+                            if (!this.services.has(service.id)) {
+                                this.services.set(service.id, service);
                             }
-                            const services: DeviceTypeServiceModel[] = [];
-                            if (!Array.isArray(device.device_type.service)) {
-                                if (this.services.has(device.device_type.service)) {
-                                    services.push(this.services.get(device.device_type.service) || {} as DeviceTypeServiceModel);
-                                }
-                            } else {
-                                device.device_type.service.forEach(serviceId => {
-                                    if (this.services.has(serviceId)) {
-                                        services.push(this.services.get(serviceId) || {} as DeviceTypeServiceModel);
-                                    }
-                                });
-                            }
-                            const pathOptions = this.pathOptionsService.getPathOptionsLocal(services, false, characteristicIds);
-                            return pathOptions.length > 0;
                         });
-
-                        if (matchingDevices.length > 0) {
-                            m.get(DeployFlowComponent.GROUP_KEY)?.push({
-                                id: selectable.device_group?.id || '',
-                                name: selectable.device_group?.name || '',
+                        const pathOptions = this.pathOptionsService.getPathOptionsLocal(
+                            selectable.services || [],
+                            false,
+                            characteristicIds,
+                        );
+                        if (pathOptions.length > 0) {
+                            m.get(DeployFlowComponent.DEVICE_KEY)?.push({
+                                id: selectable.device.id,
+                                name: selectable.device.name,
                             });
-                        } else {
-                            if (currentlySelected === selectable.device_group?.id) {
-                                // previously selected, but now invalid
-                                inputGroup.patchValue({selectableId: null});
-                            }
+                        } else if (currentlySelected === selectable.device.id) {
+                            // previously selected, but now invalid
+                            inputGroup.patchValue({ selectableId: null });
                         }
-                    });
-                } else if (selectable.import !== undefined && selectable.import !== null && selectable.importType !== undefined) {
-                    const pathOption = this.pathOptionsService.getPathOptionsLocalImport(selectable.importType,
-                        selectable.import, characteristicIds);
-                    if (pathOption.json_path.length > 0) {
-                        m.get(DeployFlowComponent.IMPORT_KEY)?.push({
-                            id: selectable.import.id, name: selectable.import.name
+                        if (
+                            !this.serviceOptions
+                                .get(aspectId)
+                                ?.get(functionId)
+                                ?.get(characteristicsKey)
+                                ?.get(selectable.device?.device_type_id || '')
+                        ) {
+                            this.serviceOptions
+                                .get(aspectId)
+                                ?.get(functionId)
+                                ?.get(characteristicsKey)
+                                ?.set(selectable.device?.device_type_id || '', new Map());
+                        }
+                        pathOptions.forEach((pathOption) => {
+                            const options: { path: string; service_id: string }[] = [];
+                            pathOption.json_path.forEach((path) => options.push({ path, service_id: pathOption.service_id }));
+                            this.serviceOptions
+                                .get(aspectId)
+                                ?.get(functionId)
+                                ?.get(characteristicsKey)
+                                ?.get(selectable.device?.device_type_id || '')
+                                ?.set(pathOption.service.name, options);
                         });
-                    } else if (currentlySelected === selectable.import.id) {
-                        // previously selected, but now invalid
-                        inputGroup.patchValue({selectableId: null});
-                    }
+                    } else if (selectable.device_group !== undefined && selectable.device_group !== null) {
+                        this.loadDeviceGroup(selectable.device_group.id).subscribe((groupDevices) => {
+                            const matchingDevices = groupDevices.filter((deviceId) => {
+                                const device = this.allDevices.find((d) => d.id === deviceId);
+                                if (device === undefined) {
+                                    return false;
+                                }
+                                const services: DeviceTypeServiceModel[] = [];
+                                if (!Array.isArray(device.device_type.service)) {
+                                    if (this.services.has(device.device_type.service)) {
+                                        services.push(this.services.get(device.device_type.service) || ({} as DeviceTypeServiceModel));
+                                    }
+                                } else {
+                                    device.device_type.service.forEach((serviceId) => {
+                                        if (this.services.has(serviceId)) {
+                                            services.push(this.services.get(serviceId) || ({} as DeviceTypeServiceModel));
+                                        }
+                                    });
+                                }
+                                const pathOptions = this.pathOptionsService.getPathOptionsLocal(services, false, characteristicIds);
+                                return pathOptions.length > 0;
+                            });
 
-                    if (!this.serviceOptions.get(aspect_id)?.get(function_id)?.get(characteristicsKey)
-                        ?.get(selectable.import.kafka_topic)) {
-                        this.serviceOptions.get(aspect_id)?.get(function_id)?.get(characteristicsKey)
-                            ?.set(selectable.import.kafka_topic, new Map());
+                            if (matchingDevices.length > 0) {
+                                m.get(DeployFlowComponent.GROUP_KEY)?.push({
+                                    id: selectable.device_group?.id || '',
+                                    name: selectable.device_group?.name || '',
+                                });
+                            } else {
+                                if (currentlySelected === selectable.device_group?.id) {
+                                    // previously selected, but now invalid
+                                    inputGroup.patchValue({ selectableId: null });
+                                }
+                            }
+                        });
+                    } else if (selectable.import !== undefined && selectable.import !== null && selectable.importType !== undefined) {
+                        const pathOption = this.pathOptionsService.getPathOptionsLocalImport(
+                            selectable.importType,
+                            selectable.import,
+                            characteristicIds,
+                        );
+                        if (pathOption.json_path.length > 0) {
+                            m.get(DeployFlowComponent.IMPORT_KEY)?.push({
+                                id: selectable.import.id,
+                                name: selectable.import.name,
+                            });
+                        } else if (currentlySelected === selectable.import.id) {
+                            // previously selected, but now invalid
+                            inputGroup.patchValue({ selectableId: null });
+                        }
+
+                        if (
+                            !this.serviceOptions
+                                .get(aspectId)
+                                ?.get(functionId)
+                                ?.get(characteristicsKey)
+                                ?.get(selectable.import.kafka_topic)
+                        ) {
+                            this.serviceOptions
+                                .get(aspectId)
+                                ?.get(functionId)
+                                ?.get(characteristicsKey)
+                                ?.set(selectable.import.kafka_topic, new Map());
+                        }
+                        const options: { path: string; service_id: string }[] = [];
+                        pathOption.json_path.forEach((path) => options.push({ path, service_id: pathOption.service_id }));
+                        this.serviceOptions
+                            .get(aspectId)
+                            ?.get(functionId)
+                            ?.get(characteristicsKey)
+                            ?.get(selectable.import.kafka_topic)
+                            ?.set(selectable.importType.name, options);
                     }
-                    const options: { path: string; service_id: string; }[] = [];
-                    pathOption.json_path.forEach(path => options.push({path, service_id: pathOption.service_id}));
-                    this.serviceOptions.get(aspect_id)?.get(function_id)?.get(characteristicsKey)
-                        ?.get(selectable.import.kafka_topic)?.set(selectable.importType.name, options);
-                }
-            });
-            this.selectablesCharacteristics.set(aspect_id + function_id + characteristicKey, m);
-            return null;
-        }));
+                });
+                this.selectablesCharacteristics.set(aspectId + functionId + characteristicKey, m);
+                return null;
+            }),
+        );
     }
 
-
-    getSelectables(aspect_id: string, function_id: string, characteristicIds: string[]): Map<string, CustomSelectable[]> {
+    getSelectables(aspectId: string, functionId: string, characteristicIds: string[]): Map<string, CustomSelectable[]> {
         const characteristicKey = DeployFlowComponent.stringArrayKey(characteristicIds);
-        return this.selectablesCharacteristics.get(aspect_id + function_id + characteristicKey) || new Map();
+        return this.selectablesCharacteristics.get(aspectId + functionId + characteristicKey) || new Map();
     }
 
     loadDeviceGroup(id: string): Observable<string[]> {
         if (!this.deviceGroupDevices.has(id)) {
             // unknown device group
-            return this.deviceGroupsService.getDeviceGroup(id).pipe(map(group => {
-                if (group === null) {
-                    console.error('Selected group does not exist!');
-                    return [];
-                }
-                this.deviceGroupDevices.set(id, group.device_ids);
-                return group.device_ids;
-            }));
+            return this.deviceGroupsService.getDeviceGroup(id).pipe(
+                map((group) => {
+                    if (group === null) {
+                        console.error('Selected group does not exist!');
+                        return [];
+                    }
+                    this.deviceGroupDevices.set(id, group.device_ids);
+                    return group.device_ids;
+                }),
+            );
         } else {
             return of(this.deviceGroupDevices.get(id) || []);
         }
@@ -599,26 +646,26 @@ export class DeployFlowComponent implements OnInit {
         if (selectableId.startsWith(DeployFlowComponent.GROUP_PREFIX)) {
             if (!this.deviceGroupDevices.has(selectableId)) {
                 // unknown device group
-                this.loadDeviceGroup(selectableId).subscribe(deviceIds => {
+                this.loadDeviceGroup(selectableId).subscribe((deviceIds) => {
                     const devices = this.getDeviceInstances(deviceIds);
-                    input.patchValue({devices});
+                    input.patchValue({ devices });
                 });
             } else {
                 // known device group
                 const devices = this.getDeviceInstances(this.deviceGroupDevices.get(selectableId) || []);
-                input.patchValue({devices});
+                input.patchValue({ devices });
             }
         } else if (selectableId.startsWith(DeployFlowComponent.IMPORT_PREFIX)) {
-            input.patchValue({devices: []});
+            input.patchValue({ devices: [] });
         } else {
             // single device
             const devices = this.getDeviceInstances([selectableId]);
-            input.patchValue({devices});
+            input.patchValue({ devices });
         }
     }
 
     private getDeviceInstances(ids: string[]): DeviceInstancesModel[] {
-        return this.allDevices.filter(d => ids.findIndex(id => id === d.id) !== -1);
+        return this.allDevices.filter((d) => ids.findIndex((id) => id === d.id) !== -1);
     }
 
     startPipeline() {
@@ -633,7 +680,7 @@ export class DeployFlowComponent implements OnInit {
         pipeReq.metrics = this.form.get('enable_metrics')?.value;
         pipeReq.windowTime = JSON.parse(this.form.get('windowTime')?.value);
         pipeReq.nodes = [];
-        this.getSubElementAsGroupArray(this.form, 'nodes').forEach(node => {
+        this.getSubElementAsGroupArray(this.form, 'nodes').forEach((node) => {
             const nodeModel: NodeModel = {
                 inputSelections: [],
                 inputs: [],
@@ -641,7 +688,7 @@ export class DeployFlowComponent implements OnInit {
                 deploymentType: node.get('deploymentType')?.value,
                 nodeId: node.get('id')?.value,
             };
-            this.getSubElementAsGroupArray(node, 'configs').forEach(config => {
+            this.getSubElementAsGroupArray(node, 'configs').forEach((config) => {
                 const nodeConfig: NodeConfig = {
                     name: config.get('name')?.value,
                     value: config.get('value')?.value,
@@ -651,19 +698,21 @@ export class DeployFlowComponent implements OnInit {
             nodeModel.inputSelections = [];
             const inputs = this.getSubElementAsGroupArray(node, 'inputs');
             const flatFilters: DeviceServicePath[] = [];
-            const flatPipelineFilters: { topic: string; filters: { pipelineId: string, operatorId: string }[], values: NodeValue[] }[] = [];
+            const flatPipelineFilters: { topic: string; filters: { pipelineId: string; operatorId: string }[]; values: NodeValue[] }[] = [];
             // Create a filter for each device/topic/value
-            inputs.forEach(input => {
-                const filters = input.get('filter')?.value as Map<string, { serviceId: string, path: string }[]>;
+            inputs.forEach((input) => {
+                const filters = input.get('filter')?.value as Map<string, { serviceId: string; path: string }[]>;
                 filters.forEach((subfilters, deviceOrImportId) => {
-                    subfilters.forEach(filter => {
+                    subfilters.forEach((filter) => {
                         flatFilters.push({
                             devicesOrImports: [deviceOrImportId],
                             topic: filter.serviceId.replace(/:/g, '_'),
-                            values: [{
-                                name: input.get('name')?.value,
-                                path: filter.path,
-                            }],
+                            values: [
+                                {
+                                    name: input.get('name')?.value,
+                                    path: filter.path,
+                                },
+                            ],
                         });
                     });
                 });
@@ -676,36 +725,44 @@ export class DeployFlowComponent implements OnInit {
                     selectableId: input.get('selectableId')?.value,
                 });
 
-                this.getSubElementAsGroupArray(input, 'pipelines').forEach(pipelineGroup => {
+                this.getSubElementAsGroupArray(input, 'pipelines').forEach((pipelineGroup) => {
                     flatPipelineFilters.push({
                         topic: pipelineGroup.get('topic')?.value,
-                        values: [{
-                            name: input.get('name')?.value,
-                            path: pipelineGroup.get('path')?.value,
-                        }],
-                        filters: [{
-                            pipelineId: pipelineGroup.get('pipelineId')?.value,
-                            operatorId: pipelineGroup.get('operatorId')?.value,
-                        }],
+                        values: [
+                            {
+                                name: input.get('name')?.value,
+                                path: pipelineGroup.get('path')?.value,
+                            },
+                        ],
+                        filters: [
+                            {
+                                pipelineId: pipelineGroup.get('pipelineId')?.value,
+                                operatorId: pipelineGroup.get('operatorId')?.value,
+                            },
+                        ],
                     });
                 });
             });
             // Create a filter for each pipeline input
             // Join all filters with same topic/value combination
             const joinedOperatorFilters: {
-                topic: string; filters:
-                    { pipelineId: string, operatorId: string }[], values: NodeValue[]
+                topic: string;
+                filters: { pipelineId: string; operatorId: string }[];
+                values: NodeValue[];
             }[] = [];
-            flatPipelineFilters.forEach(filter => {
-                const idx = joinedOperatorFilters.findIndex(joined => {
+            flatPipelineFilters.forEach((filter) => {
+                const idx = joinedOperatorFilters.findIndex((joined) => {
                     if (joined.topic !== filter.topic || joined.values.length !== filter.values.length) {
                         return false;
                     }
 
                     let valuesEqual = true;
-                    joined.values.forEach(joinedVal => {
-                        if (filter.values.findIndex(filterVal =>
-                            filterVal.name === joinedVal.name && filterVal.path === joinedVal.path) === -1) {
+                    joined.values.forEach((joinedVal) => {
+                        if (
+                            filter.values.findIndex(
+                                (filterVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
+                            ) === -1
+                        ) {
                             valuesEqual = false;
                         }
                     });
@@ -715,28 +772,39 @@ export class DeployFlowComponent implements OnInit {
                 if (idx === -1) {
                     joinedOperatorFilters.push(filter);
                 } else {
-                    const missingFilters = filter.filters.filter(filterFilter =>
-                        joinedOperatorFilters[idx].filters.findIndex(joinedFilter => filterFilter.pipelineId === joinedFilter.pipelineId
-                            && filterFilter.operatorId === joinedFilter.operatorId) === -1);
+                    const missingFilters = filter.filters.filter(
+                        (filterFilter) =>
+                            joinedOperatorFilters[idx].filters.findIndex(
+                                (joinedFilter) =>
+                                    filterFilter.pipelineId === joinedFilter.pipelineId &&
+                                    filterFilter.operatorId === joinedFilter.operatorId,
+                            ) === -1,
+                    );
                     joinedOperatorFilters[idx].filters.push(...missingFilters);
                 }
             });
 
             // Join all filters with same topic/pipe/operator combination
             const joinedPipelineFilters: {
-                topic: string; filters:
-                    { pipelineId: string, operatorId: string }[], values: NodeValue[]
+                topic: string;
+                filters: { pipelineId: string; operatorId: string }[];
+                values: NodeValue[];
             }[] = [];
-            joinedOperatorFilters.forEach(filter => {
-                const idx = joinedPipelineFilters.findIndex(joined => {
+            joinedOperatorFilters.forEach((filter) => {
+                const idx = joinedPipelineFilters.findIndex((joined) => {
                     if (joined.topic !== filter.topic || joined.filters.length !== filter.filters.length) {
                         return false;
                     }
 
                     let filtersEqual = true;
-                    joined.filters.forEach(joinedFilter => {
-                        if (filter.filters.findIndex(filterFilter => filterFilter.pipelineId === joinedFilter.pipelineId
-                            && filterFilter.operatorId === joinedFilter.operatorId) === -1) {
+                    joined.filters.forEach((joinedFilter) => {
+                        if (
+                            filter.filters.findIndex(
+                                (filterFilter) =>
+                                    filterFilter.pipelineId === joinedFilter.pipelineId &&
+                                    filterFilter.operatorId === joinedFilter.operatorId,
+                            ) === -1
+                        ) {
                             filtersEqual = false;
                         }
                     });
@@ -745,33 +813,40 @@ export class DeployFlowComponent implements OnInit {
                 if (idx === -1) {
                     joinedPipelineFilters.push(filter);
                 } else {
-                    const missingValues = filter.values.filter(filterVal =>
-                        joinedPipelineFilters[idx].values.findIndex(joinedVal =>
-                            filterVal.name === joinedVal.name && filterVal.path === joinedVal.path) === -1);
+                    const missingValues = filter.values.filter(
+                        (filterVal) =>
+                            joinedPipelineFilters[idx].values.findIndex(
+                                (joinedVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
+                            ) === -1,
+                    );
                     joinedPipelineFilters[idx].values.push(...missingValues);
                 }
             });
 
-            joinedPipelineFilters.forEach(filter => nodeModel.inputs?.push({
-                filterType: 'operatorId',
-                filterIds: filter.filters.map(f => f.operatorId + ':' + f.pipelineId).join(','),
-                topicName: filter.topic,
-                values: filter.values,
-            }));
-
+            joinedPipelineFilters.forEach((filter) =>
+                nodeModel.inputs?.push({
+                    filterType: 'operatorId',
+                    filterIds: filter.filters.map((f) => f.operatorId + ':' + f.pipelineId).join(','),
+                    topicName: filter.topic,
+                    values: filter.values,
+                }),
+            );
 
             // Join all filters with same topic/value combination
             const joinedDeviceFilters: DeviceServicePath[] = [];
-            flatFilters.forEach(filter => {
-                const idx = joinedDeviceFilters.findIndex(joined => {
+            flatFilters.forEach((filter) => {
+                const idx = joinedDeviceFilters.findIndex((joined) => {
                     if (joined.topic !== filter.topic || joined.values.length !== filter.values.length) {
                         return false;
                     }
 
                     let valuesEqual = true;
-                    joined.values.forEach(joinedVal => {
-                        if (filter.values.findIndex(filterVal =>
-                            filterVal.name === joinedVal.name && filterVal.path === joinedVal.path) === -1) {
+                    joined.values.forEach((joinedVal) => {
+                        if (
+                            filter.values.findIndex(
+                                (filterVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
+                            ) === -1
+                        ) {
                             valuesEqual = false;
                         }
                     });
@@ -781,22 +856,24 @@ export class DeployFlowComponent implements OnInit {
                 if (idx === -1) {
                     joinedDeviceFilters.push(filter);
                 } else {
-                    const missingDevices = filter.devicesOrImports.filter(filterDevice =>
-                        joinedDeviceFilters[idx].devicesOrImports.findIndex(joinedDevice => filterDevice === joinedDevice) === -1);
+                    const missingDevices = filter.devicesOrImports.filter(
+                        (filterDevice) =>
+                            joinedDeviceFilters[idx].devicesOrImports.findIndex((joinedDevice) => filterDevice === joinedDevice) === -1,
+                    );
                     joinedDeviceFilters[idx].devicesOrImports.push(...missingDevices);
                 }
             });
             // Join all filters with same topic/device combination
             const joinedValueFilters: DeviceServicePath[] = [];
-            joinedDeviceFilters.forEach(filter => {
-                const idx = joinedValueFilters.findIndex(joined => {
+            joinedDeviceFilters.forEach((filter) => {
+                const idx = joinedValueFilters.findIndex((joined) => {
                     if (joined.topic !== filter.topic || joined.devicesOrImports.length !== filter.devicesOrImports.length) {
                         return false;
                     }
 
                     let devicesEqual = true;
-                    joined.devicesOrImports.forEach(joinedDevice => {
-                        if (filter.devicesOrImports.findIndex(filterDevice => filterDevice === joinedDevice) === -1) {
+                    joined.devicesOrImports.forEach((joinedDevice) => {
+                        if (filter.devicesOrImports.findIndex((filterDevice) => filterDevice === joinedDevice) === -1) {
                             devicesEqual = false;
                         }
                     });
@@ -805,48 +882,51 @@ export class DeployFlowComponent implements OnInit {
                 if (idx === -1) {
                     joinedValueFilters.push(filter);
                 } else {
-                    const missingValues = filter.values.filter(filterVal =>
-                        joinedValueFilters[idx].values.findIndex(joinedVal =>
-                            filterVal.name === joinedVal.name && filterVal.path === joinedVal.path) === -1);
+                    const missingValues = filter.values.filter(
+                        (filterVal) =>
+                            joinedValueFilters[idx].values.findIndex(
+                                (joinedVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
+                            ) === -1,
+                    );
                     joinedValueFilters[idx].values.push(...missingValues);
                 }
             });
 
-            joinedValueFilters.forEach(filter => nodeModel.inputs?.push({
-                filterType: filter.devicesOrImports[0].startsWith(DeployFlowComponent.IMPORT_PREFIX) ? 'ImportId' : 'deviceId',
-                filterIds: filter.devicesOrImports.join(','),
-                topicName: filter.topic,
-                values: filter.values,
-            }));
+            joinedValueFilters.forEach((filter) =>
+                nodeModel.inputs?.push({
+                    filterType: filter.devicesOrImports[0].startsWith(DeployFlowComponent.IMPORT_PREFIX) ? 'ImportId' : 'deviceId',
+                    filterIds: filter.devicesOrImports.join(','),
+                    topicName: filter.topic,
+                    values: filter.values,
+                }),
+            );
 
             pipeReq.nodes.push(nodeModel);
         });
 
         if (this.editMode) {
-            this.flowEngineService.updatePipeline(pipeReq).subscribe(_ => {
-                this.route.queryParams
-                    .pipe(first()).subscribe(params => {
-                        if (params.next !== undefined && params.next.length > 0) {
-                            const next = (params.next as string).split(',');
-                            let url = '/data/pipelines/edit/' + next[0];
-                            if (next.length > 1) {
-                                url += '?next=' + next.splice(1).join(',');
-                            }
-                            this.router.navigateByUrl(url);
-                            this.snackBar.open('Pipeline updated, preparing next update...', undefined, {
-                                duration: 2000,
-                            });
-                        } else {
-                            this.router.navigate(['/data/pipelines']);
-                            this.snackBar.open('Pipeline updated', undefined, {
-                                duration: 2000,
-                            });
+            this.flowEngineService.updatePipeline(pipeReq).subscribe((_) => {
+                this.route.queryParams.pipe(first()).subscribe((params) => {
+                    if (params.next !== undefined && params.next.length > 0) {
+                        const next = (params.next as string).split(',');
+                        let url = '/data/pipelines/edit/' + next[0];
+                        if (next.length > 1) {
+                            url += '?next=' + next.splice(1).join(',');
                         }
+                        this.router.navigateByUrl(url);
+                        this.snackBar.open('Pipeline updated, preparing next update...', undefined, {
+                            duration: 2000,
+                        });
+                    } else {
+                        this.router.navigate(['/data/pipelines']);
+                        this.snackBar.open('Pipeline updated', undefined, {
+                            duration: 2000,
+                        });
                     }
-                );
+                });
             });
         } else {
-            this.flowEngineService.startPipeline(pipeReq).subscribe(_ => {
+            this.flowEngineService.startPipeline(pipeReq).subscribe((_) => {
                 this.router.navigate(['/data/pipelines']);
                 this.snackBar.open('Pipeline started', undefined, {
                     duration: 2000,
@@ -859,53 +939,51 @@ export class DeployFlowComponent implements OnInit {
         this.router.navigateByUrl('data/flow-repo/deploy-classic/' + this.flowId);
     }
 
-    getServiceOptions(input: FormGroup, id: string): Map<string, { path: string; service_id: string; }[]> {
+    getServiceOptions(input: FormGroup, id: string): Map<string, { path: string; service_id: string }[]> {
         const functionId = input.get('functionId')?.value;
         const aspectId = input.get('aspectId')?.value;
         const characteristicsKey = DeployFlowComponent.stringArrayKey(input.get('characteristics')?.value);
         let key = id;
         if (key.startsWith(DeployFlowComponent.IMPORT_PREFIX)) {
-            key = this.importInstances.find(i => i.id === id)?.kafka_topic || '';
+            key = this.importInstances.find((i) => i.id === id)?.kafka_topic || '';
         }
         const preparedOptions = this.serviceOptions.get(aspectId)?.get(functionId)?.get(characteristicsKey)?.get(key);
         return preparedOptions || new Map();
     }
 
     getDeviceTypes(input: AbstractControl): (DeviceTypePermSearchModel | ImportInstancesModel)[] {
-        const anyTypes = (input.get('devices')?.value?.map((x: DeviceInstancesModel) => x.device_type));
+        const anyTypes = input.get('devices')?.value?.map((x: DeviceInstancesModel) => x.device_type);
         if (anyTypes === undefined) {
             return [];
         }
         const types = anyTypes as (DeviceTypePermSearchModel | ImportInstancesModel)[];
         const selectableId = input.get('selectableId')?.value;
         if (selectableId !== undefined && selectableId !== null && (selectableId as string).startsWith(DeployFlowComponent.IMPORT_PREFIX)) {
-            const instance = this.importInstances.find(i => i.id === selectableId);
+            const instance = this.importInstances.find((i) => i.id === selectableId);
             if (instance !== undefined) {
                 types.push(instance);
             }
         }
-        return types.filter((t, index) => types.findIndex(t2 => t2.id === t.id) === index); // unique
+        return types.filter((t, index) => types.findIndex((t2) => t2.id === t.id) === index); // unique
     }
 
     getSubElementAsGroupArray(element: AbstractControl, subElementPath: string): FormGroup[] {
-        return (element.get(subElementPath) as FormArray)?.controls as FormGroup[] || [];
+        return ((element.get(subElementPath) as FormArray)?.controls as FormGroup[]) || [];
     }
 
-    servicePathSelected(input: FormGroup, deviceTypeOrImportInstanceId: string, selection: { service_id: string, path: string }[] | null) {
+    servicePathSelected(input: FormGroup, deviceTypeOrImportInstanceId: string, selection: { service_id: string; path: string }[] | null) {
         if (selection === null) {
             return;
         }
         let devices = input.get('devices')?.value as DeviceInstancesModel[];
-        devices = devices.filter(d => d.device_type.id === deviceTypeOrImportInstanceId);
-        const filter = input.get('filter')?.value as Map<string, { serviceId: string, path: string }[]>;
-        const convertedSelection = selection.map(x => {
-            return {serviceId: x.service_id, path: x.path};
-        });
-        devices.forEach(d => filter.set(d.id, convertedSelection));
+        devices = devices.filter((d) => d.device_type.id === deviceTypeOrImportInstanceId);
+        const filter = input.get('filter')?.value as Map<string, { serviceId: string; path: string }[]>;
+        const convertedSelection = selection.map((x) => ({ serviceId: x.service_id, path: x.path }));
+        devices.forEach((d) => filter.set(d.id, convertedSelection));
         if (deviceTypeOrImportInstanceId.startsWith(DeployFlowComponent.IMPORT_PREFIX)) {
             filter.set(deviceTypeOrImportInstanceId, convertedSelection);
         }
-        input.patchValue({filter});
+        input.patchValue({ filter });
     }
 
     getServiceTriggerValue(selection: MatOption | MatOption[] | undefined): string {
@@ -913,7 +991,7 @@ export class DeployFlowComponent implements OnInit {
             return ''; // multiple should always be set here
         }
         let r = '';
-        selection.forEach(s => {
+        selection.forEach((s) => {
             if (r.length > 0) {
                 r += ', ';
             }
@@ -926,10 +1004,12 @@ export class DeployFlowComponent implements OnInit {
         if (this.functionCharacteristics.has(func.id)) {
             return of(this.functionCharacteristics.get(func.id) || []);
         }
-        return this.conceptsService.getConceptWithCharacteristics(func.concept_id).pipe(map(concept => {
-            this.functionCharacteristics.set(func.id, concept?.characteristics || []);
-            return concept?.characteristics || [];
-        }));
+        return this.conceptsService.getConceptWithCharacteristics(func.concept_id).pipe(
+            map((concept) => {
+                this.functionCharacteristics.set(func.id, concept?.characteristics || []);
+                return concept?.characteristics || [];
+            }),
+        );
     }
 
     getFunctionCharacteristics(functionId: string): DeviceTypeCharacteristicsModel[] {
@@ -940,51 +1020,51 @@ export class DeployFlowComponent implements OnInit {
         return a && b && a.path && b.path && a.path === b.path && a.service_id && b.service_id && a.service_id === b.service_id;
     }
 
-    getServiceOptionDisabledFunction(deviceType: FormGroup): ((option: { path: string; service_id: string; }) => boolean) {
-        return ((option: { path: string; service_id: string; }) => {
-            const selection = deviceType.get('selection')?.value as { path: string; service_id: string; }[] | null;
+    getServiceOptionDisabledFunction(deviceType: FormGroup): (option: { path: string; service_id: string }) => boolean {
+        return (option: { path: string; service_id: string }) => {
+            const selection = deviceType.get('selection')?.value as { path: string; service_id: string }[] | null;
             if (selection === null) {
                 return false;
             }
-            return selection.findIndex(s => s.service_id === option.service_id && s.path !== option.path) !== -1;
-        });
+            return selection.findIndex((s) => s.service_id === option.service_id && s.path !== option.path) !== -1;
+        };
     }
 
     addPipeline(input: FormGroup, pipelineId: string = '', operatorId: string = '', path: string = '') {
-        const pipelineOperator = this.getPipelineById(pipelineId)?.operators.find(o => o.id === operatorId);
+        const pipelineOperator = this.getPipelineById(pipelineId)?.operators.find((o) => o.id === operatorId);
         const pipelineGroup = this.fb.group({
             pipelineId: '',
             operatorId: '',
             topic: pipelineOperator !== undefined ? 'analytics-' + pipelineOperator.name : '',
             path: '',
         });
-        pipelineGroup.get('pipelineId')?.valueChanges.subscribe(newPipelineId => {
+        pipelineGroup.get('pipelineId')?.valueChanges.subscribe((newPipelineId) => {
             const pipeline = this.getPipelineById(newPipelineId);
             if (pipeline !== undefined && pipeline.operators.length === 1) {
                 pipelineGroup.patchValue({
                     operatorId: pipeline.operators[0].id,
-                    topic: 'analytics-' + pipeline.operators[0].name
+                    topic: 'analytics-' + pipeline.operators[0].name,
                 });
             } else {
-                pipelineGroup.patchValue({operatorId: '', topic: ''});
+                pipelineGroup.patchValue({ operatorId: '', topic: '' });
             }
         });
-        pipelineGroup.get('operatorId')?.valueChanges.subscribe(newOperatorId => {
+        pipelineGroup.get('operatorId')?.valueChanges.subscribe((newOperatorId) => {
             const newPipelineId = pipelineGroup.get('pipelineId')?.value;
             if (newPipelineId !== undefined && newPipelineId !== '' && newOperatorId !== '') {
-                const newPipelineOperator = this.getPipelineById(newPipelineId)?.operators.find(o => o.id === newOperatorId);
+                const newPipelineOperator = this.getPipelineById(newPipelineId)?.operators.find((o) => o.id === newOperatorId);
                 if (newPipelineOperator !== undefined) {
                     this.loadOperator(newPipelineOperator.operatorId).subscribe();
-                    pipelineGroup.patchValue({topic: 'analytics-' + newPipelineOperator.name});
+                    pipelineGroup.patchValue({ topic: 'analytics-' + newPipelineOperator.name });
                 }
             }
-            pipelineGroup.patchValue({path: ''});
+            pipelineGroup.patchValue({ path: '' });
         });
         pipelineGroup.patchValue({
-            pipelineId: pipelineId,
-            operatorId: operatorId,
+            pipelineId,
+            operatorId,
             topic: pipelineOperator !== undefined ? 'analytics-' + pipelineOperator.name : '',
-            path: path,
+            path,
         });
         this.getSubElementAsGroupArray(input, 'pipelines').push(pipelineGroup);
     }
@@ -994,19 +1074,21 @@ export class DeployFlowComponent implements OnInit {
         if (operator !== undefined) {
             return of(operator);
         }
-        return this.operatorRepoService.getOperator(operatorId).pipe(map(resp => {
-            if (resp !== null) {
-                this.operators.set(operatorId, resp);
-            }
-            return resp;
-        }));
+        return this.operatorRepoService.getOperator(operatorId).pipe(
+            map((resp) => {
+                if (resp !== null) {
+                    this.operators.set(operatorId, resp);
+                }
+                return resp;
+            }),
+        );
     }
 
     getPipelineById(id: string | undefined | null): PipelineModel | undefined {
         if (id === null || id === undefined) {
             return undefined;
         }
-        return this.pipelines.find(p => p.id === id);
+        return this.pipelines.find((p) => p.id === id);
     }
 
     getImage(pipelineGroup: FormGroup): SafeHtml | undefined {
@@ -1033,36 +1115,36 @@ export class DeployFlowComponent implements OnInit {
                 }
             }
         }
-        return this.sanitizer.bypassSecurityTrustHtml(
-            new XMLSerializer().serializeToString(svg));
+        return this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
     }
 
     getOperatorPaths(pipelineId: string, operatorId: string): string[] {
-        const pipelineOperator = this.getPipelineById(pipelineId)?.operators.find(o => o.id === operatorId);
+        const pipelineOperator = this.getPipelineById(pipelineId)?.operators.find((o) => o.id === operatorId);
         if (pipelineOperator === undefined) {
             return [];
         }
-        return this.operators.get(pipelineOperator.operatorId)?.outputs?.map(x => x.name) || [];
+        return this.operators.get(pipelineOperator.operatorId)?.outputs?.map((x) => x.name) || [];
     }
 
     getPipelineOperator(pipelineId: string, operatorId: string): PipelineOperatorModel | undefined {
-        return this.getPipelineById(pipelineId)?.operators.find(o => o.id === operatorId);
+        return this.getPipelineById(pipelineId)?.operators.find((o) => o.id === operatorId);
     }
 
     removePipeline(inputGroup: FormGroup, index: number) {
         const pipelines = this.getSubElementAsGroupArray(inputGroup, 'pipelines');
         pipelines.splice(index, 1);
-        inputGroup.patchValue({pipelines});
+        inputGroup.patchValue({ pipelines });
     }
 
     selectOperator($event: MouseEvent, pipeline: FormGroup) {
         for (const operatorNode of ($event.target as any)?.nearestViewportElement?.childNodes[0]?.childNodes[1]?.childNodes || []) {
-            if (operatorNode.attributes['data-type'] !== undefined &&
-                operatorNode.attributes['data-type'].value === 'senergy.NodeElement') {
-
+            if (
+                operatorNode.attributes['data-type'] !== undefined &&
+                operatorNode.attributes['data-type'].value === 'senergy.NodeElement'
+            ) {
                 const rect: DOMRect = operatorNode.getBoundingClientRect();
                 if ($event.x < rect.right && $event.x > rect.left && $event.y > rect.top && $event.y < rect.bottom) {
-                    pipeline.patchValue({operatorId: operatorNode.attributes['model-id'].value});
+                    pipeline.patchValue({ operatorId: operatorNode.attributes['model-id'].value });
                     return;
                 }
             }

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-
-
 import {
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel,
-    DeviceTypeFunctionModel
+    DeviceTypeFunctionModel,
 } from './device-type.model';
 
 export interface DeviceTypeSelectionRefModel {
@@ -46,8 +44,8 @@ export interface ServiceInfoModel {
 }
 
 export interface BpmnSkeletonModel {
-    inputs ?: InputOutput;
-    outputs ?: InputOutput;
+    inputs?: InputOutput;
+    outputs?: InputOutput;
 }
 
 interface InputOutput {

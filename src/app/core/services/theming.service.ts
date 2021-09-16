@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-import {Inject, Injectable} from '@angular/core';
-import {DOCUMENT} from '@angular/common';
-import {environment} from '../../../environments/environment';
-import {Title} from '@angular/platform-browser';
+import { Inject, Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { environment } from '../../../environments/environment';
+import { Title } from '@angular/platform-browser';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
-
 export class ThemingService {
-    constructor(@Inject(DOCUMENT) private document: Document, private titleService: Title) {
-    }
-
+    constructor(@Inject(DOCUMENT) private document: Document, private titleService: Title) {}
 
     applyTheme() {
         this.titleService.setTitle(environment.title);
@@ -69,8 +66,7 @@ export class ThemingService {
         head.appendChild(tileImage);
     }
 
-
-    private addIconLink(rel: string, size: string | null, href: string, head: any, type ?: string) {
+    private addIconLink(rel: string, size: string | null, href: string, head: any, type?: string) {
         const style = this.document.createElement('link') as any;
         style.rel = rel;
         style.href = href;
@@ -81,9 +77,9 @@ export class ThemingService {
             style.type = type;
         }
         head.appendChild(style);
-}
+    }
 
     getToolbarLogoUrl(): string {
-       return 'src/img/' + environment.theme + '/toolbar-logo.svg';
+        return 'src/img/' + environment.theme + '/toolbar-logo.svg';
     }
 }

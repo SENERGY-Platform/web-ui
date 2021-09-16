@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ProcessIncidentsModel} from '../../incidents/shared/process-incidents.model';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
 
 @Component({
     templateUrl: './monitor-details-dialog.component.html',
@@ -25,14 +25,14 @@ import {ProcessIncidentsModel} from '../../incidents/shared/process-incidents.mo
 export class MonitorDetailsDialogComponent implements OnInit {
     incidents: ProcessIncidentsModel[] = [];
 
-    constructor(private dialogRef: MatDialogRef<MonitorDetailsDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: { incident: ProcessIncidentsModel[] }
+    constructor(
+        private dialogRef: MatDialogRef<MonitorDetailsDialogComponent>,
+        @Inject(MAT_DIALOG_DATA) data: { incident: ProcessIncidentsModel[] },
     ) {
         this.incidents = data.incident;
     }
 
-    ngOnInit() {
-    }
+    ngOnInit() {}
 
     ok(): void {
         this.dialogRef.close();

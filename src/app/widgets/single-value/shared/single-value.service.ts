@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {SingleValueModel} from './single-value.model';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {SingleValueEditDialogComponent} from '../dialog/single-value-edit-dialog.component';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ExportDataService} from '../../shared/export-data.service';
-import {QueriesRequestElementModel} from '../../shared/export-data.model';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { SingleValueModel } from './single-value.model';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { SingleValueEditDialogComponent } from '../dialog/single-value-edit-dialog.component';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ExportDataService } from '../../shared/export-data.service';
+import { QueriesRequestElementModel } from '../../shared/export-data.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class SingleValueService {
-
-    constructor(private dialog: MatDialog,
-                private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService,
-                private exportDataService: ExportDataService) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private dashboardService: DashboardService,
+        private errorHandlerService: ErrorHandlerService,
+        private exportDataService: ExportDataService,
+    ) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         const editDialogRef = this.dialog.open(SingleValueEditDialogComponent, dialogConfig);
 
@@ -60,20 +60,26 @@ export class SingleValueService {
             if (m) {
                 const requestPayload: QueriesRequestElementModel = {
                     measurement: m.id,
-                    columns: [{
-                        name: name,
-                        math: widget.properties.math !== '' ? widget.properties.math : undefined,
-                    }],
+                    columns: [
+                        {
+                            name,
+                            math: widget.properties.math !== '' ? widget.properties.math : undefined,
+                        },
+                    ],
                 };
-                if (widget.properties.group !== undefined && widget.properties.group.time !== ''
-                    && widget.properties.group.type !== undefined && widget.properties.group.type !== '') {
-                    requestPayload.time = {last: widget.properties.group.time};
+                if (
+                    widget.properties.group !== undefined &&
+                    widget.properties.group.time !== '' &&
+                    widget.properties.group.type !== undefined &&
+                    widget.properties.group.type !== ''
+                ) {
+                    requestPayload.time = { last: widget.properties.group.time };
                     requestPayload.columns[0].groupType = widget.properties.group.type;
                     requestPayload.groupTime = widget.properties.group.time;
                 } else {
                     requestPayload.limit = 1;
                 }
-                this.exportDataService.query([requestPayload]).subscribe(pairs => {
+                this.exportDataService.query([requestPayload]).subscribe((pairs) => {
                     pairs = pairs[0];
                     let value: any = '';
                     let type = widget.properties.type || '';
@@ -84,8 +90,8 @@ export class SingleValueService {
                         value = pairs[0][1];
                     }
                     const svm: SingleValueModel = {
-                        type: type,
-                        value: value
+                        type,
+                        value,
                     };
                     observer.next(svm);
                     observer.complete();
@@ -94,4 +100,3 @@ export class SingleValueService {
         });
     }
 }
-

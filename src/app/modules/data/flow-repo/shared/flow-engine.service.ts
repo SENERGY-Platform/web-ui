@@ -14,39 +14,36 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {environment} from '../../../../../environments/environment';
-import {catchError, map} from 'rxjs/internal/operators';
-import {Observable} from 'rxjs';
-import {PipelineRequestModel} from '../deploy-flow/shared/pipeline-request.model';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { environment } from '../../../../../environments/environment';
+import { catchError, map } from 'rxjs/internal/operators';
+import { Observable } from 'rxjs';
+import { PipelineRequestModel } from '../deploy-flow/shared/pipeline-request.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class FlowEngineService {
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
-    }
-
-    startPipeline(data: PipelineRequestModel): Observable<{}> {
-        return this.http.post<{}>
-        (environment.flowEngineUrl + '/pipeline', data).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'startPipeline: Error', []))
+    startPipeline(data: PipelineRequestModel): Observable<unknown> {
+        return this.http.post<unknown>(environment.flowEngineUrl + '/pipeline', data).pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'startPipeline: Error', [])),
         );
     }
 
-    deletePipeline (id: string): Observable<{}> {
-        return this.http.delete(environment.flowEngineUrl + '/pipeline/' + id).pipe(
-            catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'deletePipeline: Error', {}))
-        );
+    deletePipeline(id: string): Observable<unknown> {
+        return this.http
+            .delete(environment.flowEngineUrl + '/pipeline/' + id)
+            .pipe(catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'deletePipeline: Error', {})));
     }
 
     updatePipeline(data: PipelineRequestModel): Observable<void> {
-        return this.http.put<void>(environment.flowEngineUrl + '/pipeline', data).pipe(
-            catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'updatePipeline: Error', undefined))
-        );
+        return this.http
+            .put<void>(environment.flowEngineUrl + '/pipeline', data)
+            .pipe(catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'updatePipeline: Error', undefined)));
     }
 }

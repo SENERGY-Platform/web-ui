@@ -14,37 +14,46 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ExportService} from './shared/export.service';
-import {ExportModel, ExportResponseModel} from './shared/export.model';
-import {environment} from '../../../environments/environment';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {DialogsService} from '../../core/services/dialogs.service';
-import {ResponsiveService} from '../../core/services/responsive.service';
-import {ClipboardService} from 'ngx-clipboard';
-import {merge, Subscription} from 'rxjs';
-import {SearchbarService} from '../../core/components/searchbar/shared/searchbar.service';
-import {SelectionModel} from '@angular/cdk/collections';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
-import {MatPaginator} from '@angular/material/paginator';
-import {startWith, switchMap} from 'rxjs/internal/operators';
-import {BrokerExportService} from './shared/broker-export.service';
-import {ActivatedRoute} from '@angular/router';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ExportService } from './shared/export.service';
+import { ExportModel, ExportResponseModel } from './shared/export.model';
+import { environment } from '../../../environments/environment';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DialogsService } from '../../core/services/dialogs.service';
+import { ResponsiveService } from '../../core/services/responsive.service';
+import { ClipboardService } from 'ngx-clipboard';
+import { merge, Subscription } from 'rxjs';
+import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
+import { startWith, switchMap } from 'rxjs/internal/operators';
+import { BrokerExportService } from './shared/broker-export.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'senergy-export',
     templateUrl: './export.component.html',
-    styleUrls: ['./export.component.css']
+    styleUrls: ['./export.component.css'],
 })
-
 export class ExportComponent implements OnInit, OnDestroy {
-
-    @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
-    @ViewChild('sort', {static: false}) sort!: MatSort;
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
+    @ViewChild('sort', { static: false }) sort!: MatSort;
 
     selection = new SelectionModel<ExportModel>(true, []);
-    displayedColumns: string[] = ['select', 'filter_type', 'name', 'description', 'created_at', 'updated_at', 'info', 'edit', 'copy', 'delete'];
+    displayedColumns: string[] = [
+        'select',
+        'filter_type',
+        'name',
+        'description',
+        'created_at',
+        'updated_at',
+        'info',
+        'edit',
+        'copy',
+        'delete',
+    ];
     totalCount = 0;
 
     exports: ExportModel[] = [] as ExportModel[];
@@ -56,34 +65,50 @@ export class ExportComponent implements OnInit, OnDestroy {
     public searchText = '';
     public initSearchText = '';
     public searchField = 'name';
-    public searchFields = [['Name', 'name'], ['Gerätename', 'entity_name'], ['Beschreibung', 'description'], ['Service', 'service_name']];
+    public searchFields = [
+        ['Name', 'name'],
+        ['Gerätename', 'entity_name'],
+        ['Beschreibung', 'description'],
+        ['Service', 'service_name'],
+    ];
     private searchSub: Subscription = new Subscription();
 
     private exportSub: Subscription = new Subscription();
 
     public brokerMode = false;
 
-    constructor(private exportService: ExportService,
-                public snackBar: MatSnackBar,
-                private dialogsService: DialogsService,
-                private searchbarService: SearchbarService,
-                private responsiveService: ResponsiveService,
-                private brokerExportService: BrokerExportService,
-                private route: ActivatedRoute,
-                private clipboardService: ClipboardService) {
-    }
+    constructor(
+        private exportService: ExportService,
+        public snackBar: MatSnackBar,
+        private dialogsService: DialogsService,
+        private searchbarService: SearchbarService,
+        private responsiveService: ResponsiveService,
+        private brokerExportService: BrokerExportService,
+        private route: ActivatedRoute,
+        private clipboardService: ClipboardService,
+    ) {}
 
     ngOnInit() {
-        this.route.url.subscribe(url => {
+        this.route.url.subscribe((url) => {
             if (url[url.length - 1]?.toString() === 'broker') {
                 this.brokerMode = true;
-                this.displayedColumns = ['select', 'filter_type', 'name', 'description', 'created_at', 'updated_at', 'info', 'edit', 'delete'];
+                this.displayedColumns = [
+                    'select',
+                    'filter_type',
+                    'name',
+                    'description',
+                    'created_at',
+                    'updated_at',
+                    'info',
+                    'edit',
+                    'delete',
+                ];
             }
             if (localStorage.getItem('data.exports.search') !== null) {
-                this.initSearchText = <string>localStorage.getItem('data.exports.search');
+                this.initSearchText = localStorage.getItem('data.exports.search') as string;
             }
             if (localStorage.getItem('data.exports.searchField') !== null) {
-                this.searchField = <string>localStorage.getItem('data.exports.searchField');
+                this.searchField = localStorage.getItem('data.exports.searchField') as string;
             }
 
             this.initSearchAndGetExports();
@@ -96,25 +121,28 @@ export class ExportComponent implements OnInit, OnDestroy {
     }
 
     deleteExport(exp: ExportModel) {
-        this.dialogsService.openDeleteDialog('export').afterClosed().subscribe((deleteExport: boolean) => {
-            if (deleteExport) {
-                this.ready = false;
-                const obs = this.brokerMode ? this.brokerExportService.stopPipeline(exp) : this.exportService.stopPipeline(exp);
-                obs.subscribe((response) => {
-                    if (response.status === 204) {
-                        this.snackBar.open('Export deleted', undefined, {
-                            duration: 2000,
-                        });
-                        this.getExports(true);
-                    } else {
-                        this.snackBar.open('Export could not be deleted', undefined, {
-                            duration: 2000,
-                        });
-                    }
-                    this.ready = true;
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('export')
+            .afterClosed()
+            .subscribe((deleteExport: boolean) => {
+                if (deleteExport) {
+                    this.ready = false;
+                    const obs = this.brokerMode ? this.brokerExportService.stopPipeline(exp) : this.exportService.stopPipeline(exp);
+                    obs.subscribe((response) => {
+                        if (response.status === 204) {
+                            this.snackBar.open('Export deleted', undefined, {
+                                duration: 2000,
+                            });
+                            this.getExports(true);
+                        } else {
+                            this.snackBar.open('Export could not be deleted', undefined, {
+                                duration: 2000,
+                            });
+                        }
+                        this.ready = true;
+                    });
+                }
+            });
     }
 
     copyEndpoint(endpoint: string) {
@@ -141,30 +169,37 @@ export class ExportComponent implements OnInit, OnDestroy {
         }
         this.exportsDataSource.sort = this.sort;
         this.sort.sortChange.subscribe(() => {
-                this.paginator.pageIndex = 0;
-                this.selectionClear();
-            }
-        );
+            this.paginator.pageIndex = 0;
+            this.selectionClear();
+        });
 
-        this.exportSub = merge(this.sort.sortChange, this.paginator.page).pipe(startWith({}), switchMap(() => {
-            this.ready = false;
-            return this.brokerMode ? this.brokerExportService.getExports(
-                this.searchText,
-                this.paginator.pageSize, this.paginator.pageSize * this.paginator.pageIndex,
-                this.sort.active,
-                this.sort.direction,
-                (this.showGenerated ? undefined : false),
-                this.searchField
-            ) : this.exportService.getExports(
-                this.searchText,
-                this.paginator.pageSize, this.paginator.pageSize * this.paginator.pageIndex,
-                this.sort.active,
-                this.sort.direction,
-                (this.showGenerated ? undefined : false),
-                this.searchField
-            );
-        })).subscribe(
-            (resp: ExportResponseModel | null) => {
+        this.exportSub = merge(this.sort.sortChange, this.paginator.page)
+            .pipe(
+                startWith({}),
+                switchMap(() => {
+                    this.ready = false;
+                    return this.brokerMode
+                        ? this.brokerExportService.getExports(
+                            this.searchText,
+                            this.paginator.pageSize,
+                            this.paginator.pageSize * this.paginator.pageIndex,
+                            this.sort.active,
+                            this.sort.direction,
+                            this.showGenerated ? undefined : false,
+                            this.searchField,
+                        )
+                        : this.exportService.getExports(
+                            this.searchText,
+                            this.paginator.pageSize,
+                            this.paginator.pageSize * this.paginator.pageIndex,
+                            this.sort.active,
+                            this.sort.direction,
+                            this.showGenerated ? undefined : false,
+                            this.searchField,
+                        );
+                }),
+            )
+            .subscribe((resp: ExportResponseModel | null) => {
                 if (resp !== null) {
                     this.exports = resp.instances;
                     if (this.exports === undefined) {
@@ -200,7 +235,7 @@ export class ExportComponent implements OnInit, OnDestroy {
         if (this.isAllSelected()) {
             this.selectionClear();
         } else {
-            this.exportsDataSource.connect().value.forEach(row => this.selection.select(row));
+            this.exportsDataSource.connect().value.forEach((row) => this.selection.select(row));
         }
     }
 
@@ -209,21 +244,23 @@ export class ExportComponent implements OnInit, OnDestroy {
     }
 
     deleteMultipleItems(): void {
-        this.dialogsService.openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' exports' : ' export')).afterClosed().subscribe(
-            (deleteExports: boolean) => {
-
+        this.dialogsService
+            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' exports' : ' export'))
+            .afterClosed()
+            .subscribe((deleteExports: boolean) => {
                 if (deleteExports) {
                     this.ready = false;
 
                     const exportIDs: string[] = [];
 
                     this.selection.selected.forEach((exp: ExportModel) => {
-                            if (exp.ID !== undefined) {
-                                exportIDs.push(exp.ID);
-                            }
+                        if (exp.ID !== undefined) {
+                            exportIDs.push(exp.ID);
                         }
-                    );
-                    const obs = this.brokerMode ? this.brokerExportService.stopPipelines(exportIDs) : this.exportService.stopPipelines(exportIDs);
+                    });
+                    const obs = this.brokerMode
+                        ? this.brokerExportService.stopPipelines(exportIDs)
+                        : this.exportService.stopPipelines(exportIDs);
                     obs.subscribe(() => {
                         this.paginator.pageIndex = 0;
                         this.getExports(true);

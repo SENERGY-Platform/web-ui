@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {ConceptsService} from '../../concepts/shared/concepts.service';
-import {AspectsPermSearchModel} from '../shared/aspects-perm-search.model';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ConceptsService } from '../../concepts/shared/concepts.service';
+import { AspectsPermSearchModel } from '../shared/aspects-perm-search.model';
 
 @Component({
     templateUrl: './aspects-edit-dialog.component.html',
-    styleUrls: ['./aspects-edit-dialog.component.css']
+    styleUrls: ['./aspects-edit-dialog.component.css'],
 })
 export class AspectsEditDialogComponent implements OnInit {
-
     aspectsFormGroup!: FormGroup;
 
-    constructor(private conceptsService: ConceptsService,
-                private dialogRef: MatDialogRef<AspectsEditDialogComponent>,
-                private _formBuilder: FormBuilder,
-                @Inject(MAT_DIALOG_DATA) data: { aspect: AspectsPermSearchModel }) {
+    constructor(
+        private conceptsService: ConceptsService,
+        private dialogRef: MatDialogRef<AspectsEditDialogComponent>,
+        private _formBuilder: FormBuilder,
+        @Inject(MAT_DIALOG_DATA) data: { aspect: AspectsPermSearchModel },
+    ) {
         this.initAspectFormGroup(data.aspect);
     }
 
-    ngOnInit(): void {
-    }
+    ngOnInit(): void {}
 
     close(): void {
         this.dialogRef.close();
@@ -52,9 +52,8 @@ export class AspectsEditDialogComponent implements OnInit {
 
     private initAspectFormGroup(aspect: AspectsPermSearchModel): void {
         this.aspectsFormGroup = this._formBuilder.group({
-            id: [{value: aspect.id, disabled: true}],
+            id: [{ value: aspect.id, disabled: true }],
             name: [aspect.name, Validators.required],
         });
     }
-
 }

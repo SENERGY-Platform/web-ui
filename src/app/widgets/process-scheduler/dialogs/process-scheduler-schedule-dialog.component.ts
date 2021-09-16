@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
-import {ProcessSchedulerModel} from '../shared/process-scheduler.model';
-import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {ProcessSchedulerWidgetModel} from '../shared/process-scheduler-widget.model';
-import {CronConverterService} from '../shared/cron-converter.service';
-
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ProcessSchedulerModel } from '../shared/process-scheduler.model';
+import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { ProcessSchedulerWidgetModel } from '../shared/process-scheduler-widget.model';
+import { CronConverterService } from '../shared/cron-converter.service';
 
 @Component({
     templateUrl: './process-scheduler-schedule-dialog.component.html',
     styleUrls: ['./process-scheduler-schedule-dialog.component.css'],
 })
 export class ProcessSchedulerScheduleDialogComponent implements OnInit {
-
     form = new FormGroup({
         id: new FormControl(''),
         days: new FormArray([
@@ -51,21 +49,22 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     widget: WidgetModel = {} as WidgetModel;
     deployments: DeploymentsModel[] = [];
 
-    constructor(private dialogRef: MatDialogRef<ProcessSchedulerScheduleDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                private cronConverterService: CronConverterService,
-                @Inject(MAT_DIALOG_DATA) data: (ProcessSchedulerWidgetModel | null)) {
+    constructor(
+        private dialogRef: MatDialogRef<ProcessSchedulerScheduleDialogComponent>,
+        private deploymentsService: DeploymentsService,
+        private cronConverterService: CronConverterService,
+        @Inject(MAT_DIALOG_DATA) data: ProcessSchedulerWidgetModel | null,
+    ) {
         if (data) {
             this.form.patchValue({
-                'id': data.scheduleId,
-                'time': this.cronConverterService.getLocalTime(data.cron),
-                'processId': data.processId,
-                'days': this.cronConverterService.getDaysAsBoolArray(data.cron),
-                'process_alias': data.processAlias,
-                'enable': !data.disabled,
+                id: data.scheduleId,
+                time: this.cronConverterService.getLocalTime(data.cron),
+                processId: data.processId,
+                days: this.cronConverterService.getDaysAsBoolArray(data.cron),
+                process_alias: data.processAlias,
+                enable: !data.disabled,
             });
         }
-
     }
 
     ngOnInit() {
@@ -75,7 +74,7 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     }
 
     daySelected(): boolean {
-       return this.getDays().indexOf(true) > -1;
+        return this.getDays().indexOf(true) > -1;
     }
 
     close(): void {
@@ -87,18 +86,16 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     }
 
     save(): void {
-
         this.dialogRef.close({
             id: (this.form.get('id') as FormControl).value,
             cron: this.cronConverterService.getCronAsString((this.form.get('time') as FormControl).value, this.getDays()),
             process_deployment_id: (this.form.get('processId') as FormControl).value,
             process_alias: (this.form.get('process_alias') as FormControl).value,
-            disabled: (this.form.get('enable') as FormControl).value === false
+            disabled: (this.form.get('enable') as FormControl).value === false,
         } as ProcessSchedulerModel);
     }
 
     private getDays(): boolean[] {
-        return <boolean[]>(this.form.get('days') as FormArray).value;
+        return (this.form.get('days') as FormArray).value as boolean[];
     }
-
 }

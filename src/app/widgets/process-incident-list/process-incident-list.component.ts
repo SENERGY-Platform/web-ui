@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {
-    WidgetModel
-} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {ProcessIncidentListService} from './shared/process-incident-list.service';
-import {Subscription} from 'rxjs';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {ProcessIncidentsModel} from '../../modules/processes/incidents/shared/process-incidents.model';
-import {ProcessIncidentsService} from '../../modules/processes/incidents/shared/process-incidents.service';
-import {DeploymentsModel} from '../../modules/processes/deployments/shared/deployments.model';
-import {Router} from '@angular/router';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { ProcessIncidentListService } from './shared/process-incident-list.service';
+import { Subscription } from 'rxjs';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { ProcessIncidentsModel } from '../../modules/processes/incidents/shared/process-incidents.model';
+import { ProcessIncidentsService } from '../../modules/processes/incidents/shared/process-incidents.service';
+import { DeploymentsModel } from '../../modules/processes/deployments/shared/deployments.model';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'senergy-process-incident-list',
@@ -32,7 +30,6 @@ import {Router} from '@angular/router';
     styleUrls: ['./process-incident-list.component.css'],
 })
 export class ProcessIncidentListComponent implements OnInit, OnDestroy {
-
     incidents: ProcessIncidentsModel[] = [];
     ready = false;
     destroy = new Subscription();
@@ -41,11 +38,12 @@ export class ProcessIncidentListComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private processIncidentListService: ProcessIncidentListService,
-                private processIncidentsService: ProcessIncidentsService,
-                private dashboardService: DashboardService,
-                private router: Router) {
-    }
+    constructor(
+        private processIncidentListService: ProcessIncidentListService,
+        private processIncidentsService: ProcessIncidentsService,
+        private dashboardService: DashboardService,
+        private router: Router,
+    ) {}
 
     ngOnInit() {
         this.getIncidents();
@@ -64,9 +62,10 @@ export class ProcessIncidentListComponent implements OnInit, OnDestroy {
             state: {
                 deployment: {
                     definition_id: incident.process_definition_id,
-                    name: incident.deployment_name
-                } as DeploymentsModel, activeTab: 1
-            }
+                    name: incident.deployment_name,
+                } as DeploymentsModel,
+                activeTab: 1,
+            },
         });
     }
 
@@ -74,13 +73,13 @@ export class ProcessIncidentListComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
-                this.processIncidentsService.getProcessIncidents(this.widget.properties.limit || 0).subscribe((incidents: ProcessIncidentsModel[]) => {
-                    this.incidents = incidents;
-                    this.ready = true;
-                });
+                this.processIncidentsService
+                    .getProcessIncidents(this.widget.properties.limit || 0)
+                    .subscribe((incidents: ProcessIncidentsModel[]) => {
+                        this.incidents = incidents;
+                        this.ready = true;
+                    });
             }
         });
     }
-
-
 }

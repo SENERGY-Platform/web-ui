@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PermissionsRightsModel} from './permissions-rights.model';
+import { PermissionsRightsModel } from './permissions-rights.model';
 
 export interface PermissionsResourceModel {
     creator: string;

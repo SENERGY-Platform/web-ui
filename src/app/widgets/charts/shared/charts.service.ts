@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {GoogleChartComponent} from 'ng2-google-charts';
+import { Injectable } from '@angular/core';
+import { GoogleChartComponent } from 'ng2-google-charts';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ChartsService {
-
-    constructor() {
-    }
+    constructor() {}
 
     // Workaround to prevent Google Charts Library from causing memory leaks
     releaseResources(chartComponent: GoogleChartComponent) {
@@ -38,7 +36,7 @@ export class ChartsService {
                     chart.iv = {};
                     chart.jv = {};
 
-                    Object.keys(chart).forEach(function (key) {
+                    Object.keys(chart).forEach(function(key) {
                         delete chart[key];
                     });
                 } catch (e) {
@@ -52,7 +50,7 @@ export class ChartsService {
                 }
 
                 try {
-                    Object.keys(chartComponent.wrapper).forEach(function (key) {
+                    Object.keys(chartComponent.wrapper).forEach(function(key) {
                         delete chartComponent.wrapper[key];
                     });
 

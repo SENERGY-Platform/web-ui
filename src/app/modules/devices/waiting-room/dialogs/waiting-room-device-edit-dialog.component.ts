@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Attribute, WaitingDeviceModel} from '../shared/waiting-room.model';
-import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {DeviceTypeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Attribute, WaitingDeviceModel } from '../shared/waiting-room.model';
+import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DeviceTypeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './waiting-room-device-edit-dialog.component.html',
@@ -29,24 +29,25 @@ export class WaitingRoomDeviceEditDialogComponent implements OnInit {
     device: WaitingDeviceModel;
     deviceType: DeviceTypeModel = {} as DeviceTypeModel;
     useDialog: boolean;
-    attrFormGroup: FormGroup = new FormGroup({attributes: new FormArray([])});
+    attrFormGroup: FormGroup = new FormGroup({ attributes: new FormArray([]) });
 
-    constructor(private _formBuilder: FormBuilder,
-                private dialogRef: MatDialogRef<WaitingRoomDeviceEditDialogComponent>,
-                private deviceTypeService: DeviceTypeService,
-                @Inject(MAT_DIALOG_DATA) private data: { device: WaitingDeviceModel, useDialog: boolean,  }) {
+    constructor(
+        private _formBuilder: FormBuilder,
+        private dialogRef: MatDialogRef<WaitingRoomDeviceEditDialogComponent>,
+        private deviceTypeService: DeviceTypeService,
+        @Inject(MAT_DIALOG_DATA) private data: { device: WaitingDeviceModel; useDialog: boolean },
+    ) {
         this.device = data.device;
         this.useDialog = data.useDialog;
         this.initAttrFormGroup();
-        deviceTypeService.getDeviceType(data.device.device_type_id).subscribe(dt => {
+        deviceTypeService.getDeviceType(data.device.device_type_id).subscribe((dt) => {
             if (dt) {
-               this.deviceType = dt;
+                this.deviceType = dt;
             }
         });
     }
 
-    ngOnInit() {
-    }
+    ngOnInit() {}
 
     close(): void {
         this.dialogRef.close();
@@ -59,8 +60,9 @@ export class WaitingRoomDeviceEditDialogComponent implements OnInit {
 
     private initAttrFormGroup() {
         this.attrFormGroup = this._formBuilder.group({
-            attributes: this._formBuilder.array(this.device.attributes ?
-                this.device.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : [])
+            attributes: this._formBuilder.array(
+                this.device.attributes ? this.device.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : [],
+            ),
         });
     }
 
@@ -68,12 +70,12 @@ export class WaitingRoomDeviceEditDialogComponent implements OnInit {
         let result: FormGroup;
         if (this.useDialog) {
             result = this._formBuilder.group({
-                key: [{disabled: false, value: attribute.key}, Validators.required],
-                value: [{disabled: false, value: attribute.value}, Validators.required],
+                key: [{ disabled: false, value: attribute.key }, Validators.required],
+                value: [{ disabled: false, value: attribute.value }, Validators.required],
             });
         } else {
             result = this._formBuilder.group({
-                key: [{disabled: false, value: attribute.key}, Validators.required],
+                key: [{ disabled: false, value: attribute.key }, Validators.required],
                 value: [attribute.value],
             });
         }
@@ -86,12 +88,12 @@ export class WaitingRoomDeviceEditDialogComponent implements OnInit {
     }
 
     removeAttr(i: number) {
-        const formArray = <FormArray>this.attrFormGroup.controls['attributes'];
+        const formArray = this.attrFormGroup.controls['attributes'] as FormArray;
         formArray.removeAt(i);
     }
 
     addAttr() {
-        const formArray = <FormArray>this.attrFormGroup.controls['attributes'];
-        formArray.push(this.createAttrGroup({key: '', value: ''} as Attribute));
+        const formArray = this.attrFormGroup.controls['attributes'] as FormArray;
+        formArray.push(this.createAttrGroup({ key: '', value: '' } as Attribute));
     }
 }

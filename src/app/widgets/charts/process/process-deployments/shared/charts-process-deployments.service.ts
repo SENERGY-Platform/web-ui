@@ -14,39 +14,39 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {ChartsModel} from '../../../shared/charts.model';
-import {MonitorProcessModel} from '../../../../../modules/processes/monitor/shared/monitor-process.model';
-import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
-import {ElementSizeService} from '../../../../../core/services/element-size.service';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ChartsProcessDeploymentsEditDialogComponent} from '../dialogs/charts-process-deployments-edit-dialog.component';
-import {ChartDataTableModel} from '../../../../../core/components/chart/chart-data-table.model';
-import {ChartsDataTableModel} from '../../../shared/charts-data-table.model';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ChartsModel } from '../../../shared/charts.model';
+import { MonitorProcessModel } from '../../../../../modules/processes/monitor/shared/monitor-process.model';
+import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
+import { ElementSizeService } from '../../../../../core/services/element-size.service';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
+import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { ChartsProcessDeploymentsEditDialogComponent } from '../dialogs/charts-process-deployments-edit-dialog.component';
+import { ChartDataTableModel } from '../../../../../core/components/chart/chart-data-table.model';
+import { ChartsDataTableModel } from '../../../shared/charts-data-table.model';
 
 const customColor = '#4484ce'; // /* cc */
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ChartsProcessDeploymentsService {
-
-    constructor(private monitorService: MonitorService,
-                private elementSizeService: ElementSizeService,
-                private dialog: MatDialog,
-                private dashboardService: DashboardService) {
-    }
+    constructor(
+        private monitorService: MonitorService,
+        private elementSizeService: ElementSizeService,
+        private dialog: MatDialog,
+        private dashboardService: DashboardService,
+    ) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         const editDialogRef = this.dialog.open(ChartsProcessDeploymentsEditDialogComponent, dialogConfig);
 
@@ -71,7 +71,6 @@ export class ChartsProcessDeploymentsService {
     }
 
     private sumUpProcessDeployments(processes: MonitorProcessModel[]): ChartDataTableModel {
-
         processes.sort((a, b) => {
             if (a.startTime > b.startTime) {
                 return 1;
@@ -89,12 +88,11 @@ export class ChartsProcessDeploymentsService {
             dateCount.set(key, value);
         });
 
-        const dataTable = new ChartDataTableModel([['Date', 'Count', {role: 'tooltip'}]]);
+        const dataTable = new ChartDataTableModel([['Date', 'Count', { role: 'tooltip' }]]);
         dateCount.forEach((count, date) => {
-                const dateNew = new Date(date);
-                dataTable.data.push([dateNew, count, getTooltipText(dateNew, count)]);
-            }
-        );
+            const dateNew = new Date(date);
+            dataTable.data.push([dateNew, count, getTooltipText(dateNew, count)]);
+        });
         return dataTable;
 
         function getTooltipText(date: Date, count: number): string {
@@ -104,18 +102,13 @@ export class ChartsProcessDeploymentsService {
 
     private setProcessDeploymentValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
         const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
-        return new ChartsModel(
-            'ColumnChart',
-            dataTable.data,
-            {
-                chartArea: {width: element.widthPercentage, height: element.heightPercentage},
-                width: element.width,
-                height: element.height,
-                legend: 'none',
-                hAxis: {gridlines: {count: -1}},
-                colors: [customColor],
-            }
-        );
+        return new ChartsModel('ColumnChart', dataTable.data, {
+            chartArea: { width: element.widthPercentage, height: element.heightPercentage },
+            width: element.width,
+            height: element.height,
+            legend: 'none',
+            hAxis: { gridlines: { count: -1 } },
+            colors: [customColor],
+        });
     }
 }
-

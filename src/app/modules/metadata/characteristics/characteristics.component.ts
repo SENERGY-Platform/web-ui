@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {Navigation, Router} from '@angular/router';
-import {CharacteristicsService} from './shared/characteristics.service';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-search.model';
-import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DeviceTypeCharacteristicsModel, DeviceTypeConceptModel } from '../device-types-overview/shared/device-type.model';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { Navigation, Router } from '@angular/router';
+import { CharacteristicsService } from './shared/characteristics.service';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Subscription } from 'rxjs';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { CharacteristicsPermSearchModel } from './shared/characteristics-perm-search.model';
+import { CharacteristicsEditDialogComponent } from './dialogs/characteristics-edit-dialog.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 const grids = new Map([
     ['xs', 1],
@@ -39,7 +39,7 @@ const grids = new Map([
 @Component({
     selector: 'senergy-characteristic',
     templateUrl: './characteristics.component.html',
-    styleUrls: ['./characteristics.component.css']
+    styleUrls: ['./characteristics.component.css'],
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
@@ -58,13 +58,15 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private dialog: MatDialog,
-                private responsiveService: ResponsiveService,
-                private characteristicsService: CharacteristicsService,
-                private searchbarService: SearchbarService,
-                private snackBar: MatSnackBar,
-                private router: Router,
-                private dialogsService: DialogsService) {
+    constructor(
+        private dialog: MatDialog,
+        private responsiveService: ResponsiveService,
+        private characteristicsService: CharacteristicsService,
+        private searchbarService: SearchbarService,
+        private snackBar: MatSnackBar,
+        private router: Router,
+        private dialogsService: DialogsService,
+    ) {
         this.getRouterParams();
     }
 
@@ -95,20 +97,20 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(CharacteristicsEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((resp: { conceptId: string, characteristic: DeviceTypeCharacteristicsModel }) => {
+        editDialogRef.afterClosed().subscribe((resp: { conceptId: string; characteristic: DeviceTypeCharacteristicsModel }) => {
             if (resp !== undefined) {
                 this.reset();
                 this.characteristicsService.createCharacteristic(resp.conceptId, resp.characteristic).subscribe((characteristic) => {
                     if (characteristic === null) {
-                        this.snackBar.open('Error while creating the characteristic!', undefined, {duration: 2000});
+                        this.snackBar.open('Error while creating the characteristic!', undefined, { duration: 2000 });
                         this.getCharacteristics(true);
                     } else {
-                        this.snackBar.open('Characteristic created successfully.', undefined, {duration: 2000});
+                        this.snackBar.open('Characteristic created successfully.', undefined, { duration: 2000 });
                         this.reloadCharacterisitics(true);
                     }
                 });
             }
-        }); 
+        });
     }
 
     tagRemoved(): void {
@@ -118,44 +120,51 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     deleteCharacteristic(characteristic: CharacteristicsPermSearchModel): void {
-        this.dialogsService.openDeleteDialog('characteristic ' + characteristic.name).afterClosed().subscribe((deleteCharacteristic: boolean) => {
-            if (deleteCharacteristic) {
-                this.characteristicsService.deleteCharacteristic(characteristic.concept_id, characteristic.id).subscribe((resp: boolean) => {
-                    if (resp === true) {
-                        this.characteristics.splice(this.characteristics.indexOf(characteristic), 1);
-                        this.snackBar.open('Characteristic deleted successfully.', undefined, {duration: 2000});
-                        this.setRepoItemsParams(1);
-                        this.reloadCharacterisitics(false);
-                    } else {
-                        this.snackBar.open('Error while deleting the characteristic!', undefined, {duration: 2000});
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('characteristic ' + characteristic.name)
+            .afterClosed()
+            .subscribe((deleteCharacteristic: boolean) => {
+                if (deleteCharacteristic) {
+                    this.characteristicsService
+                        .deleteCharacteristic(characteristic.concept_id, characteristic.id)
+                        .subscribe((resp: boolean) => {
+                            if (resp === true) {
+                                this.characteristics.splice(this.characteristics.indexOf(characteristic), 1);
+                                this.snackBar.open('Characteristic deleted successfully.', undefined, { duration: 2000 });
+                                this.setRepoItemsParams(1);
+                                this.reloadCharacterisitics(false);
+                            } else {
+                                this.snackBar.open('Error while deleting the characteristic!', undefined, { duration: 2000 });
+                            }
+                        });
+                }
+            });
     }
 
     editCharacteristic(inputCharacteristic: CharacteristicsPermSearchModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
-            characteristic: JSON.parse(JSON.stringify(inputCharacteristic))         // create copy of object
+            characteristic: JSON.parse(JSON.stringify(inputCharacteristic)), // create copy of object
         };
 
         const editDialogRef = this.dialog.open(CharacteristicsEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((resp: { conceptId: string, characteristic: DeviceTypeCharacteristicsModel }) => {
+        editDialogRef.afterClosed().subscribe((resp: { conceptId: string; characteristic: DeviceTypeCharacteristicsModel }) => {
             if (resp !== undefined) {
                 const newCharacteristic = resp.characteristic;
                 this.reset();
-                this.characteristicsService.updateConcept(inputCharacteristic.concept_id, newCharacteristic).subscribe((characteristic: (DeviceTypeCharacteristicsModel | null)) => {
-                    if (characteristic === null) {
-                        this.snackBar.open('Error while updating the characteristic!', undefined, {duration: 2000});
-                        this.getCharacteristics(true);
-                    } else {
-                        this.snackBar.open('Characteristic updated successfully.', undefined, {duration: 2000});
-                        this.reloadCharacterisitics(true);
-                    }
-                });
+                this.characteristicsService
+                    .updateConcept(inputCharacteristic.concept_id, newCharacteristic)
+                    .subscribe((characteristic: DeviceTypeCharacteristicsModel | null) => {
+                        if (characteristic === null) {
+                            this.snackBar.open('Error while updating the characteristic!', undefined, { duration: 2000 });
+                            this.getCharacteristics(true);
+                        } else {
+                            this.snackBar.open('Characteristic updated successfully.', undefined, { duration: 2000 });
+                            this.reloadCharacterisitics(true);
+                        }
+                    });
             }
         });
     }
@@ -166,15 +175,21 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         }
         if (this.routerConcept !== null) {
             this.selectedTag = this.routerConcept.name;
-            this.characteristicsService.getCharacteristicByConceptId(this.routerConcept.id, this.limit, this.offset,
-                this.sortAttribute.value, this.sortAttribute.order).subscribe(
-                (characteristics: CharacteristicsPermSearchModel[]) => {
+            this.characteristicsService
+                .getCharacteristicByConceptId(
+                    this.routerConcept.id,
+                    this.limit,
+                    this.offset,
+                    this.sortAttribute.value,
+                    this.sortAttribute.order,
+                )
+                .subscribe((characteristics: CharacteristicsPermSearchModel[]) => {
                     this.setCharacteristics(characteristics);
                 });
         } else {
-            this.characteristicsService.getCharacteristics(this.searchText, this.limit, this.offset, this.sortAttribute.value,
-                this.sortAttribute.order).subscribe(
-                (characteristics: CharacteristicsPermSearchModel[]) => {
+            this.characteristicsService
+                .getCharacteristics(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+                .subscribe((characteristics: CharacteristicsPermSearchModel[]) => {
                     this.setCharacteristics(characteristics);
                 });
         }
@@ -235,5 +250,4 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             this.getCharacteristics(reset);
         }, 1500);
     }
-
 }

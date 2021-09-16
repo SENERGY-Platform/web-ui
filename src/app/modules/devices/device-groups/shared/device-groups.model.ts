@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-
-import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
+import { DeviceInstancesBaseModel } from '../../device-instances/shared/device-instances.model';
 
 export interface DeviceGroupModel {
     id: string;
@@ -31,7 +30,6 @@ export interface DeviceGroupCriteriaModel {
     aspect_id: string;
     device_class_id: string;
 }
-
 
 export interface DeviceGroupHelperResultModel {
     criteria: DeviceGroupCriteriaModel[];

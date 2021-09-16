@@ -16,7 +16,7 @@
 
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({name: 'shortInputVariableValue'})
+@Pipe({ name: 'shortInputVariableValue' })
 export class ShortInputVariableValuePipe implements PipeTransform {
     transform(value: string): string {
         if (value == null) {

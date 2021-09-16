@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {MatDialogModule} from '@angular/material/dialog';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {DeviceInstancesService} from './device-instances.service';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-
+import { MatDialogModule } from '@angular/material/dialog';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { DeviceInstancesService } from './device-instances.service';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 describe('DeviceInstancesService', () => {
     let service: DeviceInstancesService;
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [MatDialogModule, HttpClientTestingModule, MatSnackBarModule],
-            providers: [DeviceInstancesService]
+            providers: [DeviceInstancesService],
         });
         service = TestBed.inject(DeviceInstancesService);
     });
@@ -38,11 +37,10 @@ describe('DeviceInstancesService', () => {
 
     it('test convertToShortId', () => {
         expect(service.convertToShortId('urn:infai:ses:device:6bd07b75-d7cc-4a1a-88db-ac93f61aa7b3')).toBe('a9B7ddfMShqI26yT9hqnsw');
-        expect(function () {
+        expect(function() {
             service.convertToShortId('6bd07b75-d7cc-4a1a-88db-ac93f61aa7b3');
         }).toThrowError('expected urn:infai:ses:device as prefix');
         expect(service.convertToShortId('')).toBe('');
         expect(service.convertToShortId(undefined)).toBe('');
     });
-
 });

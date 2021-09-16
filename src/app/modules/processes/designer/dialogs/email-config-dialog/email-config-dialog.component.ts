@@ -19,10 +19,9 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
 import {ParentErrorStateMatcher} from '../../../../../core/classes/parent-error-state-matcher';
 
-
 @Component({
-  templateUrl: './email-config-dialog.component.html',
-  styleUrls: ['./email-config-dialog.component.css']
+    templateUrl: './email-config-dialog.component.html',
+    styleUrls: ['./email-config-dialog.component.css'],
 })
 export class EmailConfigDialogComponent implements OnInit {
     toFormGroup: FormGroup;
@@ -32,31 +31,41 @@ export class EmailConfigDialogComponent implements OnInit {
 
     constructor(
         private dialogRef: MatDialogRef<EmailConfigDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: {to: string, subj: string, content: string}
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { to: string; subj: string; content: string },
     ) {
-        this.toFormGroup = new FormGroup({
-            defaultValue: new FormControl(''),
-            fixed: new FormControl(true),
-            key: new FormControl('')
-        }, [this.getValidator(), Validators.required]);
-        this.toFormGroup.setValue(this.interpretStringAsPlaceholder(this.dialogParams.to));
+        this.toFormGroup = new FormGroup(
+            {
+                defaultValue: new FormControl(''),
+                fixed: new FormControl(true),
+                key: new FormControl(''),
+            },
+            [this.getValidator(), Validators.required],
+        );
+        this.toFormGroup.setValue(EmailConfigDialogComponent.interpretStringAsPlaceholder(this.dialogParams.to));
 
-        this.subjectFormGroup = new FormGroup({
-            defaultValue: new FormControl(''),
-            fixed: new FormControl(true),
-            key: new FormControl('')
-        }, this.getValidator());
-        this.subjectFormGroup.setValue(this.interpretStringAsPlaceholder(this.dialogParams.subj));
+        this.subjectFormGroup = new FormGroup(
+            {
+                defaultValue: new FormControl(''),
+                fixed: new FormControl(true),
+                key: new FormControl(''),
+            },
+            this.getValidator(),
+        );
+        this.subjectFormGroup.setValue(EmailConfigDialogComponent.interpretStringAsPlaceholder(this.dialogParams.subj));
 
-        this.contentFormGroup = new FormGroup({
-            defaultValue: new FormControl(''),
-            fixed: new FormControl(true),
-            key: new FormControl('')
-        }, this.getValidator());
-        this.contentFormGroup.setValue(this.interpretStringAsPlaceholder(this.dialogParams.content));
+        this.contentFormGroup = new FormGroup(
+            {
+                defaultValue: new FormControl(''),
+                fixed: new FormControl(true),
+                key: new FormControl(''),
+            },
+            this.getValidator(),
+        );
+        this.contentFormGroup.setValue(EmailConfigDialogComponent.interpretStringAsPlaceholder(this.dialogParams.content));
     }
 
-    ngOnInit() {}
+    ngOnInit() {
+    }
 
     close(): void {
         this.dialogRef.close();
@@ -71,38 +80,42 @@ export class EmailConfigDialogComponent implements OnInit {
     }
 
     private getValidator(): ValidatorFn {
-        return control => {
-            const placeholder = <{key: string, defaultValue: string, fixed: boolean}>control.value;
+        return (control) => {
+            const placeholder = control.value as { key: string; defaultValue: string; fixed: boolean };
             if (!placeholder) {
                 return {
-                    invalid: 'placeholder is null'
+                    invalid: 'placeholder is null',
                 };
             }
             if (placeholder.fixed && !placeholder.defaultValue) {
                 return {
-                    fixedNull: `fixed placeholders can't have empty default values`
+                    fixedNull: 'fixed placeholders can\'t have empty default values',
                 };
             }
             return null;
         };
     }
 
-    private getResult(): {to: string, subj: string, content: string} {
-        let result =  {to: '', subj: '', content: ''};
+    private getResult(): { to: string; subj: string; content: string } {
+        const result = {to: '', subj: '', content: ''};
 
-        const toPlaceholder =  <{key: string, defaultValue: string, fixed: boolean}>this.toFormGroup.value;
-        result.to = this.placeholderToString(toPlaceholder.fixed, toPlaceholder.key || 'to', toPlaceholder.defaultValue);
+        const toPlaceholder = this.toFormGroup.value as { key: string; defaultValue: string; fixed: boolean };
+        result.to = EmailConfigDialogComponent.placeholderToString(toPlaceholder.fixed, toPlaceholder.key || 'to', toPlaceholder.defaultValue);
 
-        const subjPlaceholder =  <{key: string, defaultValue: string, fixed: boolean}>this.subjectFormGroup.value;
-        result.subj = this.placeholderToString(subjPlaceholder.fixed, subjPlaceholder.key || 'subject', subjPlaceholder.defaultValue);
+        const subjPlaceholder = this.subjectFormGroup.value as { key: string; defaultValue: string; fixed: boolean };
+        result.subj = EmailConfigDialogComponent.placeholderToString(subjPlaceholder.fixed, subjPlaceholder.key || 'subject', subjPlaceholder.defaultValue);
 
-        const contentPlaceholder =  <{key: string, defaultValue: string, fixed: boolean}>this.contentFormGroup.value;
-        result.content = this.placeholderToString(contentPlaceholder.fixed, contentPlaceholder.key || 'content', contentPlaceholder.defaultValue);
+        const contentPlaceholder = this.contentFormGroup.value as { key: string; defaultValue: string; fixed: boolean };
+        result.content = EmailConfigDialogComponent.placeholderToString(
+            contentPlaceholder.fixed,
+            contentPlaceholder.key || 'content',
+            contentPlaceholder.defaultValue,
+        );
 
         return result;
     }
 
-    private placeholderToString(fixed: boolean, placeholderName: string, defaultValue: string): string {
+    private static placeholderToString(fixed: boolean, placeholderName: string, defaultValue: string): string {
         if (fixed) {
             return defaultValue || '';
         } else if (defaultValue && defaultValue !== '') {
@@ -112,11 +125,9 @@ export class EmailConfigDialogComponent implements OnInit {
         }
     }
 
-    private interpretStringAsPlaceholder(term: string): {key: string, defaultValue: string, fixed: boolean} {
+    private static interpretStringAsPlaceholder(term: string): { key: string; defaultValue: string; fixed: boolean } {
         if (term.trim().startsWith('{{') && term.trim().endsWith('}}')) {
-            const parts = term.replace(new RegExp('{{', 'g'), '')
-                .replace(new RegExp('}}', 'g'), '')
-                .split('=');
+            const parts = term.replace(new RegExp('{{', 'g'), '').replace(new RegExp('}}', 'g'), '').split('=');
             if (parts.length < 2) {
                 return {fixed: false, defaultValue: '', key: parts[0]};
             } else {

@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {ChartsModel} from '../../../shared/charts.model';
-import {MonitorProcessModel} from '../../../../../modules/processes/monitor/shared/monitor-process.model';
-import {ChartsDataTableModel} from '../../../shared/charts-data-table.model';
-import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
-import {ElementSizeService} from '../../../../../core/services/element-size.service';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ChartsProcessInstancesEditDialogComponent} from '../dialogs/charts-process-instances-edit-dialog.component';
-import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ChartsModel } from '../../../shared/charts.model';
+import { MonitorProcessModel } from '../../../../../modules/processes/monitor/shared/monitor-process.model';
+import { ChartsDataTableModel } from '../../../shared/charts-data-table.model';
+import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
+import { ElementSizeService } from '../../../../../core/services/element-size.service';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ChartsProcessInstancesEditDialogComponent } from '../dialogs/charts-process-instances-edit-dialog.component';
+import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
+import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ChartsProcessInstancesService {
-
-    constructor(private monitorService: MonitorService,
-                private elementSizeService: ElementSizeService,
-                private dialog: MatDialog,
-                private dashboardService: DashboardService) {
-    }
+    constructor(
+        private monitorService: MonitorService,
+        private elementSizeService: ElementSizeService,
+        private dialog: MatDialog,
+        private dashboardService: DashboardService,
+    ) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         const editDialogRef = this.dialog.open(ChartsProcessInstancesEditDialogComponent, dialogConfig);
 
@@ -62,40 +62,39 @@ export class ChartsProcessInstancesService {
                 } else {
                     observer.next(this.setProcessInstancesStatusValues(widgetId, this.sumUpProcessStatuses(processes)));
                 }
-                    observer.complete();
-                }
-            );
+                observer.complete();
+            });
         });
     }
 
     private sumUpProcessStatuses(processes: MonitorProcessModel[]): ChartsDataTableModel {
         const dataTable = new ChartsDataTableModel([['Status', 'Count']]);
-        const status = {active: 0, suspended: 0, completed: 0, externallyTerminated: 0, internallyTerminated: 0};
-        processes.forEach(process => {
+        const status = { active: 0, suspended: 0, completed: 0, externallyTerminated: 0, internallyTerminated: 0 };
+        processes.forEach((process) => {
             switch (process.state) {
-                case 'ACTIVE': {
-                    status.active++;
-                    break;
-                }
-                case 'SUSPENDED': {
-                    status.suspended++;
-                    break;
-                }
-                case 'COMPLETED': {
-                    status.completed++;
-                    break;
-                }
-                case 'EXTERNALLY_TERMINATED': {
-                    status.externallyTerminated++;
-                    break;
-                }
-                case 'INTERNALLY_TERMINATED': {
-                    status.internallyTerminated++;
-                    break;
-                }
-                default: {
-                    throw new Error('Unknown process state.');
-                }
+            case 'ACTIVE': {
+                status.active++;
+                break;
+            }
+            case 'SUSPENDED': {
+                status.suspended++;
+                break;
+            }
+            case 'COMPLETED': {
+                status.completed++;
+                break;
+            }
+            case 'EXTERNALLY_TERMINATED': {
+                status.externallyTerminated++;
+                break;
+            }
+            case 'INTERNALLY_TERMINATED': {
+                status.internallyTerminated++;
+                break;
+            }
+            default: {
+                throw new Error('Unknown process state.');
+            }
             }
         });
         dataTable.data.push(['Active', status.active]);
@@ -107,19 +106,14 @@ export class ChartsProcessInstancesService {
     }
 
     private setProcessInstancesStatusValues(widgetId: string, dataTable: ChartsDataTableModel): ChartsModel {
-
         const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
 
-        return new ChartsModel(
-            'PieChart',
-            dataTable.data,
-            {
-                chartArea: {width: element.widthPercentage, height: element.heightPercentage},
-                height: element.height,
-                width: element.width,
-                pieSliceText: 'value',
-                legend: 'none',
-            });
+        return new ChartsModel('PieChart', dataTable.data, {
+            chartArea: { width: element.widthPercentage, height: element.heightPercentage },
+            height: element.height,
+            width: element.width,
+            pieSliceText: 'value',
+            legend: 'none',
+        });
     }
 }
-

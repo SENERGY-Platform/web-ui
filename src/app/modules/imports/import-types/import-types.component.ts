@@ -13,29 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {ImportTypePermissionSearchModel} from './shared/import-types.model';
-import {ImportTypesService} from './shared/import-types.service';
-import {Sort} from '@angular/material/sort';
-import {FormControl} from '@angular/forms';
-import {debounceTime} from 'rxjs/internal/operators';
-import {MatTable} from '@angular/material/table';
-import {Router} from '@angular/router';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ImportInstancesModel} from '../import-instances/shared/import-instances.model';
-import {ImportDeployEditDialogComponent} from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
-import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {DialogsService} from '../../../core/services/dialogs.service';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { ImportTypePermissionSearchModel } from './shared/import-types.model';
+import { ImportTypesService } from './shared/import-types.service';
+import { Sort } from '@angular/material/sort';
+import { FormControl } from '@angular/forms';
+import { debounceTime } from 'rxjs/internal/operators';
+import { MatTable } from '@angular/material/table';
+import { Router } from '@angular/router';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ImportInstancesModel } from '../import-instances/shared/import-instances.model';
+import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DialogsService } from '../../../core/services/dialogs.service';
 
 @Component({
     selector: 'senergy-import-types',
     templateUrl: './import-types.component.html',
-    styleUrls: ['./import-types.component.css']
+    styleUrls: ['./import-types.component.css'],
 })
 export class ImportTypesComponent implements OnInit {
-
-    @ViewChild(MatTable, {static: false}) table!: MatTable<ImportTypePermissionSearchModel>;
+    @ViewChild(MatTable, { static: false }) table!: MatTable<ImportTypePermissionSearchModel>;
 
     importTypes: ImportTypePermissionSearchModel[] = [];
     dataReady = false;
@@ -45,10 +44,14 @@ export class ImportTypesComponent implements OnInit {
     limit = this.limitInit;
     offset = 0;
 
-    constructor(private importTypesService: ImportTypesService, private router: Router, private dialog: MatDialog,
-                private permissionsDialogService: PermissionsDialogService, private snackBar: MatSnackBar,
-                private deleteDialog: DialogsService) {
-    }
+    constructor(
+        private importTypesService: ImportTypesService,
+        private router: Router,
+        private dialog: MatDialog,
+        private permissionsDialogService: PermissionsDialogService,
+        private snackBar: MatSnackBar,
+        private deleteDialog: DialogsService,
+    ) {}
 
     ngOnInit(): void {
         this.load();
@@ -59,7 +62,6 @@ export class ImportTypesComponent implements OnInit {
         this.router.navigateByUrl('/imports/types/details/' + m.id);
     }
 
-
     start(m: ImportTypePermissionSearchModel) {
         const config: MatDialogConfig = {
             data: {
@@ -69,8 +71,10 @@ export class ImportTypesComponent implements OnInit {
             minHeight: '400px',
             minWidth: '600px',
         };
-        this.dialog.open(ImportDeployEditDialogComponent, config).afterClosed()
-            .subscribe(val => {
+        this.dialog
+            .open(ImportDeployEditDialogComponent, config)
+            .afterClosed()
+            .subscribe((val) => {
                 if (val !== undefined) {
                     this.router.navigateByUrl('imports/instances');
                 }
@@ -86,18 +90,24 @@ export class ImportTypesComponent implements OnInit {
     }
 
     delete(m: ImportTypePermissionSearchModel) {
-        this.deleteDialog.openDeleteDialog('import type').afterClosed().subscribe(del => {
-            if (del === true) {
-                this.dataReady = false;
-                this.importTypesService.deleteImportInstance(m.id).subscribe(() => {
-                    this.snackBar.open('Import type deleted', 'OK', {duration: 3000});
-                    this.reload();
-                }, err => {
-                    console.error(err);
-                    this.snackBar.open('Error deleting import type', 'OK', {duration: 3000});
-                });
-            }
-        });
+        this.deleteDialog
+            .openDeleteDialog('import type')
+            .afterClosed()
+            .subscribe((del) => {
+                if (del === true) {
+                    this.dataReady = false;
+                    this.importTypesService.deleteImportInstance(m.id).subscribe(
+                        () => {
+                            this.snackBar.open('Import type deleted', 'OK', { duration: 3000 });
+                            this.reload();
+                        },
+                        (err) => {
+                            console.error(err);
+                            this.snackBar.open('Error deleting import type', 'OK', { duration: 3000 });
+                        },
+                    );
+                }
+            });
     }
 
     matSortChange($event: Sort) {
@@ -106,7 +116,7 @@ export class ImportTypesComponent implements OnInit {
     }
 
     load() {
-        this.importTypesService.listImportTypes(this.searchControl.value, this.limit, this.offset, this.sort).subscribe(types => {
+        this.importTypesService.listImportTypes(this.searchControl.value, this.limit, this.offset, this.sort).subscribe((types) => {
             this.importTypes.push(...types);
             if (this.table !== undefined) {
                 this.table.renderRows();

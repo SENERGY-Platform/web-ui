@@ -17,6 +17,3 @@
 export interface DeviceDowntimeGatewayPropertiesModel {
     hideZeroPercentage?: boolean;
 }
-
-
-

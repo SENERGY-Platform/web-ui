@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
-import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
+import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
+import { CamundaVariable } from '../../../modules/processes/deployments/shared/deployments-definition.model';
 
 export interface RangeSliderPropertiesModel {
-        active?: boolean;
-        rangeSliderValue?: number;
-        deployment?: DeploymentsModel;
-        selectedParameter?: string;
-        selectedParameterModel?: CamundaVariable;
-        rangeSliderValue2?: number;
-        selectedMinValue?: number;
-        selectedMaxValue?: number;
-        selectedUnit?: string;
+    active?: boolean;
+    rangeSliderValue?: number;
+    deployment?: DeploymentsModel;
+    selectedParameter?: string;
+    selectedParameterModel?: CamundaVariable;
+    rangeSliderValue2?: number;
+    selectedMinValue?: number;
+    selectedMaxValue?: number;
+    selectedUnit?: string;
 }

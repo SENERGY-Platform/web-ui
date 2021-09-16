@@ -14,37 +14,36 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {EditOutputDialogComponent} from '../dialogs/edit-output-dialog/edit-output-dialog.component';
-import {EditInputDialogComponent} from '../dialogs/edit-input-dialog/edit-input-dialog.component';
-import {CycleDialogComponent} from '../dialogs/cycle-dialog/cycle-dialog.component';
-import {Observable} from 'rxjs';
-import {DateTimeDialogComponent} from '../dialogs/date-time-dialog/date-time-dialog.component';
-import {DurationDialogComponent} from '../dialogs/duration-dialog/duration-dialog.component';
-import {BpmnElement, BpmnParameter, DurationResult, HistoricDataConfig} from './designer.model';
-import {HistoricDataConfigDialogComponent} from '../dialogs/historic-data-config-dialog/historic-data-config-dialog.component';
-import {EmailConfigDialogComponent} from '../dialogs/email-config-dialog/email-config-dialog.component';
+import { Injectable } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { EditOutputDialogComponent } from '../dialogs/edit-output-dialog/edit-output-dialog.component';
+import { EditInputDialogComponent } from '../dialogs/edit-input-dialog/edit-input-dialog.component';
+import { CycleDialogComponent } from '../dialogs/cycle-dialog/cycle-dialog.component';
+import { Observable } from 'rxjs';
+import { DateTimeDialogComponent } from '../dialogs/date-time-dialog/date-time-dialog.component';
+import { DurationDialogComponent } from '../dialogs/duration-dialog/duration-dialog.component';
+import { BpmnElement, BpmnParameter, DurationResult, HistoricDataConfig } from './designer.model';
+import { HistoricDataConfigDialogComponent } from '../dialogs/historic-data-config-dialog/historic-data-config-dialog.component';
+import { EmailConfigDialogComponent } from '../dialogs/email-config-dialog/email-config-dialog.component';
 import {
     DeviceTypeSelectionRefModel,
-    DeviceTypeSelectionResultModel
+    DeviceTypeSelectionResultModel,
 } from '../../../metadata/device-types-overview/shared/device-type-selection.model';
-import {TaskConfigDialogComponent} from '../dialogs/task-config-dialog/task-config-dialog.component';
-import {NotificationConfigDialogComponent} from '../dialogs/notification-config-dialog/notification-config-dialog.component';
-import {FilterCriteriaDialogResultModel} from './designer-dialog.model';
-import {FilterCriteriaDialogComponent} from '../dialogs/filter-criteria-dialog/filter-criteria-dialog.component';
+import { TaskConfigDialogComponent } from '../dialogs/task-config-dialog/task-config-dialog.component';
+import { NotificationConfigDialogComponent } from '../dialogs/notification-config-dialog/notification-config-dialog.component';
+import { FilterCriteriaDialogResultModel } from './designer-dialog.model';
+import { FilterCriteriaDialogComponent } from '../dialogs/filter-criteria-dialog/filter-criteria-dialog.component';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DesignerDialogService {
-
     constructor(private dialog: MatDialog) {}
 
     openEditOutputDialog(outputs: BpmnParameter[], callback: () => void) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
-        dialogConfig.data = {outputs: outputs};
+        dialogConfig.data = { outputs };
         const editDialogRef = this.dialog.open(EditOutputDialogComponent, dialogConfig);
         editDialogRef.afterClosed().subscribe(() => {
             callback();
@@ -55,27 +54,27 @@ export class DesignerDialogService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
-        dialogConfig.data = {inputElement: inputElement};
+        dialogConfig.data = { inputElement };
         const editDialogRef = this.dialog.open(EditInputDialogComponent, dialogConfig);
         editDialogRef.afterClosed().subscribe(() => {
             callback();
         });
     }
 
-    openCycleDialog(initialCycle: string): Observable<{cron: string, text: string}> {
+    openCycleDialog(initialCycle: string): Observable<{ cron: string; text: string }> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
-        dialogConfig.data = {initialCycle: initialCycle};
+        dialogConfig.data = { initialCycle };
         const editDialogRef = this.dialog.open(CycleDialogComponent, dialogConfig);
         return editDialogRef.afterClosed();
     }
 
-    openDateTimeDialog(initialDateTime: string): Observable<{iso: string, text: string}> {
+    openDateTimeDialog(initialDateTime: string): Observable<{ iso: string; text: string }> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
-        dialogConfig.data = {initialDateTime: initialDateTime};
+        dialogConfig.data = { initialDateTime };
         const editDialogRef = this.dialog.open(DateTimeDialogComponent, dialogConfig);
         return editDialogRef.afterClosed();
     }
@@ -84,7 +83,7 @@ export class DesignerDialogService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
-        dialogConfig.data = {initialDuration: initialDuration};
+        dialogConfig.data = { initialDuration };
         const editDialogRef = this.dialog.open(DurationDialogComponent, dialogConfig);
         return editDialogRef.afterClosed();
     }
@@ -93,35 +92,35 @@ export class DesignerDialogService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
-        dialogConfig.data = {initial: existingConfig};
+        dialogConfig.data = { initial: existingConfig };
         const editDialogRef = this.dialog.open(HistoricDataConfigDialogComponent, dialogConfig);
-        editDialogRef.afterClosed().subscribe(value => {
+        editDialogRef.afterClosed().subscribe((value) => {
             if (value) {
                 callback(value);
             }
         });
     }
 
-    openEmailConfigDialog(to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void) {
+    openEmailConfigDialog(to: string, subj: string, content: string, callback: (to_: string, subj_: string, content_: string) => void) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
-        dialogConfig.data = {to: to, subj: subj, content: content};
+        dialogConfig.data = { to, subj, content };
         const editDialogRef = this.dialog.open(EmailConfigDialogComponent, dialogConfig);
-        editDialogRef.afterClosed().subscribe((value: {to: string, subj: string, content: string}) => {
+        editDialogRef.afterClosed().subscribe((value: { to: string; subj: string; content: string }) => {
             if (value) {
                 callback(value.to, value.subj, value.content);
             }
         });
     }
 
-    openNotificationConfigDialog(subj: string, content: string, callback: (subj: string, content: string) => void) {
+    openNotificationConfigDialog(subj: string, content: string, callback: (subj_: string, content_: string) => void) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
-        dialogConfig.data = {subj: subj, content: content};
+        dialogConfig.data = { subj, content };
         const editDialogRef = this.dialog.open(NotificationConfigDialogComponent, dialogConfig);
-        editDialogRef.afterClosed().subscribe((value: {subj: string, content: string}) => {
+        editDialogRef.afterClosed().subscribe((value: { subj: string; content: string }) => {
             if (value) {
                 callback(value.subj, value.content);
             }
@@ -131,15 +130,14 @@ export class DesignerDialogService {
     openTaskConfigDialog(defaultSelection: DeviceTypeSelectionRefModel): Observable<DeviceTypeSelectionResultModel> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
-        dialogConfig.data = {selection: JSON.parse(JSON.stringify(defaultSelection || null))};         // create copy of object
+        dialogConfig.data = { selection: JSON.parse(JSON.stringify(defaultSelection || null)) }; // create copy of object
         return this.dialog.open(TaskConfigDialogComponent, dialogConfig).afterClosed();
     }
-
 
     openFilterCriteriaDialog(aspect: string, iotFunction: string, characteristic: string): Observable<FilterCriteriaDialogResultModel> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
-        dialogConfig.data = {aspect: aspect, iotfunction: iotFunction, characteristic: characteristic};
+        dialogConfig.data = { aspect, iotfunction: iotFunction, characteristic };
         return this.dialog.open(FilterCriteriaDialogComponent, dialogConfig).afterClosed();
     }
 }

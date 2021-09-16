@@ -17,34 +17,33 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SwitchComponent } from './switch.component';
-import {MatDialogModule} from '@angular/material/dialog';
-import {HttpClientModule} from '@angular/common/http';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {MatCardModule} from '@angular/material/card';
-import {WidgetModule} from '../widget.module';
+import { MatDialogModule } from '@angular/material/dialog';
+import { HttpClientModule } from '@angular/common/http';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { MatCardModule } from '@angular/material/card';
+import { WidgetModule } from '../widget.module';
 
 describe('SwitchComponent', () => {
-  let component: SwitchComponent;
-  let fixture: ComponentFixture<SwitchComponent>;
+    let component: SwitchComponent;
+    let fixture: ComponentFixture<SwitchComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [MatDialogModule, HttpClientModule, WidgetModule, MatCardModule],
-      declarations: [ SwitchComponent ],
-      providers: [MatDialogModule,
-        { provide: DashboardService, useClass: DashboardService },
-      ]
-    })
-    .compileComponents();
-  }));
+    beforeEach(
+        waitForAsync(() => {
+            TestBed.configureTestingModule({
+                imports: [MatDialogModule, HttpClientModule, WidgetModule, MatCardModule],
+                declarations: [SwitchComponent],
+                providers: [MatDialogModule, { provide: DashboardService, useClass: DashboardService }],
+            }).compileComponents();
+        }),
+    );
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(SwitchComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(SwitchComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });

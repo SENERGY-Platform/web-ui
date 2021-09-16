@@ -19,23 +19,24 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DiagramEditorComponent } from './diagram-editor.component';
 
 describe('DiagramEditorComponent', () => {
-  let component: DiagramEditorComponent;
-  let fixture: ComponentFixture<DiagramEditorComponent>;
+    let component: DiagramEditorComponent;
+    let fixture: ComponentFixture<DiagramEditorComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ DiagramEditorComponent ]
-    })
-    .compileComponents();
-  }));
+    beforeEach(
+        waitForAsync(() => {
+            TestBed.configureTestingModule({
+                declarations: [DiagramEditorComponent],
+            }).compileComponents();
+        }),
+    );
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(DiagramEditorComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(DiagramEditorComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });

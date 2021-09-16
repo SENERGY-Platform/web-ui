@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-import {AfterViewChecked, Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
-import {
-    WidgetModel
-} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {DeviceDowntimeListService} from './shared/device-downtime-list.service';
-import {DeviceDowntimeListModel} from './shared/device-downtime-list.model';
-import {Subscription} from 'rxjs';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
+import { AfterViewChecked, Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { DeviceDowntimeListService } from './shared/device-downtime-list.service';
+import { DeviceDowntimeListModel } from './shared/device-downtime-list.model';
+import { Subscription } from 'rxjs';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 
 @Component({
     selector: 'senergy-device-downtime-list',
     templateUrl: './device-downtime-list.component.html',
     styleUrls: ['./device-downtime-list.component.css'],
 })
-export class DeviceDowntimeListComponent implements OnInit, OnDestroy{
-
+export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     devices: DeviceDowntimeListModel[] = [];
     ready = false;
     destroy = new Subscription();
@@ -38,10 +35,11 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy{
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private eventListService: DeviceDowntimeListService,
-                private processModelListService: DeviceDowntimeListService,
-                private dashboardService: DashboardService) {
-    }
+    constructor(
+        private eventListService: DeviceDowntimeListService,
+        private processModelListService: DeviceDowntimeListService,
+        private dashboardService: DashboardService,
+    ) {}
 
     ngOnInit() {
         this.getProcesses();

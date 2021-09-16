@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {
-    WidgetModel
-} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material/icon';
-import {DomSanitizer} from '@angular/platform-browser';
-import {ProcessStateService} from './shared/process-state.service';
-import {ProcessStateModel} from './shared/process-state.model';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
+import { ProcessStateService } from './shared/process-state.service';
+import { ProcessStateModel } from './shared/process-state.model';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
     selector: 'senergy-process-state',
@@ -33,8 +31,7 @@ import {HttpClient} from '@angular/common/http';
     providers: [HttpClient],
 })
 export class ProcessStateComponent implements OnInit, OnDestroy {
-
-    processStatus: ProcessStateModel = {available: 0, executable: 0};
+    processStatus: ProcessStateModel = { available: 0, executable: 0 };
     ready = false;
     destroy = new Subscription();
 
@@ -42,11 +39,12 @@ export class ProcessStateComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private iconRegistry: MatIconRegistry,
-                private sanitizer: DomSanitizer,
-                private processStateService: ProcessStateService,
-                private dashboardService: DashboardService) {
-    }
+    constructor(
+        private iconRegistry: MatIconRegistry,
+        private sanitizer: DomSanitizer,
+        private processStateService: ProcessStateService,
+        private dashboardService: DashboardService,
+    ) {}
 
     ngOnInit() {
         this.setDeviceStatus();
@@ -65,8 +63,8 @@ export class ProcessStateComponent implements OnInit, OnDestroy {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
                 this.processStateService.getProcessStatus().subscribe((processStatus: ProcessStateModel) => {
-                        this.processStatus = processStatus;
-                        this.ready = true;
+                    this.processStatus = processStatus;
+                    this.ready = true;
                 });
             }
         });

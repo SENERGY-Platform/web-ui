@@ -20,7 +20,6 @@ export interface DeploymentsDefinitionModel {
     deploymentId: string;
 }
 
-
 export interface CamundaVariable {
     value: any;
     type: string | null | undefined;

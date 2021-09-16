@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Injectable, OnInit} from '@angular/core';
-import {ImportTypeContentVariableModel, ImportTypeModel, ImportTypePermissionSearchModel} from './import-types.model';
-import {HttpClient} from '@angular/common/http';
-import {environment} from '../../../../../environments/environment';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/internal/operators';
-import {delay} from 'rxjs/operators';
-import {ExportValueModel} from '../../../exports/shared/export.model';
+import { Injectable, OnInit } from '@angular/core';
+import { ImportTypeContentVariableModel, ImportTypeModel, ImportTypePermissionSearchModel } from './import-types.model';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/internal/operators';
+import { delay } from 'rxjs/operators';
+import { ExportValueModel } from '../../../exports/shared/export.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ImportTypesService {
     eventualConsistencyDelay = 2000;
@@ -36,10 +36,14 @@ export class ImportTypesService {
     LIST = 'https://schema.org/ItemList';
     types: Map<string, string> = new Map();
 
-    constructor(private http: HttpClient) {
-    }
+    constructor(private http: HttpClient) {}
 
-    listImportTypes(search: string, limit: number | undefined, offset: number | undefined, sort: string): Observable<ImportTypePermissionSearchModel[]> {
+    listImportTypes(
+        search: string,
+        limit: number | undefined,
+        offset: number | undefined,
+        sort: string,
+    ): Observable<ImportTypePermissionSearchModel[]> {
         let url = environment.permissionSearchUrl + '/v3/resources/import-types?';
         if (search.length > 0) {
             url += '&search=' + search;
@@ -53,24 +57,29 @@ export class ImportTypesService {
         if (sort.length > 0) {
             url += '&sort=' + sort;
         }
-        return this.http.get<ImportTypePermissionSearchModel[]>(url)
-            .pipe(map(types => types || []))
-            .pipe(map(types => {
-                types.forEach(type => {
-                    type.aspect_functions = type.aspect_functions || [];
-                    type.aspect_ids = type.aspect_ids || [];
-                    type.function_ids = type.function_ids || [];
-                });
-                return types;
-            }));
+        return this.http
+            .get<ImportTypePermissionSearchModel[]>(url)
+            .pipe(map((types) => types || []))
+            .pipe(
+                map((types) => {
+                    types.forEach((type) => {
+                        type.aspect_functions = type.aspect_functions || [];
+                        type.aspect_ids = type.aspect_ids || [];
+                        type.function_ids = type.function_ids || [];
+                    });
+                    return types;
+                }),
+            );
     }
 
     getImportType(id: string): Observable<ImportTypeModel> {
-        return this.http.get<ImportTypeModel>(environment.importRepoUrl + '/import-types/' + id).pipe(map(type => {
-            type.aspect_ids = type.aspect_ids || [];
-            type.function_ids = type.function_ids || [];
-            return type;
-        }));
+        return this.http.get<ImportTypeModel>(environment.importRepoUrl + '/import-types/' + id).pipe(
+            map((type) => {
+                type.aspect_ids = type.aspect_ids || [];
+                type.function_ids = type.function_ids || [];
+                return type;
+            }),
+        );
     }
 
     saveImportType(importType: ImportTypeModel): Observable<void> {
@@ -84,8 +93,7 @@ export class ImportTypesService {
     }
 
     deleteImportInstance(id: string): Observable<void> {
-        return this.http.delete<void>(environment.importRepoUrl + '/import-types/' + id)
-            .pipe(delay(this.eventualConsistencyDelay));
+        return this.http.delete<void>(environment.importRepoUrl + '/import-types/' + id).pipe(delay(this.eventualConsistencyDelay));
     }
 
     parseImportTypeExportValues(importType: ImportTypeModel, includeComplex = false): ExportValueModel[] {
@@ -95,7 +103,7 @@ export class ImportTypesService {
         this.types.set(this.BOOLEAN, 'bool');
         this.types.set(this.LIST, 'string_json');
 
-        let exportContent = importType.output.sub_content_variables?.find(sub => sub.name === 'value' && sub.type === this.STRUCTURE);
+        let exportContent = importType.output.sub_content_variables?.find((sub) => sub.name === 'value' && sub.type === this.STRUCTURE);
         if (exportContent === undefined) {
             exportContent = importType.output;
         }
@@ -104,10 +112,17 @@ export class ImportTypesService {
         return values;
     }
 
-    private fillValuesAndTags(values: ExportValueModel[],
-                              content: ImportTypeContentVariableModel, parentPath: string, includeComplex = false) {
-        if (includeComplex || (content.sub_content_variables === null || content.sub_content_variables.length === 0)
-            && this.types.has(content.type)) { // can only export primitive types
+    private fillValuesAndTags(
+        values: ExportValueModel[],
+        content: ImportTypeContentVariableModel,
+        parentPath: string,
+        includeComplex = false,
+    ) {
+        if (
+            includeComplex ||
+            ((content.sub_content_variables === null || content.sub_content_variables.length === 0) && this.types.has(content.type))
+        ) {
+            // can only export primitive types
             const model = {
                 Name: content.name,
                 Path: parentPath + (parentPath === '' ? '' : '.') + content.name,
@@ -129,7 +144,7 @@ export class ImportTypesService {
         }
         if (content.sub_content_variables !== null && content.sub_content_variables.length > 0) {
             const path = parentPath === '' ? content.name : parentPath + '.' + content.name;
-            content.sub_content_variables?.forEach(sub => this.fillValuesAndTags(values, sub, path, includeComplex));
+            content.sub_content_variables?.forEach((sub) => this.fillValuesAndTags(values, sub, path, includeComplex));
         }
     }
 }

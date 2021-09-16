@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {FlowModel} from './shared/flow.model';
-import {FlowRepoService} from './shared/flow-repo.service';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {DomSanitizer} from '@angular/platform-browser';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {AuthorizationService} from '../../../core/services/authorization.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { FlowModel } from './shared/flow.model';
+import { FlowRepoService } from './shared/flow-repo.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { DomSanitizer } from '@angular/platform-browser';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Subscription } from 'rxjs';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { AuthorizationService } from '../../../core/services/authorization.service';
 
 const GRIDS = new Map([
     ['xs', 1],
@@ -37,11 +37,9 @@ const GRIDS = new Map([
 @Component({
     selector: 'senergy-operator-repo',
     templateUrl: './flow-repo.component.html',
-    styleUrls: ['./flow-repo.component.css']
+    styleUrls: ['./flow-repo.component.css'],
 })
-
 export class FlowRepoComponent implements OnInit, OnDestroy {
-
     flows: FlowModel[] = [];
     ready = false;
     gridCols = 0;
@@ -57,21 +55,21 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
 
     userId = {} as string | Error;
 
-    constructor(private flowRepoService: FlowRepoService,
-                public snackBar: MatSnackBar,
-                private responsiveService: ResponsiveService,
-                private dialogsService: DialogsService,
-                private sanitizer: DomSanitizer,
-                private authService: AuthorizationService,
-                private searchbarService: SearchbarService) {
-    }
+    constructor(
+        private flowRepoService: FlowRepoService,
+        public snackBar: MatSnackBar,
+        private responsiveService: ResponsiveService,
+        private dialogsService: DialogsService,
+        private sanitizer: DomSanitizer,
+        private authService: AuthorizationService,
+        private searchbarService: SearchbarService,
+    ) {}
 
     ngOnInit() {
         this.initGridCols();
         this.initSearchAndGetFlows();
         this.userId = this.authService.getUserId();
     }
-
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
@@ -85,24 +83,25 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
     }
 
     deleteFlow(flow: FlowModel) {
-        this.dialogsService.openDeleteDialog('flow ' + flow.name).afterClosed().subscribe((deleteFlow: boolean) => {
-            if (deleteFlow) {
-                const index = this.flows.indexOf(flow);
-                if (index > -1) {
-                    this.flows.splice(index, 1);
-                }
-                this.flowRepoService.deleteFlow(flow).subscribe(() => {
+        this.dialogsService
+            .openDeleteDialog('flow ' + flow.name)
+            .afterClosed()
+            .subscribe((deleteFlow: boolean) => {
+                if (deleteFlow) {
+                    const index = this.flows.indexOf(flow);
+                    if (index > -1) {
+                        this.flows.splice(index, 1);
+                    }
+                    this.flowRepoService.deleteFlow(flow).subscribe(() => {
                         this.snackBar.open('Flow deleted', undefined, {
                             duration: 2000,
                         });
                         this.setRepoItemsParams(1);
                         this.getFlows(false);
-                    }
-                );
-            }
-        });
+                    });
+                }
+            });
     }
-
 
     receiveSortingAttribute(sortAttribute: SortModel) {
         this.sortAttribute = sortAttribute;
@@ -115,8 +114,9 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
             this.reset();
         }
 
-        this.flowRepoService.getFlows(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-            (resp: { flows: FlowModel[] }) => {
+        this.flowRepoService
+            .getFlows(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .subscribe((resp: { flows: FlowModel[] }) => {
                 if (resp.flows.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
@@ -129,7 +129,6 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
                 this.ready = true;
             });
     }
-
 
     private initGridCols(): void {
         this.gridCols = GRIDS.get(this.responsiveService.getActiveMqAlias()) || 0;

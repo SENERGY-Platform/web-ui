@@ -19,13 +19,12 @@ export interface DeviceInstancesHistoryModel {
     date: number;
     name: string;
     log_state: string;
-    log_history: {values: LogHistoryValues[] | null};
-    log_edge: (string|boolean)[] | null;
+    log_history: { values: LogHistoryValues[] | null };
+    log_edge: (string | boolean)[] | null;
 }
 
 interface LogHistoryValues {
-    0: number;      /** time          */
-    1: boolean;     /** connected     */
-    2: string;      /** connectorName */
+    0: number /** time          */;
+    1: boolean /** connected     */;
+    2: string /** connectorName */;
 }
-

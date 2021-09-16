@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DeviceTypeBaseModel} from './device-type.model';
+import { DeviceTypeBaseModel } from './device-type.model';
 
 export interface DeviceTypePermSearchModel extends DeviceTypeBaseModel {
     creator: string;

@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {NameValuePair} from './dwd-pollen.model';
+import { Injectable } from '@angular/core';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { NameValuePair } from './dwd-pollen.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DWDPollenService {
-
     private pollenLevel: NameValuePair[] = [
         {
             name: 'keine Belastung',
@@ -58,18 +57,19 @@ export class DWDPollenService {
         },
     ];
 
-    constructor(private errorHandlerService: ErrorHandlerService,
-                private http: HttpClient) {
-    }
+    constructor(private errorHandlerService: ErrorHandlerService, private http: HttpClient) {}
 
     getPollenAreaResponse(): Observable<any> {
-        return this.http.get(
+        return this.http
+            .get(
                 'https://maps.dwd.de/geoserver/dwd/ows?service=WFS&version=2.0.0&request=GetFeature' +
-                '&typeName=dwd:Pollenfluggebiete' +
-                '&outputFormat=application/json')
-                .pipe(map(resp => resp || []),
-                    catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPollenArea', {}))
-                );
+                    '&typeName=dwd:Pollenfluggebiete' +
+                    '&outputFormat=application/json',
+            )
+            .pipe(
+                map((resp) => resp || []),
+                catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPollenArea', {})),
+            );
     }
 
     getNameValuePairs(): NameValuePair[] {
@@ -94,4 +94,3 @@ export class DWDPollenService {
         return -1;
     }
 }
-

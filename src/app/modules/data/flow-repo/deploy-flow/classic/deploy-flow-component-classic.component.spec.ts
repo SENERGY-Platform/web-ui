@@ -15,55 +15,66 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatDialogModule} from '@angular/material/dialog';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
 
-import {InfiniteScrollModule} from 'ngx-infinite-scroll';
-import {DeployFlowClassicComponent} from './deploy-flow-component-classic.component';
-import {CoreModule} from '../../../../../core/core.module';
-import {AuthorizationService} from '../../../../../core/services/authorization.service';
-import {AuthorizationServiceMock} from '../../../../../core/services/authorization.service.mock';
-import {DialogsService} from '../../../../../core/services/dialogs.service';
-import {ActivatedRoute} from '@angular/router';
-import {RouterTestingModule} from '@angular/router/testing';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { DeployFlowClassicComponent } from './deploy-flow-component-classic.component';
+import { CoreModule } from '../../../../../core/core.module';
+import { AuthorizationService } from '../../../../../core/services/authorization.service';
+import { AuthorizationServiceMock } from '../../../../../core/services/authorization.service.mock';
+import { DialogsService } from '../../../../../core/services/dialogs.service';
+import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('DeployFlowClassicComponent', () => {
-  let component: DeployFlowClassicComponent;
-  let fixture: ComponentFixture<DeployFlowClassicComponent>;
+    let component: DeployFlowClassicComponent;
+    let fixture: ComponentFixture<DeployFlowClassicComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule, RouterTestingModule],
-      declarations: [ DeployFlowClassicComponent ],
-      providers: [
-        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-        DialogsService,
-        {provide: ActivatedRoute, useValue: {
-            snapshot: {
-              paramMap: {
-                get(): string {
-                  return '123';
-                },
-              },
-            }
-          }}
-      ]
-    })
-    .compileComponents();
-  }));
+    beforeEach(
+        waitForAsync(() => {
+            TestBed.configureTestingModule({
+                imports: [
+                    HttpClientTestingModule,
+                    MatSnackBarModule,
+                    MatDialogModule,
+                    CoreModule,
+                    InfiniteScrollModule,
+                    RouterTestingModule,
+                ],
+                declarations: [DeployFlowClassicComponent],
+                providers: [
+                    { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                    DialogsService,
+                    {
+                        provide: ActivatedRoute,
+                        useValue: {
+                            snapshot: {
+                                paramMap: {
+                                    get(): string {
+                                        return '123';
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            }).compileComponents();
+        }),
+    );
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(DeployFlowClassicComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(DeployFlowClassicComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-  it('should parse inputs', () => {
-    expect(component.selectedValues).toBeTruthy();
-  });
+    it('should parse inputs', () => {
+        expect(component.selectedValues).toBeTruthy();
+    });
 });

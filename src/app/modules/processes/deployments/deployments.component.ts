@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {forkJoin, Observable, Subscription} from 'rxjs';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {UtilService} from '../../../core/services/util.service';
-import {DeploymentsService} from './shared/deployments.service';
-import {DeploymentsModel, DeploymentsOfflineReasonsModel} from './shared/deployments.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ClipboardService} from 'ngx-clipboard';
-import {environment} from '../../../../environments/environment';
-import {Router} from '@angular/router';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {DeploymentsMissingDependenciesDialogComponent} from './dialogs/deployments-missing-dependencies-dialog.component';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {CamundaVariable} from './shared/deployments-definition.model';
-import {DeploymentsStartParameterDialogComponent} from './dialogs/deployments-start-parameter-dialog.component';
-import {DeploymentsFogFactory} from './shared/deployments-fog.service';
-import {HubModel, NetworksModel} from '../../devices/networks/shared/networks.model';
-import {NetworksService} from '../../devices/networks/shared/networks.service';
-import {DeploymentsFogModel} from './shared/deployments-fog.model';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { forkJoin, Observable, Subscription } from 'rxjs';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { UtilService } from '../../../core/services/util.service';
+import { DeploymentsService } from './shared/deployments.service';
+import { DeploymentsModel, DeploymentsOfflineReasonsModel } from './shared/deployments.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ClipboardService } from 'ngx-clipboard';
+import { environment } from '../../../../environments/environment';
+import { Router } from '@angular/router';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { DeploymentsMissingDependenciesDialogComponent } from './dialogs/deployments-missing-dependencies-dialog.component';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { CamundaVariable } from './shared/deployments-definition.model';
+import { DeploymentsStartParameterDialogComponent } from './dialogs/deployments-start-parameter-dialog.component';
+import { DeploymentsFogFactory } from './shared/deployments-fog.service';
+import { HubModel, NetworksModel } from '../../devices/networks/shared/networks.model';
+import { NetworksService } from '../../devices/networks/shared/networks.service';
+import { DeploymentsFogModel } from './shared/deployments-fog.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -49,11 +49,10 @@ const grids = new Map([
 @Component({
     selector: 'senergy-process-deployments',
     templateUrl: './deployments.component.html',
-    styleUrls: ['./deployments.component.css']
+    styleUrls: ['./deployments.component.css'],
 })
-
 export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDestroy {
-    formGroup: FormGroup = new FormGroup({repoItems: new FormArray([])});
+    formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
     gridCols = 0;
     sortAttributes = [new SortModel('Date', 'deploymentTime', 'desc'), new SortModel('Name', 'name', 'asc')];
     ready = false;
@@ -76,34 +75,42 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     hub: NetworksModel | undefined | null;
 
     deploymentsService: {
-        getAll(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]>
-        checkForDeletedDeploymentWithRetries(id: string, maxRetries: number, intervalInMs: number): Observable<boolean>
-        getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable>|null>
-        startDeployment(deploymentId: string): Observable<any | null>
-        v2deleteDeployment(deploymentId: string): Observable<{ status: number }>
+        getAll(
+            query: string,
+            limit: number,
+            offset: number,
+            feature: string,
+            order: string,
+            source: string,
+        ): Observable<DeploymentsModel[]>;
+        checkForDeletedDeploymentWithRetries(id: string, maxRetries: number, intervalInMs: number): Observable<boolean>;
+        getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable> | null>;
+        startDeployment(deploymentId: string): Observable<any | null>;
+        v2deleteDeployment(deploymentId: string): Observable<{ status: number }>;
     };
 
-    @ViewChild('mainPanel', {static: false}) mainPanel!: ElementRef;
+    @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
 
-    constructor(private sanitizer: DomSanitizer,
-                private utilService: UtilService,
-                private searchbarService: SearchbarService,
-                private platformDeploymentsService: DeploymentsService,
-                private responsiveService: ResponsiveService,
-                private snackBar: MatSnackBar,
-                private clipboardService: ClipboardService,
-                private router: Router,
-                private dialogsService: DialogsService,
-                private dialog: MatDialog,
-                private fogDeploymentsFactory: DeploymentsFogFactory,
-                private _formBuilder: FormBuilder,
-                private hubsService: NetworksService
+    constructor(
+        private sanitizer: DomSanitizer,
+        private utilService: UtilService,
+        private searchbarService: SearchbarService,
+        private platformDeploymentsService: DeploymentsService,
+        private responsiveService: ResponsiveService,
+        private snackBar: MatSnackBar,
+        private clipboardService: ClipboardService,
+        private router: Router,
+        private dialogsService: DialogsService,
+        private dialog: MatDialog,
+        private fogDeploymentsFactory: DeploymentsFogFactory,
+        private _formBuilder: FormBuilder,
+        private hubsService: NetworksService,
     ) {
         this.deploymentsService = platformDeploymentsService;
     }
 
     ngOnInit() {
-        this.hubsService.listSyncNetworks().subscribe(result => {
+        this.hubsService.listSyncNetworks().subscribe((result) => {
             this.hubList = result;
         });
         this.initGridCols();
@@ -150,9 +157,9 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
             } else {
                 this.deploymentsService.startDeployment(deploymentId).subscribe((resp) => {
                     if (resp === null) {
-                        this.snackBar.open('Error while starting the deployment!', undefined, {duration: 2000});
+                        this.snackBar.open('Error while starting the deployment!', undefined, { duration: 2000 });
                     } else {
-                        this.snackBar.open('Deployment started successfully.', undefined, {duration: 2000});
+                        this.snackBar.open('Deployment started successfully.', undefined, { duration: 2000 });
                     }
                 });
             }
@@ -164,49 +171,54 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             deploymentService: this.deploymentsService,
-            deploymentId: deploymentId,
-            parameter: parameter
+            deploymentId,
+            parameter,
         };
         this.dialog.open(DeploymentsStartParameterDialogComponent, dialogConfig);
     }
 
     copyEndpoint(id: string) {
         this.clipboardService.copyFromContent(environment.processServiceUrl + '/deployment/' + id + '/start');
-        this.snackBar.open('URL copied to clipboard.', undefined, {duration: 2000});
+        this.snackBar.open('URL copied to clipboard.', undefined, { duration: 2000 });
     }
 
     navigateToMonitorSection(deployment: DeploymentsModel, activeTab: number) {
-        this.router.navigateByUrl('/processes/monitor', {state: {deployment: deployment, activeTab: activeTab, hub: this.hub}});
+        this.router.navigateByUrl('/processes/monitor', { state: { deployment, activeTab, hub: this.hub } });
     }
 
     deleteDeployment(deployment: DeploymentsModel): void {
-        this.dialogsService.openDeleteDialog('deployment ' + deployment.name).afterClosed().subscribe((deleteDeployment: boolean) => {
-            if (deleteDeployment) {
-                this.deploymentsService.v2deleteDeployment(deployment.id).subscribe((resp: { status: number }) => {
-                    if (resp.status === 200) {
-                        this.repoItems.removeAt(this.repoItems.value.findIndex((item: DeploymentsModel) => deployment.id === item.id));
-                        this.deploymentsService.checkForDeletedDeploymentWithRetries(deployment.id, 10, 100).subscribe((exists: boolean) => {
-                            if (exists) {
-                                this.showSnackBarError('deleting the deployment!');
-                            } else {
-                                this.showSnackBarSuccess('Deployment deleted');
-                            }
-                            this.setRepoItemsParams(1);
-                            this.getRepoItems(false);
-                        });
-                    } else {
-                        this.showSnackBarError('deleting the deployment!');
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('deployment ' + deployment.name)
+            .afterClosed()
+            .subscribe((deleteDeployment: boolean) => {
+                if (deleteDeployment) {
+                    this.deploymentsService.v2deleteDeployment(deployment.id).subscribe((resp: { status: number }) => {
+                        if (resp.status === 200) {
+                            this.repoItems.removeAt(this.repoItems.value.findIndex((item: DeploymentsModel) => deployment.id === item.id));
+                            this.deploymentsService
+                                .checkForDeletedDeploymentWithRetries(deployment.id, 10, 100)
+                                .subscribe((exists: boolean) => {
+                                    if (exists) {
+                                        this.showSnackBarError('deleting the deployment!');
+                                    } else {
+                                        this.showSnackBarSuccess('Deployment deleted');
+                                    }
+                                    this.setRepoItemsParams(1);
+                                    this.getRepoItems(false);
+                                });
+                        } else {
+                            this.showSnackBarError('deleting the deployment!');
+                        }
+                    });
+                }
+            });
     }
 
     showOfflineReasons(reasons: DeploymentsOfflineReasonsModel[]): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
-            reasons: reasons
+            reasons,
         };
         this.dialog.open(DeploymentsMissingDependenciesDialogComponent, dialogConfig);
     }
@@ -220,34 +232,39 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     deleteMultipleItems(): void {
-        this.dialogsService.openDeleteDialog(this.selectedItems.length + (this.selectedItems.length === 1 ? ' deployment' : ' deployments')).afterClosed().subscribe((deleteProcess: boolean) => {
-            if (deleteProcess) {
-                // clear repoItems and ready, that spinner occurs
-                this.repoItems.clear();
-                this.ready = false;
-                const array: Observable<boolean>[] = [];
-                this.selectedItems.forEach((item: DeploymentsModel) => {
-                    array.push(this.deploymentsService.checkForDeletedDeploymentWithRetries(item.id, 15, 200));
-                    this.deploymentsService.v2deleteDeployment(item.id).subscribe((resp: { status: number }) => {
-                        if (resp.status !== 200) {
-                            this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!');
-                        }
+        this.dialogsService
+            .openDeleteDialog(this.selectedItems.length + (this.selectedItems.length === 1 ? ' deployment' : ' deployments'))
+            .afterClosed()
+            .subscribe((deleteProcess: boolean) => {
+                if (deleteProcess) {
+                    // clear repoItems and ready, that spinner occurs
+                    this.repoItems.clear();
+                    this.ready = false;
+                    const array: Observable<boolean>[] = [];
+                    this.selectedItems.forEach((item: DeploymentsModel) => {
+                        array.push(this.deploymentsService.checkForDeletedDeploymentWithRetries(item.id, 15, 200));
+                        this.deploymentsService.v2deleteDeployment(item.id).subscribe((resp: { status: number }) => {
+                            if (resp.status !== 200) {
+                                this.showSnackBarError(
+                                    this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!',
+                                );
+                            }
+                        });
                     });
-                });
 
-                forkJoin(array).subscribe((resp: boolean[]) => {
+                    forkJoin(array).subscribe((resp: boolean[]) => {
                         const error = resp.some((item: boolean) => item === true);
                         if (error) {
-                            this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!');
+                            this.showSnackBarError(
+                                this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!',
+                            );
                         } else {
                             this.showSnackBarSuccess(this.selectedItems.length === 1 ? 'Deployment deleted' : 'Deployments deleted');
                         }
                         this.getRepoItems(true);
-                    }
-                );
-
-            }
-        });
+                    });
+                }
+            });
     }
 
     private initGridCols(): void {
@@ -286,9 +303,9 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         }
 
         this.getAllSub.unsubscribe(); // only one request at a time
-        this.getAllSub = this.deploymentsService.getAll(
-            this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.source).subscribe(
-            (repoItems: DeploymentsModel[]) => {
+        this.getAllSub = this.deploymentsService
+            .getAll(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.source)
+            .subscribe((repoItems: DeploymentsModel[]) => {
                 if (repoItems.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
@@ -322,8 +339,8 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     private addToFormArray(repoItems: DeploymentsModel[]): void {
         repoItems.forEach((repoItem: DeploymentsModel) => {
-            this.repoItems.push(this._formBuilder.group(
-                {
+            this.repoItems.push(
+                this._formBuilder.group({
                     id: repoItem.id,
                     name: repoItem.name,
                     definition_id: repoItem.definition_id,
@@ -334,21 +351,21 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                     image: this.provideImg(repoItem.diagram),
                     sync: repoItem.sync,
                     selected: false,
-                }
-            ));
+                }),
+            );
         });
     }
 
     private showSnackBarError(text: string): void {
-        this.snackBar.open('Error while ' + text + ' !', undefined, {duration: 2000});
+        this.snackBar.open('Error while ' + text + ' !', undefined, { duration: 2000 });
     }
 
     private showSnackBarSuccess(text: string): void {
-        this.snackBar.open(text + ' successfully.', undefined, {duration: 2000});
+        this.snackBar.open(text + ' successfully.', undefined, { duration: 2000 });
     }
 
     private get maxItemsDisplayed(): number {
-        return ((this.gridCols) * Math.ceil(this.knownMainPanelOffsetHeight / this.rowHeight));
+        return this.gridCols * Math.ceil(this.knownMainPanelOffsetHeight / this.rowHeight);
     }
 
     private adjustForResize(timeout: number): number {

@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {AuthorizationService} from '../../../core/services/authorization.service';
-import {AuthorizationProfileModel} from '../../../core/components/authorization/authorization-profile.model';
-import {AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
-import {MatDialogRef} from '@angular/material/dialog';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { Component, OnInit } from '@angular/core';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { AuthorizationProfileModel } from '../../../core/components/authorization/authorization-profile.model';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     templateUrl: './settings-change-dialog.component.html',
-    styleUrls: ['./settings-change-dialog.component.css']
+    styleUrls: ['./settings-change-dialog.component.css'],
 })
 export class SettingsChangeDialogComponent implements OnInit {
-
-    profile: AuthorizationProfileModel = {email: '', firstName: '', lastName: '', username: ''};
+    profile: AuthorizationProfileModel = { email: '', firstName: '', lastName: '', username: '' };
     passwordNew = new FormControl('', [Validators.pattern('.*[?|!|#|%|$].*'), Validators.minLength(8), this.forbiddenNameValidator()]);
     passwordConfirm = new FormControl('', [this.equalValidator()]);
     firstFormGroup!: FormGroup;
     hidePasswordNew = true;
     hidePasswordConfirm = true;
 
-
-    constructor(private authorizationService: AuthorizationService,
-                private dialogRef: MatDialogRef<SettingsChangeDialogComponent>,
-                private snackBar: MatSnackBar,
-                private _formBuilder: FormBuilder) {
-    }
+    constructor(
+        private authorizationService: AuthorizationService,
+        private dialogRef: MatDialogRef<SettingsChangeDialogComponent>,
+        private snackBar: MatSnackBar,
+        private _formBuilder: FormBuilder,
+    ) {}
 
     ngOnInit(): void {
         this.profile = this.authorizationService.getProfile();
@@ -58,35 +57,40 @@ export class SettingsChangeDialogComponent implements OnInit {
     }
 
     save(): void {
-
-        this.authorizationService.changeUserProfile(
-            {first_name: this.firstFormGroup.value.firstName, last_name:  this.firstFormGroup.value.lastName, email:  this.firstFormGroup.value.email}).subscribe(
-            (resp: null | { error: string }) => {
+        this.authorizationService
+            .changeUserProfile({
+                first_name: this.firstFormGroup.value.firstName,
+                last_name: this.firstFormGroup.value.lastName,
+                email: this.firstFormGroup.value.email,
+            })
+            .subscribe((resp: null | { error: string }) => {
                 if (resp === null) {
                     this.authorizationService.updateToken();
                     if (this.passwordConfirm.value !== '') {
                         this.updatePassword();
                     } else {
-                        this.snackBar.open('Settings saved successfully.', undefined, {duration: 2000});
+                        this.snackBar.open('Settings saved successfully.', undefined, { duration: 2000 });
                     }
                 } else {
-                    this.snackBar.open('Error while saving the settings!', undefined, {duration: 2000});
+                    this.snackBar.open('Error while saving the settings!', undefined, { duration: 2000 });
                 }
-            }
-        );
+            });
     }
 
     getErrorMessageNew(): string {
-        return this.passwordNew.hasError('forbiddenName') ? 'You can\'t use the username!' :
-            this.passwordNew.hasError('minlength') ? 'You must enter at least 8 characters!' :
-                this.passwordNew.hasError('pattern') ? 'You must enter at least 1 special character (?|!|#|%|$)!' :
-                    '';
+        return this.passwordNew.hasError('forbiddenName')
+            ? 'You can\'t use the username!'
+            : this.passwordNew.hasError('minlength')
+                ? 'You must enter at least 8 characters!'
+                : this.passwordNew.hasError('pattern')
+                    ? 'You must enter at least 1 special character (?|!|#|%|$)!'
+                    : '';
     }
 
     forbiddenNameValidator(): ValidatorFn {
         return (control: AbstractControl): { [key: string]: any } | null => {
             if (this.profile.username === control.value) {
-                return {'forbiddenName': true};
+                return { forbiddenName: true };
             } else {
                 return null;
             }
@@ -98,21 +102,20 @@ export class SettingsChangeDialogComponent implements OnInit {
             if (this.passwordNew.value === control.value) {
                 return null;
             } else {
-                return {'notEqual': true};
+                return { notEqual: true };
             }
         };
     }
 
     private updatePassword() {
-        this.authorizationService.changePasswort(this.passwordConfirm.value).subscribe((resp: (null | { error: string })) => {
+        this.authorizationService.changePasswort(this.passwordConfirm.value).subscribe((resp: null | { error: string }) => {
             if (resp === null) {
-                this.snackBar.open('Settings saved successfully.', undefined, {duration: 2000});
+                this.snackBar.open('Settings saved successfully.', undefined, { duration: 2000 });
                 this.passwordNew.setValue('');
                 this.passwordConfirm.setValue('');
             } else {
-                this.snackBar.open('Error while saving the settings!', undefined, {duration: 2000});
+                this.snackBar.open('Error while saving the settings!', undefined, { duration: 2000 });
             }
         });
     }
 }
-

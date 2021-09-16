@@ -14,48 +14,47 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {AirQualityExternalProvider, AirQualityPropertiesModel, MeasurementModel} from './air-quality.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {AirQualityEditDialogComponent} from '../dialog/air-quality-edit-dialog.component';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {ExportService} from '../../../modules/exports/shared/export.service';
-import {ImportInstancesService} from '../../../modules/imports/import-instances/shared/import-instances.service';
-import {ExportDataService} from '../../shared/export-data.service';
-import {QueriesRequestElementModel} from '../../shared/export-data.model';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { AirQualityExternalProvider, AirQualityPropertiesModel, MeasurementModel } from './air-quality.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { AirQualityEditDialogComponent } from '../dialog/air-quality-edit-dialog.component';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { ExportService } from '../../../modules/exports/shared/export.service';
+import { ImportInstancesService } from '../../../modules/imports/import-instances/shared/import-instances.service';
+import { ExportDataService } from '../../shared/export-data.service';
+import { QueriesRequestElementModel } from '../../shared/export-data.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class AirQualityService {
-
     public static getAbsoluteHumidity(temp: number, rel: number): number {
-        return 13.2471 * Math.pow(Math.E, 17.67 * temp / (temp + 243.5)) * rel / (273.15 + temp);
+        return (13.2471 * Math.pow(Math.E, (17.67 * temp) / (temp + 243.5)) * rel) / (273.15 + temp);
     }
 
     public static getRelativeHumidity(temp: number, abs: number): number {
-        return abs * (273.15 + temp) / (13.2471 * Math.pow(Math.E, 17.67 * temp / (temp + 243.5)));
+        return (abs * (273.15 + temp)) / (13.2471 * Math.pow(Math.E, (17.67 * temp) / (temp + 243.5)));
     }
 
-    constructor(private dialog: MatDialog,
-                private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService,
-                private exportService: ExportService,
-                private exportDataService: ExportDataService,
-                private importInstancesService: ImportInstancesService,
-    ) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private dashboardService: DashboardService,
+        private errorHandlerService: ErrorHandlerService,
+        private exportService: ExportService,
+        private exportDataService: ExportDataService,
+        private importInstancesService: ImportInstancesService,
+    ) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId
+            widgetId,
+            dashboardId,
         };
         dialogConfig.minWidth = '750px';
         const editDialogRef = this.dialog.open(AirQualityEditDialogComponent, dialogConfig);
@@ -78,25 +77,27 @@ export class AirQualityService {
                 const pollenMap = new Map<number, number>();
                 measurements.forEach((measurement: MeasurementModel, index) => {
                     if (measurement.is_enabled) {
-                        const id = (measurement.export ? measurement.export.ID : '');
+                        const id = measurement.export ? measurement.export.ID : '';
                         const column = measurement.data.column ? measurement.data.column.Name : '';
                         insideMap.set(requestPayload.length, index);
                         requestPayload.push({
                             measurement: id || '',
-                            columns: [{name: column, math: measurement.math || undefined}],
+                            columns: [{ name: column, math: measurement.math || undefined }],
                             limit: 1,
                         });
-
                     }
-                    if (measurement.has_outside || measurement.provider === AirQualityExternalProvider.UBA
-                        || measurement.provider === AirQualityExternalProvider.Yr) {
-                        const id = (measurement.outsideExport ? measurement.outsideExport.ID : '');
+                    if (
+                        measurement.has_outside ||
+                        measurement.provider === AirQualityExternalProvider.UBA ||
+                        measurement.provider === AirQualityExternalProvider.Yr
+                    ) {
+                        const id = measurement.outsideExport ? measurement.outsideExport.ID : '';
                         const column = measurement.outsideData.column ? measurement.outsideData.column.Name : '';
                         outsideMap.set(requestPayload.length, index);
                         if (measurement.provider === AirQualityExternalProvider.UBA) {
                             const ubaColumn = {
                                 measurement: id || '',
-                                columns: [{name: column}],
+                                columns: [{ name: column }],
                                 filters: [
                                     {
                                         column: 'station_id',
@@ -116,8 +117,8 @@ export class AirQualityService {
                             requestPayload.push(ubaColumn);
                         } else {
                             requestPayload.push({
-                                measurement: id || '', columns:
-                                    [{name: column, math: measurement.outsideMath || undefined}],
+                                measurement: id || '',
+                                columns: [{ name: column, math: measurement.outsideMath || undefined }],
                                 limit: 1,
                             });
                         }
@@ -131,7 +132,7 @@ export class AirQualityService {
                         pollenMap.set(requestPayload.length, index);
                         requestPayload.push({
                             measurement: widget.properties.dwdPollenInfo.exportId,
-                            columns: [{name: 'today'}],
+                            columns: [{ name: 'today' }],
                             filters: [
                                 {
                                     column: 'pollen',
@@ -143,15 +144,14 @@ export class AirQualityService {
                         });
                     });
                 }
-                this.exportDataService.query(requestPayload)
-                    .subscribe(values => {
-                        this.mapValuesIntoMeasurements(insideMap, values, widget, 'measurements', true);
-                        this.mapValuesIntoMeasurements(outsideMap, values, widget, 'measurements', false);
-                        this.mapValuesIntoMeasurements(pollenMap, values, widget, 'pollen', false);
+                this.exportDataService.query(requestPayload).subscribe((values) => {
+                    this.mapValuesIntoMeasurements(insideMap, values, widget, 'measurements', true);
+                    this.mapValuesIntoMeasurements(outsideMap, values, widget, 'measurements', false);
+                    this.mapValuesIntoMeasurements(pollenMap, values, widget, 'pollen', false);
 
-                        observer.next(widget);
-                        observer.complete();
-                    });
+                    observer.next(widget);
+                    observer.complete();
+                });
             }
         });
     }
@@ -177,14 +177,12 @@ export class AirQualityService {
         }
     }
 
-    private mapValuesIntoMeasurements(m: Map<number, number>, values: any[][][], widget: WidgetModel,
-                                      property: string, inside: boolean) {
+    private mapValuesIntoMeasurements(m: Map<number, number>, values: any[][][], widget: WidgetModel, property: string, inside: boolean) {
         m.forEach((measurementIndex, columnIndex) => {
             if (inside) {
                 if (values[columnIndex][0] !== undefined) {
                     // @ts-ignore
-                    widget.properties[property][measurementIndex].data.value =
-                        Math.round(Number(values[columnIndex][0][1]) * 100) / 100;
+                    widget.properties[property][measurementIndex].data.value = Math.round(Number(values[columnIndex][0][1]) * 100) / 100;
                 } else {
                     // @ts-ignore
                     widget.properties[property][measurementIndex].data.value = undefined;
@@ -202,4 +200,3 @@ export class AirQualityService {
         });
     }
 }
-

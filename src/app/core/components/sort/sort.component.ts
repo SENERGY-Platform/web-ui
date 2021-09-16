@@ -14,38 +14,36 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChange, SimpleChanges} from '@angular/core';
-import {SortModel} from './shared/sort.model';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChange, SimpleChanges } from '@angular/core';
+import { SortModel } from './shared/sort.model';
 
 @Component({
     selector: 'senergy-sort',
     templateUrl: './sort.component.html',
-    styleUrls: ['./sort.component.css']
+    styleUrls: ['./sort.component.css'],
 })
 export class SortComponent implements OnChanges {
-
     @Input() sortAttributes: SortModel[] = [];
     @Output() messageEvent: EventEmitter<SortModel> = new EventEmitter();
 
     selected = 0;
 
-    constructor() {
-    }
+    constructor() {}
 
     sendMessage(item: SortModel, index: number) {
         if (this.selected === index) {
             switch (item.order) {
-                case 'asc': {
-                    item.order = 'desc';
-                    break;
-                }
-                case 'desc': {
-                    item.order = 'asc';
-                    break;
-                }
-                default: {
-                    throw new Error('Unknown order value:' + item.order);
-                }
+            case 'asc': {
+                item.order = 'desc';
+                break;
+            }
+            case 'desc': {
+                item.order = 'asc';
+                break;
+            }
+            default: {
+                throw new Error('Unknown order value:' + item.order);
+            }
             }
         }
 
@@ -61,5 +59,4 @@ export class SortComponent implements OnChanges {
             this.sortAttributes = input.currentValue;
         }
     }
-
 }

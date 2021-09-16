@@ -17,54 +17,62 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { DeviceInstancesComponent } from './device-instances.component';
-import {MatDialogModule} from '@angular/material/dialog';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {KeycloakService} from 'keycloak-angular';
-import {MockKeycloakService} from '../../../core/services/keycloak.mock';
-import {CoreModule} from '../../../core/core.module';
-import {MatTabsModule} from '@angular/material/tabs';
-import {InfiniteScrollModule} from 'ngx-infinite-scroll';
-import {DevicesModule} from '../devices.module';
-import {Router} from '@angular/router';
-
-
+import { MatDialogModule } from '@angular/material/dialog';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { KeycloakService } from 'keycloak-angular';
+import { MockKeycloakService } from '../../../core/services/keycloak.mock';
+import { CoreModule } from '../../../core/core.module';
+import { MatTabsModule } from '@angular/material/tabs';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { DevicesModule } from '../devices.module';
+import { Router } from '@angular/router';
 
 describe('DeviceInstancesComponent', () => {
-  let component: DeviceInstancesComponent;
-  let fixture: ComponentFixture<DeviceInstancesComponent>;
+    let component: DeviceInstancesComponent;
+    let fixture: ComponentFixture<DeviceInstancesComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [MatDialogModule, HttpClientTestingModule, MatSnackBarModule, CoreModule, MatTabsModule, InfiniteScrollModule, DevicesModule],
-      declarations: [ DeviceInstancesComponent ],
-      providers: [{ provide: KeycloakService, useClass: MockKeycloakService },
-        {provide: Router, useClass: RouterStub}]
-    })
-    .compileComponents();
-  }));
+    beforeEach(
+        waitForAsync(() => {
+            TestBed.configureTestingModule({
+                imports: [
+                    MatDialogModule,
+                    HttpClientTestingModule,
+                    MatSnackBarModule,
+                    CoreModule,
+                    MatTabsModule,
+                    InfiniteScrollModule,
+                    DevicesModule,
+                ],
+                declarations: [DeviceInstancesComponent],
+                providers: [
+                    { provide: KeycloakService, useClass: MockKeycloakService },
+                    { provide: Router, useClass: RouterStub },
+                ],
+            }).compileComponents();
+        }),
+    );
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(DeviceInstancesComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(DeviceInstancesComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });
 
-
 class RouterStub {
-  getCurrentNavigation() {
-    return {
-      extras: {
-        state: {
-          locationId: 'someId',
-          locationName: 'someName'
-        }
-      }
-    };
-  }
+    getCurrentNavigation() {
+        return {
+            extras: {
+                state: {
+                    locationId: 'someId',
+                    locationName: 'someName',
+                },
+            },
+        };
+    }
 }

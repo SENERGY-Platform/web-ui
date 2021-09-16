@@ -17,22 +17,22 @@
 export class ChartsModel {
     constructor(
         public chartType: string,
-        public dataTable: (Date | string | number | {role: string} | null) [][],
+        public dataTable: (Date | string | number | { role: string } | null)[][],
         public options?: {
             chartArea?: {
-                left?: number,
-                top?: number,
-                width: string,
-                height: string,
-            },
-            height?: number,
-            width?: number,
-            pieSliceText?: string,
-            legend?: string,
-            curveType?: string,
+                left?: number;
+                top?: number;
+                width: string;
+                height: string;
+            };
+            height?: number;
+            width?: number;
+            pieSliceText?: string;
+            legend?: string;
+            curveType?: string;
             tooltip?: {
                 trigger?: string;
-            }
+            };
             vAxis?: {
                 format?: string;
                 title?: string;
@@ -44,15 +44,15 @@ export class ChartsModel {
                     max?: number;
                 };
                 viewWindowMode?: string;
-            }
+            };
             hAxis?: {
                 format?: string;
                 title?: string;
                 gridlines?: {
-                    count?: number
-                }
+                    count?: number;
+                };
                 ticks?: (Date | string | number)[];
-            }
+            };
             colors?: string[];
             interpolateNulls?: boolean;
             explorer?: {
@@ -60,17 +60,12 @@ export class ChartsModel {
                 axis?: string;
                 keepInBounds?: boolean;
                 maxZoomIn?: number;
-            },
+            };
             series?: any; // int to {targetAxisIndex: int}
             vAxes?: {
-                0?: {title?: string};
-                1?: {title?: string};
-            }
-        }
-    ) {
-    }
+                0?: { title?: string };
+                1?: { title?: string };
+            };
+        },
+    ) {}
 }
-
-
-
-

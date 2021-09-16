@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     templateUrl: './delete-dialog.component.html',
-    styleUrls: ['./delete-dialog.component.css']
+    styleUrls: ['./delete-dialog.component.css'],
 })
 export class DeleteDialogComponent {
-
     text: string;
 
-    constructor(private dialogRef: MatDialogRef<DeleteDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: {text: string}) {
+    constructor(private dialogRef: MatDialogRef<DeleteDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { text: string }) {
         this.text = data.text;
     }
 

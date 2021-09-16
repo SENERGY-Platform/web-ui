@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {EventEmitter, Injectable, OnDestroy, Output} from '@angular/core';
-import {Observable} from 'rxjs';
-import {NotificationModel, NotificationUpdateModel} from './notification.model';
-import {environment} from '../../../../../../environments/environment';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../services/error-handler.service';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {NotificationDialogComponent} from '../dialog/notification-dialog.component';
-import {AuthorizationService} from '../../../../services/authorization.service';
-import {webSocket, WebSocketSubject} from 'rxjs/webSocket';
+import { EventEmitter, Injectable, OnDestroy, Output } from '@angular/core';
+import { Observable } from 'rxjs';
+import { NotificationModel, NotificationUpdateModel } from './notification.model';
+import { environment } from '../../../../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../../services/error-handler.service';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { NotificationDialogComponent } from '../dialog/notification-dialog.component';
+import { AuthorizationService } from '../../../../services/authorization.service';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class NotificationService implements OnDestroy {
     @Output() notificationEmitter: EventEmitter<NotificationModel[]> = new EventEmitter();
@@ -34,10 +34,12 @@ export class NotificationService implements OnDestroy {
     private webSocketSubject: WebSocketSubject<any> | undefined;
     private notifications: NotificationModel[] = [];
 
-    constructor(private errorHandlerService: ErrorHandlerService,
-                private http: HttpClient,
-                private authorizationService: AuthorizationService,
-                private dialog: MatDialog) {
+    constructor(
+        private errorHandlerService: ErrorHandlerService,
+        private http: HttpClient,
+        private authorizationService: AuthorizationService,
+        private dialog: MatDialog,
+    ) {
         this.initWs();
     }
 
@@ -57,11 +59,11 @@ export class NotificationService implements OnDestroy {
         return dialogRef.afterClosed();
     }
 
-    deleteNotification(notification: NotificationModel): Observable<Object> {
+    deleteNotification(notification: NotificationModel): Observable<unknown> {
         return this.http.delete(environment.notificationsUrl + '/' + notification._id);
     }
 
-    updateNotification(notification: NotificationModel): Observable<Object> {
+    updateNotification(notification: NotificationModel): Observable<unknown> {
         const n: NotificationUpdateModel = {
             isRead: notification.isRead,
             message: notification.message,
@@ -75,13 +77,14 @@ export class NotificationService implements OnDestroy {
     private initWs() {
         this.webSocketSubject?.complete();
         this.webSocketSubject = webSocket(environment.notificationsWebsocketUrl);
-        this.webSocketSubject.subscribe((msg: {type: string, payload: string | NotificationModel | NotificationModel[]}) => {
-            switch (msg.type) {
+        this.webSocketSubject.subscribe(
+            (msg: { type: string; payload: string | NotificationModel | NotificationModel[] }) => {
+                switch (msg.type) {
                 case 'please reauthenticate':
                     this.authenticateWs();
                     break;
                 case 'authentication confirmed':
-                    this.webSocketSubject?.next({type: 'refresh'});
+                    this.webSocketSubject?.next({ type: 'refresh' });
                     break;
                 case 'notification list':
                     this.notifications = msg.payload as NotificationModel[];
@@ -89,7 +92,7 @@ export class NotificationService implements OnDestroy {
                     break;
                 case 'put notification':
                     const n = msg.payload as NotificationModel;
-                    const idx = this.notifications.findIndex(no => no._id === n._id);
+                    const idx = this.notifications.findIndex((no) => no._id === n._id);
                     if (idx === -1) {
                         this.notifications.push(n);
                     } else {
@@ -99,7 +102,7 @@ export class NotificationService implements OnDestroy {
                     break;
                 case 'delete notification':
                     const id = msg.payload as string;
-                    const indx = this.notifications.findIndex(no => id === no._id);
+                    const indx = this.notifications.findIndex((no) => id === no._id);
                     if (indx !== -1) {
                         this.notifications.splice(indx, 1);
                     }
@@ -107,14 +110,16 @@ export class NotificationService implements OnDestroy {
                     break;
                 default:
                     console.log('received unknown message from notification websocket', msg);
-            }
-        }, () => setTimeout(() => this.initWs(), 5000), () => setTimeout(() => this.initWs(), 5000));
+                }
+            },
+            () => setTimeout(() => this.initWs(), 5000),
+            () => setTimeout(() => this.initWs(), 5000),
+        );
         this.webSocketSubject.next('client hello');
         this.authenticateWs();
     }
 
     private authenticateWs() {
-        this.authorizationService.getToken().then(token => this.webSocketSubject?.next({type: 'authentication', payload: token}));
+        this.authorizationService.getToken().then((token) => this.webSocketSubject?.next({ type: 'authentication', payload: token }));
     }
-
 }

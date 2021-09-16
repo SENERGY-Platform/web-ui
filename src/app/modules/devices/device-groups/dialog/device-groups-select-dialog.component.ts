@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
-import {DeviceGroupsService} from '../shared/device-groups.service';
-import {MatTable} from '@angular/material/table';
-import {FormControl} from '@angular/forms';
-import {debounceTime} from 'rxjs/internal/operators';
-import {Sort} from '@angular/material/sort';
-import {DeviceGroupsPermSearchModel} from '../shared/device-groups-perm-search.model';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
+import { DeviceGroupsService } from '../shared/device-groups.service';
+import { MatTable } from '@angular/material/table';
+import { FormControl } from '@angular/forms';
+import { debounceTime } from 'rxjs/internal/operators';
+import { Sort } from '@angular/material/sort';
+import { DeviceGroupsPermSearchModel } from '../shared/device-groups-perm-search.model';
 
 @Component({
     templateUrl: './device-groups-select-dialog.component.html',
     styleUrls: ['./device-groups-select-dialog.component.css'],
 })
 export class DeviceGroupsSelectDialogComponent implements OnInit {
-
-    @ViewChild(MatTable, {static: false}) table!: MatTable<DeviceGroupsSelectDialogComponent>;
+    @ViewChild(MatTable, { static: false }) table!: MatTable<DeviceGroupsSelectDialogComponent>;
 
     deviceGroups: DeviceGroupsPermSearchModel[] = [];
     dataReady = false;
@@ -43,11 +41,7 @@ export class DeviceGroupsSelectDialogComponent implements OnInit {
 
     selectedGroups: string[] = [];
 
-    constructor(
-        private dialogRef: MatDialogRef<DeviceGroupsSelectDialogComponent>,
-        private deviceGroupsService: DeviceGroupsService
-    ) {
-    }
+    constructor(private dialogRef: MatDialogRef<DeviceGroupsSelectDialogComponent>, private deviceGroupsService: DeviceGroupsService) {}
 
     ngOnInit() {
         this.load();
@@ -61,13 +55,15 @@ export class DeviceGroupsSelectDialogComponent implements OnInit {
     }
 
     load() {
-        this.deviceGroupsService.getDeviceGroups(this.searchControl.value, this.limit, this.offset, this.sortBy, this.sortOrder).subscribe(groups => {
-            this.deviceGroups.push(...groups);
-            if (this.table !== undefined) {
-                this.table.renderRows();
-            }
-            this.dataReady = true;
-        });
+        this.deviceGroupsService
+            .getDeviceGroups(this.searchControl.value, this.limit, this.offset, this.sortBy, this.sortOrder)
+            .subscribe((groups) => {
+                this.deviceGroups.push(...groups);
+                if (this.table !== undefined) {
+                    this.table.renderRows();
+                }
+                this.dataReady = true;
+            });
     }
 
     reload() {
@@ -111,8 +107,6 @@ export class DeviceGroupsSelectDialogComponent implements OnInit {
             }
         }
         // remove duplicates
-        this.selectedGroups = this.selectedGroups.filter((item: string, index: number) => {
-            return this.selectedGroups.indexOf(item) === index;
-        });
+        this.selectedGroups = this.selectedGroups.filter((item: string, index: number) => this.selectedGroups.indexOf(item) === index);
     }
 }

@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 
 @Component({
     templateUrl: './process-incident-list-edit-dialog.component.html',
     styleUrls: ['./process-incident-list-edit-dialog.component.css'],
 })
 export class ProcessIncidentListEditDialogComponent implements OnInit {
-
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
 
-    constructor(private dialogRef: MatDialogRef<ProcessIncidentListEditDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                private dashboardService: DashboardService,
-                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
+    constructor(
+        private dialogRef: MatDialogRef<ProcessIncidentListEditDialogComponent>,
+        private deploymentsService: DeploymentsService,
+        private dashboardService: DashboardService,
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+    ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
     }
@@ -61,5 +61,4 @@ export class ProcessIncidentListEditDialogComponent implements OnInit {
             }
         });
     }
-
 }

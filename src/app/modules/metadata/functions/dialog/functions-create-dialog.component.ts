@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {ConceptsService} from '../../concepts/shared/concepts.service';
-import {ConceptsPermSearchModel} from '../../concepts/shared/concepts-perm-search.model';
+import { Component, OnInit } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ConceptsService } from '../../concepts/shared/concepts.service';
+import { ConceptsPermSearchModel } from '../../concepts/shared/concepts-perm-search.model';
 import uuid = util.uuid;
-import {util} from 'jointjs';
+import { util } from 'jointjs';
 
 @Component({
     templateUrl: './functions-create-dialog.component.html',
-    styleUrls: ['./functions-create-dialog.component.css']
+    styleUrls: ['./functions-create-dialog.component.css'],
 })
 export class FunctionsCreateDialogComponent implements OnInit {
-
     optionsFormControl = new FormControl('Controlling');
     functionFormGroup!: FormGroup;
 
     concepts: ConceptsPermSearchModel[] = [];
 
-    constructor(private conceptsService: ConceptsService,
-                private dialogRef: MatDialogRef<FunctionsCreateDialogComponent>,
-                private _formBuilder: FormBuilder) {
+    constructor(
+        private conceptsService: ConceptsService,
+        private dialogRef: MatDialogRef<FunctionsCreateDialogComponent>,
+        private _formBuilder: FormBuilder,
+    ) {
         this.initFunctionFormGroup();
         this.optionListener();
     }
@@ -67,7 +68,7 @@ export class FunctionsCreateDialogComponent implements OnInit {
 
     private initFunctionFormGroup(): void {
         this.functionFormGroup = this._formBuilder.group({
-            id: [{value: '', disabled: true}],
+            id: [{ value: '', disabled: true }],
             name: ['', Validators.required],
             description: '',
             concept_id: '',
@@ -76,13 +77,10 @@ export class FunctionsCreateDialogComponent implements OnInit {
 
     private generateUuid(option: string): void {
         if (option === 'Controlling') {
-            this.functionFormGroup.patchValue({'id': 'urn:infai:ses:controlling-function:' + uuid()});
+            this.functionFormGroup.patchValue({ id: 'urn:infai:ses:controlling-function:' + uuid() });
         }
         if (option === 'Measuring') {
-            this.functionFormGroup.patchValue({'id': 'urn:infai:ses:measuring-function:' + uuid()});
+            this.functionFormGroup.patchValue({ id: 'urn:infai:ses:measuring-function:' + uuid() });
         }
     }
-
-
-
 }

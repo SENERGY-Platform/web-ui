@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-
-import {EventEmitter, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Observable, Subscription} from 'rxjs';
-import {LocationModel} from '../../locations/shared/locations.model';
-import {environment} from '../../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
-import {ExportResponseModel} from '../../../exports/shared/export.model';
+import { EventEmitter, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Observable, Subscription } from 'rxjs';
+import { LocationModel } from '../../locations/shared/locations.model';
+import { environment } from '../../../../../environments/environment';
+import { catchError, map } from 'rxjs/operators';
+import { ExportResponseModel } from '../../../exports/shared/export.model';
 import {
     WaitingDeviceListModel,
     WaitingDeviceModel,
@@ -34,78 +33,80 @@ import {
     WaitingRoomEventTypeError,
     WaitingRoomEventTypeSet,
     WaitingRoomEventTypeDelete,
-    WaitingRoomEventTypeUse
+    WaitingRoomEventTypeUse,
 } from './waiting-room.model';
-import {AuthorizationService} from '../../../../core/services/authorization.service';
-import {webSocket, WebSocketSubject} from 'rxjs/webSocket';
-import {NotificationModel} from '../../../../core/components/toolbar/notification/shared/notification.model';
+import { AuthorizationService } from '../../../../core/services/authorization.service';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import { NotificationModel } from '../../../../core/components/toolbar/notification/shared/notification.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class WaitingRoomService {
-    constructor(private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService,
-                private authorizationService: AuthorizationService) {
-    }
+    constructor(
+        private http: HttpClient,
+        private errorHandlerService: ErrorHandlerService,
+        private authorizationService: AuthorizationService,
+    ) {}
 
     updateDevice(device: WaitingDeviceModel): Observable<WaitingDeviceModel | null> {
         const url = environment.waitingRoomUrl + '/devices/' + encodeURIComponent(device.local_id);
-        return this.http.put<WaitingDeviceModel>(url, device).pipe(
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'updateDevice', null))
-        );
+        return this.http
+            .put<WaitingDeviceModel>(url, device)
+            .pipe(catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'updateDevice', null)));
     }
 
     updateMultipleDevices(devices: WaitingDeviceModel[]): Observable<WaitingDeviceModel[] | null> {
         const url = environment.waitingRoomUrl + '/devices';
-        return this.http.put<WaitingDeviceModel[]>(url, devices).pipe(
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'updateMultipleDevices', null))
-        );
+        return this.http
+            .put<WaitingDeviceModel[]>(url, devices)
+            .pipe(catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'updateMultipleDevices', null)));
     }
 
-    useDevice(localId: string): Observable<{status: number}> {
+    useDevice(localId: string): Observable<{ status: number }> {
         const url = environment.waitingRoomUrl + '/used/devices/' + encodeURIComponent(localId);
-        return this.http.post(url, null, {responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'useDevice', {status: 404}))
+        return this.http.post(url, null, { responseType: 'text', observe: 'response' }).pipe(
+            map((resp) => ({ status: resp.status })),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'useDevice', { status: 404 })),
         );
     }
 
-    useMultipleDevices(deviceIds: string[]): Observable<{status: number}> {
-        return this.http.request('POST', environment.waitingRoomUrl + '/used/devices', {body: deviceIds, responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'useMultipleDevices: Error', {status: 404}))
-        );
+    useMultipleDevices(deviceIds: string[]): Observable<{ status: number }> {
+        return this.http
+            .request('POST', environment.waitingRoomUrl + '/used/devices', { body: deviceIds, responseType: 'text', observe: 'response' })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'useMultipleDevices: Error', { status: 404 })),
+            );
     }
 
-    deleteDevice(localId: string): Observable<{status: number}> {
-        return this.http.delete(environment.waitingRoomUrl + '/devices/' + encodeURIComponent(localId), {responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'deleteDevice', {status: 404}))
-        );
+    deleteDevice(localId: string): Observable<{ status: number }> {
+        return this.http
+            .delete(environment.waitingRoomUrl + '/devices/' + encodeURIComponent(localId), { responseType: 'text', observe: 'response' })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'deleteDevice', { status: 404 })),
+            );
     }
 
-    deleteMultipleDevices(deviceIds: string[]): Observable<{status: number}> {
-        return this.http.request('DELETE', environment.waitingRoomUrl + '/devices', {body: deviceIds, responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'deleteMultipleDevices: Error', {status: 404}))
-        );
+    deleteMultipleDevices(deviceIds: string[]): Observable<{ status: number }> {
+        return this.http
+            .request('DELETE', environment.waitingRoomUrl + '/devices', { body: deviceIds, responseType: 'text', observe: 'response' })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'deleteMultipleDevices: Error', { status: 404 })),
+            );
     }
 
-    searchDevices(search?: string, limit?: number, offset?: number, sort?: string, order?: string, showHidden?: boolean): Observable<WaitingDeviceListModel | null> {
-        const params = [
-            'limit=' + limit,
-            'offset=' + offset,
-            'sort=' + sort + '.' + order,
-        ];
+    searchDevices(
+        search?: string,
+        limit?: number,
+        offset?: number,
+        sort?: string,
+        order?: string,
+        showHidden?: boolean,
+    ): Observable<WaitingDeviceListModel | null> {
+        const params = ['limit=' + limit, 'offset=' + offset, 'sort=' + sort + '.' + order];
         if (search) {
             params.push('search=' + encodeURIComponent(search));
         }
@@ -114,63 +115,61 @@ export class WaitingRoomService {
         }
         const url = environment.waitingRoomUrl + '/devices?' + params.join('&');
 
-        return this.http.get<WaitingDeviceListModel>(url)
+        return this.http.get<WaitingDeviceListModel>(url).pipe(
+            map(
+                (resp: WaitingDeviceListModel) =>
+                    resp ||
+                    ({
+                        result: [],
+                        total: 0,
+                    } as WaitingDeviceListModel),
+            ),
+            map((resp: WaitingDeviceListModel) => {
+                resp.result = resp.result ? resp.result : [];
+                return resp;
+            }),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'searchDevices: Error', null)),
+        );
+    }
+
+    hideDevice(localId: string): Observable<{ status: number }> {
+        const url = environment.waitingRoomUrl + '/hidden/devices/' + encodeURIComponent(localId);
+        return this.http.put(url, null, { responseType: 'text', observe: 'response' }).pipe(
+            map((resp) => ({ status: resp.status })),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'hideDevice', { status: 404 })),
+        );
+    }
+
+    hideMultipleDevices(deviceIds: string[]): Observable<{ status: number }> {
+        return this.http
+            .request('PUT', environment.waitingRoomUrl + '/hidden/devices', { body: deviceIds, responseType: 'text', observe: 'response' })
             .pipe(
-                map((resp: WaitingDeviceListModel) => resp || {
-                    result: [],
-                    total: 0
-                } as WaitingDeviceListModel),
-                map((resp: WaitingDeviceListModel) => {
-                    resp.result = resp.result ? resp.result : [];
-                    return resp;
-                }),
-                catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'searchDevices: Error', null)
-                )
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'hideMultipleDevices: Error', { status: 404 })),
             );
     }
 
-    hideDevice(localId: string): Observable<{status: number}> {
-        const url = environment.waitingRoomUrl + '/hidden/devices/' + encodeURIComponent(localId);
-        return this.http.put(url, null, {responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'hideDevice', {status: 404}))
+    showDevice(localId: string): Observable<{ status: number }> {
+        const url = environment.waitingRoomUrl + '/shown/devices/' + encodeURIComponent(localId);
+        return this.http.put(url, null, { responseType: 'text', observe: 'response' }).pipe(
+            map((resp) => ({ status: resp.status })),
+            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'showDevice', { status: 404 })),
         );
     }
 
-    hideMultipleDevices(deviceIds: string[]): Observable<{status: number}> {
-        return this.http.request('PUT', environment.waitingRoomUrl + '/hidden/devices', {body: deviceIds, responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'hideMultipleDevices: Error', {status: 404}))
-        );
-    }
-
-    showDevice(localId: string): Observable<{status: number}> {
-       const url = environment.waitingRoomUrl + '/shown/devices/' + encodeURIComponent(localId);
-        return this.http.put(url, null, {responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'showDevice', {status: 404}))
-        );
-    }
-
-    showMultipleDevices(deviceIds: string[]): Observable<{status: number}> {
-        return this.http.request('PUT', environment.waitingRoomUrl + '/shown/devices', {body: deviceIds, responseType: 'text', observe: 'response'}).pipe(
-            map( resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'showMultipleDevices: Error', {status: 404}))
-        );
+    showMultipleDevices(deviceIds: string[]): Observable<{ status: number }> {
+        return this.http
+            .request('PUT', environment.waitingRoomUrl + '/shown/devices', { body: deviceIds, responseType: 'text', observe: 'response' })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'showMultipleDevices: Error', { status: 404 })),
+            );
     }
 
     events(closerSetter: (closer: () => void) => void, fallback?: () => void): Observable<WaitingRoomEvent> {
         const events: EventEmitter<WaitingRoomEvent> = new EventEmitter();
 
-        if ( environment.waitingRoomWsUrl === '' ) {
+        if (environment.waitingRoomWsUrl === '') {
             if (fallback) {
                 fallback();
             }
@@ -182,7 +181,7 @@ export class WaitingRoomService {
         let ws: WebSocketSubject<WaitingRoomEvent>;
 
         const auth = () => {
-            this.authorizationService.getToken().then(token => ws?.next({type: WaitingRoomEventTypeAuth, payload: token}));
+            this.authorizationService.getToken().then((token) => ws?.next({ type: WaitingRoomEventTypeAuth, payload: token }));
         };
 
         const useFallback = () => {
@@ -203,8 +202,9 @@ export class WaitingRoomService {
                 subscription = null;
                 ws?.complete();
             });
-            subscription = ws.subscribe((msg: WaitingRoomEvent) => {
-                switch (msg.type) {
+            subscription = ws.subscribe(
+                (msg: WaitingRoomEvent) => {
+                    switch (msg.type) {
                     case WaitingRoomEventTypeAuthRequest:
                         auth();
                         break;
@@ -217,14 +217,17 @@ export class WaitingRoomService {
                         break;
                     default:
                         events.emit(msg);
-                }
-            }, (err: any) => {
-                console.error('ERROR:', err);
-                useFallback();
-                setTimeout(() => {
-                    init();
-                }, 5000);
-            }, () => setTimeout(() => init(), 5000));
+                    }
+                },
+                (err: any) => {
+                    console.error('ERROR:', err);
+                    useFallback();
+                    setTimeout(() => {
+                        init();
+                    }, 5000);
+                },
+                () => setTimeout(() => init(), 5000),
+            );
             auth();
         };
         init();
@@ -232,8 +235,6 @@ export class WaitingRoomService {
     }
 
     eventIsUpdate(msg: WaitingRoomEvent) {
-        return msg.type === WaitingRoomEventTypeSet ||
-            msg.type === WaitingRoomEventTypeDelete ||
-            msg.type === WaitingRoomEventTypeUse;
+        return msg.type === WaitingRoomEventTypeSet || msg.type === WaitingRoomEventTypeDelete || msg.type === WaitingRoomEventTypeUse;
     }
 }

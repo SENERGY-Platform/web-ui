@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import {
-    DeviceTypePermSearchModel,
-    PermissionsModel
-} from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
-import {DeviceTypeServiceModel} from '../../../metadata/device-types-overview/shared/device-type.model';
-import {ImportInstancesModel} from '../../../imports/import-instances/shared/import-instances.model';
-import {ImportTypeModel} from '../../../imports/import-types/shared/import-types.model';
+import { DeviceTypePermSearchModel, PermissionsModel } from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
+import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
+import { ImportTypeModel } from '../../../imports/import-types/shared/import-types.model';
 
 export interface Attribute {
     key: string;
@@ -50,9 +47,9 @@ export interface DeviceInstancesModel extends DeviceInstancesIntermediateModel {
 }
 
 export interface DeviceFilterCriteriaModel {
-    function_id ?: string;
-    device_class_id ?: string;
-    aspect_id ?: string;
+    function_id?: string;
+    device_class_id?: string;
+    aspect_id?: string;
 }
 
 export interface DeviceSelectablesModel {
@@ -69,5 +66,5 @@ export interface DeviceSelectablesFullModel {
         id: string;
         name: string;
     };
-    servicePathOptions?: Map<string, {path: string, characteristicId: string}>;
+    servicePathOptions?: Map<string, { path: string; characteristicId: string }>;
 }

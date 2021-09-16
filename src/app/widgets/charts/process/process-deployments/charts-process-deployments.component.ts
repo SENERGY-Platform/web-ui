@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import {GoogleChartComponent} from 'ng2-google-charts';
-import {ChartsModel} from '../../shared/charts.model';
-import {ElementSizeService} from '../../../../core/services/element-size.service';
-import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
-import {ChartsProcessDeploymentsService} from './shared/charts-process-deployments.service';
-import {ChartsService} from "../../shared/charts.service";
+import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import { GoogleChartComponent } from 'ng2-google-charts';
+import { ChartsModel } from '../../shared/charts.model';
+import { ElementSizeService } from '../../../../core/services/element-size.service';
+import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
+import { ChartsProcessDeploymentsService } from './shared/charts-process-deployments.service';
+import { ChartsService } from '../../shared/charts.service';
 
 @Component({
     selector: 'senergy-charts-process-deployments',
@@ -30,14 +30,13 @@ import {ChartsService} from "../../shared/charts.service";
     styleUrls: ['./charts-process-deployments.component.css'],
 })
 export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
-
     processDeploymentsHistory = {} as ChartsModel;
     ready = false;
     destroy = new Subscription();
 
     private resizeTimeout = 0;
 
-    @ViewChild('processDeploymentsHistoryChart', {static: false}) processDeploymentsHistoryChart!: GoogleChartComponent;
+    @ViewChild('processDeploymentsHistoryChart', { static: false }) processDeploymentsHistoryChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -52,11 +51,12 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(private chartsService: ChartsService,
-                private chartsProcessDeploymentsService: ChartsProcessDeploymentsService,
-                private elementSizeService: ElementSizeService,
-                private dashboardService: DashboardService) {
-    }
+    constructor(
+        private chartsService: ChartsService,
+        private chartsProcessDeploymentsService: ChartsProcessDeploymentsService,
+        private elementSizeService: ElementSizeService,
+        private dashboardService: DashboardService,
+    ) {}
 
     ngOnInit() {
         this.getProcessInstances();
@@ -76,15 +76,15 @@ export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
                 this.chartsService.releaseResources(this.processDeploymentsHistoryChart);
-                this.chartsProcessDeploymentsService.getProcessDeploymentHistory(this.widget.id).subscribe(
-                    (processDeploymentsHistory: ChartsModel) => {
+                this.chartsProcessDeploymentsService
+                    .getProcessDeploymentHistory(this.widget.id)
+                    .subscribe((processDeploymentsHistory: ChartsModel) => {
                         this.processDeploymentsHistory = processDeploymentsHistory;
                         this.ready = true;
                     });
             }
         });
     }
-
 
     private resizeProcessInstancesStatusChart() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id);

@@ -16,9 +16,9 @@
 
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({name: 'shortInputVariableName'})
+@Pipe({ name: 'shortInputVariableName' })
 export class ShortInputVariableNamePipe implements PipeTransform {
     transform(value: string): string {
-        return value ?  value.substring('inputs.'.length) : '';
+        return value ? value.substring('inputs.'.length) : '';
     }
 }

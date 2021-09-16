@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ImportInstancesModel} from '../../../imports/import-instances/shared/import-instances.model';
-import {ImportTypeModel} from '../../../imports/import-types/shared/import-types.model';
+import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
+import { ImportTypeModel } from '../../../imports/import-types/shared/import-types.model';
 
 export interface V2DeploymentsPreparedModel {
     id: string;
@@ -107,7 +107,7 @@ export interface V2DeploymentsPreparedSelectionOptionModel {
     device_group: V2DeploymentsPreparedGroupModel | null;
     import: ImportInstancesModel | null;
     importType: ImportTypeModel | null;
-    servicePathOptions?: Map<string, {path: string, characteristicId: string}[]>;
+    servicePathOptions?: Map<string, { path: string; characteristicId: string }[]>;
 }
 
 export interface V2DeploymentsPreparedServiceModel {
@@ -120,7 +120,6 @@ export interface V2DeploymentsPreparedDeviceModel {
     name: string;
 }
 
-
 export interface V2DeploymentsPreparedGroupModel {
     id: string;
     name: string;
@@ -132,4 +131,3 @@ export interface V2DeploymentsPreparedFilterCriteriaModel {
     device_class_id: string | null;
     aspect_id: string | null;
 }
-

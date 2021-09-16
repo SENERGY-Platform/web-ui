@@ -14,39 +14,33 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {IOModel, OperatorModel} from '../shared/operator.model';
-import {ActivatedRoute} from '@angular/router';
-import {OperatorRepoService} from '../shared/operator-repo.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {AuthorizationService} from '../../../../core/services/authorization.service';
-import {PermissionsService} from '../../../permissions/shared/permissions.service';
-import {PermissionsUserModel} from '../../../permissions/shared/permissions-user.model';
-
+import { Component, OnInit } from '@angular/core';
+import { IOModel, OperatorModel } from '../shared/operator.model';
+import { ActivatedRoute } from '@angular/router';
+import { OperatorRepoService } from '../shared/operator-repo.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthorizationService } from '../../../../core/services/authorization.service';
+import { PermissionsService } from '../../../permissions/shared/permissions.service';
+import { PermissionsUserModel } from '../../../permissions/shared/permissions-user.model';
 
 @Component({
     selector: 'senergy-operator',
     templateUrl: './operator.component.html',
-    styleUrls: ['./operator.component.css']
+    styleUrls: ['./operator.component.css'],
 })
 export class OperatorComponent implements OnInit {
-
     operator = {} as OperatorModel;
     userId: string | Error = '';
-    dropdown = [
-        'float',
-        'string',
-        'int'
-    ];
+    dropdown = ['float', 'string', 'int'];
     shareUser: string | undefined = undefined;
 
-    constructor(private route: ActivatedRoute,
-                private operatorService: OperatorRepoService,
-                public snackBar: MatSnackBar,
-                protected auth: AuthorizationService,
-                protected permission: PermissionsService
-    ) {
-    }
+    constructor(
+        private route: ActivatedRoute,
+        private operatorService: OperatorRepoService,
+        public snackBar: MatSnackBar,
+        protected auth: AuthorizationService,
+        protected permission: PermissionsService,
+    ) {}
 
     ngOnInit() {
         this.userId = this.auth.getUserId();
@@ -56,7 +50,7 @@ export class OperatorComponent implements OnInit {
                 if (resp !== null) {
                     this.operator = resp;
                     this.operator.editable = resp.userId === this.userId;
-                    if (this.operator.userId !== undefined && this.userId !== this.operator.userId ) {
+                    if (this.operator.userId !== undefined && this.userId !== this.operator.userId) {
                         this.permission.getUserById(this.operator.userId).subscribe((response: PermissionsUserModel) => {
                             this.shareUser = response.username;
                         });
@@ -72,7 +66,7 @@ export class OperatorComponent implements OnInit {
         if (this.operator.inputs !== null && this.operator.inputs !== undefined) {
             this.operator.inputs.push({} as IOModel);
         } else {
-            this.operator.inputs = [] as IOModel [];
+            this.operator.inputs = [] as IOModel[];
             this.operator.inputs.push({} as IOModel);
         }
     }
@@ -90,7 +84,7 @@ export class OperatorComponent implements OnInit {
         if (this.operator.outputs !== null && this.operator.outputs !== undefined) {
             this.operator.outputs.push({} as IOModel);
         } else {
-            this.operator.outputs = [] as IOModel [];
+            this.operator.outputs = [] as IOModel[];
             this.operator.outputs.push({} as IOModel);
         }
     }
@@ -108,7 +102,7 @@ export class OperatorComponent implements OnInit {
         if (this.operator.config_values !== null && this.operator.config_values !== undefined) {
             this.operator.config_values.push({} as IOModel);
         } else {
-            this.operator.config_values = [] as IOModel [];
+            this.operator.config_values = [] as IOModel[];
             this.operator.config_values.push({} as IOModel);
         }
     }

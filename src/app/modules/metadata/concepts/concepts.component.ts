@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {Router} from '@angular/router';
-import {ConceptsService} from './shared/concepts.service';
-import {Subscription} from 'rxjs';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
-import {ConceptsPermSearchModel} from './shared/concepts-perm-search.model';
-import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ConceptsNewDialogComponent } from './dialogs/concepts-new-dialog.component';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { Router } from '@angular/router';
+import { ConceptsService } from './shared/concepts.service';
+import { Subscription } from 'rxjs';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { ConceptsEditDialogComponent } from './dialogs/concepts-edit-dialog.component';
+import { ConceptsPermSearchModel } from './shared/concepts-perm-search.model';
+import { DeviceTypeConceptModel } from '../device-types-overview/shared/device-type.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 const grids = new Map([
     ['xs', 1],
@@ -40,7 +40,7 @@ const grids = new Map([
 @Component({
     selector: 'senergy-concepts',
     templateUrl: './concepts.component.html',
-    styleUrls: ['./concepts.component.css']
+    styleUrls: ['./concepts.component.css'],
 })
 export class ConceptsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
@@ -57,14 +57,15 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private dialog: MatDialog,
-                private responsiveService: ResponsiveService,
-                private router: Router,
-                private conceptsService: ConceptsService,
-                private searchbarService: SearchbarService,
-                private snackBar: MatSnackBar,
-                private dialogsService: DialogsService) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private responsiveService: ResponsiveService,
+        private router: Router,
+        private conceptsService: ConceptsService,
+        private searchbarService: SearchbarService,
+        private snackBar: MatSnackBar,
+        private dialogsService: DialogsService,
+    ) {}
 
     ngOnInit() {
         this.initGridCols();
@@ -96,12 +97,12 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         editDialogRef.afterClosed().subscribe((newConcept: DeviceTypeConceptModel) => {
             if (newConcept !== undefined) {
                 this.reset();
-                this.conceptsService.createConcept(newConcept).subscribe((concept: (DeviceTypeConceptModel | null)) => {
+                this.conceptsService.createConcept(newConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
-                        this.snackBar.open('Error while creating the concept!', undefined, {duration: 2000});
+                        this.snackBar.open('Error while creating the concept!', undefined, { duration: 2000 });
                         this.getConcepts(true);
                     } else {
-                        this.snackBar.open('Concept created successfully.', undefined, {duration: 2000});
+                        this.snackBar.open('Concept created successfully.', undefined, { duration: 2000 });
                         this.reloadConcepts(true);
                     }
                 });
@@ -113,19 +114,19 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
-            conceptId: conceptInput.id
+            conceptId: conceptInput.id,
         };
         const editDialogRef = this.dialog.open(ConceptsEditDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((editConcept: DeviceTypeConceptModel) => {
             if (editConcept !== undefined) {
                 this.reset();
-                this.conceptsService.updateConcept(editConcept).subscribe((concept: (DeviceTypeConceptModel | null)) => {
+                this.conceptsService.updateConcept(editConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
-                        this.snackBar.open('Error while updating the concept!', undefined, {duration: 2000});
+                        this.snackBar.open('Error while updating the concept!', undefined, { duration: 2000 });
                         this.getConcepts(true);
                     } else {
-                        this.snackBar.open('Concept updated successfully.', undefined, {duration: 2000});
+                        this.snackBar.open('Concept updated successfully.', undefined, { duration: 2000 });
                         this.reloadConcepts(true);
                     }
                 });
@@ -134,33 +135,36 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     }
 
     deleteConcept(concept: ConceptsPermSearchModel): void {
-        this.dialogsService.openDeleteDialog('concept ' + concept.name).afterClosed().subscribe((deleteConcept: boolean) => {
-            if (deleteConcept) {
-                this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
-                    if (resp === true) {
-                        this.concepts.splice(this.concepts.indexOf(concept), 1);
-                        this.snackBar.open('Concept deleted successfully.', undefined, {duration: 2000});
-                        this.setRepoItemsParams(1);
-                        this.reloadConcepts(false);
-                    } else {
-                        this.snackBar.open('Error while deleting the concept!', undefined, {duration: 2000});
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('concept ' + concept.name)
+            .afterClosed()
+            .subscribe((deleteConcept: boolean) => {
+                if (deleteConcept) {
+                    this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
+                        if (resp === true) {
+                            this.concepts.splice(this.concepts.indexOf(concept), 1);
+                            this.snackBar.open('Concept deleted successfully.', undefined, { duration: 2000 });
+                            this.setRepoItemsParams(1);
+                            this.reloadConcepts(false);
+                        } else {
+                            this.snackBar.open('Error while deleting the concept!', undefined, { duration: 2000 });
+                        }
+                    });
+                }
+            });
     }
 
     showCharacteristics(concept: ConceptsPermSearchModel) {
-        this.router.navigateByUrl('/metadata/characteristics', {state: concept});
+        this.router.navigateByUrl('/metadata/characteristics', { state: concept });
     }
 
     private getConcepts(reset: boolean) {
         if (reset) {
             this.reset();
         }
-        this.conceptsService.getConcepts(this.searchText, this.limit, this.offset, this.sortAttribute.value,
-            this.sortAttribute.order).subscribe(
-            (concepts: ConceptsPermSearchModel[]) => {
+        this.conceptsService
+            .getConcepts(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .subscribe((concepts: ConceptsPermSearchModel[]) => {
                 if (concepts.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
@@ -202,5 +206,4 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             this.getConcepts(reset);
         }, 1500);
     }
-
 }

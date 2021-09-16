@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {TestBed} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {ImportTypesService} from './import-types.service';
-import {HttpClient} from '@angular/common/http';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
-import {of} from 'rxjs';
-import {ImportTypeModel} from './import-types.model';
-import {environment} from '../../../../../environments/environment';
-import {ExportValueModel} from '../../../exports/shared/export.model';
+import { ImportTypesService } from './import-types.service';
+import { HttpClient } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { of } from 'rxjs';
+import { ImportTypeModel } from './import-types.model';
+import { environment } from '../../../../../environments/environment';
+import { ExportValueModel } from '../../../exports/shared/export.model';
 
 describe('ImportTypesService', () => {
     let service: ImportTypesService;
@@ -44,8 +44,8 @@ describe('ImportTypesService', () => {
                 name: 'test-config',
                 description: 'none',
                 type: 'https://schema.org/Text',
-                default_value: 'config-value'
-            }
+                default_value: 'config-value',
+            },
         ],
         aspect_ids: [],
         output: {
@@ -58,14 +58,14 @@ describe('ImportTypesService', () => {
                     type: 'https://schema.org/Text',
                     characteristic_id: '',
                     sub_content_variables: [],
-                    use_as_tag: false
+                    use_as_tag: false,
                 },
                 {
                     name: 'time',
                     type: 'https://schema.org/Text',
                     characteristic_id: environment.timeStampCharacteristicId,
                     sub_content_variables: [],
-                    use_as_tag: false
+                    use_as_tag: false,
                 },
                 {
                     name: 'value',
@@ -77,7 +77,7 @@ describe('ImportTypesService', () => {
                             type: 'https://schema.org/Float',
                             characteristic_id: '',
                             sub_content_variables: [],
-                            use_as_tag: false
+                            use_as_tag: false,
                         },
                         {
                             name: 'meta',
@@ -89,44 +89,39 @@ describe('ImportTypesService', () => {
                                     type: 'https://schema.org/Float',
                                     characteristic_id: '',
                                     sub_content_variables: null,
-                                    use_as_tag: false
+                                    use_as_tag: false,
                                 },
                                 {
                                     name: 'tag1',
                                     type: 'https://schema.org/Float',
                                     characteristic_id: '',
                                     sub_content_variables: null,
-                                    use_as_tag: true
+                                    use_as_tag: true,
                                 },
                                 {
                                     name: 'tag2',
                                     type: 'https://schema.org/Text',
                                     characteristic_id: '',
                                     sub_content_variables: null,
-                                    use_as_tag: true
-                                }
+                                    use_as_tag: true,
+                                },
                             ],
-                            use_as_tag: false
-                        }
+                            use_as_tag: false,
+                        },
                     ],
-                    use_as_tag: false
-                }
+                    use_as_tag: false,
+                },
             ],
-            use_as_tag: false
+            use_as_tag: false,
         },
         function_ids: [],
-        owner: 'test-owner'
+        owner: 'test-owner',
     };
-
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [
-                HttpClientTestingModule,
-            ],
-            providers: [
-                {provide: HttpClient, useValue: httpClientSpy},
-            ]
+            imports: [HttpClientTestingModule],
+            providers: [{ provide: HttpClient, useValue: httpClientSpy }],
         });
         service = TestBed.inject(ImportTypesService);
     });
@@ -136,78 +131,68 @@ describe('ImportTypesService', () => {
     });
 
     it('should correctly request lists', () => {
-        service.listImportTypes('search', 10, 1, 'name.asc')
-            .subscribe(val => expect(val).toEqual([]));
+        service.listImportTypes('search', 10, 1, 'name.asc').subscribe((val) => expect(val).toEqual([]));
         expect(httpClientSpy.get.calls.mostRecent().args[0]).toEqual(
-            environment.permissionSearchUrl + '/v3/resources/import-types?&search=search&limit=10&offset=1&sort=name.asc'
+            environment.permissionSearchUrl + '/v3/resources/import-types?&search=search&limit=10&offset=1&sort=name.asc',
         );
     });
 
     it('should correctly request a single type', () => {
         service.getImportType('1234');
-        expect(httpClientSpy.get.calls.mostRecent().args[0]).toEqual(
-            environment.importRepoUrl + '/import-types/1234'
-        );
+        expect(httpClientSpy.get.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
     });
 
     it('should correctly create a type', () => {
-        const exampleType: ImportTypeModel = {id: '', name: 'test'} as ImportTypeModel;
+        const exampleType: ImportTypeModel = { id: '', name: 'test' } as ImportTypeModel;
         service.saveImportType(exampleType);
-        expect(httpClientSpy.post.calls.mostRecent().args[0]).toEqual(
-            environment.importRepoUrl + '/import-types'
-        );
+        expect(httpClientSpy.post.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types');
         expect(httpClientSpy.post.calls.mostRecent().args[1]).toEqual(exampleType);
     });
 
     it('should correctly update a type', () => {
-        const exampleType: ImportTypeModel = {id: '1234'} as ImportTypeModel;
+        const exampleType: ImportTypeModel = { id: '1234' } as ImportTypeModel;
         service.saveImportType(exampleType);
-        expect(httpClientSpy.put.calls.mostRecent().args[0]).toEqual(
-            environment.importRepoUrl + '/import-types/1234'
-        );
+        expect(httpClientSpy.put.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
         expect(httpClientSpy.put.calls.mostRecent().args[1]).toEqual(exampleType);
     });
 
     it('should correctly delete a type', () => {
         service.deleteImportInstance('1234');
-        expect(httpClientSpy.delete.calls.mostRecent().args[0]).toEqual(
-            environment.importRepoUrl + '/import-types/1234'
-        );
+        expect(httpClientSpy.delete.calls.mostRecent().args[0]).toEqual(environment.importRepoUrl + '/import-types/1234');
     });
 
     it('should correctly parse export values', () => {
-        expect(service.parseImportTypeExportValues(testType)).toEqual(
-            [
-                {
-                    Name: 'value',
-                    Path: 'value.value',
-                    Type: 'float',
-                    Tag: false,
-                },
-                {
-                    Name: 'value2',
-                    Path: 'value.meta.value2',
-                    Type: 'float',
-                    Tag: false,
-                },
-                {
-                    Name: 'tag1',
-                    Path: 'value.meta.tag1',
-                    Type: 'float',
-                    Tag: false,
-                },
-                {
-                    Name: 'tag1_tag',
-                    Path: 'value.meta.tag1',
-                    Type: 'string',
-                    Tag: true,
-                },
-                {
-                    Name: 'tag2',
-                    Path: 'value.meta.tag2',
-                    Type: 'string',
-                    Tag: true,
-                }] as ExportValueModel[]
-        );
+        expect(service.parseImportTypeExportValues(testType)).toEqual([
+            {
+                Name: 'value',
+                Path: 'value.value',
+                Type: 'float',
+                Tag: false,
+            },
+            {
+                Name: 'value2',
+                Path: 'value.meta.value2',
+                Type: 'float',
+                Tag: false,
+            },
+            {
+                Name: 'tag1',
+                Path: 'value.meta.tag1',
+                Type: 'float',
+                Tag: false,
+            },
+            {
+                Name: 'tag1_tag',
+                Path: 'value.meta.tag1',
+                Type: 'string',
+                Tag: true,
+            },
+            {
+                Name: 'tag2',
+                Path: 'value.meta.tag2',
+                Type: 'string',
+                Tag: true,
+            },
+        ] as ExportValueModel[]);
     });
 });

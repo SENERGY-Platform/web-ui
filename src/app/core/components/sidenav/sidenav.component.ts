@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
-import {MatSidenav} from '@angular/material/sidenav';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
-import {filter, map, mergeMap} from 'rxjs/internal/operators';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { MatSidenav } from '@angular/material/sidenav';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { filter, map, mergeMap } from 'rxjs/internal/operators';
 
-import {SidenavService} from './shared/sidenav.service';
-import {SidenavSectionModel} from './shared/sidenav-section.model';
-import {ResponsiveService} from '../../services/responsive.service';
-import {fadeInAnimation} from '../../../animations/fade-in.animation';
+import { SidenavService } from './shared/sidenav.service';
+import { SidenavSectionModel } from './shared/sidenav-section.model';
+import { ResponsiveService } from '../../services/responsive.service';
+import { fadeInAnimation } from '../../../animations/fade-in.animation';
 
 @Component({
     selector: 'senergy-sidenav',
     templateUrl: './sidenav.component.html',
     styleUrls: ['./sidenav.component.css'],
-    animations: [fadeInAnimation]
+    animations: [fadeInAnimation],
 })
-
 export class SidenavComponent implements OnInit, AfterViewInit {
-
-    @ViewChild('sidenav', {static: false}) sidenav!: MatSidenav;
+    @ViewChild('sidenav', { static: false }) sidenav!: MatSidenav;
     mode = '';
     sections: SidenavSectionModel[] = [];
     openSection: null | string = null;
     zIndex = -1;
 
-    constructor(private activatedRoute: ActivatedRoute,
-                private router: Router,
-                private sidenavService: SidenavService,
-                private responsiveService: ResponsiveService) {
-    }
+    constructor(
+        private activatedRoute: ActivatedRoute,
+        private router: Router,
+        private sidenavService: SidenavService,
+        private responsiveService: ResponsiveService,
+    ) {}
 
     ngOnInit() {
         this.getActiveSection();
@@ -64,7 +63,7 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     }
 
     toggleSection(section: SidenavSectionModel): void {
-        this.openSection = (this.openSection === section.state ? null : section.state);
+        this.openSection = this.openSection === section.state ? null : section.state;
         if (section.type === 'link') {
             this.closeSidenav();
         }
@@ -113,12 +112,12 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     }
 
     private getActiveSection() {
-        this.router.events.pipe(
-            filter((event) => event instanceof NavigationEnd),
-            map(() => {
-                return this.activatedRoute.firstChild;
-            }),
-            mergeMap((activatedRoute: any) => activatedRoute.url)
-        ).subscribe((activeRoute: any) => this.openSection = '/'  + activeRoute[0].path);
+        this.router.events
+            .pipe(
+                filter((event) => event instanceof NavigationEnd),
+                map(() => this.activatedRoute.firstChild),
+                mergeMap((activatedRoute: any) => activatedRoute.url),
+            )
+            .subscribe((activeRoute: any) => (this.openSection = '/' + activeRoute[0].path));
     }
 }

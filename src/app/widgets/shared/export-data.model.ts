@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 export interface TimeValuePairModel {
     time: string | null;
     value: string | number | boolean | null;

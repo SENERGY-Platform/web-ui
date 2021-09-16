@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
-import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
-import {DashboardResponseMessageModel} from '../../../../modules/dashboard/shared/dashboard-response-message.model';
-import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {ExportService} from '../../../../modules/exports/shared/export.service';
-import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
-import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
-import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
-import {MatTableDataSource} from '@angular/material/table';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Observable, of} from 'rxjs';
-import {map} from 'rxjs/operators';
+import { Component, Inject, OnInit } from '@angular/core';
+import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import { DeploymentsService } from '../../../../modules/processes/deployments/shared/deployments.service';
+import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
+import { DashboardResponseMessageModel } from '../../../../modules/dashboard/shared/dashboard-response-message.model';
+import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ExportService } from '../../../../modules/exports/shared/export.service';
+import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../../modules/exports/shared/export.model';
+import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../shared/charts-export-properties.model';
+import { ChartsExportRangeTimeTypeEnum } from '../shared/charts-export-range-time-type.enum';
+import { MatTableDataSource } from '@angular/material/table';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
     styleUrls: ['./charts-export-edit-dialog.component.css'],
 })
 export class ChartsExportEditDialogComponent implements OnInit {
-
     formGroupController = new FormGroup({});
     exportList: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
@@ -42,33 +41,66 @@ export class ChartsExportEditDialogComponent implements OnInit {
     chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart'];
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
-    groupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median'];
+    groupTypes = [
+        'mean',
+        'sum',
+        'count',
+        'median',
+        'min',
+        'max',
+        'first',
+        'last',
+        'difference-first',
+        'difference-last',
+        'difference-min',
+        'difference-max',
+        'difference-count',
+        'difference-mean',
+        'difference-sum',
+        'difference-median',
+    ];
     groupTypeIsDifference = false;
 
-    displayedColumns: string[] = ['exportName', 'valueName', 'valueType', 'valueAlias', 'color', 'math', 'conversions', 'filterType', 'filterValue', 'tags', 'displayOnSecondVAxis', 'duplicate-delete'];
+    displayedColumns: string[] = [
+        'exportName',
+        'valueName',
+        'valueType',
+        'valueAlias',
+        'color',
+        'math',
+        'conversions',
+        'filterType',
+        'filterValue',
+        'tags',
+        'displayOnSecondVAxis',
+        'duplicate-delete',
+    ];
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
     vAxesOptions: Map<string, ChartsExportVAxesModel[]> = new Map();
     exportTags: Map<string, Map<string, { value: string; parent: string }[]>> = new Map();
 
-    constructor(private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                private dashboardService: DashboardService,
-                private exportService: ExportService,
-                private _formBuilder: FormBuilder,
-                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
+    constructor(
+        private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
+        private deploymentsService: DeploymentsService,
+        private dashboardService: DashboardService,
+        private exportService: ExportService,
+        private _formBuilder: FormBuilder,
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+    ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
     }
 
     ngOnInit() {
         this.initFormGroup({
-            name: '', properties: {
+            name: '',
+            properties: {
                 chartType: '',
                 curvedFunction: false,
                 exports: [] as ChartsExportMeasurementModel[],
                 timeRangeType: '',
                 vAxes: [] as ChartsExportVAxesModel[],
-            }
+            },
         } as WidgetModel);
         this.getWidgetData();
     }
@@ -105,37 +137,47 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 vAxisLabel: widget.properties.vAxisLabel,
                 secondVAxisLabel: widget.properties.secondVAxisLabel,
                 vAxes: [widget.properties.vAxes || []],
-            })
+            }),
         });
         this.groupTypeIsDifference = widget.properties.group?.type?.startsWith('difference') || false;
-        this.formGroupController.get('properties.group.type')?.valueChanges.subscribe(val => {
+        this.formGroupController.get('properties.group.type')?.valueChanges.subscribe((val) => {
             this.groupTypeIsDifference = val.startsWith('difference');
             if (this.groupTypeIsDifference) {
-                this.dataSource.data.forEach(element => element.math = '');
+                this.dataSource.data.forEach((element) => (element.math = ''));
             }
         });
-        widget.properties.exports?.forEach(exp => this.preloadExportTags(exp.id || '').subscribe());
+        widget.properties.exports?.forEach((exp) => this.preloadExportTags(exp.id || '').subscribe());
         this.formGroupController.get('properties.exports')?.valueChanges.subscribe((exports: ChartsExportMeasurementModel[]) => {
-            exports.forEach(exp => this.preloadExportTags(exp.id || '').subscribe());
+            exports.forEach((exp) => this.preloadExportTags(exp.id || '').subscribe());
         });
 
         this.formGroupController.get('properties.vAxes')?.valueChanges.subscribe((vAxes: ChartsExportVAxesModel[]) => {
             // Remove no longer existing
             for (let i = this.dataSource.data.length - 1; i >= 0; i--) {
                 const axis = this.dataSource.data[i] as ChartsExportVAxesModel;
-                if (!vAxes.some((item: ChartsExportVAxesModel) => item.instanceId === axis.instanceId &&
-                    item.exportName === axis.exportName &&
-                    item.valueName === axis.valueName &&
-                    item.valueType === axis.valueType)) {
+                if (
+                    !vAxes.some(
+                        (item: ChartsExportVAxesModel) =>
+                            item.instanceId === axis.instanceId &&
+                            item.exportName === axis.exportName &&
+                            item.valueName === axis.valueName &&
+                            item.valueType === axis.valueType,
+                    )
+                ) {
                     this.dataSource.data.splice(i);
                 }
             }
             // Add not yet existing
-            vAxes.forEach(axis => {
-                if (!this.dataSource.data.some((item: ChartsExportVAxesModel) => item.instanceId === axis.instanceId &&
-                    item.exportName === axis.exportName &&
-                    item.valueName === axis.valueName &&
-                    item.valueType === axis.valueType)) {
+            vAxes.forEach((axis) => {
+                if (
+                    !this.dataSource.data.some(
+                        (item: ChartsExportVAxesModel) =>
+                            item.instanceId === axis.instanceId &&
+                            item.exportName === axis.exportName &&
+                            item.valueName === axis.valueName &&
+                            item.valueType === axis.valueType,
+                    )
+                ) {
                     this.dataSource.data.push(axis);
                 }
             });
@@ -146,21 +188,22 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     initDeployments(widget: WidgetModel) {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: (ExportResponseModel | null)) => {
+        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exportList.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
+                        this.exportList.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values });
                     }
                 });
                 // remove deleted exports
                 if (widget.properties.exports !== undefined) {
-                    widget.properties.exports = widget.properties.exports
-                        .filter(selected => exports.instances.findIndex(existing => existing.ID === selected.id) !== -1);
+                    widget.properties.exports = widget.properties.exports.filter(
+                        (selected) => exports.instances.findIndex((existing) => existing.ID === selected.id) !== -1,
+                    );
 
                     // exports values or names might have changed
-                    widget.properties.exports.forEach(selected => {
-                        const latestExisting = exports.instances.find(existing => existing.ID === selected.id);
+                    widget.properties.exports.forEach((selected) => {
+                        const latestExisting = exports.instances.find((existing) => existing.ID === selected.id);
                         if (latestExisting !== undefined && latestExisting.Name !== undefined && latestExisting.ID !== undefined) {
                             selected.values = latestExisting.Values;
                             selected.name = latestExisting.Name;
@@ -185,8 +228,9 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.formGroupController.patchValue({'properties': {'vAxes': this.dataSource.data}});
-        this.dashboardService.updateWidget(this.dashboardId, this.formGroupController.value)
+        this.formGroupController.patchValue({ properties: { vAxes: this.dataSource.data } });
+        this.dashboardService
+            .updateWidget(this.dashboardId, this.formGroupController.value)
             .subscribe((resp: DashboardResponseMessageModel) => {
                 if (resp.message === 'OK') {
                     this.dialogRef.close(this.formGroupController.value);
@@ -212,11 +256,15 @@ export class ChartsExportEditDialogComponent implements OnInit {
                     displayOnSecondVAxis: false,
                     tagSelection: [],
                 };
-                const index = this.formGroupController.get('properties.vAxes')?.value.findIndex(
-                    (item: ChartsExportVAxesModel) => item.instanceId === newVAxis.instanceId &&
-                        item.exportName === newVAxis.exportName &&
-                        item.valueName === newVAxis.valueName &&
-                        item.valueType === newVAxis.valueType);
+                const index = this.formGroupController
+                    .get('properties.vAxes')
+                    ?.value.findIndex(
+                        (item: ChartsExportVAxesModel) =>
+                            item.instanceId === newVAxis.instanceId &&
+                            item.exportName === newVAxis.exportName &&
+                            item.valueName === newVAxis.valueName &&
+                            item.valueType === newVAxis.valueType,
+                    );
                 if (index === -1) {
                     newData.get(selectedExport.name)?.push(newVAxis);
                 } else {
@@ -224,11 +272,16 @@ export class ChartsExportEditDialogComponent implements OnInit {
                     newData.get(selectedExport.name)?.push(this.formGroupController.get('properties.vAxes')?.value[index]);
                 }
                 // Add duplicates of this export value
-                const duplicates = this.formGroupController.get('properties.vAxes')?.value
-                    .filter((item: ChartsExportVAxesModel) => item.isDuplicate && item.instanceId === newVAxis.instanceId &&
-                        item.exportName === newVAxis.exportName &&
-                        item.valueName === newVAxis.valueName &&
-                        item.valueType === newVAxis.valueType);
+                const duplicates = this.formGroupController
+                    .get('properties.vAxes')
+                    ?.value.filter(
+                        (item: ChartsExportVAxesModel) =>
+                            item.isDuplicate &&
+                            item.instanceId === newVAxis.instanceId &&
+                            item.exportName === newVAxis.exportName &&
+                            item.valueName === newVAxis.valueName &&
+                            item.valueType === newVAxis.valueType,
+                    );
                 newSelection.push(...duplicates);
             });
         });
@@ -236,13 +289,11 @@ export class ChartsExportEditDialogComponent implements OnInit {
         this.dataSource.data = newSelection;
     }
 
-
     filerTypeSelected(element: ChartsExportVAxesModel) {
         if (element.filterType === undefined) {
             element.filterValue = undefined;
         }
     }
-
 
     duplicate(element: ChartsExportVAxesModel, index: number) {
         const newElement = JSON.parse(JSON.stringify(element)) as ChartsExportVAxesModel;
@@ -270,7 +321,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
             widget.properties.time = {
                 last: '1d',
                 start: '',
-                end: ''
+                end: '',
             };
         }
 
@@ -303,12 +354,12 @@ export class ChartsExportEditDialogComponent implements OnInit {
         if (element.conversions === undefined) {
             element.conversions = [];
         }
-        element.conversions.push({from: element.__from, to: element.__to});
+        element.conversions.push({ from: element.__from, to: element.__to });
         element.__from = undefined;
         element.__to = undefined;
     }
 
-    getTags(element: ChartsExportVAxesModel): Map<string, { value: string, parent: string }[]> {
+    getTags(element: ChartsExportVAxesModel): Map<string, { value: string; parent: string }[]> {
         return this.exportTags.get(element.instanceId) || new Map();
     }
 
@@ -317,28 +368,33 @@ export class ChartsExportEditDialogComponent implements OnInit {
             return of(this.exportTags.get(exportId));
         }
         this.exportTags?.set(exportId, new Map());
-        return this.exportService.getExportTags(exportId).pipe(map(res => {
-            const m = new Map<string, { value: string, parent: string }[]>();
-            res.forEach((v, k) => m.set(k, v.map(t => {
-                return {value: t, parent: k};
-            })));
-            this.exportTags?.set(exportId, m);
-            return m;
-        }));
+        return this.exportService.getExportTags(exportId).pipe(
+            map((res) => {
+                const m = new Map<string, { value: string; parent: string }[]>();
+                res.forEach((v, k) =>
+                    m.set(
+                        k,
+                        v.map((t) => ({ value: t, parent: k })),
+                    ),
+                );
+                this.exportTags?.set(exportId, m);
+                return m;
+            }),
+        );
     }
 
-    getTagOptionDisabledFunction(tab: ChartsExportVAxesModel): ((option: { value: string, parent: string }) => boolean) {
-        return ((option: { value: string, parent: string }) => {
+    getTagOptionDisabledFunction(tab: ChartsExportVAxesModel): (option: { value: string; parent: string }) => boolean {
+        return (option: { value: string; parent: string }) => {
             const selection = tab.tagSelection;
             if (selection === null || selection === undefined || Object.keys(selection).length === 0) {
                 return false;
             }
-            const existing = selection.find(s => s.startsWith(option.parent) && this.getTagValue(option) !== s);
+            const existing = selection.find((s) => s.startsWith(option.parent) && this.getTagValue(option) !== s);
             return existing !== undefined;
-        });
+        };
     }
 
-    getTagValue(a: { value: string, parent: string }): string {
+    getTagValue(a: { value: string; parent: string }): string {
         return a.parent + '!' + a.value;
     }
 }

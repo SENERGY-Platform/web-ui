@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {map, startWith} from 'rxjs/internal/operators';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../modules/exports/shared/export.model';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {ExportService} from '../../../modules/exports/shared/export.service';
-import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-import {ChartsExportRequestPayloadGroupModel} from "../../charts/export/shared/charts-export-request-payload.model";
-
+import { Component, Inject, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/internal/operators';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../modules/exports/shared/export.model';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { ExportService } from '../../../modules/exports/shared/export.service';
+import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { ChartsExportRequestPayloadGroupModel } from '../../charts/export/shared/charts-export-request-payload.model';
 
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
     styleUrls: ['./single-value-edit-dialog.component.css'],
 })
 export class SingleValueEditDialogComponent implements OnInit {
-
     formControl = new FormControl('');
     exports: ChartsExportMeasurementModel[] = [];
     filteredExports: Observable<ChartsExportMeasurementModel[]> = new Observable();
@@ -44,7 +42,24 @@ export class SingleValueEditDialogComponent implements OnInit {
     widget: WidgetModel = {} as WidgetModel;
     vAxisValues: ExportValueModel[] = [];
     disableSave = false;
-    groupTypes = ['mean', 'sum', 'count', 'median', 'min', 'max', 'first', 'last', 'difference-first', 'difference-last', 'difference-min', 'difference-max', 'difference-count', 'difference-mean', 'difference-sum', 'difference-median'];
+    groupTypes = [
+        'mean',
+        'sum',
+        'count',
+        'median',
+        'min',
+        'max',
+        'first',
+        'last',
+        'difference-first',
+        'difference-last',
+        'difference-min',
+        'difference-max',
+        'difference-count',
+        'difference-mean',
+        'difference-sum',
+        'difference-median',
+    ];
 
     vAxisLabel = '';
     name = '';
@@ -52,13 +67,15 @@ export class SingleValueEditDialogComponent implements OnInit {
     format = '';
     threshold = 128;
     math = '';
-    group: ChartsExportRequestPayloadGroupModel = {time: '', type: ''};
+    group: ChartsExportRequestPayloadGroupModel = { time: '', type: '' };
 
-    constructor(private dialogRef: MatDialogRef<SingleValueEditDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                private dashboardService: DashboardService,
-                private exportService: ExportService,
-                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
+    constructor(
+        private dialogRef: MatDialogRef<SingleValueEditDialogComponent>,
+        private deploymentsService: DeploymentsService,
+        private dashboardService: DashboardService,
+        private exportService: ExportService,
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+    ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
     }
@@ -73,7 +90,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             this.vAxisLabel = widget.properties.vAxisLabel ? widget.properties.vAxisLabel : this.vAxisLabel;
             this.name = widget.name;
             this.type = widget.properties.type ? widget.properties.type : this.type;
-            this.format =  widget.properties.format ? widget.properties.format : this.format;
+            this.format = widget.properties.format ? widget.properties.format : this.format;
             this.threshold = widget.properties.threshold ? widget.properties.threshold : this.threshold;
             this.math = widget.properties.math ? widget.properties.math : this.math;
             this.formControl.setValue(this.widget.properties.measurement || '');
@@ -83,11 +100,11 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: (ExportResponseModel | null)) => {
+        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
+                        this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values });
                         if (this.widget.properties.vAxis) {
                             if (this.widget.properties.vAxis.InstanceID === exportModel.ID) {
                                 this.vAxisValues = exportModel.Values;
@@ -95,16 +112,14 @@ export class SingleValueEditDialogComponent implements OnInit {
                         }
                     }
                 });
-                this.filteredExports = this.formControl.valueChanges
-                    .pipe(
-                        startWith<string | ChartsExportMeasurementModel>(''),
-                        map(value => typeof value === 'string' ? value : value.name),
-                        map(name => name ? this._filter(name) : this.exports.slice())
-                    );
+                this.filteredExports = this.formControl.valueChanges.pipe(
+                    startWith<string | ChartsExportMeasurementModel>(''),
+                    map((value) => (typeof value === 'string' ? value : value.name)),
+                    map((name) => (name ? this._filter(name) : this.exports.slice())),
+                );
             }
         });
     }
-
 
     close(): void {
         this.dialogRef.close();
@@ -115,7 +130,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             this.widget.properties.measurement = {
                 id: this.formControl.value.id,
                 name: this.formControl.value.name,
-                values: this.formControl.value.values
+                values: this.formControl.value.values,
             };
         }
         this.widget.properties.vAxisLabel = this.vAxisLabel;
@@ -135,7 +150,7 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     private _filter(value: string): ChartsExportMeasurementModel[] {
         const filterValue = value.toLowerCase();
-        return this.exports.filter(option => {
+        return this.exports.filter((option) => {
             if (option.name) {
                 return option.name.toLowerCase().indexOf(filterValue) === 0;
             }
@@ -155,8 +170,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         return a === b;
     }
 
-
-    optionSelected(input: MatAutocompleteSelectedEvent ) {
+    optionSelected(input: MatAutocompleteSelectedEvent) {
         this.vAxisValues = input.option.value.values;
         this.widget.properties.vAxis = this.vAxisValues[0];
     }
@@ -165,12 +179,10 @@ export class SingleValueEditDialogComponent implements OnInit {
         if (typeof this.formControl.value === 'string') {
             this.disableSave = true;
             this.vAxisValues = [];
-            this.formControl.setErrors({'valid': false});
+            this.formControl.setErrors({ valid: false });
         } else {
             this.disableSave = false;
             this.formControl.updateValueAndValidity();
         }
-
     }
-
 }

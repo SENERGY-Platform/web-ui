@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
+import { DeviceInstancesUpdateModel } from '../../../devices/device-instances/shared/device-instances-update.model';
 import {
     DeviceTypeAspectModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
-    DeviceTypeServiceModel
+    DeviceTypeServiceModel,
 } from '../../../metadata/device-types-overview/shared/device-type.model';
 
 export interface DeploymentsPreparedModel {
@@ -44,7 +44,7 @@ export interface DeploymentsPreparedElementModel {
 
 export interface DeploymentsPreparedTaskModel {
     label: string;
-    device_description: DeploymentsPreparedDeviceDescriptionModel,
+    device_description: DeploymentsPreparedDeviceDescriptionModel;
     bpmn_element_id: string;
     input: any;
     selectables: DeploymentsPreparedSelectableModel[];
@@ -120,4 +120,3 @@ export interface DeploymentsPreparedSelectionModel {
     service: DeviceTypeServiceModel;
     show: boolean;
 }
-

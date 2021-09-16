@@ -1,4 +1,3 @@
-
 export interface FilterCriteriaDialogResultModel {
     aspect: string;
     iotfunction: string;

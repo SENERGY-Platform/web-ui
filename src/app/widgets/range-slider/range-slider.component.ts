@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {
-    WidgetModel, WidgetPropertiesModels
-} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {RangeSliderService} from './shared/range-slider.service';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
-import {MatSliderChange} from '@angular/material/slider';
-import {DeploymentsService} from '../../modules/processes/deployments/shared/deployments.service';
-import {CamundaVariable} from '../../modules/processes/deployments/shared/deployments-definition.model';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel, WidgetPropertiesModels } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { RangeSliderService } from './shared/range-slider.service';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
+import { MatSliderChange } from '@angular/material/slider';
+import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
+import { CamundaVariable } from '../../modules/processes/deployments/shared/deployments-definition.model';
 
 @Component({
     selector: 'senergy-range-slider',
@@ -31,19 +29,19 @@ import {CamundaVariable} from '../../modules/processes/deployments/shared/deploy
     styleUrls: ['./range-slider.component.css'],
 })
 export class RangeSliderComponent implements OnInit, OnDestroy {
-
     ready = false;
 
     private destroy = new Subscription();
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {properties: {} as WidgetPropertiesModels} as WidgetModel;
+    @Input() widget: WidgetModel = { properties: {} as WidgetPropertiesModels } as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private rangeSliderService: RangeSliderService,
-                private dashboardService: DashboardService,
-                private deploymentService: DeploymentsService) {
-    }
+    constructor(
+        private rangeSliderService: RangeSliderService,
+        private dashboardService: DashboardService,
+        private deploymentService: DeploymentsService,
+    ) {}
 
     ngOnInit() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
@@ -69,9 +67,14 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
                 // @ts-ignore
                 this.widget.properties.selectedParameterModel.value = event.value;
                 // @ts-ignore
-                this.deploymentService.startDeploymentWithParameter(this.widget.properties.deployment.id, new Map<string, CamundaVariable>([
-                    [this.widget.properties.selectedParameter, this.widget.properties.selectedParameterModel],
-                ])).subscribe();
+                this.deploymentService
+                    .startDeploymentWithParameter(
+                        this.widget.properties.deployment?.id || '',
+                        new Map<string, CamundaVariable>([
+                            [this.widget.properties.selectedParameter as string, this.widget.properties.selectedParameterModel as CamundaVariable],
+                        ]),
+                    )
+                    .subscribe();
                 this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe();
             }
         }
@@ -82,5 +85,3 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
         }
     }
 }
-
-

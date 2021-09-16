@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import { Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     templateUrl: './networks-clear-dialog.component.html',
-    styleUrls: ['./networks-clear-dialog.component.css']
+    styleUrls: ['./networks-clear-dialog.component.css'],
 })
 export class NetworksClearDialogComponent {
-
-    constructor(private dialogRef: MatDialogRef<NetworksClearDialogComponent>) {
-    }
+    constructor(private dialogRef: MatDialogRef<NetworksClearDialogComponent>) {}
 
     close(): void {
         this.dialogRef.close(false);
@@ -33,5 +31,4 @@ export class NetworksClearDialogComponent {
     clear(): void {
         this.dialogRef.close(true);
     }
-
 }

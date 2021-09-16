@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {
-    DeviceTypeFunctionModel,
-    DeviceTypeServiceModel
-} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
-import {DeploymentsPreparedSelectableModel} from '../../../modules/processes/deployments/shared/deployments-prepared.model';
-import {ExportValueCharacteristicModel} from '../../../modules/exports/shared/export.model';
+import { DeviceTypeFunctionModel, DeviceTypeServiceModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import { DeploymentsPreparedSelectableModel } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
+import { ExportValueCharacteristicModel } from '../../../modules/exports/shared/export.model';
 
 export interface DeviceStatusPropertiesModel {
     refreshTime?: number;
@@ -39,7 +36,6 @@ export interface DeviceStatusElementModel {
     requestDevice: boolean;
     scheduleId: string | null;
 }
-
 
 export interface DeviceStatusConfigConvertRuleModel {
     status: string;

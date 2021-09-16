@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material/icon';
-import {DomSanitizer} from '@angular/platform-browser';
-import {EnergyPredictionService} from './shared/energy-prediction.service';
-import {EnergyPredictionModel} from './shared/energy-prediction.model';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
+import { EnergyPredictionService } from './shared/energy-prediction.service';
+import { EnergyPredictionModel } from './shared/energy-prediction.model';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'senergy-energy-prediction',
@@ -29,8 +29,7 @@ import {Subscription} from 'rxjs';
     styleUrls: ['./energy-prediction.component.css'],
 })
 export class EnergyPredictionComponent implements OnInit, OnDestroy {
-
-    predictionModel: EnergyPredictionModel = {prediction: 0, predictionTotal: 0, timestamp: ''};
+    predictionModel: EnergyPredictionModel = { prediction: 0, predictionTotal: 0, timestamp: '' };
     ready = false;
     configured = false;
     dataReady = false;
@@ -42,11 +41,12 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private iconRegistry: MatIconRegistry,
-                private sanitizer: DomSanitizer,
-                private predictionService: EnergyPredictionService,
-                private dashboardService: DashboardService) {
-    }
+    constructor(
+        private iconRegistry: MatIconRegistry,
+        private sanitizer: DomSanitizer,
+        private predictionService: EnergyPredictionService,
+        private dashboardService: DashboardService,
+    ) {}
 
     ngOnInit() {
         this.update();
@@ -62,7 +62,7 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
     }
 
     getConsumptionTooltip() {
-        return  'Estimated consumption within one ' + this.widget.properties.selectedOption?.toLowerCase();
+        return 'Estimated consumption within one ' + this.widget.properties.selectedOption?.toLowerCase();
     }
 
     getMeterReadingTooltip() {
@@ -80,32 +80,35 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
                 this.ready = false;
                 this.dataReady = false;
                 const prediction = this.predictionService.getPrediction(this.widget);
-                prediction.subscribe((devicesStatus: EnergyPredictionModel) => {
-                    this.predictionModel = devicesStatus;
-                    this.price = this.predictionModel.prediction * (this.widget.properties.price || 0);
-                    switch (this.widget.properties.thresholdOption) {
+                prediction.subscribe(
+                    (devicesStatus: EnergyPredictionModel) => {
+                        this.predictionModel = devicesStatus;
+                        this.price = this.predictionModel.prediction * (this.widget.properties.price || 0);
+                        switch (this.widget.properties.thresholdOption) {
                         case 'Consumption':
                             this.thresholdActive = this.predictionModel.prediction > (this.widget.properties.threshold || -Infinity);
                             break;
                         case 'Price':
                             this.thresholdActive = this.price > (this.widget.properties.threshold || -Infinity);
                             break;
-                    }
-                    this.dataReady = true;
-                    this.ready = true;
-                }, () => {
-                    this.ready = true;
-                });
+                        }
+                        this.dataReady = true;
+                        this.ready = true;
+                    },
+                    () => {
+                        this.ready = true;
+                    },
+                );
             }
         });
     }
 
     private setConfigured() {
         this.configured = !(
-            this.widget.properties === undefined
-            || this.widget.properties.thresholdOption === ''
-            || this.widget.properties.selectedOption === ''
-            || this.widget.properties.measurement === undefined
+            this.widget.properties === undefined ||
+            this.widget.properties.thresholdOption === '' ||
+            this.widget.properties.selectedOption === '' ||
+            this.widget.properties.measurement === undefined
         );
     }
 }

@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardNewDialogComponent} from '../dialogs/dashboard-new-dialog.component';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {catchError, map} from 'rxjs/internal/operators';
-import {environment} from '../../../../environments/environment';
-import {DashboardModel} from './dashboard.model';
-import {Observable, Subject} from 'rxjs';
-import {DashboardResponseMessageModel} from './dashboard-response-message.model';
-import {WidgetModel} from './dashboard-widget.model';
-import {DashboardNewWidgetDialogComponent} from '../dialogs/dashboard-new-widget-dialog.component';
-import {DashboardWidgetManipulationModel} from './dashboard-widget-manipulation.model';
-import {DashboardManipulationModel} from './dashboard-manipulation.model';
-import {DashboardManipulationEnum} from './dashboard-manipulation.enum';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {DashboardEditDialogComponent} from '../dialogs/dashboard-edit-dialog.component';
+import { Injectable } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DashboardNewDialogComponent } from '../dialogs/dashboard-new-dialog.component';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { catchError, map } from 'rxjs/internal/operators';
+import { environment } from '../../../../environments/environment';
+import { DashboardModel } from './dashboard.model';
+import { Observable, Subject } from 'rxjs';
+import { DashboardResponseMessageModel } from './dashboard-response-message.model';
+import { WidgetModel } from './dashboard-widget.model';
+import { DashboardNewWidgetDialogComponent } from '../dialogs/dashboard-new-widget-dialog.component';
+import { DashboardWidgetManipulationModel } from './dashboard-widget-manipulation.model';
+import { DashboardManipulationModel } from './dashboard-manipulation.model';
+import { DashboardManipulationEnum } from './dashboard-manipulation.enum';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { DashboardEditDialogComponent } from '../dialogs/dashboard-edit-dialog.component';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DashboardService {
-
-
     private animationDoneSubject = new Subject<string>();
     private dashboardSubject = new Subject<DashboardManipulationModel>();
     private widgetSubject = new Subject<DashboardWidgetManipulationModel>();
@@ -46,57 +44,63 @@ export class DashboardService {
     dashboardWidgetObservable = this.widgetSubject.asObservable();
     initWidgetObservable = this.animationDoneSubject.asObservable();
 
-
-    constructor(private dialog: MatDialog,
-                private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService,
-                private dialogsService: DialogsService) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private http: HttpClient,
+        private errorHandlerService: ErrorHandlerService,
+        private dialogsService: DialogsService,
+    ) {}
 
     /** REST Services */
 
     getDashboards(): Observable<DashboardModel[]> {
-        return this.http.get<DashboardModel[]>
-        (environment.dashboardServiceUrl + '/dashboards').pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [])));
+        return this.http.get<DashboardModel[]>(environment.dashboardServiceUrl + '/dashboards').pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [])),
+        );
     }
 
     createDashboard(dashboardName: string, index: number): Observable<DashboardModel> {
-        const dash: DashboardModel = {name: dashboardName, id: '', user_id: '', widgets: [], refresh_time: 0, index: index};
-        return this.http.put<DashboardModel>(environment.dashboardServiceUrl + '/dashboard', dash).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {} as DashboardModel)));
+        const dash: DashboardModel = { name: dashboardName, id: '', user_id: '', widgets: [], refresh_time: 0, index };
+        return this.http
+            .put<DashboardModel>(environment.dashboardServiceUrl + '/dashboard', dash)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {} as DashboardModel)));
     }
 
     deleteDashboard(dashboardId: string): Observable<DashboardResponseMessageModel> {
-        return this.http.delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {message: 'error delete'})));
+        return this.http
+            .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', { message: 'error delete' })));
     }
 
     updateDashboard(dashboard: DashboardModel): Observable<DashboardModel> {
-        return this.http.post<DashboardModel>(environment.dashboardServiceUrl + '/dashboard', dashboard).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {} as DashboardModel)));
+        return this.http
+            .post<DashboardModel>(environment.dashboardServiceUrl + '/dashboard', dashboard)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', {} as DashboardModel)));
     }
 
     getWidget(dashboardId: string, widgetId: string): Observable<WidgetModel> {
-        return this.http.get<WidgetModel>
-        (environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget/' + widgetId).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'getWidget', {} as WidgetModel)));
+        return this.http
+            .get<WidgetModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget/' + widgetId)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'getWidget', {} as WidgetModel)));
     }
 
     createWidget(dashboardId: string, widget: WidgetModel): Observable<WidgetModel> {
-        return this.http.put<WidgetModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget', widget).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'createWidget', {} as WidgetModel)));
+        return this.http
+            .put<WidgetModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget', widget)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'createWidget', {} as WidgetModel)));
     }
 
     deleteWidget(dashboardId: string, widgetId: string): Observable<DashboardResponseMessageModel> {
-        return this.http.delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget/' + widgetId).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteWidget', {message: 'error delete'})));
+        return this.http
+            .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget/' + widgetId)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteWidget', { message: 'error delete' })));
     }
 
     updateWidget(dashboardId: string, widget: WidgetModel): Observable<DashboardResponseMessageModel> {
-        return this.http.post<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget', widget).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidget', {message: 'error update'})));
+        return this.http
+            .post<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboard/' + dashboardId + '/widget', widget)
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidget', { message: 'error update' })));
     }
 
     /** Dialog Services */
@@ -130,20 +134,23 @@ export class DashboardService {
     }
 
     openDeleteDashboardDialog(dashboardId: string): void {
-        this.dialogsService.openDeleteDialog('dashboard').afterClosed().subscribe((deleteDashboard: boolean) => {
-               if (deleteDashboard === true) {
+        this.dialogsService
+            .openDeleteDialog('dashboard')
+            .afterClosed()
+            .subscribe((deleteDashboard: boolean) => {
+                if (deleteDashboard === true) {
                     this.deleteDashboard(dashboardId).subscribe(() => {
                         this.manipulateDashboard(DashboardManipulationEnum.Delete, dashboardId, null);
                     });
                 }
-        });
+            });
     }
 
     openEditDashboardDialog(dashboard: DashboardModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
-            dashboard: JSON.parse(JSON.stringify(dashboard))         // create copy of object
+            dashboard: JSON.parse(JSON.stringify(dashboard)), // create copy of object
         };
         const editDialogRef = this.dialog.open(DashboardEditDialogComponent, dialogConfig);
 
@@ -159,15 +166,15 @@ export class DashboardService {
     /** Observable services */
 
     manipulateWidget(manipulation: DashboardManipulationEnum, widgetId: string, widget: WidgetModel | null) {
-        this.widgetSubject.next({manipulation: manipulation, widgetId: widgetId, widget: widget});
+        this.widgetSubject.next({ manipulation, widgetId, widget });
     }
 
     manipulateDashboard(manipulation: DashboardManipulationEnum, dashboardId: string, dashboard: DashboardModel | null) {
-        this.dashboardSubject.next({manipulation: manipulation, dashboardId: dashboardId, dashboard: dashboard});
+        this.dashboardSubject.next({ manipulation, dashboardId, dashboard });
     }
 
     zoomWidget(manipulation: DashboardManipulationEnum, widgetId: string, widget: WidgetModel | null) {
-        this.widgetSubject.next({manipulation: manipulation, widgetId: widgetId, widget: widget});
+        this.widgetSubject.next({ manipulation, widgetId, widget });
     }
 
     reloadAllWidgets() {
@@ -177,5 +184,4 @@ export class DashboardService {
     initWidget(widgetId: string) {
         this.animationDoneSubject.next(widgetId);
     }
-
 }

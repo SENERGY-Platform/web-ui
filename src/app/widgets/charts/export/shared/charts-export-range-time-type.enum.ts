@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line no-shadow
 export enum ChartsExportRangeTimeTypeEnum {
     Relative = 'relative',
     Absolute = 'absolute',
 }
-

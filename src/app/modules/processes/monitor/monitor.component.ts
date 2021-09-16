@@ -14,33 +14,31 @@
  * limitations under the License.
  */
 
-import {map, startWith, switchMap} from 'rxjs/operators';
+import { map, startWith, switchMap } from 'rxjs/operators';
 
-import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {merge, Observable, Subscription} from 'rxjs';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {MonitorService} from './shared/monitor.service';
-import {MonitorProcessModel} from './shared/monitor-process.model';
-import {SelectionModel} from '@angular/cdk/collections';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {MonitorProcessTotalModel} from './shared/monitor-process-total.model';
-import {Navigation, Router} from '@angular/router';
-import {DeploymentsModel} from '../deployments/shared/deployments.model';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatSort} from '@angular/material/sort';
-import {NetworksService} from '../../devices/networks/shared/networks.service';
-import {NetworksModel} from '../../devices/networks/shared/networks.model';
-import {MonitorFogFactory, MonitorFogService} from './shared/monitor-fog.service';
+import { AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { merge, Observable, Subscription } from 'rxjs';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { MonitorService } from './shared/monitor.service';
+import { MonitorProcessModel } from './shared/monitor-process.model';
+import { SelectionModel } from '@angular/cdk/collections';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { MonitorProcessTotalModel } from './shared/monitor-process-total.model';
+import { Navigation, Router } from '@angular/router';
+import { DeploymentsModel } from '../deployments/shared/deployments.model';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { NetworksService } from '../../devices/networks/shared/networks.service';
+import { NetworksModel } from '../../devices/networks/shared/networks.model';
+import { MonitorFogFactory, MonitorFogService } from './shared/monitor-fog.service';
 
 @Component({
     selector: 'senergy-process-monitor',
     templateUrl: './monitor.component.html',
-    styleUrls: ['./monitor.component.css']
+    styleUrls: ['./monitor.component.css'],
 })
-
 export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit {
-
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();
     dataSourceRunning = new MatTableDataSource<MonitorProcessModel>();
     displayedColumnsFinished: string[] = ['select', 'definitionName', 'id', 'startTime', 'endTime', 'duration', 'info', 'delete'];
@@ -56,10 +54,10 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     searchInitialized = false;
     animation = true;
     selectedDeployment: DeploymentsModel | null = null;
-    @ViewChild('paginatorFinished', {static: false}) paginatorFinished!: MatPaginator;
-    @ViewChild('paginatorRunning', {static: false}) paginatorRunning!: MatPaginator;
-    @ViewChild('sortFinished', {static: false}) sortFinished!: MatSort;
-    @ViewChild('sortRunning', {static: false}) sortRunning!: MatSort;
+    @ViewChild('paginatorFinished', { static: false }) paginatorFinished!: MatPaginator;
+    @ViewChild('paginatorRunning', { static: false }) paginatorRunning!: MatPaginator;
+    @ViewChild('sortFinished', { static: false }) sortFinished!: MatSort;
+    @ViewChild('sortRunning', { static: false }) sortRunning!: MatSort;
 
     private searchSub: Subscription = new Subscription();
     private finishedSub: Subscription = new Subscription();
@@ -71,26 +69,36 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     hub: NetworksModel | undefined | null;
 
     private monitorService: {
-        deleteInstances(id: string): Observable<string>
-        deleteMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]>
-        stopInstances(id: string): Observable<string>
-        stopMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]>
-        getFilteredHistoryInstances(filter: string, searchtype: string, searchvalue: string, limit: number, offset: number, value: string, order: string): Observable<MonitorProcessTotalModel>
-        openDetailsDialog(id: string): void
+        deleteInstances(id: string): Observable<string>;
+        deleteMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]>;
+        stopInstances(id: string): Observable<string>;
+        stopMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]>;
+        getFilteredHistoryInstances(
+            filter: string,
+            searchtype: string,
+            searchvalue: string,
+            limit: number,
+            offset: number,
+            value: string,
+            order: string,
+        ): Observable<MonitorProcessTotalModel>;
+        openDetailsDialog(id: string): void;
     };
 
-    constructor(private searchbarService: SearchbarService,
-                private plattformMonitorService: MonitorService,
-                private dialogsService: DialogsService,
-                private router: Router,
-                private hubsService: NetworksService,
-                private fogMonitorFactory: MonitorFogFactory) {
+    constructor(
+        private searchbarService: SearchbarService,
+        private plattformMonitorService: MonitorService,
+        private dialogsService: DialogsService,
+        private router: Router,
+        private hubsService: NetworksService,
+        private fogMonitorFactory: MonitorFogFactory,
+    ) {
         this.monitorService = plattformMonitorService;
         this.getRouterParams();
     }
 
     ngOnInit() {
-        this.hubsService.listSyncNetworks().subscribe(result => {
+        this.hubsService.listSyncNetworks().subscribe((result) => {
             this.hubList = result;
         });
         this.initSearch();
@@ -137,7 +145,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         if (this.isAllSelectedRunning()) {
             this.selectionClearRunning();
         } else {
-            this.dataSourceRunning.connect().value.forEach(row => this.selectionRunning.select(row));
+            this.dataSourceRunning.connect().value.forEach((row) => this.selectionRunning.select(row));
         }
     }
 
@@ -145,7 +153,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         if (this.isAllSelected()) {
             this.selectionClear();
         } else {
-            this.dataSourceFinished.connect().value.forEach(row => this.selection.select(row));
+            this.dataSourceFinished.connect().value.forEach((row) => this.selection.select(row));
         }
     }
 
@@ -170,22 +178,27 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     deleteSingleItem(element: MonitorProcessModel): void {
-        this.dialogsService.openDeleteDialog('process (' + element.id + ')').afterClosed().subscribe((processDelete: boolean) => {
-            if (processDelete) {
-                this.isLoadingResultsFinished = true;
-                this.monitorService.deleteInstances(element.id).subscribe((resp: string) => {
-                    if (resp === 'ok') {
-                        this.paginatorFinished.pageIndex = 0;
-                        this.reload();
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('process (' + element.id + ')')
+            .afterClosed()
+            .subscribe((processDelete: boolean) => {
+                if (processDelete) {
+                    this.isLoadingResultsFinished = true;
+                    this.monitorService.deleteInstances(element.id).subscribe((resp: string) => {
+                        if (resp === 'ok') {
+                            this.paginatorFinished.pageIndex = 0;
+                            this.reload();
+                        }
+                    });
+                }
+            });
     }
 
     deleteMultipleItems(): void {
-        this.dialogsService.openDeleteDialog(this.selection.selected.length + ' process(es)').afterClosed().subscribe(
-            (processesDelete: boolean) => {
+        this.dialogsService
+            .openDeleteDialog(this.selection.selected.length + ' process(es)')
+            .afterClosed()
+            .subscribe((processesDelete: boolean) => {
                 if (processesDelete) {
                     this.isLoadingResultsFinished = true;
                     this.monitorService.deleteMultipleInstances(this.selection.selected).subscribe(() => {
@@ -198,18 +211,20 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     deleteMultipleItemsRunning(): void {
-            this.dialogsService.openDeleteDialog(this.selectionRunning.selected.length + ' process(es)').afterClosed().subscribe(
-                (processesDelete: boolean) => {
-                    if (processesDelete) {
-                        this.isLoadingResultsRunning = true;
-                        this.monitorService.stopMultipleInstances(this.selectionRunning.selected).subscribe(() => {
-                            this.paginatorRunning.pageIndex = 0;
-                            this.reload();
-                            this.selectionClearRunning();
-                        });
-                    }
-                });
-        }
+        this.dialogsService
+            .openDeleteDialog(this.selectionRunning.selected.length + ' process(es)')
+            .afterClosed()
+            .subscribe((processesDelete: boolean) => {
+                if (processesDelete) {
+                    this.isLoadingResultsRunning = true;
+                    this.monitorService.stopMultipleInstances(this.selectionRunning.selected).subscribe(() => {
+                        this.paginatorRunning.pageIndex = 0;
+                        this.reload();
+                        this.selectionClearRunning();
+                    });
+                }
+            });
+    }
 
     stop(element: MonitorProcessModel): void {
         this.monitorService.stopInstances(element.id).subscribe((resp: string) => {
@@ -239,24 +254,31 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         this.dataSourceRunning.sort.sortChange.subscribe(() => {
             this.paginatorRunning.pageIndex = 0;
         });
-        this.runningSub = merge(this.dataSourceRunning.sort.sortChange, this.paginatorRunning.page, this.reloadRunningSub).pipe(
-            startWith({}),
-            switchMap(() => {
-                this.isLoadingResultsRunning = true;
-                const searchParams = this.setSearchParams();
-                return this.monitorService.getFilteredHistoryInstances('unfinished', searchParams.searchType, searchParams.searchValue,
-                    this.paginatorRunning.pageSize, this.paginatorRunning.pageSize * this.paginatorRunning.pageIndex,
-                    this.sortRunning.active, this.sortRunning.direction);
-            }),
-            map((resp: MonitorProcessTotalModel) => {
-                this.totalCountRunning = resp.total;
-                return resp.data;
-            })
-        ).subscribe((data: MonitorProcessModel[]) => {
-            this.dataSourceRunning.data = data || [];
-            this.isLoadingResultsRunning = false;
-
-        });
+        this.runningSub = merge(this.dataSourceRunning.sort.sortChange, this.paginatorRunning.page, this.reloadRunningSub)
+            .pipe(
+                startWith({}),
+                switchMap(() => {
+                    this.isLoadingResultsRunning = true;
+                    const searchParams = this.setSearchParams();
+                    return this.monitorService.getFilteredHistoryInstances(
+                        'unfinished',
+                        searchParams.searchType,
+                        searchParams.searchValue,
+                        this.paginatorRunning.pageSize,
+                        this.paginatorRunning.pageSize * this.paginatorRunning.pageIndex,
+                        this.sortRunning.active,
+                        this.sortRunning.direction,
+                    );
+                }),
+                map((resp: MonitorProcessTotalModel) => {
+                    this.totalCountRunning = resp.total;
+                    return resp.data;
+                }),
+            )
+            .subscribe((data: MonitorProcessModel[]) => {
+                this.dataSourceRunning.data = data || [];
+                this.isLoadingResultsRunning = false;
+            });
     }
 
     private initFinished() {
@@ -266,26 +288,34 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             this.selectionClear();
         });
 
-        this.finishedSub = merge(this.dataSourceFinished.sort.sortChange, this.paginatorFinished.page, this.reloadFinishedSub).pipe(
-            startWith({}),
-            switchMap(() => {
-                this.isLoadingResultsFinished = true;
-                const searchParams = this.setSearchParams();
-                return this.monitorService.getFilteredHistoryInstances('finished', searchParams.searchType, searchParams.searchValue,
-                    this.paginatorFinished.pageSize, this.paginatorFinished.pageSize * this.paginatorFinished.pageIndex,
-                    this.sortFinished.active, this.sortFinished.direction);
-            }),
-            map((resp: MonitorProcessTotalModel) => {
-                this.totalCountFinished = resp.total;
-                return resp.data;
-            })
-        ).subscribe((data: MonitorProcessModel[]) => {
-            this.dataSourceFinished.data = data || [];
-            this.isLoadingResultsFinished = false;
-        });
+        this.finishedSub = merge(this.dataSourceFinished.sort.sortChange, this.paginatorFinished.page, this.reloadFinishedSub)
+            .pipe(
+                startWith({}),
+                switchMap(() => {
+                    this.isLoadingResultsFinished = true;
+                    const searchParams = this.setSearchParams();
+                    return this.monitorService.getFilteredHistoryInstances(
+                        'finished',
+                        searchParams.searchType,
+                        searchParams.searchValue,
+                        this.paginatorFinished.pageSize,
+                        this.paginatorFinished.pageSize * this.paginatorFinished.pageIndex,
+                        this.sortFinished.active,
+                        this.sortFinished.direction,
+                    );
+                }),
+                map((resp: MonitorProcessTotalModel) => {
+                    this.totalCountFinished = resp.total;
+                    return resp.data;
+                }),
+            )
+            .subscribe((data: MonitorProcessModel[]) => {
+                this.dataSourceFinished.data = data || [];
+                this.isLoadingResultsFinished = false;
+            });
     }
 
-    private setSearchParams(): { searchType: string, searchValue: string } {
+    private setSearchParams(): { searchType: string; searchValue: string } {
         let searchType = '';
         let searchValue = '';
 
@@ -296,11 +326,10 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             searchType = 'processDefinitionId';
             searchValue = this.selectedDeployment.definition_id;
         }
-        return {searchType, searchValue};
+        return { searchType, searchValue };
     }
 
     private initSearch() {
-
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             if (searchText !== '') {
                 this.searchInitialized = true;
@@ -315,7 +344,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         const navigation: Navigation | null = this.router.getCurrentNavigation();
         if (navigation !== null) {
             if (navigation.extras.state !== undefined) {
-                const params = navigation.extras.state as {deployment: DeploymentsModel, activeTab: number, hub?: NetworksModel};
+                const params = navigation.extras.state as { deployment: DeploymentsModel; activeTab: number; hub?: NetworksModel };
                 this.selectedDeployment = params.deployment;
                 this.activeIndex = params.activeTab;
                 if (params.hub) {

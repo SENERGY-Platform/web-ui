@@ -22,9 +22,9 @@ export interface OperatorModel {
     pub: boolean | undefined;
     deploymentType: string | undefined;
     userId: string | undefined;
-    inputs: IOModel [] | undefined;
-    outputs: IOModel [] | undefined;
-    config_values: IOModel [] | undefined;
+    inputs: IOModel[] | undefined;
+    outputs: IOModel[] | undefined;
+    config_values: IOModel[] | undefined;
     editable: boolean | undefined;
 }
 
@@ -32,4 +32,3 @@ export interface IOModel {
     name: string;
     type: string;
 }
-

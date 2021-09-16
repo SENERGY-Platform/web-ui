@@ -13,35 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {ImportTypesCreateEditComponent} from './import-types-create-edit.component';
-import {ActivatedRoute, RouterModule} from '@angular/router';
-import {ReactiveFormsModule} from '@angular/forms';
-import {HttpClientModule} from '@angular/common/http';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
-import {AspectsService} from '../../metadata/aspects/shared/aspects.service';
-import {of} from 'rxjs';
-import {CoreModule} from '../../../core/core.module';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {WidgetModule} from '../../../widgets/widget.module';
-import {FlexModule} from '@angular/flex-layout';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatSelectModule} from '@angular/material/select';
-import {MatTreeModule} from '@angular/material/tree';
-import {ImportTypesService} from '../import-types/shared/import-types.service';
-import {environment} from '../../../../environments/environment';
-import {ImportTypeModel} from '../import-types/shared/import-types.model';
-import {ImportTypesComponent} from '../import-types/import-types.component';
-import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
-import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
+import { ImportTypesCreateEditComponent } from './import-types-create-edit.component';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { AspectsService } from '../../metadata/aspects/shared/aspects.service';
+import { of } from 'rxjs';
+import { CoreModule } from '../../../core/core.module';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { WidgetModule } from '../../../widgets/widget.module';
+import { FlexModule } from '@angular/flex-layout';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTreeModule } from '@angular/material/tree';
+import { ImportTypesService } from '../import-types/shared/import-types.service';
+import { environment } from '../../../../environments/environment';
+import { ImportTypeModel } from '../import-types/shared/import-types.model';
+import { ImportTypesComponent } from '../import-types/import-types.component';
+import { ConceptsService } from '../../metadata/concepts/shared/concepts.service';
+import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 
 describe('ImportTypesCreateEditComponent', () => {
     let component: ImportTypesCreateEditComponent;
@@ -50,7 +50,6 @@ describe('ImportTypesCreateEditComponent', () => {
     const aspectsServiceSpy: Spy<AspectsService> = createSpyFromClass(AspectsService);
     const conceptsServiceSpy: Spy<ConceptsService> = createSpyFromClass(ConceptsService);
     const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
-
 
     deviceTypeService.getMeasuringFunctions.and.returnValue(of([]));
     aspectsServiceSpy.getAspects.and.returnValue(of([]));
@@ -66,8 +65,8 @@ describe('ImportTypesCreateEditComponent', () => {
                 name: 'test-config',
                 description: 'none',
                 type: 'https://schema.org/Text',
-                default_value: 'config-value'
-            }
+                default_value: 'config-value',
+            },
         ],
         aspect_ids: [],
         output: {
@@ -80,14 +79,14 @@ describe('ImportTypesCreateEditComponent', () => {
                     type: 'https://schema.org/Text',
                     characteristic_id: '',
                     sub_content_variables: [],
-                    use_as_tag: false
+                    use_as_tag: false,
                 },
                 {
                     name: 'time',
                     type: 'https://schema.org/Text',
                     characteristic_id: environment.timeStampCharacteristicId,
                     sub_content_variables: [],
-                    use_as_tag: false
+                    use_as_tag: false,
                 },
                 {
                     name: 'value',
@@ -99,7 +98,7 @@ describe('ImportTypesCreateEditComponent', () => {
                             type: 'https://schema.org/Float',
                             characteristic_id: '',
                             sub_content_variables: [],
-                            use_as_tag: false
+                            use_as_tag: false,
                         },
                         {
                             name: 'meta',
@@ -111,33 +110,33 @@ describe('ImportTypesCreateEditComponent', () => {
                                     type: 'https://schema.org/Float',
                                     characteristic_id: '',
                                     sub_content_variables: null,
-                                    use_as_tag: false
+                                    use_as_tag: false,
                                 },
                                 {
                                     name: 'tag1',
                                     type: 'https://schema.org/Float',
                                     characteristic_id: '',
                                     sub_content_variables: null,
-                                    use_as_tag: true
+                                    use_as_tag: true,
                                 },
                                 {
                                     name: 'tag2',
                                     type: 'https://schema.org/Text',
                                     characteristic_id: '',
                                     sub_content_variables: null,
-                                    use_as_tag: true
-                                }
+                                    use_as_tag: true,
+                                },
                             ],
-                            use_as_tag: false
-                        }
+                            use_as_tag: false,
+                        },
                     ],
-                    use_as_tag: false
-                }
+                    use_as_tag: false,
+                },
             ],
-            use_as_tag: false
+            use_as_tag: false,
         },
         function_ids: [],
-        owner: 'test-owner'
+        owner: 'test-owner',
     };
     importTypesServiceSpy.getImportType.and.returnValue(of(testType));
     importTypesServiceSpy.saveImportType.and.returnValue(of(true));
@@ -150,12 +149,17 @@ describe('ImportTypesCreateEditComponent', () => {
             declarations: [ImportTypesCreateEditComponent],
             imports: [
                 CoreModule,
-                RouterModule.forRoot([{
-        path: 'imports/types/list',
-        pathMatch: 'full',
-        component: ImportTypesComponent,
-        data: { header: 'Import Types' }
-    }], { relativeLinkResolution: 'legacy' }),
+                RouterModule.forRoot(
+                    [
+                        {
+                            path: 'imports/types/list',
+                            pathMatch: 'full',
+                            component: ImportTypesComponent,
+                            data: { header: 'Import Types' },
+                        },
+                    ],
+                    { relativeLinkResolution: 'legacy' },
+                ),
                 ReactiveFormsModule,
                 HttpClientModule,
                 MatDialogModule,
@@ -174,19 +178,19 @@ describe('ImportTypesCreateEditComponent', () => {
                 WidgetModule,
             ],
             providers: [
-                {provide: DeviceTypeService, useValue: deviceTypeService},
-                {provide: AspectsService, useValue: aspectsServiceSpy},
-                {provide: ImportTypesService, useValue: importTypesServiceSpy},
-                {provide: ConceptsService, useValue: conceptsServiceSpy},
+                { provide: DeviceTypeService, useValue: deviceTypeService },
+                { provide: AspectsService, useValue: aspectsServiceSpy },
+                { provide: ImportTypesService, useValue: importTypesServiceSpy },
+                { provide: ConceptsService, useValue: conceptsServiceSpy },
                 {
-                    provide: ActivatedRoute, useValue: {
+                    provide: ActivatedRoute,
+                    useValue: {
                         url: of(['edit', '1234']),
-                        snapshot: {paramMap: paramMap}
-                    }
-                }
-            ]
-        })
-            .compileComponents();
+                        snapshot: { paramMap },
+                    },
+                },
+            ],
+        }).compileComponents();
     });
 
     beforeEach(() => {

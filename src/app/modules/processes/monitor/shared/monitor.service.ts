@@ -14,58 +14,89 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {HttpClient} from '@angular/common/http';
-import {forkJoin, Observable} from 'rxjs';
-import {environment} from '../../../../../environments/environment';
-import {catchError, map, share} from 'rxjs/internal/operators';
-import {MonitorProcessModel} from './monitor-process.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {MonitorDetailsDialogComponent} from '../dialogs/monitor-details-dialog.component';
-import {MonitorProcessTotalModel} from './monitor-process-total.model';
-import {ProcessIncidentsService} from '../../incidents/shared/process-incidents.service';
-import {ProcessIncidentsModel} from '../../incidents/shared/process-incidents.model';
-import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
+import { Injectable } from '@angular/core';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { HttpClient } from '@angular/common/http';
+import { forkJoin, Observable } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
+import { catchError, map, share } from 'rxjs/internal/operators';
+import { MonitorProcessModel } from './monitor-process.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MonitorDetailsDialogComponent } from '../dialogs/monitor-details-dialog.component';
+import { MonitorProcessTotalModel } from './monitor-process-total.model';
+import { ProcessIncidentsService } from '../../incidents/shared/process-incidents.service';
+import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
+import { DeviceInstancesUpdateModel } from '../../../devices/device-instances/shared/device-instances-update.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class MonitorService {
-
     private getAllHistoryInstancesObservable: Observable<MonitorProcessModel[]> | null = null;
 
-    constructor(private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService,
-                private dialog: MatDialog,
-                private processIncidentsService: ProcessIncidentsService) {
-    }
+    constructor(
+        private http: HttpClient,
+        private errorHandlerService: ErrorHandlerService,
+        private dialog: MatDialog,
+        private processIncidentsService: ProcessIncidentsService,
+    ) {}
 
     getAllHistoryInstances(): Observable<MonitorProcessModel[]> {
         if (this.getAllHistoryInstancesObservable === null) {
-            this.getAllHistoryInstancesObservable = this.getAllHistoryInstancesObservable = this.http.get<MonitorProcessModel[]>(environment.processServiceUrl + '/history/process-instance').pipe(
-                map(resp => resp || []),
-                catchError(this.errorHandlerService.handleError(MonitorService.name, 'getAllHistoryInstances', [])),
-                share()
-            );
+            this.getAllHistoryInstancesObservable = this.getAllHistoryInstancesObservable = this.http
+                .get<MonitorProcessModel[]>(environment.processServiceUrl + '/history/process-instance')
+                .pipe(
+                    map((resp) => resp || []),
+                    catchError(this.errorHandlerService.handleError(MonitorService.name, 'getAllHistoryInstances', [])),
+                    share(),
+                );
         }
         return this.getAllHistoryInstancesObservable;
     }
 
-    getFilteredHistoryInstances(filter: string, searchtype: string, searchvalue: string, limit: number, offset: number, value: string, order: string): Observable<MonitorProcessTotalModel> {
-        return this.http.get<MonitorProcessTotalModel>
-        (environment.processServiceUrl + '/history/' + filter + '/process-instance/' + searchtype + '/' + searchvalue + '/' + limit +
-            '/' + offset + '/' + value + '/' + order ).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(MonitorService.name, 'getFilteredHistoryInstances', {} as MonitorProcessTotalModel))
-        );
+    getFilteredHistoryInstances(
+        filter: string,
+        searchtype: string,
+        searchvalue: string,
+        limit: number,
+        offset: number,
+        value: string,
+        order: string,
+    ): Observable<MonitorProcessTotalModel> {
+        return this.http
+            .get<MonitorProcessTotalModel>(
+                environment.processServiceUrl +
+                    '/history/' +
+                    filter +
+                    '/process-instance/' +
+                    searchtype +
+                    '/' +
+                    searchvalue +
+                    '/' +
+                    limit +
+                    '/' +
+                    offset +
+                    '/' +
+                    value +
+                    '/' +
+                    order,
+            )
+            .pipe(
+                map((resp) => resp || []),
+                catchError(
+                    this.errorHandlerService.handleError(
+                        MonitorService.name,
+                        'getFilteredHistoryInstances',
+                        {} as MonitorProcessTotalModel,
+                    ),
+                ),
+            );
     }
 
     stopInstances(id: string): Observable<string> {
-        return this.http.delete
-        (environment.processServiceUrl + '/process-instance/' + id, {responseType: 'text'}).pipe(
-            catchError(this.errorHandlerService.handleError(MonitorService.name, 'stopInstances', 'error'))
-        );
+        return this.http
+            .delete(environment.processServiceUrl + '/process-instance/' + id, { responseType: 'text' })
+            .pipe(catchError(this.errorHandlerService.handleError(MonitorService.name, 'stopInstances', 'error')));
     }
 
     stopMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]> {
@@ -73,17 +104,19 @@ export class MonitorService {
         processes.forEach((process: MonitorProcessModel) => {
             ids.push(process.id);
         });
-        return this.http.request('DELETE', environment.processServiceUrl + '/v2/process-instances', {responseType: 'text', body: ids}).pipe().pipe(
-            map(value => [value]),
-            catchError(this.errorHandlerService.handleError(MonitorService.name, 'stopInstances', ['error']))
-        );
+        return this.http
+            .request('DELETE', environment.processServiceUrl + '/v2/process-instances', { responseType: 'text', body: ids })
+            .pipe()
+            .pipe(
+                map((value) => [value]),
+                catchError(this.errorHandlerService.handleError(MonitorService.name, 'stopInstances', ['error'])),
+            );
     }
 
     deleteInstances(id: string): Observable<string> {
-        return this.http.delete
-        (environment.processServiceUrl + '/history/process-instance/' + id, {responseType: 'text'}).pipe(
-            catchError(this.errorHandlerService.handleError(MonitorService.name, 'deleteInstances', 'error'))
-        );
+        return this.http
+            .delete(environment.processServiceUrl + '/history/process-instance/' + id, { responseType: 'text' })
+            .pipe(catchError(this.errorHandlerService.handleError(MonitorService.name, 'deleteInstances', 'error')));
     }
 
     deleteMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]> {
@@ -91,10 +124,12 @@ export class MonitorService {
         processes.forEach((process: MonitorProcessModel) => {
             ids.push(process.id);
         });
-        return this.http.request('DELETE', environment.processServiceUrl + '/v2/history/process-instances', {responseType: 'text', body: ids}).pipe(
-            map(value => [value]),
-            catchError(this.errorHandlerService.handleError(MonitorService.name, 'deleteInstances', ['error']))
-        );
+        return this.http
+            .request('DELETE', environment.processServiceUrl + '/v2/history/process-instances', { responseType: 'text', body: ids })
+            .pipe(
+                map((value) => [value]),
+                catchError(this.errorHandlerService.handleError(MonitorService.name, 'deleteInstances', ['error'])),
+            );
     }
 
     openDetailsDialog(id: string): void {
@@ -102,12 +137,9 @@ export class MonitorService {
             const dialogConfig = new MatDialogConfig();
             dialogConfig.disableClose = false;
             dialogConfig.data = {
-                incident: incident,
+                incident,
             };
             this.dialog.open(MonitorDetailsDialogComponent, dialogConfig);
         });
-
     }
-
-
 }

@@ -38,39 +38,23 @@ export interface UBAStation {
 export interface UBAStationResponse {
     request?: UBARequestResponse;
     indices?: string[];
-    data?: {
-
-    };
+    data?: any;
     count?: number;
 }
 
 export interface UBADataResponse {
     request?: UBARequestResponse;
-    data?: {
-
-    };
-    indices?: {
-
-    };
-    count?: number;
+    data?: unknown;
+    indices?: any;
+    count?: unknown;
 }
 
 export interface UBAMetaResponse {
-    components?: {
-
-    };
-    limits?: {
-
-    };
-    networks?: {
-
-    };
-    scopes?: {
-
-    };
-    stations?: {
-
-    };
+    components?: any;
+    limits?: unknown;
+    networks?: unknown;
+    scopes?: unknown;
+    stations?: unknown;
     request?: UBARequestResponse;
 }
 

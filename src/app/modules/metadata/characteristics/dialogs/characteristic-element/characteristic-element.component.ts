@@ -14,32 +14,28 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {DeviceTypeCharacteristicsModel} from '../../../device-types-overview/shared/device-type.model';
-import {FormBuilder} from '@angular/forms';
-import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatTreeNestedDataSource} from '@angular/material/tree';
-
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { DeviceTypeCharacteristicsModel } from '../../../device-types-overview/shared/device-type.model';
+import { FormBuilder } from '@angular/forms';
+import { NestedTreeControl } from '@angular/cdk/tree';
+import { MatTreeNestedDataSource } from '@angular/material/tree';
 
 @Component({
     selector: 'senergy-characteristic-element',
     templateUrl: './characteristic-element.component.html',
-    styleUrls: ['./characteristic-element.component.css']
+    styleUrls: ['./characteristic-element.component.css'],
 })
 export class CharacteristicElementComponent implements OnInit {
-
-    constructor(private fb: FormBuilder) {
-    }
+    constructor(private fb: FormBuilder) {}
 
     @Input() data: DeviceTypeCharacteristicsModel | undefined;
     @Input() nested = false;
     @Output() valueChange = new EventEmitter<DeviceTypeCharacteristicsModel>();
 
-    treeControl = new NestedTreeControl<DeviceTypeCharacteristicsModel>(node => node.sub_characteristics || []);
+    treeControl = new NestedTreeControl<DeviceTypeCharacteristicsModel>((node) => node.sub_characteristics || []);
     dataSource = new MatTreeNestedDataSource<DeviceTypeCharacteristicsModel>();
 
-
-    types: { type: string, typeShort: string }[] = [];
+    types: { type: string; typeShort: string }[] = [];
     form = this.fb.group({
         id: undefined,
         name: '',
@@ -62,7 +58,7 @@ export class CharacteristicElementComponent implements OnInit {
             return true;
         }
         return false;
-    }
+    };
 
     private static takeValues(source: DeviceTypeCharacteristicsModel, target: DeviceTypeCharacteristicsModel) {
         target.id = source.id;
@@ -78,25 +74,25 @@ export class CharacteristicElementComponent implements OnInit {
     ngOnInit() {
         this.patch(this.data);
         this.initTypesList();
-        this.form.valueChanges.subscribe(value => {
+        this.form.valueChanges.subscribe((value) => {
             switch (this.form.get('type')?.value) {
-                case 'https://schema.org/Integer':
-                    value.min_value = value.min_value ? parseInt(value.min_value, undefined) : undefined;
-                    value.max_value = value.max_value ? parseInt(value.max_value, undefined) : undefined;
-                    value.value = value.value ? parseInt(value.value, undefined) : undefined;
-                    break;
-                case 'https://schema.org/Float':
-                    value.min_value = value.min_value ? parseFloat(value.min_value) : undefined;
-                    value.max_value = value.max_value ? parseFloat(value.max_value) : undefined;
-                    value.value = value.value ? parseFloat(value.value) : undefined;
-                    break;
-                case 'https://schema.org/Boolean':
-                    value.value = value.value ? value.value === 'true' : undefined;
-                    break;
+            case 'https://schema.org/Integer':
+                value.min_value = value.min_value ? parseInt(value.min_value, 10) : undefined;
+                value.max_value = value.max_value ? parseInt(value.max_value, 10) : undefined;
+                value.value = value.value ? parseInt(value.value, 10) : undefined;
+                break;
+            case 'https://schema.org/Float':
+                value.min_value = value.min_value ? parseFloat(value.min_value) : undefined;
+                value.max_value = value.max_value ? parseFloat(value.max_value) : undefined;
+                value.value = value.value ? parseFloat(value.value) : undefined;
+                break;
+            case 'https://schema.org/Boolean':
+                value.value = value.value ? value.value === 'true' : undefined;
+                break;
             }
             this.valueChange.emit(value);
         });
-        this.form.get('type')?.valueChanges.subscribe(_ => {
+        this.form.get('type')?.valueChanges.subscribe((_) => {
             if (this.isNumeric()) {
                 this.form.get('sub_characteristics')?.setValue([]);
             }
@@ -144,7 +140,7 @@ export class CharacteristicElementComponent implements OnInit {
 
     updateSubCharacteristic(value: DeviceTypeCharacteristicsModel, node: DeviceTypeCharacteristicsModel) {
         const subs = this.getSubCharacteristics();
-        const index = subs.findIndex(o => CharacteristicElementComponent.compareCharacteristics(o, node));
+        const index = subs.findIndex((o) => CharacteristicElementComponent.compareCharacteristics(o, node));
 
         if (index !== -1) {
             subs[index] = value;
@@ -156,7 +152,10 @@ export class CharacteristicElementComponent implements OnInit {
     }
 
     isStructureOrList(): boolean {
-        return this.form.get('type')?.value === 'https://schema.org/StructuredValue' || this.form.get('type')?.value === 'https://schema.org/ItemList';
+        return (
+            this.form.get('type')?.value === 'https://schema.org/StructuredValue' ||
+            this.form.get('type')?.value === 'https://schema.org/ItemList'
+        );
     }
 
     isNumeric(): boolean {
@@ -209,12 +208,12 @@ export class CharacteristicElementComponent implements OnInit {
     }
 
     private initTypesList(): void {
-        this.types.push({type: 'https://schema.org/Text', typeShort: 'string'});
-        this.types.push({type: 'https://schema.org/Integer', typeShort: 'int'});
-        this.types.push({type: 'https://schema.org/Float', typeShort: 'float'});
-        this.types.push({type: 'https://schema.org/Boolean', typeShort: 'bool'});
-        this.types.push({type: 'https://schema.org/StructuredValue', typeShort: 'Structure'});
-        this.types.push({type: 'https://schema.org/ItemList', typeShort: 'List'});
+        this.types.push({ type: 'https://schema.org/Text', typeShort: 'string' });
+        this.types.push({ type: 'https://schema.org/Integer', typeShort: 'int' });
+        this.types.push({ type: 'https://schema.org/Float', typeShort: 'float' });
+        this.types.push({ type: 'https://schema.org/Boolean', typeShort: 'bool' });
+        this.types.push({ type: 'https://schema.org/StructuredValue', typeShort: 'Structure' });
+        this.types.push({ type: 'https://schema.org/ItemList', typeShort: 'List' });
     }
 
     private setSubCharacteristics(subs: DeviceTypeCharacteristicsModel[]) {

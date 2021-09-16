@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import {SwitchEditDialogComponent} from '../dialogs/switch-edit-dialog.component';
-import {environment} from '../../../../environments/environment';
-import {forkJoin, Observable} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {catchError} from 'rxjs/internal/operators';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel} from './switch-properties.model';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import { SwitchEditDialogComponent } from '../dialogs/switch-edit-dialog.component';
+import { environment } from '../../../../environments/environment';
+import { forkJoin, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { catchError } from 'rxjs/internal/operators';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel } from './switch-properties.model';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class SwitchService {
-
-    constructor(private dialog: MatDialog,
-                private http: HttpClient,
-                private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private http: HttpClient,
+        private dashboardService: DashboardService,
+        private errorHandlerService: ErrorHandlerService,
+    ) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
@@ -46,8 +46,8 @@ export class SwitchService {
         // dialogConfig.minWidth = '800px';
         // dialogConfig.minHeight = '600px';
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         const editDialogRef = this.dialog.open(SwitchEditDialogComponent, dialogConfig);
 
@@ -58,31 +58,25 @@ export class SwitchService {
         });
     }
 
-
-
     startMultipleDeployments(deployments: SwitchPropertiesDeploymentsModel[]): Observable<SwitchPropertiesInstancesModel[]> {
-
         const array: Observable<SwitchPropertiesInstancesModel>[] = [];
         deployments.forEach((deploy: SwitchPropertiesDeploymentsModel) => {
-            array.push(this.http.get<SwitchPropertiesInstancesModel>(environment.processServiceUrl +
-                '/deployment/' + encodeURIComponent(deploy.id) + '/start'));
+            array.push(
+                this.http.get<SwitchPropertiesInstancesModel>(
+                    environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploy.id) + '/start',
+                ),
+            );
         });
 
         return forkJoin(array);
     }
 
     stopMultipleDeployments(instances: SwitchPropertiesInstancesModel[]): Observable<string[]> {
-
         const array: Observable<string>[] = [];
         instances.forEach((instance: SwitchPropertiesInstancesModel) => {
-            array.push(this.http.delete(environment.processServiceUrl +
-                '/process-instance/' + instance.id, {responseType: 'text'}));
+            array.push(this.http.delete(environment.processServiceUrl + '/process-instance/' + instance.id, { responseType: 'text' }));
         });
 
-        return forkJoin(array).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'stopMultipleDeployments', []))
-        );
+        return forkJoin(array).pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'stopMultipleDeployments', [])));
     }
-
 }
-

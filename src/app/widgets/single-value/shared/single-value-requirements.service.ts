@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {ExportService} from '../../../modules/exports/shared/export.service';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {ExportResponseModel} from "../../../modules/exports/shared/export.model";
-
+import { Injectable } from '@angular/core';
+import { ExportService } from '../../../modules/exports/shared/export.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ExportResponseModel } from '../../../modules/exports/shared/export.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class SingleValueRequirementsService {
-
-    constructor(
-                private exportService: ExportService, ) {
-    }
+    constructor(private exportService: ExportService) {}
 
     static requirement = 'Needs an export';
 
     requirementsFulfilled(): Observable<boolean> {
-        return this.exportService.getExports('', 1, 0, 'name', 'asc').pipe(map(r => {
-            return r !== null && r.instances.length !== 0;
-        }));
+        return this.exportService.getExports('', 1, 0, 'name', 'asc').pipe(map((r) => r !== null && r.instances.length !== 0));
     }
 }

@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-import {Injectable, Output} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-import {debounceTime} from 'rxjs/internal/operators';
+import { Injectable, Output } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { debounceTime } from 'rxjs/internal/operators';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root',
 })
 export class SearchbarService {
+    private searchText = new BehaviorSubject('');
 
-  private searchText = new BehaviorSubject('');
+    @Output() currentSearchText = this.searchText.asObservable().pipe(debounceTime(300));
 
-  @Output() currentSearchText = this.searchText.asObservable().pipe(debounceTime(300));
+    constructor() {}
 
-  constructor() {
-  }
-
-  changeMessage(message: string): void {
-    this.searchText.next(message);
-  }
-
-
-
+    changeMessage(message: string): void {
+        this.searchText.next(message);
+    }
 }

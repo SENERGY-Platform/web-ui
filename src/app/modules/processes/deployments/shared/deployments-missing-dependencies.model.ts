@@ -16,9 +16,7 @@
 
 export interface DeploymentsMissingDependenciesModel {
     devices: {
-        device_id: string
+        device_id: string;
         name: string;
     }[];
 }
-
-

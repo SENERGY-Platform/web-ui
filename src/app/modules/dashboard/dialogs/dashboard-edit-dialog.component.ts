@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormControl, Validators} from '@angular/forms';
-import {DashboardModel} from '../shared/dashboard.model';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormControl, Validators } from '@angular/forms';
+import { DashboardModel } from '../shared/dashboard.model';
 
 @Component({
     templateUrl: './dashboard-edit-dialog.component.html',
-    styleUrls: ['./dashboard-edit-dialog.component.css']
+    styleUrls: ['./dashboard-edit-dialog.component.css'],
 })
 export class DashboardEditDialogComponent {
-
     dashboard: DashboardModel;
     formControl = new FormControl('', [Validators.required, Validators.minLength(1)]);
 
-    constructor(private dialogRef: MatDialogRef<DashboardEditDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: { dashboard: DashboardModel}) {
+    constructor(
+        private dialogRef: MatDialogRef<DashboardEditDialogComponent>,
+        @Inject(MAT_DIALOG_DATA) data: { dashboard: DashboardModel },
+    ) {
         this.dashboard = data.dashboard;
         this.formControl.setValue(this.dashboard.name);
     }
@@ -42,5 +43,4 @@ export class DashboardEditDialogComponent {
         this.dashboard.name = this.formControl.value;
         this.dialogRef.close(this.dashboard);
     }
-
 }

@@ -22,6 +22,7 @@ import _PaletteProvider from 'bpmn-js/lib/features/palette/PaletteProvider';
 import * as _CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
 import * as _SenergyPropertiesProvider from 'senergy-properties-provider';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const InjectionNames = {
     eventBus: 'eventBus',
     bpmnFactory: 'bpmnFactory',
@@ -30,14 +31,20 @@ export const InjectionNames = {
     propertiesProvider: 'propertiesProvider',
     camundaPropertiesProvider: 'camundaPropertiesProvider',
     paletteProvider: 'paletteProvider',
-    elementTemplates: 'elementTemplates'
+    elementTemplates: 'elementTemplates',
 };
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Modeler = _Modeler;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PropertiesPanelModule = _PropertiesPanelModule;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PaletteProvider = _PaletteProvider;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CamundaPropertiesProvider = _CamundaPropertiesProvider;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ElementTemplates = _ElementTemplates;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SenergyPropertiesProvider = _SenergyPropertiesProvider;
 export const camundaBpmnModdle = _CamundaBpmnModdle.default;
 

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormControl, FormGroup, ValidatorFn} from '@angular/forms';
-import {ParentErrorStateMatcher} from '../../../../../core/classes/parent-error-state-matcher';
-
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormControl, FormGroup, ValidatorFn } from '@angular/forms';
+import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-error-state-matcher';
 
 @Component({
-  templateUrl: './notification-config-dialog.component.html',
-  styleUrls: ['./notification-config-dialog.component.css']
+    templateUrl: './notification-config-dialog.component.html',
+    styleUrls: ['./notification-config-dialog.component.css'],
 })
 export class NotificationConfigDialogComponent implements OnInit {
     subjectFormGroup: FormGroup;
@@ -31,20 +30,26 @@ export class NotificationConfigDialogComponent implements OnInit {
 
     constructor(
         private dialogRef: MatDialogRef<NotificationConfigDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: {to: string, subj: string, content: string}
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { to: string; subj: string; content: string },
     ) {
-        this.subjectFormGroup = new FormGroup({
-            defaultValue: new FormControl(''),
-            fixed: new FormControl(true),
-            key: new FormControl('')
-        }, this.getValidator());
+        this.subjectFormGroup = new FormGroup(
+            {
+                defaultValue: new FormControl(''),
+                fixed: new FormControl(true),
+                key: new FormControl(''),
+            },
+            this.getValidator(),
+        );
         this.subjectFormGroup.setValue(this.interpretStringAsPlaceholder(this.dialogParams.subj));
 
-        this.contentFormGroup = new FormGroup({
-            defaultValue: new FormControl(''),
-            fixed: new FormControl(true),
-            key: new FormControl('')
-        }, this.getValidator());
+        this.contentFormGroup = new FormGroup(
+            {
+                defaultValue: new FormControl(''),
+                fixed: new FormControl(true),
+                key: new FormControl(''),
+            },
+            this.getValidator(),
+        );
         this.contentFormGroup.setValue(this.interpretStringAsPlaceholder(this.dialogParams.content));
     }
 
@@ -63,16 +68,16 @@ export class NotificationConfigDialogComponent implements OnInit {
     }
 
     private getValidator(): ValidatorFn {
-        return control => {
-            const placeholder = <{key: string, defaultValue: string, fixed: boolean}>control.value;
+        return (control) => {
+            const placeholder = control.value as { key: string; defaultValue: string; fixed: boolean };
             if (!placeholder) {
                 return {
-                    invalid: 'placeholder is null'
+                    invalid: 'placeholder is null',
                 };
             }
             if (placeholder.fixed && !placeholder.defaultValue) {
                 return {
-                    fixedNull: `fixed placeholders can't have empty default values`
+                    fixedNull: 'fixed placeholders can\'t have empty default values',
                 };
             }
             return null;
@@ -80,14 +85,17 @@ export class NotificationConfigDialogComponent implements OnInit {
     }
 
     private getResult(): { subj: string; content: string } {
-        const result =  {subj: '', content: ''};
+        const result = { subj: '', content: '' };
 
-        const subjPlaceholder =  <{key: string, defaultValue: string, fixed: boolean}>this.subjectFormGroup.value;
+        const subjPlaceholder = this.subjectFormGroup.value as { key: string; defaultValue: string; fixed: boolean };
         result.subj = this.placeholderToString(subjPlaceholder.fixed, subjPlaceholder.key || 'subject', subjPlaceholder.defaultValue);
 
-        const contentPlaceholder =  <{key: string, defaultValue: string, fixed: boolean}>this.contentFormGroup.value;
-        result.content = this.placeholderToString(contentPlaceholder.fixed,
-            contentPlaceholder.key || 'content', contentPlaceholder.defaultValue);
+        const contentPlaceholder = this.contentFormGroup.value as { key: string; defaultValue: string; fixed: boolean };
+        result.content = this.placeholderToString(
+            contentPlaceholder.fixed,
+            contentPlaceholder.key || 'content',
+            contentPlaceholder.defaultValue,
+        );
 
         return result;
     }
@@ -102,18 +110,16 @@ export class NotificationConfigDialogComponent implements OnInit {
         }
     }
 
-    private interpretStringAsPlaceholder(term: string): {key: string, defaultValue: string, fixed: boolean} {
+    private interpretStringAsPlaceholder(term: string): { key: string; defaultValue: string; fixed: boolean } {
         if (term.trim().startsWith('{{') && term.trim().endsWith('}}')) {
-            const parts = term.replace(new RegExp('{{', 'g'), '')
-                .replace(new RegExp('}}', 'g'), '')
-                .split('=');
+            const parts = term.replace(new RegExp('{{', 'g'), '').replace(new RegExp('}}', 'g'), '').split('=');
             if (parts.length < 2) {
-                return {fixed: false, defaultValue: '', key: parts[0]};
+                return { fixed: false, defaultValue: '', key: parts[0] };
             } else {
-                return {fixed: false, defaultValue: parts.slice(1).join('='), key: parts[0]};
+                return { fixed: false, defaultValue: parts.slice(1).join('='), key: parts[0] };
             }
         } else {
-            return {fixed: true, defaultValue: term, key: ''};
+            return { fixed: true, defaultValue: term, key: '' };
         }
     }
 }

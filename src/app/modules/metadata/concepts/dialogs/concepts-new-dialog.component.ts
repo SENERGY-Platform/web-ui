@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
-import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
-import {FormControl, Validators} from '@angular/forms';
+import { Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
+import { DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
     templateUrl: './concepts-new-dialog.component.html',
-    styleUrls: ['./concepts-new-dialog.component.css']
+    styleUrls: ['./concepts-new-dialog.component.css'],
 })
 export class ConceptsNewDialogComponent {
-
     nameControl = new FormControl('', [Validators.required]);
 
-    constructor(private dialogRef: MatDialogRef<ConceptsNewDialogComponent>) {
-    }
+    constructor(private dialogRef: MatDialogRef<ConceptsNewDialogComponent>) {}
 
     close(): void {
         this.dialogRef.close();
@@ -39,9 +37,8 @@ export class ConceptsNewDialogComponent {
             id: '',
             name: this.nameControl.value,
             base_characteristic_id: '',
-            characteristic_ids: []
+            characteristic_ids: [],
         };
         this.dialogRef.close(concept);
     }
-
 }

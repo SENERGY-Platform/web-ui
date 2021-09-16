@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {RankingListEditDialogComponent} from '../dialogs/ranking-list-edit-dialog.component';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-
+import { Injectable } from '@angular/core';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { RankingListEditDialogComponent } from '../dialogs/ranking-list-edit-dialog.component';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class RankingListService {
-
-    constructor(private dialog: MatDialog,
-                private dashboardService: DashboardService) {
-    }
+    constructor(private dialog: MatDialog, private dashboardService: DashboardService) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         const editDialogRef = this.dialog.open(RankingListEditDialogComponent, dialogConfig);
 
@@ -47,4 +43,3 @@ export class RankingListService {
         });
     }
 }
-

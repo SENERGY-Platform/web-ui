@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Keycloak} from 'keycloak-angular/lib/core/services/keycloak.service';
+import { Keycloak } from 'keycloak-angular/lib/core/services/keycloak.service';
 
 export class MockKeycloakService {
     getKeycloakInstance(): Keycloak.KeycloakInstance {
-        return {subject: 'test'} as Keycloak.KeycloakInstance;
+        return { subject: 'test' } as Keycloak.KeycloakInstance;
     }
 
     getUsername() {
@@ -26,11 +26,14 @@ export class MockKeycloakService {
     }
 
     getToken(): Promise<string> {
-        return new Promise<string>(() => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkw' +
-            'IiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'); // John Doe
+        return new Promise<string>(
+            () =>
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkw' +
+                'IiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+        ); // John Doe
     }
 
     loadUserProfile(): Promise<Keycloak.KeycloakProfile> {
-        return new Promise<Keycloak.KeycloakProfile>(resolve => resolve({} as Keycloak.KeycloakProfile));
+        return new Promise<Keycloak.KeycloakProfile>((resolve) => resolve({} as Keycloak.KeycloakProfile));
     }
 }

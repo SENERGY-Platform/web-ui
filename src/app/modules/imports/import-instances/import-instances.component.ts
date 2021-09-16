@@ -13,35 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {ImportInstancesModel} from './shared/import-instances.model';
-import {FormControl} from '@angular/forms';
-import {ImportTypePermissionSearchModel} from '../import-types/shared/import-types.model';
-import {debounceTime} from 'rxjs/internal/operators';
-import {Sort} from '@angular/material/sort';
-import {ImportInstancesService} from './shared/import-instances.service';
-import {MatTable} from '@angular/material/table';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ImportDeployEditDialogComponent} from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {ImportInstanceExportDialogComponent} from './import-instance-export-dialog/import-instance-export-dialog.component';
-import {ExportModel} from '../../exports/shared/export.model';
-import {Router} from '@angular/router';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { ImportInstancesModel } from './shared/import-instances.model';
+import { FormControl } from '@angular/forms';
+import { ImportTypePermissionSearchModel } from '../import-types/shared/import-types.model';
+import { debounceTime } from 'rxjs/internal/operators';
+import { Sort } from '@angular/material/sort';
+import { ImportInstancesService } from './shared/import-instances.service';
+import { MatTable } from '@angular/material/table';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
+import { ExportModel } from '../../exports/shared/export.model';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'senergy-import-instances',
     templateUrl: './import-instances.component.html',
-    styleUrls: ['./import-instances.component.css']
+    styleUrls: ['./import-instances.component.css'],
 })
 export class ImportInstancesComponent implements OnInit {
+    @ViewChild(MatTable, { static: false }) table!: MatTable<ImportTypePermissionSearchModel>;
 
-    @ViewChild(MatTable, {static: false}) table!: MatTable<ImportTypePermissionSearchModel>;
-
-    constructor(private importInstancesService: ImportInstancesService, private dialog: MatDialog,
-                private snackBar: MatSnackBar, private deleteDialog: DialogsService,
-                private router: Router) {
-    }
+    constructor(
+        private importInstancesService: ImportInstancesService,
+        private dialog: MatDialog,
+        private snackBar: MatSnackBar,
+        private deleteDialog: DialogsService,
+        private router: Router,
+    ) {}
 
     instances: ImportInstancesModel[] = [];
     searchControl = new FormControl('');
@@ -63,8 +65,10 @@ export class ImportInstancesComponent implements OnInit {
             minHeight: '400px',
             minWidth: '600px',
         };
-        this.dialog.open(ImportDeployEditDialogComponent, config).afterClosed()
-            .subscribe(val => {
+        this.dialog
+            .open(ImportDeployEditDialogComponent, config)
+            .afterClosed()
+            .subscribe((val) => {
                 if (val !== undefined) {
                     this.reload();
                 }
@@ -72,17 +76,23 @@ export class ImportInstancesComponent implements OnInit {
     }
 
     delete(m: ImportInstancesModel) {
-        this.deleteDialog.openDeleteDialog('import').afterClosed().subscribe(del => {
-            if (del === true) {
-                this.importInstancesService.deleteImportInstance(m.id).subscribe(() => {
-                    this.snackBar.open('Import deleted', 'OK', {duration: 3000});
-                    this.reload();
-                }, err => {
-                    console.error(err);
-                    this.snackBar.open('Error deleting', 'OK', {duration: 3000});
-                });
-            }
-        });
+        this.deleteDialog
+            .openDeleteDialog('import')
+            .afterClosed()
+            .subscribe((del) => {
+                if (del === true) {
+                    this.importInstancesService.deleteImportInstance(m.id).subscribe(
+                        () => {
+                            this.snackBar.open('Import deleted', 'OK', { duration: 3000 });
+                            this.reload();
+                        },
+                        (err) => {
+                            console.error(err);
+                            this.snackBar.open('Error deleting', 'OK', { duration: 3000 });
+                        },
+                    );
+                }
+            });
     }
 
     matSortChange($event: Sort) {
@@ -91,15 +101,15 @@ export class ImportInstancesComponent implements OnInit {
     }
 
     load() {
-        this.importInstancesService.listImportInstances(this.searchControl.value, this.limit, this.offset, this.sort,
-            this.excludeGenerated).subscribe(inst => {
-
-            this.instances.push(...inst);
-            if (this.table !== undefined) {
-                this.table.renderRows();
-            }
-            this.dataReady = true;
-        });
+        this.importInstancesService
+            .listImportInstances(this.searchControl.value, this.limit, this.offset, this.sort, this.excludeGenerated)
+            .subscribe((inst) => {
+                this.instances.push(...inst);
+                if (this.table !== undefined) {
+                    this.table.renderRows();
+                }
+                this.dataReady = true;
+            });
     }
 
     reload() {
@@ -125,7 +135,9 @@ export class ImportInstancesComponent implements OnInit {
             minHeight: '300px',
             minWidth: '400px',
         };
-        this.dialog.open(ImportInstanceExportDialogComponent, config).afterClosed()
+        this.dialog
+            .open(ImportInstanceExportDialogComponent, config)
+            .afterClosed()
             .subscribe((val: ExportModel | undefined) => {
                 if (val !== undefined) {
                     this.router.navigateByUrl('exports/details/' + val.ID);

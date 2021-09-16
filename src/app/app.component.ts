@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {KeycloakService} from 'keycloak-angular';
-import {ThemingService} from './core/services/theming.service';
+import { Component, OnInit } from '@angular/core';
+import { KeycloakService } from 'keycloak-angular';
+import { ThemingService } from './core/services/theming.service';
 
 @Component({
-  selector: 'senergy-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'senergy-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-
-    constructor(protected keycloak: KeycloakService, private themingService: ThemingService) {
-    }
+    constructor(protected keycloak: KeycloakService, private themingService: ThemingService) {}
 
     ngOnInit() {
         localStorage.clear();

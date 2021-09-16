@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {ImportDeployEditDialogComponent} from './import-deploy-edit-dialog.component';
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {ImportInstancesModel} from '../import-instances/shared/import-instances.model';
-import {ImportTypesService} from '../import-types/shared/import-types.service';
-import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {ReactiveFormsModule} from '@angular/forms';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {HttpClientModule} from '@angular/common/http';
-import {of} from 'rxjs';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ImportInstancesService} from '../import-instances/shared/import-instances.service';
-import {MatTableModule} from "@angular/material/table";
+import { ImportDeployEditDialogComponent } from './import-deploy-edit-dialog.component';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ImportInstancesModel } from '../import-instances/shared/import-instances.model';
+import { ImportTypesService } from '../import-types/shared/import-types.service';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { HttpClientModule } from '@angular/common/http';
+import { of } from 'rxjs';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
+import { MatTableModule } from '@angular/material/table';
 
 describe('ImportDeployDialogComponent', () => {
     let component: ImportDeployEditDialogComponent;
@@ -40,28 +40,29 @@ describe('ImportDeployDialogComponent', () => {
     let r: any;
 
     const importTypeServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
-    importTypeServiceSpy.getImportType.and.returnValue(of({
-        id: 'test-id',
-        name: 'name',
-        description: '',
-        image: 'test-image',
-        default_restart: true,
-        configs: [],
-        aspect_ids: [],
-        output: {
-            name: 'output',
-            type: 'https://schema.org/Text',
-            characteristic_id: '',
-            sub_content_variables: null,
-            use_as_tag: false,
-        },
-        function_ids: [],
-        owner: 'user',
-    }));
+    importTypeServiceSpy.getImportType.and.returnValue(
+        of({
+            id: 'test-id',
+            name: 'name',
+            description: '',
+            image: 'test-image',
+            default_restart: true,
+            configs: [],
+            aspect_ids: [],
+            output: {
+                name: 'output',
+                type: 'https://schema.org/Text',
+                characteristic_id: '',
+                sub_content_variables: null,
+                use_as_tag: false,
+            },
+            function_ids: [],
+            owner: 'user',
+        }),
+    );
 
     const importInstancesServiceSpy: Spy<ImportInstancesService> = createSpyFromClass(ImportInstancesService);
     importInstancesServiceSpy.saveImportInstance.and.returnValue(of(true));
-
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -82,24 +83,24 @@ describe('ImportDeployDialogComponent', () => {
             ],
             providers: [
                 {
-                    provide: MAT_DIALOG_DATA, useValue: {
+                    provide: MAT_DIALOG_DATA,
+                    useValue: {
                         name: 'name',
                         import_type_id: 'test-id',
-                    } as ImportInstancesModel
+                    } as ImportInstancesModel,
                 },
                 {
                     provide: MatDialogRef,
                     useValue: {
                         close: (rv: any) => {
                             r = rv;
-                        }
-                    }
+                        },
+                    },
                 },
-                {provide: ImportTypesService, useValue: importTypeServiceSpy},
-                {provide: ImportInstancesService, useValue: importInstancesServiceSpy},
-            ]
-        })
-            .compileComponents();
+                { provide: ImportTypesService, useValue: importTypeServiceSpy },
+                { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
+            ],
+        }).compileComponents();
     });
 
     beforeEach(() => {

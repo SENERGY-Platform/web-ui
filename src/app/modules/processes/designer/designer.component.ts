@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {AuthorizationService} from '../../../core/services/authorization.service';
+import { Component, OnInit } from '@angular/core';
+import { AuthorizationService } from '../../../core/services/authorization.service';
 import {
     Modeler,
     CamundaPropertiesProvider,
@@ -24,37 +24,30 @@ import {
     PaletteProvider,
     ElementTemplates,
     camundaBpmnModdle,
-    SenergyPropertiesProvider
+    SenergyPropertiesProvider,
 } from './bpmn-js/bpmn-js';
-import {HttpClient} from '@angular/common/http';
-import {
-    BpmnElement,
-    HistoricDataConfig,
-    DurationResult,
-    BpmnParameter, DesignerProcessModel
-} from './shared/designer.model';
+import { HttpClient } from '@angular/common/http';
+import { BpmnElement, HistoricDataConfig, DurationResult, BpmnParameter, DesignerProcessModel } from './shared/designer.model';
 import {
     DeviceTypeSelectionRefModel,
-    DeviceTypeSelectionResultModel
+    DeviceTypeSelectionResultModel,
 } from '../../metadata/device-types-overview/shared/device-type-selection.model';
-import {DesignerDialogService} from './shared/designer-dialog.service';
-import {DesignerHelperService} from './shared/designer-helper.service';
-import {ProcessRepoService} from '../process-repo/shared/process-repo.service';
-import {ActivatedRoute} from '@angular/router';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {DesignerErrorModel} from './shared/designer-error.model';
-import {DesignerSnackBarComponent} from './snack-bar/designer-snack-bar.component';
-import {defaultIfEmpty} from 'rxjs/operators';
-import {FilterCriteriaDialogResultModel} from './shared/designer-dialog.model';
+import { DesignerDialogService } from './shared/designer-dialog.service';
+import { DesignerHelperService } from './shared/designer-helper.service';
+import { ProcessRepoService } from '../process-repo/shared/process-repo.service';
+import { ActivatedRoute } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DesignerErrorModel } from './shared/designer-error.model';
+import { DesignerSnackBarComponent } from './snack-bar/designer-snack-bar.component';
+import { defaultIfEmpty } from 'rxjs/operators';
+import { FilterCriteriaDialogResultModel } from './shared/designer-dialog.model';
 
 @Component({
     selector: 'senergy-process-designer',
     templateUrl: './designer.component.html',
-    styleUrls: ['./designer.component.css']
+    styleUrls: ['./designer.component.css'],
 })
-
 export class ProcessDesignerComponent implements OnInit {
-
     modeler: any;
     id = '';
     ready = false;
@@ -67,8 +60,7 @@ export class ProcessDesignerComponent implements OnInit {
         protected designerService: DesignerHelperService,
         protected processRepoService: ProcessRepoService,
         private snackBar: MatSnackBar,
-    ) {
-    }
+    ) {}
 
     ngOnInit() {
         // TODO: find better solution for appear / fade-in problem
@@ -84,82 +76,91 @@ export class ProcessDesignerComponent implements OnInit {
                     PropertiesPanelModule,
 
                     // Re-use original bpmn-properties-module, see CustomPropsProvider
-                    {[InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
+                    { [InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]] },
                     // {[InjectionNames.propertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
 
                     // TODO: Implement functions and UI components to use DeviceProvider
-                    {[InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]]},
+                    { [InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]] },
 
                     // Re-use original palette, see CustomPaletteProvider
-                    {[InjectionNames.paletteProvider]: ['type', PaletteProvider]},
+                    { [InjectionNames.paletteProvider]: ['type', PaletteProvider] },
 
-                    {[InjectionNames.elementTemplates]: ['type', ElementTemplates.elementTemplates[1]]}
-
+                    { [InjectionNames.elementTemplates]: ['type', ElementTemplates.elementTemplates[1]] },
                 ],
                 propertiesPanel: {
-                    parent: '#js-properties-panel'
+                    parent: '#js-properties-panel',
                 },
                 moddleExtensions: {
                     camunda: camundaBpmnModdle,
                     senergy: {
-                        'name': 'senergy',
-                        'uri': 'https://senergy.infai.org',
-                        'prefix': 'senergy',
-                    }
-                }
+                        name: 'senergy',
+                        uri: 'https://senergy.infai.org',
+                        prefix: 'senergy',
+                    },
+                },
             });
 
             this.modeler.designerCallbacks = {
-                selectIotFilterCriteria: (aspect: string, iotFunction: string, characteristic: string, callback: (criteria: FilterCriteriaDialogResultModel) => void) => {
-                    that.designerDialogService.openFilterCriteriaDialog(aspect, iotFunction, characteristic).subscribe((result: FilterCriteriaDialogResultModel) => {
+                selectIotFilterCriteria: (
+                    aspect: string,
+                    iotFunction: string,
+                    characteristic: string,
+                    callback: (criteria: FilterCriteriaDialogResultModel) => void,
+                ) => {
+                    that.designerDialogService
+                        .openFilterCriteriaDialog(aspect, iotFunction, characteristic)
+                        .subscribe((result: FilterCriteriaDialogResultModel) => {
                             if (result) {
                                 callback(result);
                             }
-                        }
-                    );
-                },
-                durationDialog: (initial: string): Promise<DurationResult> => {
-                    return new Promise((resolve, reject) => {
-                        that.designerDialogService.openDurationDialog(initial).toPromise().then(value => {
-                            if (value) {
-                                resolve(value);
-                            } else {
-                                reject();
-                            }
                         });
-                    });
                 },
-                dateDialog: (initial: string): Promise<{ iso: string, text: string }> => {
-                    return new Promise((resolve, reject) => {
-                        that.designerDialogService.openDateTimeDialog(initial).toPromise().then(value => {
-                            if (value) {
-                                resolve(value);
-                            } else {
-                                reject();
-                            }
-                        });
-                    });
-                },
-                cycleDialog: (initial: string): Promise<{ cron: string, text: string }> => {
-                    return new Promise((resolve, reject) => {
-                        that.designerDialogService.openCycleDialog(initial).toPromise().then(value => {
-                            if (value) {
-                                resolve(value);
-                            } else {
-                                reject();
-                            }
-                        });
-                    });
-                },
-                editHistoricDataConfig: function (existingConfig: HistoricDataConfig, callback: (result: HistoricDataConfig) => void) {
+                durationDialog: (initial: string): Promise<DurationResult> =>
+                    new Promise((resolve, reject) => {
+                        that.designerDialogService
+                            .openDurationDialog(initial)
+                            .toPromise()
+                            .then((value) => {
+                                if (value) {
+                                    resolve(value);
+                                } else {
+                                    reject();
+                                }
+                            });
+                    }),
+                dateDialog: (initial: string): Promise<{ iso: string; text: string }> =>
+                    new Promise((resolve, reject) => {
+                        that.designerDialogService
+                            .openDateTimeDialog(initial)
+                            .toPromise()
+                            .then((value) => {
+                                if (value) {
+                                    resolve(value);
+                                } else {
+                                    reject();
+                                }
+                            });
+                    }),
+                cycleDialog: (initial: string): Promise<{ cron: string; text: string }> =>
+                    new Promise((resolve, reject) => {
+                        that.designerDialogService
+                            .openCycleDialog(initial)
+                            .toPromise()
+                            .then((value) => {
+                                if (value) {
+                                    resolve(value);
+                                } else {
+                                    reject();
+                                }
+                            });
+                    }),
+                editHistoricDataConfig(existingConfig: HistoricDataConfig, callback: (result: HistoricDataConfig) => void) {
                     that.designerDialogService.openHistoricDataConfigDialog(existingConfig, callback);
                 },
-                registerOutputs: function (outputs: any) {
+                registerOutputs(outputs: any) {
                     console.log('WARNING: deprecated call to registerOutputs()', outputs);
                 },
-                getInfoHtml: (element: BpmnElement): string => {
-                    return that.getInfoHtml(element);
-                },
+                getInfoHtml: (element: BpmnElement): string => that.getInfoHtml(element),
                 editInput: (element: BpmnElement, callback: () => void) => {
                     that.designerDialogService.openEditInputDialog(element, callback);
                 },
@@ -168,26 +169,30 @@ export class ProcessDesignerComponent implements OnInit {
                 },
                 findIotDeviceType: (
                     devicetypeService: DeviceTypeSelectionRefModel,
-                    callback: (connectorInfo: DeviceTypeSelectionResultModel) => void
+                    callback: (connectorInfo: DeviceTypeSelectionResultModel) => void,
                 ) => {
-                    that.designerDialogService.openTaskConfigDialog(devicetypeService).subscribe((result: DeviceTypeSelectionResultModel) => {
+                    that.designerDialogService
+                        .openTaskConfigDialog(devicetypeService)
+                        .subscribe((result: DeviceTypeSelectionResultModel) => {
                             if (result) {
                                 callback(result);
                             }
-                            this.designerService.checkConstraints(this.modeler).pipe(defaultIfEmpty<DesignerErrorModel[][]>([])).subscribe((responses: DesignerErrorModel[][]) => {
-                                if (this.countErrors(responses) > 0) {
-                                    this.showDeviceClassError(responses);
-                                }
-                            });
-                        }
-                    );
+                            this.designerService
+                                .checkConstraints(this.modeler)
+                                .pipe(defaultIfEmpty<DesignerErrorModel[][]>([]))
+                                .subscribe((responses: DesignerErrorModel[][]) => {
+                                    if (this.countErrors(responses) > 0) {
+                                        this.showDeviceClassError(responses);
+                                    }
+                                });
+                        });
                 },
-                configEmail: (to: string, subj: string, content: string, callback: (to: string, subj: string, content: string) => void) => {
+                configEmail: (to: string, subj: string, content: string, callback: (to_: string, subj_: string, content_: string) => void) => {
                     that.designerDialogService.openEmailConfigDialog(to, subj, content, callback);
                 },
-                configNotification: (subj: string, content: string, callback: (subj: string, content: string) => void) => {
+                configNotification: (subj: string, content: string, callback: (subj_: string, content_: string) => void) => {
                     that.designerDialogService.openNotificationConfigDialog(subj, content, callback);
-                }
+                },
             };
 
             if (this.id === '') {
@@ -216,14 +221,14 @@ export class ProcessDesignerComponent implements OnInit {
 
     newProcessDiagram() {
         const url = '/assets/bpmn/initial.bpmn';
-        this.http.get(url, {
-            headers: {observe: 'response'}, responseType: 'text'
-        }).subscribe(
-            (x: any) => {
+        this.http
+            .get(url, {
+                headers: { observe: 'response' },
+                responseType: 'text',
+            })
+            .subscribe((x: any) => {
                 this.modeler.importXML(x, this.handleError);
-            },
-            this.handleError
-        );
+            }, this.handleError);
     }
 
     getInfoHtml(element: BpmnElement): string {
@@ -233,28 +238,30 @@ export class ProcessDesignerComponent implements OnInit {
     }
 
     save(): void {
-        this.designerService.checkConstraints(this.modeler).pipe(defaultIfEmpty<DesignerErrorModel[][]>([])).subscribe((responses: DesignerErrorModel[][]) => {
-            if (this.countErrors(responses) > 0) {
-                this.showDeviceClassError(responses);
-            } else {
-                this.saveXML((errXML, processXML) => {
-                    if (errXML) {
-                        this.snackBar.open('Error XML! ' + errXML, undefined, {duration: 3500});
-                    } else {
-                        this.saveSVG((errSVG, svgXML) => {
-                            if (errSVG) {
-                                this.snackBar.open('Error SVG! ' + errSVG, undefined, {duration: 3500});
-                            } else {
-                                this.processRepoService.saveProcess(
-                                    this.id, processXML, svgXML).subscribe(() => {
-                                    this.snackBar.open('Model saved.', undefined, {duration: 2000});
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
+        this.designerService
+            .checkConstraints(this.modeler)
+            .pipe(defaultIfEmpty<DesignerErrorModel[][]>([]))
+            .subscribe((responses: DesignerErrorModel[][]) => {
+                if (this.countErrors(responses) > 0) {
+                    this.showDeviceClassError(responses);
+                } else {
+                    this.saveXML((errXML, processXML) => {
+                        if (errXML) {
+                            this.snackBar.open('Error XML! ' + errXML, undefined, { duration: 3500 });
+                        } else {
+                            this.saveSVG((errSVG, svgXML) => {
+                                if (errSVG) {
+                                    this.snackBar.open('Error SVG! ' + errSVG, undefined, { duration: 3500 });
+                                } else {
+                                    this.processRepoService.saveProcess(this.id, processXML, svgXML).subscribe(() => {
+                                        this.snackBar.open('Model saved.', undefined, { duration: 2000 });
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
     }
 
     importBPMN(event: any): void {
@@ -263,11 +270,11 @@ export class ProcessDesignerComponent implements OnInit {
             const fileReader = new FileReader();
             fileReader.onload = () => {
                 this.modeler.importXML(fileReader.result, this.handleError);
-                this.snackBar.open('Import finished.', undefined, {duration: 2000});
+                this.snackBar.open('Import finished.', undefined, { duration: 2000 });
             };
             fileReader.readAsText(file);
         } else {
-            this.snackBar.open('Failed to load file!', undefined, {duration: 2000});
+            this.snackBar.open('Failed to load file!', undefined, { duration: 2000 });
         }
     }
 
@@ -292,7 +299,7 @@ export class ProcessDesignerComponent implements OnInit {
     }
 
     private showDeviceClassError(errors: DesignerErrorModel[][]): void {
-        this.snackBar.openFromComponent(DesignerSnackBarComponent, {duration: 5000, data: errors});
+        this.snackBar.openFromComponent(DesignerSnackBarComponent, { duration: 5000, data: errors });
     }
 
     private countErrors(errors: DesignerErrorModel[][]): number {

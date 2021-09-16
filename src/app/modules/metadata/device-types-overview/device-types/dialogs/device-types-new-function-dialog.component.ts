@@ -14,35 +14,33 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormControl, Validators} from '@angular/forms';
-import {
-    DeviceTypeFunctionModel,
-    DeviceTypeFunctionType
-} from '../../shared/device-type.model';
-import {util} from 'jointjs';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormControl, Validators } from '@angular/forms';
+import { DeviceTypeFunctionModel, DeviceTypeFunctionType } from '../../shared/device-type.model';
+import { util } from 'jointjs';
 import uuid = util.uuid;
-import {ConceptsService} from '../../../concepts/shared/concepts.service';
-import {ConceptsPermSearchModel} from '../../../concepts/shared/concepts-perm-search.model';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { ConceptsService } from '../../../concepts/shared/concepts.service';
+import { ConceptsPermSearchModel } from '../../../concepts/shared/concepts-perm-search.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',
-    styleUrls: ['./device-types-new-function-dialog.component.css']
+    styleUrls: ['./device-types-new-function-dialog.component.css'],
 })
 export class DeviceTypesNewFunctionDialogComponent implements OnInit {
-
     nameControl = new FormControl('', [Validators.required]);
     descriptionControl = new FormControl('');
     conceptControl = new FormControl('');
     concepts: ConceptsPermSearchModel[] = [];
     functionType = {} as DeviceTypeFunctionType;
 
-    constructor(private snackBar: MatSnackBar,
-                private conceptsService: ConceptsService,
-                private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: { functionType: DeviceTypeFunctionType }) {
+    constructor(
+        private snackBar: MatSnackBar,
+        private conceptsService: ConceptsService,
+        private dialogRef: MatDialogRef<DeviceTypesNewFunctionDialogComponent>,
+        @Inject(MAT_DIALOG_DATA) data: { functionType: DeviceTypeFunctionType },
+    ) {
         this.functionType = data.functionType;
     }
 
@@ -51,7 +49,6 @@ export class DeviceTypesNewFunctionDialogComponent implements OnInit {
     }
 
     save(): void {
-
         const func: DeviceTypeFunctionModel = {
             id: this.setId(),
             name: this.nameControl.value,

@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'senergy-no-data',
     templateUrl: './widget-no-data.component.html',
-    styleUrls: ['./widget-no-data.component.css']
+    styleUrls: ['./widget-no-data.component.css'],
 })
-export class WidgetNoDataComponent  {
-
+export class WidgetNoDataComponent {
     @Input() showIf = false;
 
-    constructor() {
-    }
+    constructor() {}
 }

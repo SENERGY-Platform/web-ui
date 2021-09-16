@@ -16,35 +16,34 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import {RangeSliderComponent} from './range-slider.component';
-import {MatDialogModule} from '@angular/material/dialog';
-import {HttpClientModule} from '@angular/common/http';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {MatCardModule} from '@angular/material/card';
-import {WidgetModule} from '../widget.module';
+import { RangeSliderComponent } from './range-slider.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { HttpClientModule } from '@angular/common/http';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { MatCardModule } from '@angular/material/card';
+import { WidgetModule } from '../widget.module';
 
 describe('RangeSliderComponent', () => {
-  let component: RangeSliderComponent;
-  let fixture: ComponentFixture<RangeSliderComponent>;
+    let component: RangeSliderComponent;
+    let fixture: ComponentFixture<RangeSliderComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [MatDialogModule, HttpClientModule, WidgetModule, MatCardModule],
-      declarations: [ RangeSliderComponent ],
-      providers: [MatDialogModule,
-        { provide: DashboardService, useClass: DashboardService },
-      ]
-    })
-    .compileComponents();
-  }));
+    beforeEach(
+        waitForAsync(() => {
+            TestBed.configureTestingModule({
+                imports: [MatDialogModule, HttpClientModule, WidgetModule, MatCardModule],
+                declarations: [RangeSliderComponent],
+                providers: [MatDialogModule, { provide: DashboardService, useClass: DashboardService }],
+            }).compileComponents();
+        }),
+    );
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(RangeSliderComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(RangeSliderComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });

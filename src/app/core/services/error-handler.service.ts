@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {HttpErrorResponse} from '@angular/common/http';
-import {ErrorModel} from '../model/error.model';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ErrorModel } from '../model/error.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ErrorHandlerService {
-
-    constructor() {
-    }
+    constructor() {}
 
     handleError<T>(service: string, method: string, result?: T) {
         return (error: HttpErrorResponse): Observable<T> => {

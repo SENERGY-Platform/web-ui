@@ -4,7 +4,7 @@
     "baseUrl": "./",
     "importHelpers": true,
     "strict": true,
-    "outDir": "./dist/out-tsc",
+    "outDir": "./dist/out-tsc/app",
     "sourceMap": true,
     "declaration": false,
     "module": "es2020",
@@ -35,6 +35,16 @@
   },
   "exclude": [
     "./node_modules",
-    "./dist"
-  ]
+    "./dist",
+    "karma.conf.js",
+    "test.ts",
+    "**/*.spec.ts",
+    "**/*.mock.ts",
+    "environments/environment.dev.ts",
+    "environments/environment.prod.ts",
+    "environments/environment.dev.js",
+    "app/core/validators/json.validator.ts",
+    "app/modules/metadata/device-types-overview/device-types/content-variable.validator.ts",
+    "assets/env.template.js"
+  ],
 }

@@ -14,33 +14,32 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import { Injectable } from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import * as moment from 'moment';
 import {
-    V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedConfigurableValueModel,
+    V2DeploymentsPreparedConfigurableModel,
+    V2DeploymentsPreparedConfigurableValueModel,
     V2DeploymentsPreparedElementModel,
-    V2DeploymentsPreparedModel, V2DeploymentsPreparedMsgEventModel,
+    V2DeploymentsPreparedModel,
+    V2DeploymentsPreparedMsgEventModel,
     V2DeploymentsPreparedSelectionModel,
     V2DeploymentsPreparedSelectionOptionModel,
     V2DeploymentsPreparedTaskModel,
-    V2DeploymentsPreparedTimeEventModel
+    V2DeploymentsPreparedTimeEventModel,
 } from '../../shared/deployments-prepared-v2.model';
 
-
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DeploymentsConfigInitializerService {
-
-    constructor(private _formBuilder: FormBuilder) {
-    }
+    constructor(private _formBuilder: FormBuilder) {}
 
     initFormGroup(deployment: V2DeploymentsPreparedModel): FormGroup {
         return this._formBuilder.group({
             id: deployment.id,
             name: deployment.name,
-            description: [{value: deployment.description || 'no description', disabled: true}],
+            description: [{ value: deployment.description || 'no description', disabled: true }],
             diagram: deployment.diagram,
             elements: this.initElementsArray(deployment.elements),
             executable: deployment.executable,
@@ -86,7 +85,7 @@ export class DeploymentsConfigInitializerService {
         return this._formBuilder.group({
             type: timeEvent.type,
             time: timeEvent.time,
-            timeUnits: this.initTimeRawFormGroup(timeEvent.time)
+            timeUnits: this.initTimeRawFormGroup(timeEvent.time),
         });
     }
 
@@ -116,7 +115,7 @@ export class DeploymentsConfigInitializerService {
             value: messageEvent.value,
             flow_id: messageEvent.flow_id,
             event_id: messageEvent.event_id,
-            selection: this.initSelectionFormGroup(messageEvent.selection, false)
+            selection: this.initSelectionFormGroup(messageEvent.selection, false),
         });
     }
 
@@ -137,21 +136,20 @@ export class DeploymentsConfigInitializerService {
             filter_criteria: selection.filter_criteria,
             selection_options: this.initSelectionFormArray(selection.selection_options),
             selection_options_index: selectedOptionIndex,
-            selected_device_id: [{value: selection.selected_device_id, disabled: disable}],
-            selected_service_id: [{value: selection.selected_service_id, disabled: disable}],
-            selected_device_group_id: [{value: selection.selected_device_group_id, disabled: disable}],
-            selected_import_id: [{value: selection.selected_import_id, disabled: disable}],
-            selected_path_option: [{value: undefined, disabled: disable}],
-            selected_path: [{value: selection.selected_path, disabled: disable}],
-            selected_characteristic_id: [{value: selection.selected_characteristic_id, disabled: disable}],
-            show: false
+            selected_device_id: [{ value: selection.selected_device_id, disabled: disable }],
+            selected_service_id: [{ value: selection.selected_service_id, disabled: disable }],
+            selected_device_group_id: [{ value: selection.selected_device_group_id, disabled: disable }],
+            selected_import_id: [{ value: selection.selected_import_id, disabled: disable }],
+            selected_path_option: [{ value: undefined, disabled: disable }],
+            selected_path: [{ value: selection.selected_path, disabled: disable }],
+            selected_characteristic_id: [{ value: selection.selected_characteristic_id, disabled: disable }],
+            show: false,
         });
-        group.get('selected_path_option')?.valueChanges.subscribe((option: { path: string, characteristicId: string } | null) => {
-                if (option !== null) {
-                    group.patchValue({selected_path: option.path, selected_characteristic_id: option.characteristicId});
-                }
+        group.get('selected_path_option')?.valueChanges.subscribe((option: { path: string; characteristicId: string } | null) => {
+            if (option !== null) {
+                group.patchValue({ selected_path: option.path, selected_characteristic_id: option.characteristicId });
             }
-        );
+        });
         return group;
     }
 
@@ -162,7 +160,6 @@ export class DeploymentsConfigInitializerService {
         }
         return fbGroup;
     }
-
 
     private initSelectionFormArray(selection: V2DeploymentsPreparedSelectionOptionModel[]): FormArray {
         const array: FormGroup[] = [];
@@ -183,7 +180,7 @@ export class DeploymentsConfigInitializerService {
             device_group: [selectionOption.device_group],
             import: selectionOption.import,
             importType: selectionOption.importType,
-            servicePathOptions: selectionOption.servicePathOptions
+            servicePathOptions: selectionOption.servicePathOptions,
         });
     }
 

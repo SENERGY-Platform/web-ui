@@ -1,12 +1,46 @@
 {
-  "extends": "../tsconfig.base.json",
+  "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "../out-tsc/spec",
+    "baseUrl": "./",
+    "importHelpers": true,
+    "strict": true,
+    "outDir": "./dist/out-tsc/spec",
+    "sourceMap": true,
+    "declaration": false,
+    "module": "es2020",
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "target": "es5",
+    "downlevelIteration": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2018",
+      "dom"
+    ],
     "types": [
       "jasmine",
       "node"
     ]
   },
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true
+  },
+  "exclude": [
+    "./node_modules",
+    "./dist"
+  ],
   "files": [
     "test.ts",
     "polyfills.ts",

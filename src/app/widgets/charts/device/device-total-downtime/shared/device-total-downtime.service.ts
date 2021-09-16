@@ -14,44 +14,43 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {ChartsModel} from '../../../shared/charts.model';
-import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
-import {ElementSizeService} from '../../../../../core/services/element-size.service';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ChartDataTableModel} from '../../../../../core/components/chart/chart-data-table.model';
-import {DeviceTotalDowntimeEditDialogComponent} from '../dialogs/device-total-downtime-edit-dialog.component';
-import {DeviceInstancesService} from '../../../../../modules/devices/device-instances/shared/device-instances.service';
-import {DeviceInstancesHistoryModel} from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ChartsModel } from '../../../shared/charts.model';
+import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
+import { ElementSizeService } from '../../../../../core/services/element-size.service';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
+import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { ChartDataTableModel } from '../../../../../core/components/chart/chart-data-table.model';
+import { DeviceTotalDowntimeEditDialogComponent } from '../dialogs/device-total-downtime-edit-dialog.component';
+import { DeviceInstancesService } from '../../../../../modules/devices/device-instances/shared/device-instances.service';
+import { DeviceInstancesHistoryModel } from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
 
 const customColor = '#4484ce'; // /* cc */
 const stateTrue = true;
 const stateFalse = false;
 const dayInMs = 86400000;
 
-
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DeviceTotalDowntimeService {
-
-    constructor(private monitorService: MonitorService,
-                private elementSizeService: ElementSizeService,
-                private dialog: MatDialog,
-                private dashboardService: DashboardService,
-                private deviceInstancesService: DeviceInstancesService) {
-    }
+    constructor(
+        private monitorService: MonitorService,
+        private elementSizeService: ElementSizeService,
+        private dialog: MatDialog,
+        private dashboardService: DashboardService,
+        private deviceInstancesService: DeviceInstancesService,
+    ) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         const editDialogRef = this.dialog.open(DeviceTotalDowntimeEditDialogComponent, dialogConfig);
 
@@ -77,25 +76,21 @@ export class DeviceTotalDowntimeService {
 
     private setDevicesTotalDowntimeChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
         const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
-        return new ChartsModel(
-            'AreaChart',
-            dataTable.data,
-            {
-                chartArea: {width: element.widthPercentage, height: element.heightPercentage},
-                width: element.width,
-                height: element.height,
-                legend: 'none',
-                hAxis: {format: 'HH:mm'},
-                vAxis: {format: '#.## %', viewWindow: {min: 0.00}},
-                explorer: {
-                    actions: ['dragToZoom', 'rightClickToReset'],
-                    axis: 'horizontal',
-                    keepInBounds: true,
-                    maxZoomIn: 0.001
-                },
-                colors: [customColor],
-            }
-        );
+        return new ChartsModel('AreaChart', dataTable.data, {
+            chartArea: { width: element.widthPercentage, height: element.heightPercentage },
+            width: element.width,
+            height: element.height,
+            legend: 'none',
+            hAxis: { format: 'HH:mm' },
+            vAxis: { format: '#.## %', viewWindow: { min: 0.0 } },
+            explorer: {
+                actions: ['dragToZoom', 'rightClickToReset'],
+                axis: 'horizontal',
+                keepInBounds: true,
+                maxZoomIn: 0.001,
+            },
+            colors: [customColor],
+        });
     }
 
     private processTimelineFailureRatio(devices: DeviceInstancesHistoryModel[]): ChartDataTableModel {
@@ -103,52 +98,50 @@ export class DeviceTotalDowntimeService {
         const intervalDurationInMin = 15;
         const intervalDurationInMs = intervalDurationInMin * 60 * 1000;
         const numberOfIntervals = today.getHours() * (60 / intervalDurationInMin) + Math.ceil(today.getMinutes() / intervalDurationInMin);
-        const interval: { stateConnected: number, stateDisconnected: number }[] = [];
+        const interval: { stateConnected: number; stateDisconnected: number }[] = [];
         let intervalIndex = 0;
         let timeLeft = intervalDurationInMs;
         let intervalFull = false;
 
         for (let x = 0; x < numberOfIntervals; x++) {
-            interval.push({stateConnected: 0, stateDisconnected: 0});
+            interval.push({ stateConnected: 0, stateDisconnected: 0 });
         }
 
         devices.forEach((device: DeviceInstancesHistoryModel) => {
-
             intervalIndex = 0;
             timeLeft = intervalDurationInMs;
             intervalFull = false;
 
             if (device.log_history.values !== null) {
-
                 const lastIndex = device.log_history.values.length - 1;
                 const diffToday = today.getTime() - new Date(device.log_history.values[lastIndex][0] * 1000).getTime();
                 const statusLastIndex = device.log_history.values[lastIndex][1];
                 spreadIntoTimeZones(statusLastIndex, diffToday);
 
-                for (let z = lastIndex; z >= 1 && intervalFull === false; z--) {
+                for (let z = lastIndex; z >= 1 && !intervalFull; z--) {
                     const diffDates = (device.log_history.values[z][0] - device.log_history.values[z - 1][0]) * 1000;
                     const statusBefore = device.log_history.values[z - 1][1];
                     spreadIntoTimeZones(statusBefore, diffDates);
                 }
             }
 
-            if (device.log_edge !== null && intervalFull === false) {
-                const statusEdge: boolean = <boolean>device.log_edge[1];
-                spreadIntoTimeZones((statusEdge), dayInMs);
+            if (device.log_edge !== null && !intervalFull) {
+                const statusEdge: boolean = device.log_edge[1] as boolean;
+                spreadIntoTimeZones(statusEdge, dayInMs);
             }
         });
 
         return this.prepareArray(interval, today, intervalDurationInMs);
 
         function spreadIntoTimeZones(state: boolean, time: number) {
-            while (time >= timeLeft && intervalIndex < (numberOfIntervals - 1)) {
+            while (time >= timeLeft && intervalIndex < numberOfIntervals - 1) {
                 time = time - timeLeft;
                 fillIntervalArray(state, timeLeft);
                 intervalIndex++;
                 timeLeft = intervalDurationInMs;
             }
 
-            if (intervalIndex === (numberOfIntervals - 1)) {
+            if (intervalIndex === numberOfIntervals - 1) {
                 if (time > timeLeft) {
                     fillIntervalArray(state, timeLeft);
                     intervalFull = true;
@@ -164,25 +157,29 @@ export class DeviceTotalDowntimeService {
 
         function fillIntervalArray(state: boolean, time: number) {
             switch (state) {
-                case stateTrue: {
-                    interval[intervalIndex].stateConnected += time;
-                    break;
-                }
-                case stateFalse: {
-                    interval[intervalIndex].stateDisconnected += time;
-                    break;
-                }
+            case stateTrue: {
+                interval[intervalIndex].stateConnected += time;
+                break;
+            }
+            case stateFalse: {
+                interval[intervalIndex].stateDisconnected += time;
+                break;
+            }
             }
         }
     }
 
-    private prepareArray(interval: { stateConnected: number, stateDisconnected: number }[], today: Date, intervalDurationInMs: number): ChartDataTableModel {
-        const dataTable = new ChartDataTableModel([['Date', 'Percentage', {role: 'tooltip'}]]);
+    private prepareArray(
+        interval: { stateConnected: number; stateDisconnected: number }[],
+        today: Date,
+        intervalDurationInMs: number,
+    ): ChartDataTableModel {
+        const dataTable = new ChartDataTableModel([['Date', 'Percentage', { role: 'tooltip' }]]);
 
         if (interval.length !== 0) {
-            for (let m = (interval.length - 1); m >= 0; m--) {
+            for (let m = interval.length - 1; m >= 0; m--) {
                 const percentage = interval[m].stateDisconnected / (interval[m].stateConnected + interval[m].stateDisconnected);
-                const rightPoint = new Date(today.getTime() - (m * intervalDurationInMs));
+                const rightPoint = new Date(today.getTime() - m * intervalDurationInMs);
                 let leftPoint = new Date(rightPoint.getTime() - intervalDurationInMs);
                 if (m === interval.length - 1) {
                     leftPoint = new Date(today);
@@ -197,10 +194,8 @@ export class DeviceTotalDowntimeService {
 
         function getTooltipText(date: Date, percentage: number): string {
             const percentageFormatted = Math.round(percentage * 10000) / 100 + '%';
-            const timeFormatted = date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+            const timeFormatted = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             return timeFormatted + '\n' + 'failure ratio: ' + percentageFormatted; // todo: translation
         }
     }
-
 }
-

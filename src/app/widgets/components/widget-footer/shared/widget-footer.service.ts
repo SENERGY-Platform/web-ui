@@ -14,32 +14,29 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
+import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
-import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
-import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {DialogsService} from '../../../../core/services/dialogs.service';
+import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
+import { DashboardManipulationEnum } from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { DialogsService } from '../../../../core/services/dialogs.service';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class WidgetFooterService {
-
-    constructor(private dialog: MatDialog,
-                private dashboardService: DashboardService,
-                private dialogsService: DialogsService) {
-    }
+    constructor(private dialog: MatDialog, private dashboardService: DashboardService, private dialogsService: DialogsService) {}
 
     openDeleteWidgetDialog(dashboardId: string, widgetId: string): void {
-        this.dialogsService.openDeleteDialog('widget').afterClosed().subscribe((deleteWidget: boolean) => {
-            if (deleteWidget === true) {
-                this.dashboardService.deleteWidget(dashboardId, widgetId).subscribe(() => {
-                    this.dashboardService.manipulateWidget(DashboardManipulationEnum.Delete, widgetId, null);
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('widget')
+            .afterClosed()
+            .subscribe((deleteWidget: boolean) => {
+                if (deleteWidget === true) {
+                    this.dashboardService.deleteWidget(dashboardId, widgetId).subscribe(() => {
+                        this.dashboardService.manipulateWidget(DashboardManipulationEnum.Delete, widgetId, null);
+                    });
+                }
+            });
     }
-
 }
-

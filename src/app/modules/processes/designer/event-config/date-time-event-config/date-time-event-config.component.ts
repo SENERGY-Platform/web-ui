@@ -14,29 +14,26 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output} from '@angular/core';
-import {FormControl, Validators} from '@angular/forms';
+import { Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
     selector: 'senergy-date-time-event-config',
     templateUrl: './date-time-event-config.component.html',
-    styleUrls: ['./date-time-event-config.component.css']
+    styleUrls: ['./date-time-event-config.component.css'],
 })
 export class DateTimeEventConfigComponent implements OnInit {
-
     @Input() initial = '';
-    @Output() update =  new EventEmitter<{iso: string, text: string}>();
+    @Output() update = new EventEmitter<{ iso: string; text: string }>();
 
     date = new FormControl(new Date(), Validators.required);
     hour = new FormControl(0, [Validators.max(23), Validators.min(0)]);
     minute = new FormControl(0, [Validators.max(59), Validators.min(0)]);
 
-    constructor(@Inject(LOCALE_ID) private localeId: string) {
-
-    }
+    constructor(@Inject(LOCALE_ID) private localeId: string) {}
 
     ngOnInit() {
-        this.date.valueChanges.subscribe(value => {
+        this.date.valueChanges.subscribe((value) => {
             if (value) {
                 this.update.emit(this.getResult());
             }
@@ -64,11 +61,10 @@ export class DateTimeEventConfigComponent implements OnInit {
         }
     }
 
-
-    private getResult(): {iso: string, text: string} {
-        let date = <Date>this.date.value;
+    private getResult(): { iso: string; text: string } {
+        const date = this.date.value as Date;
         date.setHours(this.hour.value);
         date.setMinutes(this.minute.value);
-        return {iso: date.toISOString(), text: date.toLocaleString(this.localeId)};
+        return { iso: date.toISOString(), text: date.toLocaleString(this.localeId) };
     }
 }

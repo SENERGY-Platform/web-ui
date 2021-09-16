@@ -16,7 +16,7 @@
 
 export interface ProcessRepoConditionsModel {
     condition?: ProcessRepoConditionModel;
-    and?: { condition: ProcessRepoConditionModel}[];
+    and?: { condition: ProcessRepoConditionModel }[];
 }
 
 export interface ProcessRepoConditionModel {
@@ -24,4 +24,3 @@ export interface ProcessRepoConditionModel {
     operation: string;
     ref: string;
 }
-

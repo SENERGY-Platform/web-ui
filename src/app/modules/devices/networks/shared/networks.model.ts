@@ -35,4 +35,3 @@ export interface HubModel {
     hash: string;
     device_local_ids: string[] | null;
 }
-

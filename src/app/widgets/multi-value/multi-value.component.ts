@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {MatIconRegistry} from '@angular/material/icon';
-import {DomSanitizer} from '@angular/platform-browser';
-import {MultiValueService} from './shared/multi-value.service';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
-import {MultiValueMeasurement, MultiValueOrderEnum} from './shared/multi-value.model';
-import {Sort} from '@angular/material/sort';
-import {MatTable} from '@angular/material/table';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
+import { MultiValueService } from './shared/multi-value.service';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
+import { MultiValueMeasurement, MultiValueOrderEnum } from './shared/multi-value.model';
+import { Sort } from '@angular/material/sort';
+import { MatTable } from '@angular/material/table';
 
 @Component({
     selector: 'senergy-multi-value',
@@ -31,7 +31,6 @@ import {MatTable} from '@angular/material/table';
     styleUrls: ['./multi-value.component.css'],
 })
 export class MultiValueComponent implements OnInit, OnDestroy {
-
     configured = false;
     destroy = new Subscription();
     dataReady = false;
@@ -40,13 +39,14 @@ export class MultiValueComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
-    @ViewChild(MatTable, {static: false}) table !: MatTable<any>;
+    @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
 
-    constructor(private iconRegistry: MatIconRegistry,
-                private sanitizer: DomSanitizer,
-                private multiValueService: MultiValueService,
-                private dashboardService: DashboardService) {
-    }
+    constructor(
+        private iconRegistry: MatIconRegistry,
+        private sanitizer: DomSanitizer,
+        private multiValueService: MultiValueService,
+        private dashboardService: DashboardService,
+    ) {}
 
     ngOnInit() {
         this.update();
@@ -67,10 +67,10 @@ export class MultiValueComponent implements OnInit, OnDestroy {
     }
 
     checkWarning(m: MultiValueMeasurement): boolean {
-        if (m.warning_enabled && m.data && m.lowerBoundary && (m.data < m.lowerBoundary)) {
+        if (m.warning_enabled && m.data && m.lowerBoundary && m.data < m.lowerBoundary) {
             return true;
         }
-        if (m.warning_enabled && m.data && m.upperBoundary && (m.data > m. upperBoundary)) {
+        if (m.warning_enabled && m.data && m.upperBoundary && m.data > m.upperBoundary) {
             return true;
         }
         return false;
@@ -81,7 +81,7 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.dataReady = false;
-                this.multiValueService.getValues(this.widget).subscribe(result => {
+                this.multiValueService.getValues(this.widget).subscribe((result) => {
                     this.widget = result;
                     this.dataReady = true;
                     this.orderValues(this.widget.properties.order || 0);
@@ -110,36 +110,24 @@ export class MultiValueComponent implements OnInit, OnDestroy {
     private orderValues(sortId: number) {
         const m = this.widget.properties.multivaluemeasurements || [];
         switch (sortId) {
-            case MultiValueOrderEnum.AlphabeticallyAsc:
-                m.sort((a, b) => {
-                    return a.name.charCodeAt(0) - b.name.charCodeAt(0);
-                });
-                break;
-            case MultiValueOrderEnum.AlphabeticallyDesc:
-                m.sort((a, b) => {
-                    return b.name.charCodeAt(0) - a.name.charCodeAt(0);
-                });
-                break;
-            case MultiValueOrderEnum.ValueAsc:
-                m.sort((a, b) => {
-                    return this.parseNumber(a, true) - this.parseNumber(b, true);
-                });
-                break;
-            case MultiValueOrderEnum.ValueDesc:
-                m.sort((a, b) => {
-                    return this.parseNumber(b, false) - this.parseNumber(a, false);
-                });
-                break;
-            case MultiValueOrderEnum.TimeDesc:
-                m.sort((a, b) => {
-                    return new Date(b.time || '').valueOf() - new Date(a.time || '').valueOf();
-                });
-                break;
-            case MultiValueOrderEnum.TimeAsc:
-                m.sort((a, b) => {
-                    return new Date(a.time || '').valueOf() - new Date(b.time || '').valueOf();
-                });
-                break;
+        case MultiValueOrderEnum.AlphabeticallyAsc:
+            m.sort((a, b) => a.name.charCodeAt(0) - b.name.charCodeAt(0));
+            break;
+        case MultiValueOrderEnum.AlphabeticallyDesc:
+            m.sort((a, b) => b.name.charCodeAt(0) - a.name.charCodeAt(0));
+            break;
+        case MultiValueOrderEnum.ValueAsc:
+            m.sort((a, b) => this.parseNumber(a, true) - this.parseNumber(b, true));
+            break;
+        case MultiValueOrderEnum.ValueDesc:
+            m.sort((a, b) => this.parseNumber(b, false) - this.parseNumber(a, false));
+            break;
+        case MultiValueOrderEnum.TimeDesc:
+            m.sort((a, b) => new Date(b.time || '').valueOf() - new Date(a.time || '').valueOf());
+            break;
+        case MultiValueOrderEnum.TimeAsc:
+            m.sort((a, b) => new Date(a.time || '').valueOf() - new Date(b.time || '').valueOf());
+            break;
         }
         this.orderedValues = m;
         if (this.table) {
@@ -152,27 +140,27 @@ export class MultiValueComponent implements OnInit, OnDestroy {
             if (max) {
                 return Number.MAX_VALUE;
             }
-            return  Number.MIN_VALUE;
+            return Number.MIN_VALUE;
         }
         return Number(m.data);
     }
 
     matSortChange(event: Sort) {
         switch (event.active) {
-            case 'value':
-                if (event.direction === 'asc') {
-                    this.orderValues(MultiValueOrderEnum.ValueAsc);
-                } else {
-                    this.orderValues(MultiValueOrderEnum.ValueDesc);
-                }
-                break;
-            case 'name':
-                if (event.direction === 'asc') {
-                    this.orderValues(MultiValueOrderEnum.AlphabeticallyAsc);
-                } else {
-                    this.orderValues(MultiValueOrderEnum.AlphabeticallyDesc);
-                }
-                break;
+        case 'value':
+            if (event.direction === 'asc') {
+                this.orderValues(MultiValueOrderEnum.ValueAsc);
+            } else {
+                this.orderValues(MultiValueOrderEnum.ValueDesc);
+            }
+            break;
+        case 'name':
+            if (event.direction === 'asc') {
+                this.orderValues(MultiValueOrderEnum.AlphabeticallyAsc);
+            } else {
+                this.orderValues(MultiValueOrderEnum.AlphabeticallyDesc);
+            }
+            break;
         }
     }
 }

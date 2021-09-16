@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
-import {NetworksService} from './shared/networks.service';
-import {NetworksModel} from './shared/networks.model';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {Subscription} from 'rxjs';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Router} from '@angular/router';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {
-    DeviceInstancesRouterState,
-    DeviceInstancesRouterStateTypesEnum
-} from '../device-instances/device-instances.component';
-import {MatDialog} from '@angular/material/dialog';
-import {NetworksDeleteDialogComponent} from './dialogs/networks-delete-dialog.component';
-import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
+import { NetworksService } from './shared/networks.service';
+import { NetworksModel } from './shared/networks.model';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { Subscription } from 'rxjs';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Router } from '@angular/router';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
+import { MatDialog } from '@angular/material/dialog';
+import { NetworksDeleteDialogComponent } from './dialogs/networks-delete-dialog.component';
+import { DeviceInstancesService } from '../device-instances/shared/device-instances.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -43,10 +40,9 @@ const grids = new Map([
 @Component({
     selector: 'senergy-networks',
     templateUrl: './networks.component.html',
-    styleUrls: ['./networks.component.css']
+    styleUrls: ['./networks.component.css'],
 })
 export class NetworksComponent implements OnInit, OnDestroy {
-
     networks: NetworksModel[] = [];
     gridCols = 0;
     ready = false;
@@ -60,15 +56,15 @@ export class NetworksComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private searchbarService: SearchbarService,
-                private responsiveService: ResponsiveService,
-                private networksService: NetworksService,
-                private router: Router,
-                private dialogsService: DialogsService,
-                private dialog: MatDialog,
-                private deviceInstancesService: DeviceInstancesService,
-                ) {
-    }
+    constructor(
+        private searchbarService: SearchbarService,
+        private responsiveService: ResponsiveService,
+        private networksService: NetworksService,
+        private router: Router,
+        private dialogsService: DialogsService,
+        private dialog: MatDialog,
+        private deviceInstancesService: DeviceInstancesService,
+    ) {}
 
     ngOnInit() {
         this.initGridCols();
@@ -96,8 +92,9 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     showDevices(network: NetworksModel) {
-        this.router.navigateByUrl('/devices/deviceinstances',
-            {state: {type: DeviceInstancesRouterStateTypesEnum.NETWORK, value: network} as DeviceInstancesRouterState});
+        this.router.navigateByUrl('/devices/deviceinstances', {
+            state: { type: DeviceInstancesRouterStateTypesEnum.NETWORK, value: network } as DeviceInstancesRouterState,
+        });
     }
 
     clear(network: NetworksModel) {
@@ -105,18 +102,19 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     delete(network: NetworksModel) {
-        this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, 'name', 'asc', network.id, null).subscribe(devices => {
-            this.dialog.open(NetworksDeleteDialogComponent, {data: {networkId: network.id, devices: devices}, minWidth: '300px'})
-                .afterClosed().subscribe((deleteNetwork: boolean) => {
-
-                if (deleteNetwork) {
-                    this.networks.splice(this.networks.indexOf(network), 1);
-                    this.setRepoItemsParams(1);
-                    setTimeout(() => {
-                        this.getNetworks(false);
-                    }, 1000);
-                }
-            });
+        this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, 'name', 'asc', network.id, null).subscribe((devices) => {
+            this.dialog
+                .open(NetworksDeleteDialogComponent, { data: { networkId: network.id, devices }, minWidth: '300px' })
+                .afterClosed()
+                .subscribe((deleteNetwork: boolean) => {
+                    if (deleteNetwork) {
+                        this.networks.splice(this.networks.indexOf(network), 1);
+                        this.setRepoItemsParams(1);
+                        setTimeout(() => {
+                            this.getNetworks(false);
+                        }, 1000);
+                    }
+                });
         });
     }
 
@@ -133,9 +131,9 @@ export class NetworksComponent implements OnInit, OnDestroy {
             this.reset();
         }
 
-        this.networksService.searchNetworks(
-            this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-            (networks: NetworksModel[]) => {
+        this.networksService
+            .searchNetworks(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .subscribe((networks: NetworksModel[]) => {
                 if (networks.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
@@ -163,5 +161,4 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.limit = limit;
         this.offset = this.networks.length;
     }
-
 }

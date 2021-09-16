@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges} from '@angular/core';
-import {SearchbarService} from './shared/searchbar.service';
-import {FormControl} from '@angular/forms';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges } from '@angular/core';
+import { SearchbarService } from './shared/searchbar.service';
+import { FormControl } from '@angular/forms';
 
 @Component({
     selector: 'senergy-searchbar',
     templateUrl: './searchbar.component.html',
-    styleUrls: ['./searchbar.component.css']
+    styleUrls: ['./searchbar.component.css'],
 })
 export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
-
     @Input() searchTextIn = '';
     @Input() disable = false;
     formControl = new FormControl(this.searchTextIn);
 
-    constructor(private searchbarService: SearchbarService) {
-    }
+    constructor(private searchbarService: SearchbarService) {}
 
     ngOnInit(): void {
         if (this.disable) {
@@ -70,5 +68,4 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     ngOnDestroy() {
         this.searchbarService.changeMessage('');
     }
-
 }

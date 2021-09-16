@@ -16,30 +16,29 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import {RouterTestingModule} from '@angular/router/testing';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatDialogModule} from '@angular/material/dialog';
-import {Subject} from 'rxjs';
-import {ReactiveFormsModule} from '@angular/forms';
-import {MatIconModule} from '@angular/material/icon';
-import {MatExpansionModule} from '@angular/material/expansion';
-import {MatInputModule} from '@angular/material/input';
-import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
-import {DashboardService} from './shared/dashboard.service';
-import {DashboardComponent} from './dashboard.component';
-import {CoreModule} from '../../core/core.module';
-import {ResponsiveService} from '../../core/services/responsive.service';
-import {DeviceStatusService} from '../../widgets/device-status/shared/device-status.service';
-import {DashboardModel} from './shared/dashboard.model';
-import {DashboardManipulationModel} from './shared/dashboard-manipulation.model';
-import {DashboardWidgetManipulationModel} from './shared/dashboard-widget-manipulation.model';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatTabsModule} from '@angular/material/tabs';
-import {MatDividerModule} from '@angular/material/divider';
-import {GridsterModule} from 'angular-gridster2';
-import {MatButtonModule} from '@angular/material/button';
-
+import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatInputModule } from '@angular/material/input';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { DashboardService } from './shared/dashboard.service';
+import { DashboardComponent } from './dashboard.component';
+import { CoreModule } from '../../core/core.module';
+import { ResponsiveService } from '../../core/services/responsive.service';
+import { DeviceStatusService } from '../../widgets/device-status/shared/device-status.service';
+import { DashboardModel } from './shared/dashboard.model';
+import { DashboardManipulationModel } from './shared/dashboard-manipulation.model';
+import { DashboardWidgetManipulationModel } from './shared/dashboard-widget-manipulation.model';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatDividerModule } from '@angular/material/divider';
+import { GridsterModule } from 'angular-gridster2';
+import { MatButtonModule } from '@angular/material/button';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
@@ -49,55 +48,62 @@ describe('DashboardComponent', () => {
     const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService);
     const deviceStatusServiceSpy: Spy<DeviceStatusService> = createSpyFromClass<DeviceStatusService>(DeviceStatusService);
 
-    beforeEach(waitForAsync(() => {
+    beforeEach(
+        waitForAsync(() => {
+            responsiveServiceSpy.observeMqAlias.and.nextOneTimeWith('md');
+            dashboardServiceSpy.getDashboards.and.nextOneTimeWith([
+                {
+                    id: 'dashboard-1',
+                    name: 'test-dashboard',
+                },
+            ] as DashboardModel[]);
+            dashboardServiceSpy.dashboardObservable = new Subject<DashboardManipulationModel>().asObservable();
+            dashboardServiceSpy.dashboardWidgetObservable = new Subject<DashboardWidgetManipulationModel>().asObservable();
 
-        responsiveServiceSpy.observeMqAlias.and.nextOneTimeWith('md');
-        dashboardServiceSpy.getDashboards.and.nextOneTimeWith([{
-            id: 'dashboard-1',
-            name: 'test-dashboard'
-        }] as DashboardModel[]);
-        dashboardServiceSpy.dashboardObservable = new Subject<DashboardManipulationModel>().asObservable();
-        dashboardServiceSpy.dashboardWidgetObservable = new Subject<DashboardWidgetManipulationModel>().asObservable();
+            TestBed.configureTestingModule({
+                imports: [
+                    CoreModule,
+                    RouterTestingModule,
+                    HttpClientTestingModule,
+                    MatSnackBarModule,
+                    MatDialogModule,
+                    MatIconModule,
+                    MatExpansionModule,
+                    MatInputModule,
+                    MatMenuModule,
+                    ReactiveFormsModule,
+                    MatTabsModule,
+                    MatDividerModule,
+                    GridsterModule,
+                    MatButtonModule,
+                ],
+                declarations: [DashboardComponent],
+                providers: [
+                    { provide: DashboardService, useValue: dashboardServiceSpy },
+                    { provide: ResponsiveService, useValue: responsiveServiceSpy },
+                    { provide: DeviceStatusService, useValue: deviceStatusServiceSpy },
+                ],
+            }).compileComponents();
+            fixture = TestBed.createComponent(DashboardComponent);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+        }),
+    );
 
-        TestBed.configureTestingModule({
-            imports: [
-                CoreModule,
-                RouterTestingModule,
-                HttpClientTestingModule,
-                MatSnackBarModule,
-                MatDialogModule,
-                MatIconModule,
-                MatExpansionModule,
-                MatInputModule,
-                MatMenuModule,
-                ReactiveFormsModule,
-                MatTabsModule,
-                MatDividerModule,
-                GridsterModule,
-                MatButtonModule,
-            ],
-            declarations: [
-                DashboardComponent
-            ],
-            providers: [
-                {provide: DashboardService, useValue: dashboardServiceSpy},
-                {provide: ResponsiveService, useValue: responsiveServiceSpy},
-                {provide: DeviceStatusService, useValue: deviceStatusServiceSpy},
-            ]
-        }).compileComponents();
-        fixture = TestBed.createComponent(DashboardComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
-    }));
+    it(
+        'should create the app',
+        waitForAsync(() => {
+            expect(component).toBeTruthy();
+        }),
+    );
 
-    it('should create the app', waitForAsync(() => {
-        expect(component).toBeTruthy();
-    }));
-
-    it('should toggle dragMode', waitForAsync(() => {
-        component.toggleDragMode();
-        expect(component.inDragMode).toBeTrue();
-        component.toggleDragMode();
-        expect(component.inDragMode).toBeFalse();
-    }));
+    it(
+        'should toggle dragMode',
+        waitForAsync(() => {
+            component.toggleDragMode();
+            expect(component.inDragMode).toBeTrue();
+            component.toggleDragMode();
+            expect(component.inDragMode).toBeFalse();
+        }),
+    );
 });

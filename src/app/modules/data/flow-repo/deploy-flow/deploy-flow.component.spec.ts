@@ -15,47 +15,56 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatDialogModule} from '@angular/material/dialog';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
 
-import {InfiniteScrollModule} from 'ngx-infinite-scroll';
-import {DeployFlowComponent} from './deploy-flow.component';
-import {CoreModule} from '../../../../core/core.module';
-import {AuthorizationService} from '../../../../core/services/authorization.service';
-import {AuthorizationServiceMock} from '../../../../core/services/authorization.service.mock';
-import {DialogsService} from '../../../../core/services/dialogs.service';
-import {ActivatedRoute} from '@angular/router';
-import {RouterTestingModule} from '@angular/router/testing';
-import {of} from 'rxjs';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { DeployFlowComponent } from './deploy-flow.component';
+import { CoreModule } from '../../../../core/core.module';
+import { AuthorizationService } from '../../../../core/services/authorization.service';
+import { AuthorizationServiceMock } from '../../../../core/services/authorization.service.mock';
+import { DialogsService } from '../../../../core/services/dialogs.service';
+import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { of } from 'rxjs';
 
 describe('DeployFlowComponent', () => {
     let component: DeployFlowComponent;
     let fixture: ComponentFixture<DeployFlowComponent>;
 
-    beforeEach(waitForAsync(() => {
-        TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule, RouterTestingModule],
-            declarations: [DeployFlowComponent],
-            providers: [
-                {provide: AuthorizationService, useClass: AuthorizationServiceMock},
-                DialogsService,
-                {
-                    provide: ActivatedRoute, useValue: {
-                        url: of(['deploy', '123']),
-                        snapshot: {
-                            paramMap: {
-                                get(): string {
-                                    return '123';
+    beforeEach(
+        waitForAsync(() => {
+            TestBed.configureTestingModule({
+                imports: [
+                    HttpClientTestingModule,
+                    MatSnackBarModule,
+                    MatDialogModule,
+                    CoreModule,
+                    InfiniteScrollModule,
+                    RouterTestingModule,
+                ],
+                declarations: [DeployFlowComponent],
+                providers: [
+                    { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                    DialogsService,
+                    {
+                        provide: ActivatedRoute,
+                        useValue: {
+                            url: of(['deploy', '123']),
+                            snapshot: {
+                                paramMap: {
+                                    get(): string {
+                                        return '123';
+                                    },
                                 },
                             },
-                        }
-                    }
-                }
-            ]
-        })
-            .compileComponents();
-    }));
+                        },
+                    },
+                ],
+            }).compileComponents();
+        }),
+    );
 
     beforeEach(() => {
         fixture = TestBed.createComponent(DeployFlowComponent);
@@ -66,5 +75,4 @@ describe('DeployFlowComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
-
 });

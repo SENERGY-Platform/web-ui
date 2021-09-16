@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormControl, Validators} from '@angular/forms';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import {
-    DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
-    DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeFunctionType, functionTypes,
+    DeviceTypeAspectModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeDeviceClassModel,
+    DeviceTypeFunctionModel,
+    DeviceTypeFunctionType,
+    functionTypes,
 } from '../../../../metadata/device-types-overview/shared/device-type.model';
 import {
     DeviceTypeSelectionRefModel,
-    DeviceTypeSelectionResultModel
+    DeviceTypeSelectionResultModel,
 } from '../../../../metadata/device-types-overview/shared/device-type-selection.model';
-import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
-import {ConceptsService} from '../../../../metadata/concepts/shared/concepts.service';
-import {ConceptsCharacteristicsModel} from '../../../../metadata/concepts/shared/concepts-characteristics.model';
+import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
+import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
+import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
 
 @Component({
     templateUrl: './task-config-dialog.component.html',
@@ -37,9 +41,9 @@ export class TaskConfigDialogComponent implements OnInit {
     optionsFormControl = new FormControl('');
     deviceClassFormControl = new FormControl('');
     aspectFormControl = new FormControl('');
-    functionFormControl = new FormControl({value: '', disabled: true});
+    functionFormControl = new FormControl({ value: '', disabled: true });
     completionStrategyFormControl = new FormControl('');
-    retriesFormControl = new FormControl({value: 0, disabled: true}, [Validators.min(0), Validators.max(100)]);
+    retriesFormControl = new FormControl({ value: 0, disabled: true }, [Validators.min(0), Validators.max(100)]);
 
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
@@ -57,7 +61,8 @@ export class TaskConfigDialogComponent implements OnInit {
         private _formBuilder: FormBuilder,
         private deviceTypeService: DeviceTypeService,
         private conceptsService: ConceptsService,
-        @Inject(MAT_DIALOG_DATA) private data: { selection: DeviceTypeSelectionRefModel | null }) {
+        @Inject(MAT_DIALOG_DATA) private data: { selection: DeviceTypeSelectionRefModel | null },
+    ) {
         this.selection = this.data.selection;
     }
 
@@ -81,7 +86,7 @@ export class TaskConfigDialogComponent implements OnInit {
             device_class: this.deviceClassFormControl.value || null,
             characteristic: this.characteristic,
             completionStrategy: this.completionStrategyFormControl.value,
-            retries: this.retriesFormControl.value
+            retries: this.retriesFormControl.value,
         };
         this.dialogRef.close(this.result);
     }
@@ -120,17 +125,17 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private getDeviceClasses(): void {
-        this.deviceTypeService.getDeviceClassesWithControllingFunction().subscribe(
-            (deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
+        this.deviceTypeService
+            .getDeviceClassesWithControllingFunction()
+            .subscribe((deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[]) => {
                 this.deviceClasses = deviceTypeDeviceClasses;
             });
     }
 
     private getAspects(): void {
-        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe(
-            (aspects: DeviceTypeAspectModel[]) => {
-                this.aspects = aspects;
-            });
+        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe((aspects: DeviceTypeAspectModel[]) => {
+            this.aspects = aspects;
+        });
     }
 
     private initFunctions(): void {
@@ -168,8 +173,9 @@ export class TaskConfigDialogComponent implements OnInit {
 
     private getBaseCharacteristics(func: DeviceTypeFunctionModel): void {
         if (func && func.concept_id !== '') {
-            this.conceptsService.getConceptWithCharacteristics(func.concept_id).subscribe(
-                (concept: (ConceptsCharacteristicsModel | null)) => {
+            this.conceptsService
+                .getConceptWithCharacteristics(func.concept_id)
+                .subscribe((concept: ConceptsCharacteristicsModel | null) => {
                     if (concept) {
                         let index = -1;
                         concept.characteristics.forEach((char: DeviceTypeCharacteristicsModel, i: number) => {

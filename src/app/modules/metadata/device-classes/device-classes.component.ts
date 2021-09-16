@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Router} from '@angular/router';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {DeviceClassesPermSearchModel} from './shared/device-classes-perm-search.model';
-import {DeviceClassesService} from './shared/device-classes.service';
-import {DeviceClassesEditDialogComponent} from './dialog/device-classes-edit-dialog.component';
-import {DeviceTypeDeviceClassModel} from '../device-types-overview/shared/device-type.model';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Subscription } from 'rxjs';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { DeviceClassesPermSearchModel } from './shared/device-classes-perm-search.model';
+import { DeviceClassesService } from './shared/device-classes.service';
+import { DeviceClassesEditDialogComponent } from './dialog/device-classes-edit-dialog.component';
+import { DeviceTypeDeviceClassModel } from '../device-types-overview/shared/device-type.model';
 import uuid = util.uuid;
-import {util} from 'jointjs';
+import { util } from 'jointjs';
 
 const grids = new Map([
     ['xs', 1],
@@ -41,7 +41,7 @@ const grids = new Map([
 @Component({
     selector: 'senergy-device-classes',
     templateUrl: './device-classes.component.html',
-    styleUrls: ['./device-classes.component.css']
+    styleUrls: ['./device-classes.component.css'],
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
@@ -58,15 +58,15 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private dialog: MatDialog,
-                private responsiveService: ResponsiveService,
-                private deviceClassesService: DeviceClassesService,
-                private searchbarService: SearchbarService,
-                private snackBar: MatSnackBar,
-                private router: Router,
-                private dialogsService: DialogsService
-    ) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private responsiveService: ResponsiveService,
+        private deviceClassesService: DeviceClassesService,
+        private searchbarService: SearchbarService,
+        private snackBar: MatSnackBar,
+        private router: Router,
+        private dialogsService: DialogsService,
+    ) {}
 
     ngOnInit() {
         this.initGridCols();
@@ -94,7 +94,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
-            deviceClass: JSON.parse(JSON.stringify(inputDeviceClass))         // create copy of object
+            deviceClass: JSON.parse(JSON.stringify(inputDeviceClass)), // create copy of object
         };
 
         const editDialogRef = this.dialog.open(DeviceClassesEditDialogComponent, dialogConfig);
@@ -102,28 +102,33 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         editDialogRef.afterClosed().subscribe((newDeviceClass: DeviceTypeDeviceClassModel) => {
             if (newDeviceClass !== undefined) {
                 this.reset();
-                this.deviceClassesService.updateDeviceClasses(newDeviceClass).subscribe((deviceClass: (DeviceTypeDeviceClassModel | null)) => {
-                    this.reloadAndShowSnackbar(deviceClass, 'updat');
-                });
+                this.deviceClassesService
+                    .updateDeviceClasses(newDeviceClass)
+                    .subscribe((deviceClass: DeviceTypeDeviceClassModel | null) => {
+                        this.reloadAndShowSnackbar(deviceClass, 'updat');
+                    });
             }
         });
     }
 
     deleteDeviceClass(deviceClass: DeviceClassesPermSearchModel): void {
-        this.dialogsService.openDeleteDialog('device class ' + deviceClass.name).afterClosed().subscribe((deleteDeviceClass: boolean) => {
-            if (deleteDeviceClass) {
-                this.deviceClassesService.deleteDeviceClasses(deviceClass.id).subscribe((resp: boolean) => {
-                    if (resp === true) {
-                        this.deviceClasses.splice(this.deviceClasses.indexOf(deviceClass), 1);
-                        this.snackBar.open('Device class deleted successfully.', undefined, {duration: 2000});
-                        this.setLimitOffset(1);
-                        this.reloadDeviceClasses(false);
-                    } else {
-                        this.snackBar.open('Error while deleting the device class!', undefined, {duration: 2000});
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('device class ' + deviceClass.name)
+            .afterClosed()
+            .subscribe((deleteDeviceClass: boolean) => {
+                if (deleteDeviceClass) {
+                    this.deviceClassesService.deleteDeviceClasses(deviceClass.id).subscribe((resp: boolean) => {
+                        if (resp === true) {
+                            this.deviceClasses.splice(this.deviceClasses.indexOf(deviceClass), 1);
+                            this.snackBar.open('Device class deleted successfully.', undefined, { duration: 2000 });
+                            this.setLimitOffset(1);
+                            this.reloadDeviceClasses(false);
+                        } else {
+                            this.snackBar.open('Error while deleting the device class!', undefined, { duration: 2000 });
+                        }
+                    });
+                }
+            });
     }
 
     newDeviceClass(): void {
@@ -134,7 +139,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
                 id: 'urn:infai:ses:device-class:' + uuid(),
                 image: '',
                 name: '',
-            }   as DeviceTypeDeviceClassModel
+            } as DeviceTypeDeviceClassModel,
         };
 
         const editDialogRef = this.dialog.open(DeviceClassesEditDialogComponent, dialogConfig);
@@ -142,7 +147,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         editDialogRef.afterClosed().subscribe((newDeviceClass: DeviceTypeDeviceClassModel) => {
             if (newDeviceClass !== undefined) {
                 this.reset();
-                this.deviceClassesService.createDeviceClass(newDeviceClass).subscribe((deviceClass: (DeviceTypeDeviceClassModel | null)) => {
+                this.deviceClassesService.createDeviceClass(newDeviceClass).subscribe((deviceClass: DeviceTypeDeviceClassModel | null) => {
                     this.reloadAndShowSnackbar(deviceClass, 'sav');
                 });
             }
@@ -168,16 +173,15 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
             this.reset();
         }
 
-        this.deviceClassesService.getDeviceClasses(this.searchText, this.limit, this.offset, this.sortAttribute.value,
-            this.sortAttribute.order).subscribe(
-            (deviceClasses: DeviceClassesPermSearchModel[]) => {
+        this.deviceClassesService
+            .getDeviceClasses(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .subscribe((deviceClasses: DeviceClassesPermSearchModel[]) => {
                 if (deviceClasses.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.deviceClasses = this.deviceClasses.concat(deviceClasses);
                 this.ready = true;
             });
-
     }
 
     private reset() {
@@ -202,12 +206,11 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
     private reloadAndShowSnackbar(deviceClass: DeviceTypeDeviceClassModel | null, text: string) {
         if (deviceClass === null) {
-            this.snackBar.open('Error while ' + text + 'ing the device class!', undefined, {duration: 2000});
+            this.snackBar.open('Error while ' + text + 'ing the device class!', undefined, { duration: 2000 });
             this.getDeviceClasses(true);
         } else {
-            this.snackBar.open('Device class ' + text + 'ed successfully.', undefined, {duration: 2000});
+            this.snackBar.open('Device class ' + text + 'ed successfully.', undefined, { duration: 2000 });
             this.reloadDeviceClasses(true);
         }
     }
-
 }

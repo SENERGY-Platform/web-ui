@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import {GoogleChartComponent} from 'ng2-google-charts';
-import {ChartsProcessInstancesService} from './shared/charts-process-instances.service';
-import {ChartsModel} from '../../shared/charts.model';
-import {ElementSizeService} from '../../../../core/services/element-size.service';
-import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
-import {ChartsService} from "../../shared/charts.service";
+import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import { GoogleChartComponent } from 'ng2-google-charts';
+import { ChartsProcessInstancesService } from './shared/charts-process-instances.service';
+import { ChartsModel } from '../../shared/charts.model';
+import { ElementSizeService } from '../../../../core/services/element-size.service';
+import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
+import { ChartsService } from '../../shared/charts.service';
 
 @Component({
     selector: 'senergy-charts-process-instances',
@@ -30,14 +30,13 @@ import {ChartsService} from "../../shared/charts.service";
     styleUrls: ['./charts-process-instances.component.css'],
 })
 export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
-
     processInstancesStatus = {} as ChartsModel;
     ready = false;
     destroy = new Subscription();
 
     private resizeTimeout = 0;
 
-    @ViewChild('processInstancesStatusChart', {static: false}) processInstancesStatusChart!: GoogleChartComponent;
+    @ViewChild('processInstancesStatusChart', { static: false }) processInstancesStatusChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -52,11 +51,12 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(private chartsService: ChartsService,
-                private chartsProcessInstancesService: ChartsProcessInstancesService,
-                private elementSizeService: ElementSizeService,
-                private dashboardService: DashboardService) {
-    }
+    constructor(
+        private chartsService: ChartsService,
+        private chartsProcessInstancesService: ChartsProcessInstancesService,
+        private elementSizeService: ElementSizeService,
+        private dashboardService: DashboardService,
+    ) {}
 
     ngOnInit() {
         this.getProcessInstances();
@@ -76,14 +76,15 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
                 this.chartsService.releaseResources(this.processInstancesStatusChart);
-                this.chartsProcessInstancesService.getProcessInstancesStatus(this.widget.id).subscribe((processInstancesStatus: ChartsModel) => {
-                    this.processInstancesStatus = processInstancesStatus;
-                    this.ready = true;
-                });
+                this.chartsProcessInstancesService
+                    .getProcessInstancesStatus(this.widget.id)
+                    .subscribe((processInstancesStatus: ChartsModel) => {
+                        this.processInstancesStatus = processInstancesStatus;
+                        this.ready = true;
+                    });
             }
         });
     }
-
 
     private resizeProcessInstancesStatusChart() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id);

@@ -53,10 +53,10 @@ export interface ImportTypePermissionSearchModel {
     image: string;
     name: string;
     permissions: {
-        a: boolean,
-        r: boolean,
-        w: boolean,
-        x: boolean,
+        a: boolean;
+        r: boolean;
+        w: boolean;
+        x: boolean;
     };
     shared: boolean;
 }

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
-import {WidgetModel} from '../shared/dashboard-widget.model';
-import {DashboardTypesEnum} from '../shared/dashboard-types.enum';
-import {Observable} from 'rxjs';
-import {SingleValueRequirementsService} from '../../../widgets/single-value/shared/single-value-requirements.service';
-import {EnergyPredictionRequirementsService} from '../../../widgets/energy-prediction/shared/energy-prediction-requirements.service';
+import { Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
+import { WidgetModel } from '../shared/dashboard-widget.model';
+import { DashboardTypesEnum } from '../shared/dashboard-types.enum';
+import { Observable } from 'rxjs';
+import { SingleValueRequirementsService } from '../../../widgets/single-value/shared/single-value-requirements.service';
+import { EnergyPredictionRequirementsService } from '../../../widgets/energy-prediction/shared/energy-prediction-requirements.service';
 
 export interface Types {
     value: string;
@@ -36,31 +36,29 @@ export interface SwitchCategories extends Types {
 
 @Component({
     templateUrl: './dashboard-new-widget-dialog.component.html',
-    styleUrls: ['./dashboard-new-widget-dialog.component.css']
+    styleUrls: ['./dashboard-new-widget-dialog.component.css'],
 })
-
 export class DashboardNewWidgetDialogComponent {
-
-    selectedType: Types = {value: '', viewValue: '', tooltip: '', disabled: false};
+    selectedType: Types = { value: '', viewValue: '', tooltip: '', disabled: false };
     selectedCategory: any = null;
     categories: Types[] | SwitchCategories[] = [];
     categoryDisabled = true;
     types: Types[] = [
-        {value: DashboardTypesEnum.Switch, viewValue: 'Switch', disabled: false, tooltip: ''},
-        {value: DashboardTypesEnum.RangeSlider, viewValue: 'Range Slider', disabled: false, tooltip: ''},
-        {value: DashboardTypesEnum.Chart, viewValue: 'Chart', disabled: false, tooltip: ''},
-        {value: DashboardTypesEnum.DevicesState, viewValue: 'Devices state', disabled: false, tooltip: ''},
-        {value: DashboardTypesEnum.ProcessState, viewValue: 'Process state', disabled: false, tooltip: ''},
-        {value: DashboardTypesEnum.EventList, viewValue: 'Event list', disabled: false, tooltip: ''},
-        {value: DashboardTypesEnum.RankingList, viewValue: 'Ranking list', disabled: false, tooltip: ''},
-        {value: DashboardTypesEnum.ProcessModelList, viewValue: 'Process model list', disabled: false, tooltip: ''},
-        {value: DashboardTypesEnum.DeviceDowntimeList, viewValue: 'Device downtime list', disabled: false, tooltip: ''},
+        { value: DashboardTypesEnum.Switch, viewValue: 'Switch', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.RangeSlider, viewValue: 'Range Slider', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.Chart, viewValue: 'Chart', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.DevicesState, viewValue: 'Devices state', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.ProcessState, viewValue: 'Process state', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.EventList, viewValue: 'Event list', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.RankingList, viewValue: 'Ranking list', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.ProcessModelList, viewValue: 'Process model list', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.DeviceDowntimeList, viewValue: 'Device downtime list', disabled: false, tooltip: '' },
         {
             value: DashboardTypesEnum.SingleValue,
             viewValue: 'Single Value',
             requirementsService: this.singleValueRequirementsService,
             disabled: false,
-            tooltip: SingleValueRequirementsService.requirement
+            tooltip: SingleValueRequirementsService.requirement,
         },
         // {value: DashboardTypesEnum.MultiValue, viewValue: 'Multi Value', disabled: false, tooltip: ''},
         {
@@ -82,9 +80,9 @@ export class DashboardNewWidgetDialogComponent {
             disabled: false,
             tooltip: '',
         },
-        {value: DashboardTypesEnum.ProcessScheduler, viewValue: 'Process Scheduler', disabled: false, tooltip: ''},
+        { value: DashboardTypesEnum.ProcessScheduler, viewValue: 'Process Scheduler', disabled: false, tooltip: '' },
         // {value: DashboardTypesEnum.DeviceStatus, viewValue: 'Device Status', disabled: false, tooltip: ''},
-        {value: DashboardTypesEnum.DataTable, viewValue: 'Data Table', disabled: false, tooltip: ''}, // TODO
+        { value: DashboardTypesEnum.DataTable, viewValue: 'Data Table', disabled: false, tooltip: '' }, // TODO
     ];
     switchCategories: SwitchCategories[] = [
         {
@@ -110,44 +108,45 @@ export class DashboardNewWidgetDialogComponent {
         },
     ];
     chartCategories: Types[] = [
-        {value: 'charts_export', viewValue: 'Export', disabled: false, tooltip: ''},
-        {value: 'charts_process_instances', viewValue: 'Process instances', disabled: false, tooltip: ''},
-        {value: 'charts_process_deployments', viewValue: 'Process deployments', disabled: false, tooltip: ''},
-        {value: 'charts_device_total_downtime', viewValue: 'Device total downtime', disabled: false, tooltip: ''},
+        { value: 'charts_export', viewValue: 'Export', disabled: false, tooltip: '' },
+        { value: 'charts_process_instances', viewValue: 'Process instances', disabled: false, tooltip: '' },
+        { value: 'charts_process_deployments', viewValue: 'Process deployments', disabled: false, tooltip: '' },
+        { value: 'charts_device_total_downtime', viewValue: 'Device total downtime', disabled: false, tooltip: '' },
         {
             value: 'charts_device_downtime_rate_per_gateway',
             viewValue: 'Downtime rate per gateway',
             disabled: false,
             tooltip: '',
         },
-        {value: 'charts_device_per_gateway', viewValue: 'Device per gateway', disabled: false, tooltip: ''},
+        { value: 'charts_device_per_gateway', viewValue: 'Device per gateway', disabled: false, tooltip: '' },
     ];
 
-    constructor(private dialogRef: MatDialogRef<DashboardNewWidgetDialogComponent>,
-                private singleValueRequirementsService: SingleValueRequirementsService,
-                private energyPredictionRequirementsService: EnergyPredictionRequirementsService,
+    constructor(
+        private dialogRef: MatDialogRef<DashboardNewWidgetDialogComponent>,
+        private singleValueRequirementsService: SingleValueRequirementsService,
+        private energyPredictionRequirementsService: EnergyPredictionRequirementsService,
     ) {
-        this.types.forEach(t => this.checkRequirements(t));
+        this.types.forEach((t) => this.checkRequirements(t));
     }
 
     activateCategory(): void {
         switch (this.selectedType.value) {
-            case DashboardTypesEnum.Switch: {
-                this.categories = this.switchCategories;
-                this.categoryDisabled = false;
-                break;
-            }
-            case DashboardTypesEnum.Chart: {
-                this.categories = this.chartCategories;
-                this.categoryDisabled = false;
-                break;
-            }
-            default: {
-                this.categories = [];
-                this.categoryDisabled = true;
-            }
+        case DashboardTypesEnum.Switch: {
+            this.categories = this.switchCategories;
+            this.categoryDisabled = false;
+            break;
         }
-        this.categories.forEach(t => this.checkRequirements(t));
+        case DashboardTypesEnum.Chart: {
+            this.categories = this.chartCategories;
+            this.categoryDisabled = false;
+            break;
+        }
+        default: {
+            this.categories = [];
+            this.categoryDisabled = true;
+        }
+        }
+        this.categories.forEach((t) => this.checkRequirements(t));
     }
 
     close(): void {
@@ -163,34 +162,33 @@ export class DashboardNewWidgetDialogComponent {
             x: -1,
             y: -1,
             cols: -1,
-            rows: -1
+            rows: -1,
         };
         switch (this.selectedType.value) {
-            case DashboardTypesEnum.Switch: {
-                widget.properties = {
-                    imgUrl: this.selectedCategory.imgUrl,
-                    active: false
-                };
-                break;
-            }
-            case DashboardTypesEnum.Chart: {
-                widget.type = this.selectedCategory.value;
-                break;
-            }
-            case DashboardTypesEnum.ProcessIncidentList: {
-                widget.properties.limit = 10;
-                break;
-            }
+        case DashboardTypesEnum.Switch: {
+            widget.properties = {
+                imgUrl: this.selectedCategory.imgUrl,
+                active: false,
+            };
+            break;
+        }
+        case DashboardTypesEnum.Chart: {
+            widget.type = this.selectedCategory.value;
+            break;
+        }
+        case DashboardTypesEnum.ProcessIncidentList: {
+            widget.properties.limit = 10;
+            break;
+        }
         }
         this.dialogRef.close(widget);
     }
 
     private checkRequirements(t: Types) {
         if (t.requirementsService !== undefined) {
-            t.requirementsService.requirementsFulfilled().subscribe(b => {
+            t.requirementsService.requirementsFulfilled().subscribe((b) => {
                 t.disabled = !b;
             });
         }
     }
-
 }

@@ -20,7 +20,7 @@ export interface GeonamesResponse {
 
 export interface Geoname {
     adminCode1: string;
-    adminCodes1: {ISO3166_2: string};
+    adminCodes1: { ISO3166_2: string };
     adminName1: string;
     countryCode: string;
     countryName: string;

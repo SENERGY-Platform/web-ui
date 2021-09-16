@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'senergy-state-icon',
     templateUrl: './state-icon.component.html',
-    styleUrls: ['./state-icon.component.css']
+    styleUrls: ['./state-icon.component.css'],
 })
-export class StateIconComponent  {
-
+export class StateIconComponent {
     @Input() state: boolean | null | undefined = false;
-
 }

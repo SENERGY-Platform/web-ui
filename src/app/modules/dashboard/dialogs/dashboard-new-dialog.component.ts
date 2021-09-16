@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import { Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     templateUrl: './dashboard-new-dialog.component.html',
-    styleUrls: ['./dashboard-new-dialog.component.css']
+    styleUrls: ['./dashboard-new-dialog.component.css'],
 })
 export class DashboardNewDialogComponent {
-
-    constructor(private dialogRef: MatDialogRef<DashboardNewDialogComponent>) {
-    }
+    constructor(private dialogRef: MatDialogRef<DashboardNewDialogComponent>) {}
 
     close(): void {
         this.dialogRef.close();
@@ -33,5 +31,4 @@ export class DashboardNewDialogComponent {
     create(name: string): void {
         this.dialogRef.close(name);
     }
-
 }

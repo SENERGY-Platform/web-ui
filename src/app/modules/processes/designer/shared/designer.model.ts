@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-
-
-
 interface BpmnElementRef {
     source: BpmnElement;
 }
@@ -32,7 +29,7 @@ interface BpmnExtensionElementsValue {
 }
 
 interface BpmnExtensionElements {
-    values ?: BpmnExtensionElementsValue[];
+    values?: BpmnExtensionElementsValue[];
 }
 
 interface BpmnBusinessObject {
@@ -62,10 +59,10 @@ export interface HistoricDataConfig {
 
 export interface DurationIso {
     string: string; // Y __ M __ d __ h __ m __ s __
-    year:   number; // Y
-    month:  number; // M
-    day:    number; // D
-    hour:   number; // h
+    year: number; // Y
+    month: number; // M
+    day: number; // D
+    hour: number; // h
     minute: number; // m
     second: number; // s
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {WidgetModel} from './dashboard-widget.model';
+import { WidgetModel } from './dashboard-widget.model';
 
 export interface DashboardModel {
     id: string;
@@ -24,6 +24,3 @@ export interface DashboardModel {
     widgets: WidgetModel[];
     index: number;
 }
-
-
-

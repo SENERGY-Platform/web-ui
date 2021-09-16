@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {Observable} from 'rxjs/index';
-import {DeviceGroupsSelectDialogComponent} from '../dialog/device-groups-select-dialog.component';
-
+import { Injectable } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { Observable } from 'rxjs/index';
+import { DeviceGroupsSelectDialogComponent } from '../dialog/device-groups-select-dialog.component';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DeviceGroupsDialogService {
-
     constructor(private dialog: MatDialog) {}
 
     openDeviceGroupSelectDialog(): Observable<string[] | null | undefined> {

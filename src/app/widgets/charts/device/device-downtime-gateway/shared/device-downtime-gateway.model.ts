@@ -23,6 +23,5 @@ export class DeviceDowntimeGatewayModel {
         public failureRate: number,
         public failureRatio: number,
         public name: string,
-    ) {
-    }
+    ) {}
 }

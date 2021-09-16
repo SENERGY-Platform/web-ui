@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Observable} from 'rxjs';
-import {LocationModel} from './locations.model';
-import {environment} from '../../../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
-
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Observable } from 'rxjs';
+import { LocationModel } from './locations.model';
+import { environment } from '../../../../../environments/environment';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class LocationsService {
-    constructor(private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService,
-                private snackBar: MatSnackBar) {
-    }
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private snackBar: MatSnackBar) {}
 
     searchLocations(searchText: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<LocationModel[]> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
@@ -45,13 +41,12 @@ export class LocationsService {
             'offset=' + offset,
             'rights=r',
             'sort=' + sortBy + '.' + sortDirection,
-            'search=' + encodeURIComponent(searchText)
+            'search=' + encodeURIComponent(searchText),
         ].join('&');
 
-        return this.http.get<LocationModel[]>(
-            environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', []))
+        return this.http.get<LocationModel[]>(environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', [])),
         );
     }
 
@@ -62,43 +57,36 @@ export class LocationsService {
         if (sortBy === '' || sortBy === null || sortBy === undefined) {
             sortBy = 'name';
         }
-        const params = [
-            'limit=' + limit,
-            'offset=' + offset,
-            'rights=r',
-            'sort=' + sortBy + '.' + sortDirection
-        ].join('&');
+        const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection].join('&');
 
-        return this.http.get<LocationModel[]>(
-            environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', []))
+        return this.http.get<LocationModel[]>(environment.permissionSearchUrl + '/v3/resources/locations?' + params).pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocations(search)', [])),
         );
     }
 
     deleteLocation(id: string) {
-        return this.http.delete<boolean>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(id)).pipe(
-            catchError(this.errorHandlerService.handleError(LocationsService.name, 'deleteLocation', false))
-        );
+        return this.http
+            .delete<boolean>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(id))
+            .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'deleteLocation', false)));
     }
 
     getLocation(id: string): Observable<LocationModel | null> {
-        return this.http.get<LocationModel>(
-            environment.deviceManagerUrl + '/locations/' + encodeURIComponent(id)).pipe(
-            map(resp => resp),
-            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocation(id)', null))
+        return this.http.get<LocationModel>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(id)).pipe(
+            map((resp) => resp),
+            catchError(this.errorHandlerService.handleError(LocationsService.name, 'getLocation(id)', null)),
         );
     }
 
     createLocation(location: LocationModel): Observable<LocationModel | null> {
-        return this.http.post<LocationModel>(environment.deviceManagerUrl + '/locations', location).pipe(
-            catchError(this.errorHandlerService.handleError(LocationsService.name, 'createLocation', null))
-        );
+        return this.http
+            .post<LocationModel>(environment.deviceManagerUrl + '/locations', location)
+            .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'createLocation', null)));
     }
 
     updateLocation(location: LocationModel): Observable<LocationModel | null> {
-        return this.http.put<LocationModel>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(location.id), location).pipe(
-            catchError(this.errorHandlerService.handleError(LocationsService.name, 'updateLocation', null))
-        );
+        return this.http
+            .put<LocationModel>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(location.id), location)
+            .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'updateLocation', null)));
     }
 }

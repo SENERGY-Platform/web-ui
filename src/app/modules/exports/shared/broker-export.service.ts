@@ -14,66 +14,77 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {environment} from '../../../../environments/environment';
-import {catchError, map} from 'rxjs/internal/operators';
-import {Observable} from 'rxjs';
-import {ExportModel, ExportResponseModel} from './export.model';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { environment } from '../../../../environments/environment';
+import { catchError, map } from 'rxjs/internal/operators';
+import { Observable } from 'rxjs';
+import { ExportModel, ExportResponseModel } from './export.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
-
 export class BrokerExportService {
     static ID_PREFIX = 'urn:infai:ses:broker-export:';
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
-    }
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
-    getExports(search?: string, limit?: number, offset?: number, sort?: string, order?: string, generated?: boolean, searchField?: string):
-        Observable<ExportResponseModel | null> {
+    getExports(
+        search?: string,
+        limit?: number,
+        offset?: number,
+        sort?: string,
+        order?: string,
+        generated?: boolean,
+        searchField?: string,
+    ): Observable<ExportResponseModel | null> {
         if (searchField === undefined || searchField === null) {
             searchField = 'name';
         }
-        return this.http.get<ExportResponseModel>
-        (environment.brokerExportServiceUrl + '/instances?limit=' + limit + '&offset=' + offset + '&order=' + sort +
-            ':' + order + (search ? ('&search=' + searchField + ':' + search) : '') +
-            (generated !== undefined ? ('&generated=' + generated.valueOf()) : ''))
+        return this.http
+            .get<ExportResponseModel>(
+                environment.brokerExportServiceUrl +
+                    '/instances?limit=' +
+                    limit +
+                    '&offset=' +
+                    offset +
+                    '&order=' +
+                    sort +
+                    ':' +
+                    order +
+                    (search ? '&search=' + searchField + ':' + search : '') +
+                    (generated !== undefined ? '&generated=' + generated.valueOf() : ''),
+            )
             .pipe(
                 map((resp: ExportResponseModel) => resp || []),
-                catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'getExports: Error', null)
-                )
+                catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'getExports: Error', null)),
             );
-
     }
 
     getExport(id: string): Observable<ExportModel | null> {
-        return this.http.get<ExportModel>
-        (environment.brokerExportServiceUrl + '/instances/' + id).pipe(
-            map(resp => resp || []),
-            catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'getExport: Error', null))
+        return this.http.get<ExportModel>(environment.brokerExportServiceUrl + '/instances/' + id).pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'getExport: Error', null)),
         );
-
     }
 
     startPipeline(exp: ExportModel): Observable<ExportModel> {
-        return this.http.post<ExportModel>(environment.brokerExportServiceUrl + '/instances', exp).pipe(
-            catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'startPipeline: Error', {} as ExportModel))
-        );
+        return this.http
+            .post<ExportModel>(environment.brokerExportServiceUrl + '/instances', exp)
+            .pipe(catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'startPipeline: Error', {} as ExportModel)));
     }
 
     editExport(id: string, exp: ExportModel): Observable<{ status: number }> {
-        return this.http.put(environment.brokerExportServiceUrl + '/instances/' + id, exp, {
-            responseType: 'text',
-            observe: 'response'
-        }).pipe(
-            map(resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'editExport: Error', {status: 400}))
-        );
+        return this.http
+            .put(environment.brokerExportServiceUrl + '/instances/' + id, exp, {
+                responseType: 'text',
+                observe: 'response',
+            })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'editExport: Error', { status: 400 })),
+            );
     }
 
     stopPipeline(exp: ExportModel): Observable<{ status: number }> {
@@ -81,27 +92,27 @@ export class BrokerExportService {
     }
 
     stopPipelineById(id: string): Observable<{ status: number }> {
-        return this.http.delete(environment.brokerExportServiceUrl + '/instances/' + id, {
-            responseType: 'text',
-            observe: 'response'
-        }).pipe(
-            map(resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'stopPipelineById: Error', {status: 404}))
-        );
+        return this.http
+            .delete(environment.brokerExportServiceUrl + '/instances/' + id, {
+                responseType: 'text',
+                observe: 'response',
+            })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'stopPipelineById: Error', { status: 404 })),
+            );
     }
 
-    stopPipelines(exp: String[]): Observable<{ status: number }> {
-        return this.http.request('DELETE', environment.brokerExportServiceUrl + '/instances', {
-            body: exp,
-            responseType: 'text',
-            observe: 'response'
-        }).pipe(
-            map(resp => {
-                return {status: resp.status};
-            }),
-            catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'stopPipelines: Error', {status: 404}))
-        );
+    stopPipelines(exp: string[]): Observable<{ status: number }> {
+        return this.http
+            .request('DELETE', environment.brokerExportServiceUrl + '/instances', {
+                body: exp,
+                responseType: 'text',
+                observe: 'response',
+            })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'stopPipelines: Error', { status: 404 })),
+            );
     }
 }

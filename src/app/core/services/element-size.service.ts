@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-
+import { Injectable } from '@angular/core';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
-
 export class ElementSizeService {
+    constructor() {}
 
-    constructor() {
-    }
-
-    getHeightAndWidthByElementId(elementId: string, heightPercentageAdjustment?: number): { 'height': number, 'width': number, 'heightPercentage': string, 'widthPercentage': string } {
+    getHeightAndWidthByElementId(
+        elementId: string,
+        heightPercentageAdjustment?: number,
+    ): { height: number; width: number; heightPercentage: string; widthPercentage: string } {
         let height = 0;
         let width = 0;
         let heightPercentage = '75%';
@@ -41,7 +40,7 @@ export class ElementSizeService {
             widthPercentage = this.calcWidthPercentage(width);
         }
 
-        return {height, width, heightPercentage, widthPercentage};
+        return { height, width, heightPercentage, widthPercentage };
     }
 
     private calcHeightPercentage(height: number, heightPercentageAdjustment: number): string {

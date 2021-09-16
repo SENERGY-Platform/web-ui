@@ -14,32 +14,35 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
-import {DeviceInstancesService} from './shared/device-instances.service';
-import {DeviceInstancesIntermediateModel, DeviceInstancesModel} from './shared/device-instances.model';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {Subscription} from 'rxjs';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {KeycloakService} from 'keycloak-angular';
-import {TagValuePipe} from '../../../core/pipe/tag-value.pipe';
-import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Navigation, Router} from '@angular/router';
-import {NetworksModel} from '../networks/shared/networks.model';
-import {DeviceTypePermSearchModel} from '../../metadata/device-types-overview/shared/device-type-perm-search.model';
-import {LocationModel} from '../locations/shared/locations.model';
-import {LocationsService} from '../locations/shared/locations.service';
-import {NetworksService} from '../networks/shared/networks.service';
-import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
-import {DeviceTypeBaseModel} from '../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceInstancesService } from './shared/device-instances.service';
+import { DeviceInstancesIntermediateModel, DeviceInstancesModel } from './shared/device-instances.model';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { Subscription } from 'rxjs';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { KeycloakService } from 'keycloak-angular';
+import { TagValuePipe } from '../../../core/pipe/tag-value.pipe';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Navigation, Router } from '@angular/router';
+import { NetworksModel } from '../networks/shared/networks.model';
+import { DeviceTypePermSearchModel } from '../../metadata/device-types-overview/shared/device-type-perm-search.model';
+import { LocationModel } from '../locations/shared/locations.model';
+import { LocationsService } from '../locations/shared/locations.service';
+import { NetworksService } from '../networks/shared/networks.service';
+import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import { DeviceTypeBaseModel } from '../../metadata/device-types-overview/shared/device-type.model';
 
-
-const tabs = [{label: 'Online', state: 'connected'}, {label: 'Offline', state: 'disconnected'}, {
-    label: 'Unknown',
-    state: 'unknown'
-}];
+const tabs = [
+    { label: 'Online', state: 'connected' },
+    { label: 'Offline', state: 'disconnected' },
+    {
+        label: 'Unknown',
+        state: 'unknown',
+    },
+];
 const sortingAttributes = [new SortModel('Name', 'name', 'asc')];
 
 export interface DeviceInstancesRouterState {
@@ -48,29 +51,30 @@ export interface DeviceInstancesRouterState {
     value: any;
 }
 
+// eslint-disable-next-line no-shadow
 export enum DeviceInstancesRouterStateTypesEnum {
     NETWORK,
     DEVICE_TYPE,
     LOCATION,
 }
 
+// eslint-disable-next-line no-shadow
 export enum DeviceInstancesRouterStateTabEnum {
     ALL,
     ONLINE,
     OFFLINE,
-    UNKNOWN
+    UNKNOWN,
 }
 
 @Component({
     selector: 'senergy-device-instances',
     templateUrl: './device-instances.component.html',
-    styleUrls: ['./device-instances.component.css']
+    styleUrls: ['./device-instances.component.css'],
 })
 export class DeviceInstancesComponent implements OnInit, OnDestroy {
-
     deviceInstances: DeviceInstancesModel[] = [];
     ready = false;
-    sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
+    sortAttributes = JSON.parse(JSON.stringify(sortingAttributes)); // create copy of object;
     userID: string;
     selectedTag = '';
     selectedTagTransformed = '';
@@ -80,7 +84,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     routerLocation: LocationModel | null = null;
     activeIndex = 0;
     animationDone = true;
-    tabs: { label: string, state: string }[] = tabs;
+    tabs: { label: string; state: string }[] = tabs;
     searchInitialized = false;
     searchText = '';
 
@@ -95,16 +99,18 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private searchbarService: SearchbarService,
-                private deviceInstancesService: DeviceInstancesService,
-                private keycloakService: KeycloakService,
-                private permissionsDialogService: PermissionsDialogService,
-                private dialogsService: DialogsService,
-                private locationsService: LocationsService,
-                private networksService: NetworksService,
-                private deviceTypesService: DeviceTypeService,
-                public snackBar: MatSnackBar,
-                private router: Router) {
+    constructor(
+        private searchbarService: SearchbarService,
+        private deviceInstancesService: DeviceInstancesService,
+        private keycloakService: KeycloakService,
+        private permissionsDialogService: PermissionsDialogService,
+        private dialogsService: DialogsService,
+        private locationsService: LocationsService,
+        private networksService: NetworksService,
+        private deviceTypesService: DeviceTypeService,
+        public snackBar: MatSnackBar,
+        private router: Router,
+    ) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
         this.getRouterParams();
     }
@@ -138,7 +144,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         this.getDeviceInstances(true);
     }
 
-    getDevicesByTag(event: { tag: string, tagType: string }) {
+    getDevicesByTag(event: { tag: string; tagType: string }) {
         this.routerNetwork = null;
         this.routerDeviceType = null;
         this.routerLocation = null;
@@ -166,7 +172,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     updateTab() {
         this.animationDone = false;
         this.searchText = '';
-        this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
+        this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes)); // create copy of object;
         this.sortAttribute = this.sortAttributes[0];
         this.resetTag();
     }
@@ -183,15 +189,15 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             if (navigation.extras.state !== undefined) {
                 const state = navigation.extras.state as DeviceInstancesRouterState;
                 switch (state.type) {
-                    case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
-                        this.routerDeviceType = state.value as DeviceTypeBaseModel;
-                        break;
-                    case DeviceInstancesRouterStateTypesEnum.NETWORK:
-                        this.routerNetwork = state.value as NetworksModel;
-                        break;
-                    case DeviceInstancesRouterStateTypesEnum.LOCATION:
-                        this.routerLocation = state.value as LocationModel;
-                        break;
+                case DeviceInstancesRouterStateTypesEnum.DEVICE_TYPE:
+                    this.routerDeviceType = state.value as DeviceTypeBaseModel;
+                    break;
+                case DeviceInstancesRouterStateTypesEnum.NETWORK:
+                    this.routerNetwork = state.value as NetworksModel;
+                    break;
+                case DeviceInstancesRouterStateTypesEnum.LOCATION:
+                    this.routerLocation = state.value as LocationModel;
+                    break;
                 }
                 if (state.tab) {
                     this.activeIndex = state.tab;
@@ -215,46 +221,81 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
         if (this.routerNetwork !== null) {
             this.selectedTag = this.routerNetwork.name;
             this.selectedTagTransformed = this.routerNetwork.name;
-            this.deviceInstancesService.getDeviceInstancesByHubId(this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order,
-                this.routerNetwork.id, this.activeIndex === 0 ? null : tabs[this.activeIndex - 1].state as 'connected' | 'disconnected' | 'unknown')
+            this.deviceInstancesService
+                .getDeviceInstancesByHubId(
+                    this.limit,
+                    this.offset,
+                    this.sortAttribute.value,
+                    this.sortAttribute.order,
+                    this.routerNetwork.id,
+                    this.activeIndex === 0 ? null : (tabs[this.activeIndex - 1].state as 'connected' | 'disconnected' | 'unknown'),
+                )
                 .subscribe((deviceInstances: DeviceInstancesModel[]) => {
-                this.setDevices(deviceInstances);
-            });
+                    this.setDevices(deviceInstances);
+                });
         } else if (this.routerDeviceType !== null) {
             this.selectedTag = this.routerDeviceType.name;
             this.selectedTagTransformed = this.routerDeviceType.name;
-            this.deviceInstancesService.getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.limit, this.offset,
-                this.sortAttribute.value, this.sortAttribute.order,
-                this.activeIndex === 0 ? null : tabs[this.activeIndex - 1].state as 'connected' | 'disconnected' | 'unknown')
-                .subscribe(deviceInstances => {
+            this.deviceInstancesService
+                .getDeviceInstancesByDeviceType(
+                    this.routerDeviceType.id,
+                    this.limit,
+                    this.offset,
+                    this.sortAttribute.value,
+                    this.sortAttribute.order,
+                    this.activeIndex === 0 ? null : (tabs[this.activeIndex - 1].state as 'connected' | 'disconnected' | 'unknown'),
+                )
+                .subscribe((deviceInstances) => {
                     this.setDevices(deviceInstances);
-            });
+                });
         } else {
             if (this.selectedTag === '') {
                 if (this.activeIndex === 0) {
-                    this.deviceInstancesService.getDeviceInstances(
-                        this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-                        (deviceInstances: DeviceInstancesModel[]) => {
+                    this.deviceInstancesService
+                        .getDeviceInstances(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+                        .subscribe((deviceInstances: DeviceInstancesModel[]) => {
                             this.setDevices(deviceInstances);
                         });
                 } else {
-                    this.deviceInstancesService.getDeviceInstancesByState(
-                        this.searchText, tabs[this.activeIndex - 1].state, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order).subscribe(
-                        (deviceInstances: DeviceInstancesModel[]) => {
+                    this.deviceInstancesService
+                        .getDeviceInstancesByState(
+                            this.searchText,
+                            tabs[this.activeIndex - 1].state,
+                            this.limit,
+                            this.offset,
+                            this.sortAttribute.value,
+                            this.sortAttribute.order,
+                        )
+                        .subscribe((deviceInstances: DeviceInstancesModel[]) => {
                             this.setDevices(deviceInstances);
                         });
                 }
             } else {
                 if (this.activeIndex === 0) {
-                    this.deviceInstancesService.getDeviceInstancesByTag(this.selectedTagType, this.selectedTag, this.sortAttribute.value,
-                        this.sortAttribute.order, this.limit, this.offset).subscribe(
-                        (deviceInstances: DeviceInstancesModel[]) => {
+                    this.deviceInstancesService
+                        .getDeviceInstancesByTag(
+                            this.selectedTagType,
+                            this.selectedTag,
+                            this.sortAttribute.value,
+                            this.sortAttribute.order,
+                            this.limit,
+                            this.offset,
+                        )
+                        .subscribe((deviceInstances: DeviceInstancesModel[]) => {
                             this.setDevices(deviceInstances);
                         });
                 } else {
-                    this.deviceInstancesService.getDeviceInstancesByTagAndState(this.selectedTagType, this.selectedTag, this.limit, this.offset,
-                        this.sortAttribute.value, this.sortAttribute.order, tabs[this.activeIndex - 1].state).subscribe(
-                        (deviceInstances: DeviceInstancesModel[]) => {
+                    this.deviceInstancesService
+                        .getDeviceInstancesByTagAndState(
+                            this.selectedTagType,
+                            this.selectedTag,
+                            this.limit,
+                            this.offset,
+                            this.sortAttribute.value,
+                            this.sortAttribute.order,
+                            tabs[this.activeIndex - 1].state,
+                        )
+                        .subscribe((deviceInstances: DeviceInstancesModel[]) => {
                             this.setDevices(deviceInstances);
                         });
                 }
@@ -305,14 +346,14 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     }
 
     private loadFilterOptions() {
-        this.locationsService.listLocations(100, 0, 'name', 'asc').subscribe(value => {
+        this.locationsService.listLocations(100, 0, 'name', 'asc').subscribe((value) => {
             this.locationOptions = value;
         });
-        this.networksService.listNetworks(100, 0, 'name', 'asc').subscribe(value => {
+        this.networksService.listNetworks(100, 0, 'name', 'asc').subscribe((value) => {
             this.networkOptions = value;
         });
-        this.deviceInstancesService.listUsedDeviceTypeIds().subscribe(deviceTypeIds => {
-            this.deviceTypesService.getDeviceTypeListByIds(deviceTypeIds).subscribe(deviceTypes => {
+        this.deviceInstancesService.listUsedDeviceTypeIds().subscribe((deviceTypeIds) => {
+            this.deviceTypesService.getDeviceTypeListByIds(deviceTypeIds).subscribe((deviceTypes) => {
                 this.deviceTypeOptions = deviceTypes;
             });
         });

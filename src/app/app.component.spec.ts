@@ -16,32 +16,29 @@
 
 import { TestBed, ComponentFixture, waitForAsync } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import {CoreModule} from './core/core.module';
-import {KeycloakService} from 'keycloak-angular';
-import {RouterTestingModule} from '@angular/router/testing';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MockKeycloakService} from './core/services/keycloak.mock';
+import { CoreModule } from './core/core.module';
+import { KeycloakService } from 'keycloak-angular';
+import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MockKeycloakService } from './core/services/keycloak.mock';
 
 describe('AppComponent', () => {
-  let component: AppComponent;
-  let fixture: ComponentFixture<AppComponent>;
+    let component: AppComponent;
+    let fixture: ComponentFixture<AppComponent>;
 
-  beforeEach((() => {
-    TestBed.configureTestingModule({
-        imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule],
-      declarations: [
-        AppComponent
-      ],
-      providers: [{ provide: KeycloakService, useClass: MockKeycloakService },
-      ]
-    }).compileComponents();
-    fixture = TestBed.createComponent(AppComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule],
+            declarations: [AppComponent],
+            providers: [{ provide: KeycloakService, useClass: MockKeycloakService }],
+        }).compileComponents();
+        fixture = TestBed.createComponent(AppComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create the app', (() => {
-    expect(component).toBeTruthy();
-  }));
+    it('should create the app', () => {
+        expect(component).toBeTruthy();
+    });
 });

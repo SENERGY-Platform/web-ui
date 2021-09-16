@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {SafeUrl} from '@angular/platform-browser';
+import { SafeUrl } from '@angular/platform-browser';
 
 export interface DeploymentsModel {
     definition_id: string;
@@ -37,6 +37,3 @@ export interface DeploymentsOfflineReasonsModel {
     };
     description: string;
 }
-
-
-

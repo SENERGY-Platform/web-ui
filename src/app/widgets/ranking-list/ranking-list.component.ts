@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {
-    WidgetModel
-} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {RankingListModel} from './shared/ranking-list.model';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
-import {RankingListService} from './shared/ranking-list.service';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { RankingListModel } from './shared/ranking-list.model';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
+import { RankingListService } from './shared/ranking-list.service';
 
 @Component({
     selector: 'senergy-ranking-list',
@@ -29,7 +27,6 @@ import {RankingListService} from './shared/ranking-list.service';
     styleUrls: ['./ranking-list.component.css'],
 })
 export class RankingListComponent implements OnInit, OnDestroy {
-
     rankings: RankingListModel[] = [];
     ready = false;
 
@@ -39,13 +36,12 @@ export class RankingListComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private rankingListService: RankingListService, private dashboardService: DashboardService) {
-    }
+    constructor(private rankingListService: RankingListService, private dashboardService: DashboardService) {}
 
     ngOnInit() {
-      this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
-          if (event === 'reloadAll' || event === this.widget.id) {
-              this.ready = false;
+        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+            if (event === 'reloadAll' || event === this.widget.id) {
+                this.ready = false;
                 this.initMockup();
                 this.ready = true;
             }
@@ -57,15 +53,13 @@ export class RankingListComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-       this.rankingListService.openEditDialog(this.dashboardId, this.widget.id);
+        this.rankingListService.openEditDialog(this.dashboardId, this.widget.id);
     }
 
     initMockup() {
         this.rankings = [];
-        this.rankings.push({rank: 1, header: 'Waschmaschine', savings: '55,55€ jährlich', recommendation: 'Kauf Model X'});
-        this.rankings.push({rank: 2, header: 'Geschirrspüler', savings: '23,50€ jährlich', recommendation: 'Kauf Model Y'});
-        this.rankings.push({rank: 3, header: 'Staubsauger', savings: '20,00€ jährlich', recommendation: 'Kauf Model Z'});
+        this.rankings.push({ rank: 1, header: 'Waschmaschine', savings: '55,55€ jährlich', recommendation: 'Kauf Model X' });
+        this.rankings.push({ rank: 2, header: 'Geschirrspüler', savings: '23,50€ jährlich', recommendation: 'Kauf Model Y' });
+        this.rankings.push({ rank: 3, header: 'Staubsauger', savings: '20,00€ jährlich', recommendation: 'Kauf Model Z' });
     }
-
-
 }

@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {ParserService} from '../../shared/parser.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ConfigModel, ParseModel} from '../../shared/parse.model';
-import {DeviceInstancesModel} from '../../../../devices/device-instances/shared/device-instances.model';
-import {DeviceInstancesService} from '../../../../devices/device-instances/shared/device-instances.service';
+import { Component } from '@angular/core';
+import { ParserService } from '../../shared/parser.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ConfigModel, ParseModel } from '../../shared/parse.model';
+import { DeviceInstancesModel } from '../../../../devices/device-instances/shared/device-instances.model';
+import { DeviceInstancesService } from '../../../../devices/device-instances/shared/device-instances.service';
 import {
-    DeviceTypeContentModel, DeviceTypeContentVariableModel,
+    DeviceTypeContentModel,
+    DeviceTypeContentVariableModel,
     DeviceTypeModel,
-    DeviceTypeServiceModel
+    DeviceTypeServiceModel,
 } from '../../../../metadata/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
-import {FlowEngineService} from '../../shared/flow-engine.service';
-import {NodeInput, NodeModel, NodeValue, PipelineRequestModel} from '../shared/pipeline-request.model';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
+import { FlowEngineService } from '../../shared/flow-engine.service';
+import { NodeInput, NodeModel, NodeValue, PipelineRequestModel } from '../shared/pipeline-request.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     selector: 'senergy-deploy-flow-classic',
     templateUrl: './deploy-flow-component-classic.component.html',
-    styleUrls: ['./deploy-flow-component-classic.component.css']
+    styleUrls: ['./deploy-flow-component-classic.component.css'],
 })
-
 export class DeployFlowClassicComponent {
-
     ready = false;
     inputs: ParseModel[] = [];
     id = '' as string;
@@ -47,7 +46,7 @@ export class DeployFlowClassicComponent {
     deviceTypes = [] as any;
     paths = [] as any;
 
-    allDevices: DeviceInstancesModel [] = [];
+    allDevices: DeviceInstancesModel[] = [];
     devices: DeviceInstancesModel[][][] = [[[]]];
 
     Arr = Array;
@@ -60,17 +59,18 @@ export class DeployFlowClassicComponent {
 
     metrics = false;
 
-    vals = [] as string [];
+    vals = [] as string[];
 
     pipeReq: PipelineRequestModel = {} as PipelineRequestModel;
 
-    constructor(private parserService: ParserService,
-                private route: ActivatedRoute,
-                private router: Router,
-                public snackBar: MatSnackBar,
-                private deviceInstanceService: DeviceInstancesService,
-                private deviceTypeService: DeviceTypeService,
-                private flowEngineService: FlowEngineService
+    constructor(
+        private parserService: ParserService,
+        private route: ActivatedRoute,
+        private router: Router,
+        public snackBar: MatSnackBar,
+        private deviceInstanceService: DeviceInstancesService,
+        private deviceTypeService: DeviceTypeService,
+        private flowEngineService: FlowEngineService,
     ) {
         const id = this.route.snapshot.paramMap.get('id');
         if (id !== null) {
@@ -78,22 +78,27 @@ export class DeployFlowClassicComponent {
         }
 
         this.pipeReq = {
-            id: null, flowId: this.id, name: '', description: '', nodes: [], windowTime: this.windowTime, metrics: this.metrics,
-            consumeAllMessages: this.allMessages
+            id: null,
+            flowId: this.id,
+            name: '',
+            description: '',
+            nodes: [],
+            windowTime: this.windowTime,
+            metrics: this.metrics,
+            consumeAllMessages: this.allMessages,
         };
 
-        this.parserService.getInputs(this.id).subscribe((resp: ParseModel []) => {
+        this.parserService.getInputs(this.id).subscribe((resp: ParseModel[]) => {
             this.inputs = resp;
-            this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc')
-                .subscribe((devices: DeviceInstancesModel []) => {
-                    this.allDevices = devices;
-                    this.inputs?.forEach((input, operatorKey) => {
-                        this.devices[operatorKey] = [];
-                        input.inPorts?.forEach((_, deviceKey) => {
-                            this.devices[operatorKey][deviceKey] = devices;
-                        });
+            this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc').subscribe((devices: DeviceInstancesModel[]) => {
+                this.allDevices = devices;
+                this.inputs?.forEach((input, operatorKey) => {
+                    this.devices[operatorKey] = [];
+                    input.inPorts?.forEach((_, deviceKey) => {
+                        this.devices[operatorKey][deviceKey] = devices;
                     });
                 });
+            });
             this.createMappingVars();
             this.ready = true;
         });
@@ -106,20 +111,19 @@ export class DeployFlowClassicComponent {
             pipeReqNode.config = [];
             pipeReqNode.inputs = [];
             for (const formDeviceEntry of this.selectedValues.get(pipeReqNode.nodeId).entries()) {
-                const nodeValues = [] as NodeValue [];
+                const nodeValues = [] as NodeValue[];
                 const operatorFieldName = formDeviceEntry[0];
-                const formDeviceInfo: {'device': DeviceInstancesModel[],
-                    'service': DeviceTypeServiceModel,
-                    'path': string} = formDeviceEntry[1];
+                const formDeviceInfo: { device: DeviceInstancesModel[]; service: DeviceTypeServiceModel; path: string } =
+                    formDeviceEntry[1];
 
                 // check if device and service are selected
                 if (operatorFieldName === '_config') {
                     for (const config of formDeviceEntry[1].entries()) {
-                        pipeReqNode.config.push({name: config[0], value: config [1]});
+                        pipeReqNode.config.push({ name: config[0], value: config[1] });
                     }
                 } else {
                     let deviceIds = '';
-                    formDeviceInfo.device.forEach(device  => {
+                    formDeviceInfo.device.forEach((device) => {
                         if (deviceIds === '') {
                             deviceIds = device.id;
                         } else {
@@ -127,24 +131,23 @@ export class DeployFlowClassicComponent {
                         }
                     });
                     // parse input of form fields
-                    const nodeValue = {name: operatorFieldName, path: formDeviceInfo.path} as NodeValue;
+                    const nodeValue = { name: operatorFieldName, path: formDeviceInfo.path } as NodeValue;
                     nodeValues.push(nodeValue);
 
                     // add values from input form
                     const nodeInput = {
                         filterIds: deviceIds,
                         filterType: 'devcieId',
-                        values: nodeValues
+                        values: nodeValues,
                     } as NodeInput;
 
                     // check if node is local or cloud and set input topic accordingly
                     if (pipeReqNode.deploymentType === 'local') {
-                        formDeviceInfo.device.forEach( (device: DeviceInstancesModel) => {
+                        formDeviceInfo.device.forEach((device: DeviceInstancesModel) => {
                             if (nodeInput.topicName === undefined) {
                                 nodeInput.topicName = 'event/' + device.local_id + '/' + formDeviceInfo.service.local_id;
                             } else {
-                                nodeInput.topicName += ',event/' + device.local_id + '/'
-                                    + formDeviceInfo.service.local_id;
+                                nodeInput.topicName += ',event/' + device.local_id + '/' + formDeviceInfo.service.local_id;
                             }
                         });
                     } else {
@@ -163,7 +166,7 @@ export class DeployFlowClassicComponent {
         this.pipeReq.name = this.name;
         this.pipeReq.description = this.description;
         this.ready = true;
-        this.flowEngineService.startPipeline(this.pipeReq).subscribe(function () {
+        this.flowEngineService.startPipeline(this.pipeReq).subscribe(function() {
             self.router.navigate(['/data/pipelines']);
             self.snackBar.open('Pipeline started', undefined, {
                 duration: 2000,
@@ -179,17 +182,16 @@ export class DeployFlowClassicComponent {
                 if (resp !== null) {
                     this.deviceTypes[inputId][port] = resp;
                     this.paths[inputId][port] = [];
-                    this.devices [operatorKey][deviceKey] = this.devices[operatorKey][deviceKey].filter(function (dev) {
-                            return dev.device_type.id === device[0].device_type.id;
-                        }
-                    );
+                    this.devices[operatorKey][deviceKey] = this.devices[operatorKey][deviceKey].filter(function(dev) {
+                        return dev.device_type.id === device[0].device_type.id;
+                    });
                 }
             });
         }
     }
 
     serviceChanged(service: DeviceTypeServiceModel, inputId: string, port: string) {
-        const input = this.inputs.find(x => x.id === inputId);
+        const input = this.inputs.find((x) => x.id === inputId);
         this.vals = [];
         let pathString = 'value';
         if (input !== undefined && input.deploymentType === 'local') {
@@ -208,8 +210,10 @@ export class DeployFlowClassicComponent {
     private createMappingVars() {
         this.inputs.map((parseModel: ParseModel, key) => {
             this.pipeReq.nodes[key] = {
-                nodeId: parseModel.id, inputs: undefined,
-                config: undefined, deploymentType: parseModel.deploymentType
+                nodeId: parseModel.id,
+                inputs: undefined,
+                config: undefined,
+                deploymentType: parseModel.deploymentType,
             } as NodeModel;
             // create map for inputs
             if (parseModel.inPorts !== undefined) {
@@ -224,9 +228,9 @@ export class DeployFlowClassicComponent {
                         this.paths[parseModel.id] = [];
                     }
                     this.selectedValues.get(parseModel.id).set(port, {
-                        device: [] as DeviceInstancesModel [],
+                        device: [] as DeviceInstancesModel[],
                         service: {} as DeviceTypeServiceModel,
-                        path: ''
+                        path: '',
                     });
                     this.deviceTypes[parseModel.id][port] = {} as DeviceTypeModel;
                 });
@@ -287,7 +291,7 @@ export class DeployFlowClassicComponent {
                 });
             }
         } else {
-            let out = (pathString + '.' + field.name);
+            let out = pathString + '.' + field.name;
             if (isLocal) {
                 out = (pathString + '.' + field.name).split(/\.(.+)/)[1];
             }

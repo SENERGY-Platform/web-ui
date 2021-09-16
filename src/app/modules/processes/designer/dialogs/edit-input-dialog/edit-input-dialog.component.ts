@@ -14,41 +14,36 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {BpmnElement, BpmnParameter} from '../../shared/designer.model';
-import {DesignerHelperService} from '../../shared/designer-helper.service';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { BpmnElement, BpmnParameter } from '../../shared/designer.model';
+import { DesignerHelperService } from '../../shared/designer-helper.service';
 
 @Component({
-  templateUrl: './edit-input-dialog.component.html',
-  styleUrls: ['./edit-input-dialog.component.css']
+    templateUrl: './edit-input-dialog.component.html',
+    styleUrls: ['./edit-input-dialog.component.css'],
 })
 export class EditInputDialogComponent implements OnInit {
-  inputs: BpmnParameter[];
-  outputs: BpmnParameter[];
+    inputs: BpmnParameter[];
+    outputs: BpmnParameter[];
 
-  constructor(
-      private dialogRef: MatDialogRef<EditInputDialogComponent>,
-      private designerService: DesignerHelperService,
-      @Inject(MAT_DIALOG_DATA) private dialogParams: {inputElement: BpmnElement}
-  ) {
-      this.outputs = this.designerService.getIncomingOutputs(dialogParams.inputElement);
-      const extensionValues = dialogParams.inputElement.businessObject.extensionElements.values;
-      if (extensionValues) {
-        this.inputs = extensionValues[0].inputParameters;
-      } else {
-        this.inputs = [];
-      }
-  }
+    constructor(
+        private dialogRef: MatDialogRef<EditInputDialogComponent>,
+        private designerService: DesignerHelperService,
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { inputElement: BpmnElement },
+    ) {
+        this.outputs = this.designerService.getIncomingOutputs(dialogParams.inputElement);
+        const extensionValues = dialogParams.inputElement.businessObject.extensionElements.values;
+        if (extensionValues) {
+            this.inputs = extensionValues[0].inputParameters;
+        } else {
+            this.inputs = [];
+        }
+    }
 
-  ngOnInit() {
-  }
+    ngOnInit() {}
 
-  close(): void {
-      this.dialogRef.close();
-  }
-
-
-
-
+    close(): void {
+        this.dialogRef.close();
+    }
 }

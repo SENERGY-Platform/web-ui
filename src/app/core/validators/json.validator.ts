@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {AbstractControl, ValidatorFn} from '@angular/forms';
+import { AbstractControl, ValidatorFn } from '@angular/forms';
 
 export function jsonValidator(blankIsValid = false): ValidatorFn {
-    return (control: AbstractControl): {[key: string]: any} | null => {
+    return (control: AbstractControl): { [key: string]: any } | null => {
         if (blankIsValid && control.value === '') {
             return null;
         }
         try {
             JSON.parse(control.value);
         } catch (e) {
-            return {'jsonValidator': {value: control.value}};
+            return { jsonValidator: { value: control.value } };
         }
         return null;
     };

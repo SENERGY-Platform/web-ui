@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Router} from '@angular/router';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {AspectsPermSearchModel} from './shared/aspects-perm-search.model';
-import {AspectsService} from './shared/aspects.service';
-import {AspectsEditDialogComponent} from './dialog/aspects-edit-dialog.component';
-import {DeviceTypeAspectModel} from '../device-types-overview/shared/device-type.model';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Subscription } from 'rxjs';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { AspectsPermSearchModel } from './shared/aspects-perm-search.model';
+import { AspectsService } from './shared/aspects.service';
+import { AspectsEditDialogComponent } from './dialog/aspects-edit-dialog.component';
+import { DeviceTypeAspectModel } from '../device-types-overview/shared/device-type.model';
 import uuid = util.uuid;
-import {util} from 'jointjs';
+import { util } from 'jointjs';
 
 const grids = new Map([
     ['xs', 1],
@@ -41,10 +41,9 @@ const grids = new Map([
 @Component({
     selector: 'senergy-aspects',
     templateUrl: './aspects.component.html',
-    styleUrls: ['./aspects.component.css']
+    styleUrls: ['./aspects.component.css'],
 })
 export class AspectsComponent implements OnInit, OnDestroy {
-
     readonly limitInit = 54;
     aspects: AspectsPermSearchModel[] = [];
     gridCols = 0;
@@ -58,15 +57,15 @@ export class AspectsComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private dialog: MatDialog,
-                private responsiveService: ResponsiveService,
-                private aspectsService: AspectsService,
-                private searchbarService: SearchbarService,
-                private snackBar: MatSnackBar,
-                private router: Router,
-                private dialogsService: DialogsService
-    ) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private responsiveService: ResponsiveService,
+        private aspectsService: AspectsService,
+        private searchbarService: SearchbarService,
+        private snackBar: MatSnackBar,
+        private router: Router,
+        private dialogsService: DialogsService,
+    ) {}
 
     ngOnInit() {
         this.initGridCols();
@@ -94,7 +93,7 @@ export class AspectsComponent implements OnInit, OnDestroy {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
-            aspect: JSON.parse(JSON.stringify(inputAspect))         // create copy of object
+            aspect: JSON.parse(JSON.stringify(inputAspect)), // create copy of object
         };
 
         const editDialogRef = this.dialog.open(AspectsEditDialogComponent, dialogConfig);
@@ -102,28 +101,31 @@ export class AspectsComponent implements OnInit, OnDestroy {
         editDialogRef.afterClosed().subscribe((newAspect: DeviceTypeAspectModel) => {
             if (newAspect !== undefined) {
                 this.reset();
-                this.aspectsService.updateAspects(newAspect).subscribe((aspect: (DeviceTypeAspectModel | null)) => {
-                    this.reloadAndShowSnackbar(aspect, 'updat', );
+                this.aspectsService.updateAspects(newAspect).subscribe((aspect: DeviceTypeAspectModel | null) => {
+                    this.reloadAndShowSnackbar(aspect, 'updat');
                 });
             }
         });
     }
 
     deleteAspect(aspect: AspectsPermSearchModel): void {
-        this.dialogsService.openDeleteDialog('aspect ' + aspect.name).afterClosed().subscribe((deleteAspect: boolean) => {
-            if (deleteAspect) {
-                this.aspectsService.deleteAspects(aspect.id).subscribe((resp: boolean) => {
-                    if (resp === true) {
-                        this.aspects.splice(this.aspects.indexOf(aspect), 1);
-                        this.snackBar.open('Aspect deleted successfully.', undefined, {duration: 2000});
-                        this.setLimitOffset(1);
-                        this.reloadAspects(false);
-                    } else {
-                        this.snackBar.open('Error while deleting the aspect!', undefined, {duration: 2000});
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('aspect ' + aspect.name)
+            .afterClosed()
+            .subscribe((deleteAspect: boolean) => {
+                if (deleteAspect) {
+                    this.aspectsService.deleteAspects(aspect.id).subscribe((resp: boolean) => {
+                        if (resp === true) {
+                            this.aspects.splice(this.aspects.indexOf(aspect), 1);
+                            this.snackBar.open('Aspect deleted successfully.', undefined, { duration: 2000 });
+                            this.setLimitOffset(1);
+                            this.reloadAspects(false);
+                        } else {
+                            this.snackBar.open('Error while deleting the aspect!', undefined, { duration: 2000 });
+                        }
+                    });
+                }
+            });
     }
 
     newAspect(): void {
@@ -133,7 +135,7 @@ export class AspectsComponent implements OnInit, OnDestroy {
             aspect: {
                 id: 'urn:infai:ses:aspect:' + uuid(),
                 name: '',
-            }   as DeviceTypeAspectModel
+            } as DeviceTypeAspectModel,
         };
 
         const editDialogRef = this.dialog.open(AspectsEditDialogComponent, dialogConfig);
@@ -141,7 +143,7 @@ export class AspectsComponent implements OnInit, OnDestroy {
         editDialogRef.afterClosed().subscribe((newAspect: DeviceTypeAspectModel) => {
             if (newAspect !== undefined) {
                 this.reset();
-                this.aspectsService.createAspect(newAspect).subscribe((aspect: (DeviceTypeAspectModel | null)) => {
+                this.aspectsService.createAspect(newAspect).subscribe((aspect: DeviceTypeAspectModel | null) => {
                     this.reloadAndShowSnackbar(aspect, 'sav');
                 });
             }
@@ -150,10 +152,10 @@ export class AspectsComponent implements OnInit, OnDestroy {
 
     private reloadAndShowSnackbar(aspect: DeviceTypeAspectModel | null, text: string) {
         if (aspect === null) {
-            this.snackBar.open('Error while ' + text + 'ing the aspect!', undefined, {duration: 2000});
+            this.snackBar.open('Error while ' + text + 'ing the aspect!', undefined, { duration: 2000 });
             this.getAspects(true);
         } else {
-            this.snackBar.open('Aspect ' + text + 'ed successfully.', undefined, {duration: 2000});
+            this.snackBar.open('Aspect ' + text + 'ed successfully.', undefined, { duration: 2000 });
             this.reloadAspects(true);
         }
     }
@@ -177,16 +179,15 @@ export class AspectsComponent implements OnInit, OnDestroy {
             this.reset();
         }
 
-        this.aspectsService.getAspects(this.searchText, this.limit, this.offset, this.sortAttribute.value,
-            this.sortAttribute.order).subscribe(
-            (aspects: AspectsPermSearchModel[]) => {
+        this.aspectsService
+            .getAspects(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .subscribe((aspects: AspectsPermSearchModel[]) => {
                 if (aspects.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.aspects = this.aspects.concat(aspects);
                 this.ready = true;
             });
-
     }
 
     private reset() {
@@ -208,5 +209,4 @@ export class AspectsComponent implements OnInit, OnDestroy {
         this.limit = limit;
         this.offset = this.aspects.length;
     }
-
 }

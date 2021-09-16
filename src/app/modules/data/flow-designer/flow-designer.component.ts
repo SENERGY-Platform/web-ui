@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
-import {OnInit, Component, AfterViewInit, ViewChild} from '@angular/core';
-import {OperatorModel} from '../operator-repo/shared/operator.model';
-import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
-import {ActivatedRoute} from '@angular/router';
-import {OperatorRepoService} from '../operator-repo/shared/operator-repo.service';
-import {FlowModel, FlowShareModel} from '../flow-repo/shared/flow.model';
-import {DiagramEditorComponent} from '../../../core/components/diagram-editor/diagram-editor.component';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {AuthorizationService} from '../../../core/services/authorization.service';
+import { OnInit, Component, AfterViewInit, ViewChild } from '@angular/core';
+import { OperatorModel } from '../operator-repo/shared/operator.model';
+import { FlowRepoService } from '../flow-repo/shared/flow-repo.service';
+import { ActivatedRoute } from '@angular/router';
+import { OperatorRepoService } from '../operator-repo/shared/operator-repo.service';
+import { FlowModel, FlowShareModel } from '../flow-repo/shared/flow.model';
+import { DiagramEditorComponent } from '../../../core/components/diagram-editor/diagram-editor.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthorizationService } from '../../../core/services/authorization.service';
 
 @Component({
     selector: 'senergy-flow-designer',
     templateUrl: './flow-designer.component.html',
-    styleUrls: ['./flow-designer.component.css']
+    styleUrls: ['./flow-designer.component.css'],
 })
 export class FlowDesignerComponent implements OnInit, AfterViewInit {
+    constructor(
+        private route: ActivatedRoute,
+        private operatorRepoService: OperatorRepoService,
+        private flowRepoService: FlowRepoService,
+        private authService: AuthorizationService,
+        public snackBar: MatSnackBar,
+    ) {}
 
-    constructor(private route: ActivatedRoute,
-                private operatorRepoService: OperatorRepoService,
-                private flowRepoService: FlowRepoService,
-                private authService: AuthorizationService,
-                public snackBar: MatSnackBar
-    ) {
-    }
-
-    @ViewChild(DiagramEditorComponent, {static: false}) diagram!: DiagramEditorComponent;
+    @ViewChild(DiagramEditorComponent, { static: false }) diagram!: DiagramEditorComponent;
 
     operators: OperatorModel[] = [];
     ready = false;
-    flow = {share: {} as FlowShareModel} as FlowModel;
+    flow = { share: {} as FlowShareModel } as FlowModel;
     write = false;
 
     ngOnInit() {
@@ -79,21 +78,38 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 this.write = true;
             }
         }, 0);
-
     }
 
     public addNode(operator: OperatorModel) {
-        if (operator.name !== undefined && operator.inputs !== undefined && operator.outputs !== undefined
-            && operator.image !== undefined && operator.config_values !== undefined && operator._id !== undefined) {
+        if (
+            operator.name !== undefined &&
+            operator.inputs !== undefined &&
+            operator.outputs !== undefined &&
+            operator.image !== undefined &&
+            operator.config_values !== undefined &&
+            operator._id !== undefined
+        ) {
             switch (operator.deploymentType) {
-                case 'local':
-                    this.diagram.newLocalNode(
-                        operator.name, operator.image, operator.inputs, operator.outputs, operator.config_values, operator._id);
-                    break;
-                default:
-                    this.diagram.newCloudNode(
-                        operator.name, operator.image, operator.inputs, operator.outputs, operator.config_values, operator._id);
-                    break;
+            case 'local':
+                this.diagram.newLocalNode(
+                    operator.name,
+                    operator.image,
+                    operator.inputs,
+                    operator.outputs,
+                    operator.config_values,
+                    operator._id,
+                );
+                break;
+            default:
+                this.diagram.newCloudNode(
+                    operator.name,
+                    operator.image,
+                    operator.inputs,
+                    operator.outputs,
+                    operator.config_values,
+                    operator._id,
+                );
+                break;
             }
         }
     }
@@ -135,8 +151,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                     startOffset = port.getBBox().width;
                 }
             }
-            const coords = node.attributes.transform.value.replace('translate(', '')
-                .replace(')', '').split(',');
+            const coords = node.attributes.transform.value.replace('translate(', '').replace(')', '').split(',');
             // x
             if (viewbox[0] === null) {
                 viewbox[0] = +coords[0] - startOffset;
@@ -155,13 +170,13 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
             }
             // x width
             // @ts-ignore
-            if (coords[0] > viewbox [2]) {
+            if (coords[0] > viewbox[2]) {
                 // @ts-ignore
                 viewbox[2] = +coords[0] + 150 - viewbox[0] + endOffset;
             }
             // y height
             // @ts-ignore
-            if (coords[1] > viewbox [3]) {
+            if (coords[1] > viewbox[3]) {
                 // @ts-ignore
                 viewbox[3] = +coords[1] + 120 - viewbox[1] + 20;
             }
@@ -183,26 +198,44 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
             'marker-arrowhead',
             'marker-arrowhead-group-target',
             'marker-arrowhead-group',
-            'marker-arrowheads'
+            'marker-arrowheads',
         ];
         this.removeSVGNodesByClassNames(svg, tags, classes);
         this.removeSVGAttributesByTagNames(svg, tags);
         source = serializer.serializeToString(svg);
         if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-            source = source.replace(/^<svg/,
-                '<svg xmlns="http://www.w3.org/2000/svg" viewbox="'
-                + viewbox[0] + ' ' + viewbox[1] + ' ' + viewbox[2] + ' ' + viewbox[3] + '"');
+            source = source.replace(
+                /^<svg/,
+                '<svg xmlns="http://www.w3.org/2000/svg" viewbox="' +
+                    viewbox[0] +
+                    ' ' +
+                    viewbox[1] +
+                    ' ' +
+                    viewbox[2] +
+                    ' ' +
+                    viewbox[3] +
+                    '"',
+            );
         } else {
-            source = source.replace(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/,
-                '<svg xmlns="http://www.w3.org/2000/svg" viewbox="'
-                + viewbox[0] + ' ' + viewbox[1] + ' ' + viewbox[2] + ' ' + viewbox[3] + '"');
+            source = source.replace(
+                /^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/,
+                '<svg xmlns="http://www.w3.org/2000/svg" viewbox="' +
+                    viewbox[0] +
+                    ' ' +
+                    viewbox[1] +
+                    ' ' +
+                    viewbox[2] +
+                    ' ' +
+                    viewbox[3] +
+                    '"',
+            );
         }
         source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
         return source;
     }
 
-    private removeSVGNodesByClassNames(svg: SVGElement, tags: string[], classes: string []) {
-        tags.forEach(tag => {
+    private removeSVGNodesByClassNames(svg: SVGElement, tags: string[], classes: string[]) {
+        tags.forEach((tag) => {
             const elements = svg.getElementsByTagName(tag);
             // @ts-ignore
             for (const element of elements) {
@@ -216,8 +249,8 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     }
 
     private removeSVGAttributesByTagNames(svg: SVGElement, tags: string[]) {
-        tags.forEach(tag => {
-            const elements  = svg.getElementsByTagName(tag) as HTMLCollectionOf<any>;
+        tags.forEach((tag) => {
+            const elements = svg.getElementsByTagName(tag) as HTMLCollectionOf<any>;
             // @ts-ignore
             for (const element of elements) {
                 element.removeAttribute('magnet');

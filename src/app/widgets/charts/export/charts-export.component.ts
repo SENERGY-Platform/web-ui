@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {GoogleChartComponent} from 'ng2-google-charts';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {ElementSizeService} from '../../../core/services/element-size.service';
-import {ChartsModel} from '../shared/charts.model';
-import {ChartsExportService} from './shared/charts-export.service';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {Subscription} from 'rxjs';
-import {ErrorModel} from '../../../core/model/error.model';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {ChartsService} from "../shared/charts.service";
+import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { GoogleChartComponent } from 'ng2-google-charts';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { ElementSizeService } from '../../../core/services/element-size.service';
+import { ChartsModel } from '../shared/charts.model';
+import { ChartsExportService } from './shared/charts-export.service';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { Subscription } from 'rxjs';
+import { ErrorModel } from '../../../core/model/error.model';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { ChartsService } from '../shared/charts.service';
 
 @Component({
     selector: 'senergy-charts-export',
@@ -32,7 +32,6 @@ import {ChartsService} from "../shared/charts.service";
     styleUrls: ['./charts-export.component.css'],
 })
 export class ChartsExportComponent implements OnInit, OnDestroy {
-
     chartExportData = {} as ChartsModel;
     ready = false;
     destroy = new Subscription();
@@ -42,7 +41,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
 
     private resizeTimeout = 0;
 
-    @ViewChild('chartExport', {static: false}) chartExport!: GoogleChartComponent;
+    @ViewChild('chartExport', { static: false }) chartExport!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -57,12 +56,13 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(private chartsService: ChartsService,
-                private chartsExportService: ChartsExportService,
-                private elementSizeService: ElementSizeService,
-                private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService) {
-    }
+    constructor(
+        private chartsService: ChartsService,
+        private chartsExportService: ChartsExportService,
+        private elementSizeService: ElementSizeService,
+        private dashboardService: DashboardService,
+        private errorHandlerService: ErrorHandlerService,
+    ) {}
 
     ngOnInit() {
         this.getData();
@@ -84,7 +84,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                 this.chartsService.releaseResources(this.chartExport);
                 this.checkConfiguration();
                 if (this.configureWidget === false) {
-                    this.chartsExportService.getChartData(this.widget).subscribe((resp: (ChartsModel | ErrorModel)) => {
+                    this.chartsExportService.getChartData(this.widget).subscribe((resp: ChartsModel | ErrorModel) => {
                         if (this.errorHandlerService.checkIfErrorExists(resp)) {
                             this.error = true;
                             this.errorMessage = resp;

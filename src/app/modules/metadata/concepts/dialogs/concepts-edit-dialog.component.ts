@@ -14,29 +14,30 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormControl, Validators} from '@angular/forms';
-import {DeviceTypeCharacteristicsModel, DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
-import {ConceptsService} from '../shared/concepts.service';
-import {ConceptsCharacteristicsModel} from '../shared/concepts-characteristics.model';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormControl, Validators } from '@angular/forms';
+import { DeviceTypeCharacteristicsModel, DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
+import { ConceptsService } from '../shared/concepts.service';
+import { ConceptsCharacteristicsModel } from '../shared/concepts-characteristics.model';
 
 @Component({
     templateUrl: './concepts-edit-dialog.component.html',
-    styleUrls: ['./concepts-edit-dialog.component.css']
+    styleUrls: ['./concepts-edit-dialog.component.css'],
 })
 export class ConceptsEditDialogComponent implements OnInit {
-
     conceptId: string;
     nameFormControl = new FormControl('', [Validators.required]);
-    idFormControl = new FormControl({value: '', disabled: true});
+    idFormControl = new FormControl({ value: '', disabled: true });
     baseCharacteristicControl = new FormControl('', [Validators.required]);
     concept!: ConceptsCharacteristicsModel;
     characteristics: DeviceTypeCharacteristicsModel[] = [];
 
-    constructor(private dialogRef: MatDialogRef<ConceptsEditDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: { conceptId: string },
-                private conceptsService: ConceptsService) {
+    constructor(
+        private dialogRef: MatDialogRef<ConceptsEditDialogComponent>,
+        @Inject(MAT_DIALOG_DATA) data: { conceptId: string },
+        private conceptsService: ConceptsService,
+    ) {
         this.conceptId = data.conceptId;
     }
 
@@ -61,7 +62,7 @@ export class ConceptsEditDialogComponent implements OnInit {
             id: this.concept.id,
             name: this.nameFormControl.value,
             base_characteristic_id: this.baseCharacteristicControl.value,
-            characteristic_ids: this.fromObjectToIds(this.concept.characteristics)
+            characteristic_ids: this.fromObjectToIds(this.concept.characteristics),
         };
         this.dialogRef.close(returnConcept);
     }
@@ -73,5 +74,4 @@ export class ConceptsEditDialogComponent implements OnInit {
         });
         return array;
     }
-
 }

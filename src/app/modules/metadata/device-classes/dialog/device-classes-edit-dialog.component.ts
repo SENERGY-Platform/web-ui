@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {ConceptsService} from '../../concepts/shared/concepts.service';
-import {DeviceClassesPermSearchModel} from '../shared/device-classes-perm-search.model';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ConceptsService } from '../../concepts/shared/concepts.service';
+import { DeviceClassesPermSearchModel } from '../shared/device-classes-perm-search.model';
 
 @Component({
     templateUrl: './device-classes-edit-dialog.component.html',
-    styleUrls: ['./device-classes-edit-dialog.component.css']
+    styleUrls: ['./device-classes-edit-dialog.component.css'],
 })
 export class DeviceClassesEditDialogComponent implements OnInit {
-
     deviceClassFormGroup!: FormGroup;
 
-    constructor(private conceptsService: ConceptsService,
-                private dialogRef: MatDialogRef<DeviceClassesEditDialogComponent>,
-                private _formBuilder: FormBuilder,
-                @Inject(MAT_DIALOG_DATA) data: { deviceClass: DeviceClassesPermSearchModel }) {
+    constructor(
+        private conceptsService: ConceptsService,
+        private dialogRef: MatDialogRef<DeviceClassesEditDialogComponent>,
+        private _formBuilder: FormBuilder,
+        @Inject(MAT_DIALOG_DATA) data: { deviceClass: DeviceClassesPermSearchModel },
+    ) {
         this.initDeviceClassFormGroup(data.deviceClass);
     }
 
-    ngOnInit(): void {
-    }
+    ngOnInit(): void {}
 
     close(): void {
         this.dialogRef.close();
@@ -52,10 +52,9 @@ export class DeviceClassesEditDialogComponent implements OnInit {
 
     private initDeviceClassFormGroup(deviceClass: DeviceClassesPermSearchModel): void {
         this.deviceClassFormGroup = this._formBuilder.group({
-            id: [{value: deviceClass.id, disabled: true}],
+            id: [{ value: deviceClass.id, disabled: true }],
             name: [deviceClass.name, Validators.required],
             image: deviceClass.image,
         });
     }
-
 }

@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {ImportInstanceExportDialogComponent} from './import-instance-export-dialog.component';
-import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
-import {ImportTypesService} from '../../import-types/shared/import-types.service';
-import {of} from 'rxjs';
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {ImportInstancesModel} from '../shared/import-instances.model';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {ReactiveFormsModule} from '@angular/forms';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {HttpClientModule} from '@angular/common/http';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatTableModule} from '@angular/material/table';
-import {ImportTypeModel} from '../../import-types/shared/import-types.model';
-import {environment} from '../../../../../environments/environment';
-import {ExportService} from '../../../exports/shared/export.service';
+import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog.component';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { ImportTypesService } from '../../import-types/shared/import-types.service';
+import { of } from 'rxjs';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ImportInstancesModel } from '../shared/import-instances.model';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { HttpClientModule } from '@angular/common/http';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatTableModule } from '@angular/material/table';
+import { ImportTypeModel } from '../../import-types/shared/import-types.model';
+import { environment } from '../../../../../environments/environment';
+import { ExportService } from '../../../exports/shared/export.service';
 
 describe('ImportInstanceExportDialogComponent', () => {
     let component: ImportInstanceExportDialogComponent;
@@ -52,8 +52,8 @@ describe('ImportInstanceExportDialogComponent', () => {
                 name: 'test-config',
                 description: 'none',
                 type: 'https://schema.org/Text',
-                default_value: 'config-value'
-            }
+                default_value: 'config-value',
+            },
         ],
         aspect_ids: [],
         output: {
@@ -66,14 +66,14 @@ describe('ImportInstanceExportDialogComponent', () => {
                     type: 'https://schema.org/Text',
                     characteristic_id: '',
                     sub_content_variables: [],
-                    use_as_tag: false
+                    use_as_tag: false,
                 },
                 {
                     name: 'time',
                     type: 'https://schema.org/Text',
                     characteristic_id: environment.timeStampCharacteristicId,
                     sub_content_variables: [],
-                    use_as_tag: false
+                    use_as_tag: false,
                 },
                 {
                     name: 'value',
@@ -85,7 +85,7 @@ describe('ImportInstanceExportDialogComponent', () => {
                             type: 'https://schema.org/Float',
                             characteristic_id: '',
                             sub_content_variables: [],
-                            use_as_tag: false
+                            use_as_tag: false,
                         },
                         {
                             name: 'meta',
@@ -97,33 +97,33 @@ describe('ImportInstanceExportDialogComponent', () => {
                                     type: 'https://schema.org/Float',
                                     characteristic_id: '',
                                     sub_content_variables: null,
-                                    use_as_tag: false
+                                    use_as_tag: false,
                                 },
                                 {
                                     name: 'tag1',
                                     type: 'https://schema.org/Float',
                                     characteristic_id: '',
                                     sub_content_variables: null,
-                                    use_as_tag: true
+                                    use_as_tag: true,
                                 },
                                 {
                                     name: 'tag2',
                                     type: 'https://schema.org/Text',
                                     characteristic_id: '',
                                     sub_content_variables: null,
-                                    use_as_tag: true
-                                }
+                                    use_as_tag: true,
+                                },
                             ],
-                            use_as_tag: false
-                        }
+                            use_as_tag: false,
+                        },
                     ],
-                    use_as_tag: false
-                }
+                    use_as_tag: false,
+                },
             ],
-            use_as_tag: false
+            use_as_tag: false,
         },
         function_ids: [],
-        owner: 'test-owner'
+        owner: 'test-owner',
     };
     importTypesServiceSpy.getImportType.and.returnValue(of(testType));
     importTypesServiceSpy.parseImportTypeExportValues.and.returnValue([
@@ -150,12 +150,14 @@ describe('ImportInstanceExportDialogComponent', () => {
             Path: 'value.meta.tag1',
             Type: 'string',
             Tag: true,
-        }, {
+        },
+        {
             Name: 'tag2',
             Path: 'value.meta.tag2',
             Type: 'string',
             Tag: true,
-        }]);
+        },
+    ]);
 
     const exportServiceSpy: Spy<ExportService> = createSpyFromClass(ExportService);
     exportServiceSpy.startPipeline.and.returnValue(of(true));
@@ -180,26 +182,26 @@ describe('ImportInstanceExportDialogComponent', () => {
             ],
             providers: [
                 {
-                    provide: MAT_DIALOG_DATA, useValue: {
+                    provide: MAT_DIALOG_DATA,
+                    useValue: {
                         name: 'name',
                         id: 'instance-id',
                         kafka_topic: 'kafka-topic',
                         import_type_id: 'urn:infai:ses:import-type:1234',
-                    } as ImportInstancesModel
+                    } as ImportInstancesModel,
                 },
                 {
                     provide: MatDialogRef,
                     useValue: {
                         close: (rv: any) => {
                             r = rv;
-                        }
-                    }
+                        },
+                    },
                 },
-                {provide: ImportTypesService, useValue: importTypesServiceSpy},
-                {provide: ExportService, useValue: exportServiceSpy},
-            ]
-        })
-            .compileComponents();
+                { provide: ImportTypesService, useValue: importTypesServiceSpy },
+                { provide: ExportService, useValue: exportServiceSpy },
+            ],
+        }).compileComponents();
     });
 
     beforeEach(() => {
@@ -252,12 +254,14 @@ describe('ImportInstanceExportDialogComponent', () => {
                     Path: 'value.meta.tag1',
                     Type: 'string',
                     Tag: true,
-                }, {
+                },
+                {
                     Name: 'tag2',
                     Path: 'value.meta.tag2',
                     Type: 'string',
                     Tag: true,
-                }],
+                },
+            ],
             EntityName: 'name',
             ServiceName: 'urn:infai:ses:import-type:1234',
         });

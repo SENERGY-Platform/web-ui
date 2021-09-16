@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
+import { NgModule } from '@angular/core';
 
-import {PermissionDialogComponent} from './dialogs/permission/permission-dialog.component';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {CommonModule} from '@angular/common';
-import {FlexLayoutModule} from '@angular/flex-layout';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatTableModule} from '@angular/material/table';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatInputModule} from '@angular/material/input';
-import {CoreModule} from '../../core/core.module';
-import {MatTooltipModule} from '@angular/material/tooltip';
+import { PermissionDialogComponent } from './dialogs/permission/permission-dialog.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatTableModule } from '@angular/material/table';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { CoreModule } from '../../core/core.module';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
     imports: [
@@ -46,10 +46,6 @@ import {MatTooltipModule} from '@angular/material/tooltip';
         CoreModule,
         MatTooltipModule,
     ],
-    declarations: [
-        PermissionDialogComponent,
-    ],
+    declarations: [PermissionDialogComponent],
 })
-export class PermissionsModule {
-
-}
+export class PermissionsModule {}

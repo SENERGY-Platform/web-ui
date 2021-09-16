@@ -13,50 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {
-    ImportTypeConfigModel,
-    ImportTypeContentVariableModel,
-    ImportTypeModel
-} from '../import-types/shared/import-types.model';
-import {ImportTypesService} from '../import-types/shared/import-types.service';
-import {AspectsService} from '../../metadata/aspects/shared/aspects.service';
-import {AspectsPermSearchModel} from '../../metadata/aspects/shared/aspects-perm-search.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ContentVariableDialogComponent} from './content-variable-dialog/content-variable-dialog.component';
-import {environment} from '../../../../environments/environment';
-import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
-import {NestedTreeControl} from '@angular/cdk/tree';
-import {Observable} from 'rxjs';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {convertPunctuation, TypeValueValidator} from '../validators/type-value-validator';
-import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
-import {
-    DeviceTypeCharacteristicsModel,
-    DeviceTypeFunctionModel
-} from '../../metadata/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ImportTypeConfigModel, ImportTypeContentVariableModel, ImportTypeModel } from '../import-types/shared/import-types.model';
+import { ImportTypesService } from '../import-types/shared/import-types.service';
+import { AspectsService } from '../../metadata/aspects/shared/aspects.service';
+import { AspectsPermSearchModel } from '../../metadata/aspects/shared/aspects-perm-search.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ContentVariableDialogComponent } from './content-variable-dialog/content-variable-dialog.component';
+import { environment } from '../../../../environments/environment';
+import { MatTree, MatTreeNestedDataSource } from '@angular/material/tree';
+import { NestedTreeControl } from '@angular/cdk/tree';
+import { Observable } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { convertPunctuation, typeValueValidator } from '../validators/type-value-validator';
+import { ConceptsService } from '../../metadata/concepts/shared/concepts.service';
+import { DeviceTypeCharacteristicsModel, DeviceTypeFunctionModel } from '../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 
 @Component({
     selector: 'senergy-import-types-create-edit',
     templateUrl: './import-types-create-edit.component.html',
-    styleUrls: ['./import-types-create-edit.component.css']
+    styleUrls: ['./import-types-create-edit.component.css'],
 })
 export class ImportTypesCreateEditComponent implements OnInit {
-
-    constructor(private route: ActivatedRoute,
-                private router: Router,
-                private fb: FormBuilder,
-                private importTypesService: ImportTypesService,
-                private aspectsService: AspectsService,
-                private conceptsService: ConceptsService,
-                private dialog: MatDialog,
-                private changeDetectorRef: ChangeDetectorRef,
-                private snackBar: MatSnackBar,
-                private deviceTypeService: DeviceTypeService) {
-    }
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        private fb: FormBuilder,
+        private importTypesService: ImportTypesService,
+        private aspectsService: AspectsService,
+        private conceptsService: ConceptsService,
+        private dialog: MatDialog,
+        private changeDetectorRef: ChangeDetectorRef,
+        private snackBar: MatSnackBar,
+        private deviceTypeService: DeviceTypeService,
+    ) {}
 
     static STRING = 'https://schema.org/Text';
     static INTEGER = 'https://schema.org/Integer';
@@ -74,16 +67,14 @@ export class ImportTypesCreateEditComponent implements OnInit {
     typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>> = new Map();
     characteristics: Map<string, DeviceTypeCharacteristicsModel> = new Map();
 
-
     types: { id: string; name: string }[] = [
-        {id: ImportTypesCreateEditComponent.STRING, name: 'string'},
-        {id: ImportTypesCreateEditComponent.INTEGER, name: 'int'},
-        {id: ImportTypesCreateEditComponent.FLOAT, name: 'float'},
-        {id: ImportTypesCreateEditComponent.BOOLEAN, name: 'bool'},
-        {id: ImportTypesCreateEditComponent.STRUCTURE, name: 'Structure'},
-        {id: ImportTypesCreateEditComponent.LIST, name: 'List'},
+        { id: ImportTypesCreateEditComponent.STRING, name: 'string' },
+        { id: ImportTypesCreateEditComponent.INTEGER, name: 'int' },
+        { id: ImportTypesCreateEditComponent.FLOAT, name: 'float' },
+        { id: ImportTypesCreateEditComponent.BOOLEAN, name: 'bool' },
+        { id: ImportTypesCreateEditComponent.STRUCTURE, name: 'Structure' },
+        { id: ImportTypesCreateEditComponent.LIST, name: 'List' },
     ];
-
 
     form = this.fb.group({
         id: '',
@@ -128,14 +119,14 @@ export class ImportTypesCreateEditComponent implements OnInit {
         ],
     };
 
-    treeControl = new NestedTreeControl<ImportTypeContentVariableModel>(node => node.sub_content_variables);
+    treeControl = new NestedTreeControl<ImportTypeContentVariableModel>((node) => node.sub_content_variables);
     dataSource = new MatTreeNestedDataSource<ImportTypeContentVariableModel>();
 
-    @ViewChild(MatTree, {static: false}) tree !: MatTree<ImportTypeContentVariableModel>;
+    @ViewChild(MatTree, { static: false }) tree!: MatTree<ImportTypeContentVariableModel>;
     hasChild = (_: number, node: ImportTypeContentVariableModel) => !!node.sub_content_variables && node.sub_content_variables.length > 0;
 
     ngOnInit(): void {
-        this.route.url.subscribe(url => {
+        this.route.url.subscribe((url) => {
             if (url[url.length - 1]?.toString() === 'new') {
                 this.editMode = false;
                 if (this.defaultOutput.sub_content_variables !== null) {
@@ -153,46 +144,56 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 } else if (url[url.length - 2]?.toString() === 'edit') {
                     this.editMode = true;
                 }
-                this.importTypesService.getImportType(this.id || '').subscribe(type => {
-                    this.form.patchValue(type);
-                    type.configs.forEach(config => this.addConfig(config));
-                    const value = type.output.sub_content_variables?.find(sub => sub.name === 'value' && sub.type === ImportTypesCreateEditComponent.STRUCTURE);
-                    if (type.output.name === 'root' && type.output.sub_content_variables?.length === 3 && value !== undefined) {
-                        this.dataSource.data = value.sub_content_variables || [];
-                    } else {
-                        this.usesDefaultOutput = false;
-                        this.dataSource.data = [type.output];
-                    }
+                this.importTypesService.getImportType(this.id || '').subscribe(
+                    (type) => {
+                        this.form.patchValue(type);
+                        type.configs.forEach((config) => this.addConfig(config));
+                        const value = type.output.sub_content_variables?.find(
+                            (sub) => sub.name === 'value' && sub.type === ImportTypesCreateEditComponent.STRUCTURE,
+                        );
+                        if (type.output.name === 'root' && type.output.sub_content_variables?.length === 3 && value !== undefined) {
+                            this.dataSource.data = value.sub_content_variables || [];
+                        } else {
+                            this.usesDefaultOutput = false;
+                            this.dataSource.data = [type.output];
+                        }
 
-                    this.ready = true;
-                }, err => {
-                    console.log(err);
-                    this.snackBar.open('Error loading import type', 'OK', {duration: 3000});
-                    this.navigateToList();
-                });
+                        this.ready = true;
+                    },
+                    (err) => {
+                        console.log(err);
+                        this.snackBar.open('Error loading import type', 'OK', { duration: 3000 });
+                        this.navigateToList();
+                    },
+                );
             }
         });
-        this.deviceTypeService.getMeasuringFunctions()
-            .subscribe(functions => {
+        this.deviceTypeService.getMeasuringFunctions().subscribe(
+            (functions) => {
                 this.functions = functions;
                 if (!this.editMode && !this.detailsMode) {
-                    this.form.patchValue({function_ids: [environment.getTimestampFunctionId]});
+                    this.form.patchValue({ function_ids: [environment.getTimestampFunctionId] });
                 }
-            }, err => {
+            },
+            (err) => {
                 console.log(err);
-                this.snackBar.open('Error loading functions', 'OK', {duration: 3000});
+                this.snackBar.open('Error loading functions', 'OK', { duration: 3000 });
                 this.navigateToList();
-            });
-        this.aspectsService.getAspects('', 10000, 0, 'name', 'asc')
-            .subscribe(aspects => this.aspects = aspects, err => {
+            },
+        );
+        this.aspectsService.getAspects('', 10000, 0, 'name', 'asc').subscribe(
+            (aspects) => (this.aspects = aspects),
+            (err) => {
                 console.log(err);
-                this.snackBar.open('Error loading aspects', 'OK', {duration: 3000});
+                this.snackBar.open('Error loading aspects', 'OK', { duration: 3000 });
                 this.navigateToList();
-            });
-        this.types.forEach(type => this.typeConceptCharacteristics.set(type.id, new Map()));
-        this.conceptsService.getConceptsWithCharacteristics()
-            .subscribe(concepts => concepts.forEach(concept => {
-                    concept.characteristics.forEach(characteristic => {
+            },
+        );
+        this.types.forEach((type) => this.typeConceptCharacteristics.set(type.id, new Map()));
+        this.conceptsService.getConceptsWithCharacteristics().subscribe(
+            (concepts) =>
+                concepts.forEach((concept) => {
+                    concept.characteristics.forEach((characteristic) => {
                         this.saveFlattenedCharacteristics(characteristic);
                         const m = this.typeConceptCharacteristics.get(characteristic.type);
                         let arr = m?.get(concept.name);
@@ -203,13 +204,13 @@ export class ImportTypesCreateEditComponent implements OnInit {
                         arr?.push(characteristic);
                     });
                 }),
-                err => {
-                    console.log(err);
-                    this.snackBar.open('Error loading characteristics', 'OK', {duration: 3000});
-                    this.navigateToList();
-                });
+            (err) => {
+                console.log(err);
+                this.snackBar.open('Error loading characteristics', 'OK', { duration: 3000 });
+                this.navigateToList();
+            },
+        );
     }
-
 
     save() {
         this.ready = false;
@@ -233,12 +234,14 @@ export class ImportTypesCreateEditComponent implements OnInit {
         } else {
             val.output = this.dataSource.data[0];
         }
-        this.importTypesService.saveImportType(val)
-            .subscribe(() => this.navigateToList(), (err: any) => {
+        this.importTypesService.saveImportType(val).subscribe(
+            () => this.navigateToList(),
+            (err: any) => {
                 console.error(err);
-                this.snackBar.open('Error saving: ' + err.error, 'OK', {duration: 3000});
+                this.snackBar.open('Error saving: ' + err.error, 'OK', { duration: 3000 });
                 this.ready = true;
-            });
+            },
+        );
     }
 
     navigateToList(): boolean {
@@ -247,27 +250,29 @@ export class ImportTypesCreateEditComponent implements OnInit {
     }
 
     addConfig(config: ImportTypeConfigModel | undefined) {
-        const group = this.fb.group({
-            name: [undefined, Validators.required],
-            description: '',
-            type: [undefined, Validators.required],
-            default_value: '',
-        }, {validators: TypeValueValidator('type', 'default_value')});
+        const group = this.fb.group(
+            {
+                name: [undefined, Validators.required],
+                description: '',
+                type: [undefined, Validators.required],
+                default_value: '',
+            },
+            { validators: typeValueValidator('type', 'default_value') },
+        );
         if (this.detailsMode) {
             group.disable();
         }
         if (config !== undefined) {
-            group.patchValue({name: config.name, description: config.description, type: config.type});
+            group.patchValue({ name: config.name, description: config.description, type: config.type });
             if (config.type !== ImportTypesCreateEditComponent.STRING) {
-                group.patchValue({default_value: JSON.stringify(config.default_value)});
+                group.patchValue({ default_value: JSON.stringify(config.default_value) });
             } else {
-                group.patchValue({default_value: config.default_value});
+                group.patchValue({ default_value: config.default_value });
             }
         }
 
         this.getConfigsFormArray().push(group);
     }
-
 
     getConfigsFormArray(): FormArray {
         return this.form.get('configs') as FormArray;
@@ -282,10 +287,10 @@ export class ImportTypesCreateEditComponent implements OnInit {
     }
 
     editContentVariable(sub: ImportTypeContentVariableModel) {
-        this.openDialog(sub, false, !this.isTopLevel(sub)).subscribe(val => {
+        this.openDialog(sub, false, !this.isTopLevel(sub)).subscribe((val) => {
             if (val !== undefined) {
                 if (!this.isComplex(val)) {
-                    val.sub_content_variables?.forEach(child => this.deleteContentVariable(child));
+                    val.sub_content_variables?.forEach((child) => this.deleteContentVariable(child));
                     val.sub_content_variables = [];
                 }
                 this.autoFillContent(val);
@@ -298,7 +303,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     }
 
     addSubContentVariable(sub: ImportTypeContentVariableModel) {
-        this.openDialog(undefined).subscribe(val => {
+        this.openDialog(undefined).subscribe((val) => {
             if (val !== undefined) {
                 this.autoFillContent(val);
                 if (sub.sub_content_variables === null || sub.sub_content_variables === undefined) {
@@ -314,7 +319,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     }
 
     addOutput() {
-        this.openDialog(undefined, false, false).subscribe(val => {
+        this.openDialog(undefined, false, false).subscribe((val) => {
             if (val !== undefined) {
                 this.autoFillContent(val);
                 const data = this.dataSource.data;
@@ -324,15 +329,17 @@ export class ImportTypesCreateEditComponent implements OnInit {
         });
     }
 
-    private openDialog(content: ImportTypeContentVariableModel | undefined, infoOnly = false, nameTimeAllowed = true)
-        : Observable<ImportTypeContentVariableModel | undefined> {
-
+    private openDialog(
+        content: ImportTypeContentVariableModel | undefined,
+        infoOnly = false,
+        nameTimeAllowed = true,
+    ): Observable<ImportTypeContentVariableModel | undefined> {
         const config: MatDialogConfig = {
             data: {
                 typeConceptCharacteristics: this.typeConceptCharacteristics,
-                content: content,
-                infoOnly: infoOnly,
-                nameTimeAllowed: nameTimeAllowed,
+                content,
+                infoOnly,
+                nameTimeAllowed,
             },
             minHeight: '400px',
         };
@@ -358,7 +365,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
         }
         const i = data.sub_content_variables.indexOf(searchElement);
         if (i === -1) {
-            data.sub_content_variables.forEach(sub => this.findAndDeleteChild(sub, searchElement));
+            data.sub_content_variables.forEach((sub) => this.findAndDeleteChild(sub, searchElement));
         } else {
             data.sub_content_variables.splice(i, 1);
         }
@@ -378,18 +385,22 @@ export class ImportTypesCreateEditComponent implements OnInit {
 
     private saveFlattenedCharacteristics(characteristic: DeviceTypeCharacteristicsModel) {
         this.characteristics.set(characteristic.id || '', characteristic);
-        characteristic.sub_characteristics?.forEach(sub => this.saveFlattenedCharacteristics(sub));
+        characteristic.sub_characteristics?.forEach((sub) => this.saveFlattenedCharacteristics(sub));
     }
 
     private autoFillContent(content: ImportTypeContentVariableModel, overrideId?: string) {
-        if (content === undefined || (content.sub_content_variables !== undefined && content.sub_content_variables !== null
-            && content.sub_content_variables?.length > 0)
-            || (content.characteristic_id.length === 0 && overrideId === undefined)) {
+        if (
+            content === undefined ||
+            (content.sub_content_variables !== undefined &&
+                content.sub_content_variables !== null &&
+                content.sub_content_variables?.length > 0) ||
+            (content.characteristic_id.length === 0 && overrideId === undefined)
+        ) {
             return;
         }
         content.sub_content_variables = [];
         const characteristic = this.characteristics.get(overrideId || content.characteristic_id);
-        characteristic?.sub_characteristics?.forEach(subCharacteristic => {
+        characteristic?.sub_characteristics?.forEach((subCharacteristic) => {
             const sub: ImportTypeContentVariableModel = {
                 name: subCharacteristic.name,
                 characteristic_id: '', // can't validate sub-characteristics with id

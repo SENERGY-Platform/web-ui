@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {MediaChange, MediaObserver} from '@angular/flex-layout';
-import {Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { MediaChange, MediaObserver } from '@angular/flex-layout';
+import { Observable } from 'rxjs';
 
 const mqAliases: string[] = ['xs', 'sm', 'md', 'lg', 'xl'];
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
-
 export class ResponsiveService {
-
-    constructor(private observableMedia: MediaObserver) {
-    }
+    constructor(private observableMedia: MediaObserver) {}
 
     getActiveMqAlias(): string {
         let mqAlias = '';
@@ -47,5 +44,4 @@ export class ResponsiveService {
             });
         });
     }
-
 }

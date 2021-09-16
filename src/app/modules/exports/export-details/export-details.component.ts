@@ -14,34 +14,31 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {Location} from '@angular/common';
-import {ExportModel, ExportValueBaseModel} from '../shared/export.model';
-import {ActivatedRoute} from '@angular/router';
-import {ExportService} from '../shared/export.service';
-import {ExportDataService} from '../../../widgets/shared/export-data.service';
-import {LastValuesRequestElementModel} from '../../../widgets/shared/export-data.model';
-import {map} from 'rxjs/operators';
-import {Observable} from 'rxjs';
-import {BrokerExportService} from '../shared/broker-export.service';
-import {AuthorizationService} from '../../../core/services/authorization.service';
-import {environment} from '../../../../environments/environment';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {ClipboardService} from 'ngx-clipboard';
-
+import { Component, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
+import { ExportModel, ExportValueBaseModel } from '../shared/export.model';
+import { ActivatedRoute } from '@angular/router';
+import { ExportService } from '../shared/export.service';
+import { ExportDataService } from '../../../widgets/shared/export-data.service';
+import { LastValuesRequestElementModel } from '../../../widgets/shared/export-data.model';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { BrokerExportService } from '../shared/broker-export.service';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { environment } from '../../../../environments/environment';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ClipboardService } from 'ngx-clipboard';
 
 @Component({
     selector: 'senergy-export-details',
     templateUrl: './export-details.component.html',
-    styleUrls: ['./export-details.component.css']
+    styleUrls: ['./export-details.component.css'],
 })
-
 export class ExportDetailsComponent implements OnInit {
-
     id: string | null = null;
     userId: string | null = null;
     userName: string | null = null;
-    baseTopic: string|null = null;
+    baseTopic: string | null = null;
     brokerUrl = environment.brokerExportBroker;
     ready = false;
     export = {} as ExportModel;
@@ -50,22 +47,23 @@ export class ExportDetailsComponent implements OnInit {
     lastValuesRequestElementModels: LastValuesRequestElementModel[] = [];
     showPassword = false;
 
-    constructor(private route: ActivatedRoute,
-                private location: Location,
-                private snackBar: MatSnackBar,
-                private clipboardService: ClipboardService,
-                private exportService: ExportService,
-                private authorizationService: AuthorizationService,
-                private brokerExportService: BrokerExportService,
-                private exportDataService: ExportDataService) {
-    }
+    constructor(
+        private route: ActivatedRoute,
+        private location: Location,
+        private snackBar: MatSnackBar,
+        private clipboardService: ClipboardService,
+        private exportService: ExportService,
+        private authorizationService: AuthorizationService,
+        private brokerExportService: BrokerExportService,
+        private exportDataService: ExportDataService,
+    ) {}
 
     ngOnInit() {
         this.id = this.route.snapshot.paramMap.get('id');
         if (this.id !== null) {
             if (this.brokerMode) {
                 this.displayedColumns = ['Name', 'Path', 'CopyClipboard'];
-                this.authorizationService.getUserName().then(name => this.userName = name);
+                this.authorizationService.getUserName().then((name) => (this.userName = name));
                 this.userId = localStorage.getItem('sub');
                 this.baseTopic = 'export/' + this.userId + '/' + this.id;
             }
@@ -74,21 +72,22 @@ export class ExportDetailsComponent implements OnInit {
                 if (resp !== null) {
                     this.export = resp;
                 }
-                this.baseTopic = this.export.CustomMqttBroker !== undefined ? this.export?.CustomMqttBaseTopic?.slice(0,
-                    this.export?.CustomMqttBaseTopic?.length - 1) || '' : this.baseTopic;
+                this.baseTopic =
+                    this.export.CustomMqttBroker !== undefined
+                        ? this.export?.CustomMqttBaseTopic?.slice(0, this.export?.CustomMqttBaseTopic?.length - 1) || ''
+                        : this.baseTopic;
 
-                this.export?.Values?.forEach(value => {
-                        if (this.export?.Measurement !== undefined) {
-                            this.lastValuesRequestElementModels.push({
-                                measurement: this.export?.Measurement,
-                                columnName: value.Name,
-                                math: undefined
-                            });
-                        }
+                this.export?.Values?.forEach((value) => {
+                    if (this.export?.Measurement !== undefined) {
+                        this.lastValuesRequestElementModels.push({
+                            measurement: this.export?.Measurement,
+                            columnName: value.Name,
+                            math: undefined,
+                        });
                     }
-                );
+                });
                 if (!this.brokerMode) {
-                    this.getLatestValues().subscribe(() => this.lastValuesReady = true);
+                    this.getLatestValues().subscribe(() => (this.lastValuesReady = true));
                 } else {
                     this.lastValuesReady = true;
                 }
@@ -99,16 +98,18 @@ export class ExportDetailsComponent implements OnInit {
 
     refreshValues() {
         this.lastValuesReady = false;
-        this.getLatestValues().subscribe(() => this.lastValuesReady = true);
+        this.getLatestValues().subscribe(() => (this.lastValuesReady = true));
     }
 
     private getLatestValues(): Observable<void> {
-        return this.exportDataService.getLastValues(this.lastValuesRequestElementModels).pipe(map(pairs => {
-            this.export.Values.forEach((_, index) => {
-                this.export.Values[index].LastValue = pairs[index].value;
-                this.export.Values[index].LastTimeStamp = '' + pairs[index].time;
-            });
-        }));
+        return this.exportDataService.getLastValues(this.lastValuesRequestElementModels).pipe(
+            map((pairs) => {
+                this.export.Values.forEach((_, index) => {
+                    this.export.Values[index].LastValue = pairs[index].value;
+                    this.export.Values[index].LastTimeStamp = '' + pairs[index].time;
+                });
+            }),
+        );
     }
 
     goBack() {
@@ -120,9 +121,11 @@ export class ExportDetailsComponent implements OnInit {
     }
 
     get password(): string {
-        return this.showPassword ?
-            (this.export?.CustomMqttPassword !== undefined ? this.export?.CustomMqttPassword : 'Your SENERGY password') :
-            '●●●●●';
+        return this.showPassword
+            ? this.export?.CustomMqttPassword !== undefined
+                ? this.export?.CustomMqttPassword
+                : 'Your SENERGY password'
+            : '●●●●●';
     }
 
     togglePasswordVisibility() {
@@ -133,5 +136,6 @@ export class ExportDetailsComponent implements OnInit {
         this.clipboardService.copyFromContent(((this.baseTopic || '').length > 0 ? this.baseTopic + '/' : '') + element.Name);
         this.snackBar.open('Topic copied to clipboard', undefined, {
             duration: 2000,
-        });    }
+        });
+    }
 }

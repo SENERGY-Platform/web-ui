@@ -36,7 +36,7 @@ export interface ExportModel {
     ServiceName: string;
     Offset: string;
     Generated: boolean;
-    Values: ExportValueModel [];
+    Values: ExportValueModel[];
     CreatedAt: string;
     UpdatedAt: string;
     CustomMqttBroker?: string;

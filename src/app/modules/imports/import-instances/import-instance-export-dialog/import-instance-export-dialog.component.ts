@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ImportInstancesModel} from '../shared/import-instances.model';
-import {FormControl, Validators} from '@angular/forms';
-import {ImportTypesService} from '../../import-types/shared/import-types.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {ImportTypeContentVariableModel, ImportTypeModel} from '../../import-types/shared/import-types.model';
-import {ExportService} from '../../../exports/shared/export.service';
-import {ExportModel, ExportValueModel} from '../../../exports/shared/export.model';
-import {SelectionModel} from '@angular/cdk/collections';
-import {MatCheckboxChange} from '@angular/material/checkbox';
-import {MatTable} from '@angular/material/table';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ImportInstancesModel } from '../shared/import-instances.model';
+import { FormControl, Validators } from '@angular/forms';
+import { ImportTypesService } from '../../import-types/shared/import-types.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ImportTypeContentVariableModel, ImportTypeModel } from '../../import-types/shared/import-types.model';
+import { ExportService } from '../../../exports/shared/export.service';
+import { ExportModel, ExportValueModel } from '../../../exports/shared/export.model';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatCheckboxChange } from '@angular/material/checkbox';
+import { MatTable } from '@angular/material/table';
 
 @Component({
     selector: 'senergy-import-instance-export-dialog',
     templateUrl: './import-instance-export-dialog.component.html',
-    styleUrls: ['./import-instance-export-dialog.component.css']
+    styleUrls: ['./import-instance-export-dialog.component.css'],
 })
 export class ImportInstanceExportDialogComponent implements OnInit {
     type: ImportTypeModel | undefined = undefined;
@@ -41,34 +41,35 @@ export class ImportInstanceExportDialogComponent implements OnInit {
     valueSelection = new SelectionModel<ExportValueModel>(true, []);
     tags: ExportValueModel[] = [];
 
-    @ViewChild(MatTable, {static: false}) table: MatTable<ExportValueModel> | undefined;
+    @ViewChild(MatTable, { static: false }) table: MatTable<ExportValueModel> | undefined;
 
-    constructor(@Inject(MAT_DIALOG_DATA) public data: ImportInstancesModel,
-                private dialogRef: MatDialogRef<ImportInstanceExportDialogComponent>,
-                private importTypesService: ImportTypesService,
-                private snackBar: MatSnackBar,
-                private exportService: ExportService,
-    ) {
-    }
+    constructor(
+        @Inject(MAT_DIALOG_DATA) public data: ImportInstancesModel,
+        private dialogRef: MatDialogRef<ImportInstanceExportDialogComponent>,
+        private importTypesService: ImportTypesService,
+        private snackBar: MatSnackBar,
+        private exportService: ExportService,
+    ) {}
 
     ngOnInit(): void {
         this.nameControl.setValue(this.data.name);
 
-        this.importTypesService.getImportType(this.data.import_type_id).subscribe(type => {
-            this.type = type;
-            const valuesAndTags = this.importTypesService.parseImportTypeExportValues(type);
-            valuesAndTags.forEach(v => v.Tag ? this.tags.push(v) : this.values.push(v));
-            this.valueSelection = new SelectionModel<ExportValueModel>(true, this.values);
-            this.table?.renderRows();
-            this.ready = true;
-        }, err => {
-            console.error(err);
-            this.snackBar.open('Error loading import type', 'OK', {duration: 3000});
-            this.dialogRef.close();
-        });
-
+        this.importTypesService.getImportType(this.data.import_type_id).subscribe(
+            (type) => {
+                this.type = type;
+                const valuesAndTags = this.importTypesService.parseImportTypeExportValues(type);
+                valuesAndTags.forEach((v) => (v.Tag ? this.tags.push(v) : this.values.push(v)));
+                this.valueSelection = new SelectionModel<ExportValueModel>(true, this.values);
+                this.table?.renderRows();
+                this.ready = true;
+            },
+            (err) => {
+                console.error(err);
+                this.snackBar.open('Error loading import type', 'OK', { duration: 3000 });
+                this.dialogRef.close();
+            },
+        );
     }
-
 
     create() {
         const values = this.valueSelection.selected;
@@ -86,14 +87,16 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             EntityName: this.data.name,
             ServiceName: this.data.import_type_id,
         } as ExportModel;
-        this.exportService.startPipeline(exp).subscribe(res => {
-            this.dialogRef.close(res);
-        }, err => {
-            console.error(err);
-            this.snackBar.open('Error creating export', 'OK', {duration: 3000});
-        });
+        this.exportService.startPipeline(exp).subscribe(
+            (res) => {
+                this.dialogRef.close(res);
+            },
+            (err) => {
+                console.error(err);
+                this.snackBar.open('Error creating export', 'OK', { duration: 3000 });
+            },
+        );
     }
-
 
     close() {
         this.dialogRef.close();

@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnInit} from '@angular/core';
-import {WidgetModel} from '../modules/dashboard/shared/dashboard-widget.model';
+import { Component, Input, OnInit } from '@angular/core';
+import { WidgetModel } from '../modules/dashboard/shared/dashboard-widget.model';
 
 @Component({
-  selector: 'senergy-widget',
-  templateUrl: './widget.component.html',
-  styleUrls: ['./widget.component.css']
+    selector: 'senergy-widget',
+    templateUrl: './widget.component.html',
+    styleUrls: ['./widget.component.css'],
 })
 export class WidgetComponent implements OnInit {
+    @Input() dashboardId = '';
+    @Input() widget: WidgetModel = {} as WidgetModel;
+    @Input() zoom = false;
 
-  @Input() dashboardId = '';
-  @Input() widget: WidgetModel = {} as WidgetModel;
-  @Input() zoom = false;
+    constructor() {}
 
-  constructor() { }
-
-  ngOnInit() {
-  }
-
+    ngOnInit() {}
 }

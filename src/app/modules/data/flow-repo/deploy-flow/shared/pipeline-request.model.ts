@@ -21,15 +21,15 @@ export interface PipelineRequestModel {
     windowTime: number;
     metrics: boolean;
     consumeAllMessages: boolean;
-    nodes: NodeModel [];
+    nodes: NodeModel[];
     flowId: string;
 }
 
 export interface NodeModel {
     nodeId: string;
     deploymentType: string;
-    config: NodeConfig [] | undefined;
-    inputs: NodeInput [] | undefined;
+    config: NodeConfig[] | undefined;
+    inputs: NodeInput[] | undefined;
     inputSelections?: PipelineInputSelectionModel[];
 }
 
@@ -37,7 +37,7 @@ export interface NodeInput {
     filterType: string; // 'deviceId' or 'operatorId'
     filterIds: string;
     topicName: string;
-    values: NodeValue [];
+    values: NodeValue[];
 }
 
 export interface NodeValue {

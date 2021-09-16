@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormControl, Validators} from '@angular/forms';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import {
-    DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
-    DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeFunctionType, functionTypes,
+    DeviceTypeAspectModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeDeviceClassModel,
+    DeviceTypeFunctionModel,
+    DeviceTypeFunctionType,
+    functionTypes,
 } from '../../../../metadata/device-types-overview/shared/device-type.model';
 import {
     DeviceTypeSelectionRefModel,
-    DeviceTypeSelectionResultModel
+    DeviceTypeSelectionResultModel,
 } from '../../../../metadata/device-types-overview/shared/device-type-selection.model';
-import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
-import {ConceptsService} from '../../../../metadata/concepts/shared/concepts.service';
-import {ConceptsCharacteristicsModel} from '../../../../metadata/concepts/shared/concepts-characteristics.model';
-import {FilterCriteriaDialogResultModel} from '../../shared/designer-dialog.model';
-import {Observable} from 'rxjs';
+import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
+import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
+import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
+import { FilterCriteriaDialogResultModel } from '../../shared/designer-dialog.model';
+import { Observable } from 'rxjs';
 
 @Component({
     templateUrl: './filter-criteria-dialog.component.html',
@@ -37,7 +41,7 @@ import {Observable} from 'rxjs';
 })
 export class FilterCriteriaDialogComponent implements OnInit {
     aspectFormControl = new FormControl('');
-    functionFormControl = new FormControl({value: '', disabled: true});
+    functionFormControl = new FormControl({ value: '', disabled: true });
 
     aspects: DeviceTypeAspectModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
@@ -51,10 +55,12 @@ export class FilterCriteriaDialogComponent implements OnInit {
         private _formBuilder: FormBuilder,
         private deviceTypeService: DeviceTypeService,
         private conceptsService: ConceptsService,
-        @Inject(MAT_DIALOG_DATA) private data: {
+        @Inject(MAT_DIALOG_DATA)
+        private data: {
             aspect: string | null | undefined;
             iotfunction: string | null | undefined;
-        }) {}
+        },
+    ) {}
 
     ngOnInit() {
         this.initOptions();
@@ -71,7 +77,7 @@ export class FilterCriteriaDialogComponent implements OnInit {
             aspect: this.aspectFormControl.value.id || '',
             iotfunction: this.functionFormControl.value.id || '',
             characteristic: this.characteristic.id || '',
-            label: this.functionFormControl.value.name + ' ' +  this.characteristic.name
+            label: this.functionFormControl.value.name + ' ' + this.characteristic.name,
         };
         this.dialogRef.close(this.result);
     }
@@ -103,33 +109,31 @@ export class FilterCriteriaDialogComponent implements OnInit {
 
             // handle init value
             if (this.data.iotfunction) {
-                functions.forEach((value => {
+                functions.forEach((value) => {
                     if (value.id === this.data.iotfunction) {
                         this.functionFormControl.setValue(value);
                         this.data.iotfunction = null;
                     }
-                }));
+                });
             }
         });
     }
 
     private getAspects() {
-        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe(
-        (aspects: DeviceTypeAspectModel[]) => {
+        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe((aspects: DeviceTypeAspectModel[]) => {
             this.aspects = aspects;
 
             // handle init value
             if (this.data.aspect) {
-                aspects.forEach((value => {
+                aspects.forEach((value) => {
                     if (value.id === this.data.aspect) {
                         this.aspectFormControl.setValue(value);
                         this.data.aspect = null;
                     }
-                }));
+                });
             }
         });
     }
-
 
     private resetFunctions() {
         this.functions = [];
@@ -139,8 +143,9 @@ export class FilterCriteriaDialogComponent implements OnInit {
 
     private getBaseCharacteristics(func: DeviceTypeFunctionModel): void {
         if (func && func.concept_id !== '') {
-            this.conceptsService.getConceptWithCharacteristics(func.concept_id).subscribe(
-                (concept: (ConceptsCharacteristicsModel | null)) => {
+            this.conceptsService
+                .getConceptWithCharacteristics(func.concept_id)
+                .subscribe((concept: ConceptsCharacteristicsModel | null) => {
                     if (concept) {
                         let index = -1;
                         concept.characteristics.forEach((char: DeviceTypeCharacteristicsModel, i: number) => {
@@ -157,14 +162,13 @@ export class FilterCriteriaDialogComponent implements OnInit {
     }
 
     private initSelection() {
-
         if (this.data.iotfunction) {
-            this.functions.forEach((value => {
+            this.functions.forEach((value) => {
                 if (value.id === this.data.iotfunction) {
                     this.functionFormControl.setValue(value);
                     this.getBaseCharacteristics(value);
                 }
-            }));
+            });
         }
     }
 }

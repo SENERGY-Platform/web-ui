@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {BpmnElement, BpmnParameter} from './designer.model';
-import {DeviceTypeSelectionResultModel} from '../../../metadata/device-types-overview/shared/device-type-selection.model';
-import {DesignerErrorModel} from './designer-error.model';
+import { Injectable } from '@angular/core';
+import { BpmnElement, BpmnParameter } from './designer.model';
+import { DeviceTypeSelectionResultModel } from '../../../metadata/device-types-overview/shared/device-type-selection.model';
+import { DesignerErrorModel } from './designer-error.model';
 import {
     DesignerElementFlowNodeRefModel,
     DesignerElementLaneSetsModel,
     DesignerElementLanesModel,
     DesignerElementModel,
-    DesignerElementParticipantsModel
+    DesignerElementParticipantsModel,
 } from './designer-element.model';
-import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
-import {forkJoin, Observable} from 'rxjs';
-import {DeviceTypeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
+import { forkJoin, Observable } from 'rxjs';
+import { DeviceTypeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DesignerHelperService {
-
-    constructor(private deviceTypeService: DeviceTypeService) {
-    }
+    constructor(private deviceTypeService: DeviceTypeService) {}
 
     getIncomingOutputs(element: BpmnElement, done: BpmnElement[] = []): BpmnParameter[] {
         let result: BpmnParameter[] = [];
@@ -45,10 +43,11 @@ export class DesignerHelperService {
         done.push(element);
         for (let index = 0; index < element.incoming.length; index++) {
             const incoming = element.incoming[index].source;
-            if (incoming.businessObject.extensionElements
-                && incoming.businessObject.extensionElements.values
-                && incoming.businessObject.extensionElements.values[0]
-                && incoming.businessObject.extensionElements.values[0].outputParameters
+            if (
+                incoming.businessObject.extensionElements &&
+                incoming.businessObject.extensionElements.values &&
+                incoming.businessObject.extensionElements.values[0] &&
+                incoming.businessObject.extensionElements.values[0].outputParameters
             ) {
                 result = result.concat(incoming.businessObject.extensionElements.values[0].outputParameters);
             }
@@ -57,16 +56,14 @@ export class DesignerHelperService {
         return result;
     }
 
-
     checkConstraints(modeler: any): Observable<DesignerErrorModel[][]> {
         const array: Observable<DesignerErrorModel[]>[] = [];
         const elements = modeler.injector.get('elementRegistry');
         elements.forEach((el: DesignerElementModel) => {
             if (el.type === 'bpmn:Collaboration') {
-                el.businessObject.participants.forEach(((participant: DesignerElementParticipantsModel) => {
-                        array.push(this.checkLaneConstraints(participant));
-                    })
-                );
+                el.businessObject.participants.forEach((participant: DesignerElementParticipantsModel) => {
+                    array.push(this.checkLaneConstraints(participant));
+                });
             }
         });
         return forkJoin(array);
@@ -92,19 +89,18 @@ export class DesignerHelperService {
     }
 
     private checkFlowNodeElements(flowNode: DesignerElementFlowNodeRefModel[], errorText: string): Observable<DesignerErrorModel> {
-        const filterArray: { function_id: string, device_class_id: string, aspect_id: string }[] = [];
-        const response: DesignerErrorModel = {error: false, errorType: null, laneName: ''};
-        let meta: (DeviceTypeSelectionResultModel | null) = null;
+        const filterArray: { function_id: string; device_class_id: string; aspect_id: string }[] = [];
+        const response: DesignerErrorModel = { error: false, errorType: null, laneName: '' };
+        let meta: DeviceTypeSelectionResultModel | null = null;
         if (flowNode) {
             flowNode.forEach((flowElement: DesignerElementFlowNodeRefModel) => {
                 const newMeta = this.getMeta(flowElement);
-                const filter: { function_id: string, device_class_id: string, aspect_id: string } = {
+                const filter: { function_id: string; device_class_id: string; aspect_id: string } = {
                     function_id: '',
                     device_class_id: '',
-                    aspect_id: ''
+                    aspect_id: '',
                 };
                 if (newMeta) {
-
                     if (newMeta.function.rdf_type === 'https://senergy.infai.org/ontology/ControllingFunction') {
                         if (!meta) {
                             meta = newMeta;
@@ -126,35 +122,32 @@ export class DesignerHelperService {
             });
         }
 
-
         return new Observable<DesignerErrorModel>((observer) => {
             if (response.error === false && filterArray.length > 0) {
-                this.deviceTypeService.getDeviceTypeFiltered(filterArray).subscribe(
-                    resp => {
-                        if (resp.length === 0) {
-                            response.error = true;
-                            response.errorType = 'deviceType';
-                            response.laneName = errorText;
-                        }
-                        observer.next(response);
-                        observer.complete();
-                    });
+                this.deviceTypeService.getDeviceTypeFiltered(filterArray).subscribe((resp) => {
+                    if (resp.length === 0) {
+                        response.error = true;
+                        response.errorType = 'deviceType';
+                        response.laneName = errorText;
+                    }
+                    observer.next(response);
+                    observer.complete();
+                });
             } else {
                 observer.next(response);
                 observer.complete();
             }
-
         });
     }
 
-    private getMeta(flowNodeRef: DesignerElementFlowNodeRefModel): (DeviceTypeSelectionResultModel | null) {
+    private getMeta(flowNodeRef: DesignerElementFlowNodeRefModel): DeviceTypeSelectionResultModel | null {
         if (flowNodeRef.$type === 'bpmn:ServiceTask' && flowNodeRef.type === 'external') {
             return this.getPayload(flowNodeRef);
         }
         return null;
     }
 
-    private getPayload(flowNode: DesignerElementFlowNodeRefModel): (DeviceTypeSelectionResultModel | null) {
+    private getPayload(flowNode: DesignerElementFlowNodeRefModel): DeviceTypeSelectionResultModel | null {
         for (let i = 0; i < flowNode.extensionElements.values.length; i++) {
             for (let j = 0; j < flowNode.extensionElements.values[i].inputParameters.length; j++) {
                 if (flowNode.extensionElements.values[i].inputParameters[j].name === 'payload') {
@@ -165,7 +158,7 @@ export class DesignerHelperService {
         return null;
     }
 
-    private checkDeviceClasses(meta: (DeviceTypeSelectionResultModel | null), newMeta: (DeviceTypeSelectionResultModel | null)): boolean {
+    private checkDeviceClasses(meta: DeviceTypeSelectionResultModel | null, newMeta: DeviceTypeSelectionResultModel | null): boolean {
         if (meta === null || newMeta === null) {
             return false;
         } else {

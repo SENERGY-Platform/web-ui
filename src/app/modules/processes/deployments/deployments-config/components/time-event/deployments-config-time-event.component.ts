@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
-import {FormGroup} from '@angular/forms';
+import { Component, Input } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 import * as moment from 'moment';
-
 
 @Component({
     selector: 'senergy-process-deployments-config-time-event',
     templateUrl: './deployments-config-time-event.component.html',
-    styleUrls: ['./deployments-config-time-event.component.css']
+    styleUrls: ['./deployments-config-time-event.component.css'],
 })
-
 export class DeploymentsConfigTimeEventComponent {
-
     @Input() time_event: FormGroup = new FormGroup({});
 
-    constructor() {
-    }
+    constructor() {}
 
     change(): void {
-        const timeUnits = <FormGroup>this.time_event.get('timeUnits');
-        this.time_event.patchValue({time: moment.duration(JSON.parse(JSON.stringify(timeUnits.value))).toISOString()});
+        const timeUnits = this.time_event.get('timeUnits') as FormGroup;
+        this.time_event.patchValue({ time: moment.duration(JSON.parse(JSON.stringify(timeUnits.value))).toISOString() });
     }
-
 }

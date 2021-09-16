@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
-import {ExportValueModel} from '../../../modules/exports/shared/export.model';
+import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
+import { ExportValueModel } from '../../../modules/exports/shared/export.model';
 
 export interface MultiValuePropertiesModel {
     multivaluemeasurements?: MultiValueMeasurement[];
@@ -31,13 +31,14 @@ export interface MultiValueMeasurement {
     column: ExportValueModel;
     unit: string;
     math?: string;
-    data?: (number | string | boolean | null);
+    data?: number | string | boolean | null;
     time?: string;
     lowerBoundary?: number;
     upperBoundary?: number;
     warning_enabled?: boolean;
 }
 
+// eslint-disable-next-line no-shadow
 export enum MultiValueOrderEnum {
     Default,
     AlphabeticallyAsc,

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {WidgetFooterService} from './shared/widget-footer.service';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { WidgetFooterService } from './shared/widget-footer.service';
 
 @Component({
     selector: 'senergy-widget-footer',
@@ -26,7 +26,6 @@ import {WidgetFooterService} from './shared/widget-footer.service';
     styleUrls: ['./widget-footer.component.css'],
 })
 export class WidgetFooterComponent implements OnInit {
-
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() optionZoom = false;
@@ -35,12 +34,9 @@ export class WidgetFooterComponent implements OnInit {
     @Output() editEvent = new EventEmitter<boolean>();
     @Output() addEvent = new EventEmitter<boolean>();
 
-    constructor(private widgetHeaderService: WidgetFooterService,
-                private dashboardService: DashboardService) {
-    }
+    constructor(private widgetHeaderService: WidgetFooterService, private dashboardService: DashboardService) {}
 
-    ngOnInit() {
-    }
+    ngOnInit() {}
 
     edit() {
         this.editEvent.emit(true);

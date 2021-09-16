@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {MatTable} from '@angular/material/table';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { MatTable } from '@angular/material/table';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     templateUrl: './ranking-list-edit-dialog.component.html',
     styleUrls: ['./ranking-list-edit-dialog.component.css'],
 })
 export class RankingListEditDialogComponent implements OnInit {
-
-    @ViewChild(MatTable, {static: false}) table!: MatTable<DeploymentsModel>;
+    @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
 
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
 
-    constructor(private dialogRef: MatDialogRef<RankingListEditDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                private dashboardService: DashboardService,
-                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
+    constructor(
+        private dialogRef: MatDialogRef<RankingListEditDialogComponent>,
+        private deploymentsService: DeploymentsService,
+        private dashboardService: DashboardService,
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+    ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
     }
@@ -65,5 +65,4 @@ export class RankingListEditDialogComponent implements OnInit {
             }
         });
     }
-
 }

@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {DeviceInstancesModel} from '../shared/device-instances.model';
-import {ResponsiveService} from '../../../../core/services/responsive.service';
-import {DeviceInstancesService} from '../shared/device-instances.service';
-import {PermissionsDialogService} from '../../../permissions/shared/permissions-dialog.service';
-import {DialogsService} from '../../../../core/services/dialogs.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {DeviceInstancesUpdateModel} from '../shared/device-instances-update.model';
-import {KeycloakService} from 'keycloak-angular';
-import {DeviceTypeDeviceClassModel, DeviceTypeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
-import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
-import {ExportService} from '../../../exports/shared/export.service';
-import {ExportModel} from '../../../exports/shared/export.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DeviceInstancesExportDialogComponent} from '../dialogs/device-instances-export-dialog.component';
-import {DeviceInstancesDialogService} from '../shared/device-instances-dialog.service';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { DeviceInstancesModel } from '../shared/device-instances.model';
+import { ResponsiveService } from '../../../../core/services/responsive.service';
+import { DeviceInstancesService } from '../shared/device-instances.service';
+import { PermissionsDialogService } from '../../../permissions/shared/permissions-dialog.service';
+import { DialogsService } from '../../../../core/services/dialogs.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DeviceInstancesUpdateModel } from '../shared/device-instances-update.model';
+import { KeycloakService } from 'keycloak-angular';
+import { DeviceTypeDeviceClassModel, DeviceTypeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
+import { ExportService } from '../../../exports/shared/export.service';
+import { ExportModel } from '../../../exports/shared/export.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DeviceInstancesExportDialogComponent } from '../dialogs/device-instances-export-dialog.component';
+import { DeviceInstancesDialogService } from '../shared/device-instances-dialog.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -42,28 +42,29 @@ const grids = new Map([
 @Component({
     selector: 'senergy-device-instances-grid',
     templateUrl: './device-instances-grid.component.html',
-    styleUrls: ['./device-instances-grid.component.css']
+    styleUrls: ['./device-instances-grid.component.css'],
 })
 export class DeviceInstancesGridComponent implements OnInit {
-
     @Input() deviceInstances: DeviceInstancesModel[] = [];
     @Input() ready = false;
-    @Output() tag =  new EventEmitter<{tag: string, tagType: string}>();
-    @Output() itemDeleted =  new EventEmitter<boolean>();
+    @Output() tag = new EventEmitter<{ tag: string; tagType: string }>();
+    @Output() itemDeleted = new EventEmitter<boolean>();
     gridCols = 0;
     userID: string;
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
 
-    constructor(private responsiveService: ResponsiveService,
-                private deviceInstancesService: DeviceInstancesService,
-                private keycloakService: KeycloakService,
-                private permissionsDialogService: PermissionsDialogService,
-                private dialogsService: DialogsService,
-                private deviceTypeService: DeviceTypeService,
-                private exportService: ExportService,
-                private snackBar: MatSnackBar,
-                private dialog: MatDialog,
-                private deviceInstancesDialogService: DeviceInstancesDialogService) {
+    constructor(
+        private responsiveService: ResponsiveService,
+        private deviceInstancesService: DeviceInstancesService,
+        private keycloakService: KeycloakService,
+        private permissionsDialogService: PermissionsDialogService,
+        private dialogsService: DialogsService,
+        private deviceTypeService: DeviceTypeService,
+        private exportService: ExportService,
+        private snackBar: MatSnackBar,
+        private dialog: MatDialog,
+        private deviceInstancesDialogService: DeviceInstancesDialogService,
+    ) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
 
@@ -81,19 +82,22 @@ export class DeviceInstancesGridComponent implements OnInit {
     }
 
     delete(device: DeviceInstancesModel): void {
-        this.dialogsService.openDeleteDialog('device').afterClosed().subscribe((deviceDelete: boolean) => {
-            if (deviceDelete) {
-                this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstancesUpdateModel | null) => {
-                    if (resp !== null) {
-                        this.deviceInstances.splice(this.deviceInstances.indexOf(device), 1);
-                        this.snackBar.open('Device deleted successfully.', '', {duration: 2000});
-                        this.emitItemDeleted();
-                    } else {
-                        this.snackBar.open('Error while deleting device!', '', {duration: 2000});
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('device')
+            .afterClosed()
+            .subscribe((deviceDelete: boolean) => {
+                if (deviceDelete) {
+                    this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstancesUpdateModel | null) => {
+                        if (resp !== null) {
+                            this.deviceInstances.splice(this.deviceInstances.indexOf(device), 1);
+                            this.snackBar.open('Device deleted successfully.', '', { duration: 2000 });
+                            this.emitItemDeleted();
+                        } else {
+                            this.snackBar.open('Error while deleting device!', '', { duration: 2000 });
+                        }
+                    });
+                }
+            });
     }
 
     permission(device: DeviceInstancesModel): void {
@@ -101,7 +105,7 @@ export class DeviceInstancesGridComponent implements OnInit {
     }
 
     emitTag(tag: string, tagType: string) {
-        this.tag.emit({tag: tag, tagType: tagType});
+        this.tag.emit({ tag, tagType });
     }
 
     emitItemDeleted() {
@@ -112,9 +116,9 @@ export class DeviceInstancesGridComponent implements OnInit {
         this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((deviceType: DeviceTypeModel | null) => {
             if (deviceType !== null) {
                 const exports: ExportModel[] = [];
-                deviceType.services.forEach(service => {
+                deviceType.services.forEach((service) => {
                     const newExports = this.exportService.prepareDeviceServiceExport(device, service);
-                    newExports.forEach(singleExport => {
+                    newExports.forEach((singleExport) => {
                         singleExport.Description = 'Created at device overview';
                         singleExport.Generated = false;
                     });
@@ -124,14 +128,14 @@ export class DeviceInstancesGridComponent implements OnInit {
                     const dialogConfig = new MatDialogConfig();
                     dialogConfig.minWidth = '375px';
                     dialogConfig.data = {
-                        exports: exports,
+                        exports,
                     };
                     this.dialog.open(DeviceInstancesExportDialogComponent, dialogConfig);
                 } else {
-                    this.snackBar.open('Device type has no output services!', '', {duration: 2000});
+                    this.snackBar.open('Device type has no output services!', '', { duration: 2000 });
                 }
             } else {
-                this.snackBar.open('Could not read device type!', '', {duration: 2000});
+                this.snackBar.open('Could not read device type!', '', { duration: 2000 });
             }
         });
     }
@@ -154,10 +158,8 @@ export class DeviceInstancesGridComponent implements OnInit {
     }
 
     private loadDeviceClasses(): void {
-        this.deviceTypeService.getDeviceClasses().subscribe(
-            (deviceClasses: DeviceTypeDeviceClassModel[]) => {
-                this.deviceClasses = deviceClasses;
-            });
+        this.deviceTypeService.getDeviceClasses().subscribe((deviceClasses: DeviceTypeDeviceClassModel[]) => {
+            this.deviceClasses = deviceClasses;
+        });
     }
-
 }

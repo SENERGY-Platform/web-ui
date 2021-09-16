@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {SettingsChangeDialogComponent} from '../dialogs/settings-change-dialog.component';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { SettingsChangeDialogComponent } from '../dialogs/settings-change-dialog.component';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class SettingsDialogService {
-
-    constructor(private http: HttpClient,
-                private errorHandlerService: ErrorHandlerService,
-                private dialog: MatDialog,
-                public snackBar: MatSnackBar) {
-    }
+    constructor(
+        private http: HttpClient,
+        private errorHandlerService: ErrorHandlerService,
+        private dialog: MatDialog,
+        public snackBar: MatSnackBar,
+    ) {}
 
     openSettingsDialog() {
         const dialogConfig = new MatDialogConfig();
@@ -41,8 +41,6 @@ export class SettingsDialogService {
         // };
         const editDialogRef = this.dialog.open(SettingsChangeDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe(() => {
-        });
+        editDialogRef.afterClosed().subscribe(() => {});
     }
-
 }

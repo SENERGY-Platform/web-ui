@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {ContentVariableDialogComponent} from './content-variable-dialog.component';
-import {CoreModule} from '../../../../core/core.module';
-import {ReactiveFormsModule} from '@angular/forms';
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {FlexModule} from '@angular/flex-layout';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatButtonModule} from '@angular/material/button';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatSelectModule} from '@angular/material/select';
-import {DeviceTypeCharacteristicsModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import { ContentVariableDialogComponent } from './content-variable-dialog.component';
+import { CoreModule } from '../../../../core/core.module';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { FlexModule } from '@angular/flex-layout';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { DeviceTypeCharacteristicsModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 
 describe('ContentVariableDialogComponent', () => {
     let component: ContentVariableDialogComponent;
@@ -40,7 +40,7 @@ describe('ContentVariableDialogComponent', () => {
         sub_characteristics: null,
     };
     const typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>> = new Map();
-    const m:  Map<string, DeviceTypeCharacteristicsModel[]> = new Map();
+    const m: Map<string, DeviceTypeCharacteristicsModel[]> = new Map();
     m.set('testconcept', [exampleChar]);
     typeConceptCharacteristics.set('https://schema.org/Text', m);
 
@@ -50,7 +50,6 @@ describe('ContentVariableDialogComponent', () => {
         infoOnly: false,
     };
     let r: any;
-
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -70,18 +69,17 @@ describe('ContentVariableDialogComponent', () => {
                 MatDialogModule,
             ],
             providers: [
-                {provide: MAT_DIALOG_DATA, useValue: dialogData},
+                { provide: MAT_DIALOG_DATA, useValue: dialogData },
                 {
                     provide: MatDialogRef,
                     useValue: {
                         close: (rv: any) => {
                             r = rv;
-                        }
-                    }
+                        },
+                    },
                 },
-            ]
-        })
-            .compileComponents();
+            ],
+        }).compileComponents();
     });
 
     beforeEach(() => {
@@ -110,6 +108,4 @@ describe('ContentVariableDialogComponent', () => {
         component.save();
         expect(r).toEqual(val);
     });
-
-
 });

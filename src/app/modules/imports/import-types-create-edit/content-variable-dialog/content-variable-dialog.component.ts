@@ -19,35 +19,33 @@ import {ImportTypeContentVariableModel} from '../../import-types/shared/import-t
 import {AbstractControl, FormBuilder, ValidationErrors, Validators} from '@angular/forms';
 import {DeviceTypeCharacteristicsModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 
-function notNamedTimeAndNotEmpty(control: AbstractControl): ValidationErrors | null  {
-    if (control.value === '') {
-        const err = {'notNamedTimeAndNotEmpty': 'Name required'};
-        control.setErrors(err);
-        return err;
-    }
-    if (control.value === 'time') {
-        const err = {'notNamedTimeAndNotEmpty': 'Name time not allowed at this level'};
-        // necessary for analytics pipelines
-        control.setErrors(err);
-        return err;
-    }
-    control.setErrors(null);
-    return null;
-}
-
-
 @Component({
     selector: 'senergy-import-content-variable-dialog',
     templateUrl: './content-variable-dialog.component.html',
-    styleUrls: ['./content-variable-dialog.component.css']
+    styleUrls: ['./content-variable-dialog.component.css'],
 })
 export class ContentVariableDialogComponent implements OnInit {
+    static notNamedTimeAndNotEmpty(control: AbstractControl): ValidationErrors | null {
+        if (control.value === '') {
+            const err = {notNamedTimeAndNotEmpty: 'Name required'};
+            control.setErrors(err);
+            return err;
+        }
+        if (control.value === 'time') {
+            const err = {notNamedTimeAndNotEmpty: 'Name time not allowed at this level'};
+            // necessary for analytics pipelines
+            control.setErrors(err);
+            return err;
+        }
+        control.setErrors(null);
+        return null;
+    }
 
     form = this.fb.group({
         name: [undefined, Validators.required],
         type: [undefined, Validators.required],
         characteristic_id: null,
-        use_as_tag: false
+        use_as_tag: false,
     });
 
     STRING = 'https://schema.org/Text';
@@ -66,19 +64,22 @@ export class ContentVariableDialogComponent implements OnInit {
         {id: this.LIST, name: 'List'},
     ];
 
-    constructor(@Inject(MAT_DIALOG_DATA) public data: {
-                    content?: ImportTypeContentVariableModel,
-                    typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>>,
-                    infoOnly: boolean,
-                    nameTimeAllowed: boolean,
-                },
-                private fb: FormBuilder, private dialogRef: MatDialogRef<ContentVariableDialogComponent>) {
+    constructor(
+        @Inject(MAT_DIALOG_DATA)
+        public data: {
+            content?: ImportTypeContentVariableModel;
+            typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>>;
+            infoOnly: boolean;
+            nameTimeAllowed: boolean;
+        },
+        private fb: FormBuilder,
+        private dialogRef: MatDialogRef<ContentVariableDialogComponent>,
+    ) {
     }
-
 
     ngOnInit(): void {
         if (!this.data.nameTimeAllowed) {
-            this.form.get('name')?.setValidators([notNamedTimeAndNotEmpty]);
+            this.form.get('name')?.setValidators([ContentVariableDialogComponent.notNamedTimeAndNotEmpty]);
         }
         if (this.data.content !== undefined) {
             this.form.patchValue(this.data.content);
@@ -88,11 +89,10 @@ export class ContentVariableDialogComponent implements OnInit {
         if (this.data.infoOnly) {
             this.form.disable();
         }
-        this.form.get('type')?.valueChanges.subscribe(_ => {
+        this.form.get('type')?.valueChanges.subscribe((_) => {
             this.form.patchValue({characteristic_id: null});
         });
     }
-
 
     save() {
         if (this.data.content === undefined) {

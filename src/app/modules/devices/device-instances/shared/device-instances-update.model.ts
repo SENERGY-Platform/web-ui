@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {DeviceInstancesBaseModel} from './device-instances.model';
+import { DeviceInstancesBaseModel } from './device-instances.model';
 
 export interface DeviceInstancesUpdateModel extends DeviceInstancesBaseModel {
     device_type_id: string;
 }
-

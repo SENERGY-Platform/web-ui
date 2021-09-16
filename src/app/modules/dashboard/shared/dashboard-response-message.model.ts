@@ -17,6 +17,3 @@
 export interface DashboardResponseMessageModel {
     message: string;
 }
-
-
-

@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'senergy-widget-spinner',
     templateUrl: './widget-spinner.component.html',
-    styleUrls: ['./widget-spinner.component.css']
+    styleUrls: ['./widget-spinner.component.css'],
 })
-export class WidgetSpinnerComponent  {
-
+export class WidgetSpinnerComponent {
     @Input() show = false;
 
-    constructor() {
-    }
-
+    constructor() {}
 }

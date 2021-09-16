@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {MultiValueMeasurement} from './multi-value.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {MultiValueEditDialogComponent} from '../dialog/multi-value-edit-dialog.component';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {LastValuesRequestElementModel} from '../../shared/export-data.model';
-import {ExportDataService} from '../../shared/export-data.service';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { MultiValueMeasurement } from './multi-value.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { MultiValueEditDialogComponent } from '../dialog/multi-value-edit-dialog.component';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { LastValuesRequestElementModel } from '../../shared/export-data.model';
+import { ExportDataService } from '../../shared/export-data.service';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class MultiValueService {
-
-    constructor(private dialog: MatDialog,
-                private dashboardService: DashboardService,
-                private errorHandlerService: ErrorHandlerService,
-                private exportDataService: ExportDataService) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private dashboardService: DashboardService,
+        private errorHandlerService: ErrorHandlerService,
+        private exportDataService: ExportDataService,
+    ) {}
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            widgetId: widgetId,
-            dashboardId: dashboardId,
+            widgetId,
+            dashboardId,
         };
         dialogConfig.minWidth = '675px';
         const editDialogRef = this.dialog.open(MultiValueEditDialogComponent, dialogConfig);
@@ -54,7 +54,6 @@ export class MultiValueService {
         });
     }
 
-
     getValues(widget: WidgetModel): Observable<WidgetModel> {
         return new Observable<WidgetModel>((observer) => {
             if (widget.properties.multivaluemeasurements) {
@@ -64,10 +63,10 @@ export class MultiValueService {
                     requestPayload.push({
                         measurement: measurement.export.id,
                         columnName: measurement.column.Name,
-                        math: measurement.math
+                        math: measurement.math,
                     });
                 });
-                this.exportDataService.getLastValues(requestPayload).subscribe(pairs => {
+                this.exportDataService.getLastValues(requestPayload).subscribe((pairs) => {
                     measurements.forEach((_, i) => {
                         measurements[i].data = pairs[i].value;
                         if (measurements[i].data == null && measurements[i].data !== 0 && measurements[i].type !== 'Boolean') {
@@ -92,4 +91,3 @@ export class MultiValueService {
         });
     }
 }
-

@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import cronstrue from 'cronstrue';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class CronConverterService {
-
-    constructor() {
-    }
+    constructor() {}
 
     getLocalTime(cron: string): string {
         const min = cron.split(' ')[0];
@@ -94,7 +92,8 @@ export class CronConverterService {
     }
 
     getHumanReadableString(cron: string): string {
-        let str = cronstrue.toString(cron, {use24HourTimeFormat: true})
+        let str = cronstrue
+            .toString(cron, { use24HourTimeFormat: true })
             // abbrev. days
             .replace('Monday', 'Mo')
             .replace('Tuesday', 'Tu')
@@ -116,4 +115,3 @@ export class CronConverterService {
         return str;
     }
 }
-

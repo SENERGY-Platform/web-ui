@@ -14,59 +14,62 @@
  * limitations under the License.
  */
 
-import {defer, Observable} from 'rxjs';
-import {Injectable} from '@angular/core';
-import {map} from 'rxjs/operators';
-import {ExportService} from '../../../modules/exports/shared/export.service';
-import {EnergyPredictionEditDialogComponent} from '../dialog/energy-prediction-edit-dialog.component';
-import {ExportValueModel} from "../../../modules/exports/shared/export.model";
-
+import { defer, Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { map } from 'rxjs/operators';
+import { ExportService } from '../../../modules/exports/shared/export.service';
+import { EnergyPredictionEditDialogComponent } from '../dialog/energy-prediction-edit-dialog.component';
+import { ExportValueModel } from '../../../modules/exports/shared/export.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class EnergyPredictionRequirementsService {
-
-    constructor(
-        private exportService: ExportService,
-    ) {
-    }
+    constructor(private exportService: ExportService) {}
 
     static requirement = 'Needs an estimation export';
     public static exportHasRequiredValues(values: ExportValueModel[]): boolean {
-        return values !== undefined && values.filter(val => val.Name === 'DayPrediction').length === 1
-            && values.filter(val => val.Name === 'MonthPrediction').length === 1
-            && values.filter(val => val.Name === 'YearPrediction').length === 1
-            && values.filter(val => val.Name === 'DayTimestamp').length === 1
-            && values.filter(val => val.Name === 'MonthTimestamp').length === 1
-            && values.filter(val => val.Name === 'YearTimestamp').length === 1
-            && values.filter(val => val.Name === 'DayPrediction').length === 1
-            && values.filter(val => val.Name === 'MonthPrediction').length === 1
-            && values.filter(val => val.Name === 'YearPrediction').length === 1;
+        return (
+            values !== undefined &&
+            values.filter((val) => val.Name === 'DayPrediction').length === 1 &&
+            values.filter((val) => val.Name === 'MonthPrediction').length === 1 &&
+            values.filter((val) => val.Name === 'YearPrediction').length === 1 &&
+            values.filter((val) => val.Name === 'DayTimestamp').length === 1 &&
+            values.filter((val) => val.Name === 'MonthTimestamp').length === 1 &&
+            values.filter((val) => val.Name === 'YearTimestamp').length === 1 &&
+            values.filter((val) => val.Name === 'DayPrediction').length === 1 &&
+            values.filter((val) => val.Name === 'MonthPrediction').length === 1 &&
+            values.filter((val) => val.Name === 'YearPrediction').length === 1
+        );
     }
 
     requirementsFulfilled(): Observable<boolean> {
         return defer(async () => {
             let page = 0;
-            let res = {hasMore: true, found: false};
+            let res = { hasMore: true, found: false };
             while (!res.found && res.hasMore) {
-                await this.search(100, page++).then(r => res = r);
+                await this.search(100, page++).then((r) => (res = r));
             }
             return res.found;
         });
     }
 
-    private search(pageSize: number, pageNo: number): Promise<{ found: boolean, hasMore: boolean }> {
-        return this.exportService.getExports('', pageSize, pageNo * pageSize, 'created_at', 'desc')
-            .pipe(map(r => {
-                if (r === null) {
-                    return {found: false, hasMore: false};
-                }
+    private search(pageSize: number, pageNo: number): Promise<{ found: boolean; hasMore: boolean }> {
+        return this.exportService
+            .getExports('', pageSize, pageNo * pageSize, 'created_at', 'desc')
+            .pipe(
+                map((r) => {
+                    if (r === null) {
+                        return { found: false, hasMore: false };
+                    }
 
-                return {
-                    found: r.instances.filter(ex => EnergyPredictionRequirementsService.exportHasRequiredValues(ex.Values)).length !== 0,
-                    hasMore: r.instances.length === pageSize,
-                };
-            })).toPromise();
+                    return {
+                        found:
+                            r.instances.filter((ex) => EnergyPredictionRequirementsService.exportHasRequiredValues(ex.Values)).length !== 0,
+                        hasMore: r.instances.length === pageSize,
+                    };
+                }),
+            )
+            .toPromise();
     }
 }

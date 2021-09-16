@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {AbstractControl, FormBuilder, FormControl, ValidatorFn, Validators} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {map, startWith} from 'rxjs/internal/operators';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../modules/exports/shared/export.model';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {ExportService} from '../../../modules/exports/shared/export.service';
-import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {chartsExportMeasurementModelValidator} from '../../charts/export/shared/chartsExportMeasurementModel.validator';
-import {EnergyPredictionRequirementsService} from '../shared/energy-prediction-requirements.service';
-
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { AbstractControl, FormBuilder, FormControl, ValidatorFn, Validators } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/internal/operators';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../modules/exports/shared/export.model';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { ExportService } from '../../../modules/exports/shared/export.service';
+import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { chartsExportMeasurementModelValidator } from '../../charts/export/shared/chartsExportMeasurementModel.validator';
+import { EnergyPredictionRequirementsService } from '../shared/energy-prediction-requirements.service';
 
 @Component({
     templateUrl: './energy-prediction-edit-dialog.component.html',
@@ -59,17 +58,20 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     private static estimationExportValidator(): ValidatorFn {
         return (control: AbstractControl): { [key: string]: any } | null => {
             const values: ExportValueModel[] = control.value.values;
-            return EnergyPredictionRequirementsService.exportHasRequiredValues(values) ?
-                null : {'isEstimationExport': {value: control.value}};
+            return EnergyPredictionRequirementsService.exportHasRequiredValues(values)
+                ? null
+                : { isEstimationExport: { value: control.value } };
         };
     }
 
-    constructor(private dialogRef: MatDialogRef<EnergyPredictionEditDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                private dashboardService: DashboardService,
-                private exportService: ExportService,
-                private formBuilder: FormBuilder,
-                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
+    constructor(
+        private dialogRef: MatDialogRef<EnergyPredictionEditDialogComponent>,
+        private deploymentsService: DeploymentsService,
+        private dashboardService: DashboardService,
+        private exportService: ExportService,
+        private formBuilder: FormBuilder,
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+    ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
     }
@@ -98,24 +100,25 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: (ExportResponseModel | null)) => {
+        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances.forEach((exportModel: ExportModel) => {
-                    if (exportModel.ID !== undefined && exportModel.Name !== undefined
-                        && EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)) {
-                        this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values});
+                    if (
+                        exportModel.ID !== undefined &&
+                        exportModel.Name !== undefined &&
+                        EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
+                    ) {
+                        this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values });
                     }
                 });
-                this.filteredExports = (this.form.get('export') as FormControl).valueChanges
-                    .pipe(
-                        startWith<string | ChartsExportMeasurementModel>(''),
-                        map(value => typeof value === 'string' ? value : value?.name),
-                        map(name => name ? this._filter(name) : this.exports.slice())
-                    );
+                this.filteredExports = (this.form.get('export') as FormControl).valueChanges.pipe(
+                    startWith<string | ChartsExportMeasurementModel>(''),
+                    map((value) => (typeof value === 'string' ? value : value?.name)),
+                    map((name) => (name ? this._filter(name) : this.exports.slice())),
+                );
             }
         });
     }
-
 
     close(): void {
         this.dialogRef.close();
@@ -126,7 +129,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         this.widget.properties.selectedOption = this.form.get('predictionType')?.value;
         this.widget.properties.thresholdOption = this.form.get('thresholdOption')?.value;
         if (this.widget.properties.columns === undefined) {
-            this.widget.properties.columns = {timestamp: '', prediction: '', predictionTotal: ''};
+            this.widget.properties.columns = { timestamp: '', prediction: '', predictionTotal: '' };
         }
         this.widget.properties.columns.prediction = this.form.get('predictionType')?.value + 'Prediction';
         this.widget.properties.columns.predictionTotal = this.form.get('predictionType')?.value + 'PredictionTotal';
@@ -148,7 +151,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
 
     private _filter(value: string): ChartsExportMeasurementModel[] {
         const filterValue = value.toLowerCase();
-        return this.exports.filter(option => {
+        return this.exports.filter((option) => {
             if (option.name) {
                 return option.name.toLowerCase().indexOf(filterValue) === 0;
             }
@@ -159,5 +162,4 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     displayFn(input?: ChartsExportMeasurementModel): string {
         return input ? input.name : '';
     }
-
 }

@@ -1,5 +1,4 @@
-import {AbstractControl, ValidatorFn} from '@angular/forms';
-
+import { AbstractControl, ValidatorFn } from '@angular/forms';
 
 const STRING = 'https://schema.org/Text';
 const INTEGER = 'https://schema.org/Integer';
@@ -19,9 +18,9 @@ export function convertPunctuation(str: string | undefined | null): string | nul
     return str.replace(',', '.');
 }
 
-export function TypeValueValidator(typeControlName: string, valueControlName: string, allowEmpty = true): ValidatorFn {
+export function typeValueValidator(typeControlName: string, valueControlName: string, allowEmpty = true): ValidatorFn {
     return (control: AbstractControl) => {
-        const err = {'configGroupValidator': {value: control.value}};
+        const err = { configGroupValidator: { value: control.value } };
         const type = control.get(typeControlName);
         const defaultValue = control.get(valueControlName);
         if (type === null || defaultValue === null) {
@@ -40,65 +39,64 @@ export function TypeValueValidator(typeControlName: string, valueControlName: st
                 defaultNotOk = true;
             }
         } else {
-
             switch (type.value) {
-                case STRING:
-                    // nop
-                    break;
-                case BOOLEAN:
-                    try {
-                        if (typeof JSON.parse(defaultValue.value) !== 'boolean') {
-                            defaultNotOk = true;
-                        }
-                    } catch (e) {
+            case STRING:
+                // nop
+                break;
+            case BOOLEAN:
+                try {
+                    if (typeof JSON.parse(defaultValue.value) !== 'boolean') {
                         defaultNotOk = true;
                     }
-                    break;
-                case FLOAT:
-                    const floatVal = convertPunctuation(defaultValue.value);
-                    try {
-                        if (typeof JSON.parse(floatVal || '') !== 'number') {
-                            defaultNotOk = true;
-                        }
-                    } catch (e) {
+                } catch (e) {
+                    defaultNotOk = true;
+                }
+                break;
+            case FLOAT:
+                const floatVal = convertPunctuation(defaultValue.value);
+                try {
+                    if (typeof JSON.parse(floatVal || '') !== 'number') {
                         defaultNotOk = true;
                     }
-                    break;
-                case INTEGER:
-                    const intVal = convertPunctuation(defaultValue.value) || '';
-                    if (intVal.indexOf !== undefined && intVal.indexOf('.') !== -1) {
+                } catch (e) {
+                    defaultNotOk = true;
+                }
+                break;
+            case INTEGER:
+                const intVal = convertPunctuation(defaultValue.value) || '';
+                if (intVal.indexOf !== undefined && intVal.indexOf('.') !== -1) {
+                    defaultNotOk = true;
+                }
+                try {
+                    const val = JSON.parse(defaultValue.value);
+                    if (typeof val !== 'number' || val % 1 !== 0) {
                         defaultNotOk = true;
                     }
-                    try {
-                        const val = JSON.parse(defaultValue.value);
-                        if (typeof val !== 'number' || val % 1 !== 0) {
-                            defaultNotOk = true;
-                        }
-                    } catch (e) {
+                } catch (e) {
+                    defaultNotOk = true;
+                }
+                break;
+            case STRUCTURE:
+                try {
+                    const structVal = JSON.parse(defaultValue.value);
+                    if (typeof structVal !== 'object' || Array.isArray(structVal)) {
                         defaultNotOk = true;
                     }
-                    break;
-                case STRUCTURE:
-                    try {
-                        const structVal = JSON.parse(defaultValue.value);
-                        if (typeof structVal !== 'object' || Array.isArray(structVal)) {
-                            defaultNotOk = true;
-                        }
-                    } catch (e) {
+                } catch (e) {
+                    defaultNotOk = true;
+                }
+                break;
+            case LIST:
+                try {
+                    if (!Array.isArray(JSON.parse(defaultValue.value))) {
                         defaultNotOk = true;
                     }
-                    break;
-                case LIST:
-                    try {
-                        if (!Array.isArray(JSON.parse(defaultValue.value))) {
-                            defaultNotOk = true;
-                        }
-                    } catch (e) {
-                        defaultNotOk = true;
-                    }
-                    break;
-                default:
-                    return err; // unknown type
+                } catch (e) {
+                    defaultNotOk = true;
+                }
+                break;
+            default:
+                return err; // unknown type
             }
         }
         if (defaultNotOk) {
@@ -107,5 +105,5 @@ export function TypeValueValidator(typeControlName: string, valueControlName: st
         }
         defaultValue.setErrors(null);
         return null;
-    }
+    };
 }

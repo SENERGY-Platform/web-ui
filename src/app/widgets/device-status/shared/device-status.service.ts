@@ -14,36 +14,34 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {
-    DeviceStatusElementModel
-} from './device-status-properties.model';
-import {ExportModel} from '../../../modules/exports/shared/export.model';
-import {ExportService} from '../../../modules/exports/shared/export.service';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {HttpClient} from '@angular/common/http';
-import {ProcessSchedulerService} from '../../process-scheduler/shared/process-scheduler.service';
+import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { DeviceStatusElementModel } from './device-status-properties.model';
+import { ExportModel } from '../../../modules/exports/shared/export.model';
+import { ExportService } from '../../../modules/exports/shared/export.service';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { HttpClient } from '@angular/common/http';
+import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DeviceStatusService {
-
-    constructor(private dialog: MatDialog,
-                private dashboardService: DashboardService,
-                private exportService: ExportService,
-                private deploymentsService: DeploymentsService,
-                private processSchedulerService: ProcessSchedulerService,
-                private http: HttpClient) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private dashboardService: DashboardService,
+        private exportService: ExportService,
+        private deploymentsService: DeploymentsService,
+        private processSchedulerService: ProcessSchedulerService,
+        private http: HttpClient,
+    ) {}
 
     deleteElements(elements: DeviceStatusElementModel[] | undefined): void {
         if (elements) {
             elements.forEach((element: DeviceStatusElementModel) => {
                 if (element.exportId) {
-                    this.exportService.stopPipeline({ID: element.exportId} as ExportModel).subscribe();
+                    this.exportService.stopPipeline({ ID: element.exportId } as ExportModel).subscribe();
                 }
                 if (element.deploymentId) {
                     this.deploymentsService.v2deleteDeployment(element.deploymentId).subscribe();
@@ -55,4 +53,3 @@ export class DeviceStatusService {
         }
     }
 }
-

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {NotificationModel} from '../shared/notification.model';
-import {NotificationService} from '../shared/notification.service';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { NotificationModel } from '../shared/notification.model';
+import { NotificationService } from '../shared/notification.service';
 
 @Component({
     templateUrl: './notification-dialog.component.html',
@@ -27,8 +27,10 @@ export class NotificationDialogComponent implements OnInit {
     notifications: NotificationModel[] = [];
     notificationService: NotificationService;
 
-    constructor(private dialogRef: MatDialogRef<NotificationDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data: {notifications: NotificationModel[], notificationService: NotificationService}) {
+    constructor(
+        private dialogRef: MatDialogRef<NotificationDialogComponent>,
+        @Inject(MAT_DIALOG_DATA) data: { notifications: NotificationModel[]; notificationService: NotificationService },
+    ) {
         this.notifications = data.notifications;
         this.notificationService = data.notificationService;
     }
@@ -68,5 +70,4 @@ export class NotificationDialogComponent implements OnInit {
     trackById(_: number, a: NotificationModel): string {
         return a._id;
     }
-
 }

@@ -16,7 +16,7 @@
 
 export interface DeviceStatusItemModel {
     name: string;
-    status: (string | number | null);
+    status: string | number | null;
     icon: string;
     color: string;
     time: string | null;

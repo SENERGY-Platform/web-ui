@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {
-    WidgetModel, WidgetPropertiesModels
-} from '../../modules/dashboard/shared/dashboard-widget.model';
-import {SwitchService} from './shared/switch.service';
-import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel} from './shared/switch-properties.model';
-import {Subscription} from 'rxjs';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { WidgetModel, WidgetPropertiesModels } from '../../modules/dashboard/shared/dashboard-widget.model';
+import { SwitchService } from './shared/switch.service';
+import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
+import { SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel } from './shared/switch-properties.model';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'senergy-switch',
@@ -29,18 +27,15 @@ import {Subscription} from 'rxjs';
     styleUrls: ['./switch.component.css'],
 })
 export class SwitchComponent implements OnInit, OnDestroy {
-
     ready = false;
 
     private destroy = new Subscription();
 
     @Input() dashboardId = '';
-    @Input() widget: WidgetModel = {properties: {} as WidgetPropertiesModels} as WidgetModel;
+    @Input() widget: WidgetModel = { properties: {} as WidgetPropertiesModels } as WidgetModel;
     @Input() zoom = false;
 
-    constructor(private switchService: SwitchService,
-                private dashboardService: DashboardService) {
-    }
+    constructor(private switchService: SwitchService, private dashboardService: DashboardService) {}
 
     ngOnInit() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
@@ -62,7 +57,6 @@ export class SwitchComponent implements OnInit, OnDestroy {
     toggle() {
         this.stopDeployedInstances();
     }
-
 
     private triggerDeployments() {
         let trigger = '';
@@ -87,7 +81,6 @@ export class SwitchComponent implements OnInit, OnDestroy {
                 this.widget.properties.instances = [];
                 this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe();
             }
-
         }
     }
 
@@ -106,7 +99,6 @@ export class SwitchComponent implements OnInit, OnDestroy {
             } else {
                 this.triggerDeployments();
             }
-
         } else {
             this.triggerDeployments();
         }

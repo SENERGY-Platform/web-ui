@@ -17,13 +17,13 @@
 export interface ParseModel {
     id: string;
     name: string;
-    inPorts: string [];
+    inPorts: string[];
     device: string;
     service: string;
     deploymentType: string;
     operatorId: string;
     path: string;
-    config: ConfigModel [];
+    config: ConfigModel[];
 }
 
 export interface ConfigModel {

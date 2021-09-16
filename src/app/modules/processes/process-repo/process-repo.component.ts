@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {AuthorizationService} from '../../../core/services/authorization.service';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {forkJoin, Observable, Subscription} from 'rxjs';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {KeycloakService} from 'keycloak-angular';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {ProcessModel} from './shared/process.model';
-import {ProcessRepoService} from './shared/process-repo.service';
-import {UtilService} from '../../../core/services/util.service';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
-import {DesignerProcessModel} from '../designer/shared/designer.model';
-import {saveAs} from 'file-saver';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {ProcessRepoConditionModel, ProcessRepoConditionsModel} from './shared/process-repo-conditions.model';
-import {Router} from '@angular/router';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { forkJoin, Observable, Subscription } from 'rxjs';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { KeycloakService } from 'keycloak-angular';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { ProcessModel } from './shared/process.model';
+import { ProcessRepoService } from './shared/process-repo.service';
+import { UtilService } from '../../../core/services/util.service';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { DesignerProcessModel } from '../designer/shared/designer.model';
+import { saveAs } from 'file-saver';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ProcessRepoConditionModel, ProcessRepoConditionsModel } from './shared/process-repo-conditions.model';
+import { Router } from '@angular/router';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 
 const grids = new Map([
     ['xs', 1],
@@ -47,15 +47,14 @@ const sortingAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel(
 @Component({
     selector: 'senergy-process-repo',
     templateUrl: './process-repo.component.html',
-    styleUrls: ['./process-repo.component.css']
+    styleUrls: ['./process-repo.component.css'],
 })
-
 export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
-    formGroup: FormGroup = new FormGroup({repoItems: new FormArray([])});
+    formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
     activeIndex = 0;
     gridCols = 0;
     animationDone = true;
-    sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
+    sortAttributes = JSON.parse(JSON.stringify(sortingAttributes)); // create copy of object;
     userID: string;
     ready = false;
     searchInitialized = false;
@@ -72,20 +71,22 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     private gridColChangeTimeout: number | undefined;
     private knownMainPanelOffsetHeight = 0;
 
-    @ViewChild('mainPanel', {static: false}) mainPanel!: ElementRef;
+    @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
 
-    constructor(private sanitizer: DomSanitizer,
-                private utilService: UtilService,
-                private searchbarService: SearchbarService,
-                private processRepoService: ProcessRepoService,
-                private responsiveService: ResponsiveService,
-                protected auth: AuthorizationService,
-                private keycloakService: KeycloakService,
-                private permissionsDialogService: PermissionsDialogService,
-                private dialogsService: DialogsService,
-                private snackBar: MatSnackBar,
-                private router: Router,
-                private _formBuilder: FormBuilder) {
+    constructor(
+        private sanitizer: DomSanitizer,
+        private utilService: UtilService,
+        private searchbarService: SearchbarService,
+        private processRepoService: ProcessRepoService,
+        private responsiveService: ResponsiveService,
+        protected auth: AuthorizationService,
+        private keycloakService: KeycloakService,
+        private permissionsDialogService: PermissionsDialogService,
+        private dialogsService: DialogsService,
+        private snackBar: MatSnackBar,
+        private router: Router,
+        private _formBuilder: FormBuilder,
+    ) {
         this.userID = this.keycloakService.getKeycloakInstance().subject || '';
     }
 
@@ -124,38 +125,41 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel | null) => {
             if (processModel) {
                 const xml = processModel.bpmn_xml;
-                const file = new Blob([xml], {type: 'application/bpmn-xml'});
+                const file = new Blob([xml], { type: 'application/bpmn-xml' });
                 saveAs(file, process.name + '.bpmn');
             }
         });
     }
 
     downloadSvg(process: ProcessModel): void {
-        const file = new Blob([process.svgXML], {type: 'image/svg+xml'});
+        const file = new Blob([process.svgXML], { type: 'image/svg+xml' });
         saveAs(file, process.name + '.svg');
     }
 
     deleteProcess(process: ProcessModel): void {
-        this.dialogsService.openDeleteDialog('process').afterClosed().subscribe((deleteProcess: boolean) => {
-            if (deleteProcess) {
-                this.processRepoService.deleteProcess(process.id).subscribe((resp: { status: number }) => {
-                    if (resp.status === 200) {
-                        this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => process.id === item.id));
-                        this.processRepoService.checkForDeletedProcess(process.id, 10, 100).subscribe((exists) => {
-                            if (exists) {
-                                this.showSnackBarError('deleting the process!');
-                            } else {
-                                this.showSnackBarSuccess('Process deleted');
-                            }
-                            this.setRepoItemsParams(1);
-                            this.getRepoItems(false);
-                        });
-                    } else {
-                        this.showSnackBarError('deleting the process!');
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('process')
+            .afterClosed()
+            .subscribe((deleteProcess: boolean) => {
+                if (deleteProcess) {
+                    this.processRepoService.deleteProcess(process.id).subscribe((resp: { status: number }) => {
+                        if (resp.status === 200) {
+                            this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => process.id === item.id));
+                            this.processRepoService.checkForDeletedProcess(process.id, 10, 100).subscribe((exists) => {
+                                if (exists) {
+                                    this.showSnackBarError('deleting the process!');
+                                } else {
+                                    this.showSnackBarSuccess('Process deleted');
+                                }
+                                this.setRepoItemsParams(1);
+                                this.getRepoItems(false);
+                            });
+                        } else {
+                            this.showSnackBarError('deleting the process!');
+                        }
+                    });
+                }
+            });
     }
 
     copyProcess(process: ProcessModel): void {
@@ -163,8 +167,9 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.processRepoService.getProcessModel(process.id).subscribe((processModel: DesignerProcessModel | null) => {
             if (processModel) {
                 const newProcess = processModel.bpmn_xml;
-                this.processRepoService.saveProcess('', newProcess, processModel.svgXML).subscribe(
-                    (processResp: DesignerProcessModel | null) => {
+                this.processRepoService
+                    .saveProcess('', newProcess, processModel.svgXML)
+                    .subscribe((processResp: DesignerProcessModel | null) => {
                         if (processResp === null) {
                             this.showSnackBarError('copying the process!');
                             this.getRepoItems(true);
@@ -191,7 +196,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.activeIndex = event;
         this.animationDone = false;
         this.searchText = '';
-        this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes));         // create copy of object;
+        this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes)); // create copy of object;
         this.sortAttribute = this.sortAttributes[0];
     }
 
@@ -202,31 +207,36 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     deleteMultipleItems(): void {
-        this.dialogsService.openDeleteDialog(this.selectedItems.length + (this.selectedItems.length === 1 ? ' process' : ' processes')).afterClosed().subscribe((deleteProcess: boolean) => {
-            if (deleteProcess) {
-                // clear repoItems and ready, that spinner occurs
-                this.repoItems.clear();
-                this.ready = false;
-                const array: Observable<boolean>[] = [];
-                this.selectedItems.forEach((item: ProcessModel) => {
-                    array.push(this.processRepoService.checkForDeletedProcess(item.id, 15, 200));
-                    this.processRepoService.deleteProcess(item.id).subscribe((resp: { status: number }) => {
-                        if (resp.status !== 200) {
-                            this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!');
-                        }
+        this.dialogsService
+            .openDeleteDialog(this.selectedItems.length + (this.selectedItems.length === 1 ? ' process' : ' processes'))
+            .afterClosed()
+            .subscribe((deleteProcess: boolean) => {
+                if (deleteProcess) {
+                    // clear repoItems and ready, that spinner occurs
+                    this.repoItems.clear();
+                    this.ready = false;
+                    const array: Observable<boolean>[] = [];
+                    this.selectedItems.forEach((item: ProcessModel) => {
+                        array.push(this.processRepoService.checkForDeletedProcess(item.id, 15, 200));
+                        this.processRepoService.deleteProcess(item.id).subscribe((resp: { status: number }) => {
+                            if (resp.status !== 200) {
+                                this.showSnackBarError(
+                                    this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!',
+                                );
+                            }
+                        });
                     });
-                });
-                forkJoin(array).subscribe((resp: boolean[]) => {
-                    const error = resp.some((item: boolean) => item === true);
-                    if (error) {
-                        this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!');
-                    } else {
-                        this.showSnackBarSuccess(this.selectedItems.length === 1 ? 'Process deleted' : 'Processes deleted');
-                    }
-                    this.getRepoItems(true);
-                });
-            }
-        });
+                    forkJoin(array).subscribe((resp: boolean[]) => {
+                        const error = resp.some((item: boolean) => item === true);
+                        if (error) {
+                            this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!');
+                        } else {
+                            this.showSnackBarSuccess(this.selectedItems.length === 1 ? 'Process deleted' : 'Processes deleted');
+                        }
+                        this.getRepoItems(true);
+                    });
+                }
+            });
     }
 
     countCheckboxes(): void {
@@ -259,9 +269,16 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
             this.reset();
         }
 
-        this.processRepoService.getProcessModels(
-            this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.getConditions()).subscribe(
-            (repoItems: ProcessModel[]) => {
+        this.processRepoService
+            .getProcessModels(
+                this.searchText,
+                this.limit,
+                this.offset,
+                this.sortAttribute.value,
+                this.sortAttribute.order,
+                this.getConditions(),
+            )
+            .subscribe((repoItems: ProcessModel[]) => {
                 this.animationDone = true;
                 this.addToFormArray(repoItems);
                 if (repoItems.length !== this.limit) {
@@ -273,8 +290,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private addToFormArray(repoItems: ProcessModel[]): void {
         repoItems.forEach((repoItem: ProcessModel) => {
-            this.repoItems.push(this._formBuilder.group(
-                {
+            this.repoItems.push(
+                this._formBuilder.group({
                     id: repoItem.id,
                     name: repoItem.name,
                     date: repoItem.date,
@@ -286,8 +303,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                     image: this.provideImg(repoItem.svgXML),
                     permissions: repoItem.permissions,
                     selected: false,
-                }
-            ));
+                }),
+            );
         });
     }
 
@@ -304,27 +321,29 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);
     }
 
-    private getConditions(): (ProcessRepoConditionsModel | null) {
+    private getConditions(): ProcessRepoConditionsModel | null {
         let conditions: ProcessRepoConditionsModel | null = {};
         switch (this.activeIndex) {
-            case 0:
-                //all
-                conditions = null;
-                break;
-            case 1:
-                //own
-                conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
-                    {'condition': this.setCondition('features.parent_id', '==', 'null')}];
-                break;
+        case 0:
+            //all
+            conditions = null;
+            break;
+        case 1:
+            //own
+            conditions.and = [
+                { condition: this.setCondition('creator', '==', 'jwt.user') },
+                { condition: this.setCondition('features.parent_id', '==', 'null') },
+            ];
+            break;
             /** case 2:
              //marketplace
              conditions.and = [{'condition': this.setCondition('creator', '==', 'jwt.user')},
              {'condition': this.setCondition('features.parent_id', '!=', 'null')}];
              break; */
-            case 2:
-                // shared
-                conditions.condition = this.setCondition('creator', '!=', 'jwt.user');
-                break;
+        case 2:
+            // shared
+            conditions.condition = this.setCondition('creator', '!=', 'jwt.user');
+            break;
         }
         return conditions;
     }
@@ -348,15 +367,15 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private showSnackBarError(text: string): void {
-        this.snackBar.open('Error while ' + text + ' !', undefined, {duration: 2000});
+        this.snackBar.open('Error while ' + text + ' !', undefined, { duration: 2000 });
     }
 
     private showSnackBarSuccess(text: string): void {
-        this.snackBar.open(text + ' successfully.', undefined, {duration: 2000});
+        this.snackBar.open(text + ' successfully.', undefined, { duration: 2000 });
     }
 
     private get maxItemsDisplayed(): number {
-        return ((this.gridCols) * Math.ceil(this.knownMainPanelOffsetHeight / this.rowHeight));
+        return this.gridCols * Math.ceil(this.knownMainPanelOffsetHeight / this.rowHeight);
     }
 
     private adjustForResize(timeout: number): number {
@@ -373,5 +392,4 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
             }
         }, timeout);
     }
-
 }

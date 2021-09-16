@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {NetworksModel} from '../shared/networks.model';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { NetworksModel } from '../shared/networks.model';
 
 @Component({
     templateUrl: './networks-edit-dialog.component.html',
-    styleUrls: ['./networks-edit-dialog.component.css']
+    styleUrls: ['./networks-edit-dialog.component.css'],
 })
 export class NetworksEditDialogComponent {
-
     network: NetworksModel;
 
-    constructor(private dialogRef: MatDialogRef<NetworksEditDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) network: NetworksModel) {
-                this.network = network;
+    constructor(private dialogRef: MatDialogRef<NetworksEditDialogComponent>, @Inject(MAT_DIALOG_DATA) network: NetworksModel) {
+        this.network = network;
     }
 
     close(): void {
@@ -38,5 +36,4 @@ export class NetworksEditDialogComponent {
     save(name: string): void {
         this.dialogRef.close(name);
     }
-
 }

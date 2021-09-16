@@ -15,10 +15,10 @@
  */
 
 export interface SwitchPropertiesModel {
-        imgUrl?: string;
-        deployments?: SwitchPropertiesDeploymentsModel[];
-        instances?: SwitchPropertiesInstancesModel[];
-        active?: boolean;
+    imgUrl?: string;
+    deployments?: SwitchPropertiesDeploymentsModel[];
+    instances?: SwitchPropertiesInstancesModel[];
+    active?: boolean;
 }
 
 export interface SwitchPropertiesDeploymentsModel {

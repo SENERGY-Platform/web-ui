@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {UtilService} from './util.service';
-
+import { UtilService } from './util.service';
 
 describe('UtilService', () => {
     let service: UtilService;
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [UtilService]
+            providers: [UtilService],
         });
         service = TestBed.inject(UtilService);
     });
@@ -33,10 +32,14 @@ describe('UtilService', () => {
     });
 
     it('test toByteArray', () => {
-        expect(service.stringToByteArray('6bd07b75d7cc4a1a88dbac93f61aa7b3')).toEqual([107, 208, 123, 117, 215, 204, 74, 26, 136, 219, 172, 147, 246, 26, 167, 179]);
+        expect(service.stringToByteArray('6bd07b75d7cc4a1a88dbac93f61aa7b3')).toEqual([
+            107, 208, 123, 117, 215, 204, 74, 26, 136, 219, 172, 147, 246, 26, 167, 179,
+        ]);
     });
 
     it('test base64ArrayBuffer', () => {
-        expect(service.convertByteArrayToBase64([107, 208, 123, 117, 215, 204, 74, 26, 136, 219, 172, 147, 246, 26, 167, 179])).toBe('a9B7ddfMShqI26yT9hqnsw');
+        expect(service.convertByteArrayToBase64([107, 208, 123, 117, 215, 204, 74, 26, 136, 219, 172, 147, 246, 26, 167, 179])).toBe(
+            'a9B7ddfMShqI26yT9hqnsw',
+        );
     });
 });

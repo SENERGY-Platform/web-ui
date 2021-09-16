@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {map, startWith} from 'rxjs/internal/operators';
-import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
-import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
-import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {SwitchPropertiesDeploymentsModel} from '../shared/switch-properties.model';
-import {MatTable} from '@angular/material/table';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/internal/operators';
+import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
+import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { SwitchPropertiesDeploymentsModel } from '../shared/switch-properties.model';
+import { MatTable } from '@angular/material/table';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 export interface TableElement {
     name: string;
@@ -38,8 +38,7 @@ export interface TableElement {
     styleUrls: ['./switch-edit-dialog.component.css'],
 })
 export class SwitchEditDialogComponent implements OnInit {
-
-    @ViewChild(MatTable, {static: false}) table!: MatTable<DeploymentsModel>;
+    @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
 
     formControl = new FormControl('');
     deployments: DeploymentsModel[] = [];
@@ -50,13 +49,15 @@ export class SwitchEditDialogComponent implements OnInit {
     data: TableElement[] = [];
     dashboardId: string;
     widgetId: string;
-    widget: WidgetModel = {properties: {imgUrl: ''}} as WidgetModel;
+    widget: WidgetModel = { properties: { imgUrl: '' } } as WidgetModel;
     newTrigger = 'on';
 
-    constructor(private dialogRef: MatDialogRef<SwitchEditDialogComponent>,
-                private deploymentsService: DeploymentsService,
-                private dashboardService: DashboardService,
-                @Inject(MAT_DIALOG_DATA) data: { dashboardId: string, widgetId: string }) {
+    constructor(
+        private dialogRef: MatDialogRef<SwitchEditDialogComponent>,
+        private deploymentsService: DeploymentsService,
+        private dashboardService: DashboardService,
+        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
+    ) {
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
     }
@@ -72,7 +73,7 @@ export class SwitchEditDialogComponent implements OnInit {
 
             if (widget.properties.deployments) {
                 widget.properties.deployments.forEach((deploy: SwitchPropertiesDeploymentsModel) => {
-                    this.data.push({name: deploy.name, id: deploy.id, trigger: deploy.trigger});
+                    this.data.push({ name: deploy.name, id: deploy.id, trigger: deploy.trigger });
                 });
             }
             this.table.renderRows();
@@ -82,12 +83,11 @@ export class SwitchEditDialogComponent implements OnInit {
     initDeployments() {
         this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc', '').subscribe((deployments: DeploymentsModel[]) => {
             this.deployments = deployments;
-            this.filteredDeployments = this.formControl.valueChanges
-                .pipe(
-                    startWith<string | DeploymentsModel>(''),
-                    map(value => typeof value === 'string' ? value : value.name),
-                    map(name => name ? this._filter(name) : this.deployments.slice())
-                );
+            this.filteredDeployments = this.formControl.valueChanges.pipe(
+                startWith<string | DeploymentsModel>(''),
+                map((value) => (typeof value === 'string' ? value : value.name)),
+                map((name) => (name ? this._filter(name) : this.deployments.slice())),
+            );
         });
     }
 
@@ -110,9 +110,8 @@ export class SwitchEditDialogComponent implements OnInit {
 
     private _filter(value: string): DeploymentsModel[] {
         const filterValue = value.toLowerCase();
-        return this.deployments.filter(option => option.name.toLowerCase().indexOf(filterValue) === 0);
+        return this.deployments.filter((option) => option.name.toLowerCase().indexOf(filterValue) === 0);
     }
-
 
     addColumn() {
         if (this.deployments.indexOf(this.formControl.value) >= 0) {
@@ -124,7 +123,7 @@ export class SwitchEditDialogComponent implements OnInit {
             this.table.renderRows();
             this.formControl.reset('');
         } else {
-            this.formControl.setErrors({'valid': false});
+            this.formControl.setErrors({ valid: false });
         }
     }
 

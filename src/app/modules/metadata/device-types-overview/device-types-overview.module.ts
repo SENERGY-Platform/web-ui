@@ -14,48 +14,58 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
+import { NgModule } from '@angular/core';
 
-import {RouterModule} from '@angular/router';
-import {DeviceTypesComponent} from './device-types/device-types.component';
-import {FlexLayoutModule} from '@angular/flex-layout';
-import {CommonModule} from '@angular/common';
-import {CoreModule} from '../../../core/core.module';
-import {InfiniteScrollModule} from 'ngx-infinite-scroll';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {DeviceTypesNewDeviceClassDialogComponent} from './device-types/dialogs/device-types-new-device-class-dialog.component';
-import {DeviceTypesNewFunctionDialogComponent} from './device-types/dialogs/device-types-new-function-dialog.component';
-import {DeviceTypesNewAspectDialogComponent} from './device-types/dialogs/device-types-new-aspect-dialog.component';
-import {DeviceTypesShowConceptDialogComponent} from './device-types/dialogs/device-types-show-concept-dialog.component';
-import {MatCardModule} from '@angular/material/card';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatChipsModule} from '@angular/material/chips';
-import {MatListModule} from '@angular/material/list';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatTableModule} from '@angular/material/table';
-import {MatPaginatorModule} from '@angular/material/paginator';
-import {MatOptionModule} from '@angular/material/core';
-import {MatSelectModule} from '@angular/material/select';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
-import {MatStepperModule} from '@angular/material/stepper';
-import {MatExpansionModule} from '@angular/material/expansion';
-import {MatTabsModule} from '@angular/material/tabs';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatSortModule} from '@angular/material/sort';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MatRadioModule} from '@angular/material/radio';
-import {MatTreeModule} from '@angular/material/tree';
-import {DeviceTypesContentVariableDialogComponent} from './device-types/dialogs/device-types-content-variable-dialog.component';
-import {WidgetModule} from '../../../widgets/widget.module';
+import { RouterModule } from '@angular/router';
+import { DeviceTypesComponent } from './device-types/device-types.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { CommonModule } from '@angular/common';
+import { CoreModule } from '../../../core/core.module';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DeviceTypesNewDeviceClassDialogComponent } from './device-types/dialogs/device-types-new-device-class-dialog.component';
+import { DeviceTypesNewFunctionDialogComponent } from './device-types/dialogs/device-types-new-function-dialog.component';
+import { DeviceTypesNewAspectDialogComponent } from './device-types/dialogs/device-types-new-aspect-dialog.component';
+import { DeviceTypesShowConceptDialogComponent } from './device-types/dialogs/device-types-show-concept-dialog.component';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatListModule } from '@angular/material/list';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatOptionModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSortModule } from '@angular/material/sort';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatTreeModule } from '@angular/material/tree';
+import { DeviceTypesContentVariableDialogComponent } from './device-types/dialogs/device-types-content-variable-dialog.component';
+import { WidgetModule } from '../../../widgets/widget.module';
 
-const devicetypes = {path: 'metadata/devicetypesoverview/devicetypes', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Device Types' }};
-const devicetypesEdit = {path: 'metadata/devicetypesoverview/devicetypes/:id', pathMatch: 'full', component: DeviceTypesComponent, data: { header: 'Device Types' }};
+const devicetypes = {
+    path: 'metadata/devicetypesoverview/devicetypes',
+    pathMatch: 'full',
+    component: DeviceTypesComponent,
+    data: { header: 'Device Types' },
+};
+const devicetypesEdit = {
+    path: 'metadata/devicetypesoverview/devicetypes/:id',
+    pathMatch: 'full',
+    component: DeviceTypesComponent,
+    data: { header: 'Device Types' },
+};
 
 @NgModule({
     imports: [
@@ -107,7 +117,6 @@ const devicetypesEdit = {path: 'metadata/devicetypesoverview/devicetypes/:id', p
         DeviceTypesNewAspectDialogComponent,
         DeviceTypesShowConceptDialogComponent,
         DeviceTypesContentVariableDialogComponent,
-    ]
+    ],
 })
-export class DeviceTypesOverviewModule {
-}
+export class DeviceTypesOverviewModule {}

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {SortModel} from '../../../core/components/sort/shared/sort.model';
-import {Subscription} from 'rxjs';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {ResponsiveService} from '../../../core/services/responsive.service';
-import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Router} from '@angular/router';
-import {DialogsService} from '../../../core/services/dialogs.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Subscription } from 'rxjs';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { DialogsService } from '../../../core/services/dialogs.service';
 import uuid = util.uuid;
-import {util} from 'jointjs';
-import {DeviceGroupsPermSearchModel} from './shared/device-groups-perm-search.model';
-import {DeviceGroupsService} from './shared/device-groups.service';
-import {DeviceGroupModel} from './shared/device-groups.model';
+import { util } from 'jointjs';
+import { DeviceGroupsPermSearchModel } from './shared/device-groups-perm-search.model';
+import { DeviceGroupsService } from './shared/device-groups.service';
+import { DeviceGroupModel } from './shared/device-groups.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -40,7 +40,7 @@ const grids = new Map([
 @Component({
     selector: 'senergy-device-groups',
     templateUrl: './device-groups.component.html',
-    styleUrls: ['./device-groups.component.css']
+    styleUrls: ['./device-groups.component.css'],
 })
 export class DeviceGroupsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
@@ -57,15 +57,15 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
-    constructor(private dialog: MatDialog,
-                private responsiveService: ResponsiveService,
-                private deviceGroupsService: DeviceGroupsService,
-                private searchbarService: SearchbarService,
-                private snackBar: MatSnackBar,
-                private router: Router,
-                private dialogsService: DialogsService
-    ) {
-    }
+    constructor(
+        private dialog: MatDialog,
+        private responsiveService: ResponsiveService,
+        private deviceGroupsService: DeviceGroupsService,
+        private searchbarService: SearchbarService,
+        private snackBar: MatSnackBar,
+        private router: Router,
+        private dialogsService: DialogsService,
+    ) {}
 
     ngOnInit() {
         this.initGridCols();
@@ -90,20 +90,23 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     }
 
     deleteDeviceGroup(deviceGroup: DeviceGroupsPermSearchModel): boolean {
-        this.dialogsService.openDeleteDialog('device group ' + deviceGroup.name).afterClosed().subscribe((deleteDeviceClass: boolean) => {
-            if (deleteDeviceClass) {
-                this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id).subscribe((resp: boolean) => {
-                    if (resp === true) {
-                        this.deviceGroups.splice(this.deviceGroups.indexOf(deviceGroup), 1);
-                        this.snackBar.open('Device-Group deleted successfully.', undefined, {duration: 2000});
-                        this.setLimitOffset(1);
-                        this.reloadDeviceGroups(false);
-                    } else {
-                        this.snackBar.open('Error while deleting the device-group!', undefined, {duration: 2000});
-                    }
-                });
-            }
-        });
+        this.dialogsService
+            .openDeleteDialog('device group ' + deviceGroup.name)
+            .afterClosed()
+            .subscribe((deleteDeviceClass: boolean) => {
+                if (deleteDeviceClass) {
+                    this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id).subscribe((resp: boolean) => {
+                        if (resp === true) {
+                            this.deviceGroups.splice(this.deviceGroups.indexOf(deviceGroup), 1);
+                            this.snackBar.open('Device-Group deleted successfully.', undefined, { duration: 2000 });
+                            this.setLimitOffset(1);
+                            this.reloadDeviceGroups(false);
+                        } else {
+                            this.snackBar.open('Error while deleting the device-group!', undefined, { duration: 2000 });
+                        }
+                    });
+                }
+            });
         return false;
     }
 
@@ -136,16 +139,15 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
             this.reset();
         }
 
-        this.deviceGroupsService.getDeviceGroups(this.searchText, this.limit, this.offset, this.sortAttribute.value,
-            this.sortAttribute.order).subscribe(
-            (deviceGroups: DeviceGroupsPermSearchModel[]) => {
+        this.deviceGroupsService
+            .getDeviceGroups(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .subscribe((deviceGroups: DeviceGroupsPermSearchModel[]) => {
                 if (deviceGroups.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.deviceGroups = this.deviceGroups.concat(deviceGroups);
                 this.ready = true;
             });
-
     }
 
     private reset() {
@@ -167,6 +169,4 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         this.limit = limit;
         this.offset = this.deviceGroups.length;
     }
-
-
 }

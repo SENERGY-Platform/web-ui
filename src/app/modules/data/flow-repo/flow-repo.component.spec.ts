@@ -15,39 +15,37 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import {FlowRepoComponent} from './flow-repo.component';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatDialogModule} from '@angular/material/dialog';
-import {AuthorizationService} from '../../../core/services/authorization.service';
-import {DialogsService} from '../../../core/services/dialogs.service';
-import {AuthorizationServiceMock} from '../../../core/services/authorization.service.mock';
-import {CoreModule} from '../../../core/core.module';
-import {InfiniteScrollModule} from 'ngx-infinite-scroll';
+import { FlowRepoComponent } from './flow-repo.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { AuthorizationServiceMock } from '../../../core/services/authorization.service.mock';
+import { CoreModule } from '../../../core/core.module';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 describe('FlowRepoComponent', () => {
-  let component: FlowRepoComponent;
-  let fixture: ComponentFixture<FlowRepoComponent>;
+    let component: FlowRepoComponent;
+    let fixture: ComponentFixture<FlowRepoComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule],
-      declarations: [ FlowRepoComponent ],
-      providers: [
-        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-        DialogsService
-      ]
-    })
-    .compileComponents();
-  }));
+    beforeEach(
+        waitForAsync(() => {
+            TestBed.configureTestingModule({
+                imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule, CoreModule, InfiniteScrollModule],
+                declarations: [FlowRepoComponent],
+                providers: [{ provide: AuthorizationService, useClass: AuthorizationServiceMock }, DialogsService],
+            }).compileComponents();
+        }),
+    );
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(FlowRepoComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(FlowRepoComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });
