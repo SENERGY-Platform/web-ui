@@ -56,6 +56,16 @@
                     Please make a selection!
                 </mat-error>
             </mat-form-field>
+            <mat-form-field color="accent">
+                <mat-label>Choose Fields</mat-label>
+                <senergy-select-search [required]="true" [multiple]="true"
+                                       formControlName="vAxes"
+                                       [options]="vAxesOptions" useOptionViewProperty="valueName">
+                </senergy-select-search>
+                <mat-error *ngIf="(formGroupController.get('properties.vAxes')?.value || []).length ===  0">
+                    Please make a selection!
+                </mat-error>
+            </mat-form-field>
             <table>
                 <tr>
                     <td fxFlex="33%">
@@ -160,21 +170,6 @@
     </div>
 
     <table mat-table [dataSource]="dataSource">
-
-        <ng-container matColumnDef="select">
-            <th mat-header-cell *matHeaderCellDef>
-                <mat-checkbox (change)="$event ? masterToggle() : null"
-                              [checked]="selection.hasValue() && isAllSelected()"
-                              [indeterminate]="selection.hasValue() && !isAllSelected()">
-                </mat-checkbox>
-            </th>
-            <td mat-cell *matCellDef="let row">
-                <mat-checkbox (click)="$event.stopPropagation()"
-                              (change)="$event ? selection.toggle(row) : null"
-                              [checked]="selection.isSelected(row)">
-                </mat-checkbox>
-            </td>
-        </ng-container>
 
         <ng-container matColumnDef="exportName">
             <th mat-header-cell *matHeaderCellDef>Export</th>
@@ -341,7 +336,7 @@
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()"
-            [disabled]="formGroupController.invalid || selection.selected.length === 0">
+            [disabled]="formGroupController.invalid || (formGroupController.get('properties.vAxes')?.value || []).length ===  0">
         Save
     </button>
 </mat-dialog-actions>
