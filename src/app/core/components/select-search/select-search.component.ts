@@ -132,14 +132,6 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         return this.select?.optionSelectionChanges;
     }
 
-    get overlayDir() {
-        return this.select?.overlayDir;
-    }
-
-    set overlayDir(dis) {
-        this.select.overlayDir = dis;
-    }
-
     get panel() {
         return this.select?.panel;
     }
