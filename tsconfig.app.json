@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": []
+  },
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "./dist",
+    "./src/karma.conf.js",
+    "./src/test.ts",
+    "./src/**/*.spec.ts",
+    "./src/**/*.mock.ts",
+    "./src/environments/environment.dev.ts",
+    "./src/environments/environment.prod.ts",
+    "./src/environments/environment.dev.js",
+    "./src/app/core/validators/json.validator.ts",
+    "./src/app/modules/metadata/device-types-overview/device-types/content-variable.validator.ts",
+    "./src/assets/env.template.js"
+  ]
+}
