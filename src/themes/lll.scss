@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
-@include mat-core();
+@include mat.core();
 
 /* generated: http://mcg.mbitson.com/#!?customcolor=%232e7d32&themename=mcgtheme */
 
@@ -151,33 +151,33 @@ $md-custom-color-sidenav: (
         )
 );
 
-$my-app-primary: mat-palette($md-custom-color);
-$my-app-accent: mat-palette($md-custom-color-accent, 500, 900, A100);
-$my-app-warn: mat-palette($md-custom-color-warn);
-$my-app-sidenav: mat-palette($md-custom-color-sidenav);
+$my-app-primary: mat.define-palette($md-custom-color);
+$my-app-accent: mat.define-palette($md-custom-color-accent, 500, 900, A100);
+$my-app-warn: mat.define-palette($md-custom-color-warn);
+$my-app-sidenav: mat.define-palette($md-custom-color-sidenav);
 
-$my-app-theme: mat-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
+$my-app-theme: mat.define-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
 
-@include angular-material-theme($my-app-theme);
+@include mat.all-component-themes($my-app-theme);
 
 .background-color-accent {
   color: white;
-  background-color: mat-color($my-app-accent);
+  background-color: mat.get-color-from-palette($my-app-accent);
 }
 
 .background-color-sidenav {
   color: white;
-  background-color: mat-color($my-app-sidenav);
+  background-color: mat.get-color-from-palette($my-app-sidenav);
 }
 
 .color-accent {
-  color: mat-color($my-app-accent) !important;
+  color: mat.get-color-from-palette($my-app-accent) !important;
 }
 
 .color-warn {
-  color: mat-color($my-app-warn) !important;
+  color: mat.get-color-from-palette($my-app-warn) !important;
 }
 
 .color-sidenav {
-  color: mat-color($my-app-sidenav) !important;
+  color: mat.get-color-from-palette($my-app-sidenav) !important;
 }
