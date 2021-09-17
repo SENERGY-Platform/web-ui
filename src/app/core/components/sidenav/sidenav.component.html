@@ -45,7 +45,7 @@
                                 routerLink="{{page.state}}" routerLinkActive="background-color-sidenav"
                                 (click)="closeSidenav()" class="md-button-toggle">
                             <mat-icon matBadge="{{page.badge}}"
-                                      [matBadgeHidden]="!page.badge || page.badge == ''"
+                                      [matBadgeHidden]="!page.badge || page.badge === ''"
                                       matBadgePosition="below before"
                                       matBadgeSize="small"
                                       matBadgeColor="accent">{{page.icon}}</mat-icon>

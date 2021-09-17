@@ -18,7 +18,7 @@
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="mat-card-image content-size drag-handler">
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-        <div *ngIf="ready && devices.length != 0" fxLayout="column" fxFill>
+        <div *ngIf="ready && devices.length !== 0" fxLayout="column" fxFill>
             <mat-list fxFlex>
                 <mat-list-item *ngFor="let device of devices; let i = index">
                     <mat-icon [ngClass]="device.color" mat-list-icon>{{device.icon}}</mat-icon>

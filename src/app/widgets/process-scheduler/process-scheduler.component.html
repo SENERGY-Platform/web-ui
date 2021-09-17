@@ -19,7 +19,7 @@
     <mat-card-content class="mat-card-image content-size">
         <senergy-widget-spinner [show]="!ready()"></senergy-widget-spinner>
 
-        <div *ngIf="ready() && schedules.length != 0" fxLayout="column" fxFill>
+        <div *ngIf="ready() && schedules.length !== 0" fxLayout="column" fxFill>
             <mat-list>
                 <mat-list-item *ngFor="let schedule of schedules" [ngClass]="schedule.disabled === true ? 'schedule-disabled' : ''">
                     <h4 mat-line class="drag-handler">

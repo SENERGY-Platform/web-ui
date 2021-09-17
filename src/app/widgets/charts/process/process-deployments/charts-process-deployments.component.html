@@ -19,7 +19,7 @@
     <mat-card-content class="mat-card-image content-size drag-handler">
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-            <google-chart *ngIf="ready && processDeploymentsHistory.dataTable[0].length != 0" #processDeploymentsHistoryChart [data]="processDeploymentsHistory"></google-chart>
+            <google-chart *ngIf="ready && processDeploymentsHistory.dataTable[0].length !== 0" #processDeploymentsHistoryChart [data]="processDeploymentsHistory"></google-chart>
             <senergy-no-data [showIf]="ready && processDeploymentsHistory.dataTable[0].length === 0"></senergy-no-data>
         </div>
     </mat-card-content>

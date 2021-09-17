@@ -167,7 +167,6 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": "e2e/tsconfig.json",
             "lintFilePatterns": [
               "e2e//**/*.ts",
               "e2e//**/*.html"

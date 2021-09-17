@@ -15,7 +15,7 @@
   -->
 
 <div class="main-panel">
-    <div class="layout-margin" fxLayout="column" *ngIf="inputs.length > 0 && ready == true">
+    <div class="layout-margin" fxLayout="column" *ngIf="inputs.length > 0 && ready === true">
         <mat-accordion class="example-headers-align" multi>
             <mat-expansion-panel expanded>
                 <mat-expansion-panel-header>
@@ -83,7 +83,7 @@
                             </senergy-select-search>
                         </mat-form-field>
                     </div>
-                    <h4 *ngIf="input.config != undefined">Configuration</h4>
+                    <h4 *ngIf="input.config !== undefined && input.config !== null">Configuration</h4>
                     <div fxLayout="column" *ngFor="let conf of input.config">
                         <mat-form-field fxFill color="accent" appearance="outline">
                             <mat-label>{{ conf.name }}</mat-label>

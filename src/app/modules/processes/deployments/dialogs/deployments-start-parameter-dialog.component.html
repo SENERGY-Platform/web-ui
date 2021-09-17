@@ -20,9 +20,9 @@
     <mat-error *ngIf="err">{{err}}</mat-error>
     <mat-form-field fxFill color="accent" appearance="outline" *ngFor="let recipient of parameter | keyvalue">
         <mat-label>{{recipient.key}}: {{recipient.value.type}}</mat-label>
-        <input *ngIf="recipient.value.type == 'String'" type="text" matInput [(ngModel)]="recipient.value.value">
-        <input *ngIf="recipient.value.type == 'Long'" type="number" matInput [(ngModel)]="recipient.value.value">
-        <mat-select *ngIf="recipient.value.type == 'Boolean'" [(ngModel)]="recipient.value.value">
+        <input *ngIf="recipient.value.type === 'String'" type="text" matInput [(ngModel)]="recipient.value.value">
+        <input *ngIf="recipient.value.type === 'Long'" type="number" matInput [(ngModel)]="recipient.value.value">
+        <mat-select *ngIf="recipient.value.type === 'Boolean'" [(ngModel)]="recipient.value.value">
             <mat-option [value]="true">True</mat-option>
             <mat-option [value]="false">False</mat-option>
         </mat-select>
