@@ -18,7 +18,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import {MatSnackBar, MatSnackBarRef} from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { merge, Subscription } from 'rxjs';
 import { MatPaginator } from '@angular/material/paginator';
@@ -34,6 +34,7 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { ConfirmDialogComponent } from '../../../core/dialogs/confirm-dialog.component';
 import { WaitingRoomMultiWmbusKeyEditDialogComponent } from './dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
 import {ClosableSnackBarComponent} from '../../../core/components/closable-snack-bar/closable-snack-bar.component';
+import {$_} from '@angular/compiler/src/chars';
 
 @Component({
     selector: 'senergy-waiting-room',
@@ -61,6 +62,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     private devicesSub: Subscription = new Subscription();
     private eventsCloser?: () => void;
     private idSet = new Set();
+    private snackBarInstance?: MatSnackBarRef<ClosableSnackBarComponent>;
 
     constructor(
         private dialog: MatDialog,
@@ -79,6 +81,9 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         this.searchSub.unsubscribe();
         if (this.eventsCloser) {
             this.eventsCloser();
+        }
+        if (this.snackBarInstance) {
+            this.snackBarInstance.dismiss();
         }
     }
 
@@ -492,20 +497,22 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         })
         .pipe(debounceTime(1000))
         .subscribe((msg) => {
-            if (msg.type === WaitingRoomEventTypeSet && !this.idSet.has(msg.payload)) {
-                this.snackBar.openFromComponent(ClosableSnackBarComponent, {
+            if (msg.type === WaitingRoomEventTypeSet && !this.idSet.has(msg.payload) && !this.snackBarInstance) {
+                let temp = this.snackBar.openFromComponent(ClosableSnackBarComponent, {
                     data: {
                         message: 'New devices found.',
                         action: 'Reload'
                     },
-                }).onAction().subscribe(_ => {
+                });
+                temp.onAction().subscribe(_ => {
                     this.getDevices(false);
                 });
-                /*
-                this.snackBar.open('New devices found.', "Reload", {}).onAction().subscribe(_ => {
-                    this.getDevices(false);
+                temp.afterDismissed().subscribe(_ => {
+                    if (this && this.snackBarInstance) {
+                        this.snackBarInstance = undefined;
+                    }
                 });
-                 */
+                this.snackBarInstance = temp;
             }
         });
     }
