@@ -25,14 +25,15 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
-import { WaitingDeviceListModel, WaitingDeviceModel } from './shared/waiting-room.model';
-import { startWith, switchMap } from 'rxjs/internal/operators';
+import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeAuthOk, WaitingRoomEventTypeSet} from './shared/waiting-room.model';
+import {debounceTime, startWith, switchMap} from 'rxjs/internal/operators';
 import { WaitingRoomService } from './shared/waiting-room.service';
 import { DeviceInstancesModel } from '../device-instances/shared/device-instances.model';
 import { WaitingRoomDeviceEditDialogComponent } from './dialogs/waiting-room-device-edit-dialog.component';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { ConfirmDialogComponent } from '../../../core/dialogs/confirm-dialog.component';
 import { WaitingRoomMultiWmbusKeyEditDialogComponent } from './dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
+import {ClosableSnackBarComponent} from '../../../core/components/closable-snack-bar/closable-snack-bar.component';
 
 @Component({
     selector: 'senergy-waiting-room',
@@ -58,6 +59,8 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     public searchText = '';
     private devicesSub: Subscription = new Subscription();
+    private eventsCloser?: () => void;
+    private idSet = new Set();
 
     constructor(
         private dialog: MatDialog,
@@ -69,10 +72,14 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearchAndGetDevices();
+        this.initEventNotification()
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+        if (this.eventsCloser) {
+            this.eventsCloser();
+        }
     }
 
     showHiddenChanged() {
@@ -121,6 +128,8 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
                     if (this.devices === undefined) {
                         this.devices = [];
                     }
+                    this.idSet.clear();
+                    this.devices.map(value => value.local_id).forEach(value => this.idSet.add(value));
                     this.totalCount = resp.total;
                     this.devicesDataSource.data = this.devices;
                 }
@@ -392,10 +401,10 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
 
     showDevice(localId: string) {
         this.dialogsService
-            .openConfirmDialog('Hide Device', 'Do you really want to show this device?')
+            .openConfirmDialog('Show Device', 'Do you really want to show this device?')
             .afterClosed()
-            .subscribe((hideDevice: boolean) => {
-                if (hideDevice) {
+            .subscribe((showDevice: boolean) => {
+                if (showDevice) {
                     this.ready = false;
                     this.waitingRoomService.showDevice(localId).subscribe((response) => {
                         if (response.status < 300) {
@@ -475,5 +484,29 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
             return element.attributes.some((value) => value.key === WaitingRoomComponent.wmbusKeyAttributeKey && !value.value);
         }
         return false;
+    }
+
+    private initEventNotification() {
+        this.waitingRoomService.events(closer => {
+            this.eventsCloser = closer;
+        })
+        .pipe(debounceTime(1000))
+        .subscribe((msg) => {
+            if (msg.type === WaitingRoomEventTypeSet && !this.idSet.has(msg.payload)) {
+                this.snackBar.openFromComponent(ClosableSnackBarComponent, {
+                    data: {
+                        message: 'New devices found.',
+                        action: 'Reload'
+                    },
+                }).onAction().subscribe(_ => {
+                    this.getDevices(false);
+                });
+                /*
+                this.snackBar.open('New devices found.', "Reload", {}).onAction().subscribe(_ => {
+                    this.getDevices(false);
+                });
+                 */
+            }
+        });
     }
 }

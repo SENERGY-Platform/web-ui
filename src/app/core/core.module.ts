@@ -51,6 +51,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { SelectSearchComponent } from './components/select-search/select-search.component';
 import { ConfirmDialogComponent } from './dialogs/confirm-dialog.component';
+import {ClosableSnackBarComponent} from './components/closable-snack-bar/closable-snack-bar.component';
 
 @NgModule({
     imports: [
@@ -92,6 +93,7 @@ import { ConfirmDialogComponent } from './dialogs/confirm-dialog.component';
         WidgetNoDataComponent,
         NotificationDialogComponent,
         SelectSearchComponent,
+        ClosableSnackBarComponent
     ],
     exports: [
         SidenavComponent,
@@ -107,6 +109,7 @@ import { ConfirmDialogComponent } from './dialogs/confirm-dialog.component';
         ShortInputVariableValuePipe,
         WidgetNoDataComponent,
         SelectSearchComponent,
+        ClosableSnackBarComponent
     ],
 })
 export class CoreModule {
