@@ -89,6 +89,9 @@ export class SidenavService implements OnDestroy {
                 if (value && value.total > 0) {
                     waitingRoom.badge = String(value.total);
                 }
+                if (value && value.total === 0) {
+                    waitingRoom.badge = "";
+                }
             });
         };
 
