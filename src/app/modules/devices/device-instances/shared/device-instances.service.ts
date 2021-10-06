@@ -387,7 +387,6 @@ export class DeviceInstancesService {
             var limit = batchsize;
             var offset = 0;
             var getDeviceHistoryBatch: ()=>void;
-            var result: DeviceInstancesHistoryModel[] = [];
             var next = (value: DeviceInstancesHistoryModel[])=> {
                 if (value && value.length) {
                     subscriber.next(value);
