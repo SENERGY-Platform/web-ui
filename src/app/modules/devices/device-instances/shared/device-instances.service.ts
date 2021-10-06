@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map, share } from 'rxjs/internal/operators';
+import {catchError, map, reduce, share} from 'rxjs/internal/operators';
 import {
     DeviceFilterCriteriaModel,
     DeviceInstancesBaseModel,
@@ -372,28 +372,52 @@ export class DeviceInstancesService {
         );
     }
 
+    getDeviceHistory(limit: number, offset: number, logDuration: string): Observable<DeviceInstancesHistoryModel[]> {
+        return this.http
+            .get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?offset='+offset+'&limit='+limit+'&log='+logDuration)
+            .pipe(
+                map((resp) => resp || []),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory', [])),
+                share(),
+            );
+    }
+
+    getDeviceHistoryAll(batchsize: number, logDuration: string): Observable<DeviceInstancesHistoryModel[]> {
+        return new Observable<DeviceInstancesHistoryModel[]>(subscriber => {
+            var limit = batchsize;
+            var offset = 0;
+            var getDeviceHistoryBatch: ()=>void;
+            var result: DeviceInstancesHistoryModel[] = [];
+            var next = (value: DeviceInstancesHistoryModel[])=> {
+                if (value && value.length) {
+                    subscriber.next(value);
+                }
+                if(!value || !value.length || value.length < limit) {
+                    subscriber.complete()
+                }else{
+                    offset = offset + limit;
+                    getDeviceHistoryBatch()
+                }
+            }
+            getDeviceHistoryBatch = ()=>{
+                this.getDeviceHistory(limit, offset, logDuration).subscribe(next);
+            }
+            getDeviceHistoryBatch();
+        });
+    }
+
     getDeviceHistory7d(): Observable<DeviceInstancesHistoryModel[]> {
         if (this.getDeviceHistoryObservable7d === null) {
-            this.getDeviceHistoryObservable7d = this.http
-                .get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?limit=10000&log=7d')
-                .pipe(
-                    map((resp) => resp || []),
-                    catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory7d', [])),
-                    share(),
-                );
+            this.getDeviceHistoryObservable7d = this.getDeviceHistoryAll(1000, '7d').
+            pipe(reduce((acc, value) => acc.concat(value)));
         }
         return this.getDeviceHistoryObservable7d;
     }
 
     getDeviceHistory1h(): Observable<DeviceInstancesHistoryModel[]> {
         if (this.getDeviceHistoryObservable1h === null) {
-            this.getDeviceHistoryObservable1h = this.http
-                .get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?limit=10000&log=1h')
-                .pipe(
-                    map((resp) => resp || []),
-                    catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory1h', [])),
-                    share(),
-                );
+            this.getDeviceHistoryObservable1h = this.getDeviceHistoryAll(1000, '1h').
+            pipe(reduce((acc, value) => acc.concat(value)));
         }
         return this.getDeviceHistoryObservable1h;
     }
