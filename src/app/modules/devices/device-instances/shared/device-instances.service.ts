@@ -28,7 +28,7 @@ import {
     DeviceSelectablesModel,
 } from './device-instances.model';
 import { Observable } from 'rxjs';
-import { DeviceInstancesHistoryModel } from './device-instances-history.model';
+import {DeviceInstancesHistoryModel, DeviceInstancesHistoryModelWithId} from './device-instances-history.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesUpdateModel } from './device-instances-update.model';
@@ -372,9 +372,9 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceHistory(limit: number, offset: number, logDuration: string): Observable<DeviceInstancesHistoryModel[]> {
+    getDeviceHistory(limit: number, offset: number, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
         return this.http
-            .get<DeviceInstancesHistoryModel[]>(environment.apiAggregatorUrl + '/devices?offset='+offset+'&limit='+limit+'&log='+logDuration)
+            .get<DeviceInstancesHistoryModelWithId[]>(environment.apiAggregatorUrl + '/devices?offset='+offset+'&limit='+limit+'&log='+logDuration)
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory', [])),
@@ -382,24 +382,42 @@ export class DeviceInstancesService {
             );
     }
 
-    getDeviceHistoryAll(batchsize: number, logDuration: string): Observable<DeviceInstancesHistoryModel[]> {
-        return new Observable<DeviceInstancesHistoryModel[]>(subscriber => {
+    getDeviceHistoryAfter(limit: number, afterId: string, afterName: string, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
+        return this.http
+            .get<DeviceInstancesHistoryModelWithId[]>(environment.apiAggregatorUrl + '/devices?after.id='+afterId+'&after.sort_field_value='+ encodeURIComponent(JSON.stringify(afterName)) +'&limit='+limit+'&log='+logDuration)
+            .pipe(
+                map((resp) => resp || []),
+                catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory', [])),
+                share(),
+            );
+    }
+
+    getDeviceHistoryAll(batchsize: number, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
+        return new Observable<DeviceInstancesHistoryModelWithId[]>(subscriber => {
             var limit = batchsize;
+            var last: DeviceInstancesHistoryModelWithId | null = null;
             var offset = 0;
             var getDeviceHistoryBatch: ()=>void;
-            var next = (value: DeviceInstancesHistoryModel[])=> {
+            var next = (value: DeviceInstancesHistoryModelWithId[])=> {
                 if (value && value.length) {
+                    last = value[value.length - 1];
+                    offset = offset + limit;
                     subscriber.next(value);
                 }
                 if(!value || !value.length || value.length < limit) {
                     subscriber.complete()
                 }else{
-                    offset = offset + limit;
                     getDeviceHistoryBatch()
                 }
             }
             getDeviceHistoryBatch = ()=>{
-                this.getDeviceHistory(limit, offset, logDuration).subscribe(next);
+                //use this if clause if you want to switch later to search with after parameter
+                //if (last && offset+limit > 10000) {
+                if (last) {
+                    this.getDeviceHistoryAfter(limit, last.id, last.name, logDuration).subscribe(next);
+                } else {
+                    this.getDeviceHistory(limit, offset, logDuration).subscribe(next);
+                }
             }
             getDeviceHistoryBatch();
         });

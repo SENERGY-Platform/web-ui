@@ -28,3 +28,7 @@ interface LogHistoryValues {
     1: boolean /** connected     */;
     2: string /** connectorName */;
 }
+
+export interface DeviceInstancesHistoryModelWithId extends DeviceInstancesHistoryModel{
+    id: string;
+}
