@@ -146,9 +146,8 @@
                         </div>
                     </div>
                 </div>
-
             </form>
         </div>
-        <button mat-raised-button color="accent" class="button-save-margin" (click)="save()">Save</button>
+        <button mat-raised-button color="accent" class="button-save-margin" (click)="save()" [disabled]="!deploymentFormGroup.valid">Save</button>
     </div>
 </div>

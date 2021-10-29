@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn} from '@angular/forms';
 import * as moment from 'moment';
 import {
     V2DeploymentsPreparedConfigurableModel,
@@ -86,6 +86,8 @@ export class DeploymentsConfigInitializerService {
             type: timeEvent.type,
             time: timeEvent.time,
             timeUnits: this.initTimeRawFormGroup(timeEvent.time),
+        }, {
+            validators: [this.getTimeEventValidator()]
         });
     }
 
@@ -227,5 +229,18 @@ export class DeploymentsConfigInitializerService {
             }
         });
         return result;
+    }
+
+    private getTimeEventValidator(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            if (control.value.type === 'timeDuration'){
+                let duration = moment.duration(control.value.timeUnits);
+                if (duration.asSeconds() < 5) {
+                    return {durationLessThan5Seconds: {value: control.value}}
+                }
+            }
+
+            return null;
+        };
     }
 }

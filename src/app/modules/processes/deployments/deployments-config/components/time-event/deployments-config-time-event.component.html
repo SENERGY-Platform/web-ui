@@ -15,6 +15,9 @@
   -->
 <div class="deployments-config-time-event-container" [formGroup]="time_event">
     <div>{{time_event.value.label}}</div>
+    <mat-error *ngIf="time_event.hasError('durationLessThan5Seconds')">
+        Please enter a valid time-event duration which is at least 5 seconds!
+    </mat-error>
     <table class="full-width" formGroupName="timeUnits"
            (change)="change()" >
         <tr>
