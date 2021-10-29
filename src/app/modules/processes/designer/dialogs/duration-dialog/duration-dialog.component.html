@@ -18,11 +18,14 @@
 <h2 mat-dialog-title>Set Duration</h2>
 
 <mat-dialog-content>
+  <div class="mat-error" *ngIf="!valid">
+    Please enter a valid duration which is at least 5 seconds!
+  </div>
   <senergy-duration-event-config [initial]="initial" (update)="update($event)"></senergy-duration-event-config>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="ok()">Ok</button>
+  <button mat-raised-button color="accent" (click)="ok()" [disabled]="!valid">Ok</button>
 </mat-dialog-actions>
 
