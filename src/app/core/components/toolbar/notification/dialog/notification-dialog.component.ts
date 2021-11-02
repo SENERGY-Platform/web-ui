@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { NotificationModel } from '../shared/notification.model';
-import { NotificationService } from '../shared/notification.service';
+import {Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {NotificationModel} from '../shared/notification.model';
+import {NotificationService} from '../shared/notification.service';
+import {PageEvent} from '@angular/material/paginator';
 
 @Component({
     templateUrl: './notification-dialog.component.html',
@@ -26,6 +27,8 @@ import { NotificationService } from '../shared/notification.service';
 export class NotificationDialogComponent implements OnInit {
     notifications: NotificationModel[] = [];
     notificationService: NotificationService;
+    defaultPageSize = 25;
+    lastPageEvent: PageEvent | undefined;
 
     constructor(
         private dialogRef: MatDialogRef<NotificationDialogComponent>,
@@ -35,7 +38,8 @@ export class NotificationDialogComponent implements OnInit {
         this.notificationService = data.notificationService;
     }
 
-    ngOnInit() {}
+    ngOnInit() {
+    }
 
     close(): void {
         this.dialogRef.close();
@@ -54,11 +58,7 @@ export class NotificationDialogComponent implements OnInit {
     }
 
     deleteAllMessages() {
-        const notificationCopy = this.notifications;
-        for (let i = 0; i < notificationCopy.length; i++) {
-            this.deleteMessage(i);
-        }
-        this.notifications = [];
+        this.notificationService.deleteNotifications(this.notifications.map(x => x._id)).subscribe();
     }
 
     setAllRead() {
@@ -69,5 +69,18 @@ export class NotificationDialogComponent implements OnInit {
 
     trackById(_: number, a: NotificationModel): string {
         return a._id;
+    }
+
+    getPage(): NotificationModel[] {
+        if (this.lastPageEvent === undefined) {
+            return this.notifications.slice(0, this.defaultPageSize);
+        } else {
+            return this.notifications.slice(this.lastPageEvent.pageIndex * this.lastPageEvent.pageSize,
+                (this.lastPageEvent.pageIndex + 1) * this.lastPageEvent.pageSize);
+        }
+    }
+
+    movePage($event: PageEvent) {
+        this.lastPageEvent = $event;
     }
 }

@@ -16,37 +16,51 @@
 
 <h2 mat-dialog-title>Notifications</h2>
 <mat-dialog-content>
+
     <div *ngIf="notifications.length === 0">
         You don't have any notifications!
     </div>
+
     <div class="container">
-        <mat-accordion multi="true">
-            <mat-expansion-panel *ngFor="let n of notifications; let index = index; trackBy: trackById" (opened)="setRead(index, true)">
-                <mat-expansion-panel-header class="right-aligned-header">
-                    <mat-panel-title>
-                        {{n.title}}
-                    </mat-panel-title>
-                    <mat-panel-description>
-                        <span *ngIf="n.created_at !== null" class="date">{{n.created_at | date:'dd.MM.yy HH:mm'}}</span>
-                        <mat-icon *ngIf="!n.isRead">new_releases</mat-icon>
-                        <span *ngIf="n.isRead" class="icon-spacer"></span>
-                    </mat-panel-description>
-                </mat-expansion-panel-header>
-                <div>
-                    {{n.message}}
-                </div>
-                <div>
-                    <button mat-icon-button style="float: right"
-                            (click)="deleteMessage(index)">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                    <button mat-icon-button style="float: right" disabled="{{!n.isRead}}"
-                            (click)="setRead(index, false)">
-                        <mat-icon>new_releases</mat-icon>
-                    </button>
-                </div>
-            </mat-expansion-panel>
-        </mat-accordion>
+            <mat-accordion multi="true">
+                <mat-expansion-panel *ngFor="let n of getPage(); let index = index; trackBy: trackById"
+                                     (opened)="setRead(index, true)">
+                    <mat-expansion-panel-header class="right-aligned-header">
+                        <mat-panel-title>
+                            {{n.title}}
+                        </mat-panel-title>
+                        <mat-panel-description>
+                            <span *ngIf="n.created_at !== null"
+                                  class="date">{{n.created_at | date:'dd.MM.yy HH:mm'}}</span>
+                            <mat-icon *ngIf="!n.isRead">new_releases</mat-icon>
+                            <span *ngIf="n.isRead" class="icon-spacer"></span>
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <ng-template matExpansionPanelContent>
+                        <div>
+                            {{n.message}}
+                        </div>
+                        <div>
+                            <button mat-icon-button style="float: right"
+                                    (click)="deleteMessage(index)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                            <button mat-icon-button style="float: right" disabled="{{!n.isRead}}"
+                                    (click)="setRead(index, false)">
+                                <mat-icon>new_releases</mat-icon>
+                            </button>
+                        </div>
+                    </ng-template>
+                </mat-expansion-panel>
+            </mat-accordion>
+            <mat-paginator [length]="notifications.length"
+                           [pageSize]="defaultPageSize"
+                           [pageSizeOptions]="[10, 25, 50, 100]"
+                           (page)="movePage($event)"
+                           showFirstLastButtons
+                           aria-label="Select page">
+            </mat-paginator>
+
     </div>
 </mat-dialog-content>
 

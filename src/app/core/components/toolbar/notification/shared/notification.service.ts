@@ -63,6 +63,14 @@ export class NotificationService implements OnDestroy {
         return this.http.delete(environment.notificationsUrl + '/' + notification._id);
     }
 
+    deleteNotifications(ids: string[]): Observable<unknown> {
+        return this.http.request('DELETE', environment.notificationsUrl, {
+            body: ids,
+            responseType: 'text',
+            observe: 'response',
+        });
+    }
+
     updateNotification(notification: NotificationModel): Observable<unknown> {
         const n: NotificationUpdateModel = {
             isRead: notification.isRead,
@@ -87,14 +95,15 @@ export class NotificationService implements OnDestroy {
                     this.webSocketSubject?.next({ type: 'refresh' });
                     break;
                 case 'notification list':
-                    this.notifications = msg.payload as NotificationModel[];
+                    this.notifications = (msg.payload as NotificationModel[]).reverse();
                     this.notificationEmitter.emit(this.notifications);
                     break;
                 case 'put notification':
                     const n = msg.payload as NotificationModel;
                     const idx = this.notifications.findIndex((no) => no._id === n._id);
                     if (idx === -1) {
-                        this.notifications.push(n);
+                        this.notifications.splice(0, 0, n);
+                        //this.notifications.push(n);
                     } else {
                         this.notifications[idx] = n;
                     }

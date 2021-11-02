@@ -52,6 +52,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { SelectSearchComponent } from './components/select-search/select-search.component';
 import { ConfirmDialogComponent } from './dialogs/confirm-dialog.component';
 import {ClosableSnackBarComponent} from './components/closable-snack-bar/closable-snack-bar.component';
+import {InfiniteScrollModule} from "ngx-infinite-scroll";
+import {MatPaginatorModule} from "@angular/material/paginator";
 
 @NgModule({
     imports: [
@@ -75,6 +77,7 @@ import {ClosableSnackBarComponent} from './components/closable-snack-bar/closabl
         MatBadgeModule,
         MatExpansionModule,
         MatSelectModule,
+        MatPaginatorModule,
     ],
     declarations: [
         SidenavComponent,
