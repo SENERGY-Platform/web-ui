@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import { EventEmitter, Injectable, OnDestroy, Output } from '@angular/core';
-import { Observable } from 'rxjs';
-import { NotificationModel, NotificationUpdateModel } from './notification.model';
-import { environment } from '../../../../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
-import { ErrorHandlerService } from '../../../../services/error-handler.service';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { NotificationDialogComponent } from '../dialog/notification-dialog.component';
-import { AuthorizationService } from '../../../../services/authorization.service';
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import {EventEmitter, Injectable, OnDestroy, Output} from '@angular/core';
+import {Observable} from 'rxjs';
+import {
+    NotificationBrokerListModel,
+    NotificationBrokerModel,
+    NotificationModel,
+    NotificationPlatformBrokerModel,
+    NotificationUpdateModel
+} from './notification.model';
+import {environment} from '../../../../../../environments/environment';
+import {HttpClient} from '@angular/common/http';
+import {ErrorHandlerService} from '../../../../services/error-handler.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {NotificationDialogComponent} from '../dialog/notification-dialog.component';
+import {AuthorizationService} from '../../../../services/authorization.service';
+import {webSocket, WebSocketSubject} from 'rxjs/webSocket';
 
 @Injectable({
     providedIn: 'root',
@@ -54,17 +60,17 @@ export class NotificationService implements OnDestroy {
             notifications: this.notifications,
             notificationService: this,
         };
-        dialogConfig.minWidth = '700px';
+        dialogConfig.width = '80vw';
         const dialogRef = this.dialog.open(NotificationDialogComponent, dialogConfig);
         return dialogRef.afterClosed();
     }
 
     deleteNotification(notification: NotificationModel): Observable<unknown> {
-        return this.http.delete(environment.notificationsUrl + '/' + notification._id);
+        return this.http.delete(environment.notificationsUrl + '/notifications/' + notification._id);
     }
 
     deleteNotifications(ids: string[]): Observable<unknown> {
-        return this.http.request('DELETE', environment.notificationsUrl, {
+        return this.http.request('DELETE', environment.notificationsUrl + '/notifications', {
             body: ids,
             responseType: 'text',
             observe: 'response',
@@ -79,7 +85,39 @@ export class NotificationService implements OnDestroy {
             userId: notification.userId,
             created_at: notification.created_at,
         };
-        return this.http.post(environment.notificationsUrl + '/' + notification._id, n);
+        return this.http.post(environment.notificationsUrl + '/notifications/' + notification._id, n);
+    }
+
+    listBrokers(limit: number, offset: number): Observable<NotificationBrokerListModel> {
+        return this.http.get<NotificationBrokerListModel>(environment.notificationsUrl + '/brokers?limit=' + limit + '&offset=' + offset);
+    }
+
+    createBroker(broker: NotificationBrokerModel): Observable<NotificationBrokerModel> {
+        return this.http.post<NotificationBrokerModel>(environment.notificationsUrl + '/brokers', broker);
+    }
+
+    updateBroker(broker: NotificationBrokerModel): Observable<NotificationBrokerModel> {
+        return this.http.put<NotificationBrokerModel>(environment.notificationsUrl + '/brokers/' + broker.id, broker);
+    }
+
+    deleteBroker(id: string): Observable<unknown> {
+        return this.http.delete(environment.notificationsUrl + '/brokers/' + id);
+    }
+
+    deleteBrokers(ids: string[]): Observable<unknown> {
+        return this.http.request('DELETE', environment.notificationsUrl, {
+            body: ids,
+            responseType: 'text',
+            observe: 'response',
+        });
+    }
+
+    getPlatformBrokerConfig(): Observable<NotificationPlatformBrokerModel> {
+        return this.http.get<NotificationPlatformBrokerModel>(environment.notificationsUrl + '/platform-broker');
+    }
+
+    updatePlatformBrokerConfig(config: NotificationPlatformBrokerModel): Observable<NotificationPlatformBrokerModel> {
+        return this.http.put<NotificationPlatformBrokerModel>(environment.notificationsUrl + '/platform-broker', config);
     }
 
     private initWs() {
@@ -92,7 +130,7 @@ export class NotificationService implements OnDestroy {
                     this.authenticateWs();
                     break;
                 case 'authentication confirmed':
-                    this.webSocketSubject?.next({ type: 'refresh' });
+                    this.webSocketSubject?.next({type: 'refresh'});
                     break;
                 case 'notification list':
                     this.notifications = (msg.payload as NotificationModel[]).reverse();
@@ -129,6 +167,9 @@ export class NotificationService implements OnDestroy {
     }
 
     private authenticateWs() {
-        this.authorizationService.getToken().then((token) => this.webSocketSubject?.next({ type: 'authentication', payload: token }));
+        this.authorizationService.getToken().then((token) => this.webSocketSubject?.next({
+            type: 'authentication',
+            payload: token
+        }));
     }
 }

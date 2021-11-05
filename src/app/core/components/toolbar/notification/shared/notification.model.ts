@@ -34,3 +34,26 @@ export interface NotificationUpdateModel {
 export interface NotificationServiceResponse {
     notifications: NotificationModel[];
 }
+
+export interface NotificationBrokerModel {
+    id: string;
+    address: string;
+    user: string;
+    password: string;
+    topic: string;
+    qos: number;
+    enabled: boolean;
+    created_at: Date;
+    updated_at: Date;
+}
+
+export interface NotificationBrokerListModel {
+    total: number;
+    limit: number;
+    offset: number;
+    brokers: NotificationBrokerModel[];
+}
+
+export interface NotificationPlatformBrokerModel {
+    enabled: boolean;
+}

@@ -30,3 +30,32 @@ mat-dialog-actions button:not(:last-child) {
 .icon-spacer {
     width: 24px;
 }
+
+table {
+    width: 100%;
+}
+
+.table-container {
+    position: relative;
+    max-width: 100%
+}
+
+::ng-deep td.mat-cell {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    max-width: calc((80vw - 232px)/2);
+}
+
+.mat-column-enabled {
+    width: 40px;
+}
+.mat-column-edit {
+    width: 20px;
+}
+.mat-column-delete {
+    width: 20px;
+}
+
+.float-right {
+    float: right
+}
