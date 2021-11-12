@@ -40,7 +40,7 @@
     "cronstrue": "^1.96.0",
     "dotenv": "^8.2.0",
     "file-saver": "^2.0.2",
-    "jointjs": "^3.3.1",
+    "jointjs": "^3.4.4",
     "jquery": "^3.5.1",
     "keycloak-angular": "^8.0.1",
     "keycloak-js": "11.0.0",
@@ -57,7 +57,7 @@
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~12.2.6",
+    "@angular-devkit/build-angular": "^12.2.6",
     "@angular-eslint/builder": "^12.4.1",
     "@angular-eslint/eslint-plugin": "^12.4.1",
     "@angular-eslint/eslint-plugin-template": "^12.4.1",
