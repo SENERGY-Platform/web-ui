@@ -154,16 +154,16 @@
 
                 <mat-checkbox formControlName="allMessages">Consume all messages</mat-checkbox>
 
-                <div formArrayName="exportValues" *ngFor="let _ of exportValues.controls; let key = index"
+                <div formArrayName="exportValues" *ngFor="let group of getExportValuesControls(); let key = index"
                      fxLayout="row" class="layout-margin">
-                    <div [formGroupName]="key" fxFlex fxLayoutAlign="center center">
+                    <div [formGroupName]="key+offset" fxFlex fxLayoutAlign="center center">
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                             <mat-label>{{exportForm.getRawValue().targetSelector === targetDb ? 'Name' : 'Topic'}}</mat-label>
                             <input #input matInput formControlName="Name" placeholder="Name"/>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
                             <mat-label>Path</mat-label>
-                            <senergy-select-search formControlName="Path" (ngModelChange)="pathChanged(key)"
+                            <senergy-select-search formControlName="Path" (ngModelChange)="pathChanged(key+offset)"
                                                    placeholder="Path"
                                                    [options]="getPathsKeyOptions()">
                             </senergy-select-search>
@@ -176,17 +176,24 @@
                                 </mat-option>
                             </mat-select>
                         </mat-form-field>
-                        <mat-checkbox formControlName="Tag" (ngModelChange)="pathChanged(key)"
+                        <mat-checkbox formControlName="Tag" (ngModelChange)="pathChanged(key+offset)"
                                       class="inline layout-margin pad-right"
                                       *ngIf="exportForm.getRawValue().targetSelector === targetDb">Tag
                         </mat-checkbox>
                         <button mat-icon-button>
-                            <mat-icon (click)="deleteValue(key)" color="warn" class="inline">
+                            <mat-icon (click)="deleteValue(key+offset)" color="warn" class="inline">
                                 delete
                             </mat-icon>
                         </button>
                     </div>
                 </div>
+                <mat-paginator [length]="exportValues.controls.length"
+                               [pageSize]="defaultPageSize"
+                               [pageSizeOptions]="[5, 10, 20]"
+                               (page)="movePage($event)"
+                               showFirstLastButtons
+                               aria-label="Select page">
+                </mat-paginator>
                 <div fxLayout="row" class="button-footer">
                     <div fxLayout="column" fxFlex fxLayoutAlign="center start">
                         <button type="button" mat-raised-button color="accent" (click)="autofillValues()"
