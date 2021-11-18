@@ -52,7 +52,7 @@
         </mat-option>
     </span>
     <span *ngIf="withGroups">
-        <mat-optgroup *ngFor="let group of optionsGroups | keyvalue" [label]="group.key">
+        <mat-optgroup *ngFor="let group of optionsGroups | keyvalue; trackBy: trackGroupName" [label]="group.key">
             <mat-option *ngFor="let option of group.value" [value]="getOptionValue(option)"
                         [ngClass]="getOptionClass(option)"
                         [disabled]="getOptionDisabled(option)">

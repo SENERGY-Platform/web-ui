@@ -27,13 +27,15 @@ import {
     Self,
     ViewChild,
 } from '@angular/core';
-import { MatSelect, MatSelectChange } from '@angular/material/select';
-import { MatFormFieldControl } from '@angular/material/form-field';
-import { Observable, Subject } from 'rxjs';
-import { ControlValueAccessor, FormControl, FormControlName, NgControl } from '@angular/forms';
-import { coerceBooleanProperty } from '@angular/cdk/coercion';
-import { ErrorStateMatcher, MatOption } from '@angular/material/core';
-import { MatInput } from '@angular/material/input';
+import {MatSelect, MatSelectChange} from '@angular/material/select';
+import {MatFormFieldControl} from '@angular/material/form-field';
+import {Observable, Subject} from 'rxjs';
+import {ControlValueAccessor, FormControl, NgControl} from '@angular/forms';
+import {coerceBooleanProperty} from '@angular/cdk/coercion';
+import {ErrorStateMatcher, MatOption} from '@angular/material/core';
+import {MatInput} from '@angular/material/input';
+import ScrollEvent = JQuery.ScrollEvent;
+import MouseUpEvent = JQuery.MouseUpEvent;
 
 export function useProperty(property: string): (option: any) => any {
     const properties = property.split('.');
@@ -53,7 +55,7 @@ export function useProperty(property: string): (option: any) => any {
     selector: 'senergy-select-search',
     templateUrl: './select-search.component.html',
     styleUrls: ['./select-search.component.css'],
-    providers: [{ provide: MatFormFieldControl, useExisting: SelectSearchComponent }],
+    providers: [{provide: MatFormFieldControl, useExisting: SelectSearchComponent}],
 })
 export class SelectSearchComponent implements MatFormFieldControl<any>, ControlValueAccessor, OnDestroy, AfterViewInit, OnInit {
     constructor(@Optional() @Self() public ngControl: NgControl) {
@@ -193,7 +195,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
 
     _autoSelectSingleElement = false;
 
-    @ViewChild(MatSelect, { static: false }) select!: MatSelect;
+    @ViewChild(MatSelect, {static: false}) select!: MatSelect;
 
     _options: any[] | Map<string, any[]> = [];
 
@@ -237,9 +239,25 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() useOptionDisabledProperty: string | undefined = undefined;
     @Input() getTriggerValue: ((options: MatOption | MatOption[]) => string) | undefined = undefined;
 
+    /**
+     * Percentage of the scrollbar that will trigger a window change.
+     */
+    @Input() scrollPercentage = 15;
+    /**
+     * How many elements will be rendered at a time
+     */
+    @Input() scrollWindowSize = 30;
+    /**
+     * scrollWindowSize / scrollWindowMoveDivisor = number of elements that will be removed/added to the sliding window
+     */
+    @Input() scrollWindowMoveDivisor = 10;
+    scrollLowerOffset = 0;
+    lastScrollPercentage = 0;
+    maxElements = 0;
+
     optionsGroups: Map<string, any> = new Map();
 
-    @ViewChild('searchInput', { static: false }) searchInput!: MatInput;
+    @ViewChild('searchInput', {static: false}) searchInput!: MatInput;
 
     ngOnInit() {
         if (this.useOptionViewProperty !== undefined) {
@@ -271,6 +289,55 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         if (this.queuedOnTouched.length > 0) {
             this.queuedOnTouched.forEach((fn) => this.registerOnTouched(fn));
             this.queuedOnTouched = [];
+        }
+        this.select.openedChange.subscribe((opened) => {
+            if (opened) {
+                this.select.panel.nativeElement.addEventListener('scroll', ($event: ScrollEvent) => this.updateScrollOffset($event, this.select.panel.nativeElement));
+                this.select.panel.nativeElement.addEventListener('mouseup', ($event: MouseUpEvent) => this.fixPowerScroll($event, this.select.panel.nativeElement)); // see explanation in handleMouseUp
+            }
+        });
+    }
+
+    updateScrollOffset($event: ScrollEvent, panelNativeElement: any) {
+        const scrollBottom = $event.target.scrollTop + $event.target.offsetHeight;
+        const lowerScrollPercentage = (scrollBottom / $event.target.scrollHeight) * 100; // percentage scrolled bottom of the scrollbar
+        const upperScrollPercentage = ($event.target.scrollTop / $event.target.scrollHeight) * 100; // percentage scrolled top of the scrollbar
+        if (lowerScrollPercentage > this.lastScrollPercentage) { // scrolling down
+            if (100 - lowerScrollPercentage < this.scrollPercentage) {
+                if (this.scrollLowerOffset + (this.scrollWindowSize / this.scrollWindowMoveDivisor) < this.maxElements - this.scrollWindowSize) {
+                    this.scrollLowerOffset = this.scrollLowerOffset + (this.scrollWindowSize / this.scrollWindowMoveDivisor);
+                    this.fixPowerScroll($event, panelNativeElement);
+                } else {
+                    this.scrollLowerOffset = this.maxElements - this.scrollWindowSize;
+                }
+                this.optionsGroups = this.getOptionsGroup(this.searchControl.value);
+
+            }
+        } else { // scrolling up
+            if (upperScrollPercentage < this.scrollPercentage) {
+                if (this.scrollLowerOffset - (this.scrollWindowSize / this.scrollWindowMoveDivisor) > 0) {
+                    this.scrollLowerOffset = this.scrollLowerOffset - (this.scrollWindowSize / this.scrollWindowMoveDivisor);
+                    this.fixPowerScroll($event, panelNativeElement);
+                } else {
+                    this.scrollLowerOffset = 0;
+                }
+                this.optionsGroups = this.getOptionsGroup(this.searchControl.value);
+            }
+        }
+        this.lastScrollPercentage = lowerScrollPercentage;
+    }
+
+    fixPowerScroll($event: MouseUpEvent | ScrollEvent, panelNativeElement: any) {
+        /*  If manually grabbing the scroll element and pulling it to the end of the scrollbar or scrolling really fast
+            can prevent loading new elements.
+            If a user scrolled to the top or bottom, but more elements may be loaded, forcing the scroll element
+            a bit up or down allows for new scroll events to fire.
+         */
+        if ($event.target.scrollTop === 0 && this.scrollLowerOffset > 0) {
+            panelNativeElement.scroll(0, $event.target.scrollTop + 84);
+        }
+        if ($event.target.scrollTop + $event.target.offsetHeight === $event.target.scrollHeight && this.scrollLowerOffset + this.scrollWindowSize < this.maxElements) {
+            panelNativeElement.scroll(0, $event.target.scrollTop - 84);
         }
     }
 
@@ -313,7 +380,10 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                     return this.getOptionViewValue(option).toLowerCase().indexOf(this.searchControl.value.toLowerCase()) !== -1;
                 });
 
+                const initialFilteredLength = filtered.length;
+                filtered = filtered.slice(this.scrollLowerOffset, this.scrollLowerOffset + this.scrollWindowSize);
                 // append selected options if not already included
+                const selected: any[] = [];
                 const addOptionByValue = (optionValue: any) => {
                     if (!Array.isArray(this.options)) {
                         console.error('Cant do that');
@@ -325,7 +395,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                         return;
                     }
                     if (filtered.indexOf(option) === -1) {
-                        filtered.push(option);
+                        selected.push(option);
                     }
                 };
                 if (this.select?.selected) {
@@ -335,6 +405,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                         addOptionByValue(this.select.selected.value);
                     }
                 }
+                this.maxElements = initialFilteredLength + selected.length;
+                filtered.push(...selected);
             }
             obs.next(filtered);
             obs.complete();
@@ -415,18 +487,24 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     }
 
     getOptionsGroup(search: string): Map<string, any> {
-        if (Array.isArray(this.options)) {
+        if (Array.isArray(this.options) || this.select === undefined) {
             return new Map();
         }
-        if (this.options?.forEach && search.length > 0) {
-            const r = new Map();
+        const r = new Map();
+        let selected = new Map();
+        if (this.options?.forEach) {
             this.options.forEach((v, k) => {
                 const filtered = v.filter((option) => {
                     if (Array.isArray(this.select.selected)) {
                         if (this.select.selected.find((sel) => sel.value === this.getOptionValue(option)) !== undefined) {
+                            selected = this.appendInsertFilterMap(selected, k, option).m;
                             return true;
                         }
                     } else if (this.select.selected?.value === this.getOptionValue(option)) {
+                        selected = this.appendInsertFilterMap(selected, k, option).m;
+                        return true;
+                    }
+                    if (search.length === 0) {
                         return true;
                     }
                     return (
@@ -438,14 +516,41 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                     r.set(k, filtered);
                 }
             });
-            return r;
-        } else {
-            return this.options;
         }
+        // Length cutting
+        let r2 = new Map();
+        let size = 0;
+        let skipped = 0;
+        this.maxElements = 0;
+        for (const [k, v] of r) {
+            this.maxElements += v.length;
+            let j = 0;
+            const v2 = [];
+            while (skipped < this.scrollLowerOffset && j < v.length) {
+                skipped++;
+                j++;
+            }
+            while (size < this.scrollWindowSize && j < v.length) {
+                v2.push(v[j]);
+                j++;
+                size++;
+            }
+            if (v2.length > 0) {
+                r2.set(k, v2);
+            }
+        }
+        for (const [k, v] of selected) {
+            r2 = this.appendInsertFilterMap(r2, k, v).m;
+        }
+        return r2;
     }
 
     toArray(v: any): any[] {
         return Array.isArray(v) ? v : [];
+    }
+
+    trackGroupName(s: any) {
+        return s;
     }
 
     private selectSingleElement() {
@@ -478,7 +583,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             toWrite = this.getOptionValue(toWrite);
             toWrite = this.multiple ? [toWrite] : toWrite;
             this.value = toWrite;
-            this.selectionChanged({ source: this.select, value: toWrite });
+            this.selectionChanged({source: this.select, value: toWrite});
             this.ngControl?.reset(this.value);
         }
     }
@@ -499,5 +604,32 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 }
             });
         }
+    }
+
+    /**
+     * Inserts val in m with a key, if the element is not already present for that key. If val is an array, all missing elements will be inserted.
+     *
+     * @param m
+     * @param key
+     * @param val
+     * @private
+     * @return The number of inserted elements
+     */
+    private appendInsertFilterMap(m: Map<string, any[]>, key: string, val: any | any[]): {i: number; m: Map<string, any[]>} {
+        const arr = Array.isArray(val) ? val : [val];
+        if (m.has(key)) {
+            let i = 0;
+            arr.forEach(v => {
+                const vals = m.get(key) || [];
+                if (!m.get(key)?.some(vKnown => vKnown === v)){
+                    vals.push(v);
+                    i++;
+                }
+                m.set(key, vals);
+            });
+            return {i, m};
+        }
+        m.set(key, arr);
+        return {i: arr.length, m};
     }
 }
