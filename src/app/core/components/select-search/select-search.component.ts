@@ -154,8 +154,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         this._options = value;
         this.withGroups = !Array.isArray(this.options);
         if (!Array.isArray(this.options)) {
-            this.optionsGroups = this.getOptionsGroup('');
-            this.searchControl.valueChanges.subscribe((val: string) => (this.optionsGroups = this.getOptionsGroup(val)));
+            this.updateOptionsGroups('');
+            this.searchControl.valueChanges.subscribe((val: string) => (this.updateOptionsGroups(val)));
         }
         this.resetSearchIfNoResults();
         this.selectSingleElement();
@@ -310,7 +310,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 } else {
                     this.scrollLowerOffset = this.maxElements - this.scrollWindowSize;
                 }
-                this.optionsGroups = this.getOptionsGroup(this.searchControl.value);
+                this.updateOptionsGroups(this.searchControl.value);
 
             }
         } else { // scrolling up
@@ -321,7 +321,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 } else {
                     this.scrollLowerOffset = 0;
                 }
-                this.optionsGroups = this.getOptionsGroup(this.searchControl.value);
+                this.updateOptionsGroups(this.searchControl.value);
             }
         }
         this.lastScrollPercentage = lowerScrollPercentage;
@@ -486,9 +486,13 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         this.select?.updateErrorState();
     }
 
-    getOptionsGroup(search: string): Map<string, any> {
-        if (Array.isArray(this.options) || this.select === undefined) {
-            return new Map();
+    updateOptionsGroups(search: string): void {
+        if (this.select === undefined) {
+            setTimeout(() => this.updateOptionsGroups(search));
+            return;
+        }
+        if (Array.isArray(this.options)) {
+            return;
         }
         const r = new Map();
         let selected = new Map();
@@ -542,7 +546,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         for (const [k, v] of selected) {
             r2 = this.appendInsertFilterMap(r2, k, v).m;
         }
-        return r2;
+        this.optionsGroups = r2;
     }
 
     toArray(v: any): any[] {
@@ -559,10 +563,10 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         }
         let toWrite: any;
         if (!Array.isArray(this.options)) {
-            const optionsGroups = this.getOptionsGroup('');
+            this.updateOptionsGroups('');
             let singleValue: any;
             let moreFound = false;
-            optionsGroups.forEach((v: any[]) => {
+            this.optionsGroups.forEach((v: any[]) => {
                 if (v.length > 1) {
                     moreFound = true;
                 } else if (v.length === 1) {
