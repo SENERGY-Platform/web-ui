@@ -176,14 +176,24 @@ export class TaskConfigDialogComponent implements OnInit {
             this.conceptsService
                 .getConceptWithCharacteristics(func.concept_id)
                 .subscribe((concept: ConceptsCharacteristicsModel | null) => {
-                    if (concept) {
+                    if (concept && concept.base_characteristic_id) {
                         let index = -1;
                         concept.characteristics.forEach((char: DeviceTypeCharacteristicsModel, i: number) => {
                             if (char.id === concept.base_characteristic_id) {
                                 index = i;
                             }
                         });
-                        this.characteristic = concept.characteristics[index];
+                        if (index >= 0) {
+                            this.characteristic = concept.characteristics[index];
+                        } else {
+                            console.log("ERROR: base characteristic "+concept.base_characteristic_id+" is not characteristic of the concept");
+                        }
+                    } else {
+                        if (!concept) {
+                            console.log("ERROR: unknown concept");
+                        }else if (!concept.base_characteristic_id) {
+                            console.log("ERROR: missing concept base characteristic");
+                        }
                     }
                 });
         } else {
