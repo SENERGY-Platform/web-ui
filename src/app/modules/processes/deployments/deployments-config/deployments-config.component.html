@@ -101,7 +101,7 @@
                                         </mat-form-field>
 
                                         <mat-form-field class="full-width" color="accent"
-                                                        [fxShow]="element.message_event.selection.show === true">
+                                                        *ngIf="element.message_event.selection.show === true">
                                             <senergy-select-search placeholder="Service" [required]="true"
                                                                    formControlName="selected_service_id"
                                                                    [autoSelectSingleElement]="true"
@@ -148,6 +148,6 @@
                 </div>
             </form>
         </div>
-        <button mat-raised-button color="accent" class="button-save-margin" (click)="save()" [disabled]="!deploymentFormGroup.valid">Save</button>
+        <button mat-raised-button color="accent" class="button-save-margin" (click)="save()" [disabled]="deploymentFormGroup.invalid">Save</button>
     </div>
 </div>
