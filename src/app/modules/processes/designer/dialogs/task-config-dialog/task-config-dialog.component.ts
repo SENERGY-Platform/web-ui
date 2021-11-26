@@ -186,13 +186,13 @@ export class TaskConfigDialogComponent implements OnInit {
                         if (index >= 0) {
                             this.characteristic = concept.characteristics[index];
                         } else {
-                            console.log("ERROR: base characteristic "+concept.base_characteristic_id+" is not characteristic of the concept");
+                            console.error('base characteristic '+concept.base_characteristic_id+' is not characteristic of the concept');
                         }
                     } else {
                         if (!concept) {
-                            console.log("ERROR: unknown concept");
+                            console.error('unknown concept');
                         }else if (!concept.base_characteristic_id) {
-                            console.log("ERROR: missing concept base characteristic");
+                            console.error('missing concept base characteristic');
                         }
                     }
                 });
