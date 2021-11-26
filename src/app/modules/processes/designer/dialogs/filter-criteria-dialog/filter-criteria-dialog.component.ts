@@ -104,7 +104,7 @@ export class FilterCriteriaDialogComponent implements OnInit {
     }
 
     private getAspectFunctions(aspect: DeviceTypeAspectModel) {
-        this.deviceTypeService.getAspectsMeasuringFunctions(aspect.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
+        this.deviceTypeService.getAspectsMeasuringFunctionsWithImports(aspect.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
             this.functions = functions;
 
             // handle init value

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProcessRepoService} from '../../process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../shared/deployments.service';
@@ -81,6 +81,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         private deploymentFogFactory: DeploymentsFogFactory,
         private hubsService: NetworksService,
         private characteristicsService: CharacteristicsService,
+        private cd: ChangeDetectorRef,
     ) {
         this.getRouterParams();
         this.getFlows();
@@ -118,6 +119,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 this.initFormGroup(deployment);
                 this.ready = true;
                 this.loadCharacteristicNames(deployment);
+                this.cd.detectChanges();
             });
         } else if (this.deploymentId !== undefined) {
             this.deploymentsService.v2getDeployments(this.deploymentId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
@@ -128,6 +130,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                     this.deployment = deployment;
                     this.ready = true;
                     this.loadCharacteristicNames(deployment);
+                    this.cd.detectChanges();
                 } else {
                     this.snackBar.open('Error while copying the deployment! Probably old version', undefined, { duration: 2000 });
                 }

@@ -419,7 +419,7 @@ export class DeployFlowComponent implements OnInit {
         if (this.aspectFunctions.has(aspectId)) {
             return of(this.aspectFunctions.get(aspectId) || []);
         }
-        return this.deviceTypeService.getAspectsMeasuringFunctions(aspectId).pipe(
+        return this.deviceTypeService.getAspectsMeasuringFunctionsWithImports(aspectId).pipe(
             map((functions) => {
                 this.aspectFunctions.set(aspectId, functions);
                 return functions;

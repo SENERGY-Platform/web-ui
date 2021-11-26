@@ -218,6 +218,13 @@ export class DeviceTypeService {
         );
     }
 
+    getAspectsMeasuringFunctionsWithImports(aspectId: string): Observable<DeviceTypeFunctionModel[]> {
+        return this.http.get<DeviceTypeFunctionModel[]>(environment.apiAggregatorUrl + '/aspects/' + aspectId + '/measuring-functions').pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsMeasuringFunctionsWithImports', [])),
+        );
+    }
+
     getLeafCharacteristics(): Observable<DeviceTypeCharacteristicsModel[]> {
         return this.http.get<DeviceTypeCharacteristicsModel[]>(environment.semanticRepoUrl + '/characteristics?leafsOnly=true').pipe(
             map((resp) => resp || []),
