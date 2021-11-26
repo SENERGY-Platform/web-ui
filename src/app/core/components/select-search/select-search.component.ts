@@ -292,8 +292,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         }
         this.select.openedChange.subscribe((opened) => {
             if (opened) {
-                this.select.panel.nativeElement.addEventListener('scroll', ($event: ScrollEvent) => this.updateScrollOffset($event, this.select.panel.nativeElement));
-                this.select.panel.nativeElement.addEventListener('mouseup', ($event: MouseUpEvent) => this.fixPowerScroll($event, this.select.panel.nativeElement)); // see explanation in handleMouseUp
+                this.select.panel.nativeElement?.addEventListener('scroll', ($event: ScrollEvent) => this.updateScrollOffset($event, this.select.panel.nativeElement));
+                this.select.panel.nativeElement?.addEventListener('mouseup', ($event: MouseUpEvent) => this.fixPowerScroll($event, this.select.panel.nativeElement)); // see explanation in handleMouseUp
             }
         });
     }
