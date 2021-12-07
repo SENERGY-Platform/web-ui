@@ -63,7 +63,7 @@ export class SwitchService {
         deployments.forEach((deploy: SwitchPropertiesDeploymentsModel) => {
             array.push(
                 this.http.get<SwitchPropertiesInstancesModel>(
-                    environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploy.id) + '/start',
+                    environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deploy.id) + '/start',
                 ),
             );
         });
@@ -74,7 +74,7 @@ export class SwitchService {
     stopMultipleDeployments(instances: SwitchPropertiesInstancesModel[]): Observable<string[]> {
         const array: Observable<string>[] = [];
         instances.forEach((instance: SwitchPropertiesInstancesModel) => {
-            array.push(this.http.delete(environment.processServiceUrl + '/process-instance/' + instance.id, { responseType: 'text' }));
+            array.push(this.http.delete(environment.processServiceUrl + '/v2/process-instances/' + instance.id, { responseType: 'text' }));
         });
 
         return forkJoin(array).pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'stopMultipleDeployments', [])));

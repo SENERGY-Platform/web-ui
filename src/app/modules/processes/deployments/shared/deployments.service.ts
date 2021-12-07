@@ -66,7 +66,7 @@ export class DeploymentsService {
     ): Observable<DeploymentsModel[]> {
         let url =
             environment.processServiceUrl +
-            '/deployment?sortBy=' +
+            '/v2/deployments?sortBy=' +
             feature +
             '&sortOrder=' +
             order +
@@ -87,7 +87,7 @@ export class DeploymentsService {
     }
 
     getDeploymentName(deploymentId: string): Observable<string> {
-        return this.http.get<DeploymentsModel>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId)).pipe(
+        return this.http.get<DeploymentsModel>(environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deploymentId)).pipe(
             map((resp) => (resp && resp.name) || ''),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeploymentName', '')),
         );
@@ -101,14 +101,14 @@ export class DeploymentsService {
 
     startDeployment(deploymentId: string): Observable<any | null> {
         return this.http
-            .get<any>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start')
+            .get<any>(environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deploymentId) + '/start')
             .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null)));
     }
 
     getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable> | null> {
         return this.http
             .get<Map<string, CamundaVariable>>(
-                environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/parameter',
+                environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deploymentId) + '/parameter',
             )
             .pipe(
                 map((resp) => {
@@ -130,7 +130,7 @@ export class DeploymentsService {
             queryParts.push(key + '=' + encodeURIComponent(JSON.stringify(value.value)));
         });
         return this.http.get<any>(
-            environment.processServiceUrl + '/deployment/' + encodeURIComponent(deploymentId) + '/start?' + queryParts.join('&'),
+            environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deploymentId) + '/start?' + queryParts.join('&'),
         );
     }
 
@@ -199,7 +199,7 @@ export class DeploymentsService {
     }
 
     checkForDeletedDeploymentWithRetries(id: string, maxRetries: number, intervalInMs: number): Observable<boolean> {
-        return this.http.get<boolean>(environment.processServiceUrl + '/deployment/' + encodeURIComponent(id) + '/exists').pipe(
+        return this.http.get<boolean>(environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(id) + '/exists').pipe(
             map((data) => {
                 if (data === true) {
                     throw Error('');

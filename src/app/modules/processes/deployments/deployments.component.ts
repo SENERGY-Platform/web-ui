@@ -178,7 +178,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     copyEndpoint(id: string) {
-        this.clipboardService.copyFromContent(environment.processServiceUrl + '/deployment/' + id + '/start');
+        this.clipboardService.copyFromContent(environment.processServiceUrl + '/v2/deployments/' + id + '/start');
         this.snackBar.open('URL copied to clipboard.', undefined, { duration: 2000 });
     }
 

@@ -44,7 +44,7 @@ export class MonitorService {
     getAllHistoryInstances(): Observable<MonitorProcessModel[]> {
         if (this.getAllHistoryInstancesObservable === null) {
             this.getAllHistoryInstancesObservable = this.getAllHistoryInstancesObservable = this.http
-                .get<MonitorProcessModel[]>(environment.processServiceUrl + '/history/process-instance')
+                .get<MonitorProcessModel[]>(environment.processServiceUrl + '/v2/history/process-instances')
                 .pipe(
                     map((resp) => resp || []),
                     catchError(this.errorHandlerService.handleError(MonitorService.name, 'getAllHistoryInstances', [])),
@@ -63,24 +63,20 @@ export class MonitorService {
         value: string,
         order: string,
     ): Observable<MonitorProcessTotalModel> {
+        var url = environment.processServiceUrl + "/v2/history/process-instances?"+
+            filter+"=true" +
+            "&with_total=true" +
+            "&maxResults=" + limit +
+            "&firstResult=" + offset +
+            "&sortBy=" + value +
+            "&sortOrder=" + order
+        if (searchtype == "processDefinitionNameLike") {
+            url = url + "&processDefinitionNameLike="+encodeURIComponent("%"+searchvalue+"%")
+        } else {
+            url = url + "&"+searchtype+"="+encodeURIComponent(searchvalue)
+        }
         return this.http
-            .get<MonitorProcessTotalModel>(
-                environment.processServiceUrl +
-                    '/history/' +
-                    filter +
-                    '/process-instance/' +
-                    searchtype +
-                    '/' +
-                    searchvalue +
-                    '/' +
-                    limit +
-                    '/' +
-                    offset +
-                    '/' +
-                    value +
-                    '/' +
-                    order,
-            )
+            .get<MonitorProcessTotalModel>(url)
             .pipe(
                 map((resp) => resp || []),
                 catchError(
@@ -95,7 +91,7 @@ export class MonitorService {
 
     stopInstances(id: string): Observable<string> {
         return this.http
-            .delete(environment.processServiceUrl + '/process-instance/' + id, { responseType: 'text' })
+            .delete(environment.processServiceUrl + '/v2/process-instances/' + id, { responseType: 'text' })
             .pipe(catchError(this.errorHandlerService.handleError(MonitorService.name, 'stopInstances', 'error')));
     }
 
@@ -115,7 +111,7 @@ export class MonitorService {
 
     deleteInstances(id: string): Observable<string> {
         return this.http
-            .delete(environment.processServiceUrl + '/history/process-instance/' + id, { responseType: 'text' })
+            .delete(environment.processServiceUrl + '/v2/history/process-instances/' + id, { responseType: 'text' })
             .pipe(catchError(this.errorHandlerService.handleError(MonitorService.name, 'deleteInstances', 'error')));
     }
 
