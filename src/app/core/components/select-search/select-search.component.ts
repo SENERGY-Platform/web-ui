@@ -68,7 +68,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         if (!this.select) {
             return false;
         }
-        return this.select.ngControl.errors !== null && !!this.select.ngControl.touched;
+        return this.select.ngControl?.errors !== null && !!this.select.ngControl?.touched;
     }
 
     @Input()
@@ -389,7 +389,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                         console.error('Cant do that');
                         return;
                     }
-                    const option = this.options.find((optionC) => this.getOptionValue(optionC) === optionValue);
+                    const option = this.options.find((optionC) => this.compareWith(this.getOptionValue(optionC), optionValue));
                     if (option === undefined) {
                         // Option got removed
                         return;
@@ -398,11 +398,11 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                         selected.push(option);
                     }
                 };
-                if (this.select?.selected) {
-                    if (Array.isArray(this.select.selected)) {
-                        this.select.selected?.forEach((sel) => addOptionByValue(sel.value));
+                if (this.value !== undefined) {
+                    if (Array.isArray(this.value)) {
+                        this.value.forEach((sel) => addOptionByValue(sel));
                     } else {
-                        addOptionByValue(this.select.selected.value);
+                        addOptionByValue(this.value);
                     }
                 }
                 this.maxElements = initialFilteredLength + selected.length;
