@@ -27,6 +27,7 @@ export interface DeviceTypeBaseModel {
 export interface Attribute {
     key: string;
     value: string;
+    origin: string;
 }
 
 export interface DeviceTypeModel extends DeviceTypeBaseModel {
@@ -51,6 +52,7 @@ export interface DeviceTypeServiceModel {
     inputs: DeviceTypeContentModel[];
     outputs: DeviceTypeContentModel[];
     function_ids: string[];
+    attributes?: Attribute[];
 }
 
 export interface DeviceTypeAspectModel {

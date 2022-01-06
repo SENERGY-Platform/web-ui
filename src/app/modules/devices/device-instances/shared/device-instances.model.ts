@@ -22,6 +22,7 @@ import { ImportTypeModel } from '../../../imports/import-types/shared/import-typ
 export interface Attribute {
     key: string;
     value: string;
+    origin: string;
 }
 
 export interface DeviceInstancesBaseModel {

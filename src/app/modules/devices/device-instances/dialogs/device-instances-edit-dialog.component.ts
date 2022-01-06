@@ -16,7 +16,7 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { DeviceInstancesModel } from '../shared/device-instances.model';
+import {Attribute, DeviceInstancesModel} from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 
 @Component({
@@ -59,6 +59,10 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
         if (!this.device.attributes) {
             this.device.attributes = [];
         }
-        this.device.attributes.push({ key: '', value: '' });
+        this.device.attributes.push({ key: '', value: '', origin: 'web-ui'});
+    }
+
+    editableAttribute(attr: Attribute) {
+        return !attr.origin || attr.origin == '' || attr.origin == 'web-ui'
     }
 }

@@ -44,13 +44,13 @@
             </div>
             <div *ngFor="let attr of device.attributes; let i = index" class="attribute">
                 <mat-form-field class="third-width" color="accent">
-                    <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}">
+                    <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
                 </mat-form-field>
                 =
                 <mat-form-field class="third-width" color="accent">
-                    <input matInput placeholder="Value" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}">
+                    <input matInput placeholder="Value" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
                 </mat-form-field>
-                <button mat-icon-button color="warn" (click)="removeAttr(i)">
+                <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
                     <mat-icon>delete</mat-icon>
                 </button>
             </div>

@@ -303,6 +303,7 @@ describe('DeviceTypesComponent', () => {
                     description: 'serv_desc',
                     protocol_id: 'protocol_1',
                     interaction: 'event',
+                    attributes: [],
                     inputs: [
                         {
                             id: '',
@@ -367,6 +368,7 @@ describe('DeviceTypesComponent', () => {
                     description: 'serv_desc',
                     protocol_id: 'protocol_1',
                     interaction: 'event',
+                    attributes: [],
                     inputs: [
                         {
                             id: 'input_id_1',

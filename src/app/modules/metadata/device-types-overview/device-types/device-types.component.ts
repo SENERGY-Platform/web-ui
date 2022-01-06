@@ -226,6 +226,10 @@ export class DeviceTypesComponent implements OnInit {
         return DeviceTypesComponent.getServiceFormArray(serviceFormGroup, formControlName).value;
     }
 
+    serviceAttributeArray(serviceFormGroup: AbstractControl): FormArray {
+        return DeviceTypesComponent.getServiceFormArray(serviceFormGroup, "attributes");
+    }
+
     inputOutput(serviceFormGroup: AbstractControl, formControlName: string, index: number): FormControl {
         return DeviceTypesComponent.getServiceFormArray(serviceFormGroup, formControlName).get([index]) as FormControl;
     }
@@ -450,6 +454,10 @@ export class DeviceTypesComponent implements OnInit {
                     },
                     Validators.required,
                 ],
+                attributes: this._formBuilder.array(
+                    deviceTypeService.attributes ? deviceTypeService.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : [],
+                    Validators.required,
+                )
             });
         } else {
             return this._formBuilder.group({
@@ -485,21 +493,27 @@ export class DeviceTypesComponent implements OnInit {
                     deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : [],
                     Validators.required,
                 ],
+                attributes: this._formBuilder.array(
+                    deviceTypeService.attributes ? deviceTypeService.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : [],
+                    Validators.required,
+                )
             });
         }
     }
 
     private createAttrGroup(attribute: Attribute): FormGroup {
-        const disabled = !this.editable;
+        const disabled = !this.editable || !this.editableAttribute(attribute);
         if (disabled) {
             return this._formBuilder.group({
                 key: [{value: attribute.key, disabled: true}],
                 value: [{value: attribute.value, disabled: true}],
+                origin: [{value: attribute.origin, disabled: true}],
             });
         } else {
             return this._formBuilder.group({
                 key: [attribute.key],
                 value: [attribute.value],
+                origin: [attribute.origin],
             });
         }
     }
@@ -729,17 +743,31 @@ export class DeviceTypesComponent implements OnInit {
         return list;
     }
 
-    get attributes(): FormArray {
+    get deviceTypeAttributes(): FormArray {
         return this.attrFormGroup.get('attributes') as FormArray;
     }
 
-    removeAttr(i: number) {
+    removeDeviceTypeAttr(i: number) {
         const formArray = this.attrFormGroup.controls['attributes'] as FormArray;
         formArray.removeAt(i);
     }
 
-    addAttr() {
+    addDeviceTypeAttr() {
         const formArray = this.attrFormGroup.controls['attributes'] as FormArray;
-        formArray.push(this.createAttrGroup({} as Attribute));
+        formArray.push(this.createAttrGroup({origin: 'web-ui'} as Attribute));
+    }
+
+    removeServiceAttr(service: AbstractControl, i: number) {
+        const formArray = (<FormGroup>service).controls['attributes'] as FormArray;
+        formArray.removeAt(i);
+    }
+
+    addServiceAttr(service: AbstractControl) {
+        const formArray = (<FormGroup>service).controls['attributes'] as FormArray;
+        formArray.push(this.createAttrGroup({origin: 'web-ui'} as Attribute));
+    }
+
+    editableAttribute(attr: Attribute) {
+        return attr.origin == '' || attr.origin == 'web-ui'
     }
 }
