@@ -57,7 +57,7 @@
                         <mat-form-field class="third-width" color="accent">
                             <input matInput placeholder="Value" formControlName="value" >
                         </mat-form-field>
-                        <button mat-icon-button color="warn" [disabled]="!editable || !editableAttribute(attr.value)" (click)="removeDeviceTypeAttr(i)">
+                        <button mat-icon-button color="warn" [disabled]="!editable" (click)="removeDeviceTypeAttr(i)">
                             <mat-icon>delete</mat-icon>
                         </button>
                     </div>
@@ -165,7 +165,7 @@
                                     <mat-form-field class="third-width" color="accent">
                                         <input matInput placeholder="Value" formControlName="value" >
                                     </mat-form-field>
-                                    <button mat-icon-button color="warn" [disabled]="!editable || !editableAttribute(attr.value)" (click)="removeServiceAttr(service, i)">
+                                    <button mat-icon-button color="warn" [disabled]="!editable" (click)="removeServiceAttr(service, i)">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </div>

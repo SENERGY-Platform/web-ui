@@ -502,7 +502,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private createAttrGroup(attribute: Attribute): FormGroup {
-        const disabled = !this.editable || !this.editableAttribute(attribute);
+        const disabled = !this.editable;
         if (disabled) {
             return this._formBuilder.group({
                 key: [{value: attribute.key, disabled: true}],
@@ -765,9 +765,5 @@ export class DeviceTypesComponent implements OnInit {
     addServiceAttr(service: AbstractControl) {
         const formArray = (<FormGroup>service).controls['attributes'] as FormArray;
         formArray.push(this.createAttrGroup({origin: 'web-ui'} as Attribute));
-    }
-
-    editableAttribute(attr: Attribute) {
-        return attr.origin == '' || attr.origin == 'web-ui'
     }
 }
