@@ -213,6 +213,9 @@ export class DeploymentsConfigInitializerService {
 
     private getSelectedOptionIndex(selection: V2DeploymentsPreparedSelectionModel) {
         let result = selection.selection_options_index === undefined ? -1 : selection.selection_options_index;
+        if (!selection.selection_options) {
+            selection.selection_options = [];
+        }
         selection.selection_options.forEach((option, index) => {
             if (option.device && selection.selected_device_id && selection.selected_device_id === option.device.id) {
                 result = index;

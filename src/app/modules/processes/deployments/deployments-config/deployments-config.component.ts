@@ -383,6 +383,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         const devices: V2DeploymentsPreparedSelectionOptionModel[] = [];
         const deviceGroups: V2DeploymentsPreparedSelectionOptionModel[] = [];
         const imports: V2DeploymentsPreparedSelectionOptionModel[] = [];
+        if (!selectionOptions) {
+            selectionOptions = [];
+        }
         for (const option of selectionOptions) {
             if (option.device) {
                 devices.push(option);
