@@ -406,7 +406,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     private initOptionGroups(deployment: V2DeploymentsPreparedModel | null) {
         if (deployment) {
-            deployment.elements.forEach((element, index) => {
+            deployment.elements?.forEach((element, index) => {
                 if (element.task) {
                     this.optionGroups.set(index, ProcessDeploymentsConfigComponent.getOptionGroups(element.task.selection.selection_options));
                 }
@@ -481,7 +481,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         if (!deployment) {
             return;
         }
-        deployment.elements.forEach((element) => {
+        deployment.elements?.forEach((element) => {
             const characteristicId = element.message_event?.selection?.filter_criteria?.characteristic_id;
             if (characteristicId && !this.characteristicNames.has(characteristicId)) {
                 this.characteristicsService.getCharacteristic(characteristicId).subscribe((value) => {
