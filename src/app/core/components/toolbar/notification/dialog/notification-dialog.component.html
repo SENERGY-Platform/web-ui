@@ -43,9 +43,7 @@
                     </mat-panel-description>
                 </mat-expansion-panel-header>
                 <ng-template matExpansionPanelContent>
-                    <div>
-                        {{n.message}}
-                    </div>
+                    <div class="notification-content">{{n.message}}</div>
                     <div>
                         <button mat-icon-button style="float: right"
                                 (click)="deleteMessage(index)">

@@ -59,3 +59,7 @@ table {
 .float-right {
     float: right
 }
+
+.notification-content{
+    white-space:pre-wrap;
+}
