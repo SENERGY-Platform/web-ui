@@ -23,6 +23,7 @@ import { FlowModel, FlowShareModel } from '../flow-repo/shared/flow.model';
 import { DiagramEditorComponent } from '../../../core/components/diagram-editor/diagram-editor.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthorizationService } from '../../../core/services/authorization.service';
+import MouseMoveEvent = JQuery.MouseMoveEvent;
 
 @Component({
     selector: 'senergy-flow-designer',
@@ -249,6 +250,14 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 this.diagram.zoomIn();
             }
         }
+    }
+
+    @HostListener('document:mousemove', ['$event'])
+    onMouseMove(e: MouseMoveEvent) {
+        if (this.diagram.dragStartPosition != null)
+            this.diagram.paper.translate(
+                e.offsetX - this.diagram.dragStartPosition.x,
+                e.offsetY - this.diagram.dragStartPosition.y);
     }
 
     private removeSVGNodesByClassNames(svg: SVGElement, tags: string[], classes: string[]) {

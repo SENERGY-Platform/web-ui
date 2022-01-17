@@ -15,7 +15,7 @@
  */
 
 import {AfterViewInit, Component} from '@angular/core';
-import {dia, shapes, util} from 'jointjs';
+import {dia, shapes, util, V, Vectorizer} from 'jointjs';
 import * as $ from 'jquery';
 import {DiagramModel} from './shared/diagram.model';
 import uuid = util.uuid;
@@ -28,7 +28,7 @@ import uuid = util.uuid;
 export class DiagramEditorComponent implements AfterViewInit {
     private graph: any;
 
-    private graphScale = 1;
+    private graphScale: Vectorizer.Scale = {sx: 1,sy: 1};
 
     idGenerated = uuid();
 
@@ -224,16 +224,19 @@ export class DiagramEditorComponent implements AfterViewInit {
     paperWidth = 500;
     paper!: any;
 
+    public dragStartPosition: {x: number, y: number }  | null = null
+
     constructor() {
     }
 
     ngAfterViewInit() {
         this.setPaperWidth();
         this.reinitializePaper();
-        this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
-            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
-            const model = elementView.model;
-            model.remove();
+        this.paper.on('blank:pointerdown', (_: any, x: number, y: number) => {
+            this.dragStartPosition = { x: x* this.graphScale.sx, y: y* this.graphScale.sy};
+        });
+        this.paper.on('cell:pointerup blank:pointerup', () => {
+            this.dragStartPosition = null;
         });
     }
 
@@ -298,22 +301,25 @@ export class DiagramEditorComponent implements AfterViewInit {
 
     public scaleContentToFit(){
         this.paper.scaleContentToFit();
-        this.graphScale = this.paper.scaleX;
+        this.graphScale = V(this.paper.viewport).scale();
     }
 
     public zoomOut () {
-        this.graphScale -= 0.1;
-        this.paperScale(this.graphScale, this.graphScale);
+        this.graphScale.sx -= 0.1;
+        this.graphScale.sy -= 0.1;
+        this.paperScale(this.graphScale.sx, this.graphScale.sy);
     }
 
     public zoomIn () {
-        this.graphScale += 0.1;
-        this.paperScale(this.graphScale, this.graphScale);
+        this.graphScale.sx += 0.1;
+        this.graphScale.sy += 0.1;
+        this.paperScale(this.graphScale.sx, this.graphScale.sy);
     }
 
     public resetZoom () {
-        this.graphScale = 1;
-        this.paperScale(this.graphScale, this.graphScale);
+        this.graphScale.sx = 1;
+        this.graphScale.sy = 1;
+        this.paperScale(this.graphScale.sx, this.graphScale.sy);
     }
 
 
