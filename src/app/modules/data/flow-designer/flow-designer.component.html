@@ -52,6 +52,9 @@
                 </div>
             </div>
         </div>
+        <button *ngIf="write" mat-fab class="fab-fit" (click)="scaleContentToFit()" matTooltip="scalePaperToFit">
+            <mat-icon>fit_screen</mat-icon>
+        </button>
         <button *ngIf="write" mat-fab class="fab" (click)="saveModel()" matTooltip="Save">
             <mat-icon>save</mat-icon>
         </button>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { OnInit, Component, AfterViewInit, ViewChild } from '@angular/core';
+import {OnInit, Component, AfterViewInit, ViewChild, HostListener, Output, EventEmitter} from '@angular/core';
 import { OperatorModel } from '../operator-repo/shared/operator.model';
 import { FlowRepoService } from '../flow-repo/shared/flow-repo.service';
 import { ActivatedRoute } from '@angular/router';
@@ -232,6 +232,23 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
         }
         source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
         return source;
+    }
+
+    scaleContentToFit(){
+        this.diagram.paper.scaleContentToFit();
+    }
+
+    @HostListener('wheel', ['$event'])
+    Wheel(event: WheelEvent) {
+        if((event.target as HTMLInputElement).nodeName == "svg"){
+            event.preventDefault();
+            if (event.deltaY > 0) {
+                this.diagram.zoomOut();
+            }
+            if (event.deltaY < 0) {
+                this.diagram.zoomIn();
+            }
+        }
     }
 
     private removeSVGNodesByClassNames(svg: SVGElement, tags: string[], classes: string[]) {

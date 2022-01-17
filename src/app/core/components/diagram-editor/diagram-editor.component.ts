@@ -28,6 +28,8 @@ import uuid = util.uuid;
 export class DiagramEditorComponent implements AfterViewInit {
     private graph: any;
 
+    private graphScale = 1;
+
     idGenerated = uuid();
 
     NodeElement: any = dia.Element.define(
@@ -294,6 +296,27 @@ export class DiagramEditorComponent implements AfterViewInit {
         return this.graph.toJSON();
     }
 
+    public scaleContentToFit(){
+        this.paper.scaleContentToFit();
+        this.graphScale = this.paper.scaleX;
+    }
+
+    public zoomOut () {
+        this.graphScale -= 0.1;
+        this.paperScale(this.graphScale, this.graphScale);
+    }
+
+    public zoomIn () {
+        this.graphScale += 0.1;
+        this.paperScale(this.graphScale, this.graphScale);
+    }
+
+    public resetZoom () {
+        this.graphScale = 1;
+        this.paperScale(this.graphScale, this.graphScale);
+    }
+
+
     public newCloudNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
         const node = this.newNode(name, image, inputs, outputs, config, operatorId);
         node.attributes.deploymentType = 'cloud';
@@ -374,5 +397,9 @@ export class DiagramEditorComponent implements AfterViewInit {
             },
         });
         return node;
+    }
+
+    private paperScale(sx: number, sy: number){
+        this.paper.scale(sx,sy);
     }
 }

@@ -59,6 +59,14 @@ mat-grid-list {
     right: 15px;
     z-index: 100;
 }
+
+.fab-fit {
+    position: fixed;
+    bottom: 15px;
+    right: 85px;
+    z-index: 100;
+}
+
 h1 {
     color: #369;
     font-family: Arial, Helvetica, sans-serif;
