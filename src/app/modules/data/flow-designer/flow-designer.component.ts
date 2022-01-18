@@ -38,6 +38,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     ready = false;
     flow = { share: {} as FlowShareModel } as FlowModel;
     write = false;
+    listHeight = 600;
 
     constructor(
         private route: ActivatedRoute,
@@ -81,6 +82,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                 this.write = true;
             }
         }, 0);
+        this.listHeight = this.diagram.paperHeight;
     }
 
     public addNode(operator: OperatorModel) {

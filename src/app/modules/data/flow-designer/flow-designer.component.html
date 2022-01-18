@@ -37,8 +37,8 @@
             <div id="senergy-diagram-editor" fxFlex="75">
                 <senergy-diagram-editor ></senergy-diagram-editor>
             </div>
-            <div id="diagram-operators" fxFlex="25">
-                <div style="overflow: auto; height: 50%">
+            <div id="diagram-operators" fxFlex="25" class="mat-elevation-z1" >
+                <div style="overflow: auto; height: {{listHeight}} px">
                     <mat-list>
                         <h3 mat-subheader>Operators</h3>
                         <mat-list-item *ngFor="let item of operators">
