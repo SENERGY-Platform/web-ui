@@ -238,7 +238,12 @@ export class DiagramEditorComponent implements AfterViewInit {
         this.paper.on('cell:pointerup blank:pointerup', () => {
             this.dragStartPosition = null;
         });
-    }
+        this.paper.on('element:button:pointerdown', (elementView: any, evt: any) => {
+            evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
+            const model = elementView.model;
+            model.remove();
+        });
+        }
 
     onResize() {
         this.setPaperWidth();
