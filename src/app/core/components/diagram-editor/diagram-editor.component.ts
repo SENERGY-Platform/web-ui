@@ -222,6 +222,7 @@ export class DiagramEditorComponent implements AfterViewInit {
     );
 
     paperWidth = 500;
+    paperHeight = 600;
     paper!: any;
 
     public dragStartPosition: {x: number, y: number }  | null = null
@@ -230,7 +231,7 @@ export class DiagramEditorComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.setPaperWidth();
+        this.setPaperWidth(this.getPaperWidthFromWrap());
         this.reinitializePaper();
         this.paper.on('blank:pointerdown', (_: any, x: number, y: number) => {
             this.dragStartPosition = { x: x* this.graphScale.sx, y: y* this.graphScale.sy};
@@ -243,18 +244,29 @@ export class DiagramEditorComponent implements AfterViewInit {
             const model = elementView.model;
             model.remove();
         });
-        }
-
-    onResize() {
-        this.setPaperWidth();
-        this.paper.setDimensions(this.paperWidth, 700);
     }
 
-    setPaperWidth() {
+    onResize() {
+        this.paperWidth = this.getPaperWidthFromWrap();
+        this.paper.setDimensions(this.paperWidth, this.paperHeight);
+    }
+
+    setPaperWidth(paperWidth: number) {
+        this.paperWidth = paperWidth;
+    }
+
+    resizePaper(width: number, height: number) {
+        this.paperWidth = width;
+        this.paperHeight = height;
+        this.paper.setDimensions(this.paperWidth, this.paperHeight);
+    }
+
+    private getPaperWidthFromWrap(){
         const paperWrap = document.getElementById('paper-wrap');
         if (paperWrap !== null) {
-            this.paperWidth = paperWrap.offsetWidth;
+            return paperWrap.offsetWidth;
         }
+        return this.paperWidth;
     }
 
     reinitializePaper() {
@@ -276,7 +288,7 @@ export class DiagramEditorComponent implements AfterViewInit {
                 attrs: {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}},
             }),
             width: this.paperWidth,
-            height: 700,
+            height: this.paperHeight,
             gridSize: 20,
             linkPinning: true,
             snapLinks: true,
@@ -326,7 +338,6 @@ export class DiagramEditorComponent implements AfterViewInit {
         this.graphScale.sy = 1;
         this.paperScale(this.graphScale.sx, this.graphScale.sy);
     }
-
 
     public newCloudNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
         const node = this.newNode(name, image, inputs, outputs, config, operatorId);

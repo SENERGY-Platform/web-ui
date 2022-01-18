@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {OnInit, Component, AfterViewInit, ViewChild, HostListener, Output, EventEmitter} from '@angular/core';
+import {OnInit, Component, AfterViewInit, ViewChild, HostListener} from '@angular/core';
 import { OperatorModel } from '../operator-repo/shared/operator.model';
 import { FlowRepoService } from '../flow-repo/shared/flow-repo.service';
 import { ActivatedRoute } from '@angular/router';
@@ -31,13 +31,6 @@ import MouseMoveEvent = JQuery.MouseMoveEvent;
     styleUrls: ['./flow-designer.component.css'],
 })
 export class FlowDesignerComponent implements OnInit, AfterViewInit {
-    constructor(
-        private route: ActivatedRoute,
-        private operatorRepoService: OperatorRepoService,
-        private flowRepoService: FlowRepoService,
-        private authService: AuthorizationService,
-        public snackBar: MatSnackBar,
-    ) {}
 
     @ViewChild(DiagramEditorComponent, { static: false }) diagram!: DiagramEditorComponent;
 
@@ -45,6 +38,15 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     ready = false;
     flow = { share: {} as FlowShareModel } as FlowModel;
     write = false;
+
+    constructor(
+        private route: ActivatedRoute,
+        private operatorRepoService: OperatorRepoService,
+        private flowRepoService: FlowRepoService,
+        private authService: AuthorizationService,
+        public snackBar: MatSnackBar
+    ) {}
+
 
     ngOnInit() {
         this.operatorRepoService.getOperators('', 9999, 0, 'name', 'asc').subscribe((resp: { operators: OperatorModel[] }) => {
