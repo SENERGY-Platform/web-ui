@@ -26,6 +26,7 @@
     "@angular/platform-browser": "^12.2.6",
     "@angular/platform-browser-dynamic": "^12.2.6",
     "@angular/router": "^12.2.6",
+    "@angular/service-worker": "^12.2.15",
     "@types/backbone": "^1.4.1",
     "@types/jquery": "^3.3.31",
     "@types/lodash": "^4.14.149",
