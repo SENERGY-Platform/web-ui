@@ -32,7 +32,7 @@ import {
     DeviceTypeServiceModel,
     functionTypes,
 } from '../shared/device-type.model';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -455,8 +455,7 @@ export class DeviceTypesComponent implements OnInit {
                     Validators.required,
                 ],
                 attributes: this._formBuilder.array(
-                    deviceTypeService.attributes ? deviceTypeService.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : [],
-                    Validators.required,
+                    deviceTypeService.attributes ? deviceTypeService.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : []
                 )
             });
         } else {
@@ -494,8 +493,7 @@ export class DeviceTypesComponent implements OnInit {
                     Validators.required,
                 ],
                 attributes: this._formBuilder.array(
-                    deviceTypeService.attributes ? deviceTypeService.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : [],
-                    Validators.required,
+                    deviceTypeService.attributes ? deviceTypeService.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : []
                 )
             });
         }
