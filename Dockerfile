@@ -29,6 +29,6 @@ ADD build-env.sh /
 COPY --from=builder /tmp/workspace/dist/senergy-web-ui/ /usr/share/nginx/html/
 COPY --from=builder /tmp/workspace/dist/senergy-web-ui/assets/nginx-custom.conf /etc/nginx/conf.d/default.conf
 RUN chmod -R a+r /usr/share/nginx/html
-CMD ["/bin/sh",  "-c",  "/build-env.sh /usr/share/nginx/html/ && exec nginx -g 'daemon off;'"]
+CMD ["/bin/sh",  "-c",  "/build-env.sh /usr/share/nginx/html/ /usr/share/nginx/html/ && exec nginx -g 'daemon off;'"]
 
 EXPOSE 80

@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start_dev": "env-cmd ./build-env.sh src && NODE_OPTIONS=\"--max-old-space-size=8192\" ng serve",
+    "start_dev": "env-cmd ./build-env.sh src . && NODE_OPTIONS=\"--max-old-space-size=8192\" ng serve",
     "start_dev_win": "build-env.cmd && node --max_old_space_size=8192 ./node_modules/@angular/cli/bin/ng serve",
     "build": "ng build",
     "test": "NODE_OPTIONS=\"--max-old-space-size=8192\" ng test",
