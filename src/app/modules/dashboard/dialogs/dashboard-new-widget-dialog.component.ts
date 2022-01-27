@@ -82,7 +82,7 @@ export class DashboardNewWidgetDialogComponent {
         },
         { value: DashboardTypesEnum.ProcessScheduler, viewValue: 'Process Scheduler', disabled: false, tooltip: '' },
         // {value: DashboardTypesEnum.DeviceStatus, viewValue: 'Device Status', disabled: false, tooltip: ''},
-        { value: DashboardTypesEnum.DataTable, viewValue: 'Data Table', disabled: false, tooltip: '' }, // TODO
+        { value: DashboardTypesEnum.DataTable, viewValue: 'Data Table', disabled: false, tooltip: '' },
     ];
     switchCategories: SwitchCategories[] = [
         {

@@ -31,6 +31,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { startWith, switchMap } from 'rxjs/internal/operators';
 import { BrokerExportService } from './shared/broker-export.service';
 import { ActivatedRoute } from '@angular/router';
+import {DBTypeEnum, ExportDataService} from "../../widgets/shared/export-data.service";
 
 @Component({
     selector: 'senergy-export',
@@ -51,7 +52,6 @@ export class ExportComponent implements OnInit, OnDestroy {
         'updated_at',
         'info',
         'edit',
-        'copy',
         'delete',
     ];
     totalCount = 0;
@@ -60,7 +60,6 @@ export class ExportComponent implements OnInit, OnDestroy {
     exportsDataSource = new MatTableDataSource<ExportModel>();
     showGenerated = localStorage.getItem('data.exports.showGenerated') === 'true';
     ready = false;
-    url = environment.influxAPIURL;
 
     public searchText = '';
     public initSearchText = '';
@@ -85,7 +84,6 @@ export class ExportComponent implements OnInit, OnDestroy {
         private responsiveService: ResponsiveService,
         private brokerExportService: BrokerExportService,
         private route: ActivatedRoute,
-        private clipboardService: ClipboardService,
     ) {}
 
     ngOnInit() {
@@ -145,12 +143,7 @@ export class ExportComponent implements OnInit, OnDestroy {
             });
     }
 
-    copyEndpoint(endpoint: string) {
-        this.clipboardService.copyFromContent(endpoint);
-        this.snackBar.open('Endpoint copied to clipboard.', undefined, {
-            duration: 2000,
-        });
-    }
+
 
     searchFieldChanged() {
         localStorage.setItem('data.exports.searchField', String(this.searchField));

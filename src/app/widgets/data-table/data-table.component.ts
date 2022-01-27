@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
-import { MatTable } from '@angular/material/table';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { DataTableEditDialogComponent } from './dialog/data-table-edit-dialog.component';
-import { QueriesRequestElementModel, QueriesRequestFilterModel, TimeValuePairModel } from '../shared/export-data.model';
-import { DeviceStatusConfigConvertRuleModel } from '../device-status/shared/device-status-properties.model';
-import { ExportDataService } from '../shared/export-data.service';
-import { DataTableOrderEnum, ExportValueTypes } from './shared/data-table.model';
-import { DecimalPipe } from '@angular/common';
-import { DashboardManipulationEnum } from '../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { Sort, SortDirection } from '@angular/material/sort';
-import { map } from 'rxjs/internal/operators';
+import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
+import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
+import {forkJoin, Observable, Subscription} from 'rxjs';
+import {MatTable} from '@angular/material/table';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DataTableEditDialogComponent} from './dialog/data-table-edit-dialog.component';
+import {
+    QueriesRequestElementInfluxModel,
+    QueriesRequestElementTimescaleModel,
+    QueriesRequestFilterModel,
+    TimeValuePairModel
+} from '../shared/export-data.model';
+import {DeviceStatusConfigConvertRuleModel} from '../device-status/shared/device-status-properties.model';
+import {DBTypeEnum, ExportDataService} from '../shared/export-data.service';
+import {DataTableOrderEnum, ExportValueTypes} from './shared/data-table.model';
+import {DecimalPipe} from '@angular/common';
+import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {Sort, SortDirection} from '@angular/material/sort';
+import {map} from 'rxjs/internal/operators';
 
 interface DataTableComponentItem {
     name: string;
@@ -49,7 +54,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
-    @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
+    @ViewChild(MatTable, {static: false}) table!: MatTable<any>;
     destroy = new Subscription();
     configured = false;
     dataReady = false;
@@ -62,7 +67,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
         private dialog: MatDialog,
         private exportDataService: ExportDataService,
         private decimalPipe: DecimalPipe,
-    ) {}
+    ) {
+    }
 
     private static parseNumber(m: DataTableComponentItem, max: boolean): number {
         if (m.value == null) {
@@ -111,7 +117,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
     edit() {
         const config: MatDialogConfig = {};
-        config.data = { dashboardId: this.dashboardId, widgetId: this.widget.id };
+        config.data = {dashboardId: this.dashboardId, widgetId: this.widget.id};
         config.minWidth = '800px';
         this.dialog
             .open(DataTableEditDialogComponent, config)
@@ -161,21 +167,18 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
                 const elements = this.widget.properties.dataTable?.elements;
                 if (elements) {
-                    const requestPayload: QueriesRequestElementModel[] = [];
-                    const m = new Map<number, number>();
-                    const resIndexToElementIndex: number[] = [];
-
-                    elements.forEach((element, index) => {
-                        m.set(index, requestPayload.length);
+                    const influxRequestPayload: QueriesRequestElementInfluxModel[] = [];
+                    const timescaleRequestPayload: QueriesRequestElementTimescaleModel[] = [];
+                    const influxResultMapper: number[] = [];
+                    const timescaleResultMapper: number[] = [];
+                    elements.forEach((element, elementIndex) => {
                         const filters: QueriesRequestFilterModel[] = [];
                         element.exportTagSelection?.forEach((tagFilter) => {
-                            filters.push({ column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1] });
+                            filters.push({column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1]});
                         });
-                        const requestElement: QueriesRequestElementModel = {
-                            measurement: element.exportId,
-                            columns: [{ name: element.exportValueName }],
+                        const requestElement: QueriesRequestElementInfluxModel | QueriesRequestElementTimescaleModel = {
                             filters: filters.length > 0 ? filters : undefined,
-                        };
+                        } as QueriesRequestElementInfluxModel | QueriesRequestElementTimescaleModel;
 
                         if (
                             element.groupTime !== undefined &&
@@ -191,38 +194,83 @@ export class DataTableComponent implements OnInit, OnDestroy {
                             const last =
                                 '' +
                                 Number(digits !== null && digits.length > 0 ? digits[0] : 0) *
-                                    (this.widget.properties.dataTable?.valuesPerElement || 1) +
+                                (this.widget.properties.dataTable?.valuesPerElement || 1) +
                                 (unit !== null && unit.length > 0 ? unit[0] : '');
 
-                            requestElement.time = { last };
+                            requestElement.time = {last};
                             requestElement.columns[0].groupType = element.groupType;
                             requestElement.groupTime = element.groupTime;
                         } else {
                             requestElement.limit = this.widget.properties.dataTable?.valuesPerElement || 1;
                         }
-                        requestPayload.push(requestElement);
+                        // Check element data location
+                        if (element.exportId !== null && element.exportId !== undefined && (element.exportDbId === undefined || element.exportDbId === DBTypeEnum.snrgyInflux)) {
+                            (requestElement as QueriesRequestElementInfluxModel).measurement = element.exportId;
+                            influxRequestPayload.push(requestElement as QueriesRequestElementInfluxModel);
+                            influxResultMapper.push(elementIndex);
+                            requestElement.columns = [{name: element.exportValueName}];
+                        } else {
+                            if (element.exportId === null || element.exportId === undefined) {
+                                (requestElement as QueriesRequestElementTimescaleModel) .deviceId = element.elementDetails.device?.deviceId;
+                                (requestElement as QueriesRequestElementTimescaleModel).serviceId = element.elementDetails.device?.serviceId;
+                                (requestElement as QueriesRequestElementTimescaleModel).columns = [{name:  element.exportValuePath.replace(/^value\./, '')}];
+                            } else {
+                                (requestElement as QueriesRequestElementTimescaleModel).exportId = element.exportId;
+                                requestElement.columns = [{name: element.exportValueName}];
+                            }
+                            timescaleRequestPayload.push(requestElement as QueriesRequestElementTimescaleModel);
+                            timescaleResultMapper.push(elementIndex);
+                        }
                     });
-                    this.exportDataService
-                        .query(requestPayload)
-                        .pipe(
-                            map((values) => {
-                                const res: TimeValuePairModel[] = [];
-                                m.forEach((columnIndex, elementIndex) => {
-                                    let dataRows = values[columnIndex];
-                                    // sometimes an extra value if given by influx
-                                    dataRows = dataRows.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1);
-                                    dataRows.forEach((dataRow) => {
-                                        resIndexToElementIndex.push(elementIndex);
-                                        res.push({ time: '' + dataRow[0], value: dataRow[1] });
+                    const obs: Observable<{ source: string; res: TimeValuePairModel[] }>[] = [];
+                    if (influxRequestPayload.length > 0) {
+                        obs.push(this.exportDataService
+                            .queryInflux(influxRequestPayload)
+                            .pipe(
+                                map((values) => {
+                                    const res: TimeValuePairModel[] = [];
+                                    values.forEach((_, elementIndex) => {
+                                        let dataRows = values[elementIndex];
+                                        // sometimes an extra value if given by influx
+                                        dataRows = dataRows.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1);
+                                        dataRows.forEach((dataRow) => {
+                                            res.push({time: '' + dataRow[0], value: dataRow[1]});
+                                        });
                                     });
-                                });
-                                return res;
-                            }),
-                        )
-                        .subscribe((res) => {
-                            this.items = [];
-                            res.forEach((pair: TimeValuePairModel, resIndex: number) => {
-                                const elementIndex = resIndexToElementIndex[resIndex];
+                                    return {source: 'influx', res};
+                                }),
+                            ));
+                    }
+                    if (timescaleRequestPayload.length > 0) {
+                        obs.push(this.exportDataService
+                            .queryTimescale(timescaleRequestPayload)
+                            .pipe(
+                                map((values) => {
+                                    const res: TimeValuePairModel[] = [];
+                                    values.forEach((_, elementIndex) => {
+                                        let dataRows = values[elementIndex];
+                                        dataRows = dataRows.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1);
+                                        dataRows.forEach((dataRow) => {
+                                            res.push({time: '' + dataRow[0], value: dataRow[1]});
+                                        });
+                                    });
+                                    return {source: 'timescale', res};
+                                }),
+                            ));
+                    }
+
+                    forkJoin(obs).subscribe((results) => {
+                        this.items = [];
+                        results.forEach(result => {
+                            result.res.forEach((pair: TimeValuePairModel, resultIndex: number) => {
+                                let elementIndex = -1;
+                                switch (result.source) {
+                                case 'influx':
+                                    elementIndex = influxResultMapper[resultIndex];
+                                    break;
+                                case 'timescale':
+                                    elementIndex = timescaleResultMapper[resultIndex];
+                                }
                                 let v = pair.value;
                                 if (v === true || v === false) {
                                     v = v as unknown as string;
@@ -263,10 +311,10 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                 }
                                 this.items.push(item);
                             });
-                            this.orderItems();
-
-                            this.dataReady = true;
                         });
+                        this.orderItems();
+                        this.dataReady = true;
+                    });
                 } else {
                     this.dataReady = true;
                 }
@@ -314,29 +362,30 @@ export class DataTableComponent implements OnInit, OnDestroy {
                 switch (type) {
                 case ExportValueTypes.STRING: {
                     if (status === convertRules[i].status) {
-                        return { icon: convertRules[i].icon, color: convertRules[i].color };
+                        return {icon: convertRules[i].icon, color: convertRules[i].color};
                     }
                     break;
                 }
                 case ExportValueTypes.BOOLEAN: {
                     try {
                         if (status === JSON.parse(convertRules[i].status)) {
-                            return { icon: convertRules[i].icon, color: convertRules[i].color };
+                            return {icon: convertRules[i].icon, color: convertRules[i].color};
                         }
-                    } catch (_) {} // happens when rule is not parsable, no problem
+                    } catch (_) {
+                    } // happens when rule is not parsable, no problem
                     break;
                 }
                 case ExportValueTypes.FLOAT:
                 case ExportValueTypes.INTEGER: {
                     if (status === parseInt(convertRules[i].status, 10)) {
-                        return { icon: convertRules[i].icon, color: convertRules[i].color };
+                        return {icon: convertRules[i].icon, color: convertRules[i].color};
                     }
                     break;
                 }
                 }
             }
         }
-        return { icon: '', color: '' };
+        return {icon: '', color: ''};
     }
 
     private checkConfigured() {

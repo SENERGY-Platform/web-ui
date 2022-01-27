@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+.mat-cell {
+    padding: 0 8px;
+}
 
-::ng-deep .mat-list .mat-list-item .mat-line{
-    word-wrap: break-word;
-    white-space: pre-wrap;
+.mat-dialog-content {
+    padding-bottom: 2em;
 }

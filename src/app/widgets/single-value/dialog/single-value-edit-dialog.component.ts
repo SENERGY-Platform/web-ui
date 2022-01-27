@@ -14,29 +14,33 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/internal/operators';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
-import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../modules/exports/shared/export.model';
-import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { ExportService } from '../../../modules/exports/shared/export.service';
-import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { ChartsExportRequestPayloadGroupModel } from '../../charts/export/shared/charts-export-request-payload.model';
+import {Component, Inject, OnInit} from '@angular/core';
+import {FormBuilder} from '@angular/forms';
+import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
+import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
+import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../modules/exports/shared/export.model';
+import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
+import {ExportService} from '../../../modules/exports/shared/export.service';
+import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {
+    DeviceInstancesModel,
+    DeviceInstancesPermSearchModel
+} from '../../../modules/devices/device-instances/shared/device-instances.model';
+import {
+    DeviceTypeContentVariableModel,
+    DeviceTypeServiceModel
+} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
+import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
     styleUrls: ['./single-value-edit-dialog.component.css'],
 })
 export class SingleValueEditDialogComponent implements OnInit {
-    formControl = new FormControl('');
     exports: ChartsExportMeasurementModel[] = [];
-    filteredExports: Observable<ChartsExportMeasurementModel[]> = new Observable();
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
@@ -61,19 +65,36 @@ export class SingleValueEditDialogComponent implements OnInit {
         'difference-median',
     ];
 
-    vAxisLabel = '';
-    name = '';
-    type = '';
-    format = '';
-    threshold = 128;
-    math = '';
-    group: ChartsExportRequestPayloadGroupModel = { time: '', type: '' };
+    devices: DeviceInstancesModel[] = [];
+    services: DeviceTypeServiceModel[] = [];
+    paths: { Name: string }[] = [];
+
+    form = this.fb.group({
+        vAxis: {},
+        vAxisLabel: '',
+        name: '',
+        type: '',
+        format: '',
+        threshold: 128,
+        math: '',
+        measurement: '',
+        group: this.fb.group({
+            time: '',
+            type: '',
+        }),
+        sourceType: '',
+        device: {},
+        service: {},
+    });
 
     constructor(
         private dialogRef: MatDialogRef<SingleValueEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
         private exportService: ExportService,
+        private fb: FormBuilder,
+        private deviceTypeService: DeviceTypeService,
+        private deviceInstancesService: DeviceInstancesService,
         @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
     ) {
         this.dashboardId = data.dashboardId;
@@ -81,44 +102,81 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.form.get('measurement')?.valueChanges.subscribe(exp => {
+            this.vAxisValues = exp.values;
+        });
+        this.form.get('type')?.valueChanges.subscribe(v => {
+            if (v === 'String') {
+                this.form.patchValue({format: ''});
+                this.form.get('format')?.disable();
+            } else {
+                this.form.get('format')?.enable();
+            }
+        });
+
+        this.form.get('device')?.valueChanges.subscribe((device: DeviceInstancesPermSearchModel) => {
+            this.paths = [];
+            this.services = [];
+            if (device === undefined || device == null) {
+                return;
+            }
+            this.deviceTypeService.getDeviceType(device.device_type_id).subscribe(dt => {
+                this.services = dt?.services.filter(service => service.outputs.length === 1) || [];
+            });
+        });
+
+        this.form.get('service')?.valueChanges.subscribe((service: DeviceTypeServiceModel) => {
+            this.paths = [];
+            if (service === undefined || service == null) {
+                return;
+            }
+            this.paths = this.deviceTypeService.getValuePaths(service.outputs[0].content_variable).map(x => {
+                return {Name: x};
+            });
+        });
         this.getWidgetData();
     }
 
     getWidgetData() {
         this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
             this.widget = widget;
-            this.vAxisLabel = widget.properties.vAxisLabel ? widget.properties.vAxisLabel : this.vAxisLabel;
-            this.name = widget.name;
-            this.type = widget.properties.type ? widget.properties.type : this.type;
-            this.format = widget.properties.format ? widget.properties.format : this.format;
-            this.threshold = widget.properties.threshold ? widget.properties.threshold : this.threshold;
-            this.math = widget.properties.math ? widget.properties.math : this.math;
-            this.formControl.setValue(this.widget.properties.measurement || '');
-            this.group = widget.properties.group ? widget.properties.group : this.group;
+            this.form.patchValue({
+                vAxis: widget.properties.vAxis,
+                vAxisLabel: widget.properties.vAxisLabel,
+                name: widget.name,
+                type: widget.properties.type,
+                format: widget.properties.format,
+                threshold: widget.properties.threshold,
+                math: widget.properties.math,
+                sourceType: this.widget.properties.sourceType || 'export',
+                measurement: this.widget.properties.measurement,
+                device: this.widget.properties.device,
+                service: this.widget.properties.service,
+            });
+            this.form.get('group')?.patchValue({
+                time: widget.properties.group?.time,
+                type: widget.properties.group?.type,
+            });
+
             this.initDeployments();
+            this.initDevices();
         });
     }
 
     initDeployments() {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: ExportResponseModel | null) => {
+        this.exportService.getExports('', 9999, 0, 'name', 'asc', undefined, undefined, true).subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values });
-                        if (this.widget.properties.vAxis) {
-                            if (this.widget.properties.vAxis.InstanceID === exportModel.ID) {
-                                this.vAxisValues = exportModel.Values;
-                            }
-                        }
+                        this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, dbId: exportModel.DbId});
                     }
                 });
-                this.filteredExports = this.formControl.valueChanges.pipe(
-                    startWith<string | ChartsExportMeasurementModel>(''),
-                    map((value) => (typeof value === 'string' ? value : value.name)),
-                    map((name) => (name ? this._filter(name) : this.exports.slice())),
-                );
             }
         });
+    }
+
+    initDevices() {
+        this.deviceInstancesService.getDeviceInstances('', 10000, 0, 'name', 'asc').subscribe(devices => this.devices = devices);
     }
 
     close(): void {
@@ -126,20 +184,24 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        if (this.formControl.value) {
-            this.widget.properties.measurement = {
-                id: this.formControl.value.id,
-                name: this.formControl.value.name,
-                values: this.formControl.value.values,
-            };
-        }
-        this.widget.properties.vAxisLabel = this.vAxisLabel;
-        this.widget.name = this.name;
-        this.widget.properties.type = this.type;
-        this.widget.properties.format = this.format;
-        this.widget.properties.threshold = this.threshold;
-        this.widget.properties.math = this.math;
-        this.widget.properties.group = this.group;
+        this.widget.properties.measurement = {
+            id: this.form.get('measurement')?.value.id,
+            name: this.form.get('measurement')?.value.name,
+            values: this.form.get('measurement')?.value.values,
+            dbId: this.form.get('measurement')?.value.DbId,
+        };
+        this.widget.properties.vAxis = this.form.get('vAxis')?.value;
+        this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value;
+        this.widget.name = this.form.get('name')?.value;
+        this.widget.properties.type = this.form.get('type')?.value;
+        this.widget.properties.format = this.form.get('format')?.value;
+        this.widget.properties.threshold = this.form.get('threshold')?.value;
+        this.widget.properties.math = this.form.get('math')?.value;
+        this.widget.properties.group = this.form.get('group')?.value;
+        this.widget.properties.device = this.form.get('device')?.value;
+        this.widget.properties.service = this.form.get('service')?.value;
+        this.widget.properties.sourceType = this.form.get('sourceType')?.value;
+
 
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
             if (resp.message === 'OK') {
@@ -148,21 +210,11 @@ export class SingleValueEditDialogComponent implements OnInit {
         });
     }
 
-    private _filter(value: string): ChartsExportMeasurementModel[] {
-        const filterValue = value.toLowerCase();
-        return this.exports.filter((option) => {
-            if (option.name) {
-                return option.name.toLowerCase().indexOf(filterValue) === 0;
-            }
-            return false;
-        });
-    }
-
     displayFn(input?: ChartsExportMeasurementModel): string {
         return input ? input.name : '';
     }
 
-    compare(a: any, b: any) {
+    compareValues(a: any, b: any) {
         return a.InstanceID === b.InstanceID && a.Name === b.Name && a.Path === b.Path;
     }
 
@@ -170,19 +222,11 @@ export class SingleValueEditDialogComponent implements OnInit {
         return a === b;
     }
 
-    optionSelected(input: MatAutocompleteSelectedEvent) {
-        this.vAxisValues = input.option.value.values;
-        this.widget.properties.vAxis = this.vAxisValues[0];
+    compareIds(a: any, b: any) {
+        return a.id === b.id;
     }
 
-    autoCompleteClosed() {
-        if (typeof this.formControl.value === 'string') {
-            this.disableSave = true;
-            this.vAxisValues = [];
-            this.formControl.setErrors({ valid: false });
-        } else {
-            this.disableSave = false;
-            this.formControl.updateValueAndValidity();
-        }
+    compareNames(a: any, b: any) {
+        return a.Name === b.Name;
     }
 }

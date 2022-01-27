@@ -86,13 +86,18 @@ export function exportValidator(): ValidatorFn {
             return { 'unknown formControl': 'exportValuePath' };
         }
 
+        const deviceId = control.get('elementDetails.device.deviceId');
+        if (deviceId === null) {
+            return { 'unknown formControl': 'deviceId' };
+        }
+
         if (exportCreatedByWidget.value === true) {
             exportId.setErrors(null);
             exportValueName.setErrors(null);
             exportValuePath.setErrors(null);
             return null; // values will be filled automatically
         }
-        if (!hasValue(exportId)) {
+        if (!hasValue(deviceId) && !hasValue(exportId)) {
             exportId.setErrors({ 'missing value': true });
             return { 'missing value': 'exportId' };
         } else {

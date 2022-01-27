@@ -23,7 +23,7 @@ import { forkJoin, Observable, of } from 'rxjs';
 import {
     DeviceTypeAspectModel,
     DeviceTypeBaseModel,
-    DeviceTypeCharacteristicsModel,
+    DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
@@ -230,5 +230,40 @@ export class DeviceTypeService {
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getLeafCharacteristics', [])),
         );
+    }
+
+    getValuePaths(field: DeviceTypeContentVariableModel): string[] {
+        const paths: { path: string; type: string }[] = [];
+        this.traverseDataStructure('', field, paths);
+        return paths.map(x => x.path);
+    }
+
+    getValuePathsAndTypes(field: DeviceTypeContentVariableModel): { path: string; type: string }[] {
+        const paths: { path: string; type: string }[] = [];
+        this.traverseDataStructure('', field, paths);
+        return paths;
+    }
+
+    private traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel, paths: { path: string; type: string }[]) {
+        if (field.type === 'https://schema.org/StructuredValue' && field.type !== undefined && field.type !== null) {
+            if (pathString !== '') {
+                pathString += '.' + field.name;
+            } else {
+                if (field.name !== undefined) {
+                    pathString = field.name;
+                }
+            }
+            if (field.sub_content_variables !== undefined) {
+                field.sub_content_variables.forEach((innerField: DeviceTypeContentVariableModel) => {
+                    this.traverseDataStructure(pathString, innerField, paths);
+                });
+            }
+        } else {
+            let name = field.name || '';
+            if (pathString.length > 0) {
+                name = pathString + '.' + name;
+            }
+            paths.push({path: name, type: field.type || ''});
+        }
     }
 }

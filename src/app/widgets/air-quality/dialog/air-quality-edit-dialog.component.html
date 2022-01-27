@@ -125,17 +125,18 @@
                                     <td>
                                         <mat-form-field color="accent">
                                             <mat-label>Export</mat-label>
-                                            <senergy-select-search [required]="true" placeholder="Export" [(ngModel)]="option.export"
-                                                        [compareWith]="compareExports" [options]="exports" useOptionViewProperty="Name">
+                                            <senergy-select-search placeholder="Export" [(ngModel)]="option.export" (ngModelChange)="insideExportChanged(option)"
+                                                        [compareWith]="compareExports" [options]="exports" useOptionViewProperty="Name" noneView="--None--"
+                                                        [disabled]="option.insideDeviceId !== undefined">
                                             </senergy-select-search>
                                         </mat-form-field>
                                     </td>
                                     <td>
                                         <mat-form-field color="accent">
                                             <mat-label>Value</mat-label>
-                                            <senergy-select-search [required]="true" placeholder="Value" [(ngModel)]="option.data.column"
+                                            <senergy-select-search placeholder="Value" [(ngModel)]="option.data.column"
                                                         [compareWith]="compareExportValueModels" [options]="option.export?.Values || []"
-                                                        useOptionViewProperty="Name">
+                                                        useOptionViewProperty="Name" [disabled]="option.insideDeviceId !== undefined">
                                             </senergy-select-search>
                                         </mat-form-field>
                                     </td>
@@ -143,6 +144,34 @@
                                         <mat-form-field color="accent">
                                             <mat-label>Math</mat-label>
                                             <input matInput placeholder="Math" [(ngModel)]="option.math">
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <mat-form-field color="accent">
+                                            <mat-label>Device</mat-label>
+                                            <senergy-select-search placeholder="Device" [(ngModel)]="option.insideDeviceId" (ngModelChange)="insideDeviceChanged(option)"
+                                                                   [options]="devices" useOptionViewProperty="name" useOptionValueProperty="id" [disabled]="option.export !== undefined" noneView="--None--">
+                                            </senergy-select-search>
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field color="accent">
+                                            <mat-label>Service</mat-label>
+                                            <senergy-select-search placeholder="Service" [(ngModel)]="option.insideServiceId"
+                                                                   [options]="(getServices(option.insideDeviceId) | async) || []" useOptionValueProperty="id"
+                                                                   [disabled]="option.export !== undefined" useOptionViewProperty="name">
+                                            </senergy-select-search>
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field color="accent">
+                                            <mat-label>Value</mat-label>
+                                            <senergy-select-search placeholder="Value" [(ngModel)]="option.insideDeviceValuePath"
+                                                                   [options]="getServiceValues(option.insideDeviceId, option.insideServiceId)"
+                                                                   [disabled]="option.export !== undefined">
+                                            </senergy-select-search>
                                         </mat-form-field>
                                     </td>
                                 </tr>
@@ -163,20 +192,22 @@
                                         <td>
                                             <mat-form-field color="accent">
                                                 <mat-label>Export</mat-label>
-                                                <senergy-select-search [required]="true" placeholder="Export"
+                                                <senergy-select-search placeholder="Export"
                                                             [(ngModel)]="option.outsideExport"
                                                             [compareWith]="compareExports"
-                                                            [options]="exports" useOptionViewProperty="Name">
+                                                            [options]="exports" useOptionViewProperty="Name" (ngModelChange)="outsideExportChanged(option)"
+                                                            [disabled]="option.outsideDeviceId !== undefined" noneView="--None--">
                                                 </senergy-select-search>
                                             </mat-form-field>
                                         </td>
                                         <td>
                                             <mat-form-field color="accent">
                                                 <mat-label>Value</mat-label>
-                                                <senergy-select-search [required]="true" placeholder="Value"
+                                                <senergy-select-search placeholder="Value"
                                                             [(ngModel)]="option.outsideData.column"
                                                             [compareWith]="compareExportValueModels"
                                                             [options]="option.outsideExport?.Values || []"
+                                                            [disabled]="option.outsideDeviceId !== undefined"
                                                             useOptionViewProperty="Name">
                                                 </senergy-select-search>
                                             </mat-form-field>
@@ -185,6 +216,33 @@
                                             <mat-form-field color="accent">
                                                 <mat-label>Math</mat-label>
                                                 <input matInput placeholder="Math" [(ngModel)]="option.outsideMath">
+                                            </mat-form-field>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <mat-form-field color="accent">
+                                                <mat-label>Device</mat-label>
+                                                <senergy-select-search placeholder="Device" [(ngModel)]="option.outsideDeviceId" (ngModelChange)="outsideDeviceChanged(option)"
+                                                                       [options]="devices" useOptionViewProperty="name" useOptionValueProperty="id" [disabled]="option.outsideExport !== undefined" noneView="--None--">
+                                                </senergy-select-search>
+                                            </mat-form-field>
+                                        </td>
+                                        <td>
+                                            <mat-form-field color="accent">
+                                                <mat-label>Service</mat-label>
+                                                <senergy-select-search placeholder="Service" [(ngModel)]="option.outsideServiceId"
+                                                                       [options]="(getServices(option.outsideDeviceId) | async) || []" useOptionValueProperty="id"
+                                                                       [disabled]="option.outsideExport !== undefined" useOptionViewProperty="name">
+                                                </senergy-select-search>
+                                            </mat-form-field>
+                                        </td>
+                                        <td>
+                                            <mat-form-field color="accent">
+                                                <mat-label>Value</mat-label>
+                                                <senergy-select-search placeholder="Value" [(ngModel)]="option.outsideDeviceValuePath"
+                                                                       [disabled]="option.outsideExport !== undefined" [options]="getServiceValues(option.outsideDeviceId, option.outsideServiceId)">
+                                                </senergy-select-search>
                                             </mat-form-field>
                                         </td>
                                     </tr>

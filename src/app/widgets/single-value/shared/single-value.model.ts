@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {DeviceInstancesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
+import {DeviceTypeServiceModel} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+
 export interface SingleValueModel {
     value: number | string;
     type: string;
@@ -23,4 +26,7 @@ export interface SingleValuePropertiesModel {
     type?: string;
     format?: string;
     math?: string;
+    sourceType?: string;
+    device?: DeviceInstancesModel;
+    service?: DeviceTypeServiceModel;
 }

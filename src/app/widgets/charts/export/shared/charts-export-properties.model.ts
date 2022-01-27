@@ -16,6 +16,7 @@
 
 import { ExportValueModel } from '../../../../modules/exports/shared/export.model';
 import { ChartsExportRequestPayloadGroupModel, ChartsExportRequestPayloadTimeModel } from './charts-export-request-payload.model';
+import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
 
 export interface ChartsExportPropertiesModel {
     chartType?: string;
@@ -26,7 +27,7 @@ export interface ChartsExportPropertiesModel {
     vAxes?: ChartsExportVAxesModel[];
     vAxisLabel?: string;
     secondVAxisLabel?: string;
-    exports?: ChartsExportMeasurementModel[];
+    exports?: (ChartsExportMeasurementModel | DeviceInstancesModel)[];
     measurement?: ChartsExportMeasurementModel; // deprecated
     math?: string;
     curvedFunction?: boolean;
@@ -39,14 +40,18 @@ export interface ChartsExportMeasurementModel {
     id: string;
     name: string;
     values: ExportValueModel[];
+    dbId?: string;
 }
 
 export interface ChartsExportVAxesModel {
-    instanceId: string;
+    instanceId?: string;
+    deviceId?: string;
+    serviceId?: string;
     exportName: string;
     valueName: string;
     valueAlias?: string;
     valueType: string;
+    valuePath?: string;
     math: string;
     color: string;
     filterType?: '=' | '<>' | '!=' | '>' | '>=' | '<' | '<=';

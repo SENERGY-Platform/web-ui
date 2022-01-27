@@ -128,16 +128,6 @@
                     </td>
                 </ng-container>
 
-                <ng-container matColumnDef="copy">
-                    <th mat-header-cell *matHeaderCellDef>Copy</th>
-                    <td mat-cell *matCellDef="let element">
-                        <button matTooltip="Copy endpoint to clipboard" mat-icon-button color="accent"
-                                (click)="copyEndpoint(url + '/measurement/' + element.Measurement)">
-                            <mat-icon>content_copy</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-
                 <ng-container matColumnDef="delete">
                     <th mat-header-cell *matHeaderCellDef>Delete</th>
                     <td mat-cell *matCellDef="let element">

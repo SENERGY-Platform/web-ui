@@ -43,6 +43,7 @@ export interface DataTableElementModel {
     exportValueName: string;
     exportCreatedByWidget: boolean;
     exportTagSelection?: string[];
+    exportDbId?: string;
     groupTime?: string | null;
     groupType?: string | null;
     unit?: string;

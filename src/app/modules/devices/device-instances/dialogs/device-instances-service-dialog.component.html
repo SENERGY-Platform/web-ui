@@ -14,16 +14,41 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Services</h2>
+<h2 mat-dialog-title>Data</h2>
 
 <mat-dialog-content>
-        <mat-list>
-            <mat-list-item *ngFor="let service of services">
-                <mat-icon mat-list-icon>keyboard_arrow_right</mat-icon>
-                <h4 mat-line>{{service.name}}</h4>
-                <p mat-line *ngIf="service.description"> {{service.description}} </p>
-            </mat-list-item>
-        </mat-list>
+    <mat-accordion multi>
+        <mat-expansion-panel *ngFor="let service of services; let i = index">
+            <mat-expansion-panel-header>
+                {{service.name}}
+            </mat-expansion-panel-header>
+            <mat-panel-description>
+                {{service.description}}
+            </mat-panel-description>
+            <ng-template matExpansionPanelContent>
+                <table mat-table *ngIf="lastValueArray[i].length > 0" [dataSource]="lastValueArray[i]">
+                    <ng-container matColumnDef="field">
+                        <th mat-header-cell *matHeaderCellDef> Field </th>
+                        <td mat-cell *matCellDef="let element"> {{element.request.columnName}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="value">
+                        <th mat-header-cell *matHeaderCellDef> Value </th>
+                        <td mat-cell *matCellDef="let element"> {{element.response.value !== null ? element.response.value : 'N/A'}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="time">
+                        <th mat-header-cell *matHeaderCellDef> Time </th>
+                        <td mat-cell *matCellDef="let element"> {{element.response.time !== null ? (element.response.time |  date:'dd.MM.yyyy - HH:mm:ss') : 'N/A'}} </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['field', 'value', 'time']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['field', 'value', 'time'];"></tr>
+                </table>
+                <span *ngIf="lastValueArray[i].length === 0">Service does not provide data</span>
+            </ng-template>
+        </mat-expansion-panel>
+    </mat-accordion>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

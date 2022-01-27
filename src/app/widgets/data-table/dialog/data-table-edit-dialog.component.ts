@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
-import { ExportModel, ExportValueBaseModel, ExportValueCharacteristicModel } from '../../../modules/exports/shared/export.model';
-import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { DeviceStatusConfigConvertRuleModel } from '../../device-status/shared/device-status-properties.model';
-import { DataTableElementModel, DataTableElementTypesEnum, DataTableOrderEnum, ExportValueTypes } from '../shared/data-table.model';
+import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
+import {
+    ExportModel,
+    ExportValueBaseModel,
+    ExportValueCharacteristicModel
+} from '../../../modules/exports/shared/export.model';
+import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {DeviceStatusConfigConvertRuleModel} from '../../device-status/shared/device-status-properties.model';
+import {
+    DataTableElementModel,
+    DataTableElementTypesEnum,
+    DataTableOrderEnum,
+    ExportValueTypes
+} from '../shared/data-table.model';
 import {
     DeviceTypeFunctionModel,
     DeviceTypeInteractionEnum,
@@ -32,16 +41,17 @@ import {
     DeviceInstancesPermSearchModel,
     DeviceSelectablesModel,
 } from '../../../modules/devices/device-instances/shared/device-instances.model';
-import { DataTableHelperService } from '../shared/data-table-helper.service';
-import { ExportService } from '../../../modules/exports/shared/export.service';
-import { PipelineModel, PipelineOperatorModel } from '../../../modules/data/pipeline-registry/shared/pipeline.model';
-import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
-import { forkJoin, Observable, of } from 'rxjs';
-import { flatMap, map } from 'rxjs/operators';
-import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
-import { DataTableService } from '../shared/data-table.service';
-import { boundaryValidator, elementDetailsValidator, exportValidator } from './data-table-edit-dialog.validators';
-import { util } from 'jointjs';
+import {DataTableHelperService} from '../shared/data-table-helper.service';
+import {ExportService} from '../../../modules/exports/shared/export.service';
+import {PipelineModel, PipelineOperatorModel} from '../../../modules/data/pipeline-registry/shared/pipeline.model';
+import {V2DeploymentsPreparedModel} from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
+import {forkJoin, Observable, of} from 'rxjs';
+import {flatMap, map} from 'rxjs/operators';
+import {ProcessSchedulerService} from '../../process-scheduler/shared/process-scheduler.service';
+import {DataTableService} from '../shared/data-table.service';
+import {boundaryValidator, elementDetailsValidator, exportValidator} from './data-table-edit-dialog.validators';
+import {util} from 'jointjs';
+import {DBTypeEnum} from '../../shared/export-data.service';
 import uuid = util.uuid;
 
 @Component({
@@ -219,6 +229,7 @@ export class DataTableEditDialogComponent implements OnInit {
                 exportValueName: [undefined],
                 exportCreatedByWidget: [undefined],
                 exportTagSelection: [undefined],
+                exportDbId: [undefined],
                 groupType: [undefined],
                 groupTime: [undefined],
                 unit: [undefined],
@@ -228,7 +239,7 @@ export class DataTableEditDialogComponent implements OnInit {
                         lowerBoundary: [undefined],
                         upperBoundary: [undefined],
                     },
-                    { validators: [boundaryValidator()] },
+                    {validators: [boundaryValidator()]},
                 ),
                 elementDetails: this.fb.group(
                     {
@@ -251,10 +262,10 @@ export class DataTableEditDialogComponent implements OnInit {
                             instanceId: [undefined],
                         }),
                     },
-                    { validators: [elementDetailsValidator()] },
+                    {validators: [elementDetailsValidator()]},
                 ),
             },
-            { validators: [exportValidator()] },
+            {validators: [exportValidator()]},
         );
 
         // Init valueChanges listeners
@@ -352,12 +363,13 @@ export class DataTableEditDialogComponent implements OnInit {
 
         newGroup.get('exportId')?.valueChanges.subscribe((exportId) => {
             this.dataTableHelperService.preloadExportTags(exportId).subscribe();
+            newGroup.get('exportDbId')?.setValue(this.dataTableHelperService.getPreloadedExportById(exportId)?.DbId);
         });
 
         if (measurement !== undefined) {
             newGroup.patchValue(measurement);
         } else {
-            newGroup.patchValue({ id: uuid() });
+            newGroup.patchValue({id: uuid()});
         }
         this.getElements().push(newGroup);
     }
@@ -372,8 +384,8 @@ export class DataTableEditDialogComponent implements OnInit {
         this.widget.name = this.formGroup.get('name')?.value;
         const observables: Observable<any>[] = [];
         observables.push(...this.createDeploymentsAndSchedules());
-        observables.push(...this.createExports());
         observables.push(...this.dataTableService.deleteElementsAndObserve(this.widget.properties.dataTable?.elements));
+        observables.push(...this.createExports());
 
         forkJoin(observables)
             .pipe(
@@ -480,10 +492,10 @@ export class DataTableEditDialogComponent implements OnInit {
         let functionId = element.get('elementDetails')?.get('device')?.get('functionId')?.value;
         if (functionId !== null && functions.findIndex((f) => f.id === functionId) === -1) {
             functionId = null;
-            element.get('elementDetails')?.get('device')?.patchValue({ functionId });
+            element.get('elementDetails')?.get('device')?.patchValue({functionId});
         }
         if (functionId === null && functions.length === 1) {
-            element.get('elementDetails')?.get('device')?.patchValue({ functionId: functions[0].id });
+            element.get('elementDetails')?.get('device')?.patchValue({functionId: functions[0].id});
         }
         return functions;
     }
@@ -499,10 +511,10 @@ export class DataTableEditDialogComponent implements OnInit {
         let deviceId = element.get('elementDetails')?.get('device')?.get('deviceId')?.value;
         if (deviceId !== null && selectables.findIndex((d) => d.device.id === deviceId) === -1) {
             deviceId = null;
-            element.get('elementDetails')?.get('device')?.patchValue({ deviceId });
+            element.get('elementDetails')?.get('device')?.patchValue({deviceId});
         }
         if (deviceId === null && selectables.length === 1) {
-            element.get('elementDetails')?.get('device')?.patchValue({ deviceId: selectables[0].device.id });
+            element.get('elementDetails')?.get('device')?.patchValue({deviceId: selectables[0].device.id});
         }
 
         return selectables;
@@ -513,20 +525,20 @@ export class DataTableEditDialogComponent implements OnInit {
             return [];
         }
         const deviceId = element.get('elementDetails')?.get('device')?.get('deviceId')?.value;
-        let selectedSelectable: DeviceSelectablesModel | undefined = { services: [] as DeviceTypeServiceModel[] } as DeviceSelectablesModel;
+        let selectedSelectable: DeviceSelectablesModel | undefined = {services: [] as DeviceTypeServiceModel[]} as DeviceSelectablesModel;
         if (deviceId !== null) {
             selectedSelectable = this.getSelectables(element).find((selectable) => selectable.device.id === deviceId);
             if (selectedSelectable === undefined) {
-                selectedSelectable = { services: [] as DeviceTypeServiceModel[] } as DeviceSelectablesModel;
+                selectedSelectable = {services: [] as DeviceTypeServiceModel[]} as DeviceSelectablesModel;
             }
         }
         let serviceId = element.get('elementDetails')?.get('device')?.get('serviceId')?.value;
         if (serviceId !== null && selectedSelectable.services.findIndex((s) => s.id === serviceId) === -1) {
             serviceId = null;
-            element.get('elementDetails')?.get('device')?.patchValue({ serviceId });
+            element.get('elementDetails')?.get('device')?.patchValue({serviceId});
         }
         if (serviceId === null && selectedSelectable.services.length === 1) {
-            element.get('elementDetails')?.get('device')?.patchValue({ serviceId: selectedSelectable.services[0].id });
+            element.get('elementDetails')?.get('device')?.patchValue({serviceId: selectedSelectable.services[0].id});
         }
 
         return selectedSelectable.services;
@@ -545,10 +557,10 @@ export class DataTableEditDialogComponent implements OnInit {
         let exportValuePath = element.get('exportValuePath')?.value;
         if (exportValuePath !== null && values.findIndex((v) => v.Path === exportValuePath) === -1) {
             exportValuePath = null;
-            element.patchValue({ exportValuePath });
+            element.patchValue({exportValuePath});
         }
         if (exportValuePath === null && values.length === 1) {
-            element.patchValue({ exportValuePath: values[0].Path });
+            element.patchValue({exportValuePath: values[0].Path});
         }
 
         return values;
@@ -594,21 +606,21 @@ export class DataTableEditDialogComponent implements OnInit {
 
         if (exports.length === 0) {
             element.get('exportId')?.disable();
-            element.patchValue({ exportCreatedByWidget: true });
+            element.patchValue({exportCreatedByWidget: true});
         } else {
             element.get('exportId')?.enable();
-            element.patchValue({ exportCreatedByWidget: false });
+            element.patchValue({exportCreatedByWidget: false});
         }
 
         let exportId = element.get('exportId')?.value;
         if (exportId !== null) {
             if (exports.findIndex((e) => e.ID === exportId) === -1) {
                 exportId = null;
-                element.patchValue({ exportId });
+                element.patchValue({exportId});
             }
         }
         if (exportId === null && exports.length === 1) {
-            element.patchValue({ exportId: exports[0].ID });
+            element.patchValue({exportId: exports[0].ID});
         }
 
         return exports;
@@ -619,21 +631,21 @@ export class DataTableEditDialogComponent implements OnInit {
             return [];
         }
         const pipelineId = element.get('elementDetails')?.get('pipeline')?.get('pipelineId')?.value;
-        let selectedPipeline: PipelineModel | undefined = { operators: [] as PipelineOperatorModel[] } as PipelineModel;
+        let selectedPipeline: PipelineModel | undefined = {operators: [] as PipelineOperatorModel[]} as PipelineModel;
         if (pipelineId !== null) {
             selectedPipeline = this.dataTableHelperService.getPipelines().find((pipe) => pipe.id === pipelineId);
             if (selectedPipeline === undefined) {
-                selectedPipeline = { operators: [] as PipelineOperatorModel[] } as PipelineModel;
+                selectedPipeline = {operators: [] as PipelineOperatorModel[]} as PipelineModel;
             }
         }
 
         let operatorId = element.get('elementDetails')?.get('pipeline')?.get('operatorId')?.value;
         if (operatorId !== null && selectedPipeline.operators.findIndex((o) => o.id === operatorId) === -1) {
             operatorId = null;
-            element.get('elementDetails')?.get('pipeline')?.patchValue({ operatorId });
+            element.get('elementDetails')?.get('pipeline')?.patchValue({operatorId});
         }
         if (operatorId === null && selectedPipeline.operators.length === 1) {
-            element.get('elementDetails')?.get('pipeline')?.patchValue({ operatorId: selectedPipeline.operators[0].id });
+            element.get('elementDetails')?.get('pipeline')?.patchValue({operatorId: selectedPipeline.operators[0].id});
         }
 
         return selectedPipeline.operators;
@@ -665,10 +677,10 @@ export class DataTableEditDialogComponent implements OnInit {
         let exportValuePath = element.get('exportValuePath')?.value;
         if (exportValuePath !== null && values.findIndex((v) => v.Path === exportValuePath) === -1) {
             exportValuePath = null;
-            element.patchValue({ exportValuePath });
+            element.patchValue({exportValuePath});
         }
         if (exportValuePath === null && values.length === 1) {
-            element.patchValue({ exportValuePath: values[0].Path });
+            element.patchValue({exportValuePath: values[0].Path});
         }
         return values;
     }
@@ -764,7 +776,7 @@ export class DataTableEditDialogComponent implements OnInit {
         if (value === undefined) {
             return;
         }
-        element.patchValue({ valueType: value.Type, exportValueName: value.Name });
+        element.patchValue({valueType: value.Type, exportValueName: value.Name});
     }
 
     private setConvertRule(convertRule: DeviceStatusConfigConvertRuleModel): FormGroup {
@@ -786,6 +798,7 @@ export class DataTableEditDialogComponent implements OnInit {
             element.get('elementDetails')?.get('pipeline')?.disable();
             element.get('elementDetails')?.get('device')?.enable();
             element.get('elementDetails')?.get('import')?.disable();
+            element.get('exportId')?.disable();
             break;
         case this.elementTypes.IMPORT:
             element.get('elementDetails')?.get('pipeline')?.disable();
@@ -808,7 +821,7 @@ export class DataTableEditDialogComponent implements OnInit {
         ) {
             requestDevice = true;
         }
-        element.get('elementDetails')?.get('device')?.patchValue({ requestDevice });
+        element.get('elementDetails')?.get('device')?.patchValue({requestDevice});
     }
 
     private ensureCorrectExportCreatedByWidget() {
@@ -825,9 +838,14 @@ export class DataTableEditDialogComponent implements OnInit {
                 return;
             }
             const existingElement = this.widget.properties.dataTable?.elements.find((e) => e.id === id);
-            if (existingElement !== undefined && existingElement.exportCreatedByWidget && existingElement.exportId === exportId) {
-                element.patchValue({ exportCreatedByWidget: true });
+
+            if (existingElement !== undefined && existingElement.exportCreatedByWidget && existingElement.exportId === exportId
+                && (element.value.elementDetails?.device?.deviceId || '').length === 0) {
+                element.patchValue({exportCreatedByWidget: true});
             }
+            element.patchValue({
+                exportDbId: element.get('exportCreatedByWidget')?.value === true ? DBTypeEnum.snrgyInflux : undefined
+            });
         });
     }
 
@@ -868,7 +886,7 @@ export class DataTableEditDialogComponent implements OnInit {
             observables.push(
                 this.exportService.startPipeline(preparedExport).pipe(
                     map((model) => {
-                        element.patchValue({ exportId: model.ID });
+                        element.patchValue({exportId: model.ID});
                     }),
                 ),
             );
@@ -1002,14 +1020,14 @@ export class DataTableEditDialogComponent implements OnInit {
                         .pipe(
                             flatMap((deployment) => {
                                 if (deployment !== null && deployment.status === 200) {
-                                    element.get('elementDetails')?.get('device')?.patchValue({ deploymentId: deployment.id });
+                                    element.get('elementDetails')?.get('device')?.patchValue({deploymentId: deployment.id});
                                     // spread process starts
                                     let cron =
                                         refreshTime === '*'
                                             ? refreshTime
                                             : (Math.round((refreshTime / elements.length) * index) as unknown as string) +
-                                              '/' +
-                                              refreshTime;
+                                            '/' +
+                                            refreshTime;
                                     cron += ' * * * * *';
                                     return this.processSchedulerService.createSchedule({
                                         created_by: this.widgetId,
@@ -1025,7 +1043,7 @@ export class DataTableEditDialogComponent implements OnInit {
                         .pipe(
                             flatMap((schedule) => {
                                 if (schedule !== null) {
-                                    element.get('elementDetails')?.get('device')?.patchValue({ scheduleId: schedule.id });
+                                    element.get('elementDetails')?.get('device')?.patchValue({scheduleId: schedule.id});
                                 }
                                 return of(null);
                             }),

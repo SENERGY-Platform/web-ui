@@ -19,18 +19,35 @@ export interface TimeValuePairModel {
     value: string | number | boolean | null;
 }
 
-export interface LastValuesRequestElementModel {
+export interface LastValuesRequestElementInfluxModel {
     measurement: string;
     columnName: string;
     math?: string;
 }
 
-export interface QueriesRequestElementModel {
+export interface LastValuesRequestElementTimescaleModel {
+    exportId?: string;
+    deviceId?: string;
+    serviceId?: string;
+    columnName: string;
+    math?: string;
+}
+
+export interface QueriesRequestElementInfluxModel extends QueriesRequestElementBaseModel{
+    measurement?: string;
+}
+
+export interface QueriesRequestElementTimescaleModel extends QueriesRequestElementBaseModel{
+    exportId?: string;
+    deviceId?: string;
+    serviceId?: string;
+}
+
+export interface QueriesRequestElementBaseModel {
     columns: QueriesRequestColumnModel[];
     filters?: QueriesRequestFilterModel[];
     groupTime?: string;
     limit?: number;
-    measurement: string;
     time?: QueriesRequestTimeModel;
     orderColumnIndex?: number; // must not be set if querying as table
     orderDirection?: 'asc' | 'desc'; // must not be set if querying as table

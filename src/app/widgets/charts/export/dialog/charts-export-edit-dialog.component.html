@@ -15,8 +15,8 @@
   -->
 
 <h2 mat-dialog-title>Edit Chart Export</h2>
-
-<mat-dialog-content class="form">
+<senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+<mat-dialog-content class="form" *ngIf="ready">
     <div fxLayout="column" [formGroup]="formGroupController">
         <mat-form-field color="accent">
             <mat-label>Name</mat-label>
@@ -46,11 +46,11 @@
             </table>
 
             <mat-form-field color="accent">
-                <mat-label>Choose Exports</mat-label>
+                <mat-label>Choose Exports/Devices</mat-label>
                 <senergy-select-search [required]="true" [multiple]="true"
                                        [compareWith]="compare" formControlName="exports"
                                        (selectionChange)="selectionChange($event.value)"
-                                       [options]="exportList" useOptionViewProperty="name">
+                                       [options]="getExportDeviceList()" useOptionViewProperty="name">
                 </senergy-select-search>
                 <mat-error *ngIf="exports.invalid">
                     Please make a selection!
@@ -333,7 +333,7 @@
 
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions fxLayoutAlign="end center" *ngIf="ready">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()"
             [disabled]="formGroupController.invalid || (formGroupController.get('properties.vAxes')?.value || []).length ===  0">

@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { DeviceInstancesModel } from './device-instances.model';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { DeviceInstancesServiceDialogComponent } from '../dialogs/device-instances-service-dialog.component';
-import { DeviceTypeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
-import { DeviceInstancesEditDialogComponent } from '../dialogs/device-instances-edit-dialog.component';
-import { DeviceInstancesUpdateModel } from './device-instances-update.model';
-import { DeviceTypePermSearchModel } from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { DeviceInstancesService } from './device-instances.service';
-import { DeviceInstancesSelectDialogComponent } from '../dialogs/device-instances-select-dialog.component';
-import { Observable } from 'rxjs/index';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
+import {DeviceInstancesModel} from './device-instances.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DeviceInstancesServiceDialogComponent} from '../dialogs/device-instances-service-dialog.component';
+import {DeviceTypeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
+import {DeviceInstancesEditDialogComponent} from '../dialogs/device-instances-edit-dialog.component';
+import {DeviceInstancesUpdateModel} from './device-instances-update.model';
+import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {DeviceInstancesService} from './device-instances.service';
+import {DeviceInstancesSelectDialogComponent} from '../dialogs/device-instances-select-dialog.component';
+import {Observable} from 'rxjs/index';
+import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
+import {ExportDataService} from '../../../../widgets/shared/export-data.service';
 
 @Injectable({
     providedIn: 'root',
@@ -41,7 +43,9 @@ export class DeviceInstancesDialogService {
         private deviceTypeService: DeviceTypeService,
         private snackBar: MatSnackBar,
         private deviceInstancesService: DeviceInstancesService,
-    ) {}
+        private exportDataService: ExportDataService,
+    ) {
+    }
 
     openDeviceSelectDialog(): Observable<string[] | null | undefined> {
         const dialogConfig = new MatDialogConfig();
@@ -50,16 +54,47 @@ export class DeviceInstancesDialogService {
         return editDialogRef.afterClosed();
     }
 
-    openDeviceServiceDialog(deviceTypeId: string): void {
+    openDeviceServiceDialog(deviceTypeId: string, deviceId: string): void {
         this.deviceTypeService.getDeviceType(deviceTypeId).subscribe((deviceType: DeviceTypeModel | null) => {
-            const dialogConfig = new MatDialogConfig();
-            dialogConfig.disableClose = false;
-            if (deviceType) {
-                dialogConfig.data = {
-                    services: deviceType.services,
-                };
-            }
-            this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
+            const lastValueElements: LastValuesRequestElementTimescaleModel[] = [];
+            const serviceOutputCounts: number[] = [];
+            deviceType?.services.forEach((service, serviceIndex) => {
+                service.outputs.forEach(output => {
+                    this.deviceTypeService.getValuePaths(output.content_variable).forEach(path => {
+                        lastValueElements.push({
+                            deviceId,
+                            serviceId: service.id,
+                            columnName: path,
+                        });
+                        if (serviceOutputCounts.length <= serviceIndex) {
+                            serviceOutputCounts.push(0);
+                        }
+                        serviceOutputCounts[serviceIndex]++;
+                    });
+                });
+            });
+            this.exportDataService.getLastValuesTimescale(lastValueElements).subscribe(lastValues => {
+                const lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[][] = [];
+                let counter = 0;
+                deviceType?.services.forEach((_, serviceIndex) => {
+                    const subArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[] = [];
+                    lastValues.slice(counter, counter+serviceOutputCounts[serviceIndex]).forEach((response, responseIndex) => {
+                        subArray.push({request: lastValueElements[counter+responseIndex], response});
+                    });
+                    lastValueArray.push(subArray);
+                    counter += serviceOutputCounts[serviceIndex];
+                });
+                const dialogConfig = new MatDialogConfig();
+                dialogConfig.disableClose = false;
+                dialogConfig.minWidth = '650px';
+                if (deviceType) {
+                    dialogConfig.data = {
+                        services: deviceType.services,
+                        lastValueArray,
+                    };
+                }
+                this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
+            });
         });
     }
 
@@ -78,10 +113,10 @@ export class DeviceInstancesDialogService {
                     .updateDeviceInstance(this.convertDeviceInstance(deviceOut))
                     .subscribe((deviceResp: DeviceInstancesUpdateModel | null) => {
                         if (deviceResp === null) {
-                            this.snackBar.open('Error while updating the device instance!', undefined, { duration: 2000 });
+                            this.snackBar.open('Error while updating the device instance!', undefined, {duration: 2000});
                         } else {
                             Object.assign(device, deviceOut);
-                            this.snackBar.open('Device instance updated successfully.', undefined, { duration: 2000 });
+                            this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
                         }
                     });
             }
@@ -92,7 +127,7 @@ export class DeviceInstancesDialogService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
-            device: { device_type: JSON.parse(JSON.stringify(deviceType)) } as DeviceInstancesModel,
+            device: {device_type: JSON.parse(JSON.stringify(deviceType))} as DeviceInstancesModel,
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);
@@ -103,9 +138,9 @@ export class DeviceInstancesDialogService {
                     .saveDeviceInstance(this.convertDeviceInstance(deviceOut))
                     .subscribe((deviceResp: DeviceInstancesUpdateModel | null) => {
                         if (deviceResp === null) {
-                            this.snackBar.open('Error while saving the device instance!', undefined, { duration: 2000 });
+                            this.snackBar.open('Error while saving the device instance!', undefined, {duration: 2000});
                         } else {
-                            this.snackBar.open('Device instance saved successfully.', undefined, { duration: 2000 });
+                            this.snackBar.open('Device instance saved successfully.', undefined, {duration: 2000});
                         }
                     });
             }

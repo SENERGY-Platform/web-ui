@@ -17,8 +17,20 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { LastValuesRequestElementModel, QueriesRequestElementModel, TimeValuePairModel } from './export-data.model';
+import {
+    LastValuesRequestElementInfluxModel,
+    LastValuesRequestElementTimescaleModel,
+    QueriesRequestElementInfluxModel, QueriesRequestElementTimescaleModel,
+    TimeValuePairModel
+} from './export-data.model';
 import { HttpClient } from '@angular/common/http';
+import {ExportModel} from '../../modules/exports/shared/export.model';
+
+export enum DBTypeEnum {
+    snrgyTimescale = 'snrgy/timescale',
+    snrgyInflux = 'snrgy/influx',
+    Unknown = 'unknown'
+}
 
 @Injectable({
     providedIn: 'root',
@@ -26,16 +38,24 @@ import { HttpClient } from '@angular/common/http';
 export class ExportDataService {
     constructor(private http: HttpClient) {}
 
-    getLastValues(requestElements: LastValuesRequestElementModel[]): Observable<TimeValuePairModel[]> {
+    getLastValuesInflux(requestElements: LastValuesRequestElementInfluxModel[]): Observable<TimeValuePairModel[]> {
         return this.http.post<TimeValuePairModel[]>(environment.influxAPIURL + '/v2/last-values', requestElements);
     }
 
-    query(query: QueriesRequestElementModel[]): Observable<any[][][]> {
+    getLastValuesTimescale(requestElements: LastValuesRequestElementTimescaleModel[]): Observable<TimeValuePairModel[]> {
+        return this.http.post<TimeValuePairModel[]>(environment.timescaleAPIURL + '/last-values', requestElements);
+    }
+
+    queryInflux(query: QueriesRequestElementInfluxModel[]): Observable<any[][][]> {
         return this.http.post<any[][][]>(environment.influxAPIURL + '/v2/queries?format=per_query', query);
     }
 
-    queryAsTable(
-        query: QueriesRequestElementModel[],
+    queryTimescale(query: QueriesRequestElementTimescaleModel[]): Observable<any[][][]> {
+        return this.http.post<any[][][]>(environment.timescaleAPIURL + '/queries?format=per_query', query);
+    }
+
+    queryAsTableInflux(
+        query: QueriesRequestElementInfluxModel[],
         orderColumnIndex: number = 0,
         orderDirection: 'asc' | 'desc' = 'desc',
     ): Observable<any[][] | null> {
@@ -48,4 +68,30 @@ export class ExportDataService {
             query,
         );
     }
+
+    queryAsTabletimescale(
+        query: QueriesRequestElementTimescaleModel[],
+        orderColumnIndex: number = 0,
+        orderDirection: 'asc' | 'desc' = 'desc',
+    ): Observable<any[][] | null> {
+        return this.http.post<any[][] | null>(
+            environment.timescaleAPIURL +
+            '/queries?format=table&order_column_index=' +
+            orderColumnIndex +
+            '&order_direction=' +
+            orderDirection,
+            query,
+        );
+    }
+
+    getDbType(exp: ExportModel): DBTypeEnum {
+        if (exp.DbId === undefined || exp.DbId === null) {
+            return DBTypeEnum.snrgyInflux;
+        }
+        if (exp.DbId === DBTypeEnum.snrgyInflux || exp.DbId === DBTypeEnum.snrgyTimescale) {
+            return exp.DbId;
+        }
+        return DBTypeEnum.Unknown;
+    }
+
 }

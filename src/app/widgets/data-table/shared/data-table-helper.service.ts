@@ -158,7 +158,7 @@ export class DataTableHelperService {
             return of(this.exportCache);
         }
         return this.exportService
-            .getExports('', -1, 0, 'name', 'asc')
+            .getExports('', -1, 0, 'name', 'asc', undefined, undefined, true)
             .pipe(map((exports) => (this.exportCache = exports === null ? [] : exports.instances)));
     }
 
@@ -343,5 +343,9 @@ export class DataTableHelperService {
                 (e) => e.FilterType === 'import_id' && e.Filter === instanceId && e.Values.findIndex((v) => v.Path === path) !== -1,
             ) || []
         );
+    }
+
+    getPreloadedExportById(id: string): ExportModel | undefined {
+        return this.exportCache?.find(x => x.ID === id);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeploymentsService } from '../../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
@@ -26,16 +26,31 @@ import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../shared/
 import { ChartsExportRangeTimeTypeEnum } from '../shared/charts-export-range-time-type.enum';
 import { MatTableDataSource } from '@angular/material/table';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Observable, of } from 'rxjs';
+import {forkJoin, Observable, of} from 'rxjs';
 import { map } from 'rxjs/operators';
+import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
+import {DeviceInstancesService} from '../../../../modules/devices/device-instances/shared/device-instances.service';
+import {DeviceTypeService} from '../../../../modules/metadata/device-types-overview/shared/device-type.service';
+import {DeviceTypeModel} from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
+import {observableToBeFn} from 'rxjs/internal/testing/TestScheduler';
+import {DBTypeEnum, ExportDataService} from '../../../shared/export-data.service';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
     styleUrls: ['./charts-export-edit-dialog.component.css'],
 })
 export class ChartsExportEditDialogComponent implements OnInit {
+    typeString = 'https://schema.org/Text';
+    typeInteger = 'https://schema.org/Integer';
+    typeFloat = 'https://schema.org/Float';
+    typeBoolean = 'https://schema.org/Boolean';
+    typeStructure = 'https://schema.org/StructuredValue';
+    typeList = 'https://schema.org/ItemList';
+
     formGroupController = new FormGroup({});
     exportList: ChartsExportMeasurementModel[] = [];
+    deviceList: DeviceInstancesModel[] = [];
+    deviceTypes: Map<string, DeviceTypeModel> = new Map();
     dashboardId: string;
     widgetId: string;
     chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart'];
@@ -78,13 +93,18 @@ export class ChartsExportEditDialogComponent implements OnInit {
     dataSource = new MatTableDataSource<ChartsExportVAxesModel>();
     vAxesOptions: Map<string, ChartsExportVAxesModel[]> = new Map();
     exportTags: Map<string, Map<string, { value: string; parent: string }[]>> = new Map();
+    ready = false;
 
     constructor(
         private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
         private exportService: ExportService,
+        private exportDataService: ExportDataService,
+        private deviceInstancesService: DeviceInstancesService,
+        private deviceTypeService: DeviceTypeService,
         private _formBuilder: FormBuilder,
+        private cd: ChangeDetectorRef,
         @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
     ) {
         this.dashboardId = data.dashboardId;
@@ -92,24 +112,20 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.initFormGroup({
-            name: '',
-            properties: {
-                chartType: '',
-                curvedFunction: false,
-                exports: [] as ChartsExportMeasurementModel[],
-                timeRangeType: '',
-                vAxes: [] as ChartsExportVAxesModel[],
-            },
-        } as WidgetModel);
-        this.getWidgetData();
+        this.getWidgetData().subscribe(_ => this.ready = true);
     }
 
-    getWidgetData() {
-        this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
-            this.setDefaultValues(widget);
-            this.initDeployments(widget);
-            this.initFormGroup(widget);
+    getWidgetData(): Observable<any> {
+        return new Observable<any>(obs => {
+            this.dashboardService.getWidget(this.dashboardId, this.widgetId).subscribe((widget: WidgetModel) => {
+                this.setDefaultValues(widget);
+                this.initDeployments(widget).subscribe(_ => {
+                    this.initFormGroup(widget);
+                    this.selectionChange(widget.properties.exports || []);
+                    obs.next(null);
+                    obs.complete();
+                });
+            });
         });
     }
 
@@ -146,9 +162,19 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 this.dataSource.data.forEach((element) => (element.math = ''));
             }
         });
-        widget.properties.exports?.forEach((exp) => this.preloadExportTags(exp.id || '').subscribe());
-        this.formGroupController.get('properties.exports')?.valueChanges.subscribe((exports: ChartsExportMeasurementModel[]) => {
-            exports.forEach((exp) => this.preloadExportTags(exp.id || '').subscribe());
+        widget.properties.exports?.forEach((exp) => {
+            if ((exp as DeviceInstancesModel).device_type === undefined &&
+                ((exp as ChartsExportMeasurementModel).dbId === undefined || (exp as ChartsExportMeasurementModel).dbId === DBTypeEnum.snrgyInflux)) {
+                this.preloadExportTags(exp.id || '').subscribe();
+            }
+        });
+        this.formGroupController.get('properties.exports')?.valueChanges.subscribe((exports: (ChartsExportMeasurementModel | DeviceInstancesModel)[]) => {
+            exports.forEach((exp) => {
+                if ((exp as DeviceInstancesModel).device_type === undefined &&
+                    ((exp as ChartsExportMeasurementModel).dbId === undefined || (exp as ChartsExportMeasurementModel).dbId === DBTypeEnum.snrgyInflux)) {
+                    this.preloadExportTags(exp.id || '').subscribe();
+                }
+            });
         });
 
         this.formGroupController.get('properties.vAxes')?.valueChanges.subscribe((vAxes: ChartsExportVAxesModel[]) => {
@@ -162,6 +188,12 @@ export class ChartsExportEditDialogComponent implements OnInit {
                             item.exportName === axis.exportName &&
                             item.valueName === axis.valueName &&
                             item.valueType === axis.valueType,
+                    )
+                    && !vAxes.some(
+                        (item: ChartsExportVAxesModel) =>
+                            item.deviceId === axis.deviceId &&
+                            item.serviceId === axis.serviceId &&
+                            item.valueName === axis.valueName
                     )
                 ) {
                     this.dataSource.data.splice(i);
@@ -177,6 +209,12 @@ export class ChartsExportEditDialogComponent implements OnInit {
                             item.valueName === axis.valueName &&
                             item.valueType === axis.valueType,
                     )
+                    && !this.dataSource.data.some(
+                        (item: ChartsExportVAxesModel) =>
+                            item.deviceId === axis.deviceId &&
+                            item.serviceId === axis.serviceId &&
+                            item.valueName === axis.valueName
+                    )
                 ) {
                     this.dataSource.data.push(axis);
                 }
@@ -187,32 +225,29 @@ export class ChartsExportEditDialogComponent implements OnInit {
         this.dataSource.data = widget.properties.vAxes || [];
     }
 
-    initDeployments(widget: WidgetModel) {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: ExportResponseModel | null) => {
+    initDeployments(widget: WidgetModel): Observable<any> {
+        const obs: Observable<any>[] = [];
+        obs.push(this.exportService.getExports('', 9999, 0, 'name', 'asc', undefined, undefined, true).pipe(map((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exportList.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values });
+                        this.exportList.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, dbId: exportModel.DbId });
                     }
                 });
-                // remove deleted exports
                 if (widget.properties.exports !== undefined) {
-                    widget.properties.exports = widget.properties.exports.filter(
-                        (selected) => exports.instances.findIndex((existing) => existing.ID === selected.id) !== -1,
-                    );
-
                     // exports values or names might have changed
                     widget.properties.exports.forEach((selected) => {
                         const latestExisting = exports.instances.find((existing) => existing.ID === selected.id);
                         if (latestExisting !== undefined && latestExisting.Name !== undefined && latestExisting.ID !== undefined) {
-                            selected.values = latestExisting.Values;
+                            (selected as ChartsExportMeasurementModel).values = latestExisting.Values;
                             selected.name = latestExisting.Name;
                         }
                     });
                 }
-                this.selectionChange(widget.properties.exports || []);
             }
-        });
+        })));
+        obs.push(this.deviceInstancesService.getDeviceInstances('', 9999, 0, 'name', 'asc').pipe(map(devices => this.deviceList = devices)));
+        return forkJoin(obs);
     }
 
     compare(a: any, b: any): boolean {
@@ -238,55 +273,124 @@ export class ChartsExportEditDialogComponent implements OnInit {
             });
     }
 
-    selectionChange(selectedExports: ChartsExportMeasurementModel[]) {
+    selectionChange(selectedExports: (ChartsExportMeasurementModel | DeviceInstancesModel)[]) {
         const newData: Map<string, ChartsExportVAxesModel[]> = new Map();
         const newSelection: ChartsExportVAxesModel[] = [];
-        (selectedExports || []).forEach((selectedExport: ChartsExportMeasurementModel) => {
-            if (!newData.has(selectedExport.name)) {
-                newData.set(selectedExport.name, []);
+        const observables: Observable<any>[] = [];
+        (selectedExports || []).forEach((selectedElement: ChartsExportMeasurementModel | DeviceInstancesModel) => {
+            if (!newData.has(selectedElement.name)) {
+                newData.set(selectedElement.name, []);
             }
-            selectedExport.values?.forEach((value: ExportValueModel) => {
-                const newVAxis: ChartsExportVAxesModel = {
-                    instanceId: value.InstanceID,
-                    exportName: selectedExport.name,
-                    valueName: value.Name,
-                    valueType: value.Type,
-                    color: '',
-                    math: '',
-                    displayOnSecondVAxis: false,
-                    tagSelection: [],
-                };
-                const index = this.formGroupController
-                    .get('properties.vAxes')
-                    ?.value.findIndex(
-                        (item: ChartsExportVAxesModel) =>
+            if ((selectedElement as ChartsExportMeasurementModel).values !== undefined) { // is export
+                selectedElement = selectedElement as ChartsExportMeasurementModel;
+                selectedElement.values?.forEach((value: ExportValueModel) => {
+                    const newVAxis: ChartsExportVAxesModel = {
+                        instanceId: value.InstanceID,
+                        exportName: selectedElement.name,
+                        valueName: value.Name,
+                        valueType: value.Type,
+                        color: '',
+                        math: '',
+                        displayOnSecondVAxis: false,
+                        tagSelection: [],
+                    };
+                    const index = this.formGroupController
+                        .get('properties.vAxes')
+                        ?.value.findIndex(
+                            (item: ChartsExportVAxesModel) =>
+                                item.instanceId === newVAxis.instanceId &&
+                            item.exportName === newVAxis.exportName &&
+                            item.valueName === newVAxis.valueName &&
+                            item.valueType === newVAxis.valueType,
+                        );
+                    if (index === -1) {
+                        newData.get(selectedElement.name)?.push(newVAxis);
+                    } else {
+                        newSelection.push(this.formGroupController.get('properties.vAxes')?.value[index]);
+                        newData.get(selectedElement.name)?.push(this.formGroupController.get('properties.vAxes')?.value[index]);
+                    }
+                    // Add duplicates of this export value
+                    const duplicates = this.formGroupController
+                        .get('properties.vAxes')
+                        ?.value.filter(
+                            (item: ChartsExportVAxesModel) =>
+                                item.isDuplicate &&
                             item.instanceId === newVAxis.instanceId &&
                             item.exportName === newVAxis.exportName &&
                             item.valueName === newVAxis.valueName &&
                             item.valueType === newVAxis.valueType,
-                    );
-                if (index === -1) {
-                    newData.get(selectedExport.name)?.push(newVAxis);
+                        );
+                    newSelection.push(...duplicates);
+                });
+            } else {
+                selectedElement = selectedElement as DeviceInstancesModel;
+                let observableDeviceType: Observable<DeviceTypeModel | undefined>;
+                if (this.deviceTypes.has(selectedElement.device_type.id)) {
+                    observableDeviceType = of(this.deviceTypes.get(selectedElement.device_type.id));
                 } else {
-                    newSelection.push(this.formGroupController.get('properties.vAxes')?.value[index]);
-                    newData.get(selectedExport.name)?.push(this.formGroupController.get('properties.vAxes')?.value[index]);
+                    observableDeviceType = this.deviceTypeService.getDeviceType(selectedElement.device_type.id).pipe(map(dt => {
+                        if (dt === null) {
+                            return;
+                        }
+                        this.deviceTypes.set(( selectedElement as DeviceInstancesModel).device_type.id, dt);
+                        return dt;
+                    }));
                 }
-                // Add duplicates of this export value
-                const duplicates = this.formGroupController
-                    .get('properties.vAxes')
-                    ?.value.filter(
-                        (item: ChartsExportVAxesModel) =>
-                            item.isDuplicate &&
-                            item.instanceId === newVAxis.instanceId &&
-                            item.exportName === newVAxis.exportName &&
-                            item.valueName === newVAxis.valueName &&
-                            item.valueType === newVAxis.valueType,
-                    );
-                newSelection.push(...duplicates);
-            });
+                observables.push(observableDeviceType.pipe(map(dt => {
+                    dt?.services.forEach(service => {
+                        service.outputs.forEach(output => {
+                            this.deviceTypeService.getValuePathsAndTypes(output.content_variable).forEach(path => {
+                                const newVAxis = {
+                                    exportName: selectedElement.name,
+                                    valueName: service.name + ': ' + path.path,
+                                    valuePath: path.path,
+                                    serviceId: service.id,
+                                    deviceId: selectedElement.id,
+                                    valueType: this.translateTypeDeviceToExport(path.type),
+                                    color: '',
+                                    math: '',
+                                    displayOnSecondVAxis: false,
+                                    tagSelection: [],
+                                };
+                                const index = this.formGroupController
+                                    .get('properties.vAxes')
+                                    ?.value.findIndex(
+                                        (item: ChartsExportVAxesModel) =>
+                                            item.serviceId === newVAxis.serviceId &&
+                                            item.deviceId === newVAxis.deviceId &&
+                                            item.valueName ===  newVAxis.valueName
+                                    );
+                                if (index === -1) {
+                                    newData.get(selectedElement.name)?.push(newVAxis);
+                                } else {
+                                    newSelection.push(this.formGroupController.get('properties.vAxes')?.value[index]);
+                                    newData.get(selectedElement.name)?.push(this.formGroupController.get('properties.vAxes')?.value[index]);
+                                }
+                                // Add duplicates of this device value
+                                const duplicates = this.formGroupController
+                                    .get('properties.vAxes')
+                                    ?.value.filter(
+                                        (item: ChartsExportVAxesModel) =>
+                                            item.isDuplicate &&
+                                            item.serviceId === newVAxis.serviceId &&
+                                            item.deviceId === newVAxis.deviceId &&
+                                            item.valueName ===  newVAxis.valueName
+                                    );
+                                newSelection.push(...duplicates);
+                            });
+                        });
+                    });
+                })));
+            }
         });
-        this.vAxesOptions = newData;
-        this.dataSource.data = newSelection;
+        if (observables.length === 0) {
+            observables.push(of(null));
+        }
+        forkJoin(observables).subscribe(_ => {
+            this.vAxesOptions = newData;
+            this.dataSource.data = newSelection;
+            this.cd.detectChanges();
+        });
     }
 
     filerTypeSelected(element: ChartsExportVAxesModel) {
@@ -360,7 +464,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     getTags(element: ChartsExportVAxesModel): Map<string, { value: string; parent: string }[]> {
-        return this.exportTags.get(element.instanceId) || new Map();
+        return this.exportTags.get(element.instanceId || '') || new Map();
     }
 
     private preloadExportTags(exportId: string): Observable<any> {
@@ -396,5 +500,30 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     getTagValue(a: { value: string; parent: string }): string {
         return a.parent + '!' + a.value;
+    }
+
+    getExportDeviceList(): Map<string, ChartsExportMeasurementModel[] | DeviceInstancesModel[]> {
+        const m: Map<string, ChartsExportMeasurementModel[] | DeviceInstancesModel[]> = new Map();
+        m.set('Exports', this.exportList);
+        m.set('Devices', this.deviceList);
+        return m;
+    };
+
+    private translateTypeDeviceToExport(type: string): string {
+        switch(type) {
+        case this.typeString:
+            return 'string';
+        case this.typeFloat:
+            return 'float';
+        case this.typeInteger:
+            return 'int';
+        case this.typeBoolean:
+            return 'bool';
+        case this.typeList:
+        case this.typeStructure:
+            return 'string_json';
+        }
+        console.error('unknown type ' + type);
+        return '';
     }
 }

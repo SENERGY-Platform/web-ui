@@ -17,6 +17,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
 
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
@@ -24,12 +25,14 @@ import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/
 })
 export class DeviceInstancesServiceDialogComponent implements OnInit {
     services: DeviceTypeServiceModel[] = [];
+    lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[][] = [[]];
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data: { services: DeviceTypeServiceModel[] },
+        @Inject(MAT_DIALOG_DATA) data: { services: DeviceTypeServiceModel[]; lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[][] },
     ) {
         this.services = data.services;
+        this.lastValueArray = data.lastValueArray;
     }
 
     ngOnInit() {}

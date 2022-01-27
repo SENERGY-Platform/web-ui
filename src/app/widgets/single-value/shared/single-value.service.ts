@@ -23,8 +23,13 @@ import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ExportDataService } from '../../shared/export-data.service';
-import { QueriesRequestElementModel } from '../../shared/export-data.model';
+import {DBTypeEnum, ExportDataService} from '../../shared/export-data.service';
+import {
+    LastValuesRequestElementInfluxModel,
+    QueriesRequestElementInfluxModel,
+    QueriesRequestElementTimescaleModel,
+    TimeValuePairModel
+} from '../../shared/export-data.model';
 
 @Injectable({
     providedIn: 'root',
@@ -58,8 +63,7 @@ export class SingleValueService {
             const m = widget.properties.measurement;
             const name = widget.properties.vAxis ? widget.properties.vAxis.Name : '';
             if (m) {
-                const requestPayload: QueriesRequestElementModel = {
-                    measurement: m.id,
+                const requestPayload: QueriesRequestElementInfluxModel | QueriesRequestElementTimescaleModel = {
                     columns: [
                         {
                             name,
@@ -79,7 +83,33 @@ export class SingleValueService {
                 } else {
                     requestPayload.limit = 1;
                 }
-                this.exportDataService.query([requestPayload]).subscribe((pairs) => {
+
+
+                let o:  Observable<any[][]> | undefined;
+                if (widget.properties.sourceType === 'export') {
+                    (requestPayload as QueriesRequestElementInfluxModel).measurement = m.id;
+                    (requestPayload as QueriesRequestElementTimescaleModel).exportId = m.id;
+                    switch (m.dbId) {
+                    case DBTypeEnum.snrgyTimescale:
+                        o = this.exportDataService.queryTimescale([requestPayload]);
+                        break;
+                    case undefined:
+                    case DBTypeEnum.snrgyInflux:
+                        o = this.exportDataService.queryInflux([requestPayload] as QueriesRequestElementInfluxModel[]);
+                        break;
+                    default:
+                        console.error('cant load data of this export: not internal');
+                        observer.complete();
+                        return;
+                    }
+                }
+                if (widget.properties.sourceType === 'device') {
+                    (requestPayload as QueriesRequestElementTimescaleModel).deviceId = widget.properties.device?.id;
+                    (requestPayload as QueriesRequestElementTimescaleModel).serviceId = widget.properties.service?.id;
+                    o = this.exportDataService.queryTimescale([requestPayload]);
+                }
+
+                o?.subscribe((pairs) => {
                     pairs = pairs[0];
                     let value: any = '';
                     let type = widget.properties.type || '';

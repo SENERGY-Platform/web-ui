@@ -29,8 +29,12 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { HttpClient } from '@angular/common/http';
 import { ChartsExportModel } from '../../charts/export/shared/charts-export.model';
 import { ChartsExportRequestPayloadModel } from '../../charts/export/shared/charts-export-request-payload.model';
-import { ExportDataService } from '../../shared/export-data.service';
-import { LastValuesRequestElementModel } from '../../shared/export-data.model';
+import {DBTypeEnum, ExportDataService} from '../../shared/export-data.service';
+import {
+    LastValuesRequestElementInfluxModel,
+    LastValuesRequestElementTimescaleModel,
+    TimeValuePairModel
+} from '../../shared/export-data.model';
 
 @Injectable({
     providedIn: 'root',
@@ -61,26 +65,45 @@ export class EnergyPredictionService {
     }
 
     getPrediction(widget: WidgetModel): Observable<EnergyPredictionModel> {
-        // .
         return new Observable<EnergyPredictionModel>((observer) => {
             const m = widget.properties.measurement;
             const columns = widget.properties.columns || ({} as EnergyPredictionColumnModel);
             if (m) {
-                const requestPayload: LastValuesRequestElementModel[] = [];
+                const requestPayload: (LastValuesRequestElementInfluxModel | LastValuesRequestElementTimescaleModel)[] = [];
 
                 requestPayload.push({
+                    exportId: m.id,
                     measurement: m.id,
                     columnName: columns.prediction,
                     math: widget.properties.math,
                 });
                 requestPayload.push({
+                    exportId: m.id,
                     measurement: m.id,
                     columnName: columns.predictionTotal,
                     math: widget.properties.math,
                 });
-                requestPayload.push({ measurement: m.id, columnName: columns.timestamp });
+                requestPayload.push({
+                    exportId: m.id,
+                    measurement: m.id,
+                    columnName: columns.timestamp
+                });
 
-                this.exportDataService.getLastValues(requestPayload).subscribe((pairs) => {
+                let o:  Observable<TimeValuePairModel[]> | undefined;
+                switch (m.dbId) {
+                case DBTypeEnum.snrgyTimescale:
+                    o = this.exportDataService.getLastValuesTimescale(requestPayload);
+                    break;
+                case undefined:
+                case DBTypeEnum.snrgyInflux:
+                    o = this.exportDataService.getLastValuesInflux(requestPayload as LastValuesRequestElementInfluxModel[]);
+                    break;
+                default:
+                    console.error('cant load data of this export: not internal');
+                    observer.complete();
+                    return;
+                }
+                o.subscribe((pairs) => {
                     if (pairs.length !== 3) {
                         observer.error('incomplete result');
                         observer.complete();

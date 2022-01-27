@@ -256,7 +256,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>
+                            <td *ngIf="!isDevice(tab)">
                                 <mat-form-field color="accent">
                                     <senergy-select-search formControlName="exportId" [required]="true"
                                                            placeholder="Choose Export" [options]="getExports(tab)"
@@ -265,7 +265,7 @@
                                 </mat-form-field>
                             </td>
 
-                            <td *ngIf="tab.get('exportId')?.value !== undefined && getTags(tab).size > 0">
+                            <td *ngIf="!isDevice(tab) && tab.get('exportId')?.value !== undefined && getTags(tab).size > 0">
                                 <mat-form-field color="accent">
                                     <senergy-select-search placeholder="Choose Tags" [multiple]="true"
                                                            [options]="getTags(tab)"

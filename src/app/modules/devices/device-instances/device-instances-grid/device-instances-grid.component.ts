@@ -73,8 +73,8 @@ export class DeviceInstancesGridComponent implements OnInit {
         this.initGridCols();
     }
 
-    service(deviceTypeId: string): void {
-        this.deviceInstancesDialogService.openDeviceServiceDialog(deviceTypeId);
+    service(deviceTypeId: string, deviceId: string): void {
+        this.deviceInstancesDialogService.openDeviceServiceDialog(deviceTypeId, deviceId);
     }
 
     edit(device: DeviceInstancesModel): void {

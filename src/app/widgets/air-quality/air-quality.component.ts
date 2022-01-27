@@ -76,9 +76,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe(async (event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
-                const observables: Observable<any>[] = [];
-                observables.push(this.updateMeasurements());
-                forkJoin(observables).subscribe((_) => {
+                this.updateMeasurements().subscribe((_) => {
                     this.createAdvice();
                     this.ready = true;
                 });

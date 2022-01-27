@@ -47,6 +47,7 @@ export class ExportService {
         order?: string,
         generated?: boolean,
         searchField?: string,
+        internalOnly: boolean = false,
     ): Observable<ExportResponseModel | null> {
         if (searchField === undefined || searchField === null) {
             searchField = 'name';
@@ -63,7 +64,8 @@ export class ExportService {
                     ':' +
                     order +
                     (search ? '&search=' + searchField + ':' + search : '') +
-                    (generated !== undefined ? '&generated=' + generated.valueOf() : ''),
+                    (generated !== undefined ? '&generated=' + generated.valueOf() : '') +
+                    '&internal_only=' + internalOnly,
             )
             .pipe(
                 map((resp: ExportResponseModel) => resp || []),

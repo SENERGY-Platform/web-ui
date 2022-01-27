@@ -38,6 +38,14 @@ import { ImportInstancesModel } from '../../../modules/imports/import-instances/
 import { environment } from '../../../../environments/environment';
 import { ImportTypesService } from '../../../modules/imports/import-types/shared/import-types.service';
 import { mergeMap } from 'rxjs/internal/operators';
+import {DeviceInstancesModel} from "../../../modules/devices/device-instances/shared/device-instances.model";
+import {
+    DeviceTypeModel,
+    DeviceTypeServiceModel
+} from "../../../modules/metadata/device-types-overview/shared/device-type.model";
+import {DeviceInstancesService} from "../../../modules/devices/device-instances/shared/device-instances.service";
+import {DeviceTypeService} from "../../../modules/metadata/device-types-overview/shared/device-type.service";
+import {ExportDataService} from "../../shared/export-data.service";
 
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',
@@ -55,6 +63,8 @@ export class AirQualityEditDialogComponent implements OnInit {
         private geonamesService: GeonamesService,
         private importInstancesService: ImportInstancesService,
         private importTypesService: ImportTypesService,
+        private deviceInstancesService: DeviceInstancesService,
+        private deviceTypeService: DeviceTypeService,
         @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
     ) {
         this.dashboardId = data.dashboardId;
@@ -339,6 +349,8 @@ export class AirQualityEditDialogComponent implements OnInit {
     searchFormControl = new FormControl();
     importInstances: ImportInstancesModel[] = [];
     ready = false;
+    devices: DeviceInstancesModel[] = [];
+    deviceTypes: Map<string, DeviceTypeModel> = new Map();
 
     private static getEmptyExportValueModel(): ExportValueModel {
         return { InstanceID: '', Name: '', Path: '', Type: '' };
@@ -371,7 +383,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     ngOnInit() {
         const obs: Observable<any>[] = [];
         obs.push(this.getWidgetData());
-        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: ExportResponseModel | null) => {
+        this.exportService.getExports('', 9999, 0, 'name', 'asc', undefined, undefined, true).subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 this.exports = exports.instances;
             }
@@ -386,6 +398,14 @@ export class AirQualityEditDialogComponent implements OnInit {
             this.ubaService.getUBAStations().pipe(
                 map((resp) => {
                     this.ubaStations = resp;
+                }),
+            ),
+        );
+
+        obs.push(
+            this.deviceInstancesService.getDeviceInstances('', 9999, 0, 'name', 'asc').pipe(
+                map((resp) => {
+                    this.devices = resp;
                 }),
             ),
         );
@@ -448,7 +468,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         observables.push(this.prepareUbaSave());
         observables.push(this.prepareYrSave());
         forkJoin(observables).subscribe((_) => {
-            this.widget.properties.version = 3;
+            this.widget.properties.version = 4; // can use devices and queries timescale
             this.widget.properties.measurements = this.measurements;
             this.widget.properties.location = this.location;
             this.widget.properties.formatted_address = this.formatted_address;
@@ -473,7 +493,13 @@ export class AirQualityEditDialogComponent implements OnInit {
         if (a === undefined && b === undefined) {
             return true;
         }
+        if (a === null && b === null) {
+            return true;
+        }
         if (a === undefined || b === undefined) {
+            return false;
+        }
+        if (a === null || b === null) {
             return false;
         }
         return a.ID === b.ID;
@@ -483,7 +509,13 @@ export class AirQualityEditDialogComponent implements OnInit {
         if (a === undefined && b === undefined) {
             return true;
         }
+        if (a === null && b === null) {
+            return true;
+        }
         if (a === undefined || b === undefined) {
+            return false;
+        }
+        if (a === null || b === null) {
             return false;
         }
         return a.InstanceID === b.InstanceID && a.Name === b.Name && a.Path === b.Path && a.Type === b.Type;
@@ -506,6 +538,81 @@ export class AirQualityEditDialogComponent implements OnInit {
                 }
             });
         });
+    }
+
+    getServices(deviceId?: string): Observable<DeviceTypeServiceModel[]> {
+        if (deviceId === null || deviceId === undefined) {
+            return of([]);
+        }
+        const device = this.devices.find(x => x.id === deviceId);
+        if (device === undefined) {
+            return of([]);
+        }
+        if (this.deviceTypes.has(device.device_type.id)) {
+            return of(this.deviceTypes.get(device.device_type.id)?.services || []);
+        }
+        this.deviceTypes.set(device.device_type.id, {} as DeviceTypeModel);
+        return new Observable<DeviceTypeServiceModel[]>(obs => { // need to subscribe in function
+            this.deviceTypeService.getDeviceType(device.device_type.id).subscribe(dt => {
+                if (dt === null) {
+                    obs.next([]);
+                    obs.complete();
+                    return;
+                }
+                this.deviceTypes.set(device.device_type.id, dt);
+                obs.next(dt.services);
+                obs.complete();
+            });
+        });
+    }
+
+    getServiceValues(deviceId?: string, serviceId?: string): string[] {
+        if (deviceId === null || deviceId === undefined) {
+            return [];
+        }
+        const device = this.devices?.find(x => x.id === deviceId);
+        if (device === undefined) {
+            return [];
+        }
+        const service = this.deviceTypes.get(device.device_type.id)?.services?.find(x => x.id === serviceId);
+        if (service === undefined) {
+            return [];
+        }
+        const res: string[] = [];
+        service.outputs.forEach(output => res.push(...this.deviceTypeService.getValuePaths(output.content_variable)));
+        return res;
+    }
+
+    outsideExportChanged(option: MeasurementModel) {
+        if (option.outsideExport === null || option.outsideExport === undefined) {
+            return;
+        }
+        option.outsideDeviceValuePath = undefined;
+        option.outsideServiceId = undefined;
+        option.outsideDeviceValuePath = undefined;
+    }
+
+    insideExportChanged(option: MeasurementModel) {
+        if (option.export === null || option.export === undefined) {
+            return;
+        }
+        option.insideDeviceValuePath = undefined;
+        option.insideServiceId = undefined;
+        option.insideDeviceValuePath = undefined;
+    }
+
+    outsideDeviceChanged(option: MeasurementModel) {
+        if (option.outsideDeviceId === undefined || option.outsideDeviceId === null) {
+            return;
+        }
+        option.outsideExport = undefined;
+    }
+
+    insideDeviceChanged(option: MeasurementModel) {
+        if (option.insideDeviceId === undefined || option.insideDeviceId === null) {
+            return;
+        }
+        option.export = undefined;
     }
 
     private selectUBAStation() {

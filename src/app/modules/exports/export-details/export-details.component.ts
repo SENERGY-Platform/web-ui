@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { Location } from '@angular/common';
-import { ExportModel, ExportValueBaseModel } from '../shared/export.model';
-import { ActivatedRoute } from '@angular/router';
-import { ExportService } from '../shared/export.service';
-import { ExportDataService } from '../../../widgets/shared/export-data.service';
-import { LastValuesRequestElementModel } from '../../../widgets/shared/export-data.model';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { BrokerExportService } from '../shared/broker-export.service';
-import { AuthorizationService } from '../../../core/services/authorization.service';
-import { environment } from '../../../../environments/environment';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { ClipboardService } from 'ngx-clipboard';
+import {Component, OnInit} from '@angular/core';
+import {Location} from '@angular/common';
+import {ExportModel, ExportValueBaseModel} from '../shared/export.model';
+import {ActivatedRoute} from '@angular/router';
+import {ExportService} from '../shared/export.service';
+import {DBTypeEnum, ExportDataService} from '../../../widgets/shared/export-data.service';
+import {
+    LastValuesRequestElementInfluxModel,
+    LastValuesRequestElementTimescaleModel,
+    TimeValuePairModel
+} from '../../../widgets/shared/export-data.model';
+import {map} from 'rxjs/operators';
+import {Observable, of} from 'rxjs';
+import {BrokerExportService} from '../shared/broker-export.service';
+import {AuthorizationService} from '../../../core/services/authorization.service';
+import {environment} from '../../../../environments/environment';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {ClipboardService} from 'ngx-clipboard';
 
 @Component({
     selector: 'senergy-export-details',
@@ -43,8 +47,9 @@ export class ExportDetailsComponent implements OnInit {
     ready = false;
     export = {} as ExportModel;
     displayedColumns: string[] = ['Name', 'Path', 'Type', 'LastValue', 'LastTimeStamp'];
+    hasLastValues = false;
     lastValuesReady = false;
-    lastValuesRequestElementModels: LastValuesRequestElementModel[] = [];
+    lastValuesRequestElementModels: (LastValuesRequestElementInfluxModel | LastValuesRequestElementTimescaleModel)[] = [];
     showPassword = false;
 
     constructor(
@@ -56,12 +61,14 @@ export class ExportDetailsComponent implements OnInit {
         private authorizationService: AuthorizationService,
         private brokerExportService: BrokerExportService,
         private exportDataService: ExportDataService,
-    ) {}
+    ) {
+    }
 
     ngOnInit() {
         this.id = this.route.snapshot.paramMap.get('id');
         if (this.id !== null) {
             if (this.brokerMode) {
+                this.hasLastValues = true;
                 this.displayedColumns = ['Name', 'Path', 'CopyClipboard'];
                 this.authorizationService.getUserName().then((name) => (this.userName = name));
                 this.userId = localStorage.getItem('sub');
@@ -80,6 +87,7 @@ export class ExportDetailsComponent implements OnInit {
                 this.export?.Values?.forEach((value) => {
                     if (this.export?.Measurement !== undefined) {
                         this.lastValuesRequestElementModels.push({
+                            exportId: this.export.ID,
                             measurement: this.export?.Measurement,
                             columnName: value.Name,
                             math: undefined,
@@ -102,7 +110,20 @@ export class ExportDetailsComponent implements OnInit {
     }
 
     private getLatestValues(): Observable<void> {
-        return this.exportDataService.getLastValues(this.lastValuesRequestElementModels).pipe(
+        let ob: Observable<TimeValuePairModel[]> = of([]);
+        switch (this.exportDataService.getDbType(this.export)) {
+        case DBTypeEnum.snrgyInflux:
+            this.hasLastValues = true;
+            ob = this.exportDataService.getLastValuesInflux(this.lastValuesRequestElementModels as LastValuesRequestElementInfluxModel[]);
+            break;
+        case DBTypeEnum.snrgyTimescale:
+            this.hasLastValues = true;
+            ob = this.exportDataService.getLastValuesTimescale(this.lastValuesRequestElementModels);
+            break;
+        default:
+            this.hasLastValues = false;
+        }
+        return ob.pipe(
             map((pairs) => {
                 this.export.Values.forEach((_, index) => {
                     this.export.Values[index].LastValue = pairs[index].value;

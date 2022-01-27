@@ -38,6 +38,12 @@ export interface MeasurementModel {
     can_web?: boolean;
     provider?: AirQualityExternalProvider;
     export?: ExportModel;
+    insideDeviceId?: string;
+    insideServiceId?: string;
+    insideDeviceValuePath?: string;
+    outsideDeviceId?: string;
+    outsideServiceId?: string;
+    outsideDeviceValuePath?: string;
     math?: string;
     outsideExport?: ExportModel;
     outsideMath?: string;

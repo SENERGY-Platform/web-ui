@@ -242,12 +242,12 @@ describe('DataTableEditDialogComponent', () => {
             const element = (component.formGroup.get('elements') as FormArray).at(0);
             expect(element.get('id')?.value.length).toBeGreaterThan(0);
             expect(element.get('name')?.value).toBe(null);
-            expect(element.get('valueType')?.value).toBe(null); // TODO
+            expect(element.get('valueType')?.value).toBe(null);
             expect(element.get('format')?.value).toBe(null);
             expect(element.get('exportId')?.value).toBe(null);
             expect(element.get('exportValuePath')?.value).toBe(null);
             expect(element.get('exportValueName')?.value).toBe(null);
-            expect(element.get('exportCreatedByWidget')?.value).toBe(true);
+            expect(element.get('exportCreatedByWidget')?.value).toBe(null);
             expect(element.get('unit')?.value).toBe(null);
             expect(element.get('warning')?.get('enabled')?.value).toBe(false);
             expect(element.get('warning')?.get('lowerBoundary')?.value).toBe(null);
@@ -271,7 +271,7 @@ describe('DataTableEditDialogComponent', () => {
     );
 
     it(
-        'should fill device data, create deployment, create schedule, create export',
+        'should fill device data, create deployment, create schedule',
         waitForAsync(() => {
             const fixture = TestBed.createComponent(DataTableEditDialogComponent);
             component = fixture.componentInstance;
@@ -296,7 +296,7 @@ describe('DataTableEditDialogComponent', () => {
             expect(element?.get('exportValuePath')?.value).toBe('struct.Time');
             expect(element?.get('exportValueName')?.value).toBe('Time');
             expect(element?.get('valueType')?.value).toBe(ExportValueTypes.STRING);
-            expect(element?.get('exportCreatedByWidget')?.value).toBe(true);
+            expect(element?.get('exportCreatedByWidget')?.value).toBe(null);
             expect(element?.get('warning')?.disabled).toBe(true);
             expect(elementDetails?.get('device')?.get('requestDevice')?.value).toBe(true);
             expect(component.formGroup.valid).toBe(true);
@@ -308,8 +308,8 @@ describe('DataTableEditDialogComponent', () => {
             expect(elementDetails?.get('device')?.get('deploymentId')?.value).toBe('deploymentId');
             expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(1);
             expect(elementDetails?.get('device')?.get('scheduleId')?.value).toBe('scheduleId');
-            expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
-            expect(element?.get('exportId')?.value).toBe('exportId');
+            expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
+            expect(element?.get('exportId')?.value).toBe(null);
 
             expect(dashboardServiceSpy.updateWidget.calls.count()).toBe(1);
             expect(dashboardServiceSpy.updateWidget.calls.mostRecent().args).toEqual([
@@ -328,11 +328,12 @@ describe('DataTableEditDialogComponent', () => {
                                     id: 'known-test-id',
                                     name: 'name',
                                     valueType: 'string',
-                                    exportId: 'exportId',
+                                    exportId: null,
                                     exportValuePath: 'struct.Time',
                                     exportValueName: 'Time',
-                                    exportCreatedByWidget: true,
+                                    exportCreatedByWidget: null,
                                     exportTagSelection: null,
+                                    exportDbId: undefined,
                                     groupType: null,
                                     groupTime: null,
                                     unit: null,
@@ -431,12 +432,11 @@ describe('DataTableEditDialogComponent', () => {
     it(
         'should not always create exports',
         waitForAsync(() => {
-            dataTableHelperServiceSpy.getExportsForDeviceAndValue.and.returnValue([{ ID: 'existing-exportId' }]);
             const fixture = TestBed.createComponent(DataTableEditDialogComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            expect(component.getElements().at(0).get('exportId')?.value).toBe('existing-exportId');
+            expect(component.getElements().at(0).get('exportId')?.value).toBe(null);
             component.save();
             expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
         }),
@@ -465,6 +465,8 @@ describe('DataTableEditDialogComponent', () => {
             elementNew.id = '';
             delete elementOld.elementDetails.pipeline; // does not get copied, since device selected
             delete elementOld.elementDetails.import; // does not get copied, since device selected
+            delete elementOld.exportId; // does not get copied, since device selected
+            elementNew.exportDbId = null; // is undefined, also fine
             expect(elementOld).toEqual(elementNew);
 
             component.moveUp(0);

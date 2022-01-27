@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 import { ChartsModel } from '../../shared/charts.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
@@ -26,11 +26,22 @@ import { ChartsExportEditDialogComponent } from '../dialog/charts-export-edit-di
 import { WidgetModel, WidgetPropertiesModels } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { ErrorModel } from '../../../../core/model/error.model';
-import { ChartsExportPropertiesModel, ChartsExportVAxesModel } from './charts-export-properties.model';
+import {
+    ChartsExportMeasurementModel,
+    ChartsExportPropertiesModel,
+    ChartsExportVAxesModel
+} from './charts-export-properties.model';
 import { ChartsExportRequestPayloadGroupModel } from './charts-export-request-payload.model';
 import { ChartsExportRangeTimeTypeEnum } from './charts-export-range-time-type.enum';
-import { ExportDataService } from '../../../shared/export-data.service';
-import { QueriesRequestElementModel, QueriesRequestFilterModel, QueriesRequestTimeModel } from '../../../shared/export-data.model';
+import {DBTypeEnum, ExportDataService} from '../../../shared/export-data.service';
+import {
+    QueriesRequestElementInfluxModel,
+    QueriesRequestElementTimescaleModel,
+    QueriesRequestFilterModel,
+    QueriesRequestTimeModel, TimeValuePairModel
+} from '../../../shared/export-data.model';
+import {map} from 'rxjs/internal/operators';
+import {ExportModel} from '../../../../modules/exports/shared/export.model';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -48,6 +59,7 @@ export class ChartsExportService {
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
+        dialogConfig.minWidth = '600px';
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             widgetId,
@@ -79,41 +91,100 @@ export class ChartsExportService {
         if (widgetProperties.group && widgetProperties.group.type !== undefined && widgetProperties.group.type !== '') {
             group = widgetProperties.group;
         }
-        const elements: QueriesRequestElementModel[] = [];
+        const influxElements: QueriesRequestElementInfluxModel[] = [];
+        const timescaleElements: QueriesRequestElementTimescaleModel[] = [];
+        const influxResultMapper: number[] = [];
+        const timescaleResultMapper: number[] = [];
 
-        if (widgetProperties.vAxes) {
-            widgetProperties.vAxes.forEach((vAxis: ChartsExportVAxesModel) => {
-                const newField: QueriesRequestElementModel = {
-                    measurement: vAxis.instanceId,
-                    columns: [
-                        {
-                            name: vAxis.valueName,
-                            math: vAxis.math !== '' ? vAxis.math : undefined,
-                            groupType: group?.type !== null ? group?.type : undefined,
-                        },
-                    ],
-                    groupTime: group?.time !== '' ? group?.time : undefined,
-                    time,
-                };
-                const filters: QueriesRequestFilterModel[] = [];
-                vAxis.tagSelection?.forEach((tagFilter) => {
-                    filters.push({ column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1] });
-                });
-                if (vAxis.filterType !== undefined) {
-                    filters.push({
-                        column: vAxis.valueName,
-                        type: vAxis.filterType,
-                        value: vAxis.valueType === 'string' ? vAxis.filterValue : Number(vAxis.filterValue),
-                    });
-                }
-                if (filters.length > 0) {
-                    newField.filters = filters;
-                }
-                elements.push(newField);
+        widgetProperties.vAxes?.forEach((vAxis: ChartsExportVAxesModel, index) => {
+            const newField: QueriesRequestElementInfluxModel | QueriesRequestElementTimescaleModel = {
+                columns: [
+                    {
+                        name: vAxis.valueName,
+                        math: vAxis.math !== '' ? vAxis.math : undefined,
+                        groupType: group?.type !== null ? group?.type : undefined,
+                    },
+                ],
+                groupTime: group?.time !== '' ? group?.time : undefined,
+                time,
+            };
+            const filters: QueriesRequestFilterModel[] = [];
+            vAxis.tagSelection?.forEach((tagFilter) => {
+                filters.push({ column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1] });
             });
+            if (vAxis.filterType !== undefined) {
+                filters.push({
+                    column: vAxis.valueName,
+                    type: vAxis.filterType,
+                    value: vAxis.valueType === 'string' ? vAxis.filterValue : Number(vAxis.filterValue),
+                });
+            }
+            if (filters.length > 0) {
+                newField.filters = filters;
+            }
+
+            const exp = widgetProperties.exports?.find(x => x.id === vAxis.instanceId);
+            if (exp !== undefined &&
+                ((exp as ChartsExportMeasurementModel).dbId === undefined || (exp as ChartsExportMeasurementModel).dbId === DBTypeEnum.snrgyInflux)) {
+                (newField as QueriesRequestElementInfluxModel).measurement = vAxis.instanceId;
+                influxElements.push(newField);
+                influxResultMapper.push(index);
+            } else {
+                (newField as QueriesRequestElementTimescaleModel).exportId = vAxis.instanceId;
+                (newField as QueriesRequestElementTimescaleModel).serviceId = vAxis.serviceId;
+                (newField as QueriesRequestElementTimescaleModel).deviceId = vAxis.deviceId;
+                newField.columns[0].name = vAxis.valuePath || '';
+                timescaleElements.push(newField);
+                timescaleResultMapper.push(index);
+            }
+        });
+
+        const obs: Observable<{ source: string; res: any[][][] }>[] = [];
+
+        if (influxElements.length > 0) {
+            obs.push(this.exportDataService.queryInflux(influxElements).pipe(map(res => ({source: 'influx', res: res || []}))));
         }
 
-        return this.exportDataService.queryAsTable(elements);
+        if (timescaleElements.length > 0) {
+            obs.push(this.exportDataService.queryTimescale(timescaleElements).pipe(map(res => ({source: 'timescale', res: res || []}))));
+        }
+
+        return forkJoin(obs).pipe(map(res => {
+            if (res.length === 1) {
+                return res[0].res;
+            }
+            const table: any[][] = [];
+            let mapper: number[] = [];
+            res.forEach(r => {
+                switch (r.source) {
+                case 'influx':
+                    mapper = influxResultMapper;
+                    break;
+                case 'timescale':
+                    mapper = timescaleResultMapper;
+                    break;
+                }
+                r.res.forEach((series, index) => {
+                    series.forEach(row => {
+                        const tableRow: any[] = [row[0]]; // using timestamp, duplicate timestamps are ok for Google charts
+                        while (mapper[index] > tableRow.length -1) {
+                            tableRow.push(null);
+                        }
+                        tableRow[mapper[index] + 1] = row[1]; // +1 for time
+                        table.push(tableRow);
+                    });
+                });
+            });
+
+            const columns = timescaleResultMapper.length + influxResultMapper.length + 1; // +1 for time
+            // insert trailing null column values
+            table.forEach((_, idx) => {
+                while (table[idx].length < columns) {
+                    table[idx].push(null);
+                }
+            });
+            return table;
+        }));
     }
 
     getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
