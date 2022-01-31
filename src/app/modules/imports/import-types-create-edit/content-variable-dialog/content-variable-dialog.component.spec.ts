@@ -36,6 +36,7 @@ describe('ContentVariableDialogComponent', () => {
     const exampleChar: DeviceTypeCharacteristicsModel = {
         id: 'char0',
         name: 'char0',
+        display_unit: '',
         type: 'https://schema.org/Text',
         sub_characteristics: null,
     };

@@ -19,6 +19,7 @@ export interface CharacteristicsPermSearchModel {
     creator: string;
     id: string;
     name: string;
+    display_unit: string;
     permissions: {
         a: boolean;
         x: boolean;

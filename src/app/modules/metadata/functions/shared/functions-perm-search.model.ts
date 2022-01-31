@@ -18,6 +18,7 @@ export interface FunctionsPermSearchModel {
     creator: string;
     id: string;
     name: string;
+    display_name: string;
     description: string;
     concept_id: string;
     permissions: {

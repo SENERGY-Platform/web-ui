@@ -210,6 +210,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                         {
                             id: 'urn:infai:ses:characteristic:7621686a',
                             name: 'on_off',
+                            display_unit: '',
                             type: 'https://schema.org/Text',
                             sub_characteristics: null,
                             rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
@@ -217,6 +218,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                         {
                             id: 'urn:infai:ses:characteristic:c0353532',
                             name: 'binary status code',
+                            display_unit: '',
                             type: 'https://schema.org/Integer',
                             min_value: 0,
                             max_value: 1,
@@ -226,6 +228,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                         {
                             id: 'urn:infai:ses:characteristic:7dc1bb7e',
                             name: 'boolean',
+                            display_unit: '',
                             type: 'https://schema.org/Boolean',
                             sub_characteristics: null,
                             rdf_type: 'https://senergy.infai.org/ontology/Characteristic',

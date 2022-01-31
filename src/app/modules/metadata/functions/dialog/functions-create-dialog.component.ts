@@ -70,6 +70,7 @@ export class FunctionsCreateDialogComponent implements OnInit {
         this.functionFormGroup = this._formBuilder.group({
             id: [{ value: '', disabled: true }],
             name: ['', Validators.required],
+            display_name: '',
             description: '',
             concept_id: '',
         });

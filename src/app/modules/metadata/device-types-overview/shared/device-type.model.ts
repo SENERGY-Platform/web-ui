@@ -97,6 +97,7 @@ export interface DeviceTypeConceptModel {
 export interface DeviceTypeCharacteristicsModel {
     id?: string;
     name: string;
+    display_unit: string;
     type: string;
     rdf_type?: string;
     min_value?: number;
@@ -108,6 +109,7 @@ export interface DeviceTypeCharacteristicsModel {
 export interface DeviceTypeFunctionModel {
     id: string;
     name: string;
+    display_name: string;
     description: string;
     rdf_type: string;
     concept_id: string;

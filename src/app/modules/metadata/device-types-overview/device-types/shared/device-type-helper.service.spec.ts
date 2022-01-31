@@ -291,6 +291,7 @@ describe('DeviceTypeHelperService', () => {
             service.characteristicsFlatten({
                 id: 'urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8',
                 name: 'hex',
+                display_unit: '',
                 type: 'https://schema.org/Text',
                 rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
             }),
@@ -305,18 +306,21 @@ describe('DeviceTypeHelperService', () => {
             service.characteristicsFlatten({
                 id: 'id:1',
                 name: 'ebene1',
+                display_unit: '',
                 type: 'https://schema.org/StructuredValue',
                 rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
                 sub_characteristics: [
                     {
                         id: 'id:2',
                         name: 'ebene2',
+                        display_unit: '',
                         type: 'https://schema.org/StructuredValue',
                         rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
                         sub_characteristics: [
                             {
                                 id: 'id3',
                                 name: 'field',
+                                display_unit: '',
                                 type: 'https://schema.org/Float',
                                 rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
                             },

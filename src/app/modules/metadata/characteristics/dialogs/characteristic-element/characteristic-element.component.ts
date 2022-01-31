@@ -39,6 +39,7 @@ export class CharacteristicElementComponent implements OnInit {
     form = this.fb.group({
         id: undefined,
         name: '',
+        display_unit: '',
         type: '',
         rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
         min_value: undefined,
@@ -63,6 +64,7 @@ export class CharacteristicElementComponent implements OnInit {
     private static takeValues(source: DeviceTypeCharacteristicsModel, target: DeviceTypeCharacteristicsModel) {
         target.id = source.id;
         target.name = source.name;
+        target.display_unit = source.display_unit;
         target.type = source.type;
         target.rdf_type = source.rdf_type;
         target.min_value = source.min_value;
@@ -109,6 +111,7 @@ export class CharacteristicElementComponent implements OnInit {
     addSubCharacteristic() {
         const newModel = {
             name: '',
+            display_unit: '',
             type: '',
             rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
             min_value: undefined,

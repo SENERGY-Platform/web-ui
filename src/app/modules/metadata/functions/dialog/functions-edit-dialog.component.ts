@@ -61,6 +61,7 @@ export class FunctionsEditDialogComponent implements OnInit {
         this.functionFormGroup = this._formBuilder.group({
             id: [{ value: func.id, disabled: true }],
             name: [func.name, Validators.required],
+            display_name: func.display_name,
             concept_id: func.concept_id,
             description: func.description,
         });
