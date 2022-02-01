@@ -150,9 +150,6 @@ export class ChartsExportService {
         }
 
         return forkJoin(obs).pipe(map(res => {
-            if (res.length === 1) {
-                return res[0].res;
-            }
             const table: any[][] = [];
             let mapper: number[] = [];
             res.forEach(r => {

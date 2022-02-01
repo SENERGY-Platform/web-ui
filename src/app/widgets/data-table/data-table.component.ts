@@ -198,7 +198,6 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                 (unit !== null && unit.length > 0 ? unit[0] : '');
 
                             requestElement.time = {last};
-                            requestElement.columns[0].groupType = element.groupType;
                             requestElement.groupTime = element.groupTime;
                         } else {
                             requestElement.limit = this.widget.properties.dataTable?.valuesPerElement || 1;
@@ -208,7 +207,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                             (requestElement as QueriesRequestElementInfluxModel).measurement = element.exportId;
                             influxRequestPayload.push(requestElement as QueriesRequestElementInfluxModel);
                             influxResultMapper.push(elementIndex);
-                            requestElement.columns = [{name: element.exportValueName}];
+                            requestElement.columns = [{name: element.exportValueName, groupType: element.groupType || undefined}];
                         } else {
                             if (element.exportId === null || element.exportId === undefined) {
                                 (requestElement as QueriesRequestElementTimescaleModel) .deviceId = element.elementDetails.device?.deviceId;
@@ -216,7 +215,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                 (requestElement as QueriesRequestElementTimescaleModel).columns = [{name:  element.exportValuePath.replace(/^value\./, '')}];
                             } else {
                                 (requestElement as QueriesRequestElementTimescaleModel).exportId = element.exportId;
-                                requestElement.columns = [{name: element.exportValueName}];
+                                requestElement.columns = [{name: element.exportValueName, groupType: element.groupType || undefined}];
                             }
                             timescaleRequestPayload.push(requestElement as QueriesRequestElementTimescaleModel);
                             timescaleResultMapper.push(elementIndex);

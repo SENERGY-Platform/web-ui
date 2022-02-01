@@ -86,7 +86,7 @@ export class SingleValueService {
 
 
                 let o:  Observable<any[][]> | undefined;
-                if (widget.properties.sourceType === 'export') {
+                if (widget.properties.sourceType === 'export' || widget.properties.sourceType === undefined) { // undefined for legacy widgets
                     (requestPayload as QueriesRequestElementInfluxModel).measurement = m.id;
                     (requestPayload as QueriesRequestElementTimescaleModel).exportId = m.id;
                     switch (m.dbId) {
