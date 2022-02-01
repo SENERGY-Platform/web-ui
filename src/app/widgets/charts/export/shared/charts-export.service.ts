@@ -180,7 +180,7 @@ export class ChartsExportService {
                     table[idx].push(null);
                 }
             });
-            return table;
+            return table.length === 0 ? null : table;
         }));
     }
 
