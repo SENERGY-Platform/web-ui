@@ -103,7 +103,7 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     ngOnInit() {
         this.form.get('measurement')?.valueChanges.subscribe(exp => {
-            this.vAxisValues = exp.values;
+            this.vAxisValues = exp?.values;
         });
         this.form.get('type')?.valueChanges.subscribe(v => {
             if (v === 'String') {
@@ -215,6 +215,9 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     compareValues(a: any, b: any) {
+        if (a === null || b === null || a === undefined || b === undefined) {
+            return a === b;
+        }
         return a.InstanceID === b.InstanceID && a.Name === b.Name && a.Path === b.Path;
     }
 
@@ -223,10 +226,16 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     compareIds(a: any, b: any) {
+        if (a === null || b === null || a === undefined || b === undefined) {
+            return a === b;
+        }
         return a.id === b.id;
     }
 
     compareNames(a: any, b: any) {
+        if (a === null || b === null || a === undefined || b === undefined) {
+            return a === b;
+        }
         return a.Name === b.Name;
     }
 }
