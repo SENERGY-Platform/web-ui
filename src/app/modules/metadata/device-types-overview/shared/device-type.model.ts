@@ -32,7 +32,14 @@ export interface Attribute {
 
 export interface DeviceTypeModel extends DeviceTypeBaseModel {
     services: DeviceTypeServiceModel[];
+    service_groups?: DeviceTypeServiceGroupModel[];
     device_class_id: string;
+}
+
+export interface DeviceTypeServiceGroupModel {
+    key: string;
+    name: string;
+    description: string;
 }
 
 export interface DeviceTypeDeviceClassModel {
@@ -44,6 +51,7 @@ export interface DeviceTypeDeviceClassModel {
 export interface DeviceTypeServiceModel {
     id: string;
     local_id: string;
+    service_group_key?: string;
     name: string;
     description: string;
     aspect_ids: string[];

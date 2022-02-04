@@ -34,9 +34,10 @@
                             <td>
                                 <mat-form-field class="full-width" color="accent">
                                     <senergy-select-search placeholder="Device class"
-                                                formControlName="device_class_id" [required]="true"
-                                                [options]="deviceTypeDeviceClasses" useOptionViewProperty="name"
-                                                useOptionValueProperty="id">
+                                                           formControlName="device_class_id" [required]="true"
+                                                           [options]="deviceTypeDeviceClasses"
+                                                           useOptionViewProperty="name"
+                                                           useOptionValueProperty="id">
                                     </senergy-select-search>
                                 </mat-form-field>
                             </td>
@@ -49,227 +50,266 @@
                     <mat-divider></mat-divider>
                 </div>
                 <div formArrayName="attributes">
-                    <div [formGroupName]="i" *ngFor="let attr of deviceTypeAttributes.controls; let i = index" class="attribute">
-                        <mat-form-field class="third-width" color="accent" >
+                    <div [formGroupName]="i" *ngFor="let attr of deviceTypeAttributes.controls; let i = index"
+                         class="attribute">
+                        <mat-form-field class="third-width" color="accent">
                             <input matInput placeholder="Key" formControlName="key">
                         </mat-form-field>
                         =
                         <mat-form-field class="third-width" color="accent">
-                            <input matInput placeholder="Value" formControlName="value" >
+                            <input matInput placeholder="Value" formControlName="value">
                         </mat-form-field>
                         <button mat-icon-button color="warn" [disabled]="!editable" (click)="removeDeviceTypeAttr(i)">
                             <mat-icon>delete</mat-icon>
                         </button>
                     </div>
-                    <button mat-stroked-button color="accent" (click)="addDeviceTypeAttr()" [disabled]="!editable">Add Attribute</button>
+                    <button mat-stroked-button color="accent" (click)="addDeviceTypeAttr()" [disabled]="!editable">Add
+                        Attribute
+                    </button>
                 </div>
             </form>
         </mat-step>
         <mat-step [stepControl]="secondFormGroup">
             <form [formGroup]="secondFormGroup">
                 <ng-template matStepLabel>Service</ng-template>
-                <mat-accordion formArrayName="services" *ngIf="services">
-                    <mat-expansion-panel [formGroupName]="i"
-                                         *ngFor="let service of services.controls; let i = index">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                Service {{service.get('name')?.value}}
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <mat-tab-group color="accent" headerPosition="above" dynamicHeight="true">
-                            <mat-tab label="Information">
-                                <div class="form">
+                    <mat-accordion formArrayName="services" cdkDropListGroup multi>
+                        <mat-expansion-panel *ngFor="let group of serviceGroupsAndUngroupedServices; trackBy:trackByKey"
+                                             cdkDropList (cdkDropListDropped)="moveServiceToGroup($event, group.key)">
+                            <mat-expansion-panel-header>
+                                {{group.title}}
+                            </mat-expansion-panel-header>
+                            <ng-template matExpansionPanelContent>
+                                <div *ngIf="group.isGroup" [formGroup]="getServiceGroup(group.key)">
                                     <mat-form-field class="full-width" color="accent">
-                                        <input matInput placeholder="Id" formControlName="id">
-                                    </mat-form-field>
-                                    <table class="full-width">
-                                        <tr>
-                                            <td>
-                                                <mat-form-field class="full-width" color="accent">
-                                                    <mat-label>Function Type</mat-label>
-                                                    <mat-select formControlName="functionType" required>
-                                                        <mat-option
-                                                                *ngFor="let item of deviceTypeFunctionType"
-                                                                [value]="item">
-                                                            {{item.text}}
-                                                        </mat-option>
-                                                    </mat-select>
-                                                </mat-form-field>
-                                            </td>
-                                            <td>
-                                                <mat-form-field class="full-width" color="accent">
-                                                    <mat-label>{{functionType(service).text === '' ? 'Function' : functionType(service).text + ' Function'}}</mat-label>
-                                                    <senergy-select-search formControlName="function_ids" [multiple]="true" [required]="true"
-                                                    [options]="functionType(service).text === 'Measuring' ? measuringFunctions : controllingFunctions"
-                                                                           useOptionValueProperty="id" useOptionViewProperty="name" [getTriggerValue]="getCustomTriggerFunction(service)">
-
-                                                    </senergy-select-search>
-                                                </mat-form-field>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <mat-form-field class="full-width" color="accent">
-                                        <input matInput placeholder="Name" formControlName="name" required>
+                                        <input matInput placeholder="Name" formControlName="name">
                                     </mat-form-field>
                                     <mat-form-field class="full-width" color="accent">
                                         <input matInput placeholder="Description" formControlName="description">
                                     </mat-form-field>
-                                    <mat-form-field class="full-width" color="accent">
-                                        <input matInput placeholder="Local Id" formControlName="local_id" required>
-                                    </mat-form-field>
-                                    <table class="full-width">
-                                        <tr>
-                                            <td>
-                                                <mat-form-field class="full-width" color="accent">
-                                                    <mat-label>Aspects</mat-label>
-                                                    <senergy-select-search formControlName="aspect_ids" [multiple]="true" [required]="true"
-                                                                           [options]="aspectList"
-                                                                           useOptionViewProperty="name"
-                                                                           useOptionValueProperty="id"
-                                                                           [getTriggerValue]="getCustomTriggerAspect(service)">
-                                                    </senergy-select-search>
-                                                </mat-form-field>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <mat-form-field class="full-width" color="accent">
-                                        <mat-select placeholder="Protocol"
-                                                    formControlName="protocol_id"
-                                                    required>
-                                            <mat-option
-                                                    *ngFor="let item of protocols"
-                                                    [value]="item.id">
-                                                {{item.name}}
-                                            </mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
-                                    <mat-form-field class="full-width" color="accent">
-                                        <mat-select placeholder="Interaction"
-                                                    formControlName="interaction"
-                                                    required>
-                                            <mat-option
-                                                    *ngFor="let item of interactionList"
-                                                    [value]="item">
-                                                {{item}}
-                                            </mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
                                 </div>
-                            </mat-tab>
-                            <mat-tab label="Attributes" formArrayName="attributes">
-                                <div [formGroupName]="i" *ngFor="let attr of serviceAttributeArray(service).controls; let i = index" class="attribute">
-                                    <mat-form-field class="third-width" color="accent">
-                                        <input matInput placeholder="Key" formControlName="key">
-                                    </mat-form-field>
-                                    =
-                                    <mat-form-field class="third-width" color="accent">
-                                        <input matInput placeholder="Value" formControlName="value" >
-                                    </mat-form-field>
-                                    <button mat-icon-button color="warn" [disabled]="!editable" (click)="removeServiceAttr(service, i)">
+
+                                <mat-accordion>
+                                    <mat-expansion-panel [id]="serviceAndIndex.index" *ngFor="let serviceAndIndex of group.serviceAndIndices;"
+                                                         [formGroupName]="serviceAndIndex.index" cdkDrag cdkDragDisabled="{{!editable}}">
+                                        <mat-expansion-panel-header>
+                                            <mat-panel-title>
+                                                Service {{serviceAndIndex.service.get('name')?.value}}
+                                            </mat-panel-title>
+                                        </mat-expansion-panel-header>
+                                        <ng-template matExpansionPanelContent>
+                                            <mat-tab-group color="accent" headerPosition="above" dynamicHeight="true">
+                                                <mat-tab label="Information">
+                                                    <div class="form">
+                                                        <mat-form-field class="full-width" color="accent">
+                                                            <input matInput placeholder="Id" formControlName="id">
+                                                        </mat-form-field>
+                                                        <table class="full-width">
+                                                            <tr>
+                                                                <td>
+                                                                    <mat-form-field class="full-width" color="accent">
+                                                                        <mat-label>Function Type</mat-label>
+                                                                        <mat-select formControlName="functionType" required>
+                                                                            <mat-option
+                                                                                    *ngFor="let item of deviceTypeFunctionType"
+                                                                                    [value]="item">
+                                                                                {{item.text}}
+                                                                            </mat-option>
+                                                                        </mat-select>
+                                                                    </mat-form-field>
+                                                                </td>
+                                                                <td>
+                                                                    <mat-form-field class="full-width" color="accent">
+                                                                        <mat-label>{{functionType(serviceAndIndex.service).text === '' ? 'Function' : functionType(serviceAndIndex.service).text + ' Function'}}</mat-label>
+                                                                        <senergy-select-search formControlName="function_ids"
+                                                                                               [multiple]="true" [required]="true"
+                                                                                               [options]="functionType(serviceAndIndex.service).text === 'Measuring' ? measuringFunctions : controllingFunctions"
+                                                                                               useOptionValueProperty="id"
+                                                                                               useOptionViewProperty="name"
+                                                                                               [getTriggerValue]="getCustomTriggerFunction(serviceAndIndex.service)">
+
+                                                                        </senergy-select-search>
+                                                                    </mat-form-field>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                        <mat-form-field class="full-width" color="accent">
+                                                            <input matInput placeholder="Name" formControlName="name" required>
+                                                        </mat-form-field>
+                                                        <mat-form-field class="full-width" color="accent">
+                                                            <input matInput placeholder="Description" formControlName="description">
+                                                        </mat-form-field>
+                                                        <mat-form-field class="full-width" color="accent">
+                                                            <input matInput placeholder="Local Id" formControlName="local_id" required>
+                                                        </mat-form-field>
+                                                        <table class="full-width">
+                                                            <tr>
+                                                                <td>
+                                                                    <mat-form-field class="full-width" color="accent">
+                                                                        <mat-label>Aspects</mat-label>
+                                                                        <senergy-select-search formControlName="aspect_ids"
+                                                                                               [multiple]="true" [required]="true"
+                                                                                               [options]="aspectList"
+                                                                                               useOptionViewProperty="name"
+                                                                                               useOptionValueProperty="id"
+                                                                                               [getTriggerValue]="getCustomTriggerAspect(serviceAndIndex.service)">
+                                                                        </senergy-select-search>
+                                                                    </mat-form-field>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                        <mat-form-field class="full-width" color="accent">
+                                                            <mat-select placeholder="Protocol"
+                                                                        formControlName="protocol_id"
+                                                                        required>
+                                                                <mat-option
+                                                                        *ngFor="let item of protocols"
+                                                                        [value]="item.id">
+                                                                    {{item.name}}
+                                                                </mat-option>
+                                                            </mat-select>
+                                                        </mat-form-field>
+                                                        <mat-form-field class="full-width" color="accent">
+                                                            <mat-select placeholder="Interaction"
+                                                                        formControlName="interaction"
+                                                                        required>
+                                                                <mat-option
+                                                                        *ngFor="let item of interactionList"
+                                                                        [value]="item">
+                                                                    {{item}}
+                                                                </mat-option>
+                                                            </mat-select>
+                                                        </mat-form-field>
+                                                    </div>
+                                                </mat-tab>
+                                                <mat-tab label="Attributes" formArrayName="attributes">
+                                                    <div [formGroupName]="i"
+                                                         *ngFor="let attr of serviceAttributeArray(serviceAndIndex.service).controls; let i = index"
+                                                         class="attribute">
+                                                        <mat-form-field class="third-width" color="accent">
+                                                            <input matInput placeholder="Key" formControlName="key">
+                                                        </mat-form-field>
+                                                        =
+                                                        <mat-form-field class="third-width" color="accent">
+                                                            <input matInput placeholder="Value" formControlName="value">
+                                                        </mat-form-field>
+                                                        <button mat-icon-button color="warn" [disabled]="!editable"
+                                                                (click)="removeServiceAttr(serviceAndIndex.service, i)">
+                                                            <mat-icon>delete</mat-icon>
+                                                        </button>
+                                                    </div>
+                                                    <button mat-stroked-button color="accent" class="button-margin"
+                                                            (click)="addServiceAttr(serviceAndIndex.service)" [disabled]="!editable">Add Attribute</button>
+                                                </mat-tab>
+                                                <mat-tab label="{{tab.label}}" disabled="{{serviceAndIndex.service.value.protocol_id === null}}"
+                                                         formArrayName="{{tab.formArrayName}}"
+                                                         *ngFor="let tab of [{label: 'Input', formArrayName: 'inputs'},{label: 'Output', formArrayName: 'outputs'}]">
+                                                    <div [formGroupName]="i"
+                                                         *ngFor="let inOut of inputOutputArray(serviceAndIndex.service, tab.formArrayName);  let i = index; trackBy: trackById">
+                                                        <div fxLayout="row" fxLayoutAlign="start center">
+                                                            <button mat-icon-button class="mat-accent"
+                                                                    (click)="expand(serviceAndIndex.service, tab.formArrayName, i)">
+                                                                <mat-icon>{{inOut.show ? 'expand_less' : 'expand_more'}}</mat-icon>
+                                                            </button>
+                                                            <div>{{inOut.name}}</div>
+                                                        </div>
+
+                                                        <div fxLayout="row" [fxShow]="inOut.show === true">
+                                                            <div fxFlex>
+                                                                <mat-form-field class="full-width" color="accent">
+                                                                    <senergy-select-search
+                                                                            [options]="serializations"
+                                                                            placeholder="Serialization"
+                                                                            formControlName="serialization"
+                                                                            [required]="inOut.dataSource && inOut.dataSource.data.length > 0"
+                                                                            noneView="-- None --"></senergy-select-search>
+                                                                </mat-form-field>
+                                                                <div *ngIf="inOut.dataSource">
+                                                                    <button mat-raised-button color="accent"
+                                                                            (click)="addContentVariable(serviceAndIndex.service.value.function_ids, inOut, [])"
+                                                                            [disabled]="inOut.dataSource.data.length === 1 || !editable">
+                                                                        ADD ContentVariable
+                                                                    </button>
+                                                                </div>
+                                                                <div *ngIf="inOut.dataSource && inOut.tree">
+                                                                    <mat-tree [dataSource]="inOut.dataSource" [treeControl]="inOut.tree"
+                                                                              class="example-tree">
+                                                                        <!-- This is the tree node template for leaf nodes -->
+                                                                        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+                                                                            <li class="mat-tree-node">
+                                                                                <!-- use a disabled button to provide padding for tree leaf -->
+                                                                                <button mat-icon-button disabled></button>
+                                                                                <button mat-stroked-button
+                                                                                        (click)="editContent(node, serviceAndIndex.service.value.function_ids, inOut)">
+                                                                                    {{node.name}}
+                                                                                </button>
+                                                                                <button mat-icon-button
+                                                                                        [disabled]="!editable"
+                                                                                        (click)="deleteContentVariable(inOut, node.indices)">
+                                                                                    <mat-icon>delete_outline</mat-icon>
+                                                                                </button>
+
+                                                                            </li>
+                                                                        </mat-tree-node>
+                                                                        <!-- This is the tree node template for expandable nodes -->
+                                                                        <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+                                                                            <li>
+                                                                                <div class="mat-tree-node">
+                                                                                    <button mat-icon-button matTreeNodeToggle
+                                                                                            [attr.aria-label]="'toggle ' + node.name">
+                                                                                        <mat-icon class="mat-icon-rtl-mirror">
+                                                                                            {{inOut.tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                                                                                        </mat-icon>
+                                                                                    </button>
+                                                                                    <button mat-stroked-button
+                                                                                            (click)="editContent(node, serviceAndIndex.service.value.function_ids, inOut)">
+                                                                                        {{node.name}}
+                                                                                    </button>
+                                                                                    <button mat-icon-button
+                                                                                            [disabled]="!editable"
+                                                                                            (click)="deleteContentVariable(inOut, node.indices)">
+                                                                                        <mat-icon>delete_outline</mat-icon>
+                                                                                    </button>
+                                                                                    <button mat-icon-button
+                                                                                            [disabled]="!editable"
+                                                                                            (click)="addContentVariable(serviceAndIndex.service.value.function_ids, inOut, node.indices)">
+                                                                                        <mat-icon>add</mat-icon>
+                                                                                    </button>
+                                                                                </div>
+                                                                                <ul [class.example-tree-invisible]="!inOut.tree.isExpanded(node)">
+                                                                                    <ng-container matTreeNodeOutlet></ng-container>
+                                                                                </ul>
+                                                                            </li>
+                                                                        </mat-nested-tree-node>
+                                                                    </mat-tree>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </mat-tab>
+                                            </mat-tab-group>
+                                            <div fxLayoutAlign="end center">
+                                                <button (click)="deleteService(serviceAndIndex.service.value)" mat-icon-button class="mat-accent"
+                                                        matTooltip="delete service" [disabled]="!editable">
+                                                    <mat-icon>delete</mat-icon>
+                                                </button>
+                                            </div>
+                                        </ng-template>
+                                    </mat-expansion-panel>
+                                </mat-accordion>
+                                <div class="button-margin" fxLayoutAlign="center center" *ngIf="editable">
+                                    <button mat-raised-button color="accent" (click)="addService(group.key)">ADD Service</button>
+                                </div>
+                                <div fxLayoutAlign="end center" *ngIf="group.isGroup">
+                                    <button (click)="deleteServiceGroup(group.key)" mat-icon-button class="mat-accent"
+                                            matTooltip="delete service group" [disabled]="!editable || group.serviceAndIndices.length > 0">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </div>
-                                <button mat-stroked-button color="accent" class="button-margin" (click)="addServiceAttr(service)" [disabled]="!editable">Add Attribute</button>
-                            </mat-tab>
-                            <mat-tab label="{{tab.label}}" disabled="{{service.value.protocol_id === null}}"
-                                     formArrayName="{{tab.formArrayName}}"
-                                     *ngFor="let tab of [{label: 'Input', formArrayName: 'inputs'},{label: 'Output', formArrayName: 'outputs'}]">
-                                <div [formGroupName]="i"
-                                     *ngFor="let inOut of inputOutputArray(service, tab.formArrayName);  let i = index; trackBy: trackById">
-                                    <div fxLayout="row" fxLayoutAlign="start center">
-                                        <button mat-icon-button class="mat-accent"
-                                                (click)="expand(service, tab.formArrayName, i)">
-                                            <mat-icon>{{inOut.show ? 'expand_less' : 'expand_more'}}</mat-icon>
-                                        </button>
-                                        <div>{{inOut.name}}</div>
-                                    </div>
-
-                                    <div fxLayout="row" [fxShow]="inOut.show === true">
-                                        <div fxFlex>
-                                            <mat-form-field class="full-width" color="accent">
-                                                <senergy-select-search
-                                                    [options]="serializations"
-                                                    placeholder="Serialization"
-                                                    formControlName="serialization"
-                                                    [required]="inOut.dataSource && inOut.dataSource.data.length > 0"
-                                                    noneView="-- None --"></senergy-select-search>
-                                            </mat-form-field>
-                                            <div *ngIf="inOut.dataSource">
-                                                <button mat-raised-button color="accent"
-                                                        (click)="addContentVariable(service.value.function_ids, inOut, [])"
-                                                        [disabled]="inOut.dataSource.data.length === 1 || !editable">
-                                                    ADD ContentVariable
-                                                </button>
-                                            </div>
-                                            <div *ngIf="inOut.dataSource && inOut.tree">
-                                                <mat-tree [dataSource]="inOut.dataSource" [treeControl]="inOut.tree"
-                                                          class="example-tree">
-                                                    <!-- This is the tree node template for leaf nodes -->
-                                                    <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-                                                        <li class="mat-tree-node">
-                                                            <!-- use a disabled button to provide padding for tree leaf -->
-                                                            <button mat-icon-button disabled></button>
-                                                            <button mat-stroked-button
-                                                                    (click)="editContent(node, service.value.function_ids, inOut)">
-                                                                {{node.name}}
-                                                            </button>
-                                                            <button mat-icon-button
-                                                                    [disabled]="!editable"
-                                                                    (click)="deleteContentVariable(inOut, node.indices)">
-                                                                <mat-icon>delete_outline</mat-icon>
-                                                            </button>
-
-                                                        </li>
-                                                    </mat-tree-node>
-                                                    <!-- This is the tree node template for expandable nodes -->
-                                                    <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
-                                                        <li>
-                                                            <div class="mat-tree-node">
-                                                                <button mat-icon-button matTreeNodeToggle
-                                                                        [attr.aria-label]="'toggle ' + node.name">
-                                                                    <mat-icon class="mat-icon-rtl-mirror">
-                                                                        {{inOut.tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-                                                                    </mat-icon>
-                                                                </button>
-                                                                <button mat-stroked-button
-                                                                        (click)="editContent(node, service.value.function_ids, inOut)">
-                                                                    {{node.name}}
-                                                                </button>
-                                                                <button mat-icon-button
-                                                                        [disabled]="!editable"
-                                                                        (click)="deleteContentVariable(inOut, node.indices)">
-                                                                    <mat-icon>delete_outline</mat-icon>
-                                                                </button>
-                                                                <button mat-icon-button
-                                                                        [disabled]="!editable"
-                                                                        (click)="addContentVariable(service.value.function_ids, inOut, node.indices)">
-                                                                    <mat-icon>add</mat-icon>
-                                                                </button>
-                                                            </div>
-                                                            <ul [class.example-tree-invisible]="!inOut.tree.isExpanded(node)">
-                                                                <ng-container matTreeNodeOutlet></ng-container>
-                                                            </ul>
-                                                        </li>
-                                                    </mat-nested-tree-node>
-                                                </mat-tree>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </mat-tab>
-
-                        </mat-tab-group>
-                        <div fxLayoutAlign="end center">
-                            <button (click)="deleteService(service.value)" mat-icon-button class="mat-accent"
-                                    matTooltip="delete service" [disabled]="!editable">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                        </div>
-
-                    </mat-expansion-panel>
-                </mat-accordion>
+                            </ng-template>
+                        </mat-expansion-panel>
+                    </mat-accordion>
                 <div class="button-margin" fxLayoutAlign="center center" *ngIf="editable">
-                    <button mat-raised-button color="accent" (click)="addService()">ADD Service</button>
+                    <button mat-raised-button color="accent" (click)="addServiceGroup()">ADD Service Group</button>
                 </div>
             </form>
         </mat-step>

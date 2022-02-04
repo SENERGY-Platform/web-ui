@@ -299,6 +299,7 @@ describe('DeviceTypesComponent', () => {
                 {
                     id: '',
                     local_id: 'local_id_1',
+                    service_group_key: null,
                     name: 'service1',
                     description: 'serv_desc',
                     protocol_id: 'protocol_1',
@@ -364,6 +365,7 @@ describe('DeviceTypesComponent', () => {
                 {
                     id: 'service_id_1',
                     local_id: 'local_id_1',
+                    service_group_key: null,
                     name: 'service1',
                     description: 'serv_desc',
                     protocol_id: 'protocol_1',

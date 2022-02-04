@@ -53,6 +53,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatTreeModule } from '@angular/material/tree';
 import { DeviceTypesContentVariableDialogComponent } from './device-types/dialogs/device-types-content-variable-dialog.component';
 import { WidgetModule } from '../../../widgets/widget.module';
+import {DragDropModule} from "@angular/cdk/drag-drop";
 
 const devicetypes = {
     path: 'metadata/devicetypesoverview/devicetypes',
@@ -102,6 +103,7 @@ const devicetypesEdit = {
         RouterModule.forChild([devicetypes, devicetypesEdit]),
         MatTreeModule,
         WidgetModule,
+        DragDropModule,
     ],
     declarations: [
         DeviceTypesComponent,
