@@ -74,6 +74,7 @@
                 <ng-template matStepLabel>Service</ng-template>
                     <mat-accordion formArrayName="services" cdkDropListGroup multi>
                         <mat-expansion-panel *ngFor="let group of serviceGroupsAndUngroupedServices; trackBy:trackByKey"
+                                             [expanded]="serviceGroupsAndUngroupedServices.length === 1"
                                              cdkDropList (cdkDropListDropped)="moveServiceToGroup($event, group.key)">
                             <mat-expansion-panel-header>
                                 {{group.title}}
