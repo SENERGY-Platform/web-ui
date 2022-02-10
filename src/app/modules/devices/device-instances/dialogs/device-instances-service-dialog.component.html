@@ -18,7 +18,7 @@
 
 <mat-dialog-content>
     <mat-accordion multi>
-        <mat-expansion-panel *ngFor="let service of services; let i = index">
+        <mat-expansion-panel *ngFor="let service of services; let i = index" [expanded]="services.length === 1">
             <mat-expansion-panel-header>
                 {{service.name}}
             </mat-expansion-panel-header>
