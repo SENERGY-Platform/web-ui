@@ -20,6 +20,8 @@ import { FormControl, Validators } from '@angular/forms';
 import { DeviceTypeCharacteristicsModel, DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
 import { ConceptsService } from '../shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../shared/concepts-characteristics.model';
+import {CharacteristicsService} from "../../characteristics/shared/characteristics.service";
+import {CharacteristicsPermSearchModel} from "../../characteristics/shared/characteristics-perm-search.model";
 
 @Component({
     templateUrl: './concepts-edit-dialog.component.html',
@@ -29,27 +31,29 @@ export class ConceptsEditDialogComponent implements OnInit {
     conceptId: string;
     nameFormControl = new FormControl('', [Validators.required]);
     idFormControl = new FormControl({ value: '', disabled: true });
+    characteristicsControl = new FormControl('', [Validators.required]);
     baseCharacteristicControl = new FormControl('', [Validators.required]);
-    concept!: ConceptsCharacteristicsModel;
-    characteristics: DeviceTypeCharacteristicsModel[] = [];
+    characteristics: CharacteristicsPermSearchModel[] = [];
 
     constructor(
         private dialogRef: MatDialogRef<ConceptsEditDialogComponent>,
         @Inject(MAT_DIALOG_DATA) data: { conceptId: string },
         private conceptsService: ConceptsService,
+        private characteristicsService: CharacteristicsService,
     ) {
         this.conceptId = data.conceptId;
     }
 
     ngOnInit(): void {
-        this.conceptsService.getConceptWithCharacteristics(this.conceptId).subscribe((concept: ConceptsCharacteristicsModel | null) => {
+        this.conceptsService.getConceptWithoutCharacteristics(this.conceptId).subscribe((concept: DeviceTypeConceptModel | null) => {
             if (concept !== null) {
-                this.concept = concept;
-                this.characteristics = concept.characteristics;
-                this.baseCharacteristicControl.setValue(this.concept.base_characteristic_id);
-                this.nameFormControl.setValue(this.concept.name);
-                this.idFormControl.setValue(this.concept.id);
+                this.baseCharacteristicControl.setValue(concept.base_characteristic_id);
+                this.nameFormControl.setValue(concept.name);
+                this.idFormControl.setValue(concept.id);
             }
+        });
+        this.characteristicsService.getCharacteristics('', 9999, 0, 'name', 'asc').subscribe(characteristics => {
+            this.characteristics = characteristics;
         });
     }
 
@@ -59,19 +63,11 @@ export class ConceptsEditDialogComponent implements OnInit {
 
     save(): void {
         const returnConcept: DeviceTypeConceptModel = {
-            id: this.concept.id,
+            id: this.idFormControl.value,
             name: this.nameFormControl.value,
             base_characteristic_id: this.baseCharacteristicControl.value,
-            characteristic_ids: this.fromObjectToIds(this.concept.characteristics),
+            characteristic_ids: (this.characteristicsControl.value as CharacteristicsPermSearchModel[]).map(c => c.id),
         };
         this.dialogRef.close(returnConcept);
-    }
-
-    fromObjectToIds(characteristics: DeviceTypeCharacteristicsModel[]): string[] {
-        const array: string[] = [];
-        characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
-            array.push(characteristic.id || '');
-        });
-        return array;
     }
 }
