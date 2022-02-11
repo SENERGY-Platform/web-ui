@@ -55,35 +55,6 @@ export class CharacteristicsService {
             .pipe(catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'deleteCharacteristic', false)));
     }
 
-    getCharacteristicByConceptId(
-        conceptId: string,
-        limit: number,
-        offset: number,
-        sortBy: string,
-        sortDirection: string,
-    ): Observable<CharacteristicsPermSearchModel[]> {
-        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
-            sortDirection = 'asc';
-        }
-        if (sortBy === '' || sortBy === null || sortBy === undefined) {
-            sortBy = 'name';
-        }
-        const params = [
-            'limit=' + limit,
-            'offset=' + offset,
-            'rights=r',
-            'sort=' + sortBy + '.' + sortDirection,
-            'filter=' + encodeURIComponent('concept_id:' + conceptId),
-        ];
-
-        return this.http
-            .get<CharacteristicsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/characteristics?' + params.join('&'))
-            .pipe(
-                map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristicByConceptId', [])),
-            );
-    }
-
     getCharacteristic(characteristicsId: string): Observable<DeviceTypeCharacteristicsModel> {
         return this.http
             .get<DeviceTypeCharacteristicsModel>(environment.deviceRepoUrl + '/characteristics/' + characteristicsId)
@@ -104,6 +75,7 @@ export class CharacteristicsService {
         offset: number,
         sortBy: string,
         sortDirection: string,
+        ids: string[] = [],
     ): Observable<CharacteristicsPermSearchModel[]> {
         if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
             sortDirection = 'asc';
@@ -114,6 +86,9 @@ export class CharacteristicsService {
         const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection];
         if (query) {
             params.push('search=' + encodeURIComponent(query));
+        }
+        if (ids.length > 0) {
+            params.push('ids=' + ids.join(','));
         }
 
         return this.http
