@@ -97,7 +97,7 @@ export class FunctionsService {
 
     getFunction(functionId: string): Observable<DeviceTypeFunctionModel | null> {
         return this.http
-            .get<DeviceTypeFunctionModel>(environment.semanticRepoUrl + '/functions/' + functionId)
+            .get<DeviceTypeFunctionModel>(environment.deviceRepoUrl + '/functions/' + functionId)
             .pipe(catchError(this.errorHandlerService.handleError(FunctionsService.name, 'getFunction', null)));
     }
 

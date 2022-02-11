@@ -52,7 +52,6 @@ export const environment = {
     usersServiceUrl: 'http://localhost',
     deviceRepoUrl: 'http://localhost',
     deviceManagerUrl: 'https://localhost',
-    semanticRepoUrl: 'https://localhost',
     deviceSelectionUrl: 'http://localhost',
     ubaUrl: 'http://localhost',
     dwdOpenUrl: 'http://localhost',

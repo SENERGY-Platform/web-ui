@@ -97,10 +97,10 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(CharacteristicsEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((resp: { conceptId: string; characteristic: DeviceTypeCharacteristicsModel }) => {
+        editDialogRef.afterClosed().subscribe((resp: { characteristic: DeviceTypeCharacteristicsModel }) => {
             if (resp !== undefined) {
                 this.reset();
-                this.characteristicsService.createCharacteristic(resp.conceptId, resp.characteristic).subscribe((characteristic) => {
+                this.characteristicsService.createCharacteristic(resp.characteristic).subscribe((characteristic) => {
                     if (characteristic === null) {
                         this.snackBar.open('Error while creating the characteristic!', undefined, { duration: 2000 });
                         this.getCharacteristics(true);
@@ -126,7 +126,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             .subscribe((deleteCharacteristic: boolean) => {
                 if (deleteCharacteristic) {
                     this.characteristicsService
-                        .deleteCharacteristic(characteristic.concept_id, characteristic.id)
+                        .deleteCharacteristic(characteristic.id)
                         .subscribe((resp: boolean) => {
                             if (resp === true) {
                                 this.characteristics.splice(this.characteristics.indexOf(characteristic), 1);
@@ -155,7 +155,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                 const newCharacteristic = resp.characteristic;
                 this.reset();
                 this.characteristicsService
-                    .updateConcept(inputCharacteristic.concept_id, newCharacteristic)
+                    .updateConcept(newCharacteristic)
                     .subscribe((characteristic: DeviceTypeCharacteristicsModel | null) => {
                         if (characteristic === null) {
                             this.snackBar.open('Error while updating the characteristic!', undefined, { duration: 2000 });

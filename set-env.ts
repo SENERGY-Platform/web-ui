@@ -54,7 +54,6 @@ export const environment = {
   usersServiceUrl: '${process.env.USERS_SERVICE_URL}',
   deviceRepoUrl: '${process.env.DEVICE_REPO_URL}',
   deviceManagerUrl: '${process.env.DEVICE_MANAGER_URL}',
-  semanticRepoUrl: '${process.env.SEMANTIC_REPO_URL}',
   deviceSelectionUrl: '${process.env.DEVICE_SELECTION_URL}',
   ubaUrl: '${process.env.UBA_URL}',
   dwdOpenUrl: '${process.env.DWD_OPEN_URL}',

@@ -30,29 +30,28 @@ export class CharacteristicsService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
     createCharacteristic(
-        conceptId: string,
         characteristic: DeviceTypeCharacteristicsModel,
     ): Observable<DeviceTypeCharacteristicsModel | null> {
         return this.http
             .post<DeviceTypeCharacteristicsModel>(
-                environment.deviceManagerUrl + '/concepts/' + conceptId + '/characteristics',
+                environment.deviceManagerUrl + '/characteristics',
                 characteristic,
             )
             .pipe(catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'createCharacteristic', null)));
     }
 
-    updateConcept(conceptId: string, characteristics: DeviceTypeCharacteristicsModel): Observable<DeviceTypeCharacteristicsModel | null> {
+    updateConcept(characteristics: DeviceTypeCharacteristicsModel): Observable<DeviceTypeCharacteristicsModel | null> {
         return this.http
             .put<DeviceTypeCharacteristicsModel>(
-                environment.deviceManagerUrl + '/concepts/' + conceptId + '/characteristics/' + characteristics.id,
+                environment.deviceManagerUrl + '/characteristics/' + characteristics.id,
                 characteristics,
             )
             .pipe(catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'updateConcept', null)));
     }
 
-    deleteCharacteristic(conceptId: string, characteristicsId: string): Observable<boolean> {
+    deleteCharacteristic(characteristicsId: string): Observable<boolean> {
         return this.http
-            .delete<boolean>(environment.deviceManagerUrl + '/concepts/' + conceptId + '/characteristics/' + characteristicsId)
+            .delete<boolean>(environment.deviceManagerUrl + '/characteristics/' + characteristicsId)
             .pipe(catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'deleteCharacteristic', false)));
     }
 
@@ -87,7 +86,7 @@ export class CharacteristicsService {
 
     getCharacteristic(characteristicsId: string): Observable<DeviceTypeCharacteristicsModel> {
         return this.http
-            .get<DeviceTypeCharacteristicsModel>(environment.semanticRepoUrl + '/characteristics/' + characteristicsId)
+            .get<DeviceTypeCharacteristicsModel>(environment.deviceRepoUrl + '/characteristics/' + characteristicsId)
             .pipe(
                 catchError(
                     this.errorHandlerService.handleError(

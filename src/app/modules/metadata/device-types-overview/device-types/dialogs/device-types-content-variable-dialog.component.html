@@ -28,6 +28,23 @@
         <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="Name" formControlName="name" required>
         </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
+            <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name"
+                                   placeholder="Aspect" formControlName="aspect_id" [compareWith]="compareIds"></senergy-select-search>
+        </mat-form-field>
+
+        <mat-form-field class="full-width" color="accent">
+            <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name"
+                                   placeholder="Function" formControlName="function_id" [compareWith]="compareIds"></senergy-select-search>
+        </mat-form-field>
+
+        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType()">
+            <mat-label>Characteristic</mat-label>
+            <senergy-select-search formControlName="characteristic_id" noneView="-- None --"
+                                   [options]="options" useOptionViewProperty="name" useOptionValueProperty="id"
+                                   useOptionClassProperty="class">
+            </senergy-select-search>
+        </mat-form-field>
         <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType()">
             <mat-select placeholder="Type"
                         formControlName="type" required>
@@ -45,13 +62,6 @@
                     {{nonPrimitive.typeShort}}
                 </mat-option>
             </mat-select>
-        </mat-form-field>
-        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType()">
-            <mat-label>Characteristic</mat-label>
-            <senergy-select-search formControlName="characteristic_id" noneView="-- None --"
-                                   [options]="options" useOptionViewProperty="name" useOptionValueProperty="id"
-                                   useOptionClassProperty="class">
-            </senergy-select-search>
         </mat-form-field>
         <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType()">
             <input matInput placeholder="Serialization Options" formControlName="serialization_options">

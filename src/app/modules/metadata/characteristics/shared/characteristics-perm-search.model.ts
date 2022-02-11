@@ -15,7 +15,6 @@
  */
 
 export interface CharacteristicsPermSearchModel {
-    concept_id: string;
     creator: string;
     id: string;
     name: string;

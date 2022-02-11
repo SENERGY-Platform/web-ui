@@ -70,7 +70,7 @@ export class DeviceTypesComponent implements OnInit {
     firstFormGroup!: FormGroup;
     secondFormGroup: FormGroup = new FormGroup({services: new FormArray([])});
     attrFormGroup: FormGroup = new FormGroup({attributes: new FormArray([])});
-    serviceGroupsAndUngroupedServices: ({key: string; title: string; isGroup: boolean; serviceAndIndices: {service: AbstractControl; index: number}[]}[]) = [];
+    serviceGroupsAndUngroupedServices: ({ key: string; title: string; isGroup: boolean; serviceAndIndices: { service: AbstractControl; index: number }[] }[]) = [];
     editable = false;
     deviceTypeFunctionType = functionTypes;
     measuringFunctions: DeviceTypeFunctionModel[] = [];
@@ -156,16 +156,16 @@ export class DeviceTypesComponent implements OnInit {
         this.updateServiceGroups();
     }
 
-    addContentVariable(functionIds: string[], inOut: DeviceTypeContentTreeModel, indices: number[]): void {
-        const functionConceptIds = this.getFunctionConceptIds(functionIds);
+    addContentVariable(isInput: boolean, inOut: DeviceTypeContentTreeModel, indices: number[]): void {
         const disabled = !this.editable;
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: {} as DeviceTypeContentVariableModel,
-            functionConceptIds,
+            functions: isInput ? this.controllingFunctions : this.measuringFunctions,
             disabled,
             concepts: this.concepts,
+            aspects: this.aspectList,
         };
         this.dialog
             .open(DeviceTypesContentVariableDialogComponent, dialogConfig)
@@ -181,16 +181,16 @@ export class DeviceTypesComponent implements OnInit {
         this.refreshTree(inOut, this.deviceTypeHelperService.deleteTreeData(inOut.dataSource.data, indices));
     }
 
-    editContent(node: DeviceTypeContentVariableModel, functionIds: string[], inOut: DeviceTypeContentTreeModel): void {
-        const functionConceptIds = this.getFunctionConceptIds(functionIds);
+    editContent(isInput: boolean, node: DeviceTypeContentVariableModel, inOut: DeviceTypeContentTreeModel): void {
         const disabled = !this.editable;
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: node,
-            functionConceptIds,
+            functions: isInput ? this.controllingFunctions : this.measuringFunctions,
             disabled,
             concepts: this.concepts,
+            aspects: this.aspectList,
         };
         this.dialog
             .open(DeviceTypesContentVariableDialogComponent, dialogConfig)
@@ -408,9 +408,6 @@ export class DeviceTypesComponent implements OnInit {
         formArray.controls.forEach((control: AbstractControl) => {
             const formGroup = control as FormGroup;
             this.initProtocolIdChangeListener(formGroup);
-            formGroup.controls['functionType'].valueChanges.subscribe(() => {
-                formGroup.controls['function_ids'].setValue([]);
-            });
         });
     }
 
@@ -459,33 +456,6 @@ export class DeviceTypesComponent implements OnInit {
                 outputs: deviceTypeService.outputs
                     ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs)
                     : this._formBuilder.array([]),
-                functionType: [
-                    {
-                        disabled: true,
-                        value:
-                            deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0
-                                ? this.getFunctionType(deviceTypeService.function_ids[0])
-                                : {text: ''},
-                    },
-                    Validators.required,
-                ],
-                function_ids: [
-                    {
-                        value:
-                            deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0
-                                ? deviceTypeService.function_ids
-                                : [],
-                        disabled: true || (deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true),
-                    },
-                    Validators.required,
-                ],
-                aspect_ids: [
-                    {
-                        disabled: true,
-                        value: deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : [],
-                    },
-                    Validators.required,
-                ],
                 attributes: this._formBuilder.array(
                     deviceTypeService.attributes ? deviceTypeService.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : []
                 )
@@ -505,26 +475,6 @@ export class DeviceTypesComponent implements OnInit {
                 outputs: deviceTypeService.outputs
                     ? this.createContent(deviceTypeService.protocol_id, deviceTypeService.outputs)
                     : this._formBuilder.array([]),
-                functionType: [
-                    deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0
-                        ? this.getFunctionType(deviceTypeService.function_ids[0])
-                        : {text: ''},
-                    Validators.required,
-                ],
-                function_ids: [
-                    {
-                        value:
-                            deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0
-                                ? deviceTypeService.function_ids
-                                : [],
-                        disabled: deviceTypeService.function_ids && deviceTypeService.function_ids.length > 0 ? false : true,
-                    },
-                    Validators.required,
-                ],
-                aspect_ids: [
-                    deviceTypeService.aspect_ids && deviceTypeService.aspect_ids.length > 0 ? deviceTypeService.aspect_ids : [],
-                    Validators.required,
-                ],
                 attributes: this._formBuilder.array(
                     deviceTypeService.attributes ? deviceTypeService.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : []
                 )
@@ -538,13 +488,13 @@ export class DeviceTypesComponent implements OnInit {
         if (disabled) {
             group = this._formBuilder.group({
                 key: [{value: deviceTypeServiceGroup?.key || uuid(), disabled: true}],
-                name:  [{value: deviceTypeServiceGroup?.name || '', disabled: true}],
+                name: [{value: deviceTypeServiceGroup?.name || '', disabled: true}],
                 description: [{value: deviceTypeServiceGroup?.description || '', disabled: true}],
             });
         } else {
             group = this._formBuilder.group({
                 key: [deviceTypeServiceGroup?.key || uuid(), Validators.required],
-                name:  [deviceTypeServiceGroup?.name || '', Validators.required],
+                name: [deviceTypeServiceGroup?.name || '', Validators.required],
                 description: [deviceTypeServiceGroup?.description || ''],
             });
         }
@@ -566,14 +516,6 @@ export class DeviceTypesComponent implements OnInit {
                 value: [attribute.value],
                 origin: [attribute.origin],
             });
-        }
-    }
-
-    private getFunctionType(functionId: string): DeviceTypeFunctionType {
-        if (functionId.startsWith('urn:infai:ses:controlling-function')) {
-            return this.deviceTypeFunctionType[0];
-        } else {
-            return this.deviceTypeFunctionType[1];
         }
     }
 
@@ -784,20 +726,6 @@ export class DeviceTypesComponent implements OnInit {
         return serviceFormGroup.get(formControlName) as FormArray;
     }
 
-    private getFunctionConceptIds(functionIds: string[]): string[] {
-        const list: string[] = [];
-        functionIds.forEach((functionId) => {
-            let func = this.controllingFunctions.find((f) => f.id === functionId);
-            if (func === undefined) {
-                func = this.measuringFunctions.find((f) => f.id === functionId);
-            }
-            if (func !== undefined) {
-                list.push(func.concept_id);
-            }
-        });
-        return list;
-    }
-
     get deviceTypeAttributes(): FormArray {
         return this.attrFormGroup.get('attributes') as FormArray;
     }
@@ -825,9 +753,14 @@ export class DeviceTypesComponent implements OnInit {
     private updateServiceGroups() {
         this.serviceGroupsAndUngroupedServices = [];
 
-        const m = new Map<string, {key: string; title: string; isGroup: boolean; serviceAndIndices: {service: AbstractControl; index: number}[]}>();
+        const m = new Map<string, { key: string; title: string; isGroup: boolean; serviceAndIndices: { service: AbstractControl; index: number }[] }>();
         this.serviceGroups.controls.forEach(group => {
-            m.set(group.get('key')?.value, {key: group.get('key')?.value, title: 'Group: ' + group.get('name')?.value, isGroup: true, serviceAndIndices: []});
+            m.set(group.get('key')?.value, {
+                key: group.get('key')?.value,
+                title: 'Group: ' + group.get('name')?.value,
+                isGroup: true,
+                serviceAndIndices: []
+            });
         });
         m.set('', {key: '', title: 'Ungrouped Services', isGroup: false, serviceAndIndices: []});
         this.services.controls.forEach((service, index) => {

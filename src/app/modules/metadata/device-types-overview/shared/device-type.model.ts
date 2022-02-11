@@ -54,18 +54,17 @@ export interface DeviceTypeServiceModel {
     service_group_key?: string;
     name: string;
     description: string;
-    aspect_ids: string[];
     protocol_id: string;
     interaction: DeviceTypeInteractionEnum | null;
     inputs: DeviceTypeContentModel[];
     outputs: DeviceTypeContentModel[];
-    function_ids: string[];
     attributes?: Attribute[];
 }
 
 export interface DeviceTypeAspectModel {
     id: string;
     name: string;
+    sub_aspects?: DeviceTypeAspectModel[];
 }
 
 export interface DeviceTypeContentModel {
@@ -93,6 +92,8 @@ export interface DeviceTypeContentVariableModel {
     sub_content_variables?: DeviceTypeContentVariableModel[];
     serialization_options: string[];
     unit_reference?: string;
+    aspect_id?: string;
+    function_id?: string;
 }
 
 export interface DeviceTypeConceptModel {

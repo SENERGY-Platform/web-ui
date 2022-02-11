@@ -31,9 +31,7 @@ import { CharacteristicElementComponent } from './characteristic-element/charact
 export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('characteristicElementComponent', { static: false }) characteristicElementComponent!: CharacteristicElementComponent;
 
-    conceptControl = new FormControl({ value: '' }, [Validators.required]);
     characteristicPerm: CharacteristicsPermSearchModel | undefined = undefined;
-    concepts: ConceptsPermSearchModel[] = [];
 
     baseCharacteristic: DeviceTypeCharacteristicsModel | undefined = undefined;
 
@@ -45,15 +43,10 @@ export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit
     ) {
         if (data !== null) {
             this.characteristicPerm = data.characteristic;
-            this.conceptControl.setValue(this.characteristicPerm.concept_id);
-            this.conceptControl.disable();
         }
     }
 
     ngOnInit(): void {
-        this.conceptsService.getConcepts('', 9999, 0, 'name', 'asc').subscribe((concepts: ConceptsPermSearchModel[]) => {
-            this.concepts = concepts;
-        });
         if (this.characteristicPerm !== undefined) {
             this.characteristicsService.getCharacteristic(this.characteristicPerm.id).subscribe((characteristic) => {
                 this.baseCharacteristic = characteristic;
@@ -73,6 +66,6 @@ export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit
     }
 
     save(): void {
-        this.dialogRef.close({ conceptId: this.conceptControl.value, characteristic: this.baseCharacteristic });
+        this.dialogRef.close({characteristic: this.baseCharacteristic });
     }
 }

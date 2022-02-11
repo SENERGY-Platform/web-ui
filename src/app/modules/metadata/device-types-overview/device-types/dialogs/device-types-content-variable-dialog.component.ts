@@ -16,11 +16,17 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel } from '../../shared/device-type.model';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeContentVariableModel,
+    DeviceTypeFunctionModel
+} from '../../shared/device-type.model';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ConceptsCharacteristicsModel } from '../../../concepts/shared/concepts-characteristics.model';
 import { DeviceTypeHelperService } from '../shared/device-type-helper.service';
 import { convertPunctuation, typeValueValidator } from '../../../../imports/validators/type-value-validator';
+import {FunctionsPermSearchModel} from '../../../functions/shared/functions-perm-search.model';
 
 @Component({
     templateUrl: './device-types-content-variable-dialog.component.html',
@@ -29,7 +35,7 @@ import { convertPunctuation, typeValueValidator } from '../../../../imports/vali
 export class DeviceTypesContentVariableDialogComponent implements OnInit {
     disabled: boolean;
     contentVariable: DeviceTypeContentVariableModel;
-    functionConceptIds: string[] = [];
+    functions: DeviceTypeFunctionModel[] = [];
     firstFormGroup!: FormGroup;
     typeOptionsControl: FormControl = new FormControl();
     primitiveTypes: { type: string; typeShort: string }[] = [];
@@ -40,6 +46,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     }[] = [];
     options: Map<string, any[]> = new Map();
     concepts: ConceptsCharacteristicsModel[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
+    aspectOptions: Map<string, DeviceTypeAspectModel[]> = new Map();
 
     constructor(
         private dialogRef: MatDialogRef<DeviceTypesContentVariableDialogComponent>,
@@ -48,15 +56,17 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA)
         data: {
             contentVariable: DeviceTypeContentVariableModel;
-            functionConceptIds: string[];
             disabled: boolean;
+            functions: DeviceTypeFunctionModel[];
             concepts: ConceptsCharacteristicsModel[];
+            aspects: DeviceTypeAspectModel[];
         },
     ) {
         this.disabled = data.disabled;
         this.contentVariable = data.contentVariable;
-        this.functionConceptIds = data.functionConceptIds;
+        this.functions = data.functions;
         this.concepts = data.concepts;
+        this.aspects = data.aspects;
     }
 
     ngOnInit(): void {
@@ -65,6 +75,9 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         this.initConceptList();
         this.options = this.getOptions();
         this.initTypeOptionControl();
+        this.aspects.forEach(a => {
+            this.aspectOptions.set(a.name, this.getAllAspectsOnTree(a));
+        });
     }
 
     close(): void {
@@ -120,6 +133,13 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         return copy.filter((concept: any) => concept.characteristicList.length > 0);
     }
 
+    compareIds(a: any, b: any) {
+        if (a === undefined || b === undefined || a === null || b === null) {
+            return a === b;
+        }
+        return a.id === b.id;
+    }
+
     private initTypeOptionControl() {
         if (this.contentVariable.type) {
             this.typeOptionsControl.disable();
@@ -152,6 +172,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 unit_reference: [{ disabled: true, value: this.contentVariable.unit_reference }],
                 sub_content_variables: [{ disabled: true, value: this.contentVariable.sub_content_variables }],
                 value: [{ disabled: true, value: this.contentVariable.value }],
+                aspect_id: [{ disabled: true, value: this.contentVariable.aspect_id }],
+                function_id: [{ disabled: true, value: this.contentVariable.function_id }],
             });
         } else {
             this.firstFormGroup = this._formBuilder.group(
@@ -165,6 +187,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                     unit_reference: [this.contentVariable.unit_reference],
                     sub_content_variables: [this.contentVariable.sub_content_variables],
                     value: [this.contentVariable.value],
+                    aspect_id: [this.contentVariable.aspect_id],
+                    function_id: [this.contentVariable.function_id],
                 },
                 { validators: typeValueValidator('type', 'value') },
             );
@@ -203,9 +227,10 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     }
 
     private initConceptList(): void {
+        const functionConceptId = this.functions.find(f => f.id === this.firstFormGroup.get('function_id')?.value)?.concept_id;
         this.concepts.forEach((concept) => {
             const characteristicsList: { id: string; name: string; type: string | undefined; class: string }[] = [];
-            const ngclass = this.functionConceptIds.includes(concept.id) ? 'color-accent' : '';
+            const ngclass = functionConceptId === concept.id ? 'color-accent' : '';
             if (concept.characteristics !== null) {
                 concept.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
                     this.deviceTypeHelperService.characteristicsFlatten(characteristic).forEach((char) => {
@@ -219,5 +244,12 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 characteristicList: characteristicsList,
             });
         });
+    }
+
+    private getAllAspectsOnTree(a: DeviceTypeAspectModel): DeviceTypeAspectModel[] {
+        const res: DeviceTypeAspectModel[] = [];
+        res.push(a);
+        a.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub)));
+        return res;
     }
 }

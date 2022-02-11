@@ -76,7 +76,7 @@ export class DeviceTypeService {
 
     getDeviceTypeFiltered(filter: { function_id: string; device_class_id: string; aspect_id: string }[]): Observable<DeviceTypeModel[]> {
         return this.http
-            .get<DeviceTypeModel[]>(environment.semanticRepoUrl + '/device-types?filter=' + JSON.stringify(filter))
+            .get<DeviceTypeModel[]>(environment.deviceRepoUrl + '/device-types?filter=' + JSON.stringify(filter))
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null)))
             .pipe(map((res) => res || []));
     }
@@ -131,7 +131,7 @@ export class DeviceTypeService {
 
     getDeviceClassesControllingFunctions(deviceClassId: string): Observable<DeviceTypeFunctionModel[]> {
         return this.http
-            .get<DeviceTypeFunctionModel[]>(environment.semanticRepoUrl + '/device-classes/' + deviceClassId + '/controlling-functions')
+            .get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/device-classes/' + deviceClassId + '/controlling-functions')
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceClassesControllingFunctions', [])),
@@ -139,7 +139,7 @@ export class DeviceTypeService {
     }
 
     getDeviceClasses(): Observable<DeviceTypeDeviceClassModel[]> {
-        return this.http.get<DeviceTypeDeviceClassModel[]>(environment.semanticRepoUrl + '/device-classes').pipe(
+        return this.http.get<DeviceTypeDeviceClassModel[]>(environment.deviceRepoUrl + '/device-classes').pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceClasses', [])),
         );
@@ -147,7 +147,7 @@ export class DeviceTypeService {
 
     getDeviceClassesWithControllingFunction(): Observable<DeviceTypeDeviceClassModel[]> {
         return this.http
-            .get<DeviceTypeDeviceClassModel[]>(environment.semanticRepoUrl + '/device-classes?function=controlling-function')
+            .get<DeviceTypeDeviceClassModel[]>(environment.deviceRepoUrl + '/device-classes?function=controlling-function')
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceClassesWithControllingFunction', [])),
@@ -184,35 +184,35 @@ export class DeviceTypeService {
     }
 
     getControllingFunctions(): Observable<DeviceTypeFunctionModel[]> {
-        return this.http.get<DeviceTypeFunctionModel[]>(environment.semanticRepoUrl + '/controlling-functions').pipe(
+        return this.http.get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/controlling-functions').pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getControllingFunctions', [])),
         );
     }
 
     getMeasuringFunctions(): Observable<DeviceTypeFunctionModel[]> {
-        return this.http.get<DeviceTypeFunctionModel[]>(environment.semanticRepoUrl + '/measuring-functions').pipe(
+        return this.http.get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/measuring-functions').pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getMeasuringFunctions', [])),
         );
     }
 
     getAspects(): Observable<DeviceTypeAspectModel[]> {
-        return this.http.get<DeviceTypeAspectModel[]>(environment.semanticRepoUrl + '/aspects').pipe(
+        return this.http.get<DeviceTypeAspectModel[]>(environment.deviceRepoUrl + '/aspects').pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspects', [])),
         );
     }
 
     getAspectsWithMeasuringFunction(): Observable<DeviceTypeAspectModel[]> {
-        return this.http.get<DeviceTypeAspectModel[]>(environment.semanticRepoUrl + '/aspects?function=measuring-function').pipe(
+        return this.http.get<DeviceTypeAspectModel[]>(environment.deviceRepoUrl + '/aspects?function=measuring-function').pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsWithMeasuringFunction', [])),
         );
     }
 
     getAspectsMeasuringFunctions(aspectId: string): Observable<DeviceTypeFunctionModel[]> {
-        return this.http.get<DeviceTypeFunctionModel[]>(environment.semanticRepoUrl + '/aspects/' + aspectId + '/measuring-functions').pipe(
+        return this.http.get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/aspects/' + aspectId + '/measuring-functions').pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsMeasuringFunctions', [])),
         );
@@ -226,7 +226,7 @@ export class DeviceTypeService {
     }
 
     getLeafCharacteristics(): Observable<DeviceTypeCharacteristicsModel[]> {
-        return this.http.get<DeviceTypeCharacteristicsModel[]>(environment.semanticRepoUrl + '/characteristics?leafsOnly=true').pipe(
+        return this.http.get<DeviceTypeCharacteristicsModel[]>(environment.deviceRepoUrl + '/characteristics?leafsOnly=true').pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getLeafCharacteristics', [])),
         );
