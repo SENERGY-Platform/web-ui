@@ -29,7 +29,11 @@ import { Observable } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { convertPunctuation, typeValueValidator } from '../validators/type-value-validator';
 import { ConceptsService } from '../../metadata/concepts/shared/concepts.service';
-import { DeviceTypeCharacteristicsModel, DeviceTypeFunctionModel } from '../../metadata/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeFunctionModel
+} from '../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 
 @Component({
@@ -63,7 +67,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     editMode = false;
     detailsMode = false;
     functions: DeviceTypeFunctionModel[] = [];
-    aspects: AspectsPermSearchModel[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
     typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>> = new Map();
     characteristics: Map<string, DeviceTypeCharacteristicsModel> = new Map();
 
@@ -83,8 +87,6 @@ export class ImportTypesCreateEditComponent implements OnInit {
         image: [undefined, Validators.required],
         default_restart: true,
         configs: this.fb.array([]),
-        aspect_ids: [],
-        function_ids: [],
         owner: '',
     });
 
@@ -171,9 +173,6 @@ export class ImportTypesCreateEditComponent implements OnInit {
         this.deviceTypeService.getMeasuringFunctions().subscribe(
             (functions) => {
                 this.functions = functions;
-                if (!this.editMode && !this.detailsMode) {
-                    this.form.patchValue({ function_ids: [environment.getTimestampFunctionId] });
-                }
             },
             (err) => {
                 console.log(err);
@@ -340,6 +339,8 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 content,
                 infoOnly,
                 nameTimeAllowed,
+                aspects: this.aspects,
+                functions: this.functions,
             },
             minHeight: '400px',
         };
