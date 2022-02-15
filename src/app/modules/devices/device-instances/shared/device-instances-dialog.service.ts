@@ -123,11 +123,17 @@ export class DeviceInstancesDialogService {
         });
     }
 
-    openDeviceCreateDialog(deviceType: DeviceTypePermSearchModel): void {
+    openDeviceCreateDialog(deviceType?: DeviceTypePermSearchModel, device?: DeviceInstancesModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
+        if (device === undefined) {
+            device = {device_type: JSON.parse(JSON.stringify(deviceType))} as DeviceInstancesModel;
+        } else {
+            device = JSON.parse(JSON.stringify(device)) as DeviceInstancesModel;
+            device.id = '';
+        }
         dialogConfig.data = {
-            device: {device_type: JSON.parse(JSON.stringify(deviceType))} as DeviceInstancesModel,
+            device,
         };
 
         const editDialogRef = this.dialog.open(DeviceInstancesEditDialogComponent, dialogConfig);

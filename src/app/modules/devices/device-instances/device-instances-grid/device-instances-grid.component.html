@@ -49,6 +49,10 @@
                                     <mat-icon>share</mat-icon>
                                     Share
                                 </button>
+                                <button mat-menu-item (click)="duplicate(device)" [disabled]="!device.permissions.w">
+                                    <mat-icon>content_copy</mat-icon>
+                                    Duplicate
+                                </button>
                                 <button mat-menu-item (click)="edit(device)" [disabled]="!device.permissions.w">
                                     <mat-icon>edit</mat-icon>
                                     Edit
