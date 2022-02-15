@@ -385,7 +385,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         obs.push(this.getWidgetData());
         this.exportService.getExports('', 9999, 0, 'name', 'asc', undefined, undefined, true).subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
-                this.exports = exports.instances;
+                this.exports = exports.instances || [];
             }
         });
         obs.push(

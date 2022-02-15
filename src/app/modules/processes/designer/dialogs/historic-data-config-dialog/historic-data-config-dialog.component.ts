@@ -76,7 +76,7 @@ export class HistoricDataConfigDialogComponent implements OnInit {
         this.config = dialogParams.initial || { dateInterval: {}, interval: {}, analysisAction: '' };
         exportsService.getExports('', 9999, 0, 'name', 'asc').subscribe((value) => {
             if (value) {
-                this.availableMeasurements = value.instances;
+                this.availableMeasurements = value.instances || [];
             }
         });
     }

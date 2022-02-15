@@ -229,7 +229,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         const obs: Observable<any>[] = [];
         obs.push(this.exportService.getExports('', 9999, 0, 'name', 'asc', undefined, undefined, true).pipe(map((exports: ExportResponseModel | null) => {
             if (exports !== null) {
-                exports.instances.forEach((exportModel: ExportModel) => {
+                exports.instances?.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
                         this.exportList.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, dbId: exportModel.DbId });
                     }
@@ -237,7 +237,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 if (widget.properties.exports !== undefined) {
                     // exports values or names might have changed
                     widget.properties.exports.forEach((selected) => {
-                        const latestExisting = exports.instances.find((existing) => existing.ID === selected.id);
+                        const latestExisting = exports.instances?.find((existing) => existing.ID === selected.id);
                         if (latestExisting !== undefined && latestExisting.Name !== undefined && latestExisting.ID !== undefined) {
                             (selected as ChartsExportMeasurementModel).values = latestExisting.Values;
                             selected.name = latestExisting.Name;

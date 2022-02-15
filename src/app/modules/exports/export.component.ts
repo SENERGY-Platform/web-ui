@@ -194,11 +194,11 @@ export class ExportComponent implements OnInit, OnDestroy {
             )
             .subscribe((resp: ExportResponseModel | null) => {
                 if (resp !== null) {
-                    this.exports = resp.instances;
+                    this.exports = resp.instances || [];
                     if (this.exports === undefined) {
                         this.exports = [];
                     }
-                    this.totalCount = resp.total;
+                    this.totalCount = resp.total || 0;
                     this.exportsDataSource.data = this.exports;
                 }
                 this.ready = true;
