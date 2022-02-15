@@ -68,7 +68,6 @@ describe('ImportTypesCreateEditComponent', () => {
                 default_value: 'config-value',
             },
         ],
-        aspect_ids: [],
         output: {
             name: 'root',
             type: 'https://schema.org/StructuredValue',
@@ -135,7 +134,6 @@ describe('ImportTypesCreateEditComponent', () => {
             ],
             use_as_tag: false,
         },
-        function_ids: [],
         owner: 'test-owner',
     };
     importTypesServiceSpy.getImportType.and.returnValue(of(testType));

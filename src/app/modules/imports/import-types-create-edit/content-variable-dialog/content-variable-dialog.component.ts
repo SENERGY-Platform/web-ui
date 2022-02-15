@@ -102,7 +102,7 @@ export class ContentVariableDialogComponent implements OnInit {
         this.form.get('type')?.valueChanges.subscribe((_) => {
             this.form.patchValue({characteristic_id: null});
         });
-        this.data.aspects.forEach(a => {
+        this.data.aspects?.forEach(a => {
             this.aspectOptions.set(a.name, this.getAllAspectsOnTree(a));
         });
     }
