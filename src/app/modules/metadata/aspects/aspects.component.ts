@@ -14,48 +14,35 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { Subscription } from 'rxjs';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ResponsiveService } from '../../../core/services/responsive.service';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
-import { DialogsService } from '../../../core/services/dialogs.service';
-import { AspectsPermSearchModel } from './shared/aspects-perm-search.model';
-import { AspectsService } from './shared/aspects.service';
-import { AspectsEditDialogComponent } from './dialog/aspects-edit-dialog.component';
-import { DeviceTypeAspectModel } from '../device-types-overview/shared/device-type.model';
-import uuid = util.uuid;
-import { util } from 'jointjs';
-
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {Observable} from 'rxjs';
+import {MatDialog} from '@angular/material/dialog';
+import {ResponsiveService} from '../../../core/services/responsive.service';
+import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {Router} from '@angular/router';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {AspectsPermSearchModel} from './shared/aspects-perm-search.model';
+import {AspectsService} from './shared/aspects.service';
+import {DeviceTypeAspectModel} from '../device-types-overview/shared/device-type.model';
+import {NestedTreeControl} from '@angular/cdk/tree';
+import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
+import {AuthorizationService} from '../../../core/services/authorization.service';
 
 @Component({
     selector: 'senergy-aspects',
     templateUrl: './aspects.component.html',
     styleUrls: ['./aspects.component.css'],
 })
-export class AspectsComponent implements OnInit, OnDestroy {
-    readonly limitInit = 54;
-    aspects: AspectsPermSearchModel[] = [];
-    gridCols = 0;
+export class AspectsComponent implements OnInit {
     ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
-    private searchText = '';
-    private limit = this.limitInit;
-    private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
-    private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
+    treeControl = new NestedTreeControl<DeviceTypeAspectModel>((node) => node.sub_aspects);
+    dataSource = new MatTreeNestedDataSource<DeviceTypeAspectModel>();
+
+    @ViewChild(MatTree, {static: false}) tree!: MatTree<DeviceTypeAspectModel>;
+    hasChild = (_: number, node: DeviceTypeAspectModel) => !!node.sub_aspects && node.sub_aspects.length > 0;
+    userIsAdmin = false;
 
     constructor(
         private dialog: MatDialog,
@@ -65,148 +52,134 @@ export class AspectsComponent implements OnInit, OnDestroy {
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
-    ) {}
+        private authService: AuthorizationService,
+    ) {
+    }
 
     ngOnInit() {
-        this.initGridCols();
-        this.initSearchAndGetAspects();
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
-    }
-
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getAspects(true);
-    }
-
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.offset = this.offset + this.limit;
-            this.getAspects(false);
-        }
-    }
-
-    editAspect(inputAspect: AspectsPermSearchModel): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        dialogConfig.data = {
-            aspect: JSON.parse(JSON.stringify(inputAspect)), // create copy of object
-        };
-
-        const editDialogRef = this.dialog.open(AspectsEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((newAspect: DeviceTypeAspectModel) => {
-            if (newAspect !== undefined) {
-                this.reset();
-                this.aspectsService.updateAspects(newAspect).subscribe((aspect: DeviceTypeAspectModel | null) => {
-                    this.reloadAndShowSnackbar(aspect, 'updat');
-                });
-            }
-        });
-    }
-
-    deleteAspect(aspect: AspectsPermSearchModel): void {
-        this.dialogsService
-            .openDeleteDialog('aspect ' + aspect.name)
-            .afterClosed()
-            .subscribe((deleteAspect: boolean) => {
-                if (deleteAspect) {
-                    this.aspectsService.deleteAspects(aspect.id).subscribe((resp: boolean) => {
-                        if (resp === true) {
-                            this.aspects.splice(this.aspects.indexOf(aspect), 1);
-                            this.snackBar.open('Aspect deleted successfully.', undefined, { duration: 2000 });
-                            this.setLimitOffset(1);
-                            this.reloadAspects(false);
-                        } else {
-                            this.snackBar.open('Error while deleting the aspect!', undefined, { duration: 2000 });
-                        }
-                    });
-                }
-            });
+        this.getAspects();
+        this.userIsAdmin = this.authService.userIsAdmin();
     }
 
     newAspect(): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.autoFocus = true;
-        dialogConfig.data = {
-            aspect: {
-                id: 'urn:infai:ses:aspect:' + uuid(),
-                name: '',
-            } as DeviceTypeAspectModel,
-        };
+        this.dataSource.data.push({name: ''} as DeviceTypeAspectModel);
+        this.redraw();
+    }
 
-        const editDialogRef = this.dialog.open(AspectsEditDialogComponent, dialogConfig);
+    addSubNode(node: DeviceTypeAspectModel) {
+        if (node.sub_aspects === undefined) {
+            node.sub_aspects = [];
+        }
+        node.sub_aspects.push({name: ''} as DeviceTypeAspectModel);
+        this.treeControl.expand(node);
+        this.redraw();
+    }
 
-        editDialogRef.afterClosed().subscribe((newAspect: DeviceTypeAspectModel) => {
-            if (newAspect !== undefined) {
-                this.reset();
-                this.aspectsService.createAspect(newAspect).subscribe((aspect: DeviceTypeAspectModel | null) => {
-                    this.reloadAndShowSnackbar(aspect, 'sav');
-                });
+    deleteNode(node: AspectsPermSearchModel | DeviceTypeAspectModel) {
+        this.dataSource.data.forEach((sub, i) => {
+            if (sub === node) {
+                this.dialogsService
+                    .openDeleteDialog('aspect ' + node.name + ' and all sub aspects')
+                    .afterClosed()
+                    .subscribe((deleteAspect: boolean) => {
+                        if (deleteAspect) {
+                            if (node.id === undefined) {
+                                this.dataSource.data.splice(i, 1);
+                                this.redraw();
+                            } else {
+                                this.aspectsService.deleteAspects(node.id).subscribe((resp: boolean) => {
+                                    if (resp === true) {
+                                        this.dataSource.data.splice(i, 1);
+                                        this.redraw();
+                                        this.snackBar.open('Aspect deleted successfully.', undefined, {duration: 2000});
+                                    } else {
+                                        this.snackBar.open('Error while deleting the aspect!', undefined, {duration: 2000});
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+            } else {
+                this.findAndDeleteChild(sub, node);
+            }
+        });
+        this.redraw();
+    }
+
+    nodeValid(node: DeviceTypeAspectModel): boolean {
+        if (node.name.length === 0) {
+            return false;
+        }
+        if (node.sub_aspects !== undefined) {
+            for (const n of node.sub_aspects) {
+                if (!this.nodeValid(n)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    isRootNode(node: DeviceTypeAspectModel): boolean {
+        return this.dataSource.data.find(n => n === node) !== undefined;
+    }
+
+    save(node: DeviceTypeAspectModel) {
+        let obs: Observable<DeviceTypeAspectModel | null>|undefined;
+        if (node.id === undefined) {
+            obs = this.aspectsService.createAspect(node);
+        } else {
+            obs = this.aspectsService.updateAspects(node);
+        }
+
+        obs.subscribe((resp: DeviceTypeAspectModel | null) => {
+            if (resp === null) {
+                this.snackBar.open('Error while saving the aspect!', undefined, {duration: 2000});
+            } else {
+                const i = this.dataSource.data.findIndex(x => x === node);
+                if (i !== -1) {
+                    this.dataSource.data[i] = resp;
+                    this.redraw();
+                }
+                this.snackBar.open('Aspect saved successfully.', undefined, {duration: 2000});
             }
         });
     }
 
-    private reloadAndShowSnackbar(aspect: DeviceTypeAspectModel | null, text: string) {
-        if (aspect === null) {
-            this.snackBar.open('Error while ' + text + 'ing the aspect!', undefined, { duration: 2000 });
-            this.getAspects(true);
+    private findAndDeleteChild(data: DeviceTypeAspectModel, searchElement: DeviceTypeAspectModel) {
+        if (data.sub_aspects === null || data.sub_aspects === undefined) {
+            return;
+        }
+        const i = data.sub_aspects.indexOf(searchElement);
+        if (i === -1) {
+            data.sub_aspects.forEach((sub) => this.findAndDeleteChild(sub, searchElement));
         } else {
-            this.snackBar.open('Aspect ' + text + 'ed successfully.', undefined, { duration: 2000 });
-            this.reloadAspects(true);
+            this.dialogsService
+                .openDeleteDialog('aspect ' +  data.sub_aspects[i].name + ' and all sub aspects')
+                .afterClosed()
+                .subscribe((deleteAspect: boolean) => {
+                    if (deleteAspect) {
+                        data.sub_aspects?.splice(i, 1);
+                        this.redraw();
+                    }
+                });
         }
     }
 
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
-    }
-
-    private initSearchAndGetAspects() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.searchText = searchText;
-            this.getAspects(true);
-        });
-    }
-
-    private getAspects(reset: boolean) {
-        if (reset) {
-            this.reset();
-        }
-
+    private getAspects() {
         this.aspectsService
-            .getAspects(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .getAspects('', 9999, 0, 'name', 'asc')
             .subscribe((aspects: AspectsPermSearchModel[]) => {
-                if (aspects.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
-                this.aspects = this.aspects.concat(aspects);
+                this.dataSource.data = aspects;
+                this.redraw();
                 this.ready = true;
             });
     }
 
-    private reset() {
-        this.aspects = [];
-        this.limit = this.limitInit;
-        this.offset = 0;
-        this.allDataLoaded = false;
-        this.ready = false;
-    }
-
-    private reloadAspects(reset: boolean) {
-        setTimeout(() => {
-            this.getAspects(reset);
-        }, 2500);
-    }
-
-    private setLimitOffset(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.aspects.length;
+    private redraw() {
+        const data = this.dataSource.data;
+        this.dataSource.data = [];
+        this.dataSource.data = data;
     }
 }

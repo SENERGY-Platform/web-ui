@@ -16,61 +16,61 @@
 
 
 <div class="aspects-container">
-    <div fxLayout="column">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-    </div>
-    <div class="aspects-scroll">
-        <div infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.aspects-scroll'"
-             [fromRoot]="true"
-             (scrolled)="onScroll()">
-            <div class="layout-margin" fxLayout="column">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                               *ngIf="aspects.length > 0">
-                    <mat-grid-tile class="mat-elevation-z1"
-                                   *ngFor="let aspect of aspects; let i = index">
-                        <div fxFill>
-                            <img class="background" src="src/img/aspects.jpg">
-                        </div>
-                        <mat-grid-tile-footer>
-                            <div fxLayout="column" fxFill>
-                                <div class="truncate footer-item-header" matTooltip="{{aspect.name}}">
-                                    {{aspect.name}}
-                                </div>
-                                <form fxLayout="row" class="footer-buttons">
-                                    <div fxFlex></div>
-                                    <div [fxLayoutAlign]="'start center'">
-                                        <button (click)="editAspect(aspect)" [disabled]="!aspect.permissions.w"
-                                                mat-icon-button color="accent" matTooltip="Edit">
-                                            <mat-icon>edit</mat-icon>
-                                        </button>
-                                        <button (click)="deleteAspect(aspect)"
-                                                [disabled]="!aspect.permissions.a"
-                                                mat-icon-button
-                                                color="accent"
-                                                matTooltip="Delete">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </mat-grid-tile-footer>
-                    </mat-grid-tile>
-                </mat-grid-list>
-                <div *ngIf="aspects.length === 0 && ready">No aspect found.</div>
-                <senergy-spinner [elementCount]="aspects.length" [show]="!ready"></senergy-spinner>
-            </div>
-        </div>
-    </div>
+    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree">
+        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+            <li class="mat-tree-node" fxLayout="row">
+                <button mat-icon-button disabled></button>
+                <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
+                    <input matInput placeholder="Name" [(ngModel)]="node.name" required [disabled]="node.permissions?.w === false">
+                </mat-form-field>
+                <button mat-icon-button disabled *ngIf="!isRootNode(node)"></button>
+                <button mat-icon-button *ngIf="isRootNode(node)" (click)="save(node)" color="accent" class="tree-inline"
+                        [disabled]="node.permissions?.w === false || !nodeValid(node)">
+                    <mat-icon>save</mat-icon>
+                </button>
+                <button mat-icon-button (click)="addSubNode(node)" color="accent" class="tree-inline"
+                        [disabled]="node.permissions?.w === false">
+                    <mat-icon>add</mat-icon>
+                </button>
+                <button mat-icon-button [disabled]="node.permissions?.w === false" (click)="deleteNode(node)" color="warn" class="tree-inline">
+                    <mat-icon>delete</mat-icon>
+                </button>
+
+            </li>
+        </mat-tree-node>
+        <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+            <li>
+                <div class="mat-tree-node" fxLayout="row">
+                    <button mat-icon-button matTreeNodeToggle class="tree-inline"
+                            [attr.aria-label]="'Toggle ' + node.name">
+                        <mat-icon class="mat-icon-rtl-mirror">
+                            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                        </mat-icon>
+                    </button>
+                    <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
+                        <input matInput placeholder="Name" [(ngModel)]="node.name" [disabled]="node.permissions?.w === false">
+                    </mat-form-field>
+                    <button mat-icon-button disabled *ngIf="!isRootNode(node)"></button>
+                    <button mat-icon-button *ngIf="isRootNode(node)" (click)="save(node)" color="accent" class="tree-inline"
+                            [disabled]="node.permissions?.w === false || !nodeValid(node)">
+                        <mat-icon>save</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="addSubNode(node)" color="accent" class="tree-inline"
+                            [disabled]="node.permissions?.w === false">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                    <button mat-icon-button [disabled]="node.permissions?.w === false" (click)="deleteNode(node)" color="warn" class="tree-inline">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                <ul [class.tree-invisible]="!treeControl.isExpanded(node)">
+                    <ng-container matTreeNodeOutlet></ng-container>
+                </ul>
+            </li>
+        </mat-nested-tree-node>
+    </mat-tree>
 </div>
-<button mat-fab class="fab" matTooltip="Add new aspect" (click)="newAspect()">
+<button mat-fab class="fab" matTooltip="Add new aspect" (click)="newAspect()" *ngIf="userIsAdmin">
     <mat-icon>add</mat-icon>
 </button>
 
