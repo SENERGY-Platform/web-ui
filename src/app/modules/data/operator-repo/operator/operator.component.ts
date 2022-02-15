@@ -31,7 +31,7 @@ import { PermissionsUserModel } from '../../../permissions/shared/permissions-us
 export class OperatorComponent implements OnInit {
     operator = {} as OperatorModel;
     userId: string | Error = '';
-    dropdown = ['float', 'string', 'int'];
+    dropdown = ['float', 'string', 'int', 'bool'];
     shareUser: string | undefined = undefined;
 
     constructor(
