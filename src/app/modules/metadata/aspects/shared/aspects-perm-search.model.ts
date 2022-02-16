@@ -20,7 +20,7 @@ export interface AspectsPermSearchModel {
     creator: string;
     id: string;
     name: string;
-    sub_aspects?: DeviceTypeAspectModel[];
+    raw?: DeviceTypeAspectModel;
     permissions: {
         a: boolean;
         x: boolean;

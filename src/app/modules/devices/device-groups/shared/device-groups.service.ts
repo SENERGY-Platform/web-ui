@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { Observable } from 'rxjs';
-import { environment } from '../../../../../environments/environment';
-import { catchError, map } from 'rxjs/operators';
-import { DeviceGroupsPermSearchModel } from './device-groups-perm-search.model';
-import { DeviceGroupHelperResultModel, DeviceGroupModel } from './device-groups.model';
-import { DeviceTypeFunctionModel, DeviceTypeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { DeviceInstancesBaseModel } from '../../device-instances/shared/device-instances.model';
-import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects-perm-search.model';
-import { DeviceClassesPermSearchModel } from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
+import {Observable} from 'rxjs';
+import {environment} from '../../../../../environments/environment';
+import {catchError, map} from 'rxjs/operators';
+import {DeviceGroupsPermSearchModel} from './device-groups-perm-search.model';
+import {DeviceGroupHelperResultModel, DeviceGroupModel} from './device-groups.model';
+import {DeviceTypeFunctionModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
+import {DeviceClassesPermSearchModel} from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
+import {AspectsPermSearchModel} from '../../../metadata/aspects/shared/aspects-perm-search.model';
 
 @Injectable({
     providedIn: 'root',

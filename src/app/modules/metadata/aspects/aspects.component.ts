@@ -22,12 +22,12 @@ import {SearchbarService} from '../../../core/components/searchbar/shared/search
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {AspectsPermSearchModel} from './shared/aspects-perm-search.model';
 import {AspectsService} from './shared/aspects.service';
 import {DeviceTypeAspectModel} from '../device-types-overview/shared/device-type.model';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
 import {AuthorizationService} from '../../../core/services/authorization.service';
+import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
 
 @Component({
     selector: 'senergy-aspects',
@@ -53,6 +53,7 @@ export class AspectsComponent implements OnInit {
         private router: Router,
         private dialogsService: DialogsService,
         private authService: AuthorizationService,
+        private deviceTypesService: DeviceTypeService,
     ) {
     }
 
@@ -75,7 +76,7 @@ export class AspectsComponent implements OnInit {
         this.redraw();
     }
 
-    deleteNode(node: AspectsPermSearchModel | DeviceTypeAspectModel) {
+    deleteNode(node: DeviceTypeAspectModel) {
         this.dataSource.data.forEach((sub, i) => {
             if (sub === node) {
                 this.dialogsService
@@ -168,9 +169,9 @@ export class AspectsComponent implements OnInit {
     }
 
     private getAspects() {
-        this.aspectsService
-            .getAspects('', 9999, 0, 'name', 'asc')
-            .subscribe((aspects: AspectsPermSearchModel[]) => {
+        this.deviceTypesService
+            .getAspects()
+            .subscribe((aspects: DeviceTypeAspectModel[]) => {
                 this.dataSource.data = aspects;
                 this.redraw();
                 this.ready = true;

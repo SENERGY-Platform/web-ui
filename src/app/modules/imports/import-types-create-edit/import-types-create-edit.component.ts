@@ -13,28 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ImportTypeConfigModel, ImportTypeContentVariableModel, ImportTypeModel } from '../import-types/shared/import-types.model';
-import { ImportTypesService } from '../import-types/shared/import-types.service';
-import { AspectsService } from '../../metadata/aspects/shared/aspects.service';
-import { AspectsPermSearchModel } from '../../metadata/aspects/shared/aspects-perm-search.model';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ContentVariableDialogComponent } from './content-variable-dialog/content-variable-dialog.component';
-import { environment } from '../../../../environments/environment';
-import { MatTree, MatTreeNestedDataSource } from '@angular/material/tree';
-import { NestedTreeControl } from '@angular/cdk/tree';
-import { Observable } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { convertPunctuation, typeValueValidator } from '../validators/type-value-validator';
-import { ConceptsService } from '../../metadata/concepts/shared/concepts.service';
+import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {
+    ImportTypeConfigModel,
+    ImportTypeContentVariableModel,
+    ImportTypeModel
+} from '../import-types/shared/import-types.model';
+import {ImportTypesService} from '../import-types/shared/import-types.service';
+import {AspectsService} from '../../metadata/aspects/shared/aspects.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {ContentVariableDialogComponent} from './content-variable-dialog/content-variable-dialog.component';
+import {environment} from '../../../../environments/environment';
+import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
+import {NestedTreeControl} from '@angular/cdk/tree';
+import {Observable} from 'rxjs';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {convertPunctuation, typeValueValidator} from '../validators/type-value-validator';
+import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
 import {
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel
 } from '../../metadata/device-types-overview/shared/device-type.model';
-import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
 
 @Component({
     selector: 'senergy-import-types-create-edit',
@@ -180,7 +183,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 this.navigateToList();
             },
         );
-        this.aspectsService.getAspects('', 10000, 0, 'name', 'asc').subscribe(
+        this.deviceTypeService.getAspects().subscribe(
             (aspects) => (this.aspects = aspects),
             (err) => {
                 console.log(err);

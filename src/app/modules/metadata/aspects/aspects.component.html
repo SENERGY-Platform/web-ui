@@ -21,18 +21,18 @@
             <li class="mat-tree-node" fxLayout="row">
                 <button mat-icon-button disabled></button>
                 <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
-                    <input matInput placeholder="Name" [(ngModel)]="node.name" required [disabled]="node.permissions?.w === false">
+                    <input matInput placeholder="Name" [(ngModel)]="node.name" required [disabled]="!userIsAdmin">
                 </mat-form-field>
                 <button mat-icon-button disabled *ngIf="!isRootNode(node)"></button>
                 <button mat-icon-button *ngIf="isRootNode(node)" (click)="save(node)" color="accent" class="tree-inline"
-                        [disabled]="node.permissions?.w === false || !nodeValid(node)">
+                        [disabled]="!userIsAdmin || !nodeValid(node)">
                     <mat-icon>save</mat-icon>
                 </button>
                 <button mat-icon-button (click)="addSubNode(node)" color="accent" class="tree-inline"
-                        [disabled]="node.permissions?.w === false">
+                        [disabled]="!userIsAdmin">
                     <mat-icon>add</mat-icon>
                 </button>
-                <button mat-icon-button [disabled]="node.permissions?.w === false" (click)="deleteNode(node)" color="warn" class="tree-inline">
+                <button mat-icon-button [disabled]="!userIsAdmin" (click)="deleteNode(node)" color="warn" class="tree-inline">
                     <mat-icon>delete</mat-icon>
                 </button>
 
@@ -48,18 +48,18 @@
                         </mat-icon>
                     </button>
                     <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
-                        <input matInput placeholder="Name" [(ngModel)]="node.name" [disabled]="node.permissions?.w === false">
+                        <input matInput placeholder="Name" [(ngModel)]="node.name" [disabled]="!userIsAdmin">
                     </mat-form-field>
                     <button mat-icon-button disabled *ngIf="!isRootNode(node)"></button>
                     <button mat-icon-button *ngIf="isRootNode(node)" (click)="save(node)" color="accent" class="tree-inline"
-                            [disabled]="node.permissions?.w === false || !nodeValid(node)">
+                            [disabled]="!userIsAdmin || !nodeValid(node)">
                         <mat-icon>save</mat-icon>
                     </button>
                     <button mat-icon-button (click)="addSubNode(node)" color="accent" class="tree-inline"
-                            [disabled]="node.permissions?.w === false">
+                            [disabled]="!userIsAdmin">
                         <mat-icon>add</mat-icon>
                     </button>
-                    <button mat-icon-button [disabled]="node.permissions?.w === false" (click)="deleteNode(node)" color="warn" class="tree-inline">
+                    <button mat-icon-button [disabled]="!userIsAdmin" (click)="deleteNode(node)" color="warn" class="tree-inline">
                         <mat-icon>delete</mat-icon>
                     </button>
                 </div>
