@@ -22,7 +22,7 @@
                 cdkDragDisabled="{{!userIsAdmin || !nodeValid(node)}}"
                 [cdkDragData]="node" (cdkDragStarted)="dragStart()" (cdkDragEnded)="dragEnd()">
                 <button mat-icon-button disabled></button>
-                <button mat-icon-button [disabled]="!nodeValid(node)" color="accent" disableRipple class="tree-inline">
+                <button mat-icon-button [disabled]="!userIsAdmin || !nodeValid(node)" color="accent" disableRipple class="tree-inline">
                     <mat-icon cdkDragHandle>drag_handle</mat-icon>
                 </button>
                 <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
@@ -55,7 +55,7 @@
                                 {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                             </mat-icon>
                         </button>
-                        <button mat-icon-button [disabled]="!nodeValid(node)" color="accent" disableRipple class="nested-tree-inline">
+                        <button mat-icon-button [disabled]="!userIsAdmin || !nodeValid(node)" color="accent" disableRipple class="nested-tree-inline">
                             <mat-icon cdkDragHandle>drag_handle</mat-icon>
                         </button>
                         <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
