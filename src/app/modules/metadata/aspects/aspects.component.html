@@ -15,11 +15,16 @@
   -->
 
 
-<div class="aspects-container">
+<div class="aspects-container" fxLayout="column" cdkDropListGroup>
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree">
-        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-            <li class="mat-tree-node" fxLayout="row">
+        <mat-tree-node *matTreeNodeDef="let node" cdkDropList (cdkDropListDropped)="dropped($event, node)">
+            <li class="mat-tree-node" fxLayout="row" matTreeNodeToggle cdkDrag
+                cdkDragDisabled="{{!userIsAdmin || !nodeValid(node)}}"
+                [cdkDragData]="node" (cdkDragStarted)="dragStart()" (cdkDragEnded)="dragEnd()">
                 <button mat-icon-button disabled></button>
+                <button mat-icon-button [disabled]="!nodeValid(node)" color="accent" disableRipple>
+                    <mat-icon cdkDragHandle class="tree-inline drag-inline">drag_handle</mat-icon>
+                </button>
                 <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
                     <input matInput placeholder="Name" [(ngModel)]="node.name" required [disabled]="!userIsAdmin">
                 </mat-form-field>
@@ -32,36 +37,45 @@
                         [disabled]="!userIsAdmin">
                     <mat-icon>add</mat-icon>
                 </button>
-                <button mat-icon-button [disabled]="!userIsAdmin" (click)="deleteNode(node)" color="warn" class="tree-inline">
+                <button mat-icon-button [disabled]="!userIsAdmin" (click)="deleteNode(node)" color="warn"
+                        class="tree-inline">
                     <mat-icon>delete</mat-icon>
                 </button>
 
             </li>
         </mat-tree-node>
         <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
-            <li>
+            <li cdkDropList (cdkDropListDropped)="dropped($event, node)">
                 <div class="mat-tree-node" fxLayout="row">
-                    <button mat-icon-button matTreeNodeToggle class="tree-inline"
-                            [attr.aria-label]="'Toggle ' + node.name">
-                        <mat-icon class="mat-icon-rtl-mirror">
-                            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-                        </mat-icon>
-                    </button>
-                    <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
-                        <input matInput placeholder="Name" [(ngModel)]="node.name" [disabled]="!userIsAdmin">
-                    </mat-form-field>
-                    <button mat-icon-button disabled *ngIf="!isRootNode(node)"></button>
-                    <button mat-icon-button *ngIf="isRootNode(node)" (click)="save(node)" color="accent" class="tree-inline"
-                            [disabled]="!userIsAdmin || !nodeValid(node)">
-                        <mat-icon>save</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="addSubNode(node)" color="accent" class="tree-inline"
-                            [disabled]="!userIsAdmin">
-                        <mat-icon>add</mat-icon>
-                    </button>
-                    <button mat-icon-button [disabled]="!userIsAdmin" (click)="deleteNode(node)" color="warn" class="tree-inline">
-                        <mat-icon>delete</mat-icon>
-                    </button>
+                    <span fxFlex cdkDrag cdkDragDisabled="{{!userIsAdmin || !nodeValid(node)}}" [cdkDragData]="node"
+                          (cdkDragStarted)="dragStart()" (cdkDragEnded)="dragEnd()">
+                        <button mat-icon-button matTreeNodeToggle class="nested-tree-inline"
+                                [attr.aria-label]="'Toggle ' + node.name">
+                            <mat-icon class="mat-icon-rtl-mirror">
+                                {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                            </mat-icon>
+                        </button>
+                        <button mat-icon-button [disabled]="!nodeValid(node)" color="accent" disableRipple>
+                            <mat-icon cdkDragHandle class="nested-tree-inline">drag_handle</mat-icon>
+                        </button>
+                        <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
+                            <input matInput placeholder="Name" [(ngModel)]="node.name" [disabled]="!userIsAdmin">
+                        </mat-form-field>
+                        <button mat-icon-button disabled *ngIf="!isRootNode(node)"></button>
+                        <button mat-icon-button *ngIf="isRootNode(node)" (click)="save(node)" color="accent"
+                                class="nested-tree-inline"
+                                [disabled]="!userIsAdmin || !nodeValid(node)">
+                            <mat-icon>save</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="addSubNode(node)" color="accent" class="nested-tree-inline"
+                                [disabled]="!userIsAdmin">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                        <button mat-icon-button [disabled]="!userIsAdmin" (click)="deleteNode(node)" color="warn"
+                                class="nested-tree-inline">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </span>
                 </div>
                 <ul [class.tree-invisible]="!treeControl.isExpanded(node)">
                     <ng-container matTreeNodeOutlet></ng-container>
@@ -69,6 +83,8 @@
             </li>
         </mat-nested-tree-node>
     </mat-tree>
+    <h3 class="root-drop-zone color-accent" [fxShow]="dragging" cdkDropList (cdkDropListDropped)="dropped($event)">As
+        New Aspect</h3>
 </div>
 <button mat-fab class="fab" matTooltip="Add new aspect" (click)="newAspect()" *ngIf="userIsAdmin">
     <mat-icon>add</mat-icon>

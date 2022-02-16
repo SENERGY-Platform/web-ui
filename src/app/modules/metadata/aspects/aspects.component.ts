@@ -44,6 +44,8 @@ export class AspectsComponent implements OnInit {
     hasChild = (_: number, node: DeviceTypeAspectModel) => !!node.sub_aspects && node.sub_aspects.length > 0;
     userIsAdmin = false;
 
+    dragging = false;
+
     constructor(
         private dialog: MatDialog,
         private responsiveService: ResponsiveService,
@@ -76,33 +78,38 @@ export class AspectsComponent implements OnInit {
         this.redraw();
     }
 
-    deleteNode(node: DeviceTypeAspectModel) {
+    deleteNode(node: DeviceTypeAspectModel, skipDialog = false) {
         this.dataSource.data.forEach((sub, i) => {
             if (sub === node) {
-                this.dialogsService
-                    .openDeleteDialog('aspect ' + node.name + ' and all sub aspects')
-                    .afterClosed()
-                    .subscribe((deleteAspect: boolean) => {
-                        if (deleteAspect) {
-                            if (node.id === undefined) {
-                                this.dataSource.data.splice(i, 1);
-                                this.redraw();
-                            } else {
-                                this.aspectsService.deleteAspects(node.id).subscribe((resp: boolean) => {
-                                    if (resp === true) {
-                                        this.dataSource.data.splice(i, 1);
-                                        this.redraw();
-                                        this.snackBar.open('Aspect deleted successfully.', undefined, {duration: 2000});
-                                    } else {
-                                        this.snackBar.open('Error while deleting the aspect!', undefined, {duration: 2000});
-                                    }
-                                });
-                            }
+                const del = (deleteAspect: boolean) => {
+                    if (deleteAspect) {
+                        if (node.id === undefined) {
+                            this.dataSource.data.splice(i, 1);
+                            this.redraw();
+                        } else {
+                            this.aspectsService.deleteAspects(node.id).subscribe((resp: boolean) => {
+                                if (resp === true) {
+                                    this.dataSource.data.splice(i, 1);
+                                    this.redraw();
+                                    this.snackBar.open('Aspect deleted successfully.', undefined, {duration: 2000});
+                                } else {
+                                    this.snackBar.open('Error while deleting the aspect!', undefined, {duration: 2000});
+                                }
+                            });
                         }
-                    });
+                    }
+                };
+                if (!skipDialog) {
+                    this.dialogsService
+                        .openDeleteDialog('aspect ' + node.name + ' and all sub aspects')
+                        .afterClosed()
+                        .subscribe(del);
+                } else {
+                    del(true);
+                }
 
             } else {
-                this.findAndDeleteChild(sub, node);
+                this.findAndDeleteChild(sub, node, skipDialog);
             }
         });
         this.redraw();
@@ -127,7 +134,7 @@ export class AspectsComponent implements OnInit {
     }
 
     save(node: DeviceTypeAspectModel) {
-        let obs: Observable<DeviceTypeAspectModel | null>|undefined;
+        let obs: Observable<DeviceTypeAspectModel | null> | undefined;
         if (node.id === undefined) {
             obs = this.aspectsService.createAspect(node);
         } else {
@@ -148,24 +155,89 @@ export class AspectsComponent implements OnInit {
         });
     }
 
-    private findAndDeleteChild(data: DeviceTypeAspectModel, searchElement: DeviceTypeAspectModel) {
+    private findAndDeleteChild(data: DeviceTypeAspectModel, searchElement: DeviceTypeAspectModel, skipDialog = false) {
         if (data.sub_aspects === null || data.sub_aspects === undefined) {
             return;
         }
         const i = data.sub_aspects.indexOf(searchElement);
         if (i === -1) {
-            data.sub_aspects.forEach((sub) => this.findAndDeleteChild(sub, searchElement));
+            data.sub_aspects.forEach((sub) => this.findAndDeleteChild(sub, searchElement, skipDialog));
         } else {
-            this.dialogsService
-                .openDeleteDialog('aspect ' +  data.sub_aspects[i].name + ' and all sub aspects')
-                .afterClosed()
-                .subscribe((deleteAspect: boolean) => {
-                    if (deleteAspect) {
-                        data.sub_aspects?.splice(i, 1);
-                        this.redraw();
-                    }
-                });
+            if (skipDialog) {
+                data.sub_aspects?.splice(i, 1);
+                this.redraw();
+            } else {
+                this.dialogsService
+                    .openDeleteDialog('aspect ' + data.sub_aspects[i].name + ' and all sub aspects')
+                    .afterClosed()
+                    .subscribe((deleteAspect: boolean) => {
+                        if (deleteAspect) {
+                            data.sub_aspects?.splice(i, 1);
+                            this.redraw();
+                        }
+                    });
+            }
         }
+    }
+
+    dropped($event: any, target?: DeviceTypeAspectModel) {
+        const node = $event.item.data as DeviceTypeAspectModel;
+        if (node === target) {
+            this.snackBar.open('Can\'t move aspect into itself', undefined, {duration: 2000});
+            return;
+        }
+        if (target !== undefined && !this.nodeValid(target)) {
+            this.snackBar.open('Can\'t move into invalid aspect', undefined, {duration: 2000});
+            return;
+        }
+        if (target !== undefined && this.hasDescendant(node, target)) {
+            this.snackBar.open('Can\'t move into descendant aspect', undefined, {duration: 2000});
+            return;
+        }
+        this.dialogsService.openConfirmDialog('Move Aspect', 'Do you want to move this aspect? Changes will be saved immediately').afterClosed().subscribe(move => {
+            if (!move) {
+                return;
+            }
+            const clone = JSON.parse(JSON.stringify(node));
+            if (target !== undefined) {
+                if (target.sub_aspects === undefined) {
+                    target.sub_aspects = [clone];
+                } else {
+                    target.sub_aspects.push(clone);
+                }
+            } else {
+                this.dataSource.data.push(clone);
+            }
+            const root = this.findRoot(clone);
+            if (root !== undefined) {
+                this.save(root);
+            } else {
+                this.snackBar.open('Can\'t find new root for moved Aspect', undefined, {duration: 2000});
+            }
+            this.deleteNode(node, true);
+            this.redraw();
+        });
+    }
+
+    dragStart() {
+        this.dragging = true;
+    }
+
+    dragEnd() {
+        this.dragging = false;
+    }
+
+    hasDescendant(node: DeviceTypeAspectModel, descendant: DeviceTypeAspectModel): boolean {
+        for (const child of node.sub_aspects || []) {
+            if (child === descendant || this.hasDescendant(child, descendant)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    findRoot(node: DeviceTypeAspectModel): DeviceTypeAspectModel | undefined {
+        return this.dataSource.data.find(root => this.hasDescendant(root, node));
     }
 
     private getAspects() {
