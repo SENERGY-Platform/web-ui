@@ -205,6 +205,10 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         if (this.firstFormGroup.get('characteristic_id')?.value) {
             this.patchType(this.firstFormGroup.get('characteristic_id')?.value);
         }
+        this.firstFormGroup?.get('function_id')?.valueChanges.subscribe((_) => {
+            this.initConceptList();
+            this.options = this.getOptions();
+        });
     }
 
     private patchType(characteristicId: string) {
