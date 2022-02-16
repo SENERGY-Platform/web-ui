@@ -70,9 +70,7 @@ export class AspectsComponent implements OnInit {
     }
 
     addSubNode(node: DeviceTypeAspectModel) {
-        if (node.sub_aspects === undefined) {
-            node.sub_aspects = [];
-        }
+        node.sub_aspects = node.sub_aspects || [];
         node.sub_aspects.push({name: ''} as DeviceTypeAspectModel);
         this.treeControl.expand(node);
         this.redraw();
@@ -119,11 +117,9 @@ export class AspectsComponent implements OnInit {
         if (node.name.length === 0) {
             return false;
         }
-        if (node.sub_aspects !== undefined) {
-            for (const n of node.sub_aspects) {
-                if (!this.nodeValid(n)) {
-                    return false;
-                }
+        for (const n of node.sub_aspects || []) {
+            if (!this.nodeValid(n)) {
+                return false;
             }
         }
         return true;
@@ -200,7 +196,7 @@ export class AspectsComponent implements OnInit {
             }
             const clone = JSON.parse(JSON.stringify(node));
             if (target !== undefined) {
-                if (target.sub_aspects === undefined) {
+                if (target.sub_aspects === undefined || target.sub_aspects === null) {
                     target.sub_aspects = [clone];
                 } else {
                     target.sub_aspects.push(clone);

@@ -64,7 +64,7 @@ export interface DeviceTypeServiceModel {
 export interface DeviceTypeAspectModel {
     id: string;
     name: string;
-    sub_aspects?: DeviceTypeAspectModel[];
+    sub_aspects?: DeviceTypeAspectModel[] | null;
 }
 
 export interface DeviceTypeContentModel {
