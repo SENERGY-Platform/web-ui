@@ -16,7 +16,7 @@
 
 <h2 mat-dialog-title>Edit Concept</h2>
 
-<mat-dialog-content>
+<mat-dialog-content *ngIf="ready">
     <form class="form" fxLayout="column">
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Id</mat-label>
@@ -32,7 +32,8 @@
                                    useOptionViewProperty="name"
                                    placeholder="Characteristics"
                                    [formControl]="characteristicsControl"
-                                   [multiple]="true">
+                                   [multiple]="true"
+                                   [compareWith]="compareIds">
             </senergy-select-search>
         </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
