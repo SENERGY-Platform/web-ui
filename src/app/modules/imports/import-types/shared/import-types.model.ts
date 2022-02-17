@@ -44,11 +44,11 @@ export interface ImportTypeContentVariableModel {
 
 export interface ImportTypePermissionSearchModel {
     aspect_functions: string[];
-    aspect_ids: string[];
+    content_aspect_ids: string[];
     creator: string;
     default_restart: boolean;
     description: string;
-    function_ids: string[];
+    content_function_ids: string[];
     id: string;
     image: string;
     name: string;
