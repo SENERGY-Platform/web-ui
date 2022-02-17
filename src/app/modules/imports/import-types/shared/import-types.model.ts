@@ -35,7 +35,7 @@ export interface ImportTypeConfigModel {
 export interface ImportTypeContentVariableModel {
     name: string;
     type: string;
-    characteristic_id: string;
+    characteristic_id?: string;
     sub_content_variables: ImportTypeContentVariableModel[] | null;
     use_as_tag: boolean;
     aspect_id?: string;

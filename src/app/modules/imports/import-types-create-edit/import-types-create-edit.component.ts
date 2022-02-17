@@ -398,12 +398,12 @@ export class ImportTypesCreateEditComponent implements OnInit {
             (content.sub_content_variables !== undefined &&
                 content.sub_content_variables !== null &&
                 content.sub_content_variables?.length > 0) ||
-            (content.characteristic_id.length === 0 && overrideId === undefined)
+            (content.characteristic_id?.length === 0 && overrideId === undefined)
         ) {
             return;
         }
         content.sub_content_variables = [];
-        const characteristic = this.characteristics.get(overrideId || content.characteristic_id);
+        const characteristic = this.characteristics.get(overrideId || content.characteristic_id || '');
         characteristic?.sub_characteristics?.forEach((subCharacteristic) => {
             const sub: ImportTypeContentVariableModel = {
                 name: subCharacteristic.name,
