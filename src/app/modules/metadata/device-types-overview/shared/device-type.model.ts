@@ -67,6 +67,16 @@ export interface DeviceTypeAspectModel {
     sub_aspects?: DeviceTypeAspectModel[] | null;
 }
 
+export interface DeviceTypeAspectNodeModel {
+    id: string;
+    name: string;
+    root_id: string;
+    parent_id: string;
+    child_ids: string[];
+    ancestor_ids: string[];
+    descendent_ids: string[];
+}
+
 export interface DeviceTypeContentModel {
     id: string;
     content_variable: DeviceTypeContentVariableModel;

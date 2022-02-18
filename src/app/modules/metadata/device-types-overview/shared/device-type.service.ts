@@ -21,7 +21,7 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/internal/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
     DeviceTypeBaseModel,
     DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel,
     DeviceTypeDeviceClassModel,
@@ -204,10 +204,17 @@ export class DeviceTypeService {
         );
     }
 
-    getAspectsWithMeasuringFunction(): Observable<DeviceTypeAspectModel[]> {
-        return this.http.get<DeviceTypeAspectModel[]>(environment.deviceRepoUrl + '/aspects?function=measuring-function').pipe(
+    getAspectNodesWithMeasuringFunction(): Observable<DeviceTypeAspectNodeModel[]> {
+        return this.http.get<DeviceTypeAspectNodeModel[] | null>(environment.apiAggregatorUrl + '/aspect-nodes?function=measuring-function').pipe(
             map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectsWithMeasuringFunction', [])),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectNodesWithMeasuringFunction', [])),
+        );
+    }
+
+    getAspectNodesWithMeasuringFunctionOfDevicesOnly(): Observable<DeviceTypeAspectNodeModel[]> {
+        return this.http.get<DeviceTypeAspectNodeModel[] | null>(environment.deviceRepoUrl + '/aspect-nodes?function=measuring-function').pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getAspectNodesWithMeasuringFunctionOfDevicesOnly', [])),
         );
     }
 

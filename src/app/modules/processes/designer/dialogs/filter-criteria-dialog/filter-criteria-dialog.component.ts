@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
@@ -43,7 +43,7 @@ export class FilterCriteriaDialogComponent implements OnInit {
     aspectFormControl = new FormControl('');
     functionFormControl = new FormControl({ value: '', disabled: true });
 
-    aspects: DeviceTypeAspectModel[] = [];
+    aspects: Map<string, DeviceTypeAspectModel[]> = new Map();
     functions: DeviceTypeFunctionModel[] = [];
     characteristic: DeviceTypeCharacteristicsModel = {} as DeviceTypeCharacteristicsModel;
     limit = 20;
@@ -74,7 +74,7 @@ export class FilterCriteriaDialogComponent implements OnInit {
 
     save(): void {
         this.result = {
-            aspect: this.aspectFormControl.value.id || '',
+            aspect: this.aspectFormControl.value || '',
             iotfunction: this.functionFormControl.value.id || '',
             characteristic: this.characteristic.id || '',
             label: this.functionFormControl.value.name + ' ' + this.characteristic.name,
@@ -87,8 +87,8 @@ export class FilterCriteriaDialogComponent implements OnInit {
     }
 
     private initOptions(): void {
-        this.aspectFormControl.setValue('');
-        this.functionFormControl.setValue('');
+        this.aspectFormControl.setValue(undefined);
+        this.functionFormControl.setValue(undefined);
         this.functionFormControl.disable();
     }
 
@@ -97,14 +97,14 @@ export class FilterCriteriaDialogComponent implements OnInit {
             this.getBaseCharacteristics(func);
         });
 
-        this.aspectFormControl.valueChanges.subscribe((aspect: DeviceTypeAspectModel) => {
+        this.aspectFormControl.valueChanges.subscribe((aspectId: string) => {
             this.resetFunctions();
-            this.getAspectFunctions(aspect);
+            this.getAspectFunctions(aspectId);
         });
     }
 
-    private getAspectFunctions(aspect: DeviceTypeAspectModel) {
-        this.deviceTypeService.getAspectsMeasuringFunctionsWithImports(aspect.id).subscribe((functions: DeviceTypeFunctionModel[]) => {
+    private getAspectFunctions(aspectId: string) {
+        this.deviceTypeService.getAspectsMeasuringFunctionsWithImports(aspectId).subscribe((functions: DeviceTypeFunctionModel[]) => {
             this.functions = functions;
 
             // handle init value
@@ -120,18 +120,25 @@ export class FilterCriteriaDialogComponent implements OnInit {
     }
 
     private getAspects() {
-        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe((aspects: DeviceTypeAspectModel[]) => {
-            this.aspects = aspects;
-
+        this.deviceTypeService.getAspectNodesWithMeasuringFunction().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
+            const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            const asp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            aspects.forEach(a => {
+                if (!tmp.has(a.root_id)) {
+                    tmp.set(a.root_id, []);
+                }
+                tmp.get(a.root_id)?.push(a);
+            });
+            tmp.forEach((v, k) => asp.set(aspects.find(a => a.id === k)?.name || '', v));
             // handle init value
             if (this.data.aspect) {
-                aspects.forEach((value) => {
-                    if (value.id === this.data.aspect) {
-                        this.aspectFormControl.setValue(value);
-                        this.data.aspect = null;
-                    }
-                });
+                const sel = aspects.find(value => value.id === this.data.aspect);
+                if (sel !== undefined) {
+                    this.aspectFormControl.setValue(sel.id);
+                    this.data.aspect = null;
+                }
             }
+            this.aspects = asp;
         });
     }
 
