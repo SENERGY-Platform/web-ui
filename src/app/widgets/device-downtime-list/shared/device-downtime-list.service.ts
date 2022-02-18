@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { DeviceDowntimeListEditDialogComponent } from '../dialogs/device-downtime-list-edit-dialog.component';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
-import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { DeviceDowntimeListModel } from './device-downtime-list.model';
-import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
-import { DeviceInstancesHistoryModel } from '../../../modules/devices/device-instances/shared/device-instances-history.model';
+import {Injectable} from '@angular/core';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
+import {DeviceDowntimeListEditDialogComponent} from '../dialogs/device-downtime-list-edit-dialog.component';
+import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {Observable} from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {ErrorHandlerService} from '../../../core/services/error-handler.service';
+import {DeviceDowntimeListModel} from './device-downtime-list.model';
+import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
+import {
+    DeviceInstancesHistoryModel
+} from '../../../modules/devices/device-instances/shared/device-instances-history.model';
+import {map} from 'rxjs/internal/operators';
 
 const stateConnected = 'connected';
 const stateDisconnected = 'disconnected';
@@ -45,7 +48,8 @@ export class DeviceDowntimeListService {
         private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private deviceInstancesService: DeviceInstancesService,
-    ) {}
+    ) {
+    }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
@@ -64,12 +68,10 @@ export class DeviceDowntimeListService {
     }
 
     getDevicesDowntime(): Observable<DeviceDowntimeListModel[]> {
-        return new Observable<DeviceDowntimeListModel[]>((observer) => {
-            this.deviceInstancesService.getDeviceHistory7d().subscribe((devices: DeviceInstancesHistoryModel[]) => {
-                observer.next(this.calcDevicesConnectionTime(devices));
-                observer.complete();
-            });
-        });
+        return this.deviceInstancesService.getDeviceHistory7d().pipe(
+            map(d => d || []),
+            map((devices: DeviceInstancesHistoryModel[]) => this.calcDevicesConnectionTime(devices))
+        );
     }
 
     private calcDevicesConnectionTime(devices: DeviceInstancesHistoryModel[]): DeviceDowntimeListModel[] {
