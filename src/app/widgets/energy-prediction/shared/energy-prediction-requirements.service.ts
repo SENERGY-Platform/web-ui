@@ -62,11 +62,10 @@ export class EnergyPredictionRequirementsService {
                     if (r === null) {
                         return { found: false, hasMore: false };
                     }
-
+                    const filter = r.instances?.filter((ex) => EnergyPredictionRequirementsService.exportHasRequiredValues(ex.Values));
                     return {
-                        found:
-                            r.instances.filter((ex) => EnergyPredictionRequirementsService.exportHasRequiredValues(ex.Values)).length !== 0,
-                        hasMore: r.instances.length === pageSize,
+                        found: filter !== undefined && filter.length !== 0,
+                        hasMore: r.instances !== undefined && r.instances.length === pageSize,
                     };
                 }),
             )

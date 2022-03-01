@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ChartsModel } from '../../../shared/charts.model';
-import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
-import { ElementSizeService } from '../../../../../core/services/element-size.service';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
-import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { ChartDataTableModel } from '../../../../../core/components/chart/chart-data-table.model';
-import { DeviceTotalDowntimeEditDialogComponent } from '../dialogs/device-total-downtime-edit-dialog.component';
-import { DeviceInstancesService } from '../../../../../modules/devices/device-instances/shared/device-instances.service';
-import { DeviceInstancesHistoryModel } from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {ChartsModel} from '../../../shared/charts.model';
+import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
+import {ElementSizeService} from '../../../../../core/services/element-size.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
+import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
+import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {ChartDataTableModel} from '../../../../../core/components/chart/chart-data-table.model';
+import {DeviceTotalDowntimeEditDialogComponent} from '../dialogs/device-total-downtime-edit-dialog.component';
+import {DeviceInstancesService} from '../../../../../modules/devices/device-instances/shared/device-instances.service';
+import {
+    DeviceInstancesHistoryModel
+} from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
+import {map} from "rxjs/internal/operators";
 
 const customColor = '#4484ce'; // /* cc */
 const stateTrue = true;
@@ -43,7 +46,8 @@ export class DeviceTotalDowntimeService {
         private dialog: MatDialog,
         private dashboardService: DashboardService,
         private deviceInstancesService: DeviceInstancesService,
-    ) {}
+    ) {
+    }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
@@ -62,27 +66,27 @@ export class DeviceTotalDowntimeService {
     }
 
     getTotalDowntime(widgetId: string): Observable<ChartsModel> {
-        return new Observable<ChartsModel>((observer) => {
-            this.deviceInstancesService.getDeviceHistory7d().subscribe((devices: DeviceInstancesHistoryModel[]) => {
+        return this.deviceInstancesService.getDeviceHistory7d().pipe(
+            map(d => d || []),
+            map((devices: DeviceInstancesHistoryModel[]) => {
                 if (devices.length === 0) {
-                    observer.next(this.setDevicesTotalDowntimeChartValues(widgetId, new ChartDataTableModel([[]])));
+                    return this.setDevicesTotalDowntimeChartValues(widgetId, new ChartDataTableModel([[]]));
                 } else {
-                    observer.next(this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(devices)));
+                    return this.setDevicesTotalDowntimeChartValues(widgetId, this.processTimelineFailureRatio(devices));
                 }
-                observer.complete();
-            });
-        });
+            })
+        );
     }
 
     private setDevicesTotalDowntimeChartValues(widgetId: string, dataTable: ChartDataTableModel): ChartsModel {
         const element = this.elementSizeService.getHeightAndWidthByElementId(widgetId);
         return new ChartsModel('AreaChart', dataTable.data, {
-            chartArea: { width: element.widthPercentage, height: element.heightPercentage },
+            chartArea: {width: element.widthPercentage, height: element.heightPercentage},
             width: element.width,
             height: element.height,
             legend: 'none',
-            hAxis: { format: 'HH:mm' },
-            vAxis: { format: '#.## %', viewWindow: { min: 0.0 } },
+            hAxis: {format: 'HH:mm'},
+            vAxis: {format: '#.## %', viewWindow: {min: 0.0}},
             explorer: {
                 actions: ['dragToZoom', 'rightClickToReset'],
                 axis: 'horizontal',
@@ -104,7 +108,7 @@ export class DeviceTotalDowntimeService {
         let intervalFull = false;
 
         for (let x = 0; x < numberOfIntervals; x++) {
-            interval.push({ stateConnected: 0, stateDisconnected: 0 });
+            interval.push({stateConnected: 0, stateDisconnected: 0});
         }
 
         devices.forEach((device: DeviceInstancesHistoryModel) => {
@@ -157,14 +161,14 @@ export class DeviceTotalDowntimeService {
 
         function fillIntervalArray(state: boolean, time: number) {
             switch (state) {
-            case stateTrue: {
-                interval[intervalIndex].stateConnected += time;
-                break;
-            }
-            case stateFalse: {
-                interval[intervalIndex].stateDisconnected += time;
-                break;
-            }
+                case stateTrue: {
+                    interval[intervalIndex].stateConnected += time;
+                    break;
+                }
+                case stateFalse: {
+                    interval[intervalIndex].stateDisconnected += time;
+                    break;
+                }
             }
         }
     }
@@ -174,7 +178,7 @@ export class DeviceTotalDowntimeService {
         today: Date,
         intervalDurationInMs: number,
     ): ChartDataTableModel {
-        const dataTable = new ChartDataTableModel([['Date', 'Percentage', { role: 'tooltip' }]]);
+        const dataTable = new ChartDataTableModel([['Date', 'Percentage', {role: 'tooltip'}]]);
 
         if (interval.length !== 0) {
             for (let m = interval.length - 1; m >= 0; m--) {
@@ -194,7 +198,7 @@ export class DeviceTotalDowntimeService {
 
         function getTooltipText(date: Date, percentage: number): string {
             const percentageFormatted = Math.round(percentage * 10000) / 100 + '%';
-            const timeFormatted = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timeFormatted = date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
             return timeFormatted + '\n' + 'failure ratio: ' + percentageFormatted; // todo: translation
         }
     }

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import { GoogleChartComponent } from 'ng2-google-charts';
-import { ChartsModel } from '../../shared/charts.model';
-import { ElementSizeService } from '../../../../core/services/element-size.service';
-import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
-import { DeviceTotalDowntimeService } from './shared/device-total-downtime.service';
-import { ChartsService } from '../../shared/charts.service';
+import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import {GoogleChartComponent} from 'ng2-google-charts';
+import {ChartsModel} from '../../shared/charts.model';
+import {ElementSizeService} from '../../../../core/services/element-size.service';
+import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
+import {Subscription} from 'rxjs';
+import {DeviceTotalDowntimeService} from './shared/device-total-downtime.service';
+import {ChartsService} from '../../shared/charts.service';
 
 @Component({
     selector: 'senergy-device-total-downtime',
@@ -30,13 +30,13 @@ import { ChartsService } from '../../shared/charts.service';
     styleUrls: ['./device-total-downtime.component.css'],
 })
 export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
-    deviceTotalDowntime = {} as ChartsModel;
+    deviceTotalDowntime: ChartsModel|undefined;
     ready = false;
     destroy = new Subscription();
 
     private resizeTimeout = 0;
 
-    @ViewChild('deviceTotalDowntimeChart', { static: false }) deviceTotalDowntimeChart!: GoogleChartComponent;
+    @ViewChild('deviceTotalDowntimeChart', {static: false}) deviceTotalDowntimeChart!: GoogleChartComponent;
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -56,7 +56,8 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
         private deviceDowntimeGatewayService: DeviceTotalDowntimeService,
         private elementSizeService: ElementSizeService,
         private dashboardService: DashboardService,
-    ) {}
+    ) {
+    }
 
     ngOnInit() {
         this.getProcessInstances();
@@ -79,6 +80,9 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
                 this.deviceDowntimeGatewayService.getTotalDowntime(this.widget.id).subscribe((processDeploymentsHistory: ChartsModel) => {
                     this.deviceTotalDowntime = processDeploymentsHistory;
                     this.ready = true;
+                }, () => {
+                }, () => {
+                    this.ready = true;
                 });
             }
         });
@@ -86,7 +90,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy {
 
     private resizeProcessInstancesStatusChart() {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget.id);
-        if (this.deviceTotalDowntime.options !== undefined) {
+        if (this.deviceTotalDowntime?.options !== undefined) {
             this.deviceTotalDowntime.options.height = element.height;
             this.deviceTotalDowntime.options.width = element.width;
             if (this.deviceTotalDowntime.options.chartArea) {

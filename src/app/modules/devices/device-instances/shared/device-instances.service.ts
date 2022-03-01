@@ -423,7 +423,7 @@ export class DeviceInstancesService {
         });
     }
 
-    getDeviceHistory7d(): Observable<DeviceInstancesHistoryModel[]> {
+    getDeviceHistory7d(): Observable<DeviceInstancesHistoryModel[] | null> {
         if (this.getDeviceHistoryObservable7d === null) {
             this.getDeviceHistoryObservable7d = this.getDeviceHistoryAll(1000, '7d').
             pipe(reduce((acc, value) => acc.concat(value)));
@@ -431,7 +431,7 @@ export class DeviceInstancesService {
         return this.getDeviceHistoryObservable7d;
     }
 
-    getDeviceHistory1h(): Observable<DeviceInstancesHistoryModel[]> {
+    getDeviceHistory1h(): Observable<DeviceInstancesHistoryModel[] | null> {
         if (this.getDeviceHistoryObservable1h === null) {
             this.getDeviceHistoryObservable1h = this.getDeviceHistoryAll(1000, '1h').
             pipe(reduce((acc, value) => acc.concat(value)));

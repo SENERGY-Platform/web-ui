@@ -60,7 +60,7 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
                 this.processModelListService.getDevicesDowntime().subscribe((devices: DeviceDowntimeListModel[]) => {
                     this.devices = devices;
                     this.ready = true;
-                });
+                }, () => {}, () => this.ready = true);
             }
         });
     }

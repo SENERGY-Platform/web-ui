@@ -244,6 +244,10 @@
                                                 </mat-tab>
                                             </mat-tab-group>
                                             <div fxLayoutAlign="end center">
+                                                <button (click)="cloneService(serviceAndIndex.index)" mat-icon-button class="mat-accent"
+                                                        matTooltip="clone service" [disabled]="!editable">
+                                                    <mat-icon>content_copy</mat-icon>
+                                                </button>
                                                 <button (click)="deleteService(serviceAndIndex.service.value)" mat-icon-button class="mat-accent"
                                                         matTooltip="delete service" [disabled]="!editable">
                                                     <mat-icon>delete</mat-icon>
@@ -256,6 +260,10 @@
                                     <button mat-raised-button color="accent" (click)="addService(group.key)">ADD Service</button>
                                 </div>
                                 <div fxLayoutAlign="end center" *ngIf="group.isGroup">
+                                    <button (click)="cloneServiceGroup(group)" mat-icon-button class="mat-accent"
+                                            matTooltip="clone service group" [disabled]="!editable">
+                                        <mat-icon>content_copy</mat-icon>
+                                    </button>
                                     <button (click)="deleteServiceGroup(group.key)" mat-icon-button class="mat-accent"
                                             matTooltip="delete service group" [disabled]="!editable || group.serviceAndIndices.length > 0">
                                         <mat-icon>delete</mat-icon>

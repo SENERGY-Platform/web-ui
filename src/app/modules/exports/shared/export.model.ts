@@ -15,9 +15,9 @@
  */
 
 export interface ExportResponseModel {
-    count: number;
-    instances: ExportModel[];
-    total: number;
+    count?: number;
+    instances?: ExportModel[];
+    total?: number;
 }
 
 export interface ExportModel {

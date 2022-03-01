@@ -81,6 +81,10 @@ export class DeviceInstancesGridComponent implements OnInit {
         this.deviceInstancesDialogService.openDeviceEditDialog(device);
     }
 
+    duplicate(device: DeviceInstancesModel): void {
+        this.deviceInstancesDialogService.openDeviceCreateDialog(undefined, device);
+    }
+
     delete(device: DeviceInstancesModel): void {
         this.dialogsService
             .openDeleteDialog('device')

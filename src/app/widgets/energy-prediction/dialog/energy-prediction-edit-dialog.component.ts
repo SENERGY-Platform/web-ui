@@ -102,7 +102,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     initDeployments() {
         this.exportService.getExports('', 9999, 0, 'name', 'asc', undefined, undefined, true).subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
-                exports.instances.forEach((exportModel: ExportModel) => {
+                exports.instances?.forEach((exportModel: ExportModel) => {
                     if (
                         exportModel.ID !== undefined &&
                         exportModel.Name !== undefined &&

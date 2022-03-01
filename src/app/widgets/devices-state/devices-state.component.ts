@@ -62,6 +62,8 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
                 this.devicesStateService.getDevicesStatus().subscribe((devicesStatus: DevicesStateModel) => {
                     this.devicesStatus = devicesStatus;
                     this.ready = true;
+                }, () => {}, () => {
+                    this.ready = true;
                 });
             }
         });

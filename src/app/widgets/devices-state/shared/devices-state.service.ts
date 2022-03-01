@@ -24,6 +24,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { DevicesStateEditDialogComponent } from '../dialog/devices-state-edit-dialog.component';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {map} from "rxjs/internal/operators";
 
 @Injectable({
     providedIn: 'root',
@@ -52,12 +53,10 @@ export class DevicesStateService {
     }
 
     getDevicesStatus(): Observable<DevicesStateModel> {
-        return new Observable<DevicesStateModel>((observer) => {
-            this.deviceInstancesService.getDeviceHistory1h().subscribe((devices: DeviceInstancesHistoryModel[]) => {
-                observer.next(this.sumDevicesStatus(devices));
-                observer.complete();
-            });
-        });
+        return this.deviceInstancesService.getDeviceHistory1h().pipe(
+            map(devices => devices || []),
+            map((devices: DeviceInstancesHistoryModel[]) => this.sumDevicesStatus(devices))
+        );
     }
 
     private sumDevicesStatus(devices: DeviceInstancesHistoryModel[]): DevicesStateModel {

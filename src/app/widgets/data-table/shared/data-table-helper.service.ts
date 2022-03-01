@@ -171,7 +171,7 @@ export class DataTableHelperService {
         }
         return this.exportService
             .getExports('', -1, 0, 'name', 'asc', undefined, undefined, true)
-            .pipe(map((exports) => (this.exportCache = exports === null ? [] : exports.instances)));
+            .pipe(map((exports) => (this.exportCache = exports === null ? [] : exports.instances || [])));
     }
 
     getExportsForDeviceAndValue(serviceId: string, deviceId: string, path: string): ExportModel[] {

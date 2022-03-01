@@ -150,10 +150,12 @@ export class DeviceTypesComponent implements OnInit {
         this.updateServiceGroups();
     }
 
-    addServiceGroup() {
+    addServiceGroup(): FormGroup {
         const formArray = this.secondFormGroup.controls['serviceGroups'] as FormArray;
-        formArray.push(this.createServiceGroupFormGroup(undefined));
+        const group = this.createServiceGroupFormGroup(undefined);
+        formArray.push(group);
         this.updateServiceGroups();
+        return group;
     }
 
     addContentVariable(isInput: boolean, inOut: DeviceTypeContentTreeModel, indices: number[]): void {
@@ -204,9 +206,70 @@ export class DeviceTypesComponent implements OnInit {
             });
     }
 
+    cloneService(index: number): FormGroup {
+        const control = this.secondFormGroup.controls['services'] as FormArray;
+
+        const deviceTypeService = control.at(index).value as DeviceTypeServiceModel;
+        const clone: DeviceTypeServiceModel = {
+            id: '',
+            inputs: [],
+            outputs: [],
+            service_group_key: deviceTypeService.service_group_key,
+            aspect_ids: JSON.parse(JSON.stringify(deviceTypeService.aspect_ids)),
+            function_ids: JSON.parse(JSON.stringify(deviceTypeService.function_ids)),
+            name: deviceTypeService.name,
+            description: deviceTypeService.description,
+            attributes: JSON.parse(JSON.stringify(deviceTypeService.attributes)),
+            interaction: deviceTypeService.interaction,
+            protocol_id: deviceTypeService.protocol_id,
+            local_id: deviceTypeService.local_id,
+        };
+        const copyContent = (x: DeviceTypeContentModel, input: boolean) => {
+            const xTree = x as DeviceTypeContentTreeModel;
+            const content: DeviceTypeContentModel = {
+                id: '',
+                name: x.name,
+                content_variable: xTree.dataSource.data.length > 0 ? JSON.parse(JSON.stringify(xTree.dataSource.data[0])) : undefined,
+                protocol_segment_id: x.protocol_segment_id,
+                content_variable_raw: x.content_variable_raw,
+                show: x.show,
+                serialization: x.serialization,
+            };
+            if (input) {
+                clone.inputs.push(content);
+            } else {
+                clone.outputs.push(content);
+            }
+        };
+        deviceTypeService.inputs.forEach(x => copyContent(x, true));
+        deviceTypeService.outputs.forEach(x => copyContent(x, false));
+
+        clone.inputs.forEach(x => {
+            this.removeContentVariableIds(x.content_variable);
+        });
+        clone.outputs.forEach(x => {
+            this.removeContentVariableIds(x.content_variable);
+        });
+        const group = this.createServiceFormGroup(clone);
+        control.push(group);
+        this.updateServiceGroups();
+        return group;
+    }
+
     deleteService(deviceTypeService: DeviceTypeServiceModel) {
         const control = this.secondFormGroup.controls['services'] as FormArray;
         control.removeAt(this.secondFormGroup.value.services.indexOf(deviceTypeService));
+        this.updateServiceGroups();
+    }
+
+    cloneServiceGroup(group: { key: string; title: string; isGroup: boolean; serviceAndIndices: { service: AbstractControl; index: number }[] }) {
+        const newServiceFormGroup = this.addServiceGroup();
+        newServiceFormGroup.patchValue({name: this.getServiceGroup(group.key).get('name')?.value});
+        const key = newServiceFormGroup.get('key')?.value;
+        group.serviceAndIndices.forEach(s => {
+            const clonedServiceGroup = this.cloneService(s.index);
+            clonedServiceGroup.patchValue({service_group_key: key});
+        });
         this.updateServiceGroups();
     }
 
@@ -784,5 +847,13 @@ export class DeviceTypesComponent implements OnInit {
         const idx = Number($event.item.element.nativeElement.id);
         this.services.at(idx).patchValue({service_group_key: key});
         this.updateServiceGroups();
+    }
+
+    private removeContentVariableIds(c?: DeviceTypeContentVariableModel) {
+        if (c === undefined) {
+            return;
+        }
+        c.id = undefined;
+        c.sub_content_variables?.forEach(sub => this.removeContentVariableIds(sub));
     }
 }
