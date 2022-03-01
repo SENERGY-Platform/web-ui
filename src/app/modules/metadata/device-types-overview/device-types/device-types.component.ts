@@ -215,8 +215,6 @@ export class DeviceTypesComponent implements OnInit {
             inputs: [],
             outputs: [],
             service_group_key: deviceTypeService.service_group_key,
-            aspect_ids: JSON.parse(JSON.stringify(deviceTypeService.aspect_ids)),
-            function_ids: JSON.parse(JSON.stringify(deviceTypeService.function_ids)),
             name: deviceTypeService.name,
             description: deviceTypeService.description,
             attributes: JSON.parse(JSON.stringify(deviceTypeService.attributes)),
