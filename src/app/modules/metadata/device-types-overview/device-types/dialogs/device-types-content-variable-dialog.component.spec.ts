@@ -101,6 +101,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 value: 'value',
                 aspect_id: null,
                 function_id: null,
+                is_void: null,
             });
         }),
     );
@@ -133,6 +134,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 value: 'value',
                 aspect_id: null,
                 function_id: null,
+                is_void: null,
             });
         }),
     );
@@ -165,6 +167,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 value: null,
                 aspect_id: null,
                 function_id: null,
+                is_void: false,
             });
         }),
     );
@@ -205,6 +208,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 value: null,
                 aspect_id: null,
                 function_id: null,
+                is_void: null,
             });
         }),
     );

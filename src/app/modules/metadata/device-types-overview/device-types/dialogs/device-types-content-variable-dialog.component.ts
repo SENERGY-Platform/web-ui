@@ -48,6 +48,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     concepts: ConceptsCharacteristicsModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     aspectOptions: Map<string, DeviceTypeAspectModel[]> = new Map();
+    allowVoid = false;
 
     constructor(
         private dialogRef: MatDialogRef<DeviceTypesContentVariableDialogComponent>,
@@ -60,6 +61,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             functions: DeviceTypeFunctionModel[];
             concepts: ConceptsCharacteristicsModel[];
             aspects: DeviceTypeAspectModel[];
+            allowVoid: boolean;
         },
     ) {
         this.disabled = data.disabled;
@@ -67,6 +69,9 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         this.functions = data.functions;
         this.concepts = data.concepts;
         this.aspects = data.aspects;
+        this.allowVoid = data.allowVoid;
+        console.log(this.allowVoid); // TODO
+        console.log(this.contentVariable); // TODO
     }
 
     ngOnInit(): void {
@@ -103,6 +108,10 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
     isPrimitiveType(): boolean {
         return this.typeOptionsControl.value === 'primitive';
+    }
+
+    isVoidType(): boolean {
+        return this.typeOptionsControl.value === 'void';
     }
 
     getOptions(): Map<string, any[]> {
@@ -151,11 +160,32 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             this.typeOptionsControl.setValue('primitive');
         }
 
+        if (this.contentVariable.is_void && this.allowVoid) {
+            this.typeOptionsControl.setValue('void');
+        }
+
         this.typeOptionsControl.valueChanges.subscribe(() => {
             this.firstFormGroup.reset();
             this.firstFormGroup.patchValue({
-                sub_content_variables: this.isPrimitiveType() ? null : [],
+                sub_content_variables: this.isPrimitiveType() || this.isVoidType() ? null : [],
             });
+            if (this.isVoidType()) {
+                this.firstFormGroup.patchValue({
+                    is_void: true,
+                    name: 'void',
+                    type: 'https://schema.org/Boolean',
+                    characteristic_id: '',
+                    serialization_options: undefined,
+                    unit_reference: undefined,
+                    sub_content_variables: undefined,
+                    value: undefined,
+                    aspect_id: undefined,
+                });
+            } else {
+                this.firstFormGroup.patchValue({
+                    is_void: false,
+                });
+            }
         });
     }
 
@@ -174,6 +204,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 value: [{ disabled: true, value: this.contentVariable.value }],
                 aspect_id: [{ disabled: true, value: this.contentVariable.aspect_id }],
                 function_id: [{ disabled: true, value: this.contentVariable.function_id }],
+                is_void: [{ disabled: true, value: this.contentVariable.is_void }],
             });
         } else {
             this.firstFormGroup = this._formBuilder.group(
@@ -189,6 +220,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                     value: [this.contentVariable.value],
                     aspect_id: [this.contentVariable.aspect_id],
                     function_id: [this.contentVariable.function_id],
+                    is_void: [this.contentVariable.is_void],
                 },
                 { validators: typeValueValidator('type', 'value') },
             );

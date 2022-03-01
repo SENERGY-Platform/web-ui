@@ -166,6 +166,7 @@ export class DeviceTypesComponent implements OnInit {
             disabled,
             concepts: this.concepts,
             aspects: this.aspectList,
+            allowVoid: isInput,
         };
         this.dialog
             .open(DeviceTypesContentVariableDialogComponent, dialogConfig)
@@ -191,6 +192,7 @@ export class DeviceTypesComponent implements OnInit {
             disabled,
             concepts: this.concepts,
             aspects: this.aspectList,
+            allowVoid: isInput,
         };
         this.dialog
             .open(DeviceTypesContentVariableDialogComponent, dialogConfig)

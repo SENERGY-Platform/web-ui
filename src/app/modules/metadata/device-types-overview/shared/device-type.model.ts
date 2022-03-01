@@ -104,6 +104,7 @@ export interface DeviceTypeContentVariableModel {
     unit_reference?: string;
     aspect_id?: string;
     function_id?: string;
+    is_void: boolean;
 }
 
 export interface DeviceTypeConceptModel {
