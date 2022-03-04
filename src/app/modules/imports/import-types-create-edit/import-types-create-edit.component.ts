@@ -394,7 +394,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
             (content.sub_content_variables !== undefined &&
                 content.sub_content_variables !== null &&
                 content.sub_content_variables?.length > 0) ||
-            (content.characteristic_id.length === 0 && overrideId === undefined)
+            (content.characteristic_id?.length === 0 && overrideId === undefined)
         ) {
             return;
         }
