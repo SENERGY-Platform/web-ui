@@ -239,6 +239,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             this.initConceptList();
             this.options = this.getOptions();
         });
+        console.log(this.firstFormGroup.value); // TODO
     }
 
     private patchType(characteristicId: string) {

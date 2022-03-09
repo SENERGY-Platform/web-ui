@@ -31,12 +31,12 @@
         </mat-form-field>
         <mat-form-field class="full-width" color="accent" *ngIf="!isVoidType()">
             <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name"
-                                   placeholder="Aspect" formControlName="aspect_id" [compareWith]="compareIds"></senergy-select-search>
+                                   placeholder="Aspect" formControlName="aspect_id"></senergy-select-search>
         </mat-form-field>
 
         <mat-form-field class="full-width" color="accent">
             <senergy-select-search [options]="functions" useOptionValueProperty="id" useOptionViewProperty="name"
-                                   placeholder="Function" formControlName="function_id" [compareWith]="compareIds"></senergy-select-search>
+                                   placeholder="Function" formControlName="function_id"></senergy-select-search>
         </mat-form-field>
 
         <mat-form-field class="full-width" color="accent" *ngIf="!isVoidType()">
