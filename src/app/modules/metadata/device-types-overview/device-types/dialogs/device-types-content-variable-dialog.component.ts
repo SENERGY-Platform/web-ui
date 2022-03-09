@@ -70,8 +70,6 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         this.concepts = data.concepts;
         this.aspects = data.aspects;
         this.allowVoid = data.allowVoid;
-        console.log(this.allowVoid); // TODO
-        console.log(this.contentVariable); // TODO
     }
 
     ngOnInit(): void {
@@ -269,7 +267,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             const ngclass = functionConceptId === concept.id ? 'color-accent' : '';
             if (concept.characteristics !== null) {
                 concept.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
-                    this.deviceTypeHelperService.characteristicsFlatten(characteristic).forEach((char) => {
+                    this.deviceTypeHelperService.characteristicsFlatten(characteristic, '', true).forEach((char) => {
                         characteristicsList.push({ id: char.id, name: char.name, type: char.type, class: ngclass });
                     });
                 });

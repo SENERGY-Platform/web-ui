@@ -39,7 +39,7 @@
                                    placeholder="Function" formControlName="function_id" [compareWith]="compareIds"></senergy-select-search>
         </mat-form-field>
 
-        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
+        <mat-form-field class="full-width" color="accent" *ngIf="!isVoidType()">
             <mat-label>Characteristic</mat-label>
             <senergy-select-search formControlName="characteristic_id" noneView="-- None --"
                                    [options]="options" useOptionViewProperty="name" useOptionValueProperty="id"
