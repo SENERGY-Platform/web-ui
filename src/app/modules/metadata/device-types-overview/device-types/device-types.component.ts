@@ -138,15 +138,6 @@ export class DeviceTypesComponent implements OnInit {
         formArray.push(this.createServiceFormGroup({service_group_key: key} as DeviceTypeServiceModel));
         const formGroup = formArray.controls[formArray.length - 1] as FormGroup;
         this.initProtocolIdChangeListener(formGroup);
-        formGroup.controls['functionType'].valueChanges.subscribe(() => {
-            if (formGroup.controls['functionType'].invalid) {
-                formGroup.controls['function_ids'].disable();
-            } else {
-                formGroup.controls['function_ids'].enable();
-            }
-
-            formGroup.controls['function_ids'].setValue([]);
-        });
         this.updateServiceGroups();
     }
 
