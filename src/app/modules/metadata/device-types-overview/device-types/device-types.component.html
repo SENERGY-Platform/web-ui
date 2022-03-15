@@ -227,7 +227,7 @@
                                                                                     </button>
                                                                                     <button mat-icon-button
                                                                                             [disabled]="!editable"
-                                                                                            (click)="addContentVariable(serviceAndIndex.service.value.function_ids, inOut, node.indices)">
+                                                                                            (click)="addContentVariable(tab.label === 'Input', inOut, node.indices)">
                                                                                         <mat-icon>add</mat-icon>
                                                                                     </button>
                                                                                 </div>
