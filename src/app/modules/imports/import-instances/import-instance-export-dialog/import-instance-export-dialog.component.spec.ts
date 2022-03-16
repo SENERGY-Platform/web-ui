@@ -55,7 +55,6 @@ describe('ImportInstanceExportDialogComponent', () => {
                 default_value: 'config-value',
             },
         ],
-        aspect_ids: [],
         output: {
             name: 'root',
             type: 'https://schema.org/StructuredValue',
@@ -122,7 +121,6 @@ describe('ImportInstanceExportDialogComponent', () => {
             ],
             use_as_tag: false,
         },
-        function_ids: [],
         owner: 'test-owner',
     };
     importTypesServiceSpy.getImportType.and.returnValue(of(testType));

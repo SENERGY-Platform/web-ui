@@ -47,7 +47,6 @@ describe('ImportTypesService', () => {
                 default_value: 'config-value',
             },
         ],
-        aspect_ids: [],
         output: {
             name: 'root',
             type: 'https://schema.org/StructuredValue',
@@ -114,7 +113,6 @@ describe('ImportTypesService', () => {
             ],
             use_as_tag: false,
         },
-        function_ids: [],
         owner: 'test-owner',
     };
 

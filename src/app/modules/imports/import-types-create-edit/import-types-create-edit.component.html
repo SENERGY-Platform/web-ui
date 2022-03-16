@@ -36,24 +36,6 @@
                 <input matInput formControlName="image" required>
             </mat-form-field>
         </div>
-
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Aspects</mat-label>
-                <senergy-select-search [multiple]="true" [options]="aspects" useOptionValueProperty="id"
-                                       useOptionViewProperty="name"
-                                       formControlName="aspect_ids"></senergy-select-search>
-            </mat-form-field>
-        </div>
-        <div>
-            <mat-form-field color="accent" appearance="outline" fxFill>
-                <mat-label>Functions</mat-label>
-                <senergy-select-search [multiple]="true" [options]="functions" useOptionValueProperty="id"
-                                       useOptionViewProperty="name"
-                                       formControlName="function_ids"></senergy-select-search>
-            </mat-form-field>
-        </div>
-
         <mat-divider></mat-divider>
 
         <div>

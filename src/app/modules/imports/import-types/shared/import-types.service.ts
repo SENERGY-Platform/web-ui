@@ -64,8 +64,8 @@ export class ImportTypesService {
                 map((types) => {
                     types.forEach((type) => {
                         type.aspect_functions = type.aspect_functions || [];
-                        type.aspect_ids = type.aspect_ids || [];
-                        type.function_ids = type.function_ids || [];
+                        type.content_aspect_ids = type.content_aspect_ids || [];
+                        type.content_function_ids = type.content_function_ids || [];
                     });
                     return types;
                 }),
@@ -73,13 +73,7 @@ export class ImportTypesService {
     }
 
     getImportType(id: string): Observable<ImportTypeModel> {
-        return this.http.get<ImportTypeModel>(environment.importRepoUrl + '/import-types/' + id).pipe(
-            map((type) => {
-                type.aspect_ids = type.aspect_ids || [];
-                type.function_ids = type.function_ids || [];
-                return type;
-            }),
-        );
+        return this.http.get<ImportTypeModel>(environment.importRepoUrl + '/import-types/' + id);
     }
 
     saveImportType(importType: ImportTypeModel): Observable<void> {

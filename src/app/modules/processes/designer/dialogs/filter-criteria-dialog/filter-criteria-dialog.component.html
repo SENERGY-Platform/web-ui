@@ -21,9 +21,9 @@
 <mat-dialog-content>
     <form class="form">
         <mat-form-field class="form-field" color="accent">
-            <senergy-select-search placeholder="Aspect" [compareWith]="compare"
+            <senergy-select-search placeholder="Aspect"
                         [formControl]="aspectFormControl" [required]="true"
-                        [options]="aspects" useOptionViewProperty="name">
+                        [options]="this.aspects" useOptionViewProperty="name" useOptionValueProperty="id">
             </senergy-select-search>
         </mat-form-field>
 

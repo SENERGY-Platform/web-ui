@@ -27,6 +27,26 @@
 
         <div>
             <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Aspect</mat-label>
+                <senergy-select-search noneView="--None--" [options]="aspectOptions"
+                                       useOptionValueProperty="id"
+                                       useOptionViewProperty="name"
+                                       formControlName="aspect_id"></senergy-select-search>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Function</mat-label>
+                <senergy-select-search noneView="--None--" [options]="data.functions"
+                                       useOptionValueProperty="id"
+                                       useOptionViewProperty="name"
+                                       formControlName="function_id"></senergy-select-search>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
                 <mat-label>Type</mat-label>
                 <mat-select formControlName="type" required>
                     <mat-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mat-option>

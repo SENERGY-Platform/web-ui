@@ -13,24 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ImportTypeConfigModel, ImportTypeContentVariableModel, ImportTypeModel } from '../import-types/shared/import-types.model';
-import { ImportTypesService } from '../import-types/shared/import-types.service';
-import { AspectsService } from '../../metadata/aspects/shared/aspects.service';
-import { AspectsPermSearchModel } from '../../metadata/aspects/shared/aspects-perm-search.model';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ContentVariableDialogComponent } from './content-variable-dialog/content-variable-dialog.component';
-import { environment } from '../../../../environments/environment';
-import { MatTree, MatTreeNestedDataSource } from '@angular/material/tree';
-import { NestedTreeControl } from '@angular/cdk/tree';
-import { Observable } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { convertPunctuation, typeValueValidator } from '../validators/type-value-validator';
-import { ConceptsService } from '../../metadata/concepts/shared/concepts.service';
-import { DeviceTypeCharacteristicsModel, DeviceTypeFunctionModel } from '../../metadata/device-types-overview/shared/device-type.model';
-import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {
+    ImportTypeConfigModel,
+    ImportTypeContentVariableModel,
+    ImportTypeModel
+} from '../import-types/shared/import-types.model';
+import {ImportTypesService} from '../import-types/shared/import-types.service';
+import {AspectsService} from '../../metadata/aspects/shared/aspects.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {ContentVariableDialogComponent} from './content-variable-dialog/content-variable-dialog.component';
+import {environment} from '../../../../environments/environment';
+import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
+import {NestedTreeControl} from '@angular/cdk/tree';
+import {Observable} from 'rxjs';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {convertPunctuation, typeValueValidator} from '../validators/type-value-validator';
+import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeFunctionModel
+} from '../../metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
 
 @Component({
     selector: 'senergy-import-types-create-edit',
@@ -63,7 +70,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     editMode = false;
     detailsMode = false;
     functions: DeviceTypeFunctionModel[] = [];
-    aspects: AspectsPermSearchModel[] = [];
+    aspects: DeviceTypeAspectModel[] = [];
     typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>> = new Map();
     characteristics: Map<string, DeviceTypeCharacteristicsModel> = new Map();
 
@@ -83,8 +90,6 @@ export class ImportTypesCreateEditComponent implements OnInit {
         image: [undefined, Validators.required],
         default_restart: true,
         configs: this.fb.array([]),
-        aspect_ids: [],
-        function_ids: [],
         owner: '',
     });
 
@@ -171,9 +176,6 @@ export class ImportTypesCreateEditComponent implements OnInit {
         this.deviceTypeService.getMeasuringFunctions().subscribe(
             (functions) => {
                 this.functions = functions;
-                if (!this.editMode && !this.detailsMode) {
-                    this.form.patchValue({ function_ids: [environment.getTimestampFunctionId] });
-                }
             },
             (err) => {
                 console.log(err);
@@ -181,7 +183,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 this.navigateToList();
             },
         );
-        this.aspectsService.getAspects('', 10000, 0, 'name', 'asc').subscribe(
+        this.deviceTypeService.getAspects().subscribe(
             (aspects) => (this.aspects = aspects),
             (err) => {
                 console.log(err);
@@ -340,6 +342,8 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 content,
                 infoOnly,
                 nameTimeAllowed,
+                aspects: this.aspects,
+                functions: this.functions,
             },
             minHeight: '400px',
         };
@@ -399,7 +403,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
             return;
         }
         content.sub_content_variables = [];
-        const characteristic = this.characteristics.get(overrideId || content.characteristic_id);
+        const characteristic = this.characteristics.get(overrideId || content.characteristic_id || '');
         characteristic?.sub_characteristics?.forEach((subCharacteristic) => {
             const sub: ImportTypeContentVariableModel = {
                 name: subCharacteristic.name,

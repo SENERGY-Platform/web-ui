@@ -21,7 +21,7 @@ import { ParseModel } from '../shared/parse.model';
 import { DeviceInstancesModel, DeviceSelectablesFullModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
     DeviceTypeServiceModel,
@@ -93,7 +93,7 @@ export class DeployFlowComponent implements OnInit {
     editMode = false;
     allDevices: DeviceInstancesModel[] = [];
     pipelines: PipelineModel[] = [];
-    aspects: DeviceTypeAspectModel[] = [];
+    aspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
     aspectFunctions = new Map<string, DeviceTypeFunctionModel[]>();
     selectables = new Map<string, DeviceSelectablesFullModel[]>();
     selectablesCharacteristics = new Map<string, Map<string, CustomSelectable[]>>();
@@ -126,7 +126,16 @@ export class DeployFlowComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe((aspects) => (this.aspects = aspects));
+        this.deviceTypeService.getAspectNodesWithMeasuringFunction().subscribe((aspects) => {
+            const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            aspects.forEach(a => {
+                if (!tmp.has(a.root_id)) {
+                    tmp.set(a.root_id, []);
+                }
+                tmp.get(a.root_id)?.push(a);
+            });
+            tmp.forEach((v, k) => this.aspects.set(aspects.find(a => a.id === k)?.name || '', v));
+        });
         this.pipelineRegistryService.getPipelines().subscribe((pipelines) => (this.pipelines = pipelines));
         this.importInstancesService
             .listImportInstances('', undefined, undefined, 'name.asc')

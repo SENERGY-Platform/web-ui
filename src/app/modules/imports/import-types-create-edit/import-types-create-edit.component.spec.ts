@@ -52,7 +52,7 @@ describe('ImportTypesCreateEditComponent', () => {
     const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
 
     deviceTypeService.getMeasuringFunctions.and.returnValue(of([]));
-    aspectsServiceSpy.getAspects.and.returnValue(of([]));
+    deviceTypeService.getAspects.and.returnValue(of([]));
     conceptsServiceSpy.getConceptsWithCharacteristics.and.returnValue(of([]));
     const testType: ImportTypeModel = {
         id: 'urn:infai:ses:import-type:1234',
@@ -68,7 +68,6 @@ describe('ImportTypesCreateEditComponent', () => {
                 default_value: 'config-value',
             },
         ],
-        aspect_ids: [],
         output: {
             name: 'root',
             type: 'https://schema.org/StructuredValue',
@@ -135,7 +134,6 @@ describe('ImportTypesCreateEditComponent', () => {
             ],
             use_as_tag: false,
         },
-        function_ids: [],
         owner: 'test-owner',
     };
     importTypesServiceSpy.getImportType.and.returnValue(of(testType));

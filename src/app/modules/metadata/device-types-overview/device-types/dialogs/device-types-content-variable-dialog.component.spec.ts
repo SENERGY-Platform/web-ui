@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { DeviceTypesContentVariableDialogComponent } from './device-types-content-variable-dialog.component';
-import { CoreModule } from '../../../../../core/core.module';
-import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { ConceptsService } from '../../../concepts/shared/concepts.service';
-import { DeviceTypeContentVariableModel, DeviceTypeFunctionModel } from '../../shared/device-type.model';
-import { MatRadioModule } from '@angular/material/radio';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { ConceptsCharacteristicsModel } from '../../../concepts/shared/concepts-characteristics.model';
-import { of } from 'rxjs';
-import { FunctionsService } from '../../../functions/shared/functions.service';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {DeviceTypesContentVariableDialogComponent} from './device-types-content-variable-dialog.component';
+import {CoreModule} from '../../../../../core/core.module';
+import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeContentVariableModel,
+    DeviceTypeFunctionModel
+} from '../../shared/device-type.model';
+import {MatRadioModule} from '@angular/material/radio';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatSelectModule} from '@angular/material/select';
+import {MatInputModule} from '@angular/material/input';
+import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
 
 describe('DeviceTypesContentVariableDialog', () => {
     let component: DeviceTypesContentVariableDialogComponent;
@@ -35,7 +36,7 @@ describe('DeviceTypesContentVariableDialog', () => {
 
     const matDialogRefSpy: Spy<MatDialogRef<DeviceTypesContentVariableDialogComponent>> =
         createSpyFromClass<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
-    function init(contentVariable: DeviceTypeContentVariableModel, functionConceptIds: string[], concepts: ConceptsCharacteristicsModel[]) {
+    function init(contentVariable: DeviceTypeContentVariableModel, concepts: ConceptsCharacteristicsModel[], functions: DeviceTypeFunctionModel[], aspects: DeviceTypeAspectModel[]) {
         TestBed.configureTestingModule({
             imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatSelectModule, MatInputModule],
             declarations: [DeviceTypesContentVariableDialogComponent],
@@ -45,8 +46,9 @@ describe('DeviceTypesContentVariableDialog', () => {
                     provide: MAT_DIALOG_DATA,
                     useValue: {
                         contentVariable,
-                        functionConceptIds,
                         concepts,
+                        functions,
+                        aspects,
                     },
                 },
             ],
@@ -62,7 +64,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         'should create the app',
         waitForAsync(() => {
             const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
-            init(contentVariable, [], []);
+            init(contentVariable, [], [], []);
             expect(component).toBeTruthy();
         }),
     );
@@ -70,7 +72,7 @@ describe('DeviceTypesContentVariableDialog', () => {
     it(
         'create primitive Type',
         waitForAsync(() => {
-            init({} as DeviceTypeContentVariableModel, [], []);
+            init({} as DeviceTypeContentVariableModel, [], [], []);
             expect(component.isPrimitiveType()).toBe(true);
             expect(component.typeOptionsControl.value).toBe('primitive');
             expect(component.firstFormGroup.invalid).toBe(true);
@@ -97,6 +99,9 @@ describe('DeviceTypesContentVariableDialog', () => {
                 unit_reference: 'unit_reference',
                 sub_content_variables: null,
                 value: 'value',
+                aspect_id: null,
+                function_id: null,
+                is_void: null,
             });
         }),
     );
@@ -114,7 +119,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 unit_reference: 'unit_reference',
                 value: 'value',
             } as DeviceTypeContentVariableModel;
-            init(contentVariable, [], []);
+            init(contentVariable, [], [], []);
             expect(component.typeOptionsControl.value).toBe('primitive');
             expect(component.typeOptionsControl.disabled).toBe(true);
             expect(component.firstFormGroup.getRawValue()).toEqual({
@@ -127,6 +132,9 @@ describe('DeviceTypesContentVariableDialog', () => {
                 unit_reference: 'unit_reference',
                 sub_content_variables: null,
                 value: 'value',
+                aspect_id: null,
+                function_id: null,
+                is_void: null,
             });
         }),
     );
@@ -135,7 +143,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         'create non-primitive Type',
         waitForAsync(() => {
             const contentVariable: DeviceTypeContentVariableModel = {} as DeviceTypeContentVariableModel;
-            init(contentVariable, [], []);
+            init(contentVariable, [], [], []);
             component.typeOptionsControl.setValue('non-primitive');
             expect(component.typeOptionsControl.value).toBe('non-primitive');
             expect(component.isPrimitiveType()).toBe(false);
@@ -143,6 +151,8 @@ describe('DeviceTypesContentVariableDialog', () => {
             component.firstFormGroup.patchValue({
                 name: 'testStruct',
                 type: component.nonPrimitiveTypes[0].type,
+                aspect_id: null,
+                function_id: null,
             });
             expect(component.firstFormGroup.valid).toBe(true);
             expect(component.firstFormGroup.getRawValue()).toEqual({
@@ -155,6 +165,9 @@ describe('DeviceTypesContentVariableDialog', () => {
                 unit_reference: null,
                 sub_content_variables: [],
                 value: null,
+                aspect_id: null,
+                function_id: null,
+                is_void: false,
             });
         }),
     );
@@ -174,7 +187,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                     },
                 ] as DeviceTypeContentVariableModel[],
             } as DeviceTypeContentVariableModel;
-            init(contentVariable, [], []);
+            init(contentVariable, [], [], []);
             expect(component.typeOptionsControl.value).toBe('non-primitive');
             expect(component.typeOptionsControl.disabled).toBe(true);
             expect(component.firstFormGroup.getRawValue()).toEqual({
@@ -193,6 +206,9 @@ describe('DeviceTypesContentVariableDialog', () => {
                     },
                 ],
                 value: null,
+                aspect_id: null,
+                function_id: null,
+                is_void: null,
             });
         }),
     );
@@ -200,8 +216,7 @@ describe('DeviceTypesContentVariableDialog', () => {
     it(
         'init concepts and characteristics',
         waitForAsync(() => {
-            const functionIds: string[] = ['urn:infai:ses:concept:ebfeabb3', 'func_id_2'];
-            init({} as DeviceTypeContentVariableModel, functionIds, [
+            init({function_id: 'f1'} as DeviceTypeContentVariableModel,  [
                 {
                     id: 'urn:infai:ses:concept:ebfeabb3',
                     name: 'binary state',
@@ -235,8 +250,10 @@ describe('DeviceTypesContentVariableDialog', () => {
                         },
                     ],
                 },
-            ]);
-            expect(component.functionConceptIds).toEqual(functionIds);
+            ], [{
+                id: 'f1',
+                concept_id: 'urn:infai:ses:concept:ebfeabb3'
+            } as DeviceTypeFunctionModel], []);
             expect(component.conceptList).toEqual([
                 {
                     conceptName: 'binary state',

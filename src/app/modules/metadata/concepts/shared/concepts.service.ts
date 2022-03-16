@@ -45,13 +45,13 @@ export class ConceptsService {
 
     getConceptWithoutCharacteristics(conceptId: string): Observable<DeviceTypeConceptModel | null> {
         return this.http
-            .get<DeviceTypeConceptModel>(environment.semanticRepoUrl + '/concepts/' + conceptId + '?sub-class=false')
+            .get<DeviceTypeConceptModel>(environment.deviceRepoUrl + '/concepts/' + conceptId + '?sub-class=false')
             .pipe(catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcept', null)));
     }
 
     getConceptWithCharacteristics(conceptId: string): Observable<ConceptsCharacteristicsModel | null> {
         return this.http
-            .get<ConceptsCharacteristicsModel>(environment.semanticRepoUrl + '/concepts/' + conceptId + '?sub-class=true')
+            .get<ConceptsCharacteristicsModel>(environment.deviceRepoUrl + '/concepts/' + conceptId + '?sub-class=true')
             .pipe(catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcept', null)));
     }
 

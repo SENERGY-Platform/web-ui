@@ -27,7 +27,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DeviceStatusElementModel } from '../shared/device-status-properties.model';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
     DeviceTypeServiceModel,
@@ -128,13 +128,13 @@ describe('DeviceStatusEditDialogComponent', () => {
 
             dashboardServiceSpy.getWidget.and.returnValue(of({ name: 'test', properties: {} } as WidgetModel));
             dashboardServiceSpy.updateWidget.and.returnValue(of({ message: 'OK' }));
-            deviceTypeServiceeSpy.getAspectsWithMeasuringFunction.and.returnValue(
+            deviceTypeServiceeSpy.getAspectNodesWithMeasuringFunction.and.returnValue(
                 of([
                     {
                         id: 'aspect_1',
                         name: 'Air',
                     },
-                ] as DeviceTypeAspectModel[]),
+                ] as DeviceTypeAspectNodeModel[]),
             );
             deviceTypeServiceeSpy.getAspectsMeasuringFunctions.and.returnValue(
                 of([
@@ -220,7 +220,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             expect(component.preparedDeployment.length).toBe(0);
             expect(component.serviceExportValueArray.length).toBe(0);
             expect(component.aspects.length).toBe(1);
-            expect(component.aspects[0]).toEqual({ id: 'aspect_1', name: 'Air' });
+            expect(component.aspects[0]).toEqual({ id: 'aspect_1', name: 'Air' } as DeviceTypeAspectNodeModel);
             expect(component.dashboardId).toBe('dashboardId-1');
             expect(component.widgetId).toBe('widgetId-1');
         }),
@@ -425,7 +425,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             expect(component.selectablesArray.length).toBe(0);
             expect(component.preparedDeployment.length).toBe(0);
             expect(component.serviceExportValueArray.length).toBe(0);
-            expect(component.aspects[0]).toEqual({ id: 'aspect_1', name: 'Air' });
+            expect(component.aspects[0]).toEqual({ id: 'aspect_1', name: 'Air' } as DeviceTypeAspectNodeModel);
             expect(component.dashboardId).toBe('dashboardId-1');
             expect(component.widgetId).toBe('widgetId-1');
         }),

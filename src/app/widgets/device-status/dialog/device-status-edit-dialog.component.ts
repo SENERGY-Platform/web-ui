@@ -22,7 +22,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
     DeviceTypeServiceModel,
@@ -49,7 +49,7 @@ import { V2DeploymentsPreparedModel } from '../../../modules/processes/deploymen
     styleUrls: ['./device-status-edit-dialog.component.css'],
 })
 export class DeviceStatusEditDialogComponent implements OnInit {
-    aspects: DeviceTypeAspectModel[] = [];
+    aspects:  DeviceTypeAspectNodeModel[] = [];
     icons: string[] = [
         'power',
         'power_off',
@@ -428,7 +428,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     }
 
     private getAspects(): void {
-        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe((aspects: DeviceTypeAspectModel[]) => {
+        this.deviceTypeService.getAspectNodesWithMeasuringFunction().subscribe(aspects => {
             this.aspects = aspects;
         });
     }

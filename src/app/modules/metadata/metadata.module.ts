@@ -19,7 +19,6 @@ import { RouterModule } from '@angular/router';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { CommonModule } from '@angular/common';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-
 import { DeviceTypesOverviewComponent } from './device-types-overview/device-types-overview.component';
 import { CoreModule } from '../../core/core.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -56,12 +55,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FunctionsComponent } from './functions/functions.component';
 import { FunctionsEditDialogComponent } from './functions/dialog/functions-edit-dialog.component';
 import { AspectsComponent } from './aspects/aspects.component';
-import { AspectsEditDialogComponent } from './aspects/dialog/aspects-edit-dialog.component';
 import { DeviceClassesComponent } from './device-classes/device-classes.component';
 import { DeviceClassesEditDialogComponent } from './device-classes/dialog/device-classes-edit-dialog.component';
 import { FunctionsCreateDialogComponent } from './functions/dialog/functions-create-dialog.component';
 import { CharacteristicElementComponent } from './characteristics/dialogs/characteristic-element/characteristic-element.component';
 import { MatTreeModule } from '@angular/material/tree';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 const deviceTypes = {
     path: 'metadata/devicetypesoverview',
@@ -121,6 +120,7 @@ const deviceClasses = {
         DeviceTypesOverviewModule,
         RouterModule.forChild([deviceTypes, concepts, characteristics, functions, aspects, deviceClasses]),
         MatTreeModule,
+        DragDropModule,
     ],
     declarations: [
         DeviceTypesOverviewComponent,
@@ -134,7 +134,6 @@ const deviceClasses = {
         FunctionsEditDialogComponent,
         FunctionsCreateDialogComponent,
         AspectsComponent,
-        AspectsEditDialogComponent,
         DeviceClassesComponent,
         DeviceClassesEditDialogComponent,
     ],

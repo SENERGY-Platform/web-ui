@@ -104,35 +104,6 @@
                                                         <mat-form-field class="full-width" color="accent">
                                                             <input matInput placeholder="Id" formControlName="id">
                                                         </mat-form-field>
-                                                        <table class="full-width">
-                                                            <tr>
-                                                                <td>
-                                                                    <mat-form-field class="full-width" color="accent">
-                                                                        <mat-label>Function Type</mat-label>
-                                                                        <mat-select formControlName="functionType" required>
-                                                                            <mat-option
-                                                                                    *ngFor="let item of deviceTypeFunctionType"
-                                                                                    [value]="item">
-                                                                                {{item.text}}
-                                                                            </mat-option>
-                                                                        </mat-select>
-                                                                    </mat-form-field>
-                                                                </td>
-                                                                <td>
-                                                                    <mat-form-field class="full-width" color="accent">
-                                                                        <mat-label>{{functionType(serviceAndIndex.service).text === '' ? 'Function' : functionType(serviceAndIndex.service).text + ' Function'}}</mat-label>
-                                                                        <senergy-select-search formControlName="function_ids"
-                                                                                               [multiple]="true" [required]="true"
-                                                                                               [options]="functionType(serviceAndIndex.service).text === 'Measuring' ? measuringFunctions : controllingFunctions"
-                                                                                               useOptionValueProperty="id"
-                                                                                               useOptionViewProperty="name"
-                                                                                               [getTriggerValue]="getCustomTriggerFunction(serviceAndIndex.service)">
-
-                                                                        </senergy-select-search>
-                                                                    </mat-form-field>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
                                                         <mat-form-field class="full-width" color="accent">
                                                             <input matInput placeholder="Name" formControlName="name" required>
                                                         </mat-form-field>
@@ -142,22 +113,6 @@
                                                         <mat-form-field class="full-width" color="accent">
                                                             <input matInput placeholder="Local Id" formControlName="local_id" required>
                                                         </mat-form-field>
-                                                        <table class="full-width">
-                                                            <tr>
-                                                                <td>
-                                                                    <mat-form-field class="full-width" color="accent">
-                                                                        <mat-label>Aspects</mat-label>
-                                                                        <senergy-select-search formControlName="aspect_ids"
-                                                                                               [multiple]="true" [required]="true"
-                                                                                               [options]="aspectList"
-                                                                                               useOptionViewProperty="name"
-                                                                                               useOptionValueProperty="id"
-                                                                                               [getTriggerValue]="getCustomTriggerAspect(serviceAndIndex.service)">
-                                                                        </senergy-select-search>
-                                                                    </mat-form-field>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
                                                         <mat-form-field class="full-width" color="accent">
                                                             <mat-select placeholder="Protocol"
                                                                         formControlName="protocol_id"
@@ -226,7 +181,7 @@
                                                                 </mat-form-field>
                                                                 <div *ngIf="inOut.dataSource">
                                                                     <button mat-raised-button color="accent"
-                                                                            (click)="addContentVariable(serviceAndIndex.service.value.function_ids, inOut, [])"
+                                                                            (click)="addContentVariable(tab.label === 'Input', inOut, [])"
                                                                             [disabled]="inOut.dataSource.data.length === 1 || !editable">
                                                                         ADD ContentVariable
                                                                     </button>
@@ -240,7 +195,7 @@
                                                                                 <!-- use a disabled button to provide padding for tree leaf -->
                                                                                 <button mat-icon-button disabled></button>
                                                                                 <button mat-stroked-button
-                                                                                        (click)="editContent(node, serviceAndIndex.service.value.function_ids, inOut)">
+                                                                                        (click)="editContent(tab.label === 'Input', node, inOut)">
                                                                                     {{node.name}}
                                                                                 </button>
                                                                                 <button mat-icon-button
@@ -262,7 +217,7 @@
                                                                                         </mat-icon>
                                                                                     </button>
                                                                                     <button mat-stroked-button
-                                                                                            (click)="editContent(node, serviceAndIndex.service.value.function_ids, inOut)">
+                                                                                            (click)="editContent(tab.label === 'Input', node, inOut)">
                                                                                         {{node.name}}
                                                                                     </button>
                                                                                     <button mat-icon-button
@@ -272,7 +227,7 @@
                                                                                     </button>
                                                                                     <button mat-icon-button
                                                                                             [disabled]="!editable"
-                                                                                            (click)="addContentVariable(serviceAndIndex.service.value.function_ids, inOut, node.indices)">
+                                                                                            (click)="addContentVariable(tab.label === 'Input', inOut, node.indices)">
                                                                                         <mat-icon>add</mat-icon>
                                                                                     </button>
                                                                                 </div>

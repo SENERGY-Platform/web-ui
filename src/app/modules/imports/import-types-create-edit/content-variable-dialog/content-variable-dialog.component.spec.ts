@@ -104,6 +104,8 @@ describe('ContentVariableDialogComponent', () => {
             type: component.STRING,
             characteristic_id: 'char0',
             use_as_tag: true,
+            function_id: null,
+            aspect_id: null,
         };
         component.form.patchValue(val);
         component.save();

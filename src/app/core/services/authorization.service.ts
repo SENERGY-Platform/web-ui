@@ -83,4 +83,8 @@ export class AuthorizationService {
             .put<null>(environment.usersServiceUrl + '/info', userProfile)
             .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'changeUserProfile', { error: 'error' })));
     }
+
+    userIsAdmin(): boolean {
+        return this.keycloakService.isUserInRole('admin');
+    }
 }

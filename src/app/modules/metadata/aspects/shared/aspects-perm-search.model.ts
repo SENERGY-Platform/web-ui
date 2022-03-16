@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import {DeviceTypeAspectModel} from '../../device-types-overview/shared/device-type.model';
+
 export interface AspectsPermSearchModel {
     creator: string;
     id: string;
     name: string;
+    raw?: DeviceTypeAspectModel;
     permissions: {
         a: boolean;
         x: boolean;

@@ -19,7 +19,7 @@ import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
     DeviceTypeServiceModel,
@@ -47,7 +47,7 @@ export class DataTableHelperService {
     pipelineCache: PipelineModel[] | undefined = undefined;
     deviceTypeCache = new Map<string, DeviceTypeModel>();
     deviceInstancesCache = new Map<string, DeviceSelectablesModel[]>();
-    aspectCache: DeviceTypeAspectModel[] = [];
+    aspectCache: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
     aspectFunctionsCache = new Map<string, DeviceTypeFunctionModel[]>();
     operatorCache = new Map<string, OperatorModel>();
     serviceExportValueCache = new Map<string, ExportValueCharacteristicModel[]>();
@@ -89,7 +89,7 @@ export class DataTableHelperService {
         this.pipelineCache = undefined;
         this.deviceTypeCache = new Map<string, DeviceTypeModel>();
         this.deviceInstancesCache = new Map<string, DeviceSelectablesModel[]>();
-        this.aspectCache = [];
+        this.aspectCache = new Map();
         this.aspectFunctionsCache = new Map<string, DeviceTypeFunctionModel[]>();
         this.operatorCache = new Map<string, OperatorModel>();
         this.serviceExportValueCache = new Map<string, ExportValueCharacteristicModel[]>();
@@ -109,11 +109,23 @@ export class DataTableHelperService {
         return forkJoin(obs).pipe(map(() => null));
     }
 
-    preloadAspectsWithMeasuringFunction(): Observable<DeviceTypeAspectModel[]> {
-        return this.deviceTypeService.getAspectsWithMeasuringFunction().pipe(map((aspects) => (this.aspectCache = aspects)));
+    preloadAspectsWithMeasuringFunction(): Observable<Map<string, DeviceTypeAspectNodeModel[]>> {
+        return this.deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().pipe(map((aspects) => {
+            const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            const asp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            aspects.forEach(a => {
+                if (!tmp.has(a.root_id)) {
+                    tmp.set(a.root_id, []);
+                }
+                tmp.get(a.root_id)?.push(a);
+            });
+            tmp.forEach((v, k) => asp.set(aspects.find(a => a.id === k)?.name || '', v));
+            this.aspectCache = asp;
+            return this.aspectCache;
+        }));
     }
 
-    getAspectsWithMeasuringFunction(): DeviceTypeAspectModel[] {
+    getAspectsWithMeasuringFunction(): Map<string, DeviceTypeAspectNodeModel[]> {
         return this.aspectCache;
     }
 

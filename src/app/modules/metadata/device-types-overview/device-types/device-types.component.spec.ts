@@ -345,9 +345,6 @@ describe('DeviceTypesComponent', () => {
                             show: true,
                         },
                     ],
-                    functionType: { text: '' },
-                    function_ids: [],
-                    aspect_ids: [],
                 },
             ]);
         }),
@@ -408,9 +405,6 @@ describe('DeviceTypesComponent', () => {
                             show: true,
                         },
                     ],
-                    functionType: { text: '' },
-                    function_ids: [],
-                    aspect_ids: [],
                 },
             ]);
         }),

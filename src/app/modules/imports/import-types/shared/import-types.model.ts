@@ -21,9 +21,7 @@ export interface ImportTypeModel {
     image: string;
     default_restart: boolean;
     configs: ImportTypeConfigModel[];
-    aspect_ids: string[];
     output: ImportTypeContentVariableModel;
-    function_ids: string[];
     owner: string;
 }
 
@@ -37,18 +35,20 @@ export interface ImportTypeConfigModel {
 export interface ImportTypeContentVariableModel {
     name: string;
     type: string;
-    characteristic_id: string;
+    characteristic_id?: string;
     sub_content_variables: ImportTypeContentVariableModel[] | null;
     use_as_tag: boolean;
+    aspect_id?: string;
+    function_id?: string;
 }
 
 export interface ImportTypePermissionSearchModel {
     aspect_functions: string[];
-    aspect_ids: string[];
+    content_aspect_ids: string[];
     creator: string;
     default_restart: boolean;
     description: string;
-    function_ids: string[];
+    content_function_ids: string[];
     id: string;
     image: string;
     name: string;

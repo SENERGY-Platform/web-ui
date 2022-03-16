@@ -18,7 +18,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import {
-    DeviceTypeAspectModel,
+    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
@@ -46,7 +46,7 @@ export class TaskConfigDialogComponent implements OnInit {
     retriesFormControl = new FormControl({ value: 0, disabled: true }, [Validators.min(0), Validators.max(100)]);
 
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
-    aspects: DeviceTypeAspectModel[] = [];
+    aspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
     functions: DeviceTypeFunctionModel[] = [];
     characteristic: DeviceTypeCharacteristicsModel = {} as DeviceTypeCharacteristicsModel;
     limit = 20;
@@ -133,8 +133,17 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private getAspects(): void {
-        this.deviceTypeService.getAspectsWithMeasuringFunction().subscribe((aspects: DeviceTypeAspectModel[]) => {
-            this.aspects = aspects;
+        this.deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
+            const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            const asp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            aspects.forEach(a => {
+                if (!tmp.has(a.root_id)) {
+                    tmp.set(a.root_id, []);
+                }
+                tmp.get(a.root_id)?.push(a);
+            });
+            tmp.forEach((v, k) => asp.set(aspects.find(a => a.id === k)?.name || '', v));
+            this.aspects = asp;
         });
     }
 

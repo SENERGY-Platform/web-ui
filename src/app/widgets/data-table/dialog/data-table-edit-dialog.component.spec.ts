@@ -24,7 +24,10 @@ import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.
 import { of } from 'rxjs';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { FormArray, ReactiveFormsModule } from '@angular/forms';
-import { DeviceTypeInteractionEnum } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectNodeModel,
+    DeviceTypeInteractionEnum
+} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -158,7 +161,9 @@ describe('DataTableEditDialogComponent', () => {
             processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
 
             dataTableHelperServiceSpy.preloadMeasuringFunctionsOfAspect.and.returnValue(of([{ id: 'aspectId' }]));
-            dataTableHelperServiceSpy.getAspectsWithMeasuringFunction.and.returnValue([{ id: 'aspectId' }]);
+            const m = new Map();
+            m.set('aspect', [{ id: 'aspectId' }]);
+            dataTableHelperServiceSpy.getAspectsWithMeasuringFunction.and.returnValue(m);
             dataTableHelperServiceSpy.preloadDevicesOfFunctionAndAspect.and.returnValue(of([{ id: 'functionId' }]));
             dataTableHelperServiceSpy.getMeasuringFunctionsOfAspect.and.returnValue([{ id: 'functionId' }]);
             dataTableHelperServiceSpy.getDevicesOfFunctionAndAspect.and.returnValue([
@@ -222,7 +227,7 @@ describe('DataTableEditDialogComponent', () => {
     it(
         'check the first dialog init',
         waitForAsync(() => {
-            dataTableHelperServiceSpy.getAspectsWithMeasuringFunction.and.returnValue([]);
+            dataTableHelperServiceSpy.getAspectsWithMeasuringFunction.and.returnValue(new Map());
             dataTableHelperServiceSpy.getMeasuringFunctionsOfAspect.and.returnValue([]);
             dataTableHelperServiceSpy.getDevicesOfFunctionAndAspect.and.returnValue([]);
             dataTableHelperServiceSpy.getServiceValues.and.returnValue([]);

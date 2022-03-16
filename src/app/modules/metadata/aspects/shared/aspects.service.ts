@@ -14,39 +14,19 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { Observable } from 'rxjs';
-import { environment } from '../../../../../environments/environment';
-import { catchError, map } from 'rxjs/operators';
-import { DeviceTypeAspectModel, DeviceTypeCharacteristicsModel } from '../../device-types-overview/shared/device-type.model';
-import { AspectsPermSearchModel } from './aspects-perm-search.model';
-import { LocationModel } from '../../../devices/locations/shared/locations.model';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
+import {Observable} from 'rxjs';
+import {environment} from '../../../../../environments/environment';
+import {catchError} from 'rxjs/operators';
+import {DeviceTypeAspectModel} from '../../device-types-overview/shared/device-type.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AspectsService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
-
-    getAspects(query: string, limit: number, offset: number, sortBy: string, sortDirection: string): Observable<AspectsPermSearchModel[]> {
-        if (sortDirection === '' || sortDirection === null || sortDirection === undefined) {
-            sortDirection = 'asc';
-        }
-        if (sortBy === '' || sortBy === null || sortBy === undefined) {
-            sortBy = 'name';
-        }
-        const params = ['limit=' + limit, 'offset=' + offset, 'rights=r', 'sort=' + sortBy + '.' + sortDirection];
-        if (query) {
-            params.push('search=' + encodeURIComponent(query));
-        }
-
-        return this.http.get<AspectsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/resources/aspects?' + params.join('&')).pipe(
-            map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(AspectsService.name, 'getAspects(search)', [])),
-        );
-    }
 
     updateAspects(aspect: DeviceTypeAspectModel): Observable<DeviceTypeAspectModel | null> {
         return this.http

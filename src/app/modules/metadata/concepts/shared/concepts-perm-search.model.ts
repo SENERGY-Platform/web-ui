@@ -18,6 +18,7 @@ export interface ConceptsPermSearchModel {
     creator: string;
     id: string;
     name: string;
+    characteristic_ids?: string[];
     permissions: {
         a: boolean;
         x: boolean;

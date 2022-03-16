@@ -17,7 +17,11 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ImportTypeContentVariableModel} from '../../import-types/shared/import-types.model';
 import {AbstractControl, FormBuilder, ValidationErrors, Validators} from '@angular/forms';
-import {DeviceTypeCharacteristicsModel} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeFunctionModel
+} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     selector: 'senergy-import-content-variable-dialog',
@@ -46,6 +50,8 @@ export class ContentVariableDialogComponent implements OnInit {
         type: [undefined, Validators.required],
         characteristic_id: null,
         use_as_tag: false,
+        aspect_id: undefined,
+        function_id: undefined,
     });
 
     STRING = 'https://schema.org/Text';
@@ -64,10 +70,14 @@ export class ContentVariableDialogComponent implements OnInit {
         {id: this.LIST, name: 'List'},
     ];
 
+    aspectOptions: Map<string, DeviceTypeAspectModel[]> = new Map();
+
     constructor(
         @Inject(MAT_DIALOG_DATA)
         public data: {
             content?: ImportTypeContentVariableModel;
+            functions: DeviceTypeFunctionModel[];
+            aspects: DeviceTypeAspectModel[];
             typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>>;
             infoOnly: boolean;
             nameTimeAllowed: boolean;
@@ -92,6 +102,9 @@ export class ContentVariableDialogComponent implements OnInit {
         this.form.get('type')?.valueChanges.subscribe((_) => {
             this.form.patchValue({characteristic_id: null});
         });
+        this.data.aspects?.forEach(a => {
+            this.aspectOptions.set(a.name, this.getAllAspectsOnTree(a));
+        });
     }
 
     save() {
@@ -103,6 +116,8 @@ export class ContentVariableDialogComponent implements OnInit {
         this.data.content.type = this.form.get('type')?.value;
         this.data.content.characteristic_id = this.form.get('characteristic_id')?.value;
         this.data.content.use_as_tag = this.form.get('use_as_tag')?.value;
+        this.data.content.aspect_id = this.form.get('aspect_id')?.value;
+        this.data.content.function_id = this.form.get('function_id')?.value;
         this.dialogRef.close(this.data.content);
     }
 
@@ -121,5 +136,12 @@ export class ContentVariableDialogComponent implements OnInit {
             return '';
         }
         return errors['notNamedTimeAndNotEmpty'];
+    }
+
+    private getAllAspectsOnTree(a: DeviceTypeAspectModel): DeviceTypeAspectModel[] {
+        const res: DeviceTypeAspectModel[] = [];
+        res.push(a);
+        a.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub)));
+        return res;
     }
 }

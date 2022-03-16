@@ -16,8 +16,8 @@
 
 <h2 mat-dialog-title>Edit Concept</h2>
 
-<mat-dialog-content>
-    <form class="form">
+<mat-dialog-content *ngIf="ready">
+    <form class="form" fxLayout="column">
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Id</mat-label>
             <input matInput placeholder="Id" [formControl]="idFormControl">
@@ -26,11 +26,21 @@
             <mat-label>Name</mat-label>
             <input matInput placeholder="Name" [formControl]="nameFormControl" required>
         </mat-form-field>
+        <mat-form-field fxFlex color="accent" appearance="outline">
+            <mat-label>Characteristics</mat-label>
+            <senergy-select-search [options]="characteristics"
+                                   useOptionViewProperty="name"
+                                   placeholder="Characteristics"
+                                   [formControl]="characteristicsControl"
+                                   [multiple]="true"
+                                   [compareWith]="compareIds">
+            </senergy-select-search>
+        </mat-form-field>
         <mat-form-field class="full-width" appearance="outline" color="accent">
             <mat-label>Base Characteristic</mat-label>
             <mat-select placeholder="Base Characteristic"
                         [formControl]="baseCharacteristicControl" required>
-                <mat-option *ngFor="let characteristic of characteristics"
+                <mat-option *ngFor="let characteristic of characteristicsControl.value"
                             [value]="characteristic.id">
                     {{characteristic.name}}
                 </mat-option>
