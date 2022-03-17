@@ -41,6 +41,7 @@
                             <table class="full-width">
                                 <tr>
                                     <td formGroupName="selection">
+
                                         <mat-form-field class="full-width" color="accent">
                                             <senergy-select-search placeholder="{{element.name}}" [required]="true"
                                                                    formControlName="selection_options_index"
@@ -51,8 +52,7 @@
                                             </senergy-select-search>
                                         </mat-form-field>
 
-                                        <mat-form-field class="full-width" color="accent"
-                                                        *ngIf="element.task.selection.show === true">
+                                        <mat-form-field class="full-width" color="accent" *ngIf="element.task.selection.show === true">
                                             <senergy-select-search placeholder="Service" [required]="true"
                                                                    formControlName="selected_service_id"
                                                                    [options]="element.task.selection.selection_options[element.task.selection.selection_options_index || 0].services || []"
@@ -60,28 +60,38 @@
                                                                    useOptionViewProperty="name">
                                             </senergy-select-search>
                                         </mat-form-field>
-                                    </td>
-                                    <td formGroupName="parameter"
-                                        *ngFor="let item of element.task.parameter | keyvalue; trackBy:trackByFn">
+
                                         <mat-form-field class="full-width" color="accent"
-                                                        *ngIf="displayParameter(item.value)">
-                                            <input type="text" matInput placeholder="{{item.key}}"
-                                                   [formControlName]="'' + item.key">
+                                                        [fxShow]="getPathOptions(elementIndex, 'task').length > 1">
+                                            <senergy-select-search placeholder="Path" [required]="true"
+                                                                   (selectionChange)="setSelectedPathOptionByElementIndex('task', elementIndex, $event.value)"
+                                                                   [autoSelectSingleElement]="true"
+                                                                   [options]="getPathOptions(elementIndex, 'task')"
+                                                                   useOptionViewProperty="path">
+                                            </senergy-select-search>
                                         </mat-form-field>
                                     </td>
-                                    <td formArrayName="configurables"
-                                        *ngFor="let configurable of element.task.configurables; let configurableIndex = index; trackBy:trackByFn">
-                                        <div [formGroupName]="configurableIndex">
-                                            <div formArrayName="values"
-                                                 *ngFor="let value of configurable.values; let configurableValueIndex = index; trackBy:trackByFn">
-                                                <div [formGroupName]="configurableValueIndex">
-                                                    <mat-form-field class="full-width" color="accent">
-                                                        <input type="text" matInput placeholder="{{value.label}}"
-                                                               formControlName="value">
+                                    <td formGroupName="parameter" *ngFor="let item of element.task.parameter | keyvalue; trackBy:trackByFn">
+                                        <mat-form-field class="full-width" color="accent" *ngIf="displayParameter(item.value)">
+                                            <input type="text" matInput placeholder="{{item.key}}" [formControlName]="'' + item.key">
+                                        </mat-form-field>
+                                    </td>
+                                    <td formGroupName="selection" *ngFor="let configurable of element.task.selection.selected_path?.configurables; let configurableIndex = index; trackBy:trackByFn">
+                                        <ng-container formGroupName="selected_path">
+                                            <ng-container formGroupName="configurables">
+                                                <div [formGroupName]="configurableIndex">
+                                                    <mat-form-field class="full-width" color="accent" *ngIf="configurable.type=='https://schema.org/Text'">
+                                                        <input type="text"  matInput placeholder="{{configurable.path}}" formControlName="value">
                                                     </mat-form-field>
+                                                    <mat-form-field class="full-width" color="accent" *ngIf="configurable.type=='https://schema.org/Integer' || configurable.type=='https://schema.org/Float'">
+                                                        <input type="number"  matInput placeholder="{{configurable.path}}" formControlName="value">
+                                                    </mat-form-field>
+                                                    <mat-checkbox *ngIf="configurable.type=='https://schema.org/Boolean'" formControlName="value">
+                                                        {{configurable.path}}
+                                                    </mat-checkbox>
                                                 </div>
-                                            </div>
-                                        </div>
+                                            </ng-container>
+                                        </ng-container>
                                     </td>
                                 </tr>
                             </table>
@@ -112,11 +122,11 @@
                                         </mat-form-field>
 
                                         <mat-form-field class="full-width" color="accent"
-                                         [fxShow]="getPathOptions(elementIndex).length > 1">
+                                                        [fxShow]="getPathOptions(elementIndex, 'message_event').length > 1">
                                             <senergy-select-search placeholder="Path" [required]="true"
-                                                                   formControlName="selected_path_option"
+                                                                   (selectionChange)="setSelectedPathOptionByElementIndex('message_event', elementIndex, $event.value)"
                                                                    [autoSelectSingleElement]="true"
-                                                                   [options]="getPathOptions(elementIndex)"
+                                                                   [options]="getPathOptions(elementIndex, 'message_event')"
                                                                    useOptionViewProperty="path">
                                             </senergy-select-search>
                                         </mat-form-field>

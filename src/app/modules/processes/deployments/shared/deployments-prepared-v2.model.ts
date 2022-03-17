@@ -16,6 +16,7 @@
 
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
 import { ImportTypeModel } from '../../../imports/import-types/shared/import-types.model';
+import {DeviceTypeAspectNodeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 export interface V2DeploymentsPreparedModel {
     id: string;
@@ -52,7 +53,6 @@ export interface V2DeploymentsPreparedTaskModel {
     retries: number;
     parameter: any;
     selection: V2DeploymentsPreparedSelectionModel;
-    configurables: V2DeploymentsPreparedConfigurableModel[] | null;
 }
 
 export interface V2DeploymentsPreparedConfigurableModel {
@@ -96,8 +96,7 @@ export interface V2DeploymentsPreparedSelectionModel {
     selected_service_id: string | null;
     selected_device_group_id: string | null;
     selected_import_id: string | null;
-    selected_path: string | null;
-    selected_characteristic_id: string | null;
+    selected_path: DeploymentsSelectionPathOptionModel | null;
     show?: boolean;
 }
 
@@ -107,7 +106,27 @@ export interface V2DeploymentsPreparedSelectionOptionModel {
     device_group: V2DeploymentsPreparedGroupModel | null;
     import: ImportInstancesModel | null;
     importType: ImportTypeModel | null;
-    servicePathOptions?: Map<string, { path: string; characteristicId: string }[]>;
+    path_options: Map<string, DeploymentsSelectionPathOptionModel[]> | null;
+}
+
+export interface DeploymentsSelectionPathOptionModel {
+    path: string;
+    characteristicId: string;
+    aspectNode: DeviceTypeAspectNodeModel;
+    functionId: string;
+    isVoid: boolean;
+    value: any;
+    type: string;
+    configurables: DeploymentsSelectionConfigurableModel[];
+}
+
+export interface DeploymentsSelectionConfigurableModel {
+    path: string;
+    characteristic_id: string;
+    aspect_node: DeviceTypeAspectNodeModel;
+    function_id: string;
+    value: any;
+    type: string;
 }
 
 export interface V2DeploymentsPreparedServiceModel {

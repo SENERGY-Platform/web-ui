@@ -18,6 +18,8 @@ import { Injectable } from '@angular/core';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn} from '@angular/forms';
 import * as moment from 'moment';
 import {
+    DeploymentsSelectionConfigurableModel,
+    DeploymentsSelectionPathOptionModel,
     V2DeploymentsPreparedConfigurableModel,
     V2DeploymentsPreparedConfigurableValueModel,
     V2DeploymentsPreparedElementModel,
@@ -28,6 +30,7 @@ import {
     V2DeploymentsPreparedTaskModel,
     V2DeploymentsPreparedTimeEventModel,
 } from '../../shared/deployments-prepared-v2.model';
+import {DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
 
 @Injectable({
     providedIn: 'root',
@@ -108,7 +111,6 @@ export class DeploymentsConfigInitializerService {
             retries: task.retries,
             parameter: this.initParameterFormGroup(task.parameter),
             selection: this.initSelectionFormGroup(task.selection, disable),
-            configurables: this.initConfigurablesArray(task.configurables),
         });
     }
 
@@ -143,16 +145,58 @@ export class DeploymentsConfigInitializerService {
             selected_device_group_id: [{ value: selection.selected_device_group_id, disabled: disable }],
             selected_import_id: [{ value: selection.selected_import_id, disabled: disable }],
             selected_path_option: [{ value: undefined, disabled: disable }],
-            selected_path: [{ value: selection.selected_path, disabled: disable }],
-            selected_characteristic_id: [{ value: selection.selected_characteristic_id, disabled: disable }],
+            selected_path: this.iniPathOptionFormControl(selection.selected_path, disable),
             show: false,
         });
-        group.get('selected_path_option')?.valueChanges.subscribe((option: { path: string; characteristicId: string } | null) => {
-            if (option !== null) {
-                group.patchValue({ selected_path: option.path, selected_characteristic_id: option.characteristicId });
-            }
-        });
         return group;
+    }
+
+    private initPathOptionsFormArray(pathOptions: DeploymentsSelectionPathOptionModel[], disabled: boolean): FormArray {
+        const array: FormGroup[] = [];
+        if (pathOptions !== null) {
+            pathOptions.forEach((option: DeploymentsSelectionPathOptionModel) => {
+                array.push(this.iniPathOptionFormControl(option, disabled));
+            });
+        }
+
+        return this._formBuilder.array(array);
+    }
+
+
+    public iniPathOptionFormControl(pathOption: DeploymentsSelectionPathOptionModel | null, disable: boolean):FormGroup {
+        const that = this;
+        return this._formBuilder.group({
+            path: [{ value: pathOption?.path, disabled: disable }],
+            characteristicId: [{ value: pathOption?.characteristicId, disabled: disable }],
+            aspectNode: [{ value: pathOption?.aspectNode, disabled: disable }],
+            functionId: [{ value: pathOption?.functionId, disabled: disable }],
+            isVoid: [{ value: pathOption?.isVoid, disabled: disable }],
+            value: [{ value: pathOption?.value, disabled: disable }],
+            type: [{ value: pathOption?.type, disabled: disable }],
+            configurables: that.initConfigurablesFormArray(pathOption?.configurables, disable),
+        });
+    }
+
+    public initConfigurablesFormArray(configurables: undefined | DeploymentsSelectionConfigurableModel[], disabled: boolean): FormArray {
+        const array: FormGroup[] = [];
+        if (configurables !== undefined && configurables !== null) {
+            configurables.forEach((c: DeploymentsSelectionConfigurableModel) => {
+                array.push(this.iniConfigurableFormControl(c, disabled));
+            });
+        }
+        return this._formBuilder.array(array);
+    }
+
+
+    public iniConfigurableFormControl(configurable: DeploymentsSelectionConfigurableModel | null, disable: boolean):FormGroup {
+        return this._formBuilder.group({
+            path: [{ value: configurable?.path, disabled: disable }],
+            characteristic_id: [{ value: configurable?.characteristic_id, disabled: disable }],
+            aspect_node: [{ value: configurable?.aspect_node, disabled: disable }],
+            function_id: [{ value: configurable?.function_id, disabled: disable }],
+            value: [{ value: configurable?.value, disabled: disable }],
+            type: [{ value: configurable?.type, disabled: disable }],
+        });
     }
 
     private initParameterFormGroup(parameter: any): FormGroup {
@@ -182,7 +226,7 @@ export class DeploymentsConfigInitializerService {
             device_group: [selectionOption.device_group],
             import: selectionOption.import,
             importType: selectionOption.importType,
-            servicePathOptions: selectionOption.servicePathOptions,
+            path_options: [selectionOption.path_options]
         });
     }
 
@@ -242,8 +286,8 @@ export class DeploymentsConfigInitializerService {
                     return {durationLessThan5Seconds: {value: control.value}}
                 }
             }
-
             return null;
         };
     }
+
 }

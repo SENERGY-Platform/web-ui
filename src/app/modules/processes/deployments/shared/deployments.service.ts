@@ -24,7 +24,11 @@ import { DeploymentsModel } from './deployments.model';
 import { CamundaVariable, DeploymentsDefinitionModel } from './deployments-definition.model';
 import { DeploymentsMissingDependenciesModel } from './deployments-missing-dependencies.model';
 import { DeploymentsPreparedModel } from './deployments-prepared.model';
-import { V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel } from './deployments-prepared-v2.model';
+import {
+    DeploymentsSelectionPathOptionModel,
+    V2DeploymentsPreparedConfigurableModel,
+    V2DeploymentsPreparedModel
+} from './deployments-prepared-v2.model';
 import { MatDialog } from '@angular/material/dialog';
 
 @Injectable({
@@ -136,7 +140,7 @@ export class DeploymentsService {
 
     v2deleteDeployment(deploymentId: string): Observable<{ status: number }> {
         return this.http
-            .delete(environment.processDeploymentUrl + '/v2/deployments/' + encodeURIComponent(deploymentId), {
+            .delete(environment.processDeploymentUrl + '/v3/deployments/' + encodeURIComponent(deploymentId), {
                 responseType: 'text',
                 observe: 'response',
             })
@@ -147,19 +151,29 @@ export class DeploymentsService {
     }
 
     getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null> {
-        return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/prepared-deployments/' + processId).pipe(
+        return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v3/prepared-deployments/' + processId).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null)),
             map((deployment) => {
                 deployment?.elements?.forEach((element) => {
                     element.message_event?.selection.selection_options.forEach((option: any) => {
-                        if (option.servicePathOptions === undefined) {
+                        if (option.path_options === undefined) {
                             return;
                         }
-                        const m = new Map<string, { path: string; characteristicId: string }[]>();
-                        for (const key of Object.keys(option.servicePathOptions)) {
-                            m.set(key, option.servicePathOptions[key]);
+                        const m = new Map<string, DeploymentsSelectionPathOptionModel[]>();
+                        for (const key of Object.keys(option.path_options)) {
+                            m.set(key, option.path_options[key]);
                         }
-                        option.servicePathOptions = m;
+                        option.path_options = m;
+                    });
+                    element.task?.selection.selection_options.forEach((option: any) => {
+                        if (option.path_options === undefined) {
+                            return;
+                        }
+                        const m = new Map<string, DeploymentsSelectionPathOptionModel[]>();
+                        for (const key of Object.keys(option.path_options)) {
+                            m.set(key, option.path_options[key]);
+                        }
+                        option.path_options = m;
                     });
                 });
                 return deployment;
@@ -169,16 +183,17 @@ export class DeploymentsService {
 
     v2getPreparedDeploymentsByXml(xml: string, svg: string): Observable<V2DeploymentsPreparedModel | null> {
         return this.http
-            .post<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/prepared-deployments', { xml, svg })
+            .post<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v3/prepared-deployments', { xml, svg })
             .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null)));
     }
 
     v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null> {
         return this.http
-            .get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/deployments/' + deploymentId)
+            .get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v3/deployments/' + deploymentId)
             .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v2getDeployments', null)));
     }
 
+    //deprecated
     getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null> {
         return this.http
             .get<V2DeploymentsPreparedConfigurableModel[]>(
@@ -189,7 +204,7 @@ export class DeploymentsService {
 
     v2postDeployments(deployment: V2DeploymentsPreparedModel, source: string = 'sepl'): Observable<{ status: number; id: string }> {
         return this.http
-            .post<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v2/deployments?source=' + source, deployment, {
+            .post<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v3/deployments?source=' + source, deployment, {
                 observe: 'response',
             })
             .pipe(
