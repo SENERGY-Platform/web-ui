@@ -21,6 +21,8 @@ import { DeploymentsConfigInitializerService } from './deployments-config-initia
 import { FormBuilder, FormControl } from '@angular/forms';
 import { V2DeploymentsPreparedModel } from '../../shared/deployments-prepared-v2.model';
 
+const nullPath = { path: '', characteristicId: '', aspectNode: Object({  }), functionId: '', isVoid: false, value: null, type: '', configurables: [  ] }
+
 describe('DeploymentsConfigInitializerService', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -57,7 +59,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         task: {
                             retries: 0,
                             parameter: {},
-                            configurables: null,
+                            
                             selection: {
                                 filter_criteria: {
                                     characteristic_id: '',
@@ -80,7 +82,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -96,7 +98,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -112,15 +114,15 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                 ],
                                 selected_device_id: null,
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
-                                selected_characteristic_id: null,
-                                selected_path: null,
+                                
+                                selected_path: nullPath,
                                 selected_path_option: undefined,
                             },
                         },
@@ -153,7 +155,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                 'inputs.g': '0',
                                 'inputs.r': '0',
                             },
-                            configurables: null,
+                            
                             selection: {
                                 filter_criteria: {
                                     characteristic_id: 'urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43',
@@ -176,7 +178,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -192,7 +194,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -208,15 +210,15 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                 ],
                                 selected_device_id: null,
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
-                                selected_characteristic_id: null,
-                                selected_path: null,
+                                
+                                selected_path: nullPath,
                                 selected_path_option: undefined,
                             },
                         },
@@ -245,7 +247,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         task: {
                             retries: 0,
                             parameter: {},
-                            configurables: null,
+                            
                             selection: {
                                 filter_criteria: {
                                     characteristic_id: '',
@@ -268,7 +270,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -284,7 +286,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -300,15 +302,15 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                 ],
                                 selected_device_id: null,
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
-                                selected_characteristic_id: null,
-                                selected_path: null,
+                                
+                                selected_path: nullPath,
                                 selected_path_option: undefined,
                             },
                         },
@@ -337,7 +339,6 @@ describe('DeploymentsConfigInitializerService', () => {
                         task: {
                             retries: 0,
                             parameter: {},
-                            configurables: [],
                             selection: {
                                 filter_criteria: {
                                     characteristic_id: '',
@@ -360,7 +361,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -376,7 +377,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -392,7 +393,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                 ],
                                 selection_options_index: -1,
@@ -400,8 +401,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
-                                selected_characteristic_id: null,
-                                selected_path: null,
+                                
+                                selected_path: nullPath,
                                 selected_path_option: undefined,
                                 show: false,
                             },
@@ -436,7 +437,6 @@ describe('DeploymentsConfigInitializerService', () => {
                                 'inputs.g': '0',
                                 'inputs.r': '0',
                             },
-                            configurables: [],
                             selection: {
                                 filter_criteria: {
                                     characteristic_id: 'urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43',
@@ -459,7 +459,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -475,7 +475,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -491,7 +491,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                 ],
                                 selection_options_index: -1,
@@ -499,8 +499,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
-                                selected_characteristic_id: null,
-                                selected_path: null,
+                                
+                                selected_path: nullPath,
                                 selected_path_option: undefined,
                                 show: false,
                             },
@@ -531,7 +531,6 @@ describe('DeploymentsConfigInitializerService', () => {
                         task: {
                             retries: 0,
                             parameter: {},
-                            configurables: [],
                             selection: {
                                 filter_criteria: {
                                     characteristic_id: '',
@@ -554,7 +553,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -570,7 +569,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                     {
                                         device: {
@@ -586,7 +585,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: null,
+                                        path_options: null,
                                     },
                                 ],
                                 selection_options_index: -1,
@@ -594,8 +593,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
-                                selected_characteristic_id: null,
-                                selected_path: null,
+                                
+                                selected_path: nullPath,
                                 selected_path_option: undefined,
                                 show: false,
                             },
@@ -651,8 +650,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
-                                selected_characteristic_id: null,
-                                selected_path: null,
+                                
+                                selected_path: nullPath,
                                 selection_options: [
                                     {
                                         device: {
@@ -668,7 +667,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: new Map(),
+                                        path_options: new Map(),
                                     },
                                 ],
                             },
@@ -712,8 +711,8 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
-                                selected_characteristic_id: null,
-                                selected_path: null,
+                                
+                                selected_path: nullPath,
                                 selected_path_option: undefined,
                                 selection_options: [
                                     {
@@ -730,7 +729,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                         device_group: null,
                                         import: null,
                                         importType: null,
-                                        servicePathOptions: new Map(),
+                                        path_options: new Map(),
                                     },
                                 ],
                             },

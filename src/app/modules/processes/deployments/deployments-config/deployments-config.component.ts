@@ -181,7 +181,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             selectedServiceFormControl?.valueChanges.subscribe((selectedServiceId: string) => {
                 const selectedPathOption = element.get(['task', 'selection', 'selected_path']);
                 let option: V2DeploymentsPreparedSelectionOptionModel | undefined = that.getSelectedOption(element.get(['task', 'selection'])?.value)
-                if (option && option.path_options) {
+                if (option && option.path_options && option.path_options.get) {
                     let pathOptions = option.path_options.get(selectedServiceId);
                     if (pathOptions && pathOptions.length == 1) {
                         that.setSelectedPathOption(selectedPathOption as FormGroup, pathOptions[0])
@@ -237,7 +237,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 selectedImportId?.patchValue(option.import.id);
             }
             let defaultSelectedService = that.setSelectedServiceId(elementIndex, selectionOptionIndex, elementType);
-            if (defaultSelectedService && option && option.path_options) {
+            if (defaultSelectedService && option && option.path_options && option.path_options.get) {
                 let pathOptions = option.path_options.get(defaultSelectedService);
                 if (pathOptions && pathOptions.length == 1) {
                     that.setSelectedPathOption(selectedPathOption as FormGroup, pathOptions[0])
