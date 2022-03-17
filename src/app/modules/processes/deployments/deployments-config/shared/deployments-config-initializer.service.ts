@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import * as moment from 'moment';
 import {
     DeploymentsSelectionConfigurableModel,
@@ -167,7 +167,7 @@ export class DeploymentsConfigInitializerService {
     public iniPathOptionFormControl(pathOption: DeploymentsSelectionPathOptionModel | null, disable: boolean):FormGroup {
         const that = this;
         return this._formBuilder.group({
-            path: [{ value: pathOption?.path, disabled: disable }],
+            path: [{ value: pathOption?.path, disabled: disable }, Validators.required],
             characteristicId: [{ value: pathOption?.characteristicId, disabled: disable }],
             aspectNode: [{ value: pathOption?.aspectNode, disabled: disable }],
             functionId: [{ value: pathOption?.functionId, disabled: disable }],
