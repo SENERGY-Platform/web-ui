@@ -92,6 +92,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(
                 of({
                     id: '',
+                    version: 3,
                     elements: [
                         {
                             task: {

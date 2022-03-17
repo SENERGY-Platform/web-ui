@@ -114,6 +114,7 @@ describe('DataTableEditDialogComponent', () => {
                     diagram: {} as V2DeploymentsPreparedDiagramModel,
                     elements: [],
                     executable: true,
+                    version: 3
                 } as V2DeploymentsPreparedModel),
             );
 

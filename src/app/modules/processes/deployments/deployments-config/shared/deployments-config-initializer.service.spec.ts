@@ -39,6 +39,7 @@ describe('DeploymentsConfigInitializerService', () => {
         [DeploymentsConfigInitializerService],
         (service: DeploymentsConfigInitializerService) => {
             const deployment: any = {
+                version: 3,
                 id: '',
                 name: 'Lamp_in_Lane',
                 description: 'test_description',
@@ -319,6 +320,7 @@ describe('DeploymentsConfigInitializerService', () => {
                 executable: true,
             };
             const initValues: any = {
+                version: 3,
                 id: '',
                 name: 'Lamp_in_Lane',
                 description: 'test_description',
@@ -619,6 +621,7 @@ describe('DeploymentsConfigInitializerService', () => {
         [DeploymentsConfigInitializerService],
         (service: DeploymentsConfigInitializerService) => {
             const deployment: V2DeploymentsPreparedModel = {
+                version: 3,
                 id: '',
                 name: 'message_event',
                 description: 'test_description',
@@ -678,6 +681,7 @@ describe('DeploymentsConfigInitializerService', () => {
                 executable: true,
             };
             const initValues: any = {
+                version: 3,
                 id: '',
                 name: 'message_event',
                 description: 'test_description',

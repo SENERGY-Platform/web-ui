@@ -121,6 +121,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
 
     it('test simple process and service auto selection', () => {
         const simpleProcess = {
+            version: 3,
             description: '',
             diagram: {
                 svg: '',
@@ -211,6 +212,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
         expect(component.processId).toBe('4711');
         expect(component.deploymentId).toBeUndefined();
         expect(component.deploymentFormGroup.getRawValue()).toEqual({
+            version: 3,
             description: 'no description',
             diagram: {
                 svg: '',
@@ -303,6 +305,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
         }
         component.changeTaskSelectionOption(0, 1);
         expect(component.deploymentFormGroup.getRawValue()).toEqual({
+            version: 3,
             description: 'no description',
             diagram: {
                 svg: '',
@@ -411,6 +414,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
         ];
 
         const laneProcess = {
+            version: 3,
             description: 'description',
             diagram: {
                 svg: '',
@@ -681,6 +685,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
         }
         component.changeTaskSelectionOption(0, 2);
         expect(component.deploymentFormGroup.getRawValue()).toEqual({
+            version: 3,
             description: 'description',
             diagram: {
                 svg: '',
@@ -970,6 +975,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
 
     it('test lane process auto selection of device-group', () => {
         const laneProcess = {
+            version: 3,
             description: 'description',
             diagram: {
                 svg: '',
@@ -1262,6 +1268,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
         initSpies();
         component.changeTaskSelectionOption(0, 3);
         expect(component.deploymentFormGroup.getRawValue()).toEqual({
+            version: 3,
             description: 'description',
             diagram: {
                 svg: '',

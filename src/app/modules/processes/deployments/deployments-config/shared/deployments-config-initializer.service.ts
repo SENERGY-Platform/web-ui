@@ -46,6 +46,7 @@ export class DeploymentsConfigInitializerService {
             diagram: deployment.diagram,
             elements: this.initElementsArray(deployment.elements),
             executable: deployment.executable,
+            version: deployment.version
         });
     }
 

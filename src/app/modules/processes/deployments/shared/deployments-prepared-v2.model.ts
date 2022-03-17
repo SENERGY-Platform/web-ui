@@ -25,6 +25,7 @@ export interface V2DeploymentsPreparedModel {
     diagram: V2DeploymentsPreparedDiagramModel;
     elements: V2DeploymentsPreparedElementModel[];
     executable: boolean;
+    version: number;
 }
 
 export interface V2DeploymentsPreparedDiagramModel {
