@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeContentVariableModel,
     DeviceTypeFunctionModel
 } from '../../shared/device-type.model';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ConceptsCharacteristicsModel } from '../../../concepts/shared/concepts-characteristics.model';
-import { DeviceTypeHelperService } from '../shared/device-type-helper.service';
-import { convertPunctuation, typeValueValidator } from '../../../../imports/validators/type-value-validator';
-import {FunctionsPermSearchModel} from '../../../functions/shared/functions-perm-search.model';
+import {AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
+import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
+import {DeviceTypeHelperService} from '../shared/device-type-helper.service';
+import {convertPunctuation, typeValueValidator} from '../../../../imports/validators/type-value-validator';
 
 @Component({
     templateUrl: './device-types-content-variable-dialog.component.html',
@@ -49,19 +48,21 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     aspects: DeviceTypeAspectModel[] = [];
     aspectOptions: Map<string, DeviceTypeAspectModel[]> = new Map();
     allowVoid = false;
+    prohibitedNames: string[] = [];
 
     constructor(
         private dialogRef: MatDialogRef<DeviceTypesContentVariableDialogComponent>,
         private _formBuilder: FormBuilder,
         private deviceTypeHelperService: DeviceTypeHelperService,
         @Inject(MAT_DIALOG_DATA)
-        data: {
+            data: {
             contentVariable: DeviceTypeContentVariableModel;
             disabled: boolean;
             functions: DeviceTypeFunctionModel[];
             concepts: ConceptsCharacteristicsModel[];
             aspects: DeviceTypeAspectModel[];
             allowVoid: boolean;
+            prohibitedNames: string[];
         },
     ) {
         this.disabled = data.disabled;
@@ -70,6 +71,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         this.concepts = data.concepts;
         this.aspects = data.aspects;
         this.allowVoid = data.allowVoid;
+        this.prohibitedNames = data.prohibitedNames;
     }
 
     ngOnInit(): void {
@@ -96,9 +98,9 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             }
 
             if (toParse !== null && toParse !== undefined && toParse.length > 0) {
-                this.firstFormGroup.patchValue({ value: JSON.parse(toParse) });
+                this.firstFormGroup.patchValue({value: JSON.parse(toParse)});
             } else {
-                this.firstFormGroup.patchValue({ value: null });
+                this.firstFormGroup.patchValue({value: null});
             }
         }
         this.dialogRef.close(this.firstFormGroup.getRawValue());
@@ -191,24 +193,24 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         if (disabled) {
             this.firstFormGroup = this._formBuilder.group({
                 indices: [this.contentVariable.indices],
-                id: [{ value: this.contentVariable.id || null, disabled: true }],
-                name: [{ disabled: true, value: this.contentVariable.name }],
-                type: [{ disabled: true, value: this.contentVariable.type }],
-                characteristic_id: [{ disabled: true, value: this.contentVariable.characteristic_id }],
-                serialization_options: [{ disabled: true, value: this.contentVariable.serialization_options }],
-                unit_reference: [{ disabled: true, value: this.contentVariable.unit_reference }],
-                sub_content_variables: [{ disabled: true, value: this.contentVariable.sub_content_variables }],
-                value: [{ disabled: true, value: this.contentVariable.value }],
-                aspect_id: [{ disabled: true, value: this.contentVariable.aspect_id }],
-                function_id: [{ disabled: true, value: this.contentVariable.function_id }],
-                is_void: [{ disabled: true, value: this.contentVariable.is_void }],
+                id: [{value: this.contentVariable.id || null, disabled: true}],
+                name: [{disabled: true, value: this.contentVariable.name}, (c: AbstractControl) => this.prohibitedNames.some(p => p === c.value) ? {nameValidator: {value: c.value}} : null],
+                type: [{disabled: true, value: this.contentVariable.type}],
+                characteristic_id: [{disabled: true, value: this.contentVariable.characteristic_id}],
+                serialization_options: [{disabled: true, value: this.contentVariable.serialization_options}],
+                unit_reference: [{disabled: true, value: this.contentVariable.unit_reference}],
+                sub_content_variables: [{disabled: true, value: this.contentVariable.sub_content_variables}],
+                value: [{disabled: true, value: this.contentVariable.value}],
+                aspect_id: [{disabled: true, value: this.contentVariable.aspect_id}],
+                function_id: [{disabled: true, value: this.contentVariable.function_id}],
+                is_void: [{disabled: true, value: this.contentVariable.is_void}],
             });
         } else {
             this.firstFormGroup = this._formBuilder.group(
                 {
                     indices: [this.contentVariable.indices],
-                    id: [{ value: this.contentVariable.id || null, disabled: true }],
-                    name: [this.contentVariable.name],
+                    id: [{value: this.contentVariable.id || null, disabled: true}],
+                    name: [this.contentVariable.name, (c: AbstractControl) => this.prohibitedNames.some(p => p === c.value) ? {nameValidator: {value: c.value}} : null],
                     type: [this.contentVariable.type],
                     characteristic_id: [this.contentVariable.characteristic_id],
                     serialization_options: [this.contentVariable.serialization_options],
@@ -219,7 +221,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                     function_id: [this.contentVariable.function_id],
                     is_void: [this.contentVariable.is_void],
                 },
-                { validators: typeValueValidator('type', 'value') },
+                {validators: typeValueValidator('type', 'value')},
             );
         }
 
@@ -245,19 +247,19 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         this.conceptList.forEach((concept) => {
             const selectedChar = concept.characteristicList.find((characteristic) => characteristic.id === characteristicId);
             if (selectedChar !== undefined && selectedChar.type !== undefined) {
-                this.firstFormGroup.patchValue({ type: selectedChar.type });
+                this.firstFormGroup.patchValue({type: selectedChar.type});
             }
         });
     }
 
     private initTypesList(): void {
-        this.primitiveTypes.push({ type: 'https://schema.org/Text', typeShort: 'string' });
-        this.primitiveTypes.push({ type: 'https://schema.org/Integer', typeShort: 'int' });
-        this.primitiveTypes.push({ type: 'https://schema.org/Float', typeShort: 'float' });
-        this.primitiveTypes.push({ type: 'https://schema.org/Boolean', typeShort: 'bool' });
+        this.primitiveTypes.push({type: 'https://schema.org/Text', typeShort: 'string'});
+        this.primitiveTypes.push({type: 'https://schema.org/Integer', typeShort: 'int'});
+        this.primitiveTypes.push({type: 'https://schema.org/Float', typeShort: 'float'});
+        this.primitiveTypes.push({type: 'https://schema.org/Boolean', typeShort: 'bool'});
 
-        this.nonPrimitiveTypes.push({ type: 'https://schema.org/StructuredValue', typeShort: 'Structure' });
-        this.nonPrimitiveTypes.push({ type: 'https://schema.org/ItemList', typeShort: 'List' });
+        this.nonPrimitiveTypes.push({type: 'https://schema.org/StructuredValue', typeShort: 'Structure'});
+        this.nonPrimitiveTypes.push({type: 'https://schema.org/ItemList', typeShort: 'List'});
     }
 
     private initConceptList(): void {
@@ -268,7 +270,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             if (concept.characteristics !== null) {
                 concept.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
                     this.deviceTypeHelperService.characteristicsFlatten(characteristic, '', true).forEach((char) => {
-                        characteristicsList.push({ id: char.id, name: char.name, type: char.type, class: ngclass });
+                        characteristicsList.push({id: char.id, name: char.name, type: char.type, class: ngclass});
                     });
                 });
             }

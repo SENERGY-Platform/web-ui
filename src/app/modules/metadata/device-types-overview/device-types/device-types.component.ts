@@ -153,6 +153,8 @@ export class DeviceTypesComponent implements OnInit {
         const disabled = !this.editable;
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
+        let node = inOut.dataSource.data[indices[0]];
+        indices.slice(1).forEach(i => node = node.sub_content_variables !== undefined ? node.sub_content_variables[i] : node);
         dialogConfig.data = {
             contentVariable: {} as DeviceTypeContentVariableModel,
             functions: isInput ? this.controllingFunctions : this.measuringFunctions,
@@ -160,6 +162,7 @@ export class DeviceTypesComponent implements OnInit {
             concepts: this.concepts,
             aspects: this.aspectList,
             allowVoid: isInput,
+            prohibitedNames: node?.sub_content_variables?.map(s => s.name) || [],
         };
         this.dialog
             .open(DeviceTypesContentVariableDialogComponent, dialogConfig)
@@ -186,6 +189,10 @@ export class DeviceTypesComponent implements OnInit {
             concepts: this.concepts,
             aspects: this.aspectList,
             allowVoid: isInput,
+            prohibitedNames: inOut.dataSource.data.find(n => n.sub_content_variables?.some(s => s.id === node.id))
+                ?.sub_content_variables
+                ?.map(s => s.name)
+                .filter(s => s !== node.name) || [],
         };
         this.dialog
             .open(DeviceTypesContentVariableDialogComponent, dialogConfig)

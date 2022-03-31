@@ -49,6 +49,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                         concepts,
                         functions,
                         aspects,
+                        prohibitedNames: [],
                     },
                 },
             ],
