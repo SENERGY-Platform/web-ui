@@ -163,9 +163,12 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         }
 
         this.typeOptionsControl.valueChanges.subscribe(() => {
-            this.firstFormGroup.reset();
             this.firstFormGroup.patchValue({
                 sub_content_variables: this.isPrimitiveType() || this.isVoidType() ? null : [],
+                serialization_options: null,
+                unit_reference: null,
+                value: null,
+                type: null,
             });
             if (this.isVoidType()) {
                 this.firstFormGroup.patchValue({
@@ -173,10 +176,6 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                     name: 'void',
                     type: 'https://schema.org/Boolean',
                     characteristic_id: '',
-                    serialization_options: undefined,
-                    unit_reference: undefined,
-                    sub_content_variables: undefined,
-                    value: undefined,
                     aspect_id: undefined,
                 });
             } else {
