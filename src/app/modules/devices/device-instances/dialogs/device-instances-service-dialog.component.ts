@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import {Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {
+    DeviceTypeModel,
+    DeviceTypeServiceModel
+} from '../../../metadata/device-types-overview/shared/device-type.model';
 import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
+import {ExportDataService} from '../../../../widgets/shared/export-data.service';
 
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
@@ -25,17 +29,43 @@ import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../
 })
 export class DeviceInstancesServiceDialogComponent implements OnInit {
     services: DeviceTypeServiceModel[] = [];
-    lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[][] = [[]];
+    lastValueElements: LastValuesRequestElementTimescaleModel[] = [];
+    lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[][] = [];
+    deviceType: DeviceTypeModel;
+    serviceOutputCounts: number[] = [];
+
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data: { services: DeviceTypeServiceModel[]; lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[][] },
+        @Inject(MAT_DIALOG_DATA) data: {
+            services: DeviceTypeServiceModel[]; lastValueElements: LastValuesRequestElementTimescaleModel[]; deviceType: DeviceTypeModel; serviceOutputCounts: number[];
+        },
+        private exportDataService: ExportDataService,
     ) {
         this.services = data.services;
-        this.lastValueArray = data.lastValueArray;
+        this.lastValueElements = data.lastValueElements;
+        this.deviceType = data.deviceType;
+        this.serviceOutputCounts = data.serviceOutputCounts;
     }
 
-    ngOnInit() {}
+    ngOnInit() {
+        this.refresh();
+    }
+
+    refresh() {
+        this.exportDataService.getLastValuesTimescale(this.lastValueElements).subscribe(lastValues => {
+            this.lastValueArray = [];
+            let counter = 0;
+            this.deviceType.services.forEach((_, serviceIndex) => {
+                const subArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[] = [];
+                lastValues.slice(counter, counter + this.serviceOutputCounts[serviceIndex]).forEach((response, responseIndex) => {
+                    subArray.push({request: this.lastValueElements[counter + responseIndex], response});
+                });
+                this.lastValueArray.push(subArray);
+                counter += this.serviceOutputCounts[serviceIndex];
+            });
+        });
+    }
 
     close(): void {
         this.dialogRef.close();

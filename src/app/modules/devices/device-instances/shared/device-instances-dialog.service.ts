@@ -73,28 +73,18 @@ export class DeviceInstancesDialogService {
                     });
                 });
             });
-            this.exportDataService.getLastValuesTimescale(lastValueElements).subscribe(lastValues => {
-                const lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[][] = [];
-                let counter = 0;
-                deviceType?.services.forEach((_, serviceIndex) => {
-                    const subArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[] = [];
-                    lastValues.slice(counter, counter+serviceOutputCounts[serviceIndex]).forEach((response, responseIndex) => {
-                        subArray.push({request: lastValueElements[counter+responseIndex], response});
-                    });
-                    lastValueArray.push(subArray);
-                    counter += serviceOutputCounts[serviceIndex];
-                });
-                const dialogConfig = new MatDialogConfig();
-                dialogConfig.disableClose = false;
-                dialogConfig.minWidth = '650px';
-                if (deviceType) {
-                    dialogConfig.data = {
-                        services: deviceType.services,
-                        lastValueArray,
-                    };
-                }
-                this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
-            });
+            const dialogConfig = new MatDialogConfig();
+            dialogConfig.disableClose = false;
+            dialogConfig.minWidth = '650px';
+            if (deviceType) {
+                dialogConfig.data = {
+                    services: deviceType.services,
+                    lastValueElements,
+                    deviceType,
+                    serviceOutputCounts,
+                };
+            }
+            this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
         });
     }
 

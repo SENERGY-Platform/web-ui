@@ -14,7 +14,10 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Data</h2>
+<h2 mat-dialog-title>
+    <span fxFlex>Data</span>
+    <button mat-icon-button color="accent" (click)="refresh()"><mat-icon>refresh</mat-icon></button>
+</h2>
 
 <mat-dialog-content>
     <mat-accordion multi>
