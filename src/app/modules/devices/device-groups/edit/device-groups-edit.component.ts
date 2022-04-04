@@ -25,7 +25,7 @@ import {
     DeviceGroupHelperResultModel,
     DeviceGroupModel,
 } from '../shared/device-groups.model';
-import { DeviceInstancesBaseModel } from '../../device-instances/shared/device-instances.model';
+import {Attribute, DeviceInstancesBaseModel} from '../../device-instances/shared/device-instances.model';
 import { debounceTime, delay } from 'rxjs/operators';
 import { DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects-perm-search.model';
@@ -42,6 +42,7 @@ import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/
 export class DeviceGroupsEditComponent implements OnInit {
     id = '';
     deviceGroupForm!: FormGroup; // DeviceGroupModel
+    attributes: Attribute[] = [];
 
     selectedForm: FormControl = new FormControl([]); // []DeviceInstancesBaseModel
     selectableForm: FormControl = new FormControl([]); // []DeviceGroupHelperOptionsModel
@@ -109,7 +110,27 @@ export class DeviceGroupsEditComponent implements OnInit {
     close(): void {}
 
     save(): void {
-        this.saveDeviceGroup(this.getDeviceGroupFromForm());
+        const deviceGroup = this.getDeviceGroupFromForm();
+        deviceGroup.attributes = this.attributes;
+        this.saveDeviceGroup(deviceGroup);
+    }
+
+    removeAttr(i: number) {
+        if (!this.attributes) {
+            this.attributes = [];
+        }
+        this.attributes.splice(i, 1);
+    }
+
+    addAttr() {
+        if (!this.attributes) {
+            this.attributes = [];
+        }
+        this.attributes.push({ key: '', value: '', origin: 'web-ui'});
+    }
+
+    editableAttribute(attr: Attribute) {
+        return !attr.origin || attr.origin === '' || 'web-ui' === attr.origin;
     }
 
     private initDeviceGroupFormGroup(deviceGroup: DeviceGroupModel) {
@@ -212,6 +233,7 @@ export class DeviceGroupsEditComponent implements OnInit {
             this.deviceGroupService.getDeviceGroup(this.id).subscribe((deviceGroup: DeviceGroupModel | null) => {
                 if (deviceGroup !== null) {
                     this.initDeviceGroupFormGroup(deviceGroup);
+                    this.attributes = deviceGroup.attributes || [];
                 }
             });
         } else {

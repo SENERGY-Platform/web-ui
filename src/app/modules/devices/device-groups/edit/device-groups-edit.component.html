@@ -55,6 +55,26 @@
 
             </div>
 
+            <div class="attributes">
+                <div class="divider">
+                    Attributes
+                    <mat-divider></mat-divider>
+                </div>
+                <div *ngFor="let attr of attributes; let i = index" class="attribute">
+                    <mat-form-field class="third-width" color="accent" fxFlex>
+                        <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
+                    </mat-form-field>
+                    <span style="width: 2em"></span>
+                    <mat-form-field class="third-width" color="accent" fxFlex>
+                        <input matInput placeholder="Value" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
+                    </mat-form-field>
+                    <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+            </div>
+
             <div class="controls" fxLayoutAlign="end center">
                 <button mat-raised-button color="accent"
                         [class.spinner]="isSaving"
