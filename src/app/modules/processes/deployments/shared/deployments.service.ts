@@ -155,7 +155,7 @@ export class DeploymentsService {
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null)),
             map((deployment) => {
                 deployment?.elements?.forEach((element) => {
-                    element.message_event?.selection.selection_options.forEach((option: any) => {
+                    element.message_event?.selection?.selection_options?.forEach((option: any) => {
                         if (option.path_options === undefined) {
                             return;
                         }
@@ -165,7 +165,7 @@ export class DeploymentsService {
                         }
                         option.path_options = m;
                     });
-                    element.task?.selection.selection_options.forEach((option: any) => {
+                    element.task?.selection?.selection_options?.forEach((option: any) => {
                         if (option.path_options === undefined) {
                             return;
                         }
