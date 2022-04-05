@@ -212,7 +212,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                             if (element.exportId === null || element.exportId === undefined) {
                                 (requestElement as QueriesRequestElementTimescaleModel) .deviceId = element.elementDetails.device?.deviceId;
                                 (requestElement as QueriesRequestElementTimescaleModel).serviceId = element.elementDetails.device?.serviceId;
-                                (requestElement as QueriesRequestElementTimescaleModel).columns = [{name:  element.exportValuePath.replace(/^value\./, '')}];
+                                (requestElement as QueriesRequestElementTimescaleModel).columns = [{name:  element.exportValuePath.replace(/^value\./, ''), groupType: element.groupType || undefined}];
                             } else {
                                 (requestElement as QueriesRequestElementTimescaleModel).exportId = element.exportId;
                                 requestElement.columns = [{name: element.exportValueName, groupType: element.groupType || undefined}];
