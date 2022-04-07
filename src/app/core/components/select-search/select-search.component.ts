@@ -154,7 +154,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         this._options = value;
         this.withGroups = !Array.isArray(this.options);
         if (!Array.isArray(this.options)) {
-            this.updateOptionsGroups('');
+            this.updateOptionsGroups(this.searchControl.value || '');
             this.searchControl.valueChanges.subscribe((val: string) => (this.updateOptionsGroups(val)));
         }
         this.resetSearchIfNoResults();
@@ -496,6 +496,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         }
         const r = new Map();
         let selected = new Map();
+        this.maxElements = 0;
         if (this.options?.forEach) {
             this.options.forEach((v, k) => {
                 const filtered = v.filter((option) => {
@@ -518,6 +519,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 });
                 if (filtered.length > 0) {
                     r.set(k, filtered);
+                    this.maxElements += filtered.length;
                 }
             });
         }
@@ -525,11 +527,13 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         let r2 = new Map();
         let size = 0;
         let skipped = 0;
-        this.maxElements = 0;
         for (const [k, v] of r) {
-            this.maxElements += v.length;
+            if (size === this.scrollWindowSize) {
+                continue;
+            }
             let j = 0;
             const v2 = [];
+            if (this.scrollLowerOffset > 0 && r2.size > 0) debugger; // TODO
             while (skipped < this.scrollLowerOffset && j < v.length) {
                 skipped++;
                 j++;
@@ -540,13 +544,14 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 size++;
             }
             if (v2.length > 0) {
-                r2.set(k, v2);
+                 r2.set(k, v2);
             }
         }
         for (const [k, v] of selected) {
             r2 = this.appendInsertFilterMap(r2, k, v).m;
         }
         this.optionsGroups = r2;
+        console.log(this.optionsGroups); // TODO
     }
 
     toArray(v: any): any[] {
@@ -619,13 +624,13 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
      * @private
      * @return The number of inserted elements
      */
-    private appendInsertFilterMap(m: Map<string, any[]>, key: string, val: any | any[]): {i: number; m: Map<string, any[]>} {
+    private appendInsertFilterMap(m: Map<string, any[]>, key: string, val: any | any[]): { i: number; m: Map<string, any[]> } {
         const arr = Array.isArray(val) ? val : [val];
         if (m.has(key)) {
             let i = 0;
             arr.forEach(v => {
                 const vals = m.get(key) || [];
-                if (!m.get(key)?.some(vKnown => vKnown === v)){
+                if (!m.get(key)?.some(vKnown => vKnown === v)) {
                     vals.push(v);
                     i++;
                 }
