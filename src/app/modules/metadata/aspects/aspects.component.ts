@@ -248,7 +248,9 @@ export class AspectsComponent implements OnInit {
 
     private redraw() {
         const data = this.dataSource.data;
+        const expanded = this.treeControl.expansionModel.selected;
         this.dataSource.data = [];
         this.dataSource.data = data;
+        data.filter(f => expanded.some(e => e.id === f.id )).forEach(n => this.treeControl.expand(n));
     }
 }
