@@ -46,7 +46,7 @@
     "keycloak-angular": "^8.4.0",
     "keycloak-js": "^15.0.2",
     "lodash": "^4.17.19",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "ng2-google-charts": "^6.1.0",
     "ngx-clipboard": "^12.3.0",
     "ngx-infinite-scroll": "^8.0.1",
