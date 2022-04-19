@@ -41,7 +41,7 @@
 
         <mat-form-field class="full-width" color="accent" *ngIf="!isVoidType()">
             <mat-label>Characteristic</mat-label>
-            <senergy-select-search formControlName="characteristic_id" noneView="-- None --"
+            <senergy-select-search [scrollWindowSize]="1000" formControlName="characteristic_id" noneView="-- None --"
                                    [options]="options" useOptionViewProperty="name" useOptionValueProperty="id"
                                    useOptionClassProperty="class">
             </senergy-select-search>
