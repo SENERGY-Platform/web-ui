@@ -70,10 +70,10 @@ export interface V2DeploymentsPreparedConfigurableValueModel {
 export interface V2DeploymentsPreparedTimeEventModel {
     time: string;
     type: string;
-    timeUnits?: V2DeploymentsPreparedTimeUnitsModel;
+    durationUnits?: V2DeploymentsPreparedDurationUnitsModel;
 }
 
-export interface V2DeploymentsPreparedTimeUnitsModel {
+export interface V2DeploymentsPreparedDurationUnitsModel {
     years: number;
     months: number;
     days: number;

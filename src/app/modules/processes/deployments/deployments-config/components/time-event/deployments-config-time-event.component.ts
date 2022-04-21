@@ -28,8 +28,8 @@ export class DeploymentsConfigTimeEventComponent {
 
     constructor() {}
 
-    change(): void {
-        const timeUnits = this.time_event.get('timeUnits') as FormGroup;
-        this.time_event.patchValue({ time: moment.duration(JSON.parse(JSON.stringify(timeUnits.value))).toISOString() });
+    changeDuration(): void {
+        const durationUnits = this.time_event.get('durationUnits') as FormGroup;
+        this.time_event.patchValue({ time: moment.duration(JSON.parse(JSON.stringify(durationUnits.value))).toISOString() });
     }
 }

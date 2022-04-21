@@ -418,7 +418,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         time_event: {
                             type: 'timeDuration',
                             time: 'PT5S',
-                            timeUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 5 },
+                            durationUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 5 },
                         },
                         notification: null,
                         message_event: null,
@@ -516,7 +516,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         time_event: {
                             type: 'timeDuration',
                             time: 'PT10S',
-                            timeUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 10 },
+                            durationUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 10 },
                         },
                         notification: null,
                         message_event: null,

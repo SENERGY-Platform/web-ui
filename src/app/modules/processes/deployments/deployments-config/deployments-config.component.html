@@ -151,6 +151,7 @@
                             </table>
                         </div>
                         <div formGroupName="time_event" *ngIf="element.time_event !== null">
+                            <div>{{element.name}}</div>
                             <senergy-process-deployments-config-time-event
                                     [time_event]="elementsTimeEvent(elementIndex)"></senergy-process-deployments-config-time-event>
                         </div>

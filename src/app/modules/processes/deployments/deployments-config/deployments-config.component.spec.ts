@@ -781,7 +781,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: {
                         type: 'timeDuration',
                         time: 'PT10S',
-                        timeUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 10 },
+                        durationUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 10 },
                     },
                     notification: null,
                     message_event: null,
@@ -879,7 +879,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: {
                         type: 'timeDuration',
                         time: 'PT2M',
-                        timeUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 2, seconds: 0 },
+                        durationUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 2, seconds: 0 },
                     },
                     notification: null,
                     message_event: null,
@@ -1376,7 +1376,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: {
                         type: 'timeDuration',
                         time: 'PT10S',
-                        timeUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 10 },
+                        durationUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 10 },
                     },
                     notification: null,
                     message_event: null,
@@ -1485,7 +1485,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: {
                         type: 'timeDuration',
                         time: 'PT2M',
-                        timeUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 2, seconds: 0 },
+                        durationUnits: { years: 0, months: 0, days: 0, hours: 0, minutes: 2, seconds: 0 },
                     },
                     notification: null,
                     message_event: null,

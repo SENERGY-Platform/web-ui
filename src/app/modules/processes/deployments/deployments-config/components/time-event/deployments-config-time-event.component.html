@@ -13,13 +13,21 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="deployments-config-time-event-container" [formGroup]="time_event">
-    <div>{{time_event.value.label}}</div>
+<div class="deployments-config-time-event-container" [formGroup]="time_event" *ngIf="time_event.value.type === 'timeCycle'">
+    <mat-form-field class="full-width" color="accent">
+        <input matInput placeholder="Cron" formControlName="time">
+    </mat-form-field>
+</div>
+<div class="deployments-config-time-event-container" [formGroup]="time_event" *ngIf="time_event.value.type === 'timeDate'">
+    <mat-form-field class="full-width" color="accent">
+        <input matInput placeholder="ISO 8601 Date-Timestamp" formControlName="time">
+    </mat-form-field>
+</div>
+<div class="deployments-config-time-event-container" [formGroup]="time_event" *ngIf="time_event.value.type === 'timeDuration'">
     <mat-error *ngIf="time_event.hasError('durationLessThan5Seconds')">
         Please enter a valid time-event duration which is at least 5 seconds!
     </mat-error>
-    <table class="full-width" formGroupName="timeUnits"
-           (change)="change()" >
+    <table class="full-width" formGroupName="durationUnits" (change)="changeDuration()" >
         <tr>
             <td>
                 <mat-form-field class="full-width" color="accent">

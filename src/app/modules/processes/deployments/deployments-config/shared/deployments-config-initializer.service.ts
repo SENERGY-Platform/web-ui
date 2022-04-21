@@ -89,7 +89,7 @@ export class DeploymentsConfigInitializerService {
         return this._formBuilder.group({
             type: timeEvent.type,
             time: timeEvent.time,
-            timeUnits: this.initTimeRawFormGroup(timeEvent.time),
+            durationUnits: this.initTimeDurationRawFormGroup(timeEvent.time),
         }, {
             validators: [this.getTimeEventValidator()]
         });
@@ -124,7 +124,7 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    private initTimeRawFormGroup(timeEvent: string): FormGroup {
+    private initTimeDurationRawFormGroup(timeEvent: string): FormGroup {
         return this._formBuilder.group({
             years: [moment.duration(timeEvent).years()],
             months: [moment.duration(timeEvent).months()],
@@ -282,7 +282,7 @@ export class DeploymentsConfigInitializerService {
     private getTimeEventValidator(): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
             if (control.value.type === 'timeDuration'){
-                let duration = moment.duration(control.value.timeUnits);
+                let duration = moment.duration(control.value.durationUnits);
                 if (duration.asSeconds() < 5) {
                     return {durationLessThan5Seconds: {value: control.value}}
                 }
