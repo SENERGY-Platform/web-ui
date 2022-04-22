@@ -28,6 +28,7 @@ import { FunctionsService } from './shared/functions.service';
 import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../device-types-overview/shared/device-type.model';
 import { FunctionsEditDialogComponent } from './dialog/functions-edit-dialog.component';
 import { FunctionsCreateDialogComponent } from './dialog/functions-create-dialog.component';
+import {AuthorizationService} from '../../../core/services/authorization.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -49,6 +50,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     gridCols = 0;
     ready = false;
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
+    userIsAdmin = false;
 
     private searchText = '';
     private limit = this.limitInit;
@@ -65,11 +67,13 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
+        private authService: AuthorizationService,
     ) {}
 
     ngOnInit() {
         this.initGridCols();
         this.initSearchAndGetFunctions();
+        this.userIsAdmin = this.authService.userIsAdmin();
     }
 
     ngOnDestroy() {

@@ -29,6 +29,7 @@ import { DeviceClassesEditDialogComponent } from './dialog/device-classes-edit-d
 import { DeviceTypeDeviceClassModel } from '../device-types-overview/shared/device-type.model';
 import uuid = util.uuid;
 import { util } from 'jointjs';
+import {AuthorizationService} from '../../../core/services/authorization.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -50,6 +51,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     gridCols = 0;
     ready = false;
     sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
+    userIsAdmin = false;
 
     private searchText = '';
     private limit = this.limitInit;
@@ -66,11 +68,13 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
+        private authService: AuthorizationService,
     ) {}
 
     ngOnInit() {
         this.initGridCols();
         this.initSearchAndGetDeviceClasses();
+        this.userIsAdmin = this.authService.userIsAdmin();
     }
 
     ngOnDestroy() {

@@ -70,6 +70,6 @@
         </div>
     </div>
 </div>
-<button mat-fab class="fab" matTooltip="Add new device class" (click)="newDeviceClass()">
+<button mat-fab class="fab" matTooltip="Add new device class" (click)="newDeviceClass()" *ngIf="userIsAdmin">
     <mat-icon>add</mat-icon>
 </button>
