@@ -114,6 +114,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 type: ImportTypesCreateEditComponent.STRING,
                 sub_content_variables: [],
                 characteristic_id: environment.timeStampCharacteristicId,
+                function_id: environment.getTimestampFunctionId,
                 use_as_tag: false,
             },
             {
@@ -236,6 +237,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
             }
             this.defaultOutput.sub_content_variables[2].sub_content_variables = this.dataSource.data;
             this.defaultOutput.sub_content_variables[1].aspect_id = this.timeAspect.value;
+            this.defaultOutput.sub_content_variables[1].function_id = environment.getTimestampFunctionId;
             val.output = this.defaultOutput;
         } else {
             val.output = this.dataSource.data[0];

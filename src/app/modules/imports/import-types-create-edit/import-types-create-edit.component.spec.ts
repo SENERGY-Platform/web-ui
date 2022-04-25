@@ -84,6 +84,7 @@ describe('ImportTypesCreateEditComponent', () => {
                     name: 'time',
                     type: 'https://schema.org/Text',
                     characteristic_id: environment.timeStampCharacteristicId,
+                    function_id: environment.getTimestampFunctionId,
                     sub_content_variables: [],
                     use_as_tag: false,
                     aspect_id: undefined,
