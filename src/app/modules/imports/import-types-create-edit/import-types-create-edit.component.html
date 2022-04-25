@@ -82,6 +82,15 @@
 
         <mat-divider></mat-divider>
 
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Time Aspect</mat-label>
+                <senergy-select-search noneView="--None--" [options]="aspects"
+                                       useOptionValueProperty="id"
+                                       useOptionViewProperty="name"
+                                       [formControl]="timeAspect"></senergy-select-search>
+            </mat-form-field>
+        </div>
 
         <div>
             <h4 fxFlex>Output</h4>

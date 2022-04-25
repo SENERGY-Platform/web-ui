@@ -86,6 +86,7 @@ describe('ImportTypesCreateEditComponent', () => {
                     characteristic_id: environment.timeStampCharacteristicId,
                     sub_content_variables: [],
                     use_as_tag: false,
+                    aspect_id: undefined,
                 },
                 {
                     name: 'value',

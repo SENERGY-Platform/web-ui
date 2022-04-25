@@ -15,7 +15,7 @@
  */
 import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {
     ImportTypeConfigModel,
     ImportTypeContentVariableModel,
@@ -93,6 +93,8 @@ export class ImportTypesCreateEditComponent implements OnInit {
         owner: '',
     });
 
+    timeAspect = this.fb.control(null);
+
     usesDefaultOutput = true;
     defaultOutput: ImportTypeContentVariableModel = {
         name: 'root',
@@ -158,6 +160,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                         );
                         if (type.output.name === 'root' && type.output.sub_content_variables?.length === 3 && value !== undefined) {
                             this.dataSource.data = value.sub_content_variables || [];
+                            this.timeAspect.setValue(type.output.sub_content_variables[1].aspect_id);
                         } else {
                             this.usesDefaultOutput = false;
                             this.dataSource.data = [type.output];
@@ -232,6 +235,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 return;
             }
             this.defaultOutput.sub_content_variables[2].sub_content_variables = this.dataSource.data;
+            this.defaultOutput.sub_content_variables[1].aspect_id = this.timeAspect.value;
             val.output = this.defaultOutput;
         } else {
             val.output = this.dataSource.data[0];
