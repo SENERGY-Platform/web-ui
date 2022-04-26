@@ -45,6 +45,11 @@
                 "bundleName": "platonam",
                 "inject": false
               },
+              {
+                "input": "src/themes/optimise.scss",
+                "bundleName": "optimise",
+                "inject": false
+              },
               "node_modules/bpmn-js/dist/assets/diagram-js.css",
               "node_modules/bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css",
               "node_modules/bpmn-js-properties-panel/styles/properties.less",
