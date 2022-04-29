@@ -45,6 +45,7 @@ export class LocationsEditComponent implements OnInit {
 
     debounceTimeInMs = 500;
     rerouteAfterSaveDelayInMs = 2000;
+    isSaving = false
 
     constructor(
         private _formBuilder: FormBuilder,
@@ -205,21 +206,26 @@ export class LocationsEditComponent implements OnInit {
     }
 
     private saveLocation(location: LocationModel) {
+        this.isSaving = true;
         if (location.id === '' || location.id === undefined) {
             this.locationService
                 .createLocation(location)
                 .pipe(delay(this.rerouteAfterSaveDelayInMs))
                 .subscribe((locationSaved: LocationModel | null) => {
+                    this.isSaving = false;
                     this.showMessage(locationSaved);
-                    this.reload(locationSaved);
+                    //this.reload(locationSaved);
+                    this.goToLocationsOverviewPage();
                 });
         } else {
             this.locationService
                 .updateLocation(location)
                 .pipe(delay(this.rerouteAfterSaveDelayInMs))
                 .subscribe((locationSaved: LocationModel | null) => {
+                    this.isSaving = false;
                     this.showMessage(locationSaved);
-                    this.reload(locationSaved);
+                    //this.reload(locationSaved);
+                    this.goToLocationsOverviewPage();
                 });
         }
     }
@@ -232,6 +238,14 @@ export class LocationsEditComponent implements OnInit {
             this.router.onSameUrlNavigation = 'reload';
             this.router.navigate(['devices/locations/edit/' + location.id], {});
         }
+    }
+
+    private goToLocationsOverviewPage() {
+        this.router.routeReuseStrategy.shouldReuseRoute = function() {
+            return false;
+        };
+        this.router.onSameUrlNavigation = 'reload';
+        this.router.navigate(['devices/locations'], {});
     }
 
     private showMessage(locationSaved: LocationModel | null) {

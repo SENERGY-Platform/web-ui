@@ -68,6 +68,8 @@
 
     <div class="controls" fxLayoutAlign="end center">
         <button mat-raised-button color="accent"
+                [class.spinner]="isSaving"
+                [disabled]="isSaving"
                 (click)="save()">Save
         </button>
     </div>

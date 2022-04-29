@@ -98,18 +98,18 @@ export class LocationsComponent implements OnInit, OnDestroy {
 
     deleteLocation(location: LocationModel): boolean {
         this.dialogsService
-            .openDeleteDialog('device group ' + location.name)
+            .openDeleteDialog('location ' + location.name)
             .afterClosed()
             .subscribe((deleteDeviceClass: boolean) => {
                 if (deleteDeviceClass) {
                     this.locationsService.deleteLocation(location.id).subscribe((resp: boolean) => {
                         if (resp === true) {
                             this.locations.splice(this.locations.indexOf(location), 1);
-                            this.snackBar.open('Device-Group deleted successfully.', undefined, { duration: 2000 });
+                            this.snackBar.open('Location deleted successfully.', undefined, { duration: 2000 });
                             this.setLimitOffset(1);
                             this.reloadLocations(false);
                         } else {
-                            this.snackBar.open('Error while deleting the device-group!', undefined, { duration: 2000 });
+                            this.snackBar.open('Error while deleting the location!', undefined, { duration: 2000 });
                         }
                     });
                 }
