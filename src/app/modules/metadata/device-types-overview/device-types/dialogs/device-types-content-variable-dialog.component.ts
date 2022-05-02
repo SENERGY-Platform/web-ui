@@ -18,14 +18,30 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {
     DeviceTypeAspectModel,
-    DeviceTypeCharacteristicsModel,
+    DeviceTypeCharacteristicsModel, DeviceTypeConceptModel,
     DeviceTypeContentVariableModel,
     DeviceTypeFunctionModel
 } from '../../shared/device-type.model';
-import {AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
+import {
+    AbstractControl,
+    FormBuilder,
+    FormControl,
+    FormGroup,
+    ValidationErrors,
+    ValidatorFn,
+    Validators
+} from '@angular/forms';
 import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
 import {DeviceTypeHelperService} from '../shared/device-type-helper.service';
 import {convertPunctuation, typeValueValidator} from '../../../../imports/validators/type-value-validator';
+
+interface DeviceTypeCharacteristicsClassModel extends DeviceTypeCharacteristicsModel {
+    class: string;
+}
+
+interface DeviceTypeFunctionClassModel extends DeviceTypeFunctionModel {
+    class: string;
+}
 
 @Component({
     templateUrl: './device-types-content-variable-dialog.component.html',
@@ -34,16 +50,12 @@ import {convertPunctuation, typeValueValidator} from '../../../../imports/valida
 export class DeviceTypesContentVariableDialogComponent implements OnInit {
     disabled: boolean;
     contentVariable: DeviceTypeContentVariableModel;
-    functions: DeviceTypeFunctionModel[] = [];
+    functions: DeviceTypeFunctionClassModel[] = [];
     firstFormGroup!: FormGroup;
     typeOptionsControl: FormControl = new FormControl();
     primitiveTypes: { type: string; typeShort: string }[] = [];
     nonPrimitiveTypes: { type: string; typeShort: string }[] = [];
-    conceptList: {
-        conceptName: string;
-        characteristicList: { id: string; name: string; type: string | undefined; class: string }[];
-    }[] = [];
-    options: Map<string, any[]> = new Map();
+    characteristics: DeviceTypeCharacteristicsClassModel[] = [];
     concepts: ConceptsCharacteristicsModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     aspectOptions: Map<string, DeviceTypeAspectModel[]> = new Map();
@@ -67,7 +79,11 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     ) {
         this.disabled = data.disabled;
         this.contentVariable = data.contentVariable;
-        this.functions = data.functions;
+        this.functions = data.functions.map(f => {
+            const x = f as DeviceTypeFunctionClassModel;
+            x.class = '';
+            return x;
+        });
         this.concepts = data.concepts;
         this.aspects = data.aspects;
         this.allowVoid = data.allowVoid;
@@ -77,12 +93,19 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     ngOnInit(): void {
         this.initTypesList();
         this.initFormGroup();
-        this.initConceptList();
-        this.options = this.getOptions();
+        for (const concept of this.concepts) {
+            this.characteristics.push(...(concept.characteristics.filter(c => !this.characteristics.some(cc => cc.id === c.id))).map(x => {
+                const c = x as DeviceTypeCharacteristicsClassModel;
+                c.class = '';
+                return c;
+            }));
+        }
         this.initTypeOptionControl();
         this.aspects.forEach(a => {
             this.aspectOptions.set(a.name, this.getAllAspectsOnTree(a));
         });
+        this.highlightCharacteristics();
+        this.highlightFunctions();
     }
 
     close(): void {
@@ -114,39 +137,50 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         return this.typeOptionsControl.value === 'void';
     }
 
-    getOptions(): Map<string, any[]> {
-        const m = new Map();
-        const filteredList = this.getFilteredConceptList();
-        filteredList.forEach((c) => m.set(c.conceptName, c.characteristicList));
-        return m;
+    highlightCharacteristics() {
+        let conceptCharacteristicIds: string[] | undefined;
+        if (this.firstFormGroup.get('function_id')?.value != null) {
+            const conceptId = this.functions.find(f => f.id === this.firstFormGroup.get('function_id')?.value)?.concept_id;
+            conceptCharacteristicIds = this.concepts.find(c => c.id === conceptId)?.characteristics.map(c => c.id!);
+        }
+        const type = this.getType();
+        this.characteristics.forEach(c => {
+            if ((conceptCharacteristicIds !== undefined && conceptCharacteristicIds.indexOf(c.id || '') !== -1 && c.type === type) || (conceptCharacteristicIds === undefined && c.type === type)) {
+                c.class = 'color-accent';
+            } else {
+                c.class = '';
+            }
+        });
+        this.characteristics.sort((a, b) => {
+            if (a.class === b.class) {
+                return (a === b ? 0 : (a.name < b.name ? -1 : 1));
+            } else {
+                return a.class === '' ? 1 : -1;
+            }
+        });
+    }
+
+    highlightFunctions() {
+        const characteristicId = this.firstFormGroup.get('characteristic_id')?.value;
+        const concepts = this.concepts.filter(c => c.characteristics.some(cc => cc.id === characteristicId));
+        this.functions.forEach(f => {
+            if (concepts.some(c => c.id === f.concept_id)) {
+                f.class = 'color-accent';
+            } else {
+                f.class = '';
+            }
+        });
+        this.functions.sort((a, b) => {
+            if (a.class === b.class) {
+                return (a === b ? 0 : (a.name < b.name ? -1 : 1));
+            } else {
+                return a.class === '' ? 1 : -1;
+            }
+        });
     }
 
     getType(): string {
         return this.firstFormGroup?.get('type')?.value;
-    }
-
-    getFilteredConceptList(): {
-        conceptName: string;
-        characteristicList: { id: string; name: string; type: string | undefined }[];
-    }[] {
-        if (this.getType() === null) {
-            return this.conceptList;
-        }
-        const type = this.getType();
-        const copy = JSON.parse(JSON.stringify(this.conceptList));
-        copy.forEach((concept: any) => {
-            concept.characteristicList = concept.characteristicList.filter(
-                (characteristic: any) => characteristic.type === undefined || characteristic.type === type,
-            );
-        });
-        return copy.filter((concept: any) => concept.characteristicList.length > 0);
-    }
-
-    compareIds(a: any, b: any) {
-        if (a === undefined || b === undefined || a === null || b === null) {
-            return a === b;
-        }
-        return a.id === b.id;
     }
 
     private initTypeOptionControl() {
@@ -194,9 +228,15 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             this.firstFormGroup = this._formBuilder.group({
                 indices: [this.contentVariable.indices],
                 id: [{value: this.contentVariable.id || null, disabled: true}],
-                name: [{disabled: true, value: this.contentVariable.name}, (c: AbstractControl) => this.prohibitedNames.some(p => p === c.value) ? {nameValidator: {value: c.value}} : null],
+                name: [{
+                    disabled: true,
+                    value: this.contentVariable.name
+                }, (c: AbstractControl) => this.prohibitedNames.some(p => p === c.value) ? {nameValidator: {value: c.value}} : null],
                 type: [{disabled: true, value: this.contentVariable.type}],
-                characteristic_id: [{disabled: true, value: this.contentVariable.characteristic_id}],
+                characteristic_id: [{
+                    disabled: true,
+                    value: this.contentVariable.characteristic_id
+                }, this.characteristicValidator()],
                 serialization_options: [{disabled: true, value: this.contentVariable.serialization_options}],
                 unit_reference: [{disabled: true, value: this.contentVariable.unit_reference}],
                 sub_content_variables: [{disabled: true, value: this.contentVariable.sub_content_variables}],
@@ -212,7 +252,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                     id: [{value: this.contentVariable.id || null, disabled: true}],
                     name: [this.contentVariable.name, (c: AbstractControl) => this.prohibitedNames.some(p => p === c.value) ? {nameValidator: {value: c.value}} : null],
                     type: [this.contentVariable.type],
-                    characteristic_id: [this.contentVariable.characteristic_id],
+                    characteristic_id: [this.contentVariable.characteristic_id, this.characteristicValidator()],
                     serialization_options: [this.contentVariable.serialization_options],
                     unit_reference: [this.contentVariable.unit_reference],
                     sub_content_variables: [this.contentVariable.sub_content_variables],
@@ -229,27 +269,39 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             if (id) {
                 this.patchType(id);
             }
+            this.highlightFunctions();
         });
         this.firstFormGroup?.get('type')?.valueChanges.subscribe((_) => {
-            this.options = this.getOptions();
+            this.highlightCharacteristics();
+            this.firstFormGroup.get('characteristic_id')?.updateValueAndValidity({onlySelf: true, emitEvent: false});
         });
         if (this.firstFormGroup.get('characteristic_id')?.value) {
             this.patchType(this.firstFormGroup.get('characteristic_id')?.value);
         }
         this.firstFormGroup?.get('function_id')?.valueChanges.subscribe((_) => {
-            this.initConceptList();
-            this.options = this.getOptions();
+            this.highlightCharacteristics();
+            this.firstFormGroup.get('characteristic_id')?.updateValueAndValidity({onlySelf: true, emitEvent: false});
         });
-        console.log(this.firstFormGroup.value); // TODO
+    }
+
+    private characteristicValidator(): ValidatorFn {
+        return (control) => {
+            const err = this.getCharacteristicError(control);
+            if (err !== undefined) {
+                const res = {err: true};
+                control.setErrors(res);
+                return res;
+            }
+            control.setErrors(null);
+            return null;
+        };
     }
 
     private patchType(characteristicId: string) {
-        this.conceptList.forEach((concept) => {
-            const selectedChar = concept.characteristicList.find((characteristic) => characteristic.id === characteristicId);
-            if (selectedChar !== undefined && selectedChar.type !== undefined) {
-                this.firstFormGroup.patchValue({type: selectedChar.type});
-            }
-        });
+        const char = this.characteristics.find(c => c.id === characteristicId);
+        if (char !== undefined) {
+            this.firstFormGroup.patchValue({type: char.type});
+        }
     }
 
     private initTypesList(): void {
@@ -262,30 +314,31 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         this.nonPrimitiveTypes.push({type: 'https://schema.org/ItemList', typeShort: 'List'});
     }
 
-    private initConceptList(): void {
-        const functionConceptId = this.functions.find(f => f.id === this.firstFormGroup.get('function_id')?.value)?.concept_id;
-        this.concepts.forEach((concept) => {
-            const characteristicsList: { id: string; name: string; type: string | undefined; class: string }[] = [];
-            const ngclass = functionConceptId === concept.id ? 'color-accent' : '';
-            if (concept.characteristics !== null) {
-                concept.characteristics.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
-                    this.deviceTypeHelperService.characteristicsFlatten(characteristic, '', true).forEach((char) => {
-                        characteristicsList.push({id: char.id, name: char.name, type: char.type, class: ngclass});
-                    });
-                });
-            }
-
-            this.conceptList.push({
-                conceptName: concept.name,
-                characteristicList: characteristicsList,
-            });
-        });
-    }
-
     private getAllAspectsOnTree(a: DeviceTypeAspectModel): DeviceTypeAspectModel[] {
         const res: DeviceTypeAspectModel[] = [];
         res.push(a);
         a.sub_aspects?.forEach(sub => res.push(...this.getAllAspectsOnTree(sub)));
         return res;
+    }
+
+    getCharacteristicError(control: AbstractControl | null): string | undefined {
+        if (control === null) {
+            return undefined;
+        }
+        if (control.value === null) {
+            return undefined;
+        }
+        if (this.firstFormGroup?.get('function_id')?.value != null) {
+            const func = this.functions.find(f => f.id === this.firstFormGroup?.get('function_id')?.value);
+            const concept = this.concepts.find(c => c.id === func?.concept_id);
+            if (!concept?.characteristics.some(char => char.id === control.value)) {
+                return 'Characteristic doesn\'t match function';
+            }
+        }
+        const type = this.getType();
+        if (type !== null && this.characteristics.find(c => c.id === control.value)?.type !== type) {
+            return 'Characteristic doesn\'t match type';
+        }
+        return undefined;
     }
 }

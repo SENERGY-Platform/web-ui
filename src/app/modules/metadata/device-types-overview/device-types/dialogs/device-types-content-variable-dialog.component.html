@@ -30,21 +30,22 @@
             <input matInput placeholder="Name" formControlName="name" required>
         </mat-form-field>
         <mat-form-field class="full-width" color="accent" *ngIf="!isVoidType()">
-            <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name"
+            <senergy-select-search [options]="aspectOptions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
                                    placeholder="Aspect" formControlName="aspect_id"></senergy-select-search>
         </mat-form-field>
 
         <mat-form-field class="full-width" color="accent">
-            <senergy-select-search [options]="functions" useOptionValueProperty="id" useOptionViewProperty="name"
-                                   placeholder="Function" formControlName="function_id"></senergy-select-search>
+            <senergy-select-search [options]="functions" useOptionValueProperty="id" useOptionViewProperty="name" noneView="-- None --"
+                                   placeholder="Function" formControlName="function_id" useOptionClassProperty="class"></senergy-select-search>
         </mat-form-field>
 
         <mat-form-field class="full-width" color="accent" *ngIf="!isVoidType()">
             <mat-label>Characteristic</mat-label>
-            <senergy-select-search [scrollWindowSize]="1000" formControlName="characteristic_id" noneView="-- None --"
-                                   [options]="options" useOptionViewProperty="name" useOptionValueProperty="id"
+            <senergy-select-search formControlName="characteristic_id" noneView="-- None --"
+                                   [options]="characteristics" useOptionViewProperty="name" useOptionValueProperty="id"
                                    useOptionClassProperty="class">
             </senergy-select-search>
+            <mat-error *ngIf="firstFormGroup.get('characteristic_id')?.invalid">{{getCharacteristicError(firstFormGroup.get('characteristic_id')) || ''}}</mat-error>
         </mat-form-field>
         <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
             <mat-select placeholder="Type"

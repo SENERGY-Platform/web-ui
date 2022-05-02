@@ -15,7 +15,7 @@
  */
 
 import {
-    AfterViewInit,
+    AfterViewInit, ChangeDetectorRef,
     Component,
     EventEmitter,
     HostBinding,
@@ -58,7 +58,7 @@ export function useProperty(property: string): (option: any) => any {
     providers: [{provide: MatFormFieldControl, useExisting: SelectSearchComponent}],
 })
 export class SelectSearchComponent implements MatFormFieldControl<any>, ControlValueAccessor, OnDestroy, AfterViewInit, OnInit {
-    constructor(@Optional() @Self() public ngControl: NgControl) {
+    constructor(@Optional() @Self() public ngControl: NgControl, private cd: ChangeDetectorRef) {
         if (this.ngControl != null) {
             this.ngControl.valueAccessor = this;
         }
@@ -87,6 +87,9 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             this.queuedWriteValue = selection;
         } else {
             this.select.value = selection;
+        }
+        if (this.withGroups) {
+            this.updateOptionsGroups(this.searchControl.value || '');
         }
         this.stateChanges.next();
     }
@@ -153,7 +156,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() set options(value: any[] | Map<string, any[]>) {
         this._options = value;
         this.withGroups = !Array.isArray(this.options);
-        if (!Array.isArray(this.options)) {
+        if (this.withGroups) {
             this.updateOptionsGroups(this.searchControl.value || '');
             this.searchControl.valueChanges.subscribe((val: string) => (this.updateOptionsGroups(val)));
         }
@@ -292,8 +295,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         }
         this.select.openedChange.subscribe((opened) => {
             if (opened) {
-                this.select.panel?.nativeElement?.addEventListener('scroll', ($event: ScrollEvent) => this.updateScrollOffset($event, this.select.panel.nativeElement));
-                this.select.panel?.nativeElement?.addEventListener('mouseup', ($event: MouseUpEvent) => this.fixPowerScroll($event, this.select.panel.nativeElement)); // see explanation in handleMouseUp
+                this.select.panel?.nativeElement?.addEventListener('scroll', ($event: ScrollEvent) => this.updateScrollOffset($event, this.select.panel?.nativeElement));
+                this.select.panel?.nativeElement?.addEventListener('mouseup', ($event: MouseUpEvent) => this.fixPowerScroll($event, this.select.panel?.nativeElement)); // see explanation in handleMouseUp
             }
         });
     }
@@ -442,6 +445,9 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         if (this.select !== undefined) {
             this.select.writeValue(obj);
             this.queuedWriteValue = undefined;
+            if (this.withGroups) {
+                this.updateOptionsGroups(this.searchControl.value || '');
+            }
         } else {
             this.queuedWriteValue = obj;
         }
@@ -533,7 +539,6 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             }
             let j = 0;
             const v2 = [];
-            if (this.scrollLowerOffset > 0 && r2.size > 0) debugger; // TODO
             while (skipped < this.scrollLowerOffset && j < v.length) {
                 skipped++;
                 j++;
@@ -544,14 +549,14 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 size++;
             }
             if (v2.length > 0) {
-                 r2.set(k, v2);
+                r2.set(k, v2);
             }
         }
         for (const [k, v] of selected) {
             r2 = this.appendInsertFilterMap(r2, k, v).m;
         }
         this.optionsGroups = r2;
-        console.log(this.optionsGroups); // TODO
+        this.cd.detectChanges();
     }
 
     toArray(v: any): any[] {
