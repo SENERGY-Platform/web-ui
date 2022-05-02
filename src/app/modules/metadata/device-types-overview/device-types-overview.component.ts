@@ -107,7 +107,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
                             this.setRepoItemsParams(1);
                             this.getDeviceTypes();
                         } else {
-                            this.snackBar.open('Error while deleting device type!', '', { duration: 2000 });
+                            this.snackBar.open('Error while deleting device type!', "close", { panelClass: "snack-bar-error" });
                         }
                     });
                 }

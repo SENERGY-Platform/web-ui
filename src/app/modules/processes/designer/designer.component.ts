@@ -247,11 +247,11 @@ export class ProcessDesignerComponent implements OnInit {
                 } else {
                     this.saveXML((errXML, processXML) => {
                         if (errXML) {
-                            this.snackBar.open('Error XML! ' + errXML, undefined, { duration: 3500 });
+                            this.snackBar.open('Error XML! ' + errXML, "close", { panelClass: "snack-bar-error" });
                         } else {
                             this.saveSVG((errSVG, svgXML) => {
                                 if (errSVG) {
-                                    this.snackBar.open('Error SVG! ' + errSVG, undefined, { duration: 3500 });
+                                    this.snackBar.open('Error SVG! ' + errSVG, "close", { panelClass: "snack-bar-error" });
                                 } else {
                                     this.processRepoService.saveProcess(this.id, processXML, svgXML).subscribe(() => {
                                         this.snackBar.open('Model saved.', undefined, { duration: 2000 });

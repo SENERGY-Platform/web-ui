@@ -109,7 +109,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
                             this.setLimitOffset(1);
                             this.reloadLocations(false);
                         } else {
-                            this.snackBar.open('Error while deleting the location!', undefined, { duration: 2000 });
+                            this.snackBar.open('Error while deleting the location!', "close", { panelClass: "snack-bar-error" });
                         }
                     });
                 }

@@ -142,7 +142,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                             this.setLimitOffset(1);
                             this.reloadFunctions(false);
                         } else {
-                            this.snackBar.open('Error while deleting the function!', undefined, { duration: 2000 });
+                            this.snackBar.open('Error while deleting the function!', "close", { panelClass: "snack-bar-error" });
                         }
                     });
                 }
@@ -219,7 +219,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     private reloadAndShowSnackbar(func: DeviceTypeFunctionModel | null, text: string) {
         if (func === null) {
-            this.snackBar.open('Error while ' + text + 'ing the function!', undefined, { duration: 2000 });
+            this.snackBar.open('Error while ' + text + 'ing the function!', "close", { panelClass: "snack-bar-error" });
             this.getFunctions(true);
         } else {
             this.snackBar.open('Function ' + text + 'ed successfully.', undefined, { duration: 2000 });

@@ -252,7 +252,7 @@ export class LocationsEditComponent implements OnInit {
         if (locationSaved) {
             this.snackBar.open('Location saved successfully.', undefined, { duration: 2000 });
         } else {
-            this.snackBar.open('Error while saving the device group!', undefined, { duration: 2000 });
+            this.snackBar.open('Error while saving the device group!', "close", { panelClass: "snack-bar-error" });
         }
     }
 

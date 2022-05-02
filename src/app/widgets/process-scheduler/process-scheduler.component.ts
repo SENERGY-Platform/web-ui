@@ -97,7 +97,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
                             this.snackBar.open('Schedule saved!', undefined, { duration: 2000 });
                             this.reload();
                         } else {
-                            this.snackBar.open('Error while saving schedule!');
+                            this.snackBar.open('Error while saving schedule!', "close", { panelClass: "snack-bar-error" });
                         }
                     });
                 } else {
@@ -106,7 +106,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
                             this.snackBar.open('Schedule updated!', undefined, { duration: 2000 });
                             this.reload();
                         } else {
-                            this.snackBar.open('Error while updating schedule!');
+                            this.snackBar.open('Error while updating schedule!', "close", { panelClass: "snack-bar-error" });
                         }
                     });
                 }

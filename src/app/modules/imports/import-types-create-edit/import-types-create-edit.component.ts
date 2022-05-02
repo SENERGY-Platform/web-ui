@@ -171,7 +171,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                     },
                     (err) => {
                         console.log(err);
-                        this.snackBar.open('Error loading import type', 'OK', { duration: 3000 });
+                        this.snackBar.open('Error loading import type', "close", { panelClass: "snack-bar-error" });
                         this.navigateToList();
                     },
                 );
@@ -183,7 +183,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
             },
             (err) => {
                 console.log(err);
-                this.snackBar.open('Error loading functions', 'OK', { duration: 3000 });
+                this.snackBar.open('Error loading functions', "close", { panelClass: "snack-bar-error" });
                 this.navigateToList();
             },
         );
@@ -191,7 +191,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
             (aspects) => (this.aspects = aspects),
             (err) => {
                 console.log(err);
-                this.snackBar.open('Error loading aspects', 'OK', { duration: 3000 });
+                this.snackBar.open('Error loading aspects', "close", { panelClass: "snack-bar-error" });
                 this.navigateToList();
             },
         );
@@ -212,7 +212,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 }),
             (err) => {
                 console.log(err);
-                this.snackBar.open('Error loading characteristics', 'OK', { duration: 3000 });
+                this.snackBar.open('Error loading characteristics', "close", { panelClass: "snack-bar-error" });
                 this.navigateToList();
             },
         );
@@ -246,7 +246,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
             () => this.navigateToList(),
             (err: any) => {
                 console.error(err);
-                this.snackBar.open('Error saving: ' + err.error, 'OK', { duration: 3000 });
+                this.snackBar.open('Error saving: ' + err.error, "close", { panelClass: "snack-bar-error" });
                 this.ready = true;
             },
         );

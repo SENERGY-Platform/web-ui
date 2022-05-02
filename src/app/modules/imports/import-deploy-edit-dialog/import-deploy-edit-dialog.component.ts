@@ -110,7 +110,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error loading import type', 'OK', { duration: 3000 });
+                this.snackBar.open('Error loading import type', "close", { panelClass: "snack-bar-error" });
                 this.dialogRef.close();
             },
         );
@@ -155,7 +155,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
             () => this.dialogRef.close(true),
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error saving', 'OK', { duration: 3000 });
+                this.snackBar.open('Error saving', "close", { panelClass: "snack-bar-error" });
             },
         );
     }

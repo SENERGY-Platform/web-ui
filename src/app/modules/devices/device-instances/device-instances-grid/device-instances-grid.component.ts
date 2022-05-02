@@ -97,7 +97,7 @@ export class DeviceInstancesGridComponent implements OnInit {
                             this.snackBar.open('Device deleted successfully.', '', { duration: 2000 });
                             this.emitItemDeleted();
                         } else {
-                            this.snackBar.open('Error while deleting device!', '', { duration: 2000 });
+                            this.snackBar.open('Error while deleting device!', "close", { panelClass: "snack-bar-error" });
                         }
                     });
                 }
@@ -136,10 +136,10 @@ export class DeviceInstancesGridComponent implements OnInit {
                     };
                     this.dialog.open(DeviceInstancesExportDialogComponent, dialogConfig);
                 } else {
-                    this.snackBar.open('Device type has no output services!', '', { duration: 2000 });
+                    this.snackBar.open('Device type has no output services!', "close", { panelClass: "snack-bar-error" });
                 }
             } else {
-                this.snackBar.open('Could not read device type!', '', { duration: 2000 });
+                this.snackBar.open('Could not read device type!', "close", { panelClass: "snack-bar-error" });
             }
         });
     }

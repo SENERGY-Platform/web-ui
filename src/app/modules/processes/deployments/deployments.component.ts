@@ -157,7 +157,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
             } else {
                 this.deploymentsService.startDeployment(deploymentId).subscribe((resp) => {
                     if (resp === null) {
-                        this.snackBar.open('Error while starting the deployment!', undefined, { duration: 2000 });
+                        this.snackBar.open('Error while starting the deployment!', "close", { panelClass: "snack-bar-error" });
                     } else {
                         this.snackBar.open('Deployment started successfully.', undefined, { duration: 2000 });
                     }
@@ -357,7 +357,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     private showSnackBarError(text: string): void {
-        this.snackBar.open('Error while ' + text + ' !', undefined, { duration: 2000 });
+        this.snackBar.open('Error while ' + text + ' !', "close", { panelClass: "snack-bar-error" });
     }
 
     private showSnackBarSuccess(text: string): void {

@@ -72,7 +72,7 @@ export class SettingsChangeDialogComponent implements OnInit {
                         this.snackBar.open('Settings saved successfully.', undefined, { duration: 2000 });
                     }
                 } else {
-                    this.snackBar.open('Error while saving the settings!', undefined, { duration: 2000 });
+                    this.snackBar.open('Error while saving the settings!', "close", { panelClass: "snack-bar-error" });
                 }
             });
     }
@@ -114,7 +114,7 @@ export class SettingsChangeDialogComponent implements OnInit {
                 this.passwordNew.setValue('');
                 this.passwordConfirm.setValue('');
             } else {
-                this.snackBar.open('Error while saving the settings!', undefined, { duration: 2000 });
+                this.snackBar.open('Error while saving the settings!', "close", { panelClass: "snack-bar-error" });
             }
         });
     }

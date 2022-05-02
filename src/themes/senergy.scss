@@ -181,3 +181,14 @@ $my-app-theme: mat.define-light-theme($my-app-primary, $my-app-accent, $my-app-w
 .color-sidenav {
   color: mat.get-color-from-palette($my-app-sidenav) !important;
 }
+
+.snack-bar-error {
+    background-color: darkred !important;
+    font-weight: bold;
+}
+
+.snack-bar-error button{
+    color: white;
+    font-family: "Material Icons";
+    font-weight: bold;
+}

@@ -133,9 +133,7 @@ export class ExportComponent implements OnInit, OnDestroy {
                             });
                             this.getExports(true);
                         } else {
-                            this.snackBar.open('Export could not be deleted', undefined, {
-                                duration: 2000,
-                            });
+                            this.snackBar.open('Export could not be deleted', "close", { panelClass: "snack-bar-error" });
                         }
                         this.ready = true;
                     });

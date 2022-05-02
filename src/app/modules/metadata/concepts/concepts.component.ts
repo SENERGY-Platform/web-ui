@@ -99,7 +99,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
                 this.reset();
                 this.conceptsService.createConcept(newConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
-                        this.snackBar.open('Error while creating the concept!', undefined, { duration: 2000 });
+                        this.snackBar.open('Error while creating the concept!', "close", { panelClass: "snack-bar-error" });
                         this.getConcepts(true);
                     } else {
                         this.snackBar.open('Concept created successfully.', undefined, { duration: 2000 });
@@ -123,7 +123,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
                 this.reset();
                 this.conceptsService.updateConcept(editConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
-                        this.snackBar.open('Error while updating the concept!', undefined, { duration: 2000 });
+                        this.snackBar.open('Error while updating the concept!', "close", { panelClass: "snack-bar-error" });
                         this.getConcepts(true);
                     } else {
                         this.snackBar.open('Concept updated successfully.', undefined, { duration: 2000 });
@@ -147,7 +147,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
                             this.setRepoItemsParams(1);
                             this.reloadConcepts(false);
                         } else {
-                            this.snackBar.open('Error while deleting the concept!', undefined, { duration: 2000 });
+                            this.snackBar.open('Error while deleting the concept!', "close", { panelClass: "snack-bar-error" });
                         }
                     });
                 }

@@ -65,7 +65,7 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error loading import type', 'OK', { duration: 3000 });
+                this.snackBar.open('Error loading import type', "close", { panelClass: "snack-bar-error" });
                 this.dialogRef.close();
             },
         );
@@ -93,7 +93,7 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error creating export', 'OK', { duration: 3000 });
+                this.snackBar.open('Error creating export', "close", { panelClass: "snack-bar-error" });
             },
         );
     }

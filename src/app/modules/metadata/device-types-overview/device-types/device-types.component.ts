@@ -662,7 +662,7 @@ export class DeviceTypesComponent implements OnInit {
         if (deviceTypeSaved) {
             this.snackBar.open('Device type saved successfully.', undefined, {duration: 2000});
         } else {
-            this.snackBar.open('Error while saving the device type!', undefined, {duration: 2000});
+            this.snackBar.open('Error while saving the device type!', "close", { panelClass: "snack-bar-error" });
         }
     }
 

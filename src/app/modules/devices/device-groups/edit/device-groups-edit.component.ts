@@ -224,7 +224,7 @@ export class DeviceGroupsEditComponent implements OnInit {
         if (deviceGroupSaved) {
             this.snackBar.open('Device-Group saved successfully.', undefined, { duration: 2000 });
         } else {
-            this.snackBar.open('Error while saving the device group!', undefined, { duration: 2000 });
+            this.snackBar.open('Error while saving the device group!', "close", { panelClass: "snack-bar-error" });
         }
     }
 

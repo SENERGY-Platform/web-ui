@@ -135,7 +135,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                     this.loadCharacteristicNames(deployment);
                     this.cd.detectChanges();
                 } else {
-                    this.snackBar.open('Error while copying the deployment! Probably old version', undefined, { duration: 2000 });
+                    this.snackBar.open('Error while copying the deployment! Probably old version', "close", { panelClass: "snack-bar-error" });
                 }
             });
         } else {
@@ -169,7 +169,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             if (resp.status === 200) {
                 this.snackBar.open('Deployment stored successfully.', undefined, { duration: 2000 });
             } else {
-                this.snackBar.open('Error while storing the deployment!', undefined, { duration: 2000 });
+                this.snackBar.open('Error while storing the deployment!', "close", { panelClass: "snack-bar-error" });
             }
         });
     }

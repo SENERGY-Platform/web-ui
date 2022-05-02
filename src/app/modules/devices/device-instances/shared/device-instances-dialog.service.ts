@@ -103,7 +103,7 @@ export class DeviceInstancesDialogService {
                     .updateDeviceInstance(this.convertDeviceInstance(deviceOut))
                     .subscribe((deviceResp: DeviceInstancesUpdateModel | null) => {
                         if (deviceResp === null) {
-                            this.snackBar.open('Error while updating the device instance!', undefined, {duration: 2000});
+                            this.snackBar.open('Error while updating the device instance!', "close", { panelClass: "snack-bar-error" });
                         } else {
                             Object.assign(device, deviceOut);
                             this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
@@ -134,7 +134,7 @@ export class DeviceInstancesDialogService {
                     .saveDeviceInstance(this.convertDeviceInstance(deviceOut))
                     .subscribe((deviceResp: DeviceInstancesUpdateModel | null) => {
                         if (deviceResp === null) {
-                            this.snackBar.open('Error while saving the device instance!', undefined, {duration: 2000});
+                            this.snackBar.open('Error while saving the device instance!', "close", { panelClass: "snack-bar-error" });
                         } else {
                             this.snackBar.open('Device instance saved successfully.', undefined, {duration: 2000});
                         }

@@ -226,9 +226,10 @@ export class NewExportComponent implements OnInit {
                                     }
                                 });
                             } else if (exp.FilterType === 'pipeId') {
-                                this.snackBar.open('Outdated export version - Please reconfigure and redeploy the export', undefined, {
+                                this.snackBar.open('Outdated export version - Please reconfigure and redeploy the export', "close", {
                                     duration: 5000,
                                     verticalPosition: 'top',
+                                    panelClass: "snack-bar-error"
                                 });
                                 this.exportForm.patchValue({selector: 'pipe'});
                                 this.pipelines.forEach((pipeline) => {
@@ -313,9 +314,7 @@ export class NewExportComponent implements OnInit {
                             duration: 2000,
                         });
                     } else {
-                        this.snackBar.open('Export could not be updated', undefined, {
-                            duration: 2000,
-                        });
+                        this.snackBar.open('Export could not be updated', "close", { panelClass: "snack-bar-error" });
                     }
                     this.ready = true;
                 });

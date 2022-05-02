@@ -61,9 +61,7 @@ export class NetworksDeleteDialogComponent implements OnInit {
                 });
                 this.close(true);
             } else {
-                this.snackBar.open('Error while deleting the hub' + (ids.length > 0 ? ' and devices' : '') + '!', undefined, {
-                    duration: 2000,
-                });
+                this.snackBar.open('Error while deleting the hub' + (ids.length > 0 ? ' and devices' : '') + '!', "close", { panelClass: "snack-bar-error" });
                 this.ready = true;
             }
         });

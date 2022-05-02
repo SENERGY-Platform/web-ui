@@ -103,7 +103,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                 this.reset();
                 this.characteristicsService.createCharacteristic(resp.characteristic).subscribe((characteristic) => {
                     if (characteristic === null) {
-                        this.snackBar.open('Error while creating the characteristic!', undefined, {duration: 2000});
+                        this.snackBar.open('Error while creating the characteristic!', "close", { panelClass: "snack-bar-error" });
                         this.getCharacteristics(true);
                     } else {
                         this.snackBar.open('Characteristic created successfully.', undefined, {duration: 2000});
@@ -135,7 +135,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                                 this.setRepoItemsParams(1);
                                 this.reloadCharacterisitics(false);
                             } else {
-                                this.snackBar.open('Error while deleting the characteristic!', undefined, {duration: 2000});
+                                this.snackBar.open('Error while deleting the characteristic!', "close", { panelClass: "snack-bar-error" });
                             }
                         });
                 }
@@ -159,7 +159,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                     .updateConcept(newCharacteristic)
                     .subscribe((characteristic: DeviceTypeCharacteristicsModel | null) => {
                         if (characteristic === null) {
-                            this.snackBar.open('Error while updating the characteristic!', undefined, {duration: 2000});
+                            this.snackBar.open('Error while updating the characteristic!', "close", { panelClass: "snack-bar-error" });
                             this.getCharacteristics(true);
                         } else {
                             this.snackBar.open('Characteristic updated successfully.', undefined, {duration: 2000});

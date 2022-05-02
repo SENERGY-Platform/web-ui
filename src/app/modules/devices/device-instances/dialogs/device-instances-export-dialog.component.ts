@@ -74,7 +74,7 @@ export class DeviceInstancesExportDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error creating exports', '', {duration: 2000});
+                this.snackBar.open('Error creating exports', "close", { panelClass: "snack-bar-error" });
             },
         );
     }

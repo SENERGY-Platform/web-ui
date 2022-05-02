@@ -128,7 +128,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
                             this.setLimitOffset(1);
                             this.reloadDeviceClasses(false);
                         } else {
-                            this.snackBar.open('Error while deleting the device class!', undefined, { duration: 2000 });
+                            this.snackBar.open('Error while deleting the device class!', "close", { panelClass: "snack-bar-error" });
                         }
                     });
                 }
@@ -210,7 +210,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
     private reloadAndShowSnackbar(deviceClass: DeviceTypeDeviceClassModel | null, text: string) {
         if (deviceClass === null) {
-            this.snackBar.open('Error while ' + text + 'ing the device class!', undefined, { duration: 2000 });
+            this.snackBar.open('Error while ' + text + 'ing the device class!', "close", { panelClass: "snack-bar-error" });
             this.getDeviceClasses(true);
         } else {
             this.snackBar.open('Device class ' + text + 'ed successfully.', undefined, { duration: 2000 });

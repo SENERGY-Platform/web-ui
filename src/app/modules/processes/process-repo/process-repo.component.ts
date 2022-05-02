@@ -367,7 +367,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private showSnackBarError(text: string): void {
-        this.snackBar.open('Error while ' + text + ' !', undefined, { duration: 2000 });
+        this.snackBar.open('Error while ' + text + ' !', "close", { panelClass: "snack-bar-error" });
     }
 
     private showSnackBarSuccess(text: string): void {
