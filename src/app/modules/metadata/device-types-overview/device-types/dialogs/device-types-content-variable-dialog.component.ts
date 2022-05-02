@@ -325,7 +325,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         if (control === null) {
             return undefined;
         }
-        if (control.value === null) {
+        if (control.value === null || control.value === undefined || control.value.length === 0) {
             return undefined;
         }
         if (this.firstFormGroup?.get('function_id')?.value != null) {
