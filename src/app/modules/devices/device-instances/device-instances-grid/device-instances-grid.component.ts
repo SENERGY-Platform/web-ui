@@ -52,6 +52,7 @@ export class DeviceInstancesGridComponent implements OnInit {
     gridCols = 0;
     userID: string;
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
+    displayNameAttributeKey: string = "shared/nickname";
 
     constructor(
         private responsiveService: ResponsiveService,
@@ -165,5 +166,15 @@ export class DeviceInstancesGridComponent implements OnInit {
         this.deviceTypeService.getDeviceClasses().subscribe((deviceClasses: DeviceTypeDeviceClassModel[]) => {
             this.deviceClasses = deviceClasses;
         });
+    }
+
+    getDisplayName(device: DeviceInstancesModel): string {
+        let result = device.name;
+        device.attributes?.forEach(value => {
+            if(value.key == this.displayNameAttributeKey) {
+                result = value.value;
+            }
+        })
+        return result
     }
 }

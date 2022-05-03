@@ -25,6 +25,9 @@ import { DeviceInstancesService } from '../shared/device-instances.service';
 })
 export class DeviceInstancesEditDialogComponent implements OnInit {
     device: DeviceInstancesModel;
+    displayname: string = "";
+    nicknameAttributeKey: string = "shared/nickname";
+    nicknameAttributeOrigin: string = "shared"
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesEditDialogComponent>,
@@ -32,6 +35,11 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) private data: { device: DeviceInstancesModel },
     ) {
         this.device = data.device;
+        this.device.attributes?.forEach(value => {
+            if (value.key == this.nicknameAttributeKey) {
+                this.displayname = value.value;
+            }
+        })
     }
 
     ngOnInit() {}
@@ -45,6 +53,7 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     }
 
     save(): void {
+        this.setDisplayNameAttribute()
         this.dialogRef.close(this.device);
     }
 
@@ -64,5 +73,21 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
 
     editableAttribute(attr: Attribute) {
         return !attr.origin || attr.origin == '' || attr.origin == 'web-ui'
+    }
+
+    private setDisplayNameAttribute() {
+        if(!this.device.attributes) {
+            this.device.attributes = [];
+        }
+        this.device.attributes = this.device.attributes?.filter((value)=>{
+            return value.key != this.nicknameAttributeKey;
+        })
+        if (this.displayname != "") {
+            this.device.attributes?.push({
+                key: this.nicknameAttributeKey,
+                origin: this.nicknameAttributeOrigin,
+                value: this.displayname
+            } as Attribute)
+        }
     }
 }

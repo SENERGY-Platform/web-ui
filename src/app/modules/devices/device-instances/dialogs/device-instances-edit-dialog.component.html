@@ -31,7 +31,10 @@
             <input matInput placeholder="Devicetype Name" disabled value="{{device.device_type.name}}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
-            <input matInput placeholder="Name" [(ngModel)]="device.name" [ngModelOptions]="{standalone: true}">
+            <input matInput placeholder="Origin Name" [(ngModel)]="device.name" disabled [ngModelOptions]="{standalone: true}">
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent">
+            <input matInput placeholder="Display Name" [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
         </mat-form-field>
         <mat-form-field class="full-width" color="accent">
             <input matInput placeholder="Local ID" [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}">
@@ -43,16 +46,18 @@
                 <mat-divider></mat-divider>
             </div>
             <div *ngFor="let attr of device.attributes; let i = index" class="attribute">
-                <mat-form-field class="third-width" color="accent">
-                    <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
-                </mat-form-field>
-                =
-                <mat-form-field class="third-width" color="accent">
-                    <input matInput placeholder="Value" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
-                </mat-form-field>
-                <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
-                    <mat-icon>delete</mat-icon>
-                </button>
+                <ng-container *ngIf="attr.key != nicknameAttributeKey">
+                    <mat-form-field class="third-width" color="accent">
+                        <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
+                    </mat-form-field>
+                    =
+                    <mat-form-field class="third-width" color="accent">
+                        <input matInput placeholder="Value" [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
+                    </mat-form-field>
+                    <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </ng-container>
             </div>
             <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
         </div>
