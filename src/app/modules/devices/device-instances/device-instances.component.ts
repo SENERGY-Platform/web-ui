@@ -43,7 +43,7 @@ const tabs = [
         state: 'unknown',
     },
 ];
-const sortingAttributes = [new SortModel('Name', 'name', 'asc')];
+const sortingAttributes = [new SortModel('Name', 'display_name', 'asc')];
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
