@@ -30,6 +30,7 @@ export interface DeviceInstancesBaseModel {
     local_id: string;
     name: string;
     attributes?: Attribute[];
+    display_name?: string;
 }
 
 export interface DeviceInstancesIntermediateModel extends DeviceInstancesBaseModel {

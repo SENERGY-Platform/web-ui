@@ -23,8 +23,8 @@
             </div>
             <mat-grid-tile-footer>
                 <div fxLayout="column" fxFill>
-                    <div class="truncate footer-item-header" matTooltip="{{getDisplayName(device)}}">
-                        {{getDisplayName(device)}}
+                    <div class="truncate footer-item-header" matTooltip="{{device.display_name}}">
+                        {{device.display_name}}
                     </div>
                     <form fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                         <senergy-state-icon [state]="device.log_state"></senergy-state-icon>

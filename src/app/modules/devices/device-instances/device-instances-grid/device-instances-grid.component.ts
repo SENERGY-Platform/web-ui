@@ -167,14 +167,4 @@ export class DeviceInstancesGridComponent implements OnInit {
             this.deviceClasses = deviceClasses;
         });
     }
-
-    getDisplayName(device: DeviceInstancesModel): string {
-        let result = device.name;
-        device.attributes?.forEach(value => {
-            if(value.key == this.displayNameAttributeKey) {
-                result = value.value;
-            }
-        })
-        return result
-    }
 }
