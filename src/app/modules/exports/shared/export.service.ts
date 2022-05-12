@@ -25,6 +25,7 @@ import { DeviceTypeContentVariableModel, DeviceTypeServiceModel } from '../../me
 import { DeviceInstancesModel } from '../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesUpdateModel } from '../../devices/device-instances/shared/device-instances-update.model';
 import { PathOption } from '../../data/flow-repo/shared/path-options.service';
+import {DeviceInstancesService} from '../../devices/device-instances/shared/device-instances.service';
 
 @Injectable({
     providedIn: 'root',
@@ -37,7 +38,7 @@ export class ExportService {
     typeStructure = 'https://schema.org/StructuredValue';
     typeList = 'https://schema.org/ItemList';
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private deviceService: DeviceInstancesService) {}
 
     getExports(
         search?: string,
@@ -117,6 +118,8 @@ export class ExportService {
         deviceInstancesModel: DeviceInstancesModel | DeviceInstancesUpdateModel,
         service: DeviceTypeServiceModel,
     ): ExportModel[] {
+        let device = this.deviceService.addDisplayName(deviceInstancesModel);
+        device.name = device.display_name || device.name;
         const exports: ExportModel[] = [];
         service.outputs.forEach((output, index) => {
             const traverse = this.addCharacteristicToDeviceTypeContentVariable(output.content_variable);

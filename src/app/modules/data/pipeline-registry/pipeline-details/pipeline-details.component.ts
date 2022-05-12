@@ -74,7 +74,7 @@ export class PipelineDetailsComponent implements OnInit {
                                         .getDeviceInstance(value)
                                         .subscribe((device: DeviceInstancesBaseModel | null) => {
                                             if (device !== null) {
-                                                devices[i] = device.name;
+                                                devices[i] = device.display_name || device.name;
                                             }
                                             topic.devices = devices;
                                         });

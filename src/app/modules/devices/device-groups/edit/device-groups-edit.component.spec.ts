@@ -552,11 +552,13 @@ describe('DeviceGroupsEditComponent', () => {
                     id: 'device:id-1',
                     local_id: 'local-device-id-1',
                     name: 'device1',
+                    display_name: 'device1',
                 },
                 {
                     id: 'device:id-2',
                     local_id: 'local-device-id-2',
                     name: 'device2',
+                    display_name: 'device2',
                 },
             ]);
             expect(component.capabilities.value).toEqual(
@@ -605,16 +607,19 @@ describe('DeviceGroupsEditComponent', () => {
                         id: 'device:id-1',
                         local_id: 'local-device-id-1',
                         name: 'device1',
+                        display_name: 'device1',
                     },
                     {
                         id: 'device:id-2',
                         local_id: 'local-device-id-2',
                         name: 'device2',
+                        display_name: 'device2',
                     },
                     {
                         id: 'device:id-4',
                         local_id: 'local-device-id-4',
                         name: 'device4',
+                        display_name: 'device4',
                     },
                 ]);
                 expect(component.capabilities.value).toEqual(
@@ -654,6 +659,7 @@ describe('DeviceGroupsEditComponent', () => {
                         id: 'device:id-1',
                         local_id: 'local-device-id-1',
                         name: 'device1',
+                        display_name: 'device1',
                     },
                 ]);
                 expect(component.capabilities.value).toEqual(
@@ -714,11 +720,13 @@ describe('DeviceGroupsEditComponent', () => {
                         id: 'device:id-1',
                         local_id: 'local-device-id-1',
                         name: 'device1',
+                        display_name: 'device1',
                     },
                     {
                         id: 'device:id-2',
                         local_id: 'local-device-id-2',
                         name: 'device2',
+                        display_name: 'device2',
                     },
                 ]);
                 expect(component.capabilities.value).toEqual(

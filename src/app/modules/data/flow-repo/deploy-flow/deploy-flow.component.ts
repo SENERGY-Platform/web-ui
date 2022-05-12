@@ -516,7 +516,7 @@ export class DeployFlowComponent implements OnInit {
                         if (pathOptions.length > 0) {
                             m.get(DeployFlowComponent.DEVICE_KEY)?.push({
                                 id: selectable.device.id,
-                                name: selectable.device.name,
+                                name: selectable.device.display_name || selectable.device.name,
                             });
                         } else if (currentlySelected === selectable.device.id) {
                             // previously selected, but now invalid

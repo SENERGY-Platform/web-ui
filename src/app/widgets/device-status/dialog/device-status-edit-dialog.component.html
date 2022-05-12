@@ -124,7 +124,7 @@
                                     <mat-select formControlName="selectable" required
                                                 placeholder="Choose Device" [compareWith]="compareSelectables">
                                         <mat-option *ngFor="let selectable of selectablesArray[elementIndex]" [value]="selectable">
-                                            {{selectable.device.name}}
+                                            {{selectable.device.display_name}}
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>

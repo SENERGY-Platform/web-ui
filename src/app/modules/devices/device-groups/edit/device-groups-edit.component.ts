@@ -33,6 +33,7 @@ import { DeviceClassesPermSearchModel } from '../../../metadata/device-classes/s
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
+import {DeviceInstancesService} from '../../device-instances/shared/device-instances.service';
 
 @Component({
     selector: 'senergy-device-groups-edit',
@@ -61,6 +62,7 @@ export class DeviceGroupsEditComponent implements OnInit {
     constructor(
         private _formBuilder: FormBuilder,
         private deviceGroupService: DeviceGroupsService,
+        private deviceInstanceService: DeviceInstancesService,
         private snackBar: MatSnackBar,
         private dialog: MatDialog,
         private pipelineRegistryService: PipelineRegistryService,
@@ -275,6 +277,7 @@ export class DeviceGroupsEditComponent implements OnInit {
 
         if (idsForRepoSearch.length) {
             this.deviceGroupService.getDeviceListByIds(idsForRepoSearch).subscribe((devices) => {
+                devices = this.deviceInstanceService.useDisplayNameAsName(devices)
                 for (const device of devices) {
                     this.deviceCache.set(device.id, device);
                 }

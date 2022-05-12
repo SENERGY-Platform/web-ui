@@ -41,6 +41,7 @@ import { UtilService } from '../../../../core/services/util.service';
 export class DeviceInstancesService {
     private getDeviceHistoryObservable7d: Observable<DeviceInstancesHistoryModel[]> | null = null;
     private getDeviceHistoryObservable1h: Observable<DeviceInstancesHistoryModel[]> | null = null;
+    nicknameAttributeKey: string = "shared/nickname";
 
     constructor(
         private dialog: MatDialog,
@@ -112,8 +113,32 @@ export class DeviceInstancesService {
     getDeviceInstance(id: string): Observable<DeviceInstancesBaseModel | null> {
         return this.http.get<DeviceInstancesBaseModel>(environment.deviceManagerUrl + '/devices/' + id).pipe(
             map((resp) => resp),
+            map(this.addDisplayName),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstance', null)),
         );
+    }
+
+    useDisplayNameAsName(devices: DeviceInstancesBaseModel[]): DeviceInstancesBaseModel[] {
+        return this.addDisplayNames(devices).map((device) => {
+            device.name = device.display_name || device.name;
+            return device
+        })
+    }
+
+    addDisplayNames(devices: DeviceInstancesBaseModel[]): DeviceInstancesBaseModel[] {
+        return devices.map(this.addDisplayName)
+    }
+
+    addDisplayName(device: DeviceInstancesBaseModel): DeviceInstancesBaseModel {
+        if (!device.display_name) {
+            device.display_name = device.name;
+            device.attributes?.forEach((attr) => {
+                if(attr.key == this.nicknameAttributeKey) {
+                    device.display_name = attr.value;
+                }
+            })
+        }
+        return device;
     }
 
     getDeviceInstancesByState(

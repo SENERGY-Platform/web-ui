@@ -106,7 +106,7 @@ export class DeviceInstancesGridComponent implements OnInit {
     }
 
     permission(device: DeviceInstancesModel): void {
-        this.permissionsDialogService.openPermissionDialog('devices', device.id, device.name);
+        this.permissionsDialogService.openPermissionDialog('devices', device.id, device.display_name || device.name);
     }
 
     emitTag(tag: string, tagType: string) {

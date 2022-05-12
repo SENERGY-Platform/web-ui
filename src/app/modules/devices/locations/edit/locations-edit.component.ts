@@ -306,6 +306,7 @@ export class LocationsEditComponent implements OnInit {
 
         if (idsForRepoSearch.length) {
             this.deviceService.getDeviceListByIds(idsForRepoSearch).subscribe((devices) => {
+                devices = this.deviceService.useDisplayNameAsName(devices);
                 for (const device of devices) {
                     this.deviceCache.set(device.id, device);
                 }
