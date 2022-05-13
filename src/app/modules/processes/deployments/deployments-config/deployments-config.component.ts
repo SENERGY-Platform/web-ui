@@ -482,7 +482,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         if (!(selectedServiceId === undefined || selectedServiceId === null)) {
             const servicePathOptions = selectedOption.get('path_options')?.value;
             if (servicePathOptions) {
-                options = servicePathOptions.get(selectedServiceId) || [];
+                options = this.getFromMapOrObj(servicePathOptions, selectedServiceId) || [];
             } else {
                 options = [];
             }
@@ -490,12 +490,16 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         if (!(importTypeId === undefined || importTypeId === null)) {
             const servicePathOptions = selectedOption.get('path_options')?.value;
             if (servicePathOptions) {
-                options = servicePathOptions.get(importTypeId) || [];
+                options = this.getFromMapOrObj(servicePathOptions, importTypeId) || [];
             } else {
                 options = [];
             }
         }
         return options;
+    }
+
+    getFromMapOrObj(index: any, key: string){
+        return index.get ? index.get(key) : index[key];
     }
 
     getServiceOptions(elementIndex: number) {
