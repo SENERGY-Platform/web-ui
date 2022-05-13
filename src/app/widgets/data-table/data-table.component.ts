@@ -248,10 +248,14 @@ export class DataTableComponent implements OnInit, OnDestroy {
                                     const res: TimeValuePairModel[] = [];
                                     values.forEach((_, elementIndex) => {
                                         let dataRows = values[elementIndex];
-                                        dataRows = dataRows.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1);
-                                        dataRows.forEach((dataRow) => {
-                                            res.push({time: '' + dataRow[0], value: dataRow[1]});
-                                        });
+                                        if (dataRows === null) {
+                                            res.push({time: '', value: null});
+                                        } else {
+                                            dataRows = dataRows.slice(0, this.widget.properties.dataTable?.valuesPerElement || 1);
+                                            dataRows.forEach((dataRow) => {
+                                                res.push({time: '' + dataRow[0], value: dataRow[1]});
+                                            });
+                                        }
                                     });
                                     return {source: 'timescale', res};
                                 }),

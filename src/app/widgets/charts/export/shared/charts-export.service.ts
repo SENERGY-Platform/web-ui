@@ -162,9 +162,9 @@ export class ChartsExportService {
                     break;
                 }
                 r.res.forEach((series, index) => {
-                    series.forEach(row => {
+                    series?.forEach(row => {
                         const tableRow: any[] = [row[0]]; // using timestamp, duplicate timestamps are ok for Google charts
-                        while (mapper[index] > tableRow.length -1) {
+                        while (mapper[index] > tableRow.length - 1) {
                             tableRow.push(null);
                         }
                         tableRow[mapper[index] + 1] = row[1]; // +1 for time
@@ -258,11 +258,11 @@ export class ChartsExportService {
             widget.properties.chartType === undefined || widget.properties.chartType === '' ? 'LineChart' : widget.properties.chartType,
             dataTable.data,
             {
-                chartArea: { width: element.widthPercentage, height: element.heightPercentage },
+                chartArea: {width: element.widthPercentage, height: element.heightPercentage},
                 colors,
                 hAxis: {
                     title: widget.properties.hAxisLabel,
-                    gridlines: { count: -1 },
+                    gridlines: {count: -1},
                     format: widget.properties.hAxisFormat,
                     ticks: widget.properties.chartType === 'ColumnChart' ? dataTable.data.slice(1).map((x) => x[0] as Date) : undefined,
                 },
@@ -276,7 +276,7 @@ export class ChartsExportService {
                     viewWindow: {},
                 },
                 vAxes: {
-                    0: { title: widget.properties.vAxisLabel },
+                    0: {title: widget.properties.vAxisLabel},
                 },
                 explorer: {
                     actions: ['dragToZoom', 'rightClickToReset'],
