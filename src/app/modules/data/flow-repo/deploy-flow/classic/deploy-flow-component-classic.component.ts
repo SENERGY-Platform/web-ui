@@ -91,6 +91,7 @@ export class DeployFlowClassicComponent {
         this.parserService.getInputs(this.id).subscribe((resp: ParseModel[]) => {
             this.inputs = resp;
             this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc').subscribe((devices: DeviceInstancesModel[]) => {
+                devices = this.deviceInstanceService.useDisplayNameAsName(devices) as DeviceInstancesModel[];
                 this.allDevices = devices;
                 this.inputs?.forEach((input, operatorKey) => {
                     this.devices[operatorKey] = [];
