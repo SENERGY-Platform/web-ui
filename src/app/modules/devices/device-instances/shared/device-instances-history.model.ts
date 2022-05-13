@@ -18,6 +18,7 @@ export interface DeviceInstancesHistoryModel {
     creator: string;
     date: number;
     name: string;
+    display_name: string;
     log_state: string;
     log_history: { values: LogHistoryValues[] | null };
     log_edge: (string | boolean)[] | null;

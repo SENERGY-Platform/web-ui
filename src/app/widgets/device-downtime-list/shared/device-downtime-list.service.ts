@@ -86,7 +86,7 @@ export class DeviceDowntimeListService {
     }
 
     private calcDisconnectedTime(item: DeviceInstancesHistoryModel): DeviceDowntimeListModel {
-        const itemStatus = new DeviceDowntimeListModel(0, 0, 0, 0, 0, 0, item.name, '', '');
+        const itemStatus = new DeviceDowntimeListModel(0, 0, 0, 0, 0, 0, item.display_name || item.name, '', '');
         if (item.log_history.values === null) {
             switch (item.log_state) {
             case stateConnected: {

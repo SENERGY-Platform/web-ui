@@ -93,8 +93,8 @@
         <div class="selectable-devices">
             <mat-card fxLayout="row" fxLayoutAlign="space-between center" *ngFor="let option of selectableForm.value" class="selectable-card">
                 <div class="selectable-device-info">
-                    <div matTooltip="{{option.device.name || option.device.id}}" class="selectable-device-name">
-                        {{option.device.name || option.device.id}}
+                    <div matTooltip="{{option.device.display_name || option.device.name || option.device.id}}" class="selectable-device-name">
+                        {{option.device.display_name || option.device.name || option.device.id}}
                     </div>
                 </div>
                 <div class="selectable-device-ctrl">
