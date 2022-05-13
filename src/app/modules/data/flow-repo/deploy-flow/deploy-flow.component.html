@@ -178,7 +178,10 @@
                         </mat-form-field>
                     </div>
                 </div>
-                <h4 *ngIf="getSubElementAsGroupArray(node, 'configs').length > 0">Configuration</h4>
+                <h4>Configuration</h4>
+                <section class="checkbox-section">
+                    <mat-checkbox class="checkbox-margin" formControlName="persistData">Persist data </mat-checkbox>
+                </section>
                 <div fxLayout="column" *ngFor="let config of getSubElementAsGroupArray(node, 'configs')"
                      [formGroup]="config">
                     <mat-form-field fxFill color="accent" appearance="outline">

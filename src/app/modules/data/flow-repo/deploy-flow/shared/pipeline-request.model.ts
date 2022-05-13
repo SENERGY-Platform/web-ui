@@ -31,6 +31,7 @@ export interface NodeModel {
     config: NodeConfig[] | undefined;
     inputs: NodeInput[] | undefined;
     inputSelections?: PipelineInputSelectionModel[];
+    persistData: boolean;
 }
 
 export interface NodeInput {

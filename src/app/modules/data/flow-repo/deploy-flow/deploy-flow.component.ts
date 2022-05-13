@@ -111,6 +111,7 @@ export class DeployFlowComponent implements OnInit {
         windowTime: 30,
         enable_metrics: false,
         consume_all_msgs: false,
+        persistData: false,
     });
 
     private static stringArrayKey(s: string[] | null | undefined): string {
@@ -226,6 +227,7 @@ export class DeployFlowComponent implements OnInit {
             inputs: this.fb.array([]),
             deploymentType: '',
             operatorId: '',
+            persistData: false,
             configs: this.fb.array([]),
         });
         node.patchValue(newNode);
@@ -696,6 +698,7 @@ export class DeployFlowComponent implements OnInit {
                 config: [],
                 deploymentType: node.get('deploymentType')?.value,
                 nodeId: node.get('id')?.value,
+                persistData: node.get('persistData')?.value,
             };
             this.getSubElementAsGroupArray(node, 'configs').forEach((config) => {
                 const nodeConfig: NodeConfig = {

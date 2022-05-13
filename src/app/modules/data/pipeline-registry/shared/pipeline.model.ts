@@ -40,6 +40,7 @@ export interface PipelineOperatorModel {
     inputTopics: OperatorInputTopic[];
     inputSelections?: PipelineInputSelectionModel[];
     config?: Map<string, string>;
+    persistData?: boolean;
 }
 
 export interface OperatorInputTopic {
