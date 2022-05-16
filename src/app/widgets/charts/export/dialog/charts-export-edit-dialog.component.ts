@@ -248,7 +248,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         })));
         obs.push(this.deviceInstancesService.getDeviceInstances('', 9999, 0, 'name', 'asc')
             .pipe(
-                map(this.deviceInstancesService.useDisplayNameAsName),
+                map(devices => this.deviceInstancesService.useDisplayNameAsName(devices)),
                 map(devices => devices as DeviceInstancesModel[]),
                 map(devices => this.deviceList = devices)));
         return forkJoin(obs);
