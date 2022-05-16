@@ -113,7 +113,7 @@ export class DeviceInstancesService {
     getDeviceInstance(id: string): Observable<DeviceInstancesBaseModel | null> {
         return this.http.get<DeviceInstancesBaseModel>(environment.deviceManagerUrl + '/devices/' + id).pipe(
             map((resp) => resp),
-            map(this.addDisplayName),
+            map(devices => this.addDisplayName(devices)),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstance', null)),
         );
     }
@@ -126,7 +126,7 @@ export class DeviceInstancesService {
     }
 
     addDisplayNames(devices: DeviceInstancesBaseModel[]): DeviceInstancesBaseModel[] {
-        return devices.map(this.addDisplayName)
+        return devices.map(device => this.addDisplayName(device))
     }
 
     addDisplayName(device: DeviceInstancesBaseModel): DeviceInstancesBaseModel {
