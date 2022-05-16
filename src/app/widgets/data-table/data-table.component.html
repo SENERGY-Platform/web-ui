@@ -44,7 +44,7 @@
                 </ng-container>
                 <ng-container matColumnDef="time">
                     <th mat-header-cell mat-sort-header *matHeaderCellDef>Time</th>
-                    <td mat-cell *matCellDef="let m">{{m.time | date:'short'}}</td>
+                    <td mat-cell *matCellDef="let m"><ng-container *ngIf="m.time && m.time != 'null'">{{m.time | date:'short'}}</ng-container></td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="['name', 'value', 'time']; sticky: true"></tr>
                 <tr mat-row *matRowDef="let m; columns: ['name', 'value', 'time'];"></tr>
