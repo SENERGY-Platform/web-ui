@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+import {ConverterExtension} from './concepts-characteristics.model';
+
 export interface ConceptsPermSearchModel {
     creator: string;
     id: string;
     name: string;
     characteristic_ids?: string[];
+    conversions?: ConverterExtension[];
     permissions: {
         a: boolean;
         x: boolean;

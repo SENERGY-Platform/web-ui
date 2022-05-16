@@ -21,4 +21,13 @@ export interface ConceptsCharacteristicsModel {
     name: string;
     base_characteristic_id: string;
     characteristics: DeviceTypeCharacteristicsModel[];
+    conversions?: ConverterExtension[];
+}
+
+export interface ConverterExtension {
+    from: string
+    to: string
+    distance: number
+    formula: string
+    placeholder_name: string
 }

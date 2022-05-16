@@ -46,6 +46,39 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
+        <div class="conversions">
+            <div class="divider">
+                Conversions
+                <mat-divider></mat-divider>
+            </div>
+            <ng-container *ngIf="concept">
+                <div *ngFor="let conversion of concept.conversions; let i = index" class="conversion">
+                    <mat-form-field class="forth-width">
+                        <mat-label>From</mat-label>
+                        <mat-select [(ngModel)]="conversion.from" [ngModelOptions]="{standalone: true}" required>
+                            <mat-option *ngFor="let characteristic of characteristicsControl.value" [value]="characteristic.id">
+                                {{characteristic.name}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="forth-width">
+                        <mat-label>To</mat-label>
+                        <mat-select [(ngModel)]="conversion.to" [ngModelOptions]="{standalone: true}" required>
+                            <mat-option *ngFor="let characteristic of characteristicsControl.value" [value]="characteristic.id">
+                                {{characteristic.name}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="third-width" color="accent">
+                        <input matInput placeholder="f({{conversion.placeholder_name}})" [(ngModel)]="conversion.formula" [ngModelOptions]="{standalone: true}" required>
+                    </mat-form-field>
+                    <button mat-icon-button color="warn" (click)="removeConversion(i)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                <button mat-stroked-button color="accent" (click)="addConversion()">Add Conversion</button>
+            </ng-container>
+        </div>
     </form>
 </mat-dialog-content>
 

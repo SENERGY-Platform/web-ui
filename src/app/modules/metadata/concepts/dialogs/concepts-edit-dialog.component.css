@@ -27,3 +27,25 @@
 mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
+
+.third-width {
+    width: 33%;
+}
+
+.forth-width {
+    width: 25%;
+}
+
+.conversions {
+    margin-bottom: 5px;
+}
+
+.conversion {
+    justify-content: space-between;
+    display: flex;
+    align-items: baseline;
+}
+.divider {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}

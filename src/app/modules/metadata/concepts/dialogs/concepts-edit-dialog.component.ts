@@ -16,7 +16,7 @@
 
 import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FormControl, Validators } from '@angular/forms';
+import {FormArray, FormControl, Validators} from '@angular/forms';
 import { DeviceTypeCharacteristicsModel, DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
 import { ConceptsService } from '../shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../shared/concepts-characteristics.model';
@@ -74,12 +74,31 @@ export class ConceptsEditDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
+    removeConversion(i: number) {
+        if (this.concept) {
+            if (!this.concept?.conversions) {
+                this.concept.conversions = [];
+            }
+            this.concept.conversions.splice(i, 1);
+        }
+    }
+
+    addConversion() {
+        if (this.concept) {
+            if (!this.concept?.conversions) {
+                this.concept.conversions = [];
+            }
+            this.concept.conversions.push({from: "", to: "", distance: 1, formula: "", placeholder_name: "x"});
+        }
+    }
+
     save(): void {
         const returnConcept: DeviceTypeConceptModel = {
             id: this.idFormControl.value,
             name: this.nameFormControl.value,
             base_characteristic_id: this.baseCharacteristicControl.value,
             characteristic_ids: (this.characteristicsControl.value as CharacteristicsPermSearchModel[]).map(c => c.id),
+            conversions: this.concept?.conversions
         };
         this.dialogRef.close(returnConcept);
     }

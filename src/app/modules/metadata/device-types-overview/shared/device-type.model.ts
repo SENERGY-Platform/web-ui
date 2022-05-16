@@ -112,6 +112,15 @@ export interface DeviceTypeConceptModel {
     name: string;
     base_characteristic_id: string;
     characteristic_ids: string[];
+    conversions?: ConverterExtension[];
+}
+
+export interface ConverterExtension {
+    from: string
+    to: string
+    distance: number
+    formula: string
+    placeholder_name: string
 }
 
 export interface DeviceTypeCharacteristicsModel {
