@@ -111,7 +111,6 @@ export class DeployFlowComponent implements OnInit {
         windowTime: 30,
         enable_metrics: false,
         consume_all_msgs: false,
-        persistData: false,
     });
 
     private static stringArrayKey(s: string[] | null | undefined): string {
@@ -179,7 +178,7 @@ export class DeployFlowComponent implements OnInit {
                                 parseModels.forEach((input) => {
                                     const operator = pipeline.operators.find((o) => o.id === input.id);
                                     observables.push(
-                                        this.addNode(input, operator?.inputSelections || [], operator?.config, operator?.inputTopics),
+                                        this.addNode(input, operator?.inputSelections || [], operator?.config, operator?.inputTopics, operator?.persistData),
                                     );
                                 });
                                 forkJoin(observables).subscribe((_) => (this.ready = true));
@@ -219,6 +218,7 @@ export class DeployFlowComponent implements OnInit {
         inputSelections: PipelineInputSelectionModel[],
         configs: Map<string, string> = new Map(),
         inputTopics: OperatorInputTopic[] = [],
+        persistData = false,
     ): Observable<null[]> {
         const observables: Observable<null>[] = [];
         const node = this.fb.group({
@@ -227,7 +227,7 @@ export class DeployFlowComponent implements OnInit {
             inputs: this.fb.array([]),
             deploymentType: '',
             operatorId: '',
-            persistData: false,
+            persistData: persistData,
             configs: this.fb.array([]),
         });
         node.patchValue(newNode);
