@@ -28,7 +28,7 @@ import { FlowModel } from './flow.model';
 export class FlowRepoService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
-    getFlows(search: string, limit: number, offset: number, feature: string, order: string): Observable<{ flows: FlowModel[] }> {
+    getFlows(search: string, limit: number, offset: number, feature: string, order: string, shared?: boolean): Observable<{ flows: FlowModel[] }> {
         return this.http
             .get<{ flows: FlowModel[] }>(
                 environment.flowRepoUrl +
@@ -40,7 +40,8 @@ export class FlowRepoService {
                     feature +
                     ':' +
                     order +
-                    (search ? '&search=' + search : ''),
+                    (search ? '&search=' + search : '')+
+                    (shared !== undefined ? '&shared=' + shared.valueOf() : ''),
             )
             .pipe(
                 map((resp) => resp || []),

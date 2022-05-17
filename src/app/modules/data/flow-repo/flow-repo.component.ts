@@ -53,6 +53,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
+    showShared = localStorage.getItem('data.flows.showShared') === 'true';
+
     userId = {} as string | Error;
 
     constructor(
@@ -108,6 +110,12 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         this.getFlows(true);
     }
 
+    showSharedChanged() {
+        this.showShared= !this.showShared;
+        localStorage.setItem('data.flows.showShared', String(this.showShared));
+        this.getFlows(true);
+    }
+
     private getFlows(reset: boolean) {
         if (reset) {
             this.setRepoItemsParams(this.limitInit);
@@ -115,7 +123,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy {
         }
 
         this.flowRepoService
-            .getFlows(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .getFlows(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.showShared)
             .subscribe((resp: { flows: FlowModel[] }) => {
                 if (resp.flows.length !== this.limit) {
                     this.allDataLoaded = true;

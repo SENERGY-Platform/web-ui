@@ -17,11 +17,9 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ExportService } from './shared/export.service';
 import { ExportModel, ExportResponseModel } from './shared/export.model';
-import { environment } from '../../../environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { ResponsiveService } from '../../core/services/responsive.service';
-import { ClipboardService } from 'ngx-clipboard';
 import { merge, Subscription } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -31,7 +29,6 @@ import { MatPaginator } from '@angular/material/paginator';
 import { startWith, switchMap } from 'rxjs/internal/operators';
 import { BrokerExportService } from './shared/broker-export.service';
 import { ActivatedRoute } from '@angular/router';
-import {DBTypeEnum, ExportDataService} from "../../widgets/shared/export-data.service";
 
 @Component({
     selector: 'senergy-export',

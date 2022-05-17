@@ -19,6 +19,14 @@
         <senergy-searchbar fxFlex></senergy-searchbar>
         <div fxLayout="row">
             <div fxFlex=""></div>
+            <button matTooltip="Show shared" mat-icon-button (click)="showSharedChanged()"
+                    *ngIf="!this.showShared">
+                <mat-icon>share</mat-icon>
+            </button>
+            <button matTooltip="Hide shared" mat-icon-button color="accent" (click)="showSharedChanged()"
+                    *ngIf="this.showShared">
+                <mat-icon>share</mat-icon>
+            </button>
             <senergy-sort [sortAttributes]="sortAttributes"
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         </div>
