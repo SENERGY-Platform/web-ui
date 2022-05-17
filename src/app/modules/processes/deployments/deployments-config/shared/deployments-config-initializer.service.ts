@@ -148,6 +148,24 @@ export class DeploymentsConfigInitializerService {
             selected_path_option: [{ value: undefined, disabled: disable }],
             selected_path: this.iniPathOptionFormControl(selection.selected_path, disable),
             show: false,
+        }, {
+            validators: [
+                control => {
+                    let selectedGroupId = control.get("selected_device_group_id")?.value;
+                    let selectedPath = control.get("selected_path.path")?.value;
+                    if(!selectedPath || selectedPath == "") {
+                        if( selectedGroupId &&  selectedGroupId != "") {
+                            control.get("selected_path.path")?.setErrors(null);
+                            return
+                        } else {
+                            control.get("selected_path.path")?.setErrors({missingSelectedPathForNoneGroup: true});
+                            return
+                        }
+                    }
+                    control.get("selected_path.path")?.setErrors(null);
+                    return
+                }
+            ]
         });
         return group;
     }
@@ -167,7 +185,7 @@ export class DeploymentsConfigInitializerService {
     public iniPathOptionFormControl(pathOption: DeploymentsSelectionPathOptionModel | null, disable: boolean):FormGroup {
         const that = this;
         return this._formBuilder.group({
-            path: [{ value: pathOption?.path, disabled: disable }, Validators.required],
+            path: [{ value: pathOption?.path, disabled: disable }],
             characteristicId: [{ value: pathOption?.characteristicId, disabled: disable }],
             aspectNode: [{ value: pathOption?.aspectNode, disabled: disable }],
             functionId: [{ value: pathOption?.functionId, disabled: disable }],

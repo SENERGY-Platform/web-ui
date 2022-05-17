@@ -45,6 +45,7 @@
                                         <mat-form-field class="full-width" color="accent">
                                             <senergy-select-search placeholder="{{element.name}}" [required]="true"
                                                                    formControlName="selection_options_index"
+                                                                   [scrollWindowSize]="10000"
                                                                    [options]="optionGroups.get(elementIndex) || []"
                                                                    [getOptionValue]="getTaskIndex(element)"
                                                                    (selectionChange)="changeTaskSelectionOption(elementIndex, $event.value)"
@@ -102,6 +103,7 @@
                                     <td formGroupName="selection">
                                         <mat-form-field class="full-width" color="accent">
                                             <senergy-select-search placeholder="{{element.name}}" [required]="true"
+                                                                   [scrollWindowSize]="10000"
                                                                    formControlName="selection_options_index"
                                                                    [options]="optionGroups.get(elementIndex) || []"
                                                                    [getOptionValue]="getMsgEventIndex(element)"

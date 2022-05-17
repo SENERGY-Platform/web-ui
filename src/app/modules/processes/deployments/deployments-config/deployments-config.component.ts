@@ -147,6 +147,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         if (deployment !== null) {
             this.deployment = deployment;
             this.deploymentFormGroup = this.deploymentsConfigInitializerService.initFormGroup(this.deployment);
+
+            (document as any).foo = this.deploymentFormGroup; //TODO remove
             this.selectedServiceIdchangeListener();
         }
     }
