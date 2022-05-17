@@ -43,9 +43,21 @@
                             <div fxLayout="column" fxFill>
                                 <div *ngIf="item.description !== null" class="truncate footer-item-header" matTooltip="{{item.name + ' - ' + item.description}}">
                                     {{item.name}}
+                                    <mat-icon class="share-icon" *ngIf="item.share.list && item.userId === userId">
+                                        public
+                                    </mat-icon>
+                                    <mat-icon class="share-icon" *ngIf="item.share.list && item.userId !== userId">
+                                        share
+                                    </mat-icon>
                                 </div>
                                 <div *ngIf="item.description === null" class="truncate footer-item-header" matTooltip="{{item.name}}">
                                     {{item.name}}
+                                    <mat-icon class="share-icon" *ngIf="item.share.list && item.userId === userId">
+                                        public
+                                    </mat-icon>
+                                    <mat-icon class="share-icon" *ngIf="item.share.list && item.userId !== userId">
+                                        share
+                                    </mat-icon>
                                 </div>
                                 <div class="truncate footer-item-subtitle" fxLayoutAlign="start center"
                                      matTooltip="last updated">

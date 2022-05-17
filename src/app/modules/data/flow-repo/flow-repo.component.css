@@ -78,3 +78,8 @@ mat-grid-list {
 }
 
 .link-tools .tool-remove { display: none }
+
+.share-icon {
+    padding-top: 6px;
+    font-size: 18px !important;
+}
