@@ -152,7 +152,7 @@ export class DeploymentsService {
 
     getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null> {
         return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v3/prepared-deployments/' + processId).pipe(
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null)),
+            catchError(this.errorHandlerService.handleErrorWithSnackBar("Error: unable to load prepared process deployment", DeploymentsService.name, 'getPreparedDeployments', null)),
             map((deployment) => {
                 deployment?.elements?.forEach((element) => {
                     element.message_event?.selection?.selection_options?.forEach((option: any) => {
@@ -184,7 +184,7 @@ export class DeploymentsService {
     v2getPreparedDeploymentsByXml(xml: string, svg: string): Observable<V2DeploymentsPreparedModel | null> {
         return this.http
             .post<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v3/prepared-deployments', { xml, svg })
-            .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getPreparedDeployments', null)));
+            .pipe(catchError(this.errorHandlerService.handleErrorWithSnackBar("Error: unable to load prepared process deployment", DeploymentsService.name, 'getPreparedDeployments', null)));
     }
 
     v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null> {

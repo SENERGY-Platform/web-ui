@@ -18,17 +18,26 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorModel } from '../model/error.model';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ErrorHandlerService {
-    constructor() {}
+    constructor(private snackBar: MatSnackBar) {}
 
     handleError<T>(service: string, method: string, result?: T) {
         return (error: HttpErrorResponse): Observable<T> => {
             console.error('Error =>> Service: ' + service + ' =>> Method: ' + method);
             console.error(error);
+            return of(result as T);
+        };
+    }
+
+    handleErrorWithSnackBar<T>(snackbarMessage: string, service: string, method: string, result?: T) {
+        return (error: HttpErrorResponse): Observable<T> => {
+            this.handleError(service, method, result)(error)
+            this.snackBar.open(snackbarMessage, "close", { panelClass: "snack-bar-error" });
             return of(result as T);
         };
     }
