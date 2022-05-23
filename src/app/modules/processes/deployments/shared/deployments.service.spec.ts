@@ -22,12 +22,13 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { CamundaVariable } from './deployments-definition.model';
 import { environment } from '../../../../../environments/environment';
 import { MatDialogModule } from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 describe('DeploymentsService', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientModule, HttpClientTestingModule, MatDialogModule],
-            providers: [DeploymentsService],
+            providers: [DeploymentsService, MatSnackBar],
         });
     });
 

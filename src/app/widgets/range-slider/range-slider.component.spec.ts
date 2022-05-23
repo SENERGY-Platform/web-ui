@@ -22,6 +22,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { MatCardModule } from '@angular/material/card';
 import { WidgetModule } from '../widget.module';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 describe('RangeSliderComponent', () => {
     let component: RangeSliderComponent;
@@ -32,7 +33,7 @@ describe('RangeSliderComponent', () => {
             TestBed.configureTestingModule({
                 imports: [MatDialogModule, HttpClientModule, WidgetModule, MatCardModule],
                 declarations: [RangeSliderComponent],
-                providers: [MatDialogModule, { provide: DashboardService, useClass: DashboardService }],
+                providers: [MatDialogModule, MatSnackBar, { provide: DashboardService, useClass: DashboardService }],
             }).compileComponents();
         }),
     );

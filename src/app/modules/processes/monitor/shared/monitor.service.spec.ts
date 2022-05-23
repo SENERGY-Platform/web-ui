@@ -19,12 +19,13 @@ import { TestBed, inject } from '@angular/core/testing';
 import { MonitorService } from './monitor.service';
 import { HttpClientModule } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 describe('MonitorService', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientModule, MatDialogModule],
-            providers: [MonitorService],
+            providers: [MonitorService, MatSnackBar],
         });
     });
 
