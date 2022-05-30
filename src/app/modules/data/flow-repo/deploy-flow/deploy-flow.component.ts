@@ -21,7 +21,7 @@ import { ParseModel } from '../shared/parse.model';
 import { DeviceInstancesModel, DeviceSelectablesFullModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import {
-    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
+    DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
     DeviceTypeServiceModel,
@@ -34,7 +34,7 @@ import { first, map } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
-import { AbstractControl, FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import { DeviceTypePermSearchModel } from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import { MatOption } from '@angular/material/core';
 import { ConceptsService } from '../../../metadata/concepts/shared/concepts.service';
@@ -105,7 +105,7 @@ export class DeployFlowComponent implements OnInit {
     importInstances: ImportInstancesModel[] = [];
 
     form = this.fb.group({
-        name: '',
+        name: ['', Validators.required],
         description: '',
         nodes: this.fb.array([]),
         windowTime: 30,
@@ -680,271 +680,274 @@ export class DeployFlowComponent implements OnInit {
     }
 
     startPipeline() {
-        this.ready = false;
-        const pipeReq: PipelineRequestModel = {
-            flowId: this.flowId,
-        } as PipelineRequestModel;
-        pipeReq.id = this.editMode ? this.pipelineId : null;
-        pipeReq.name = this.form.get('name')?.value;
-        pipeReq.description = this.form.get('description')?.value;
-        pipeReq.consumeAllMessages = this.form.get('consume_all_msgs')?.value;
-        pipeReq.metrics = this.form.get('enable_metrics')?.value;
-        pipeReq.windowTime = JSON.parse(this.form.get('windowTime')?.value);
-        pipeReq.nodes = [];
-        this.getSubElementAsGroupArray(this.form, 'nodes').forEach((node) => {
-            const nodeModel: NodeModel = {
-                inputSelections: [],
-                inputs: [],
-                config: [],
-                deploymentType: node.get('deploymentType')?.value,
-                nodeId: node.get('id')?.value,
-                persistData: node.get('persistData')?.value,
-            };
-            this.getSubElementAsGroupArray(node, 'configs').forEach((config) => {
-                const nodeConfig: NodeConfig = {
-                    name: config.get('name')?.value,
-                    value: config.get('value')?.value,
+        if (this.form.valid) {
+            this.ready = false;
+            const pipeReq: PipelineRequestModel = {
+                flowId: this.flowId,
+            } as PipelineRequestModel;
+            pipeReq.id = this.editMode ? this.pipelineId : null;
+            pipeReq.name = this.form.get('name')?.value;
+            pipeReq.description = this.form.get('description')?.value;
+            pipeReq.consumeAllMessages = this.form.get('consume_all_msgs')?.value;
+            pipeReq.metrics = this.form.get('enable_metrics')?.value;
+            pipeReq.windowTime = JSON.parse(this.form.get('windowTime')?.value);
+            pipeReq.nodes = [];
+            this.getSubElementAsGroupArray(this.form, 'nodes').forEach((node) => {
+                const nodeModel: NodeModel = {
+                    inputSelections: [],
+                    inputs: [],
+                    config: [],
+                    deploymentType: node.get('deploymentType')?.value,
+                    nodeId: node.get('id')?.value,
+                    persistData: node.get('persistData')?.value,
                 };
-                nodeModel.config?.push(nodeConfig);
-            });
-            nodeModel.inputSelections = [];
-            const inputs = this.getSubElementAsGroupArray(node, 'inputs');
-            const flatFilters: DeviceServicePath[] = [];
-            const flatPipelineFilters: { topic: string; filters: { pipelineId: string; operatorId: string }[]; values: NodeValue[] }[] = [];
-            // Create a filter for each device/topic/value
-            inputs.forEach((input) => {
-                const filters = input.get('filter')?.value as Map<string, { serviceId: string; path: string }[]>;
-                filters.forEach((subfilters, deviceOrImportId) => {
-                    subfilters.forEach((filter) => {
-                        flatFilters.push({
-                            devicesOrImports: [deviceOrImportId],
-                            topic: filter.serviceId.replace(/:/g, '_'),
+                this.getSubElementAsGroupArray(node, 'configs').forEach((config) => {
+                    const nodeConfig: NodeConfig = {
+                        name: config.get('name')?.value,
+                        value: config.get('value')?.value,
+                    };
+                    nodeModel.config?.push(nodeConfig);
+                });
+                nodeModel.inputSelections = [];
+                const inputs = this.getSubElementAsGroupArray(node, 'inputs');
+                const flatFilters: DeviceServicePath[] = [];
+                const flatPipelineFilters: { topic: string; filters: { pipelineId: string; operatorId: string }[]; values: NodeValue[] }[] = [];
+                // Create a filter for each device/topic/value
+                inputs.forEach((input) => {
+                    const filters = input.get('filter')?.value as Map<string, { serviceId: string; path: string }[]>;
+                    filters.forEach((subfilters, deviceOrImportId) => {
+                        subfilters.forEach((filter) => {
+                            flatFilters.push({
+                                devicesOrImports: [deviceOrImportId],
+                                topic: filter.serviceId.replace(/:/g, '_'),
+                                values: [
+                                    {
+                                        name: input.get('name')?.value,
+                                        path: filter.path,
+                                    },
+                                ],
+                            });
+                        });
+                    });
+
+                    nodeModel.inputSelections?.push({
+                        inputName: input.get('name')?.value,
+                        aspectId: input.get('aspectId')?.value,
+                        characteristicIds: input.get('characteristics')?.value,
+                        functionId: input.get('functionId')?.value,
+                        selectableId: input.get('selectableId')?.value,
+                    });
+
+                    this.getSubElementAsGroupArray(input, 'pipelines').forEach((pipelineGroup) => {
+                        flatPipelineFilters.push({
+                            topic: pipelineGroup.get('topic')?.value,
                             values: [
                                 {
                                     name: input.get('name')?.value,
-                                    path: filter.path,
+                                    path: pipelineGroup.get('path')?.value,
+                                },
+                            ],
+                            filters: [
+                                {
+                                    pipelineId: pipelineGroup.get('pipelineId')?.value,
+                                    operatorId: pipelineGroup.get('operatorId')?.value,
                                 },
                             ],
                         });
                     });
                 });
-
-                nodeModel.inputSelections?.push({
-                    inputName: input.get('name')?.value,
-                    aspectId: input.get('aspectId')?.value,
-                    characteristicIds: input.get('characteristics')?.value,
-                    functionId: input.get('functionId')?.value,
-                    selectableId: input.get('selectableId')?.value,
-                });
-
-                this.getSubElementAsGroupArray(input, 'pipelines').forEach((pipelineGroup) => {
-                    flatPipelineFilters.push({
-                        topic: pipelineGroup.get('topic')?.value,
-                        values: [
-                            {
-                                name: input.get('name')?.value,
-                                path: pipelineGroup.get('path')?.value,
-                            },
-                        ],
-                        filters: [
-                            {
-                                pipelineId: pipelineGroup.get('pipelineId')?.value,
-                                operatorId: pipelineGroup.get('operatorId')?.value,
-                            },
-                        ],
-                    });
-                });
-            });
-            // Create a filter for each pipeline input
-            // Join all filters with same topic/value combination
-            const joinedOperatorFilters: {
-                topic: string;
-                filters: { pipelineId: string; operatorId: string }[];
-                values: NodeValue[];
-            }[] = [];
-            flatPipelineFilters.forEach((filter) => {
-                const idx = joinedOperatorFilters.findIndex((joined) => {
-                    if (joined.topic !== filter.topic || joined.values.length !== filter.values.length) {
-                        return false;
-                    }
-
-                    let valuesEqual = true;
-                    joined.values.forEach((joinedVal) => {
-                        if (
-                            filter.values.findIndex(
-                                (filterVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
-                            ) === -1
-                        ) {
-                            valuesEqual = false;
+                // Create a filter for each pipeline input
+                // Join all filters with same topic/value combination
+                const joinedOperatorFilters: {
+                    topic: string;
+                    filters: { pipelineId: string; operatorId: string }[];
+                    values: NodeValue[];
+                }[] = [];
+                flatPipelineFilters.forEach((filter) => {
+                    const idx = joinedOperatorFilters.findIndex((joined) => {
+                        if (joined.topic !== filter.topic || joined.values.length !== filter.values.length) {
+                            return false;
                         }
-                    });
-                    return valuesEqual;
-                });
 
-                if (idx === -1) {
-                    joinedOperatorFilters.push(filter);
-                } else {
-                    const missingFilters = filter.filters.filter(
-                        (filterFilter) =>
-                            joinedOperatorFilters[idx].filters.findIndex(
-                                (joinedFilter) =>
-                                    filterFilter.pipelineId === joinedFilter.pipelineId &&
-                                    filterFilter.operatorId === joinedFilter.operatorId,
-                            ) === -1,
-                    );
-                    joinedOperatorFilters[idx].filters.push(...missingFilters);
-                }
-            });
-
-            // Join all filters with same topic/pipe/operator combination
-            const joinedPipelineFilters: {
-                topic: string;
-                filters: { pipelineId: string; operatorId: string }[];
-                values: NodeValue[];
-            }[] = [];
-            joinedOperatorFilters.forEach((filter) => {
-                const idx = joinedPipelineFilters.findIndex((joined) => {
-                    if (joined.topic !== filter.topic || joined.filters.length !== filter.filters.length) {
-                        return false;
-                    }
-
-                    let filtersEqual = true;
-                    joined.filters.forEach((joinedFilter) => {
-                        if (
-                            filter.filters.findIndex(
-                                (filterFilter) =>
-                                    filterFilter.pipelineId === joinedFilter.pipelineId &&
-                                    filterFilter.operatorId === joinedFilter.operatorId,
-                            ) === -1
-                        ) {
-                            filtersEqual = false;
-                        }
-                    });
-                    return filtersEqual;
-                });
-                if (idx === -1) {
-                    joinedPipelineFilters.push(filter);
-                } else {
-                    const missingValues = filter.values.filter(
-                        (filterVal) =>
-                            joinedPipelineFilters[idx].values.findIndex(
-                                (joinedVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
-                            ) === -1,
-                    );
-                    joinedPipelineFilters[idx].values.push(...missingValues);
-                }
-            });
-
-            joinedPipelineFilters.forEach((filter) =>
-                nodeModel.inputs?.push({
-                    filterType: 'operatorId',
-                    filterIds: filter.filters.map((f) => f.operatorId + ':' + f.pipelineId).join(','),
-                    topicName: filter.topic,
-                    values: filter.values,
-                }),
-            );
-
-            // Join all filters with same topic/value combination
-            const joinedDeviceFilters: DeviceServicePath[] = [];
-            flatFilters.forEach((filter) => {
-                const idx = joinedDeviceFilters.findIndex((joined) => {
-                    if (joined.topic !== filter.topic || joined.values.length !== filter.values.length) {
-                        return false;
-                    }
-
-                    let valuesEqual = true;
-                    joined.values.forEach((joinedVal) => {
-                        if (
-                            filter.values.findIndex(
-                                (filterVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
-                            ) === -1
-                        ) {
-                            valuesEqual = false;
-                        }
-                    });
-                    return valuesEqual;
-                });
-
-                if (idx === -1) {
-                    joinedDeviceFilters.push(filter);
-                } else {
-                    const missingDevices = filter.devicesOrImports.filter(
-                        (filterDevice) =>
-                            joinedDeviceFilters[idx].devicesOrImports.findIndex((joinedDevice) => filterDevice === joinedDevice) === -1,
-                    );
-                    joinedDeviceFilters[idx].devicesOrImports.push(...missingDevices);
-                }
-            });
-            // Join all filters with same topic/device combination
-            const joinedValueFilters: DeviceServicePath[] = [];
-            joinedDeviceFilters.forEach((filter) => {
-                const idx = joinedValueFilters.findIndex((joined) => {
-                    if (joined.topic !== filter.topic || joined.devicesOrImports.length !== filter.devicesOrImports.length) {
-                        return false;
-                    }
-
-                    let devicesEqual = true;
-                    joined.devicesOrImports.forEach((joinedDevice) => {
-                        if (filter.devicesOrImports.findIndex((filterDevice) => filterDevice === joinedDevice) === -1) {
-                            devicesEqual = false;
-                        }
-                    });
-                    return devicesEqual;
-                });
-                if (idx === -1) {
-                    joinedValueFilters.push(filter);
-                } else {
-                    const missingValues = filter.values.filter(
-                        (filterVal) =>
-                            joinedValueFilters[idx].values.findIndex(
-                                (joinedVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
-                            ) === -1,
-                    );
-                    joinedValueFilters[idx].values.push(...missingValues);
-                }
-            });
-
-            joinedValueFilters.forEach((filter) =>
-                nodeModel.inputs?.push({
-                    filterType: filter.devicesOrImports[0].startsWith(DeployFlowComponent.IMPORT_PREFIX) ? 'ImportId' : 'deviceId',
-                    filterIds: filter.devicesOrImports.join(','),
-                    topicName: filter.topic,
-                    values: filter.values,
-                }),
-            );
-
-            pipeReq.nodes.push(nodeModel);
-        });
-
-        if (this.editMode) {
-            this.flowEngineService.updatePipeline(pipeReq).subscribe((_) => {
-                this.route.queryParams.pipe(first()).subscribe((params) => {
-                    if (params.next !== undefined && params.next.length > 0) {
-                        const next = (params.next as string).split(',');
-                        let url = '/data/pipelines/edit/' + next[0];
-                        if (next.length > 1) {
-                            url += '?next=' + next.splice(1).join(',');
-                        }
-                        this.router.navigateByUrl(url);
-                        this.snackBar.open('Pipeline updated, preparing next update...', undefined, {
-                            duration: 2000,
+                        let valuesEqual = true;
+                        joined.values.forEach((joinedVal) => {
+                            if (
+                                filter.values.findIndex(
+                                    (filterVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
+                                ) === -1
+                            ) {
+                                valuesEqual = false;
+                            }
                         });
+                        return valuesEqual;
+                    });
+
+                    if (idx === -1) {
+                        joinedOperatorFilters.push(filter);
                     } else {
-                        this.router.navigate(['/data/pipelines']);
-                        this.snackBar.open('Pipeline updated', undefined, {
-                            duration: 2000,
-                        });
+                        const missingFilters = filter.filters.filter(
+                            (filterFilter) =>
+                                joinedOperatorFilters[idx].filters.findIndex(
+                                    (joinedFilter) =>
+                                        filterFilter.pipelineId === joinedFilter.pipelineId &&
+                                        filterFilter.operatorId === joinedFilter.operatorId,
+                                ) === -1,
+                        );
+                        joinedOperatorFilters[idx].filters.push(...missingFilters);
                     }
                 });
-            });
-        } else {
-            this.flowEngineService.startPipeline(pipeReq).subscribe((_) => {
-                this.router.navigate(['/data/pipelines']);
-                this.snackBar.open('Pipeline started', undefined, {
-                    duration: 2000,
+
+                // Join all filters with same topic/pipe/operator combination
+                const joinedPipelineFilters: {
+                    topic: string;
+                    filters: { pipelineId: string; operatorId: string }[];
+                    values: NodeValue[];
+                }[] = [];
+                joinedOperatorFilters.forEach((filter) => {
+                    const idx = joinedPipelineFilters.findIndex((joined) => {
+                        if (joined.topic !== filter.topic || joined.filters.length !== filter.filters.length) {
+                            return false;
+                        }
+
+                        let filtersEqual = true;
+                        joined.filters.forEach((joinedFilter) => {
+                            if (
+                                filter.filters.findIndex(
+                                    (filterFilter) =>
+                                        filterFilter.pipelineId === joinedFilter.pipelineId &&
+                                        filterFilter.operatorId === joinedFilter.operatorId,
+                                ) === -1
+                            ) {
+                                filtersEqual = false;
+                            }
+                        });
+                        return filtersEqual;
+                    });
+                    if (idx === -1) {
+                        joinedPipelineFilters.push(filter);
+                    } else {
+                        const missingValues = filter.values.filter(
+                            (filterVal) =>
+                                joinedPipelineFilters[idx].values.findIndex(
+                                    (joinedVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
+                                ) === -1,
+                        );
+                        joinedPipelineFilters[idx].values.push(...missingValues);
+                    }
                 });
+
+                joinedPipelineFilters.forEach((filter) =>
+                    nodeModel.inputs?.push({
+                        filterType: 'operatorId',
+                        filterIds: filter.filters.map((f) => f.operatorId + ':' + f.pipelineId).join(','),
+                        topicName: filter.topic,
+                        values: filter.values,
+                    }),
+                );
+
+                // Join all filters with same topic/value combination
+                const joinedDeviceFilters: DeviceServicePath[] = [];
+                flatFilters.forEach((filter) => {
+                    const idx = joinedDeviceFilters.findIndex((joined) => {
+                        if (joined.topic !== filter.topic || joined.values.length !== filter.values.length) {
+                            return false;
+                        }
+
+                        let valuesEqual = true;
+                        joined.values.forEach((joinedVal) => {
+                            if (
+                                filter.values.findIndex(
+                                    (filterVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
+                                ) === -1
+                            ) {
+                                valuesEqual = false;
+                            }
+                        });
+                        return valuesEqual;
+                    });
+
+                    if (idx === -1) {
+                        joinedDeviceFilters.push(filter);
+                    } else {
+                        const missingDevices = filter.devicesOrImports.filter(
+                            (filterDevice) =>
+                                joinedDeviceFilters[idx].devicesOrImports.findIndex((joinedDevice) => filterDevice === joinedDevice) === -1,
+                        );
+                        joinedDeviceFilters[idx].devicesOrImports.push(...missingDevices);
+                    }
+                });
+                // Join all filters with same topic/device combination
+                const joinedValueFilters: DeviceServicePath[] = [];
+                joinedDeviceFilters.forEach((filter) => {
+                    const idx = joinedValueFilters.findIndex((joined) => {
+                        if (joined.topic !== filter.topic || joined.devicesOrImports.length !== filter.devicesOrImports.length) {
+                            return false;
+                        }
+
+                        let devicesEqual = true;
+                        joined.devicesOrImports.forEach((joinedDevice) => {
+                            if (filter.devicesOrImports.findIndex((filterDevice) => filterDevice === joinedDevice) === -1) {
+                                devicesEqual = false;
+                            }
+                        });
+                        return devicesEqual;
+                    });
+                    if (idx === -1) {
+                        joinedValueFilters.push(filter);
+                    } else {
+                        const missingValues = filter.values.filter(
+                            (filterVal) =>
+                                joinedValueFilters[idx].values.findIndex(
+                                    (joinedVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
+                                ) === -1,
+                        );
+                        joinedValueFilters[idx].values.push(...missingValues);
+                    }
+                });
+
+                joinedValueFilters.forEach((filter) =>
+                    nodeModel.inputs?.push({
+                        filterType: filter.devicesOrImports[0].startsWith(DeployFlowComponent.IMPORT_PREFIX) ? 'ImportId' : 'deviceId',
+                        filterIds: filter.devicesOrImports.join(','),
+                        topicName: filter.topic,
+                        values: filter.values,
+                    }),
+                );
+
+                pipeReq.nodes.push(nodeModel);
             });
+
+            if (this.editMode) {
+                this.flowEngineService.updatePipeline(pipeReq).subscribe((_) => {
+                    this.route.queryParams.pipe(first()).subscribe((params) => {
+                        if (params.next !== undefined && params.next.length > 0) {
+                            const next = (params.next as string).split(',');
+                            let url = '/data/pipelines/edit/' + next[0];
+                            if (next.length > 1) {
+                                url += '?next=' + next.splice(1).join(',');
+                            }
+                            this.router.navigateByUrl(url);
+                            this.snackBar.open('Pipeline updated, preparing next update...', undefined, {
+                                duration: 2000,
+                            });
+                        } else {
+                            this.router.navigate(['/data/pipelines']);
+                            this.snackBar.open('Pipeline updated', undefined, {
+                                duration: 2000,
+                            });
+                        }
+                    });
+                });
+            } else {
+                this.flowEngineService.startPipeline(pipeReq).subscribe((_) => {
+                    this.router.navigate(['/data/pipelines']);
+                    this.snackBar.open('Pipeline started', undefined, {
+                        duration: 2000,
+                    });
+                });
+            }
         }
+        this.form.markAllAsTouched();
     }
 
     switchToClassic() {

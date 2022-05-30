@@ -35,7 +35,9 @@
                     <div fxLayout="column">
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Name</mat-label>
-                            <input matInput formControlName="name" placeholder="Name">
+                            <input matInput formControlName="name" placeholder="Name" required="true" />
+                            <mat-error *ngIf="form.controls.name.errors?.required">Please enter a name for the pipeline.
+                            </mat-error>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline">
                             <mat-label>Description</mat-label>
@@ -217,11 +219,9 @@
                 </section>
             </mat-expansion-panel>
         </mat-accordion>
-
-        <div fxLayout="row" fxLayoutAlign="start center" style="margin-top:8px;">
-            <button mat-raised-button color="accent"
-                    (click)="startPipeline()">{{editMode ? 'Update' : 'Start'}}</button>
-        </div>
+        <button mat-fab class="fab" (click)="startPipeline()"  matTooltip="{{editMode ? 'Update' : 'Start'}} Pipeline">
+            <mat-icon>play_arrow</mat-icon>
+        </button>
     </div>
     <senergy-spinner [show]="!ready"></senergy-spinner>
 </div>
