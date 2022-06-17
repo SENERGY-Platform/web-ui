@@ -94,11 +94,15 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         this.initTypesList();
         this.initFormGroup();
         for (const concept of this.concepts) {
-            this.characteristics.push(...(concept.characteristics.filter(c => !this.characteristics.some(cc => cc.id === c.id))).map(x => {
-                const c = x as DeviceTypeCharacteristicsClassModel;
-                c.class = '';
-                return c;
-            }));
+            const toAdd = concept.characteristics.filter(c => !this.characteristics.some(cc => cc.id === c.id))
+                .map(x => {
+                    const c = x as DeviceTypeCharacteristicsClassModel;
+                    c.class = '';
+                    const resp = [c];
+                    resp.push(...this.getSubCharacteristicsClass(c));
+                    return resp;
+                });
+            this.characteristics.push(...([] as DeviceTypeCharacteristicsClassModel[]).concat(...toAdd));
         }
         this.initTypeOptionControl();
         this.aspects.forEach(a => {
@@ -340,5 +344,26 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             return 'Characteristic doesn\'t match type';
         }
         return undefined;
+    }
+
+    private getSubCharacteristicsClass(c: DeviceTypeCharacteristicsModel, existing?: DeviceTypeCharacteristicsClassModel[]): DeviceTypeCharacteristicsClassModel[] {
+        if (existing === undefined) {
+            existing = [];
+        } else {
+            const sClass = JSON.parse(JSON.stringify(c)) as DeviceTypeCharacteristicsClassModel;
+            sClass.class = '';
+            existing?.push(sClass);
+        }
+        (c.sub_characteristics || []).forEach(s => {
+            const sClass = JSON.parse(JSON.stringify(s)) as DeviceTypeCharacteristicsClassModel;
+            sClass.name = c.name + '.' + sClass.name;
+            sClass.class = '';
+            existing?.push(sClass);
+            sClass.sub_characteristics?.forEach(sub => {
+                sub.name = sClass.name + '.' + sub.name;
+                existing = this.getSubCharacteristicsClass(sub, existing);
+            });
+        });
+        return existing;
     }
 }
