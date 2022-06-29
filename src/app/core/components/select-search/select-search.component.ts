@@ -89,7 +89,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             this.select.value = selection;
         }
         if (this.withGroups) {
-            this.updateOptionsGroups(this.searchControl.value || '');
+            this.updateOptionsGroups(this.searchControl.value || '', true);
         }
         this.stateChanges.next();
     }
@@ -157,8 +157,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         this._options = value;
         this.withGroups = !Array.isArray(this.options);
         if (this.withGroups) {
-            this.updateOptionsGroups(this.searchControl.value || '');
-            this.searchControl.valueChanges.subscribe((val: string) => (this.updateOptionsGroups(val)));
+            this.updateOptionsGroups(this.searchControl.value || '', true);
+            this.searchControl.valueChanges.subscribe((val: string) => (this.updateOptionsGroups(val, false)));
         }
         this.resetSearchIfNoResults();
         this.selectSingleElement();
@@ -255,12 +255,14 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
      */
     @Input() scrollWindowMoveDivisor = 10;
     scrollLowerOffset = 0;
+    lastScrollLowerOffset = 0;
     lastScrollPercentage = 0;
     maxElements = 0;
 
     optionsGroups: Map<string, any> = new Map();
 
     @ViewChild('searchInput', {static: false}) searchInput!: MatInput;
+    private lastSearch: string|undefined;
 
     ngOnInit() {
         if (this.useOptionViewProperty !== undefined) {
@@ -313,7 +315,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 } else {
                     this.scrollLowerOffset = this.maxElements - this.scrollWindowSize;
                 }
-                this.updateOptionsGroups(this.searchControl.value);
+                this.updateOptionsGroups(this.searchControl.value, false);
 
             }
         } else { // scrolling up
@@ -324,7 +326,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 } else {
                     this.scrollLowerOffset = 0;
                 }
-                this.updateOptionsGroups(this.searchControl.value);
+                this.updateOptionsGroups(this.searchControl.value, false);
             }
         }
         this.lastScrollPercentage = lowerScrollPercentage;
@@ -446,7 +448,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             this.select.writeValue(obj);
             this.queuedWriteValue = undefined;
             if (this.withGroups) {
-                this.updateOptionsGroups(this.searchControl.value || '');
+                this.updateOptionsGroups(this.searchControl.value || '', true);
             }
         } else {
             this.queuedWriteValue = obj;
@@ -492,9 +494,14 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         this.select?.updateErrorState();
     }
 
-    updateOptionsGroups(search: string): void {
+    updateOptionsGroups(search: string, force: boolean): void {
+        if (!force && this.lastSearch === search && this.scrollLowerOffset === this.lastScrollLowerOffset) {
+            return;
+        }
+        this.lastSearch = search;
+        this.lastScrollLowerOffset = this.scrollLowerOffset;
         if (this.select === undefined) {
-            setTimeout(() => this.updateOptionsGroups(search));
+            setTimeout(() => this.updateOptionsGroups(search, force), 10);
             return;
         }
         if (Array.isArray(this.options)) {
@@ -573,7 +580,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         }
         let toWrite: any;
         if (!Array.isArray(this.options)) {
-            this.updateOptionsGroups('');
+            this.updateOptionsGroups('', true);
             let singleValue: any;
             let moreFound = false;
             this.optionsGroups.forEach((v: any[]) => {

@@ -94,6 +94,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
     vAxesOptions: Map<string, ChartsExportVAxesModel[]> = new Map();
     exportTags: Map<string, Map<string, { value: string; parent: string }[]>> = new Map();
     ready = false;
+    exportDeviceList: Map<string, ChartsExportMeasurementModel[] | DeviceInstancesModel[]> = new Map();
+    emptyMap = new Map();
 
     constructor(
         private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
@@ -233,6 +235,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
                         this.exportList.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, dbId: exportModel.DbId });
                     }
+                    this.exportDeviceList.set('Exports', this.exportList);
+                    this.cd.detectChanges();
                 });
                 if (widget.properties.exports !== undefined) {
                     // exports values or names might have changed
@@ -250,7 +254,11 @@ export class ChartsExportEditDialogComponent implements OnInit {
             .pipe(
                 map(devices => this.deviceInstancesService.useDisplayNameAsName(devices)),
                 map(devices => devices as DeviceInstancesModel[]),
-                map(devices => this.deviceList = devices)));
+                map(devices => this.deviceList = devices),
+                map(_ => {
+                    this.exportDeviceList.set('Devices', this.deviceList);
+                    this.cd.detectChanges();
+                })));
         return forkJoin(obs);
     }
 
@@ -468,7 +476,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     getTags(element: ChartsExportVAxesModel): Map<string, { value: string; parent: string }[]> {
-        return this.exportTags.get(element.instanceId || '') || new Map();
+        return this.exportTags.get(element.instanceId || '') || this.emptyMap;
     }
 
     private preloadExportTags(exportId: string): Observable<any> {
@@ -505,13 +513,6 @@ export class ChartsExportEditDialogComponent implements OnInit {
     getTagValue(a: { value: string; parent: string }): string {
         return a.parent + '!' + a.value;
     }
-
-    getExportDeviceList(): Map<string, ChartsExportMeasurementModel[] | DeviceInstancesModel[]> {
-        const m: Map<string, ChartsExportMeasurementModel[] | DeviceInstancesModel[]> = new Map();
-        m.set('Exports', this.exportList);
-        m.set('Devices', this.deviceList);
-        return m;
-    };
 
     private translateTypeDeviceToExport(type: string): string {
         switch(type) {

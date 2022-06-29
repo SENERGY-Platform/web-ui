@@ -50,7 +50,7 @@
                 <senergy-select-search [required]="true" [multiple]="true"
                                        [compareWith]="compare" formControlName="exports"
                                        (selectionChange)="selectionChange($event.value)"
-                                       [options]="getExportDeviceList()" useOptionViewProperty="name">
+                                       [options]="exportDeviceList" useOptionViewProperty="name">
                 </senergy-select-search>
                 <mat-error *ngIf="exports.invalid">
                     Please make a selection!
