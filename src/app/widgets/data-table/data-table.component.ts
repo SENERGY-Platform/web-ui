@@ -266,6 +266,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                         this.items = [];
                         results.forEach(result => {
                             result.res.forEach((pair: TimeValuePairModel, resultIndex: number) => {
+                                resultIndex = Math.floor(resultIndex / (this.widget.properties.dataTable?.valuesPerElement || 1));
                                 let elementIndex = -1;
                                 switch (result.source) {
                                 case 'influx':
