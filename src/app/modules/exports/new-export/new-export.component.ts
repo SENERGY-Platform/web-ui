@@ -81,6 +81,7 @@ export class NewExportComponent implements OnInit {
         import: [{value: null, disabled: true}, Validators.required],
         operator: [{value: null, disabled: true}, Validators.required],
         pipeline: [{value: null, disabled: true}, Validators.required],
+        databaseType: 'influxdb',
         exportValues: this.fb.array([] as ExportValueModel[]),
     });
 
@@ -281,6 +282,7 @@ export class NewExportComponent implements OnInit {
             this.export.CustomMqttUser = this.exportForm.value.customMqttUser;
             this.export.CustomMqttPassword = this.exportForm.value.customMqttPassword;
             this.export.CustomMqttBaseTopic = this.exportForm.value.customMqttBaseTopic;
+            this.export.DatabaseType=this.exportForm.value.databaseType;
 
             if (this.exportForm.value.selector === 'device') {
                 this.export.EntityName = this.exportForm.value.device.name;
