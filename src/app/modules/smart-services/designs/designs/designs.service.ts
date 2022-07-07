@@ -56,8 +56,8 @@ export class SmartServiceDesignsService {
         );
     }
 
-    saveDesign(id: string, bpmnXml: string, svgXML: string): Observable<SmartServiceDesignModel | null> {
-        const model: SmartServiceDesignModel = { id: id, svg_xml: svgXML, bpmn_xml: bpmnXml, name: "", description: "", user_id: "" };
+    saveDesign(model: SmartServiceDesignModel): Observable<SmartServiceDesignModel | null> {
+        let id = model.id;
         if (id === '') {
             return this.http
                 .post<SmartServiceDesignModel>(environment.smartServiceRepoUrl+"/designs", model)

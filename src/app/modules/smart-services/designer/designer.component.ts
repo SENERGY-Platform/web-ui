@@ -18,7 +18,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {SmartServiceDesignsService} from '../designs/designs/designs.service';
 import {
@@ -31,6 +31,7 @@ import {
     PaletteProvider, SenergyPropertiesProvider
 } from '../../processes/designer/bpmn-js/bpmn-js';
 import {SmartServiceDesignModel} from '../designs/designs/design.model';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 @Component({
     selector: 'smart-service-designer',
@@ -41,6 +42,8 @@ export class SmartServiceDesignerComponent implements OnInit {
     modeler: any;
     id = '';
     ready = false;
+    name = ''
+    description = ''
 
     constructor(
         private http: HttpClient,
@@ -48,6 +51,8 @@ export class SmartServiceDesignerComponent implements OnInit {
         protected auth: AuthorizationService,
         protected designsService: SmartServiceDesignsService,
         private snackBar: MatSnackBar,
+        private dialogService: DialogsService,
+        private router: Router,
     ) {}
 
     ngOnInit() {
@@ -105,6 +110,8 @@ export class SmartServiceDesignerComponent implements OnInit {
         this.designsService.getDesign(id).subscribe((resp: SmartServiceDesignModel | null) => {
             if (resp !== null) {
                 const xml = resp.bpmn_xml;
+                this.name = resp.name;
+                this.description = resp.description;
                 this.modeler.importXML(xml, this.handleError);
             }
         });
@@ -137,9 +144,21 @@ export class SmartServiceDesignerComponent implements OnInit {
                     if (errSVG) {
                         this.snackBar.open('Error SVG! ' + errSVG, "close", { panelClass: "snack-bar-error" });
                     } else {
-                        this.designsService.saveDesign(this.id, processXML, svgXML).subscribe(() => {
-                            this.snackBar.open('Model saved.', undefined, { duration: 2000 });
-                        });
+                        this.dialogService.openInputDialog("Design Name and Description", {name: this.name, description: this.description}, ["name"])
+                            .afterClosed()
+                            .subscribe((result: {name: string, description: string}) => {
+                                this.name = result.name;
+                                this.description = result.description;
+                                let model = { id: this.id, svg_xml: svgXML, bpmn_xml: processXML, name: result.name, description: result.description, user_id: "" }
+                                this.designsService.saveDesign(model).subscribe((result: SmartServiceDesignModel | null) => {
+                                    if (result) {
+                                        this.snackBar.open('Model saved.', undefined, { duration: 2000 });
+                                        if(this.id == "") {
+                                            this.router.navigate(['/smart-services/designer/'+result.id]);
+                                        }
+                                    }
+                                });
+                            })
                     }
                 });
             }

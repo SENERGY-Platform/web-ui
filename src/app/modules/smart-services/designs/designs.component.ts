@@ -226,6 +226,11 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
 
     releaseDesign(design: SmartServiceDesignModel): void {
         console.log(design)
+        this.dialogsService.openInputDialog("Release Name and Description", {name: design.name, description: design.description}, ["name"])
+            .afterClosed()
+            .subscribe((result: {name: string, description: string}) => {
+                console.log(result);
+            })
     }
 
     private showSnackBarError(text: string): void {
