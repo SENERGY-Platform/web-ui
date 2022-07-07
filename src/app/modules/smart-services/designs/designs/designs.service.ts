@@ -21,6 +21,7 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/internal/operators';
 import { Observable } from 'rxjs';
 import {SmartServiceDesignModel} from './design.model';
+import {ProcessModel} from '../../../processes/process-repo/shared/process.model';
 
 @Injectable({
     providedIn: 'root',
@@ -28,6 +29,19 @@ import {SmartServiceDesignModel} from './design.model';
 export class SmartServiceDesignsService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
+    getDesignList(limit: number, offset: number, search: string) : Observable<SmartServiceDesignModel[]> {
+        const params = ['limit=' + limit, 'offset=' + offset];
+        if (search != "") {
+            params.push('search=' + encodeURIComponent(search));
+        }
+        const paramsStr = params.join('&');
+        return this.http
+            .get<SmartServiceDesignModel[]>(environment.smartServiceRepoUrl + '/designs?'+paramsStr)
+            .pipe(
+                map((resp) => resp || []),
+                catchError(this.errorHandlerService.handleError(SmartServiceDesignsService.name, 'getDesignList()', []))
+            );
+    }
 
     getDesign(id: string): Observable<SmartServiceDesignModel | null> {
         return this.http
