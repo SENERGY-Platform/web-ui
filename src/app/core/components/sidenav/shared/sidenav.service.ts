@@ -59,6 +59,13 @@ export class SidenavService implements OnDestroy {
         sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []));
 
         sections.push(
+            new SidenavSectionModel('Smart Services', 'toggle', 'design_services', '/smart-services', [
+                new SidenavPageModel('Designs', 'link', 'create', '/smart-services/designs'),
+                new SidenavPageModel('Releases', 'link', 'storage', '/smart-services/releases'),
+            ]),
+        );
+
+        sections.push(
             new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', [
                 new SidenavPageModel('Designer', 'link', 'create', '/processes/designer'),
                 new SidenavPageModel('Repository', 'link', 'storage', '/processes/repository'),

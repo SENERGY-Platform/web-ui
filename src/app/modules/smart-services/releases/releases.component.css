@@ -1,0 +1,114 @@
+/*
+ * Copyright 2020 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.releases-container {
+    height: calc(100% - 64px);
+    overflow-y: hidden;
+}
+
+.releases-scroll {
+    height: calc(100% - 106px);
+    overflow-y: auto;
+}
+
+.layout-margin {
+    margin: 8px;
+}
+
+mat-grid-tile {
+    background: whitesmoke !important;
+    transition: box-shadow 280ms cubic-bezier(.4,0,.2,1);
+    border-radius: 4px;
+}
+
+mat-grid-tile-footer {
+    height: 110px !important;
+    background-color: white !important;
+    color: black !important;
+    padding: 8px !important;
+}
+
+.footer-item-header {
+    min-height: 20px;
+    padding: 5px;
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.footer-item-subtitle {
+    min-height: 20px;
+    margin-top: -4px;
+    padding: 5px;
+    margin-bottom: 16px;
+}
+
+mat-grid-list {
+    margin-bottom: 100px;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fab {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    z-index: 100;
+}
+
+.footer-buttons {
+    max-height: 30px;
+}
+
+.widget-image {
+    height: 156px;
+    width: 100%;
+    background-color: whitesmoke;
+}
+
+.filter-margin {
+    margin-top: 12px
+}
+
+.icon-spin {
+    -webkit-animation: icon-spin 2s infinite linear;
+    animation: icon-spin 2s infinite linear;
+}
+
+@-webkit-keyframes icon-spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(-359deg);
+        transform: rotate(-359deg);
+    }
+}
+@keyframes icon-spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(-359deg);
+        transform: rotate(-359deg);
+    }
+}

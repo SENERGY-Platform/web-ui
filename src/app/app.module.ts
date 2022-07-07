@@ -37,6 +37,7 @@ import { ImportsModule } from './modules/imports/imports.module';
 import { MetadataModule } from './modules/metadata/metadata.module';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import {SmartServicesModule} from './modules/smart-services/smart-services.module';
 
 registerLocaleData(localeDe);
 
@@ -52,6 +53,7 @@ registerLocaleData(localeDe);
         KeycloakAngularModule,
         DataModule,
         ProcessesModule,
+        SmartServicesModule,
         ImportsModule,
         MetadataModule,
         BrowserAnimationsModule,
