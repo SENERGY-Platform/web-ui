@@ -75,7 +75,7 @@
                                 *ngIf="exportForm.getRawValue().selector ==='device'">
                     <mat-label>Device</mat-label>
                     <senergy-select-search formControlName="device"
-                                           [options]="devices" useOptionViewProperty="name" [required]="true">
+                                           [options]="devices" useOptionViewProperty="display_name" [required]="true">
                     </senergy-select-search>
                     <mat-error
                             *ngIf="exportForm.controls.device.invalid && (exportForm.controls.device.dirty || exportForm.controls.device.touched) && exportForm.controls.device.errors?.required">
