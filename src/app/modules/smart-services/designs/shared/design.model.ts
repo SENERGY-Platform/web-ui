@@ -16,7 +16,6 @@
 
 export interface SmartServiceDesignModel {
     id: string;
-    user_id: string;
     name: string;
     description: string;
     bpmn_xml: string;

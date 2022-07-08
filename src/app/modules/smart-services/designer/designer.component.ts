@@ -20,7 +20,7 @@ import { AuthorizationService } from '../../../core/services/authorization.servi
 import { HttpClient } from '@angular/common/http';
 import {ActivatedRoute, Router} from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {SmartServiceDesignsService} from '../designs/designs/designs.service';
+import {SmartServiceDesignsService} from '../designs/shared/designs.service';
 import {
     camundaBpmnModdle,
     CamundaPropertiesProvider,
@@ -30,7 +30,7 @@ import {
     PropertiesPanelModule,
     PaletteProvider, SenergyPropertiesProvider
 } from '../../processes/designer/bpmn-js/bpmn-js';
-import {SmartServiceDesignModel} from '../designs/designs/design.model';
+import {SmartServiceDesignModel} from '../designs/shared/design.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
 
 @Component({

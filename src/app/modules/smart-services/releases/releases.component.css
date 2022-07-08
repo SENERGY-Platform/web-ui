@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-.releases-container {
-    height: calc(100% - 64px);
-    overflow-y: hidden;
+.releases-container ::ng-deep .mat-tab-body-content {
+    overflow: hidden;
 }
 
-.releases-scroll {
+.releases-container ::ng-deep .mat-tab-body-wrapper {
+    height: calc(100vh - 118px);
+}
+
+.releases-container ::ng-deep .mat-tab-header {
+    min-height: 54px;
+}
+
+.main-panel {
     height: calc(100% - 106px);
     overflow-y: auto;
 }
@@ -83,32 +90,11 @@ mat-grid-list {
     background-color: whitesmoke;
 }
 
-.filter-margin {
-    margin-top: 12px
+.info-icon {
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
-.icon-spin {
-    -webkit-animation: icon-spin 2s infinite linear;
-    animation: icon-spin 2s infinite linear;
-}
-
-@-webkit-keyframes icon-spin {
-    0% {
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100% {
-        -webkit-transform: rotate(-359deg);
-        transform: rotate(-359deg);
-    }
-}
-@keyframes icon-spin {
-    0% {
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100% {
-        -webkit-transform: rotate(-359deg);
-        transform: rotate(-359deg);
-    }
+.info-icon-color {
+    color: darkgray;
 }

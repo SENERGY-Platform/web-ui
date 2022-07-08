@@ -21,7 +21,6 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/internal/operators';
 import { Observable } from 'rxjs';
 import {SmartServiceDesignModel} from './design.model';
-import {ProcessModel} from '../../../processes/process-repo/shared/process.model';
 
 @Injectable({
     providedIn: 'root',

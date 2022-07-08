@@ -18,8 +18,8 @@ import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from
 import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {ProcessModel} from '../../processes/process-repo/shared/process.model';
-import {SmartServiceDesignsService} from './designs/designs.service';
-import {SmartServiceDesignModel} from './designs/design.model';
+import {SmartServiceDesignsService} from './shared/designs.service';
+import {SmartServiceDesignModel} from './shared/design.model';
 import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DesignerProcessModel} from '../../processes/designer/shared/designer.model';
@@ -28,6 +28,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';
+import {SmartServiceReleasesService} from '../releases/shared/release.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -66,6 +67,7 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
     constructor(
         private searchbarService: SearchbarService,
         private designsService: SmartServiceDesignsService,
+        private releaseService: SmartServiceReleasesService,
         private responsiveService: ResponsiveService,
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
@@ -217,7 +219,7 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
                         if (resp.status === 200) {
                             this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => design.id === item.id));
                         } else {
-                            this.showSnackBarError('deleting the design!');
+                            this.showSnackBarError('deleting the design');
                         }
                     });
                 }
@@ -225,11 +227,16 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
     }
 
     releaseDesign(design: SmartServiceDesignModel): void {
-        console.log(design)
         this.dialogsService.openInputDialog("Release Name and Description", {name: design.name, description: design.description}, ["name"])
             .afterClosed()
             .subscribe((result: {name: string, description: string}) => {
-                console.log(result);
+                this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
+                    if(value) {
+                        this.snackBar.open('Release created.', undefined, { duration: 2000 });
+                    } else {
+                        this.showSnackBarError('creating a release');
+                    }
+                })
             })
     }
 
