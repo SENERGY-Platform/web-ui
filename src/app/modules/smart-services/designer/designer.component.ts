@@ -32,6 +32,7 @@ import {
 } from '../../processes/designer/bpmn-js/bpmn-js';
 import {SmartServiceDesignModel} from '../designs/shared/design.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import * as ServicePropertiesProvider from './smart-service-properties-provider';
 
 @Component({
     selector: 'smart-service-designer',
@@ -70,10 +71,8 @@ export class SmartServiceDesignerComponent implements OnInit {
 
                     // Re-use original bpmn-properties-module, see CustomPropsProvider
                     { [InjectionNames.camundaPropertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]] },
-                    // {[InjectionNames.propertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]]},
 
-                   // { [InjectionNames.propertiesProvider]: ['type', SenergyPropertiesProvider.propertiesProvider[1]] },
-                    { [InjectionNames.propertiesProvider]: ['type', CamundaPropertiesProvider.propertiesProvider[1]] },
+                    { [InjectionNames.propertiesProvider]: ['type', ServicePropertiesProvider.propertiesProvider[1]] },
 
                     // Re-use original palette, see CustomPaletteProvider
                     { [InjectionNames.paletteProvider]: ['type', PaletteProvider] },
