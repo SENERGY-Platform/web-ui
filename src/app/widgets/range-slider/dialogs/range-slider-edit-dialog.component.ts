@@ -65,15 +65,17 @@ export class RangeSliderEditDialogComponent implements OnInit {
 
     ngOnInit() {
         this.formGroup.get('deployment')?.valueChanges.subscribe((deployment: DeploymentsModel) => {
-            this.deploymentsService.getDeploymentInputParameters(deployment.id).subscribe((pars) => {
-                if (pars !== null) {
-                    this.parametersMap = pars;
-                    this.parameters = [];
-                    pars.forEach((_, key) => {
-                        this.parameters.push(key);
-                    });
-                }
-            });
+            if (deployment) {
+                this.deploymentsService.getDeploymentInputParameters(deployment.id).subscribe((pars) => {
+                    if (pars !== null) {
+                        this.parametersMap = pars;
+                        this.parameters = [];
+                        pars.forEach((_, key) => {
+                            this.parameters.push(key);
+                        });
+                    }
+                });
+            }
         });
         this.getWidgetData();
         this.initDeployments();
@@ -117,6 +119,6 @@ export class RangeSliderEditDialogComponent implements OnInit {
     }
 
     compareDeployments(first: DeploymentsModel, second: DeploymentsModel) {
-        return first.id === second.id;
+        return second && first && first.id === second.id;
     }
 }
