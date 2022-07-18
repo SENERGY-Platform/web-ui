@@ -33,6 +33,9 @@ import {
 import {SmartServiceDesignModel} from '../designs/shared/design.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import * as ServicePropertiesProvider from './smart-service-properties-provider';
+import {SmartServiceTaskDescription} from './shared/designer.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {EditSmartServiceTaskDialogComponent} from './dialog/edit-smart-service-task-dialog/edit-smart-service-task-dialog.component';
 
 @Component({
     selector: 'smart-service-designer',
@@ -54,10 +57,10 @@ export class SmartServiceDesignerComponent implements OnInit {
         private snackBar: MatSnackBar,
         private dialogService: DialogsService,
         private router: Router,
+        private dialog: MatDialog
     ) {}
 
     ngOnInit() {
-        // TODO: find better solution for appear / fade-in problem
         setTimeout(() => {
             const that = this;
             this.id = this.route.snapshot.paramMap.get('id') || '';
@@ -93,7 +96,17 @@ export class SmartServiceDesignerComponent implements OnInit {
             });
 
             this.modeler.designerCallbacks = {
-
+                openTaskEditDialog: function (initInfo: SmartServiceTaskDescription, callback: (info: SmartServiceTaskDescription) => void ) {
+                    const dialogConfig = new MatDialogConfig();
+                    dialogConfig.disableClose = false;
+                    dialogConfig.data = { info: initInfo };
+                    const editDialogRef = that.dialog.open(EditSmartServiceTaskDialogComponent, dialogConfig);
+                    editDialogRef.afterClosed().subscribe((value: SmartServiceTaskDescription) => {
+                        if (value) {
+                            callback(value);
+                        }
+                    });
+                }
             };
 
             if (this.id === '') {

@@ -50,6 +50,9 @@ import { MatBadgeModule } from '@angular/material/badge';
 import {SmartServiceReleasesComponent} from './releases/releases.component';
 import {SmartServiceDesignsComponent} from './designs/designs.component';
 import {SmartServiceDesignerComponent} from './designer/designer.component';
+import {
+    EditSmartServiceTaskDialogComponent
+} from './designer/dialog/edit-smart-service-task-dialog/edit-smart-service-task-dialog.component';
 
 const designs = {
     path: 'smart-services/designs',
@@ -122,7 +125,8 @@ const designer = {
     declarations: [
         SmartServiceReleasesComponent,
         SmartServiceDesignsComponent,
-        SmartServiceDesignerComponent
+        SmartServiceDesignerComponent,
+        EditSmartServiceTaskDialogComponent
     ],
 })
 export class SmartServicesModule {}
