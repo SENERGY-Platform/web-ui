@@ -16,7 +16,7 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {SmartServiceTaskDescription} from '../../shared/designer.model';
+import {SmartServiceInputsDescription, SmartServiceTaskDescription} from '../../shared/designer.model';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -49,6 +49,79 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     set activeIndex(index: number) {
         this.result.topic = this.tabs[index]
         this.ensureResultFields();
+    }
+
+    get processTaskIds(): string[]{
+        let resultSet = new Map<string, string>();
+        this.result.inputs.forEach(input => {
+            if (input.name.startsWith("process_deployment.")) {
+                const parts = input.name.split(".")
+                if (parts.length > 2) {
+                    resultSet.set(parts[1], parts[1])
+                }
+            }
+        })
+        return Array.from( resultSet.keys() );
+    }
+
+    getProcessTaskParameter(taskId: string): string[]{
+        let result: string[] = [];
+        const prefix = "process_deployment."+taskId+".parameter.";
+        this.result.inputs.forEach(input => {
+            if (input.name.startsWith(prefix)) {
+                result.push(input.name.slice(prefix.length))
+            }
+        })
+        return result;
+    }
+
+    processProcessModelIdFieldName = "process_deployment.process_model_id"
+    get processProcessModelId(): string {
+        return this.getFieldValue(this.processProcessModelIdFieldName, "text", "")
+    }
+
+    set processProcessModelId(value: string) {
+        this.setFieldValue(this.processProcessModelIdFieldName, "text", value)
+    }
+
+    processProcessNameFieldName = "process_deployment.name"
+    get processProcessName(): string {
+        return this.getFieldValue(this.processProcessNameFieldName, "text", "")
+    }
+
+    set processProcessName(value: string) {
+        this.setFieldValue(this.processProcessNameFieldName, "text", value)
+    }
+
+    processTaskMatches(input: SmartServiceInputsDescription, taskId: string, suffix: string) {
+        return input.name == "process_deployment."+taskId+"."+suffix
+    }
+
+    getFieldValue(name: string, type: string, defaultValue: string): string {
+        if (!this.result.inputs) {
+            this.result.inputs = [];
+        }
+        var result = this.result.inputs.find(element => element.name == name)
+        if (result) {
+            return result.value;
+        } else {
+            this.result.inputs.push({name: name, value: defaultValue, type: type})
+            return ""
+        }
+    }
+
+    setFieldValue(name: string, type: string, value: string) {
+        let found = false
+        this.result.inputs = this.result.inputs.map(element => {
+            if(element.name == name) {
+                found = true;
+                element.value = value
+            }
+            return element;
+        })
+        if(!found) {
+            this.result.inputs.push({name: name, value: value, type: type})
+        }
     }
 
     close(): void {

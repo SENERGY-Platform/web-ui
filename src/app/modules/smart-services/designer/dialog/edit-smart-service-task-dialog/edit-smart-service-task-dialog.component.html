@@ -18,6 +18,54 @@
 <mat-dialog-content>
   <mat-tab-group  dynamicHeight="true" [(selectedIndex)]="activeIndex">
     <mat-tab label="Process">
+      <div>
+        <mat-form-field class="full-width" color="accent">
+          <input matInput placeholder="Model-Id" [(ngModel)]="processProcessModelId" required>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field class="full-width" color="accent">
+          <input matInput placeholder="Deployment-Name" [(ngModel)]="processProcessName" required>
+        </mat-form-field>
+      </div>
+
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let taskId of processTaskIds">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{taskId}}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <ng-container *ngFor="let input of result.inputs">
+                <div *ngIf="processTaskMatches(input, taskId, 'selection')">
+                  <mat-form-field class="full-width" color="accent">
+                    <input matInput placeholder="IoT-Selection" [(ngModel)]="input.value" required>
+                  </mat-form-field>
+                </div>
+                <div *ngIf="processTaskMatches(input, taskId, 'event.flow_id')">
+                  <mat-form-field class="full-width" color="accent">
+                    <input matInput placeholder="Event-Flow-Id" [(ngModel)]="input.value" required>
+                  </mat-form-field>
+                </div>
+                <div *ngIf="processTaskMatches(input, taskId, 'event.value')">
+                  <mat-form-field class="full-width" color="accent">
+                    <input matInput placeholder="Event-Value" [(ngModel)]="input.value" required>
+                  </mat-form-field>
+                </div>
+                <ng-container *ngFor="let parameter of getProcessTaskParameter(taskId)">
+                  <div *ngIf="processTaskMatches(input, taskId, 'parameter.'+parameter)">
+                    <mat-form-field class="full-width" color="accent">
+                      <input matInput placeholder="{{parameter}}" [(ngModel)]="input.value" required>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+              </ng-container>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
 
     </mat-tab>
     <mat-tab label="Analytics">
