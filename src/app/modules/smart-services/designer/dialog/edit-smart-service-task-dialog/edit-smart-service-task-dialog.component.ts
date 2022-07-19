@@ -77,8 +77,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 if(value) {
                     this.selectedProcessModelPreparation = value
                     this.result.inputs = [
-                        this.knownInputValues.get("process_deployment.process_model_id") || {name:"process_deployment.process_model_id", value: "", type: "text"},
-                        this.knownInputValues.get("process_deployment.name") || {name:"process_deployment.name", value: "", type: "text"},
+                        this.knownInputValues.get("process_deployment.process_model_id") || {name:"process_deployment.process_model_id", value: id, type: "text"},
+                        {name:"process_deployment.name", value: this.selectedProcessModelPreparation.name, type: "text"},
                         this.knownInputValues.get("process_deployment.module_data") || {name:"process_deployment.module_data", value: "{}", type: "text"}
                     ];
                     this.selectedProcessModelPreparation.elements.forEach(element => {

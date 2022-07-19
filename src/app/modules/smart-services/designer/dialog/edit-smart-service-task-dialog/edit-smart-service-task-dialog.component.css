@@ -17,3 +17,11 @@
 mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
+
+.full-width {
+    width: 100%;
+}
+
+.smart-service-task-tab{
+    margin-top: 15px;
+}
