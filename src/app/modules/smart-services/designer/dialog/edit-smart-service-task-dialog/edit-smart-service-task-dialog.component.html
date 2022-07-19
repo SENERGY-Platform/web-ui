@@ -19,8 +19,13 @@
   <mat-tab-group  dynamicHeight="true" [(selectedIndex)]="activeIndex">
     <mat-tab label="Process">
       <div>
-        <mat-form-field class="full-width" color="accent">
-          <input matInput placeholder="Model-Id" [(ngModel)]="processProcessModelId" required>
+        <mat-form-field appearance="fill">
+          <mat-label>Process-Model</mat-label>
+          <mat-select [(ngModel)]="processProcessModelId">
+            <mat-option *ngFor="let model of processModels" [value]="model.id">
+              {{model.name}}
+            </mat-option>
+          </mat-select>
         </mat-form-field>
       </div>
       <div>
@@ -42,6 +47,11 @@
                 <div *ngIf="processTaskMatches(input, taskId, 'selection')">
                   <mat-form-field class="full-width" color="accent">
                     <input matInput placeholder="IoT-Selection" [(ngModel)]="input.value" required>
+                  </mat-form-field>
+                </div>
+                <div *ngIf="processTaskMatches(input, taskId, 'time')">
+                  <mat-form-field class="full-width" color="accent">
+                    <input matInput placeholder="Time-Event" [(ngModel)]="input.value" required>
                   </mat-form-field>
                 </div>
                 <div *ngIf="processTaskMatches(input, taskId, 'event.flow_id')">

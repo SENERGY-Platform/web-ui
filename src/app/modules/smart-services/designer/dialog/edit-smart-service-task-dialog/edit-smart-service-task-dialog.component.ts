@@ -17,6 +17,10 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {SmartServiceInputsDescription, SmartServiceTaskDescription} from '../../shared/designer.model';
+import {ProcessRepoService} from '../../../../processes/process-repo/shared/process-repo.service';
+import {DeploymentsService} from '../../../../processes/deployments/shared/deployments.service';
+import {ProcessModel} from '../../../../processes/process-repo/shared/process.model';
+import {V2DeploymentsPreparedModel} from '../../../../processes/deployments/shared/deployments-prepared-v2.model';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -27,10 +31,19 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     result: SmartServiceTaskDescription;
     tabs: string[] = ["process_deployment", "analytics", "export", "import"]
 
+    processModels: ProcessModel[] | null = null
+    selectedProcessModelPreparation: V2DeploymentsPreparedModel | null = null
+    knownInputValues = new Map<string, SmartServiceInputsDescription>();
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
+        private processRepo: ProcessRepoService,
+        private processDeployment: DeploymentsService,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription },
     ) {
+        if(!dialogParams.info.topic) {
+            dialogParams.info.topic = this.tabs[0];
+        }
         this.result = dialogParams.info;
         this.init = dialogParams.info;
         this.ensureResultFields();
@@ -39,7 +52,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     ngOnInit() {}
 
     ensureResultFields() {
-
+        if(!this.processModels && this.result.topic == "process_deployment") {
+            this.processRepo.getProcessModels("", 9999, 0, "date", "asc", null).subscribe(value => this.processModels = value)
+        }
     }
 
     get activeIndex(): number {
@@ -49,6 +64,49 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     set activeIndex(index: number) {
         this.result.topic = this.tabs[index]
         this.ensureResultFields();
+    }
+
+    /******************************
+     *      Processes
+     ******************************/
+
+    private ensureProcessTaskParameter(id: string) {
+        this.result.inputs.forEach(e => this.knownInputValues.set(e.name, e));
+        if(!this.selectedProcessModelPreparation || this.selectedProcessModelPreparation.id != id) {
+            this.processDeployment.getPreparedDeployments(id).subscribe(value => {
+                if(value) {
+                    this.selectedProcessModelPreparation = value
+                    this.result.inputs = [
+                        this.knownInputValues.get("process_deployment.process_model_id") || {name:"process_deployment.process_model_id", value: "", type: "text"},
+                        this.knownInputValues.get("process_deployment.name") || {name:"process_deployment.name", value: "", type: "text"},
+                        this.knownInputValues.get("process_deployment.module_data") || {name:"process_deployment.module_data", value: "{}", type: "text"}
+                    ];
+                    this.selectedProcessModelPreparation.elements.forEach(element => {
+                        if(element.task){
+                            const selectionKey = "process_deployment."+element.bpmn_id+".selection";
+                            this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
+                            for (let key in element.task.parameter) {
+                                let value = element.task.parameter[key];
+                                const paramKey = "process_deployment."+element.bpmn_id+".parameter."+key;
+                                this.result.inputs.push(this.knownInputValues.get(paramKey) || {name:paramKey, value: value, type: "text"});
+                            }
+                        }
+                        if(element.message_event){
+                            const selectionKey = "process_deployment."+element.bpmn_id+".selection";
+                            this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
+                            const eventFlowKey = "process_deployment."+element.bpmn_id+".event.flow_id";
+                            this.result.inputs.push(this.knownInputValues.get(eventFlowKey) || {name:eventFlowKey, value: "", type: "text"});
+                            const eventValueKey = "process_deployment."+element.bpmn_id+".event.value";
+                            this.result.inputs.push(this.knownInputValues.get(eventValueKey) || {name:eventValueKey, value: "", type: "text"});
+                        }
+                        if(element.time_event){
+                            const eventTimeKey = "process_deployment."+element.bpmn_id+".time";
+                            this.result.inputs.push(this.knownInputValues.get(eventTimeKey) || {name:eventTimeKey, value: element.time_event.time, type: "text"});
+                        }
+                    })
+                }
+            })
+        }
     }
 
     get processTaskIds(): string[]{
@@ -82,6 +140,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     set processProcessModelId(value: string) {
         this.setFieldValue(this.processProcessModelIdFieldName, "text", value)
+        this.ensureProcessTaskParameter(value)
     }
 
     processProcessNameFieldName = "process_deployment.name"
@@ -129,6 +188,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     ok(): void {
+        this.result.inputs = this.result.inputs.filter(e => e.name.startsWith(this.result.topic+".")) //filter unused inputs
         this.dialogRef.close(this.result);
     }
 }
