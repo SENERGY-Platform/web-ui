@@ -61,19 +61,24 @@
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'event.flow_id')">
-                    <mat-form-field class="full-width" color="accent">
-                      <input matInput placeholder="Event-Flow-Id" [(ngModel)]="input.value" required>
+                    <mat-form-field class="full-width">
+                      <mat-label>Event-Flow</mat-label>
+                      <mat-select [(ngModel)]="input.value">
+                        <mat-option *ngFor="let flow of eventFlows" [value]="flow._id">
+                          {{flow.name}}
+                        </mat-option>
+                      </mat-select>
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'event.value')">
                     <mat-form-field class="full-width" color="accent">
-                      <input matInput placeholder="Event-Value" [(ngModel)]="input.value" required>
+                      <input matInput placeholder="Event-Value" [(ngModel)]="input.value">
                     </mat-form-field>
                   </div>
                   <ng-container *ngFor="let parameter of getProcessTaskParameter(taskId)">
                     <div *ngIf="processTaskMatches(input, taskId, 'parameter.'+parameter)">
                       <mat-form-field class="full-width" color="accent">
-                        <input matInput placeholder="{{parameter}}" [(ngModel)]="input.value" required>
+                        <input matInput placeholder="{{parameter}}" [(ngModel)]="input.value">
                       </mat-form-field>
                     </div>
                   </ng-container>

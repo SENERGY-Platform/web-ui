@@ -21,6 +21,8 @@ import {ProcessRepoService} from '../../../../processes/process-repo/shared/proc
 import {DeploymentsService} from '../../../../processes/deployments/shared/deployments.service';
 import {ProcessModel} from '../../../../processes/process-repo/shared/process.model';
 import {V2DeploymentsPreparedModel} from '../../../../processes/deployments/shared/deployments-prepared-v2.model';
+import {FlowRepoService} from '../../../../data/flow-repo/shared/flow-repo.service';
+import {FlowModel} from '../../../../data/flow-repo/shared/flow.model';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -31,6 +33,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     result: SmartServiceTaskDescription;
     tabs: string[] = ["process_deployment", "analytics", "export", "import"]
 
+    eventFlows: FlowModel[] | null = null
     processModels: ProcessModel[] | null = null
     selectedProcessModelPreparation: V2DeploymentsPreparedModel | null = null
     knownInputValues = new Map<string, SmartServiceInputsDescription>();
@@ -39,6 +42,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
         private processRepo: ProcessRepoService,
         private processDeployment: DeploymentsService,
+        private flowService: FlowRepoService,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription },
     ) {
         if(!dialogParams.info.topic) {
@@ -92,6 +96,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                             }
                         }
                         if(element.message_event){
+                            this.ensureEventFlowList();
                             const selectionKey = "process_deployment."+element.bpmn_id+".selection";
                             this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
                             const eventFlowKey = "process_deployment."+element.bpmn_id+".event.flow_id";
@@ -105,6 +110,14 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                         }
                     })
                 }
+            })
+        }
+    }
+
+    ensureEventFlowList(){
+        if(!this.eventFlows) {
+            this.flowService.getFlows("", 9999, 0, "name", "asc").subscribe(flows => {
+                this.eventFlows = flows.flows;
             })
         }
     }
