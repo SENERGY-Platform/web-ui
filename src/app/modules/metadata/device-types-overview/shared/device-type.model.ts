@@ -131,6 +131,7 @@ export interface DeviceTypeCharacteristicsModel {
     rdf_type?: string;
     min_value?: number;
     max_value?: number;
+    allowed_values?: any[];
     value?: string | boolean | number;
     sub_characteristics?: DeviceTypeCharacteristicsModel[] | null;
 }

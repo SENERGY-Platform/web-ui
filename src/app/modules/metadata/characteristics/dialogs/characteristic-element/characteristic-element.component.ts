@@ -44,6 +44,7 @@ export class CharacteristicElementComponent implements OnInit {
         rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
         min_value: undefined,
         max_value: undefined,
+        allowed_values: [],
         value: undefined,
         sub_characteristics: [],
     });
@@ -69,6 +70,7 @@ export class CharacteristicElementComponent implements OnInit {
         target.rdf_type = source.rdf_type;
         target.min_value = source.min_value;
         target.max_value = source.max_value;
+        target.allowed_values = source.allowed_values;
         target.value = source.value;
         target.sub_characteristics = JSON.parse(JSON.stringify(source.sub_characteristics));
     }
@@ -92,9 +94,11 @@ export class CharacteristicElementComponent implements OnInit {
                 value.value = value.value ? value.value === 'true' : undefined;
                 break;
             }
+            console.log(value);
             this.valueChange.emit(value);
         });
         this.form.get('type')?.valueChanges.subscribe((_) => {
+            this.form.get('allowed_values')?.setValue([]);
             if (this.isNumeric()) {
                 this.form.get('sub_characteristics')?.setValue([]);
             }
@@ -108,6 +112,7 @@ export class CharacteristicElementComponent implements OnInit {
         });
     }
 
+
     addSubCharacteristic() {
         const newModel = {
             name: '',
@@ -116,6 +121,7 @@ export class CharacteristicElementComponent implements OnInit {
             rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
             min_value: undefined,
             max_value: undefined,
+            allowed_values: [],
             value: undefined,
             sub_characteristics: [],
             valid: false,
@@ -161,6 +167,14 @@ export class CharacteristicElementComponent implements OnInit {
         );
     }
 
+    isBool(): boolean {
+        return this.form.get('type')?.value === 'https://schema.org/Boolean';
+    }
+
+    isText(): boolean {
+        return this.form.get('type')?.value === 'https://schema.org/Text';
+    }
+
     isNumeric(): boolean {
         return this.form.get('type')?.value === 'https://schema.org/Integer' || this.form.get('type')?.value === 'https://schema.org/Float';
     }
@@ -178,6 +192,10 @@ export class CharacteristicElementComponent implements OnInit {
 
     showValue() {
         return this.form.get('type')?.value.length > 0 && !this.isStructureOrList();
+    }
+
+    showAllowedValues(){
+        return this.isText() || this.isNumeric();
     }
 
     deleteSubCharacteristic(node: DeviceTypeCharacteristicsModel) {
@@ -221,5 +239,40 @@ export class CharacteristicElementComponent implements OnInit {
 
     private setSubCharacteristics(subs: DeviceTypeCharacteristicsModel[]) {
         this.form.get('sub_characteristics')?.setValue(subs);
+    }
+
+    get allowedValues(): any[] {
+        return this.form.get('allowed_values')?.value;
+    }
+
+    set allowedValues(value: any[]) {
+        this.form.get('allowed_values')?.setValue(value);
+    }
+
+    refreshFormAllowedValues() {
+        this.form.get('allowed_values')?.setValue(this.form.get('allowed_values')?.value);
+    }
+
+    addAllowedValue() {
+        let newValue;
+        if(this.isNumeric()) {
+            newValue = 0;
+        }
+        if(this.isText()) {
+            newValue = "";
+        }
+        let newList = JSON.parse(JSON.stringify(this.form.get('allowed_values')?.value || []));
+        newList.push(newValue);
+        this.form.get('allowed_values')?.setValue(newList);
+    }
+
+    removeAllowedValue(index: number) {
+        let newList = JSON.parse(JSON.stringify(this.form.get('allowed_values')?.value || []));
+        newList.splice(index, 1);
+        this.form.get('allowed_values')?.setValue(newList);
+    }
+
+    trackByFn(index: number, _: any): number {
+        return index;
     }
 }

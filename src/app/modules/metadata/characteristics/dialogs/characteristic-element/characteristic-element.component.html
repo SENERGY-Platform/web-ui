@@ -49,6 +49,30 @@
         <input [type]="getType()" matInput placeholder="Value" formControlName="value">
     </mat-form-field>
 
+    <mat-accordion *ngIf="showAllowedValues()">
+        <mat-expansion-panel>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    Allowed Values
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+                <div *ngFor="let _ of allowedValues; let i = index; trackBy: trackByFn" class="allowed-value-container">
+                    <mat-form-field *ngIf="showValue()" appearance="outline" color="accent" class="full-width">
+                        <input [type]="getType()" matInput [(ngModel)]="allowedValues[i]" [ngModelOptions]="{standalone: true}" (ngModelChange)="refreshFormAllowedValues()">
+                        <button mat-icon-button matSuffix (click)="removeAllowedValue(i)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </mat-form-field>
+
+                </div>
+                <button mat-icon-button (click)="addAllowedValue()">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+
     <div *ngIf="isStructureOrList()">
         <div>
             <button mat-stroked-button color="accent" (click)="addSubCharacteristic()">
