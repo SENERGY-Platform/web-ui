@@ -26,6 +26,14 @@
     min-height: 54px;
 }
 
+.designs-container {
+    height: 100%;
+}
+
+.designs-container > div{
+    height: 100%;
+}
+
 .main-panel {
     height: calc(100% - 106px);
     overflow-y: auto;
