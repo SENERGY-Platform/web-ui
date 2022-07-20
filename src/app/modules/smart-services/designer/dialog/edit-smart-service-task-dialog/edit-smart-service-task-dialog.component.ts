@@ -33,7 +33,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     result: SmartServiceTaskDescription;
     tabs: string[] = ["process_deployment", "analytics", "export", "import"]
 
-    eventFlows: FlowModel[] | null = null
+    flows: FlowModel[] | null = null
     processModels: ProcessModel[] | null = null
     selectedProcessModelPreparation: V2DeploymentsPreparedModel | null = null
     knownInputValues = new Map<string, SmartServiceInputsDescription>();
@@ -56,8 +56,13 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     ngOnInit() {}
 
     ensureResultFields() {
-        if(!this.processModels && this.result.topic == "process_deployment") {
-            this.processRepo.getProcessModels("", 9999, 0, "date", "asc", null).subscribe(value => this.processModels = value)
+        let processDeploymentTopic = this.tabs[0];
+        if(!this.processModels && this.result.topic == processDeploymentTopic) {
+            this.processRepo.getProcessModels("", 9999, 0, "date", "asc", null).subscribe(value => this.processModels = value);
+        }
+        let analyticsTopic = this.tabs[1];
+        if(this.result.topic == analyticsTopic) {
+            this.ensureFlowList();
         }
     }
 
@@ -96,7 +101,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                             }
                         }
                         if(element.message_event){
-                            this.ensureEventFlowList();
+                            this.ensureFlowList();
                             const selectionKey = "process_deployment."+element.bpmn_id+".selection";
                             this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
                             const eventFlowKey = "process_deployment."+element.bpmn_id+".event.flow_id";
@@ -114,10 +119,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         }
     }
 
-    ensureEventFlowList(){
-        if(!this.eventFlows) {
+    ensureFlowList(){
+        if(!this.flows) {
             this.flowService.getFlows("", 9999, 0, "name", "asc").subscribe(flows => {
-                this.eventFlows = flows.flows;
+                this.flows = flows.flows;
             })
         }
     }
@@ -169,6 +174,73 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         return input.name == "process_deployment."+taskId+"."+suffix
     }
 
+    /******************************
+     *      Analytics
+     ******************************/
+
+    analyticsFlowIdFieldName = "analytics.flow_id"
+    get analyticsFlowId(): string {
+        return this.getFieldValue(this.analyticsFlowIdFieldName, "text", "")
+    }
+
+    set analyticsFlowId(value: string) {
+        this.setFieldValue(this.analyticsFlowIdFieldName, "text", value)
+        const flow = this.flows?.find(e => e._id == value);
+        const flowName = flow?.name;
+        if (flowName) {
+            this.analyticsPipelineName = flowName;
+        }
+        if(flow){
+            this.ensureAnalyticsFlowParameter(flow)
+        }
+    }
+
+    private ensureAnalyticsFlowParameter(flow: FlowModel) {
+        console.log("TODO:", flow) //TODO
+    }
+
+    analyticsPipelineNameFieldName = "analytics.name"
+    get analyticsPipelineName(): string {
+        return this.getFieldValue(this.analyticsPipelineNameFieldName, "text", "")
+    }
+
+    set analyticsPipelineName(value: string) {
+        this.setFieldValue(this.analyticsPipelineNameFieldName, "text", value)
+    }
+
+    analyticsPipelineDescFieldName = "analytics.desc"
+    get analyticsPipelineDesc(): string {
+        return this.getFieldValue(this.analyticsPipelineDescFieldName, "text", "")
+    }
+
+    set analyticsPipelineDesc(value: string) {
+        this.setFieldValue(this.analyticsPipelineDescFieldName, "text", value)
+    }
+
+    analyticsWindowTimeFieldName = "analytics.window_time"
+    get analyticsWindowTime(): number {
+        const temp = parseInt(this.getFieldValue(this.analyticsWindowTimeFieldName, "text", "30"));
+        if (Number.isNaN(temp)) {
+            return 30;
+        }
+        if(Number.isInteger(temp)) {
+            return temp;
+        }
+        console.error("WARNING: unexpected state in analyticsWindowTime()")
+        console.trace()
+        return 30;
+    }
+
+    set analyticsWindowTime(value: number) {
+        this.setFieldValue(this.analyticsWindowTimeFieldName, "text", value.toString())
+    }
+
+
+
+    /******************************
+     *      Util
+     ******************************/
+
     getFieldValue(name: string, type: string, defaultValue: string): string {
         if (!this.result.inputs) {
             this.result.inputs = [];
@@ -201,7 +273,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     ok(): void {
-        this.result.inputs = this.result.inputs.filter(e => e.name.startsWith(this.result.topic+".")) //filter unused inputs
-        this.dialogRef.close(this.result);
+        let result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; //prevent changes to the result after filtering
+        const temp = result.inputs.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
+        result.inputs = temp;
+        this.dialogRef.close(result);
     }
 }

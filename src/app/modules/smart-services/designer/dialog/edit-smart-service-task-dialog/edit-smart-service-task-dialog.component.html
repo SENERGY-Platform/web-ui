@@ -64,7 +64,7 @@
                     <mat-form-field class="full-width">
                       <mat-label>Event-Flow</mat-label>
                       <mat-select [(ngModel)]="input.value">
-                        <mat-option *ngFor="let flow of eventFlows" [value]="flow._id">
+                        <mat-option *ngFor="let flow of flows" [value]="flow._id">
                           {{flow.name}}
                         </mat-option>
                       </mat-select>
@@ -91,7 +91,38 @@
     </mat-tab>
     <mat-tab label="Analytics">
       <div class="smart-service-task-tab">
-
+        <div class="smart-service-task-tab">
+          <div>
+            <mat-form-field class="full-width">
+              <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field class="full-width">
+              <mat-label>Flow</mat-label>
+              <mat-select [(ngModel)]="analyticsFlowId">
+                <mat-option *ngFor="let flow of flows" [value]="flow._id">
+                  {{flow.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field class="full-width" color="accent">
+              <input matInput placeholder="Pipeline-Name" [(ngModel)]="analyticsPipelineName" required>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field class="full-width" color="accent">
+              <input matInput placeholder="Pipeline-Description" [(ngModel)]="analyticsPipelineDesc">
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field class="full-width" color="accent">
+              <input matInput placeholder="Pipeline Window-Time" [(ngModel)]="analyticsWindowTime" required>
+            </mat-form-field>
+          </div>
+        </div>
       </div>
     </mat-tab>
     <mat-tab label="Export">
