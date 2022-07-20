@@ -41,7 +41,8 @@
         </div>
 
         <div>
-          <mat-accordion>
+          <mat-card>
+            <mat-accordion>
             <mat-expansion-panel *ngFor="let taskId of processTaskIds">
               <mat-expansion-panel-header>
                 <mat-panel-title>
@@ -86,6 +87,7 @@
               </div>
             </mat-expansion-panel>
           </mat-accordion>
+          </mat-card>
         </div>
       </div>
     </mat-tab>
@@ -121,6 +123,49 @@
             <mat-form-field class="full-width" color="accent">
               <input matInput placeholder="Pipeline Window-Time" [(ngModel)]="analyticsWindowTime" required>
             </mat-form-field>
+          </div>
+
+          <div>
+            <mat-card>
+              <mat-accordion>
+                <mat-expansion-panel *ngFor="let flowInput of currentParsedFlows">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      {{flowInput.name}}
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div>
+                    <div *ngFor="let port of flowInput.inPorts">
+                      <mat-divider [inset]="true"></mat-divider>
+                      <h4 class="mat-h4">{{port}}</h4>
+                      <ng-container *ngFor="let input of result.inputs">
+                        <div *ngIf="analyticsInputMatchesIotSelection(input, flowInput.id, port)">
+                          <mat-form-field class="full-width" color="accent">
+                            <input matInput placeholder="IoT-Selection" [(ngModel)]="input.value" required>
+                          </mat-form-field>
+                        </div>
+                        <div *ngIf="analyticsInputMatchesIotCriteria(input, flowInput.id, port)">
+                          <mat-form-field class="full-width" color="accent">
+                            <input matInput placeholder="IoT-Criteria" [(ngModel)]="input.value" required>
+                          </mat-form-field>
+                        </div>
+                      </ng-container>
+                    </div>
+                    <mat-divider [inset]="true"></mat-divider>
+                    <h4 class="mat-h4">Configurations</h4>
+                    <div *ngFor="let config of flowInput.config">
+                      <ng-container *ngFor="let input of result.inputs">
+                        <div *ngIf="analyticsInputMatchesIotConfig(input, flowInput.id, config.name)">
+                          <mat-form-field class="full-width" color="accent">
+                            <input matInput placeholder="{{config.name}}" [(ngModel)]="input.value">
+                          </mat-form-field>
+                        </div>
+                      </ng-container>
+                    </div>
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+            </mat-card>
           </div>
         </div>
       </div>

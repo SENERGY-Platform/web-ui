@@ -23,6 +23,9 @@ import {ProcessModel} from '../../../../processes/process-repo/shared/process.mo
 import {V2DeploymentsPreparedModel} from '../../../../processes/deployments/shared/deployments-prepared-v2.model';
 import {FlowRepoService} from '../../../../data/flow-repo/shared/flow-repo.service';
 import {FlowModel} from '../../../../data/flow-repo/shared/flow.model';
+import {FlowEngineService} from '../../../../data/flow-repo/shared/flow-engine.service';
+import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
+import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -38,11 +41,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     selectedProcessModelPreparation: V2DeploymentsPreparedModel | null = null
     knownInputValues = new Map<string, SmartServiceInputsDescription>();
 
+    parsedFlows: Map<string, ParseModel[]> = new Map<string, ParseModel[]>();
+    currentParsedFlows: ParseModel[] = []
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
         private processRepo: ProcessRepoService,
         private processDeployment: DeploymentsService,
         private flowService: FlowRepoService,
+        private flowParser: ParserService,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription },
     ) {
         if(!dialogParams.info.topic) {
@@ -123,6 +130,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if(!this.flows) {
             this.flowService.getFlows("", 9999, 0, "name", "asc").subscribe(flows => {
                 this.flows = flows.flows;
+                const currentFlowId = this.analyticsFlowId;
+                if(currentFlowId){
+                    this.ensureAnalyticsFlowParameter(currentFlowId)
+                }
             })
         }
     }
@@ -170,7 +181,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.setFieldValue(this.processProcessNameFieldName, "text", value)
     }
 
-    processTaskMatches(input: SmartServiceInputsDescription, taskId: string, suffix: string) {
+    processTaskMatches(input: SmartServiceInputsDescription, taskId: string, suffix: string): boolean  {
         return input.name == "process_deployment."+taskId+"."+suffix
     }
 
@@ -190,13 +201,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if (flowName) {
             this.analyticsPipelineName = flowName;
         }
-        if(flow){
-            this.ensureAnalyticsFlowParameter(flow)
-        }
-    }
-
-    private ensureAnalyticsFlowParameter(flow: FlowModel) {
-        console.log("TODO:", flow) //TODO
+        this.ensureAnalyticsFlowParameter(value);
     }
 
     analyticsPipelineNameFieldName = "analytics.name"
@@ -235,7 +240,53 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.setFieldValue(this.analyticsWindowTimeFieldName, "text", value.toString())
     }
 
+    private ensureAnalyticsFlowParameter(flowId: string) {
+        let f = (inputs: ParseModel[]) => {
+            this.currentParsedFlows = inputs;
+            this.result.inputs.forEach(e => this.knownInputValues.set(e.name, e));
+            this.result.inputs = [
+                this.knownInputValues.get(this.analyticsFlowIdFieldName) || {name:this.analyticsFlowIdFieldName, value: flowId, type: "text"},
+                this.knownInputValues.get(this.analyticsPipelineNameFieldName) || {name:this.analyticsPipelineNameFieldName, value: "", type: "text"},
+                this.knownInputValues.get(this.analyticsPipelineDescFieldName) || {name:this.analyticsPipelineDescFieldName, value: "", type: "text"},
+                this.knownInputValues.get(this.analyticsWindowTimeFieldName) || {name:this.analyticsWindowTimeFieldName, value: "30", type: "text"},
+            ];
+            inputs.forEach(input => {
+                input.inPorts.forEach(port => {
+                    const selectionKey = "analytics.selection."+input.id+"."+port;
+                    this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
+                    const criteriaKey = "analytics.criteria."+input.id+"."+port;
+                    this.result.inputs.push(this.knownInputValues.get(criteriaKey) || {name:criteriaKey, value: "[]", type: "text"});
+                })
+                input.config.forEach(config => {
+                    const configKey = "analytics.conf."+input.id+"."+config.name;
+                    this.result.inputs.push(this.knownInputValues.get(configKey) || {name:configKey, value: "", type: "text"});
+                })
+            })
+        }
+        if(this.parsedFlows.has(flowId)){
+            const parsed = this.parsedFlows.get(flowId);
+            if(parsed){
+                f(parsed);
+            }
+        } else {
+            this.flowParser.getInputs(flowId).subscribe(value =>{
+                this.parsedFlows.set(flowId, value);
+                f(value);
+            })
+        }
+    }
 
+    analyticsInputMatchesIotSelection(input: SmartServiceInputsDescription, flowInputId: string, port: string): boolean {
+        return input.name == "analytics.selection."+flowInputId+"."+port
+    }
+
+    analyticsInputMatchesIotCriteria(input: SmartServiceInputsDescription, flowInputId: string, port: string): boolean {
+        return input.name == "analytics.criteria."+flowInputId+"."+port
+    }
+
+    analyticsInputMatchesIotConfig(input: SmartServiceInputsDescription, flowInputId: string, configName: string): boolean {
+        return input.name == "analytics.conf."+flowInputId+"."+configName
+    }
 
     /******************************
      *      Util
