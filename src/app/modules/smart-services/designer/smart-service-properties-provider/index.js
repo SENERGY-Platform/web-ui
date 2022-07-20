@@ -100,7 +100,6 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                     serviceTask.name = taskInfo.name
 
                     var inputs = [];
-
                     taskInfo.inputs.forEach(input => {
                         switch(input.type) {
                             case "script":
@@ -112,7 +111,23 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                         }
                     })
 
-                    var inputOutput = createInputOutput(bpmnjs, inputs, []);
+                    var outputs = [];
+                    switch (serviceTask.topic){
+                        case "process_deployment":
+                            outputs = [createTextOutputParameter(bpmnjs, element.businessObject.id+"_process_deployment_id", "${process_deployment_id}")];
+                            break;
+                        case "analytics":
+                            outputs = [createTextOutputParameter(bpmnjs, element.businessObject.id+"_pipeline_id", "${pipeline_id}")];
+                            break;
+                        case "export":
+                            outputs = [createTextOutputParameter(bpmnjs, element.businessObject.id+"_export_id", "${export_id}")];
+                            break;
+                        case "import":
+                            outputs = [createTextOutputParameter(bpmnjs, element.businessObject.id+"_import_id", "${import_id}")];
+                            break;
+                    }
+
+                    var inputOutput = createInputOutput(bpmnjs, inputs, outputs);
                     setExtentionsElement(bpmnjs, serviceTask, inputOutput);
 
                     refresh();
@@ -247,6 +262,26 @@ var createScriptInputParameter = function (bpmnjs, name, value) {
 
 var createTextInputParameter = function (bpmnjs, name, value) {
     return createInputParameter(bpmnjs, name, value, null)
+};
+
+var createOutputParameter = function (bpmnjs, name, value, definition) {
+    var moddle = bpmnjs.get('moddle');
+    if (value !== null) {
+        return moddle.create('camunda:OutputParameter', {
+            name: name,
+            value: value
+        });
+    }
+    if (definition) {
+        return moddle.create('camunda:OutputParameter', {
+            name: name,
+            definition: definition
+        });
+    }
+};
+
+var createTextOutputParameter = function (bpmnjs, name, value) {
+    return createOutputParameter(bpmnjs, name, value, null)
 };
 
 SmartServicePropertiesProvider.$inject = [
