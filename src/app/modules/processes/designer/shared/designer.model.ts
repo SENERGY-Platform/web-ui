@@ -24,6 +24,8 @@ export interface BpmnParameter {
 }
 
 interface BpmnExtensionElementsValue {
+    $type: string;
+    fields?: FormField[];
     outputParameters: BpmnParameter[];
     inputParameters: BpmnParameter[];
 }
@@ -33,6 +35,8 @@ interface BpmnExtensionElements {
 }
 
 interface BpmnBusinessObject {
+    $type: string;
+    topic?: string;
     extensionElements: BpmnExtensionElements;
 }
 
@@ -78,4 +82,25 @@ export interface DesignerProcessModel {
     bpmn_xml: string;
     svgXML: string;
     _id: string;
+}
+
+export interface FormField {
+    id: string;
+    label: string;
+    type: string;
+    properties: FormFieldPropertiesWrapper
+}
+
+export interface FormFieldPropertiesWrapper {
+    values: FormFieldProperty[]
+}
+
+export interface FormFieldProperty {
+    $type: string;
+    id: string;
+    value: string;
+}
+
+export interface BpmnParameterWithLabel extends BpmnParameter {
+    label?: string;
 }

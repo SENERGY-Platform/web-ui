@@ -94,7 +94,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
         id: "smart-service-task-button",
         html: "<button class='bpmn-iot-button' data-action='editSmartServiceTask'>Edit Smart-Service Task</button>",
         editSmartServiceTask: function (element, node) {
-            bpmnjs.designerCallbacks.openTaskEditDialog(getTaskInfoFromElement(element), function (taskInfo) {
+            bpmnjs.designerCallbacks.openTaskEditDialog(getTaskInfoFromElement(element), element, function (taskInfo) {
                 toExternalServiceTask(bpmnFactory, replace, selection, element, function (serviceTask, element) {
                     serviceTask.topic = taskInfo.topic;
                     serviceTask.name = taskInfo.name

@@ -26,6 +26,7 @@ import {FlowModel} from '../../../../data/flow-repo/shared/flow.model';
 import {FlowEngineService} from '../../../../data/flow-repo/shared/flow-engine.service';
 import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
 import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
+import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../processes/designer/shared/designer.model';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -44,13 +45,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     parsedFlows: Map<string, ParseModel[]> = new Map<string, ParseModel[]>();
     currentParsedFlows: ParseModel[] = []
 
+    availableProcessVariables: Map<string,BpmnParameterWithLabel[]> = new Map();
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
         private processRepo: ProcessRepoService,
         private processDeployment: DeploymentsService,
         private flowService: FlowRepoService,
         private flowParser: ParserService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription },
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription, element: BpmnElement},
     ) {
         if(!dialogParams.info.topic) {
             dialogParams.info.topic = this.tabs[0];
@@ -58,6 +61,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.result = dialogParams.info;
         this.init = dialogParams.info;
         this.ensureResultFields();
+        this.availableProcessVariables = this.getIncomingOutputs(dialogParams.element);
     }
 
     ngOnInit() {}
@@ -317,6 +321,59 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if(!found) {
             this.result.inputs.push({name: name, value: value, type: type})
         }
+    }
+
+    getIncomingOutputs(element: BpmnElement, done: BpmnElement[] = []): Map<string,BpmnParameterWithLabel[]> {
+        let result: Map<string,BpmnParameter[]> = new Map<string, BpmnParameterWithLabel[]>();
+        if (done.indexOf(element) !== -1) {
+            return result;
+        }
+
+        let add = (key: string, value: BpmnParameterWithLabel[]) => {
+            let temp = result.get(key) || [];
+            temp = temp.concat(value);
+            result.set(key, temp);
+        }
+
+        done.push(element);
+        for (let index = 0; index < element.incoming.length; index++) {
+            const incoming = element.incoming[index].source;
+            if (
+                incoming.businessObject.extensionElements &&
+                incoming.businessObject.extensionElements.values &&
+                incoming.businessObject.extensionElements.values[0] &&
+                incoming.businessObject.extensionElements.values[0].outputParameters &&
+                incoming.businessObject.topic
+            ) {
+                const topic = incoming.businessObject.topic;
+                add(topic, incoming.businessObject.extensionElements.values[0].outputParameters)
+            }
+            if (
+                incoming.businessObject.$type == "bpmn:StartEvent" &&
+                incoming.businessObject.extensionElements.values &&
+                incoming.businessObject.extensionElements.values[0] &&
+                incoming.businessObject.extensionElements.values[0].$type == "camunda:FormData"
+            ) {
+                let formFields = incoming.businessObject.extensionElements.values[0].fields;
+                formFields?.forEach(field => {
+                    add("form_fields", [{name: field.id, label: field.label, value: ""}]);
+                    let iotProperty = field.properties.values.find(property => property.id == "iot") ;
+                    if(iotProperty){
+                        add("iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                        iotProperty.value.split(",").forEach(iotKind => {
+                            add(iotKind.trim()+"_iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                        })
+                    }else {
+                        add("value_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                    }
+                })
+            }
+            let sub = this.getIncomingOutputs(incoming, done);
+            sub.forEach((value, topic) => {
+                add(topic, value)
+            })
+        }
+        return result;
     }
 
     close(): void {
