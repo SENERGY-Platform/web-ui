@@ -71,10 +71,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if(!this.processModels && this.result.topic == processDeploymentTopic) {
             this.processRepo.getProcessModels("", 9999, 0, "date", "asc", null).subscribe(value => this.processModels = value);
         }
-        let analyticsTopic = this.tabs[1];
-        if(this.result.topic == analyticsTopic) {
-            this.ensureFlowList();
-        }
+        this.ensureFlowList();
     }
 
     get activeIndex(): number {

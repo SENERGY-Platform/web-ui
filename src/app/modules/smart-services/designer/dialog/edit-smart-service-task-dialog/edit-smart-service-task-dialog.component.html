@@ -53,7 +53,15 @@
                 <ng-container *ngFor="let input of result.inputs">
                   <div *ngIf="processTaskMatches(input, taskId, 'selection')">
                     <mat-form-field class="full-width" color="accent">
-                      <input matInput placeholder="IoT-Selection" [(ngModel)]="input.value" required>
+                      <mat-label>IoT-Selection</mat-label>
+                      <mat-select [(ngModel)]="input.value">
+                        <mat-option *ngFor="let variable of availableProcessVariables.get('iot_form_fields') || []" [value]="'${'+variable.name+'}'">
+                          {{variable.label || variable.name}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="full-width" color="accent">
+                      <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'time')">
@@ -141,7 +149,15 @@
                       <ng-container *ngFor="let input of result.inputs">
                         <div *ngIf="analyticsInputMatchesIotSelection(input, flowInput.id, port)">
                           <mat-form-field class="full-width" color="accent">
-                            <input matInput placeholder="IoT-Selection" [(ngModel)]="input.value" required>
+                            <mat-label>IoT-Selection</mat-label>
+                            <mat-select [(ngModel)]="input.value">
+                              <mat-option *ngFor="let variable of availableProcessVariables.get('iot_form_fields') || []" [value]="'${'+variable.name+'}'">
+                                {{variable.label || variable.name}}
+                              </mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                          <mat-form-field class="full-width" color="accent">
+                            <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>
                           </mat-form-field>
                         </div>
                         <div *ngIf="analyticsInputMatchesIotCriteria(input, flowInput.id, port)">
