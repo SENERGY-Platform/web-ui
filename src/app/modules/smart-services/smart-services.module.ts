@@ -54,6 +54,9 @@ import {
     EditSmartServiceTaskDialogComponent
 } from './designer/dialog/edit-smart-service-task-dialog/edit-smart-service-task-dialog.component';
 import {MatExpansionModule} from '@angular/material/expansion';
+import {
+    EditSmartServiceInputDialogComponent
+} from './designer/dialog/edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
 
 const designs = {
     path: 'smart-services/designs',
@@ -128,7 +131,8 @@ const designer = {
         SmartServiceReleasesComponent,
         SmartServiceDesignsComponent,
         SmartServiceDesignerComponent,
-        EditSmartServiceTaskDialogComponent
+        EditSmartServiceTaskDialogComponent,
+        EditSmartServiceInputDialogComponent
     ],
 })
 export class SmartServicesModule {}

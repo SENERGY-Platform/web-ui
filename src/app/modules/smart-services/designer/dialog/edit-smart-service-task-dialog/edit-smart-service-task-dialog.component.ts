@@ -16,7 +16,7 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {SmartServiceInputsDescription, SmartServiceTaskDescription} from '../../shared/designer.model';
+import {SmartServiceTaskInputDescription, SmartServiceTaskDescription} from '../../shared/designer.model';
 import {ProcessRepoService} from '../../../../processes/process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../../../../processes/deployments/shared/deployments.service';
 import {ProcessModel} from '../../../../processes/process-repo/shared/process.model';
@@ -40,7 +40,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     flows: FlowModel[] | null = null
     processModels: ProcessModel[] | null = null
     selectedProcessModelPreparation: V2DeploymentsPreparedModel | null = null
-    knownInputValues = new Map<string, SmartServiceInputsDescription>();
+    knownInputValues = new Map<string, SmartServiceTaskInputDescription>();
 
     parsedFlows: Map<string, ParseModel[]> = new Map<string, ParseModel[]>();
     currentParsedFlows: ParseModel[] = []
@@ -182,7 +182,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.setFieldValue(this.processProcessNameFieldName, "text", value)
     }
 
-    processTaskMatches(input: SmartServiceInputsDescription, taskId: string, suffix: string): boolean  {
+    processTaskMatches(input: SmartServiceTaskInputDescription, taskId: string, suffix: string): boolean  {
         return input.name == "process_deployment."+taskId+"."+suffix
     }
 
@@ -277,15 +277,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         }
     }
 
-    analyticsInputMatchesIotSelection(input: SmartServiceInputsDescription, flowInputId: string, port: string): boolean {
+    analyticsInputMatchesIotSelection(input: SmartServiceTaskInputDescription, flowInputId: string, port: string): boolean {
         return input.name == "analytics.selection."+flowInputId+"."+port
     }
 
-    analyticsInputMatchesIotCriteria(input: SmartServiceInputsDescription, flowInputId: string, port: string): boolean {
+    analyticsInputMatchesIotCriteria(input: SmartServiceTaskInputDescription, flowInputId: string, port: string): boolean {
         return input.name == "analytics.criteria."+flowInputId+"."+port
     }
 
-    analyticsInputMatchesIotConfig(input: SmartServiceInputsDescription, flowInputId: string, configName: string): boolean {
+    analyticsInputMatchesIotConfig(input: SmartServiceTaskInputDescription, flowInputId: string, configName: string): boolean {
         return input.name == "analytics.conf."+flowInputId+"."+configName
     }
 

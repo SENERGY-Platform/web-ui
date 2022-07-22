@@ -15,6 +15,7 @@ var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
 var extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper');
 var ImplementationTypeHelper = require('bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper');
 const {isEventSubProcess} = require("bpmn-js/lib/util/DiUtil");
+const {property} = require("lodash");
 const typeString = "https://schema.org/Text";
 const typeInteger = "https://schema.org/Integer";
 const typeFloat = "https://schema.org/Float";
@@ -28,6 +29,7 @@ function SmartServicePropertiesProvider(eventBus, canvas, bpmnFactory, elementRe
         var camundaTabs = camunda.getTabs(element);
         camundaTabs[0].groups.unshift(createDescriptionGroup(element));
         camundaTabs[0].groups.unshift(createTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
+        camundaTabs[0].groups.unshift(createSmartServiceInputsGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
         return camundaTabs;
     };
 }
@@ -38,6 +40,10 @@ var isTask = function(element){
 
 var isEvent = function(element) {
     return element.type == "bpmn:StartEvent"  || element.type == "bpmn:IntermediateCatchEvent";
+};
+
+var isStartEvent = function(element) {
+    return is(element, "bpmn:StartEvent");
 };
 
 var isMsgEvent = function (element) {
@@ -83,6 +89,43 @@ function createTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, select
     };
     createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
     return group;
+}
+
+function createSmartServiceInputsGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection){
+    var group = {
+        id: 'smart_service_inputs_group',
+        label: 'Smart-Service Inputs',
+        entries: [],
+        enabled: isStartEvent()
+    };
+    createSmartServiceInputEntries(group, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    return group;
+}
+
+function createSmartServiceInputEntries(group, element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+    var refresh = function () {
+        eventBus.fire('elements.changed', {elements: [element]});
+    };
+
+    group.entries.push({
+        id: "smart-service-inputs-button",
+        html: "<button class='bpmn-iot-button' data-action='editSmartServiceInputs'>Edit Smart-Service Inputs</button>",
+        editSmartServiceInputs: function (element, node) {
+            bpmnjs.designerCallbacks.openSmartServiceInputsEditDialog(getSmartServiceInputsForElement(element), element, function (info) {
+                var fields = info.inputs.map(fieldDesc => {
+                    return createField(bpmnjs, fieldDesc.id, fieldDesc.label, fieldDesc.type, fieldDesc.default_value, createProperties(bpmnjs, fieldDesc.properties.map(property => {
+                        return createProperty(bpmnjs, property.id, property.value);
+                    })));
+                })
+
+                var formData = createFormData(bpmnjs, fields);
+                setExtentionsElement(bpmnjs, element.businessObject, formData);
+
+                refresh();
+            });
+            return true;
+        }
+    });
 }
 
 function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
@@ -199,6 +242,28 @@ function toExternalServiceTask(bpmnFactory, replace, selection, element, additio
     }
 }
 
+var getSmartServiceInputsForElement = function (element) {
+    var inputs = []; //[{id:"", label:"", type:"", default_value:"", properties:[{id:"", value:""}]}]
+    if (element.businessObject.extensionElements && element.businessObject.extensionElements.values) {
+        const extensionValues = element.businessObject.extensionElements.values;
+        extensionValues[0].fields.forEach(field => {
+            var properties = [];
+            field.properties?.values?.forEach(property => {
+                properties.push({id: property.id, value: property.value})
+            })
+            inputs.push({
+                id: field.id,
+                label: field.label,
+                type: field.type,
+                properties: properties
+            })
+        })
+    }
+    return {
+        inputs: inputs
+    }
+}
+
 var getTaskInfoFromElement = function (element) {
     const topic = element.businessObject.topic || "";
     const name = element.businessObject.name || "";
@@ -283,6 +348,39 @@ var createOutputParameter = function (bpmnjs, name, value, definition) {
 var createTextOutputParameter = function (bpmnjs, name, value) {
     return createOutputParameter(bpmnjs, name, value, null)
 };
+
+var createFormData = function (bpmnjs, fields) {
+    var moddle = bpmnjs.get('moddle');
+    return moddle.create('camunda:FormData', {
+        fields: fields,
+    });
+};
+
+var createField = function (bpmnjs, id, label, type, defaultValue, properties) {
+    var moddle = bpmnjs.get('moddle');
+    return moddle.create('camunda:FormField', {
+        id: id,
+        label: label,
+        type: type,
+        defaultValue: defaultValue,
+        properties: properties,
+    });
+}
+
+var createProperty = function (bpmnjs, id, value) {
+    var moddle = bpmnjs.get('moddle');
+    return moddle.create('camunda:Property', {
+        id: id,
+        value: value
+    });
+}
+
+var createProperties = function (bpmnjs, properties) {
+    var moddle = bpmnjs.get('moddle');
+    return moddle.create('camunda:Properties', {
+        values: properties
+    });
+}
 
 SmartServicePropertiesProvider.$inject = [
     'eventBus',

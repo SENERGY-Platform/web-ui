@@ -18,11 +18,28 @@
 export interface SmartServiceTaskDescription {
     name: string;
     topic: string;
-    inputs: SmartServiceInputsDescription[]
+    inputs: SmartServiceTaskInputDescription[]
+}
+
+export interface SmartServiceTaskInputDescription {
+    name: string;
+    type: string; //"text" || "script"
+    value: string;
 }
 
 export interface SmartServiceInputsDescription {
-    name: string;
-    type: string; //"text" || "script"
+    inputs: SmartServiceInput[];
+}
+
+export interface SmartServiceInput {
+    id: string;
+    label: string;
+    type: string;
+    default_value: string;
+    properties: SmartServiceInputProperty[];
+}
+
+export interface SmartServiceInputProperty {
+    id: string;
     value: string;
 }
