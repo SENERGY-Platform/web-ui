@@ -55,10 +55,10 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
             if(input.description) {
                 properties.push({id: "description", value: input.description});
             }
-            if(input.iot_selectors) {
+            if(input.iot_selectors && input.iot_selectors.length > 0) {
                 properties.push({id: "iot", value: input.iot_selectors.join(",")});
             }
-            if(input.criteria_list) {
+            if(input.criteria_list && input.criteria_list.length > 0) {
                 properties.push({id: "criteria_list", value: JSON.stringify(input.criteria_list)});
             }
             if(input.entity_only) {
@@ -67,13 +67,13 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
             if(input.same_entity) {
                 properties.push({id: "same_entity", value: input.same_entity});
             }
-            if(input.order) {
+            if(input.order !== null && input.order !== undefined) {
                 properties.push({id: "order", value: input.order.toString()});
             }
             if(input.multiple) {
                 properties.push({id: "multiple", value: JSON.stringify(input.multiple)});
             }
-            if(input.options) {
+            if(input.options && input.options.length > 0) {
                 let obj: any = {};
                 input.options.forEach(element => {
                     obj[element.key] = element.value;
