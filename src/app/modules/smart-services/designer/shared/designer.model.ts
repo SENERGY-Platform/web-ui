@@ -35,7 +35,7 @@ export interface SmartServiceInput {
     id: string;
     label: string;
     type: string;
-    default_value: string;
+    default_value: any;
     properties: SmartServiceInputProperty[];
 }
 

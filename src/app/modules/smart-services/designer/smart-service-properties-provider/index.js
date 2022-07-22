@@ -255,6 +255,7 @@ var getSmartServiceInputsForElement = function (element) {
                 id: field.id,
                 label: field.label,
                 type: field.type,
+                default_value: field.defaultValue,
                 properties: properties
             })
         })
