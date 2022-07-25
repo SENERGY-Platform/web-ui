@@ -25,3 +25,11 @@ mat-dialog-actions button:not(:last-child) {
 .smart-service-input-tab{
     margin-top: 15px;
 }
+
+.edit-smart-service-input-dialog button {
+    margin-top: 15px;
+}
+
+.edit-smart-service-input-dialog {
+    min-width: 50vw;
+}

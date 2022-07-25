@@ -32,6 +32,14 @@ import {FlowEngineService} from '../../../../data/flow-repo/shared/flow-engine.s
 import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
 import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
 import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../processes/designer/shared/designer.model';
+import {AspectsPermSearchModel} from '../../../../metadata/aspects/shared/aspects-perm-search.model';
+import {FunctionsPermSearchModel} from '../../../../metadata/functions/shared/functions-perm-search.model';
+import {DeviceClassesPermSearchModel} from '../../../../metadata/device-classes/shared/device-classes-perm-search.model';
+import {FunctionsService} from '../../../../metadata/functions/shared/functions.service';
+import {AspectsService} from '../../../../metadata/aspects/shared/aspects.service';
+import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
+import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
+import {DeviceTypeAspectModel, DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './edit-smart-service-input-dialog.component.html',
@@ -40,10 +48,35 @@ import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../pr
 export class EditSmartServiceInputDialogComponent implements OnInit {
     abstract: AbstractInput[] = [];
 
+    functions: (FunctionsPermSearchModel | {name: string})[] = [];
+    deviceClasses: (DeviceClassesPermSearchModel | {name: string})[] = [];
+    nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceInputDialogComponent>,
+        private functionsService: FunctionsService,
+        private deviceTypesService: DeviceTypeService,
+        private deviceClassService: DeviceClassesService,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceInputsDescription, element: BpmnElement},
     ) {
+        this.functionsService.getFunctions("", 9999, 0, "name", "asc").subscribe(value => {
+            this.functions = value;
+        })
+        this.deviceClassService.getDeviceClasses("", 9999, 0, "name", "asc").subscribe(value => {
+            this.deviceClasses = value;
+        })
+        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
+            const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            const asp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            aspects.forEach(a => {
+                if (!tmp.has(a.root_id)) {
+                    tmp.set(a.root_id, []);
+                }
+                tmp.get(a.root_id)?.push(a);
+            });
+            tmp.forEach((v, k) => asp.set(aspects.find(a => a.id === k)?.name || '', v));
+            this.nestedAspects = asp;
+        });
         this.setAbstractByDescription(dialogParams.info);
     }
 
@@ -59,6 +92,13 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
                 properties.push({id: "iot", value: input.iot_selectors.join(",")});
             }
             if(input.criteria_list && input.criteria_list.length > 0) {
+                input.criteria_list = input.criteria_list.map(criteria => {
+                    criteria.function_id = criteria.function_id || undefined;
+                    criteria.aspect_id = criteria.aspect_id || undefined;
+                    criteria.device_class_id = criteria.device_class_id || undefined;
+                    criteria.interaction = criteria.interaction || undefined;
+                    return criteria;
+                })
                 properties.push({id: "criteria_list", value: JSON.stringify(input.criteria_list)});
             }
             if(input.entity_only) {
@@ -141,6 +181,90 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
             })
             return result
         });
+    }
+
+    useIotSelectors(condition: boolean, input: AbstractInput) {
+        if(condition) {
+            if(!input.iot_selectors) {
+                input.iot_selectors = [];
+            }
+            if(!input.criteria_list) {
+                input.criteria_list = [];
+            }
+            if(input.options){
+                input.options = undefined;
+            }
+        } else {
+            if(input.iot_selectors) {
+                input.iot_selectors = undefined;
+            }
+            if(input.criteria_list) {
+                input.criteria_list = undefined;
+            }
+            if(!input.options){
+                input.options = [];
+            }
+        }
+    }
+
+    isIotInputProvider(input: AbstractInput): boolean {
+        return !!input.iot_selectors
+    }
+
+    removeOption(input: AbstractInput, optionKey: string) {
+        if(input.options) {
+            input.options = input.options.filter(value => value.key != optionKey);
+        }
+    }
+
+    addOption(input: AbstractInput) {
+        let value;
+        switch(input.type){
+            case "string":
+                value = "";
+                break;
+            case "long":
+                value = 0;
+                break;
+            case "boolean":
+                value = false;
+                break;
+        }
+        if(input.options) {
+            input.options.push({key: "", value: value});
+        } else {
+            input.options = [{key: "", value: value}];
+        }
+    }
+
+    removeCriteria(input: AbstractInput, index: number) {
+        input.criteria_list?.splice(index, 1);
+    }
+
+    addCriteria(input: AbstractInput) {
+        if(input.criteria_list) {
+            input.criteria_list?.push({});
+        } else {
+            input.criteria_list = [{}];
+        }
+    }
+
+    removeInput(index: number){
+        this.abstract?.splice(index, 1);
+    }
+
+    addInput(){
+        this.abstract?.push({
+            id: "",
+            label: "",
+            type: "string",
+            order: 0,
+            multiple: false
+        });
+    }
+
+    compareById(a: any, b: any): boolean {
+        return a && b && a.id === b.id;
     }
 
     close(): void {

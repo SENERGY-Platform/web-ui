@@ -15,8 +15,191 @@
   -->
 
 
-<mat-dialog-content>
- {{abstract | json}}
+<mat-dialog-content class="edit-smart-service-input-dialog">
+        <mat-accordion *ngIf="abstract && abstract.length > 0">
+            <mat-expansion-panel *ngFor="let input of abstract; let inputIndex = index">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        {{input.label || input.id || "new-input"}}
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div>
+                    <div>
+                        <mat-form-field class="full-width">
+                            <input matInput placeholder="Id" [(ngModel)]="input.id">
+                        </mat-form-field>
+                    </div>
+                    <div>
+                        <mat-form-field class="full-width">
+                            <input matInput placeholder="Label" [(ngModel)]="input.label">
+                        </mat-form-field>
+                    </div>
+
+                    <div>
+                        <mat-form-field class="full-width">
+                            <input matInput placeholder="Description" [(ngModel)]="input.description">
+                        </mat-form-field>
+                    </div>
+
+                    <div>
+                        <mat-form-field class="full-width">
+                            <input matInput placeholder="Order" [(ngModel)]="input.order" type="number">
+                        </mat-form-field>
+                    </div>
+
+                    <div>
+                        <mat-checkbox [(ngModel)]="input.multiple">
+                            Multiple
+                        </mat-checkbox>
+                    </div>
+
+                    <div>
+                        <mat-checkbox [checked]="isIotInputProvider(input)" (change)="useIotSelectors($event.checked, input)">
+                            IoT
+                        </mat-checkbox>
+                    </div>
+
+                    <ng-container *ngIf="input.iot_selectors">
+                        <div>
+                            <mat-form-field class="full-width" color="accent" >
+                                <mat-label>Iot-Selectors</mat-label>
+                                <mat-select [(ngModel)]="input.iot_selectors" multiple>
+                                    <mat-option value="device">Device</mat-option>
+                                    <mat-option value="group">Device-Group</mat-option>
+                                    <mat-option value="import">Import</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <mat-divider [inset]="true"></mat-divider>
+                        <h4 class="mat-h4">Criteria</h4>
+                        <mat-accordion>
+                            <mat-expansion-panel *ngFor="let criteria of input.criteria_list; let i = index">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title>
+                                        {{criteria.interaction}} {{criteria.function_id}} {{criteria.aspect_id}}
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+                                <div>
+                                    <div>
+                                        <mat-form-field class="full-width">
+                                            <mat-label>Interaction</mat-label>
+                                            <mat-select [(ngModel)]="criteria.interaction">
+                                                <mat-option [value]="undefined">NONE</mat-option>
+                                                <mat-option value="event">event</mat-option>
+                                                <mat-option value="request">request</mat-option>
+                                                <mat-option value="event+request">event+request</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                    <div>
+                                        <div>
+                                            <mat-form-field class="form-field full-width" color="accent">
+                                                <senergy-select-search placeholder="Function"
+                                                                       [(ngModel)]="criteria.function_id"
+                                                                       [options]="functions"
+                                                                       noneView="NONE"
+                                                                       useOptionViewProperty="name"
+                                                                       useOptionValueProperty="id">
+                                                </senergy-select-search>
+                                            </mat-form-field>
+                                        </div>
+                                        <div>
+                                            <mat-form-field class="form-field full-width" color="accent">
+                                                <senergy-select-search placeholder="Aspect"
+                                                                       [(ngModel)]="criteria.aspect_id"
+                                                                       [options]="nestedAspects"
+                                                                       noneView="NONE"
+                                                                       useOptionViewProperty="name"
+                                                                       useOptionValueProperty="id">
+                                                </senergy-select-search>
+                                            </mat-form-field>
+                                        </div>
+                                        <div>
+                                            <mat-form-field class="form-field full-width" color="accent">
+                                                <senergy-select-search placeholder="Device-Class"
+                                                                       [(ngModel)]="criteria.device_class_id"
+                                                                       [options]="deviceClasses"
+                                                                       noneView="NONE"
+                                                                       useOptionViewProperty="name"
+                                                                       useOptionValueProperty="id">
+                                                </senergy-select-search>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button mat-raised-button color="accent" (click)="removeCriteria(input, i)">Remove Criteria</button>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel>
+                        </mat-accordion>
+                        <div>
+                            <button mat-raised-button color="accent" (click)="addCriteria(input)">Add Criteria</button>
+                        </div>
+                    </ng-container>
+
+                    <ng-container *ngIf="!input.iot_selectors">
+                        <div>
+                            <mat-form-field class="full-width">
+                                <mat-label>Type</mat-label>
+                                <mat-select [(ngModel)]="input.type">
+                                    <mat-option value="string">string</mat-option>
+                                    <mat-option value="long">number</mat-option>
+                                    <mat-option value="boolean">boolean</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div *ngIf="input.type == 'string'">
+                            <mat-form-field class="full-width">
+                                <input matInput placeholder="Default Value" [(ngModel)]="input.default_value" type="text">
+                            </mat-form-field>
+                        </div>
+                        <div *ngIf="input.type == 'long'">
+                            <mat-form-field class="full-width">
+                                <input matInput placeholder="Default Value" [(ngModel)]="input.default_value" type="number">
+                            </mat-form-field>
+                        </div>
+                        <div *ngIf="input.type == 'boolean'">
+                            <mat-radio-group aria-label="Default Value" [(ngModel)]="input.default_value">
+                                <mat-radio-button [value]="true">True</mat-radio-button>
+                                <mat-radio-button [value]="false">False</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+                        <mat-divider [inset]="true"></mat-divider>
+                        <h4 class="mat-h4">Options</h4>
+                        <div *ngFor="let option of input.options" class="full-width">
+                            <mat-form-field>
+                                <input matInput placeholder="Name" [(ngModel)]="option.key">
+                            </mat-form-field>
+                            <mat-form-field  *ngIf="input.type == 'string'">
+                                <input matInput placeholder="Value" [(ngModel)]="option.value" type="text">
+                            </mat-form-field>
+                            <mat-form-field *ngIf="input.type == 'long'">
+                                <input matInput placeholder="Value" [(ngModel)]="option.value" type="number">
+                            </mat-form-field>
+                            <mat-radio-group aria-label="Value" [(ngModel)]="option.value" *ngIf="input.type == 'boolean'">
+                                <mat-radio-button [value]="true">True</mat-radio-button>
+                                <mat-radio-button [value]="false">False</mat-radio-button>
+                            </mat-radio-group>
+                            <button mat-icon-button matSuffix (click)="removeOption(input, option.key)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                        <div>
+                            <button mat-raised-button color="accent" (click)="addOption(input)">Add Option</button>
+                        </div>
+                    </ng-container>
+
+                    <div>
+                        <button mat-raised-button color="accent" (click)="removeInput(inputIndex)">Remove Input</button>
+                    </div>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+    <div>
+        <button mat-raised-button color="accent" (click)="addInput()">Add Input</button>
+    </div>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
