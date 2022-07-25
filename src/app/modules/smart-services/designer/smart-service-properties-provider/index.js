@@ -96,7 +96,7 @@ function createSmartServiceInputsGroup(element, bpmnjs, eventBus, bpmnFactory, r
         id: 'smart_service_inputs_group',
         label: 'Smart-Service Inputs',
         entries: [],
-        enabled: isStartEvent()
+        enabled: isStartEvent
     };
     createSmartServiceInputEntries(group, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
     return group;
