@@ -25,3 +25,7 @@ mat-dialog-actions button:not(:last-child) {
 .smart-service-task-tab{
     margin-top: 15px;
 }
+
+.edit-smart-service-task-dialog button {
+    margin-top: 15px;
+}

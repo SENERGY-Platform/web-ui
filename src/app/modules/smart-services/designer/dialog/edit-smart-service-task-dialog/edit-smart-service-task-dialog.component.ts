@@ -23,10 +23,10 @@ import {ProcessModel} from '../../../../processes/process-repo/shared/process.mo
 import {V2DeploymentsPreparedModel} from '../../../../processes/deployments/shared/deployments-prepared-v2.model';
 import {FlowRepoService} from '../../../../data/flow-repo/shared/flow-repo.service';
 import {FlowModel} from '../../../../data/flow-repo/shared/flow.model';
-import {FlowEngineService} from '../../../../data/flow-repo/shared/flow-engine.service';
 import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
 import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
 import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../processes/designer/shared/designer.model';
+import {ExportModel} from '../../../../exports/shared/export.model';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -47,6 +47,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     availableProcessVariables: Map<string,BpmnParameterWithLabel[]> = new Map();
 
+    exportRequest: ExportModel;
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
         private processRepo: ProcessRepoService,
@@ -62,6 +64,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.init = dialogParams.info;
         this.ensureResultFields();
         this.availableProcessVariables = this.getIncomingOutputs(dialogParams.element);
+        this.exportRequest = this.parseExport(this.result.inputs.find(value => value.name == "export.request")?.value || "{}");
     }
 
     ngOnInit() {}
@@ -71,6 +74,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if(!this.processModels && this.result.topic == processDeploymentTopic) {
             this.processRepo.getProcessModels("", 9999, 0, "date", "asc", null).subscribe(value => this.processModels = value);
         }
+
         this.ensureFlowList();
     }
 
@@ -290,6 +294,54 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     /******************************
+     *      Export
+     ******************************/
+
+    removeExportValue(index: number){
+        this.exportRequest?.Values?.splice(index, 1);
+    }
+
+    addExportValue(){
+        if(!this.exportRequest){
+            this.exportRequest = this.parseExport("{}");
+        }
+        if(!this.exportRequest.Values){
+            this.exportRequest.Values = [];
+        }
+        this.exportRequest?.Values.push({Name: "", Path: "", Type: "string", Tag: false, LastValue: null, InstanceID: ""})
+    }
+
+    parseExport(str: string): ExportModel {
+        return JSON.parse(str)
+    }
+
+    stringifyExport(exp: ExportModel | undefined | null) {
+        if(!exp) {
+            exp = this.parseExport("{}");
+        }
+        let unsetEmptyString = function (value: string | undefined): string | undefined {
+            if(value && value == "") {
+                return undefined;
+            }
+            return value
+        }
+        exp.ID = unsetEmptyString(exp.ID);
+        exp.FilterType = unsetEmptyString(exp.FilterType);
+        exp.Name = unsetEmptyString(exp.Name);
+        exp.Description = unsetEmptyString(exp.Description);
+        exp.EntityName = unsetEmptyString(exp.EntityName);
+        exp.Topic = unsetEmptyString(exp.Topic);
+        exp.Measurement = unsetEmptyString(exp.Measurement);
+        exp.Database = unsetEmptyString(exp.Database);
+        exp.TimePath = unsetEmptyString(exp.TimePath);
+        exp.TimePrecision = unsetEmptyString(exp.TimePrecision);
+        exp.DbId = unsetEmptyString(exp.DbId);
+        exp.DatabaseType = unsetEmptyString(exp.DatabaseType);
+
+        return JSON.stringify(exp);
+    }
+
+    /******************************
      *      Util
      ******************************/
 
@@ -347,7 +399,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             }
             if (
                 incoming.businessObject.$type == "bpmn:StartEvent" &&
-                incoming.businessObject.extensionElements.values &&
+                incoming.businessObject.extensionElements?.values &&
                 incoming.businessObject.extensionElements.values[0] &&
                 incoming.businessObject.extensionElements.values[0].$type == "camunda:FormData"
             ) {
@@ -378,6 +430,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     ok(): void {
+        this.result.inputs.push({name: "export.request", type: "text", value: this.stringifyExport(this.exportRequest)})
+
         let result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; //prevent changes to the result after filtering
         const temp = result.inputs.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
         result.inputs = temp;

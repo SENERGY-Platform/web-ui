@@ -15,7 +15,7 @@
   -->
 
 
-<mat-dialog-content>
+<mat-dialog-content class="edit-smart-service-task-dialog">
   <mat-tab-group  dynamicHeight="true" [(selectedIndex)]="activeIndex">
     <mat-tab label="Process">
       <div class="smart-service-task-tab">
@@ -188,7 +188,133 @@
     </mat-tab>
     <mat-tab label="Export">
       <div class="smart-service-task-tab">
-
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Name" [(ngModel)]="exportRequest.Name" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Description" [(ngModel)]="exportRequest.Description" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <mat-label>FilterType</mat-label>
+            <mat-select [(ngModel)]="exportRequest.FilterType">
+              <mat-option value="deviceId">deviceId</mat-option>
+              <mat-option value="pipeId">pipeId</mat-option>
+              <mat-option value="operatorId">operatorId</mat-option>
+              <mat-option value="import_id">import_id</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Filter" [(ngModel)]="exportRequest.Filter" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="EntityName" [(ngModel)]="exportRequest.EntityName" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Topic" [(ngModel)]="exportRequest.Topic" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Measurement" [(ngModel)]="exportRequest.Measurement" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="DatabaseType" [(ngModel)]="exportRequest.DatabaseType" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Database" [(ngModel)]="exportRequest.Database" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="DbId" [(ngModel)]="exportRequest.DbId" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="TimePath" [(ngModel)]="exportRequest.TimePath" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="TimePrecision" [(ngModel)]="exportRequest.TimePrecision" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="ServiceName" [(ngModel)]="exportRequest.ServiceName" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="ServiceName" [(ngModel)]="exportRequest.ServiceName" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <mat-label>Offset</mat-label>
+            <mat-select [(ngModel)]="exportRequest.Offset">
+              <mat-option value="largest">largest</mat-option>
+              <mat-option value="smallest">smallest</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-checkbox class="checkbox-margin" [(ngModel)]="exportRequest.Generated">Generated</mat-checkbox>
+        </div>
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let value of exportRequest.Values; let i = index">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{value.Name}}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div>
+                <mat-form-field class="full-width">
+                  <input matInput placeholder="Name" [(ngModel)]="value.Name" type="text">
+                </mat-form-field>
+              </div>
+              <div>
+                <mat-form-field class="full-width">
+                  <input matInput placeholder="Path" [(ngModel)]="value.Path" type="text">
+                </mat-form-field>
+              </div>
+              <div>
+                <mat-form-field class="full-width">
+                  <mat-label>Type</mat-label>
+                  <mat-select [(ngModel)]="value.Type">
+                    <mat-option value="string">string</mat-option>
+                    <mat-option value="float">float</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div>
+                <mat-checkbox class="checkbox-margin" [(ngModel)]="value.Tag">Tag</mat-checkbox>
+              </div>
+              <div>
+                <button mat-raised-button color="accent" (click)="removeExportValue(i)">Remove Value</button>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+        <div>
+          <button mat-raised-button color="accent" (click)="addExportValue()">Add Value</button>
+        </div>
       </div>
     </mat-tab>
     <mat-tab label="Import">
