@@ -27,6 +27,9 @@ import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
 import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
 import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../processes/designer/shared/designer.model';
 import {ExportModel} from '../../../../exports/shared/export.model';
+import {ImportInstanceConfigModel, ImportInstancesModel} from '../../../../imports/import-instances/shared/import-instances.model';
+import {ImportTypeModel, ImportTypePermissionSearchModel} from '../../../../imports/import-types/shared/import-types.model';
+import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -48,6 +51,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     availableProcessVariables: Map<string,BpmnParameterWithLabel[]> = new Map();
 
     exportRequest: ExportModel;
+    importRequest: ImportInstancesModel;
+    importRequestConfigValueType: Map<string,string> = new Map();
+    importTypes: ImportTypePermissionSearchModel[] = [];
+    knownImportTypes: Map<string, ImportTypeModel> = new Map();
 
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
@@ -55,6 +62,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         private processDeployment: DeploymentsService,
         private flowService: FlowRepoService,
         private flowParser: ParserService,
+        private importTypeService: ImportTypesService,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription, element: BpmnElement},
     ) {
         if(!dialogParams.info.topic) {
@@ -65,6 +73,11 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.ensureResultFields();
         this.availableProcessVariables = this.getIncomingOutputs(dialogParams.element);
         this.exportRequest = this.parseExport(this.result.inputs.find(value => value.name == "export.request")?.value || "{}");
+        this.importRequest = this.parseImport(this.result.inputs.find(value => value.name == "import.request")?.value || "{}");
+        this.importTypeService.listImportTypes("", 9999, 0, "name.asc").subscribe(value => this.importTypes = value);
+        if(this.importRequest.import_type_id != "") {
+            this.loadImportType(false);
+        }
     }
 
     ngOnInit() {}
@@ -342,6 +355,89 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     /******************************
+     *      Import
+     ******************************/
+
+    parseImport(str: string): ImportInstancesModel {
+        return JSON.parse(str)
+    }
+
+    stringifyImport(value: ImportInstancesModel | undefined | null) {
+        if(!value) {
+            value = this.parseImport("{}");
+        }
+        return JSON.stringify(value);
+    }
+
+    setImportRequestConfigValueTypes(importType: ImportTypeModel){
+        importType.configs.forEach(value => {
+            this.importRequestConfigValueType.set(value.name, value.type);
+        })
+    }
+
+    generateImportFields(importType: ImportTypeModel){
+        this.importRequest.image = importType.image;
+        this.importRequest.restart = importType.default_restart;
+        this.importRequest.configs = importType.configs.map(value => {
+            return {name: value.name, value: value.default_value} as ImportInstanceConfigModel;
+        })
+    }
+
+    loadImportType(updateConfigs: boolean){
+        const importType: ImportTypeModel | undefined = this.knownImportTypes.get(this.importRequest.import_type_id);
+        if(importType){
+            this.setImportRequestConfigValueTypes(importType);
+            if(updateConfigs) {
+                this.generateImportFields(importType);
+            }
+        }else{
+            this.importTypeService.getImportType(this.importRequest.import_type_id).subscribe(value => {
+                this.knownImportTypes.set(this.importRequest.import_type_id, value);
+                this.setImportRequestConfigValueTypes(value);
+                if(updateConfigs){
+                    this.generateImportFields(value);
+                }
+            })
+        }
+    }
+
+    set importTypeId(id: string){
+        this.importRequest.import_type_id = id;
+        this.loadImportType(true);
+    }
+
+    get importTypeId(): string {
+        return this.importRequest.import_type_id;
+    }
+
+    STRING = 'https://schema.org/Text';
+    INTEGER = 'https://schema.org/Integer';
+    FLOAT = 'https://schema.org/Float';
+    BOOLEAN = 'https://schema.org/Boolean';
+
+    isTextImportConfig(config: ImportInstanceConfigModel): boolean{
+        const type = this.importRequestConfigValueType.get(config.name);
+        return type == this.STRING || type == "text"
+    }
+
+    isNumberImportConfig(config: ImportInstanceConfigModel): boolean{
+        const type = this.importRequestConfigValueType.get(config.name);
+        return type == this.INTEGER || type == this.FLOAT || type == "number"
+    }
+
+    isBooleanImportConfig(config: ImportInstanceConfigModel): boolean{
+        const type = this.importRequestConfigValueType.get(config.name);
+        return type == this.BOOLEAN || type == "boolean"
+    }
+
+    isUnknownImportConfig(config: ImportInstanceConfigModel): boolean{
+        return !(
+            this.isTextImportConfig(config) ||
+            this.isNumberImportConfig(config) ||
+            this.isBooleanImportConfig(config))
+    }
+
+    /******************************
      *      Util
      ******************************/
 
@@ -430,7 +526,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     ok(): void {
-        this.result.inputs.push({name: "export.request", type: "text", value: this.stringifyExport(this.exportRequest)})
+        this.result.inputs.push({name: "export.request", type: "text", value: this.stringifyExport(this.exportRequest)});
+        this.result.inputs.push({name: "import.request", type: "text", value: this.stringifyImport(this.importRequest)});
 
         let result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; //prevent changes to the result after filtering
         const temp = result.inputs.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs

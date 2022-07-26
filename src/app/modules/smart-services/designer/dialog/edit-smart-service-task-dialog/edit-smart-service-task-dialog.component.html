@@ -319,7 +319,42 @@
     </mat-tab>
     <mat-tab label="Import">
       <div class="smart-service-task-tab">
-
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Name" [(ngModel)]="importRequest.name" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <mat-label>Import-Type</mat-label>
+            <mat-select [(ngModel)]="importTypeId">
+              <mat-option *ngFor="let importType of importTypes" [value]="importType.id">
+                {{importType.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Kafka Topic" [(ngModel)]="importRequest.kafka_topic" type="text">
+          </mat-form-field>
+        </div>
+      </div>
+      <div>
+        <mat-checkbox class="checkbox-margin" [(ngModel)]="importRequest.restart">Generated</mat-checkbox>
+      </div>
+      <div>
+        <mat-checkbox class="checkbox-margin" [(ngModel)]="importRequest.generated">Restart</mat-checkbox>
+      </div>
+      <div *ngFor="let config of importRequest.configs">
+        <mat-form-field class="full-width" *ngIf="isTextImportConfig(config)">
+          <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="text">
+        </mat-form-field>
+        <mat-form-field class="full-width" *ngIf="isNumberImportConfig(config)">
+          <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="number">
+        </mat-form-field>
+        <mat-checkbox class="checkbox-margin" *ngIf="isBooleanImportConfig(config)" [(ngModel)]="importRequest.restart">{{config.name}}</mat-checkbox>
+        <span *ngIf="isUnknownImportConfig(config)"> {{config.name}} is of unknown type: {{importRequestConfigValueType.get(config.name)}}. pleas set value via Input/Output panel. </span>
       </div>
     </mat-tab>
   </mat-tab-group>
