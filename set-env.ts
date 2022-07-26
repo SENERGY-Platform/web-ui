@@ -34,6 +34,7 @@ export const environment = {
   keyCloakRealm: '${process.env.KEYCLOACK_REALM}',
   keyCloakClientId: '${process.env.KEYCLOACK_CLIENT_ID}',
   keycloakUrl: '${process.env.KEYCLOACK_URL}',
+  smartServiceRepoUrl: '${process.env.SMART_SERVICE_REPO_URL}',
   processRepoUrl: '${process.env.PROCESS_REPO_URL}',
   processDeploymentUrl: '${process.env.PROCESS_DEPLOYMENT_URL}',
   processServiceUrl: '${process.env.PROCESS_SERVICE_URL}',

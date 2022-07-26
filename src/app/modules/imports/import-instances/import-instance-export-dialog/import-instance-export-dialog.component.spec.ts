@@ -262,6 +262,7 @@ describe('ImportInstanceExportDialogComponent', () => {
             ],
             EntityName: 'name',
             ServiceName: 'urn:infai:ses:import-type:1234',
+            DatabaseType: 'influxdb',
         });
         expect(r).toBeDefined();
     });

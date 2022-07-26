@@ -81,6 +81,7 @@ export class NewExportComponent implements OnInit {
         import: [{value: null, disabled: true}, Validators.required],
         operator: [{value: null, disabled: true}, Validators.required],
         pipeline: [{value: null, disabled: true}, Validators.required],
+        databaseType: 'influxdb',
         exportValues: this.fb.array([] as ExportValueModel[]),
     });
 
@@ -142,9 +143,6 @@ export class NewExportComponent implements OnInit {
             );
             this.exportForm.controls['targetSelector'].disable({onlySelf: true, emitEvent: false});
         }
-
-        this.onChanges();
-
         const array: Observable<DeviceInstancesModel[] | PipelineModel[] | ImportInstancesModel[]>[] = [];
 
         array.push(this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc'));
@@ -172,6 +170,7 @@ export class NewExportComponent implements OnInit {
                                 customMqttPassword: exp.CustomMqttPassword,
                                 customMqttBaseTopic: exp.CustomMqttBaseTopic,
                             });
+                            exp.Values.forEach(v => this.addValue(v.Name, v.Path, v.Type, v.Tag));
                             if (exp.Offset === 'smallest') {
                                 this.exportForm.patchValue({allMessages: true});
                             }
@@ -256,13 +255,16 @@ export class NewExportComponent implements OnInit {
                                 const importInstance: ImportInstancesModel =
                                     this.imports.find((i) => i.id === exp.Filter) || ({} as ImportInstancesModel);
                                 this.exportForm.patchValue({import: importInstance});
-                                this.getImportType(this.exportForm.value.import.import_type_id).subscribe((type) => {
+                                this.getImportType(exp.ServiceName).subscribe((type) => {
                                     type.output.sub_content_variables?.forEach((output) => this.traverseDataStructure('', output));
                                 });
                             }
                             this.export = exp;
                         }
+                        setTimeout(() => this.onChanges(), 100); // delay for async init
                     });
+                } else {
+                    this.onChanges();
                 }
             }, 0);
             this.ready = true;
@@ -281,6 +283,7 @@ export class NewExportComponent implements OnInit {
             this.export.CustomMqttUser = this.exportForm.value.customMqttUser;
             this.export.CustomMqttPassword = this.exportForm.value.customMqttPassword;
             this.export.CustomMqttBaseTopic = this.exportForm.value.customMqttBaseTopic;
+            this.export.DatabaseType = this.exportForm.value.databaseType;
 
             if (this.exportForm.value.selector === 'device') {
                 this.export.EntityName = this.exportForm.value.device.name;
@@ -314,7 +317,7 @@ export class NewExportComponent implements OnInit {
                             duration: 2000,
                         });
                     } else {
-                        this.snackBar.open('Export could not be updated', "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Export could not be updated', "close", {panelClass: "snack-bar-error"});
                     }
                     this.ready = true;
                 });
@@ -322,7 +325,7 @@ export class NewExportComponent implements OnInit {
                 const obs = (
                     this.exportForm.get('targetSelector')?.value === this.targetDb ? this.exportService : this.brokerExportService
                 ).startPipeline(this.export);
-                obs.subscribe(function() {
+                obs.subscribe(function () {
                     self.router.navigate(['/exports', self.exportForm.get('targetSelector')?.value === self.targetDb ? 'db' : 'broker']);
                     self.snackBar.open('Export created', undefined, {
                         duration: 2000,
@@ -616,22 +619,22 @@ export class NewExportComponent implements OnInit {
             } else {
                 let type = this.paths.get(this.exportValues.at(id).value.Path);
                 switch (this.paths.get(this.exportValues.at(id).value.Path)) {
-                case this.typeString:
-                    type = 'string';
-                    break;
-                case this.typeFloat:
-                    type = 'float';
-                    break;
-                case this.typeInteger:
-                    type = 'int';
-                    break;
-                case this.typeBoolean:
-                    type = 'bool';
-                    break;
-                case this.typeList:
-                case this.typeStructure:
-                    type = 'string_json';
-                    break;
+                    case this.typeString:
+                        type = 'string';
+                        break;
+                    case this.typeFloat:
+                        type = 'float';
+                        break;
+                    case this.typeInteger:
+                        type = 'int';
+                        break;
+                    case this.typeBoolean:
+                        type = 'bool';
+                        break;
+                    case this.typeList:
+                    case this.typeStructure:
+                        type = 'string_json';
+                        break;
                 }
 
                 this.exportValues.at(id).patchValue({Type: type});

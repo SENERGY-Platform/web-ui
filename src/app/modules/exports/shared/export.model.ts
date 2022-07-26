@@ -44,6 +44,7 @@ export interface ExportModel {
     CustomMqttUser?: string;
     CustomMqttPassword?: string;
     DbId?: string;
+    DatabaseType?: string;
 }
 
 export interface ExportValueBaseModel {

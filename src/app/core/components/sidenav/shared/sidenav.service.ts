@@ -24,6 +24,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { WaitingRoomService } from '../../../../modules/devices/waiting-room/shared/waiting-room.service';
 import { debounceTime } from 'rxjs/internal/operators';
 import { WaitingRoomEventTypeAuthOk, WaitingRoomEventTypeError } from '../../../../modules/devices/waiting-room/shared/waiting-room.model';
+import {environment} from '../../../../../environments/environment';
 
 @Injectable({
     providedIn: 'root',
@@ -57,6 +58,15 @@ export class SidenavService implements OnDestroy {
         const sections: SidenavSectionModel[] = [];
 
         sections.push(new SidenavSectionModel('Dashboard', 'link', 'dashboard', '/dashboard', []));
+
+        if(environment.smartServiceRepoUrl){
+            sections.push(
+                new SidenavSectionModel('Smart Services', 'toggle', 'design_services', '/smart-services', [
+                    new SidenavPageModel('Designs', 'link', 'create', '/smart-services/designs'),
+                    new SidenavPageModel('Releases', 'link', 'storage', '/smart-services/releases'),
+                ]),
+            );
+        }
 
         sections.push(
             new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', [

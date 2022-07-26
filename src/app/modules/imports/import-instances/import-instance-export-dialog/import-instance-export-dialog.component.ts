@@ -86,6 +86,7 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             Values: values,
             EntityName: this.data.name,
             ServiceName: this.data.import_type_id,
+            DatabaseType: 'influxdb',
         } as ExportModel;
         this.exportService.startPipeline(exp).subscribe(
             (res) => {

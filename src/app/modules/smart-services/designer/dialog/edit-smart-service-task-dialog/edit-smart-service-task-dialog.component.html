@@ -1,0 +1,206 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+
+<mat-dialog-content>
+  <mat-tab-group  dynamicHeight="true" [(selectedIndex)]="activeIndex">
+    <mat-tab label="Process">
+      <div class="smart-service-task-tab">
+        <div>
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width">
+            <mat-label>Process-Model</mat-label>
+            <mat-select [(ngModel)]="processProcessModelId">
+              <mat-option *ngFor="let model of processModels" [value]="model.id">
+                {{model.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width" color="accent">
+            <input matInput placeholder="Deployment-Name" [(ngModel)]="processProcessName" required>
+          </mat-form-field>
+        </div>
+
+        <div>
+          <mat-card>
+            <mat-accordion>
+            <mat-expansion-panel *ngFor="let taskId of processTaskIds">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  {{taskId}}
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div>
+                <ng-container *ngFor="let input of result.inputs">
+                  <div *ngIf="processTaskMatches(input, taskId, 'selection')">
+                    <mat-form-field class="full-width" color="accent">
+                      <mat-label>IoT-Selection</mat-label>
+                      <mat-select [(ngModel)]="input.value">
+                        <mat-option *ngFor="let variable of availableProcessVariables.get('iot_form_fields') || []" [value]="'${'+variable.name+'}'">
+                          {{variable.label || variable.name}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="full-width" color="accent">
+                      <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>
+                    </mat-form-field>
+                  </div>
+                  <div *ngIf="processTaskMatches(input, taskId, 'time')">
+                    <mat-form-field class="full-width" color="accent">
+                      <input matInput placeholder="Time-Event" [(ngModel)]="input.value" required>
+                    </mat-form-field>
+                  </div>
+                  <div *ngIf="processTaskMatches(input, taskId, 'event.flow_id')">
+                    <mat-form-field class="full-width">
+                      <mat-label>Event-Flow</mat-label>
+                      <mat-select [(ngModel)]="input.value">
+                        <mat-option *ngFor="let flow of flows" [value]="flow._id">
+                          {{flow.name}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <div *ngIf="processTaskMatches(input, taskId, 'event.value')">
+                    <mat-form-field class="full-width" color="accent">
+                      <input matInput placeholder="Event-Value" [(ngModel)]="input.value">
+                    </mat-form-field>
+                  </div>
+                  <ng-container *ngFor="let parameter of getProcessTaskParameter(taskId)">
+                    <div *ngIf="processTaskMatches(input, taskId, 'parameter.'+parameter)">
+                      <mat-form-field class="full-width" color="accent">
+                        <input matInput placeholder="{{parameter}}" [(ngModel)]="input.value">
+                      </mat-form-field>
+                    </div>
+                  </ng-container>
+                </ng-container>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+    <mat-tab label="Analytics">
+      <div class="smart-service-task-tab">
+        <div class="smart-service-task-tab">
+          <div>
+            <mat-form-field class="full-width">
+              <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field class="full-width">
+              <mat-label>Flow</mat-label>
+              <mat-select [(ngModel)]="analyticsFlowId">
+                <mat-option *ngFor="let flow of flows" [value]="flow._id">
+                  {{flow.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field class="full-width" color="accent">
+              <input matInput placeholder="Pipeline-Name" [(ngModel)]="analyticsPipelineName" required>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field class="full-width" color="accent">
+              <input matInput placeholder="Pipeline-Description" [(ngModel)]="analyticsPipelineDesc">
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field class="full-width" color="accent">
+              <input matInput placeholder="Pipeline Window-Time" [(ngModel)]="analyticsWindowTime" required>
+            </mat-form-field>
+          </div>
+
+          <div>
+            <mat-card>
+              <mat-accordion>
+                <mat-expansion-panel *ngFor="let flowInput of currentParsedFlows">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      {{flowInput.name}}
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div>
+                    <div *ngFor="let port of flowInput.inPorts">
+                      <mat-divider [inset]="true"></mat-divider>
+                      <h4 class="mat-h4">{{port}}</h4>
+                      <ng-container *ngFor="let input of result.inputs">
+                        <div *ngIf="analyticsInputMatchesIotSelection(input, flowInput.id, port)">
+                          <mat-form-field class="full-width" color="accent">
+                            <mat-label>IoT-Selection</mat-label>
+                            <mat-select [(ngModel)]="input.value">
+                              <mat-option *ngFor="let variable of availableProcessVariables.get('iot_form_fields') || []" [value]="'${'+variable.name+'}'">
+                                {{variable.label || variable.name}}
+                              </mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                          <mat-form-field class="full-width" color="accent">
+                            <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>
+                          </mat-form-field>
+                        </div>
+                        <div *ngIf="analyticsInputMatchesIotCriteria(input, flowInput.id, port)">
+                          <mat-form-field class="full-width" color="accent">
+                            <input matInput placeholder="IoT-Criteria" [(ngModel)]="input.value" required>
+                          </mat-form-field>
+                        </div>
+                      </ng-container>
+                    </div>
+                    <mat-divider [inset]="true"></mat-divider>
+                    <h4 class="mat-h4">Configurations</h4>
+                    <div *ngFor="let config of flowInput.config">
+                      <ng-container *ngFor="let input of result.inputs">
+                        <div *ngIf="analyticsInputMatchesIotConfig(input, flowInput.id, config.name)">
+                          <mat-form-field class="full-width" color="accent">
+                            <input matInput placeholder="{{config.name}}" [(ngModel)]="input.value">
+                          </mat-form-field>
+                        </div>
+                      </ng-container>
+                    </div>
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+    <mat-tab label="Export">
+      <div class="smart-service-task-tab">
+
+      </div>
+    </mat-tab>
+    <mat-tab label="Import">
+      <div class="smart-service-task-tab">
+
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="ok()">Ok</button>
+</mat-dialog-actions>
+

@@ -56,6 +56,7 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatTableModule} from '@angular/material/table';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {InputDialogComponent} from './dialogs/input-dialog.component';
 
 @NgModule({
     imports: [
@@ -98,6 +99,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
         ShortInputVariableValuePipe,
         DeleteDialogComponent,
         ConfirmDialogComponent,
+        InputDialogComponent,
         WidgetNoDataComponent,
         NotificationDialogComponent,
         SelectSearchComponent,

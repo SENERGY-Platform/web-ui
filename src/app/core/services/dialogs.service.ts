@@ -18,6 +18,7 @@ import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../dialogs/delete-dialog.component';
 import { ConfirmDialogComponent } from '../dialogs/confirm-dialog.component';
+import {InputDialogComponent} from '../dialogs/input-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -44,5 +45,17 @@ export class DialogsService {
         };
 
         return this.dialog.open(ConfirmDialogComponent, dialogConfig);
+    }
+
+    openInputDialog(title: string, fields: {[key: string]: string}, required: string[]): MatDialogRef<InputDialogComponent> {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            title: title,
+            fields: fields,
+            required: required
+        };
+
+        return this.dialog.open(InputDialogComponent, dialogConfig);
     }
 }

@@ -1,0 +1,87 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<div class="releases-container">
+    <div fxLayout="column">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+        <div class="main-panel"
+             infiniteScroll
+             [infiniteScrollDistance]="1"
+             [infiniteScrollThrottle]="50"
+             [scrollWindow]="false"
+             (scrolled)="onScroll()"
+             #mainPanel>
+            <div class="layout-margin" fxLayout="column" *ngIf="animationDone" [formGroup]="formGroup">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px" formArrayName="repoItems"
+                               *ngIf="repoItems.length > 0">
+                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
+                                   [formGroupName]="i">
+                        <div fxFill>
+                            <img class="widget-image" [src]="item.value.image">
+                        </div>
+                        <mat-grid-tile-footer>
+                            <div fxLayout="column" fxFill>
+                                <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
+                                    {{item.value.name}}
+                                </div>
+                                <div class="truncate footer-item-subtitle"
+                                     matTooltip="{{item.value.description}}">
+                                    {{item.value.description}}
+                                </div>
+                                <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
+                                    <mat-icon matTooltip="Release is shared" *ngIf="item.value.shared"
+                                              class="color-sidenav info-icon">share
+                                    </mat-icon>
+                                    <mat-icon matTooltip="{{item.value.created_at | date:'medium'}}" class="info-icon-color info-icon">
+                                        calendar_month
+                                    </mat-icon>
+                                    <div fxFlex></div>
+                                    <button mat-icon-button matTooltip="Delete" color="accent"
+                                            (click)="deleteRelease(item.value)"
+                                            [disabled]="item.value.permissions.a === false">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+
+                                    <button mat-icon-button [matMenuTriggerFor]="subMenu"
+                                            color="accent"
+                                            matTooltip="More">
+                                        <mat-icon>more_vert</mat-icon>
+                                    </button>
+                                    <mat-menu #subMenu="matMenu" [overlapTrigger]="false">
+                                        <button mat-menu-item (click)="permission(item.value)"
+                                                [disabled]="item.value.permissions.a === false">
+                                            <mat-icon>share</mat-icon>
+                                            <span>Share</span>
+                                        </button>
+                                        <button mat-menu-item (click)="downloadDiagram(item.value)">
+                                            <mat-icon>cloud_download</mat-icon>
+                                            <span>Download BPMN</span>
+                                        </button>
+                                        <button mat-menu-item (click)="downloadSvg(item.value)">
+                                            <mat-icon>insert_photo</mat-icon>
+                                            <span>Download SVG</span>
+                                        </button>
+                                    </mat-menu>
+                                </div>
+                            </div>
+                        </mat-grid-tile-footer>
+                    </mat-grid-tile>
+                </mat-grid-list>
+                <div *ngIf="repoItems.length === 0 && ready">No process models found.</div>
+                <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
+            </div>
+        </div>
+    </div>
+</div>
