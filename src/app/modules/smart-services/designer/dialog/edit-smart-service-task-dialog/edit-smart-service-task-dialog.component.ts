@@ -30,6 +30,7 @@ import {ExportModel} from '../../../../exports/shared/export.model';
 import {ImportInstanceConfigModel, ImportInstancesModel} from '../../../../imports/import-instances/shared/import-instances.model';
 import {ImportTypeModel, ImportTypePermissionSearchModel} from '../../../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
+import {AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -75,7 +76,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.exportRequest = this.parseExport(this.result.inputs.find(value => value.name == "export.request")?.value || "{}");
         this.importRequest = this.parseImport(this.result.inputs.find(value => value.name == "import.request")?.value || "{}");
         this.importTypeService.listImportTypes("", 9999, 0, "name.asc").subscribe(value => this.importTypes = value);
-        if(this.importRequest.import_type_id != "") {
+        if(this.importRequest.import_type_id) {
             this.loadImportType(false);
         }
     }
@@ -375,6 +376,26 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         })
     }
 
+    handleUnknownImportConfigAsJsonString(){
+        this.importRequest.configs = this.importRequest.configs.map(value => {
+            if (this.isUnknownImportConfig(value)) {
+                return {name: value.name, value: JSON.stringify(value.value)} as ImportInstanceConfigModel;
+            } else {
+                return {name: value.name, value: value.value} as ImportInstanceConfigModel;
+            }
+        })
+    }
+
+    handleUnknownImportConfigAsJsonObject(){
+        this.importRequest.configs = this.importRequest.configs.map(value => {
+            if (this.isUnknownImportConfig(value) && (typeof value.value == "string")) {
+                return {name: value.name, value: JSON.parse(value.value)} as ImportInstanceConfigModel;
+            } else {
+                return {name: value.name, value: value.value} as ImportInstanceConfigModel;
+            }
+        })
+    }
+
     generateImportFields(importType: ImportTypeModel){
         this.importRequest.image = importType.image;
         this.importRequest.restart = importType.default_restart;
@@ -384,20 +405,24 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     loadImportType(updateConfigs: boolean){
-        const importType: ImportTypeModel | undefined = this.knownImportTypes.get(this.importRequest.import_type_id);
-        if(importType){
-            this.setImportRequestConfigValueTypes(importType);
-            if(updateConfigs) {
-                this.generateImportFields(importType);
-            }
-        }else{
-            this.importTypeService.getImportType(this.importRequest.import_type_id).subscribe(value => {
-                this.knownImportTypes.set(this.importRequest.import_type_id, value);
-                this.setImportRequestConfigValueTypes(value);
-                if(updateConfigs){
-                    this.generateImportFields(value);
+        if(this.importRequest.import_type_id) {
+            const importType: ImportTypeModel | undefined = this.knownImportTypes.get(this.importRequest.import_type_id);
+            if(importType){
+                this.setImportRequestConfigValueTypes(importType);
+                if(updateConfigs) {
+                    this.generateImportFields(importType);
                 }
-            })
+                this.handleUnknownImportConfigAsJsonString();
+            }else{
+                this.importTypeService.getImportType(this.importRequest.import_type_id).subscribe(value => {
+                    this.knownImportTypes.set(this.importRequest.import_type_id, value);
+                    this.setImportRequestConfigValueTypes(value);
+                    if(updateConfigs){
+                        this.generateImportFields(value);
+                    }
+                    this.handleUnknownImportConfigAsJsonString();
+                })
+            }
         }
     }
 
@@ -415,27 +440,46 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     FLOAT = 'https://schema.org/Float';
     BOOLEAN = 'https://schema.org/Boolean';
 
+    isTextImportConfigType(type: string | null | undefined): boolean {
+        return type == this.STRING || type == "text"
+    }
+
     isTextImportConfig(config: ImportInstanceConfigModel): boolean{
         const type = this.importRequestConfigValueType.get(config.name);
-        return type == this.STRING || type == "text"
+        return this.isTextImportConfigType(type)
+    }
+
+    isNumberImportConfigType(type: string | null | undefined): boolean {
+        return type == this.INTEGER || type == this.FLOAT || type == "number"
     }
 
     isNumberImportConfig(config: ImportInstanceConfigModel): boolean{
         const type = this.importRequestConfigValueType.get(config.name);
-        return type == this.INTEGER || type == this.FLOAT || type == "number"
+        return this.isNumberImportConfigType(type)
     }
 
-    isBooleanImportConfig(config: ImportInstanceConfigModel): boolean{
-        const type = this.importRequestConfigValueType.get(config.name);
+    isBooleanImportConfigType(type: string | null | undefined): boolean {
         return type == this.BOOLEAN || type == "boolean"
     }
 
-    isUnknownImportConfig(config: ImportInstanceConfigModel): boolean{
-        return !(
-            this.isTextImportConfig(config) ||
-            this.isNumberImportConfig(config) ||
-            this.isBooleanImportConfig(config))
+
+    isBooleanImportConfig(config: ImportInstanceConfigModel): boolean{
+        const type = this.importRequestConfigValueType.get(config.name);
+        return this.isBooleanImportConfigType(type)
     }
+
+    isUnknownImportConfigType(type: string | null | undefined): boolean {
+        return !(
+            this.isTextImportConfigType(type) ||
+            this.isNumberImportConfigType(type) ||
+            this.isBooleanImportConfigType(type))
+    }
+
+    isUnknownImportConfig(config: ImportInstanceConfigModel): boolean{
+        const type = this.importRequestConfigValueType.get(config.name);
+        return this.isUnknownImportConfigType(type)
+    }
+
 
     /******************************
      *      Util
@@ -527,6 +571,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     ok(): void {
         this.result.inputs.push({name: "export.request", type: "text", value: this.stringifyExport(this.exportRequest)});
+
+        this.handleUnknownImportConfigAsJsonObject();
         this.result.inputs.push({name: "import.request", type: "text", value: this.stringifyImport(this.importRequest)});
 
         let result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; //prevent changes to the result after filtering
