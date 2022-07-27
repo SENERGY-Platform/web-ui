@@ -41,3 +41,7 @@
 .node-title {
     min-width: fit-content;
 }
+
+.characteristics-allowed-values-wrapper {
+    margin-bottom: 5px;
+}
