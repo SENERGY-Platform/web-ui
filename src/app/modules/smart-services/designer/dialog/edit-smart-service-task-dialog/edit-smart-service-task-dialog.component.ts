@@ -57,6 +57,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     importTypes: ImportTypePermissionSearchModel[] = [];
     knownImportTypes: Map<string, ImportTypeModel> = new Map();
 
+    test: string = "[]";
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
         private processRepo: ProcessRepoService,
@@ -389,7 +391,11 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     handleUnknownImportConfigAsJsonObject(){
         this.importRequest.configs = this.importRequest.configs.map(value => {
             if (this.isUnknownImportConfig(value) && (typeof value.value == "string")) {
-                return {name: value.name, value: JSON.parse(value.value)} as ImportInstanceConfigModel;
+                let newValue = value.value;
+                try{
+                    newValue = JSON.parse(newValue)
+                } catch (e) {}
+                return {name: value.name, value: newValue} as ImportInstanceConfigModel;
             } else {
                 return {name: value.name, value: value.value} as ImportInstanceConfigModel;
             }
@@ -563,6 +569,25 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             })
         }
         return result;
+    }
+
+    isInvalid(): boolean {
+        switch (this.result.topic){
+            case "import":
+                let invalidJsonConfig = false;
+                this.importRequest?.configs?.forEach(value => {
+                    if (this.isUnknownImportConfig(value) && (typeof value.value == "string")) {
+                        try{
+                            JSON.parse(value.value)
+                        } catch (e) {
+                            invalidJsonConfig = true
+                        }
+                    }
+                })
+                return invalidJsonConfig;
+            default:
+                return false;
+        }
     }
 
     close(): void {

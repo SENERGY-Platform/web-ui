@@ -354,9 +354,6 @@
           <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="number">
         </mat-form-field>
         <mat-checkbox class="checkbox-margin" *ngIf="isBooleanImportConfig(config)" [(ngModel)]="importRequest.restart">{{config.name}}</mat-checkbox>
-
-
-        <span *ngIf="isUnknownImportConfig(config)"> {{config.name}} is of unknown type: {{importRequestConfigValueType.get(config.name)}}. pleas set value via Input/Output panel. </span>
         <mat-form-field class="full-width" *ngIf="isUnknownImportConfig(config)">
           <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="text" isValidJson>
         </mat-form-field>
@@ -367,6 +364,5 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="ok()">Ok</button>
+  <button mat-raised-button color="accent" (click)="ok()" [disabled]="isInvalid()">Ok</button>
 </mat-dialog-actions>
-
