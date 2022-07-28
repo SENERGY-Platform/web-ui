@@ -39,7 +39,7 @@ import {AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
 export class EditSmartServiceTaskDialogComponent implements OnInit {
     init: SmartServiceTaskDescription;
     result: SmartServiceTaskDescription;
-    tabs: string[] = ["process_deployment", "analytics", "export", "import"]
+    tabs: string[] = ["process_deployment", "analytics", "export", "import", "info"]
 
     flows: FlowModel[] | null = null
     processModels: ProcessModel[] | null = null
@@ -57,7 +57,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     importTypes: ImportTypePermissionSearchModel[] = [];
     knownImportTypes: Map<string, ImportTypeModel> = new Map();
 
-    test: string = "[]";
+    infoModuleType: string = "widget"
+    infoModuleData: string = "{}"
 
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
@@ -81,6 +82,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if(this.importRequest.import_type_id) {
             this.loadImportType(false);
         }
+
+        this.infoModuleType = this.result.inputs.find(value => value.name == "info.module_type")?.value || "widget";
+        this.infoModuleData = this.result.inputs.find(value => value.name == "info.module_data")?.value || "{}";
     }
 
     ngOnInit() {}
@@ -379,7 +383,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     handleUnknownImportConfigAsJsonString(){
-        this.importRequest.configs = this.importRequest.configs.map(value => {
+        this.importRequest.configs = this.importRequest.configs?.map(value => {
             if (this.isUnknownImportConfig(value)) {
                 return {name: value.name, value: JSON.stringify(value.value)} as ImportInstanceConfigModel;
             } else {
@@ -389,7 +393,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     handleUnknownImportConfigAsJsonObject(){
-        this.importRequest.configs = this.importRequest.configs.map(value => {
+        this.importRequest.configs = this.importRequest.configs?.map(value => {
             if (this.isUnknownImportConfig(value) && (typeof value.value == "string")) {
                 let newValue = value.value;
                 try{
@@ -585,6 +589,14 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                     }
                 })
                 return invalidJsonConfig;
+            case "info":
+                let invalidInfoModuleData = false;
+                try{
+                    JSON.parse(this.infoModuleData)
+                } catch (e) {
+                    invalidInfoModuleData = true
+                }
+                return invalidInfoModuleData;
             default:
                 return false;
         }
@@ -599,6 +611,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
         this.handleUnknownImportConfigAsJsonObject();
         this.result.inputs.push({name: "import.request", type: "text", value: this.stringifyImport(this.importRequest)});
+
+        this.result.inputs.push({name: "info.module_type", type: "text", value: this.infoModuleType});
+        this.result.inputs.push({name: "info.module_data", type: "text", value: this.infoModuleData});
 
         let result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; //prevent changes to the result after filtering
         const temp = result.inputs.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
