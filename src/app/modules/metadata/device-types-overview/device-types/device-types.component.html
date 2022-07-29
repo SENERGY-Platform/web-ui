@@ -208,7 +208,7 @@
                                                                                         (click)="deleteContentVariable(inOut, node.indices)">
                                                                                     <mat-icon>delete_outline</mat-icon>
                                                                                 </button>
-
+                                                                                <mat-icon *ngIf="!node.type" color="warn" matTooltip="missing type">warning</mat-icon>
                                                                             </li>
                                                                         </mat-tree-node>
                                                                         <!-- This is the tree node template for expandable nodes -->
@@ -240,6 +240,7 @@
                                                                                             (click)="addContentVariable(tab.label === 'Input', inOut, node.indices)">
                                                                                         <mat-icon>add</mat-icon>
                                                                                     </button>
+                                                                                    <mat-icon *ngIf="!node.type" color="warn" matTooltip="missing type">warning</mat-icon>
                                                                                 </div>
                                                                                 <ul [class.example-tree-invisible]="!inOut.tree.isExpanded(node)">
                                                                                     <ng-container matTreeNodeOutlet></ng-container>

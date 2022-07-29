@@ -38,3 +38,7 @@ mat-dialog-actions button:not(:last-child) {
 .mat-radio-button ~ .mat-radio-button {
     margin-left: 16px;
 }
+
+.device-type-content-variable-json-dialog-content{
+    min-width: 50vw;
+}

@@ -52,7 +52,9 @@ export class DeviceTypesContentVariableJsonDialogComponent {
             is_void: false,
             serialization_options: [],
         };
-        if (typeof value == "boolean") {
+        if(value === undefined || value === null) {
+
+        } else if (typeof value == "boolean") {
             result.type = 'https://schema.org/Boolean';
         } else if(typeof value === 'string' || value instanceof String){
             result.type = 'https://schema.org/Text';
@@ -72,7 +74,7 @@ export class DeviceTypesContentVariableJsonDialogComponent {
             result.type = 'https://schema.org/Integer';
         } else if (typeof value === 'number') {
             result.type = 'https://schema.org/Float';
-        } else {
+        } else  {
             console.error("unknown value type in valueToContentVariable()", value);
         }
         return result;
