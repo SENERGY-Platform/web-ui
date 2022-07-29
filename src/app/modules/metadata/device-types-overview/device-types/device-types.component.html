@@ -180,10 +180,15 @@
                                                                             noneView="-- None --"></senergy-select-search>
                                                                 </mat-form-field>
                                                                 <div *ngIf="inOut.dataSource">
-                                                                    <button mat-raised-button color="accent"
+                                                                    <button mat-raised-button color="accent" class="button-margin"
                                                                             (click)="addContentVariable(tab.label === 'Input', inOut, [])"
                                                                             [disabled]="inOut.dataSource.data.length === 1 || !editable">
                                                                         ADD ContentVariable
+                                                                    </button>
+                                                                    <button mat-raised-button color="accent" class="button-margin"
+                                                                            (click)="addContentVariableFromJson(inOut,[])"
+                                                                            [disabled]="inOut.dataSource.data.length === 1 || !editable">
+                                                                        Import JSON as ContentVariable
                                                                     </button>
                                                                 </div>
                                                                 <div *ngIf="inOut.dataSource && inOut.tree">
@@ -224,6 +229,11 @@
                                                                                             [disabled]="!editable"
                                                                                             (click)="deleteContentVariable(inOut, node.indices)">
                                                                                         <mat-icon>delete_outline</mat-icon>
+                                                                                    </button>
+                                                                                    <button mat-icon-button
+                                                                                            *ngIf="editable"
+                                                                                            (click)="addContentVariableFromJson(inOut, node.indices)">
+                                                                                        <mat-icon>data_object</mat-icon>
                                                                                     </button>
                                                                                     <button mat-icon-button
                                                                                             [disabled]="!editable"

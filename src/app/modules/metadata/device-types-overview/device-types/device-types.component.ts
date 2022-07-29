@@ -51,6 +51,7 @@ import {debounceTime, map, mergeAll} from 'rxjs/internal/operators';
 import {util} from 'jointjs';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import uuid = util.uuid;
+import {DeviceTypesContentVariableJsonDialogComponent} from './dialogs/device-types-content-variable-json-dialog.component';
 
 interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     tree?: NestedTreeControl<DeviceTypeContentVariableModel>;
@@ -166,6 +167,26 @@ export class DeviceTypesComponent implements OnInit {
         };
         this.dialog
             .open(DeviceTypesContentVariableDialogComponent, dialogConfig)
+            .afterClosed()
+            .subscribe((resp: DeviceTypeContentVariableModel | undefined) => {
+                if (resp) {
+                    this.refreshTree(inOut, this.deviceTypeHelperService.addTreeData(inOut.dataSource.data, resp, indices));
+                }
+            });
+    }
+
+    addContentVariableFromJson(inOut: DeviceTypeContentTreeModel, indices: number[]): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        let node = inOut.dataSource.data[indices[0]];
+        indices.slice(1).forEach(i => node = node.sub_content_variables !== undefined ? node.sub_content_variables[i] : node);
+        dialogConfig.data = {
+            contentVariable: {} as DeviceTypeContentVariableModel,
+            prohibitedNames: node?.sub_content_variables?.map(s => s.name) || [],
+            name: ""
+        };
+        this.dialog
+            .open(DeviceTypesContentVariableJsonDialogComponent, dialogConfig)
             .afterClosed()
             .subscribe((resp: DeviceTypeContentVariableModel | undefined) => {
                 if (resp) {

@@ -57,6 +57,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatTableModule} from '@angular/material/table';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {InputDialogComponent} from './dialogs/input-dialog.component';
+import {IsJsonValidatorDirective} from './validators/is-json-validator.directive';
 
 @NgModule({
     imports: [
@@ -103,7 +104,8 @@ import {InputDialogComponent} from './dialogs/input-dialog.component';
         WidgetNoDataComponent,
         NotificationDialogComponent,
         SelectSearchComponent,
-        ClosableSnackBarComponent
+        ClosableSnackBarComponent,
+        IsJsonValidatorDirective
     ],
     exports: [
         SidenavComponent,
@@ -119,7 +121,8 @@ import {InputDialogComponent} from './dialogs/input-dialog.component';
         ShortInputVariableValuePipe,
         WidgetNoDataComponent,
         SelectSearchComponent,
-        ClosableSnackBarComponent
+        ClosableSnackBarComponent,
+        IsJsonValidatorDirective
     ],
 })
 export class CoreModule {

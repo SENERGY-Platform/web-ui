@@ -16,19 +16,14 @@
 
 import {Directive, Input} from '@angular/core';
 import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn} from '@angular/forms';
+import {jsonValidator} from './json.validator';
 
 @Directive({
     selector: '[isValidJson]',
     providers: [{provide: NG_VALIDATORS, useExisting: IsJsonValidatorDirective, multi: true}]
 })
 export class IsJsonValidatorDirective implements Validator {
-
     validate(control: AbstractControl): ValidationErrors | null {
-        try {
-            JSON.parse(control.value);
-            return null;
-        }catch (e) {
-            return {invalidJson: {exception: e, value: control.value}}
-        }
+        return jsonValidator()(control)
     }
 }

@@ -54,6 +54,10 @@ import { MatTreeModule } from '@angular/material/tree';
 import { DeviceTypesContentVariableDialogComponent } from './device-types/dialogs/device-types-content-variable-dialog.component';
 import { WidgetModule } from '../../../widgets/widget.module';
 import {DragDropModule} from "@angular/cdk/drag-drop";
+import {
+    DeviceTypesContentVariableJsonDialogComponent,
+} from './device-types/dialogs/device-types-content-variable-json-dialog.component';
+import {IsNotProhibitedNameValidatorDirective} from './device-types/shared/is-not-prohibited-name.directive';
 
 const devicetypes = {
     path: 'metadata/devicetypesoverview/devicetypes',
@@ -112,6 +116,8 @@ const devicetypesEdit = {
         DeviceTypesNewAspectDialogComponent,
         DeviceTypesShowConceptDialogComponent,
         DeviceTypesContentVariableDialogComponent,
+        DeviceTypesContentVariableJsonDialogComponent,
+        IsNotProhibitedNameValidatorDirective
     ],
     entryComponents: [
         DeviceTypesNewDeviceClassDialogComponent,
