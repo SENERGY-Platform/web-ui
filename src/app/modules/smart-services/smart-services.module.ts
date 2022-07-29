@@ -57,6 +57,7 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {
     EditSmartServiceInputDialogComponent
 } from './designer/dialog/edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
+import {CheckboxValueDirective} from './designer/shared/string-check-box.directive';
 
 const designs = {
     path: 'smart-services/designs',
@@ -132,7 +133,8 @@ const designer = {
         SmartServiceDesignsComponent,
         SmartServiceDesignerComponent,
         EditSmartServiceTaskDialogComponent,
-        EditSmartServiceInputDialogComponent
+        EditSmartServiceInputDialogComponent,
+        CheckboxValueDirective
     ],
 })
 export class SmartServicesModule {}

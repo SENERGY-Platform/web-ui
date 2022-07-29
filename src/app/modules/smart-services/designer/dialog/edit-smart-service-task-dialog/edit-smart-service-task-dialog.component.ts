@@ -58,7 +58,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     knownImportTypes: Map<string, ImportTypeModel> = new Map();
 
     infoModuleType: string = "widget"
-    infoModuleData: string = "{}"
+    infoModuleData: string = "{\n\n}"
 
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
@@ -84,7 +84,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         }
 
         this.infoModuleType = this.result.inputs.find(value => value.name == "info.module_type")?.value || "widget";
-        this.infoModuleData = this.result.inputs.find(value => value.name == "info.module_data")?.value || "{}";
+        this.infoModuleData = this.result.inputs.find(value => value.name == "info.module_data")?.value || "{\n\n}";
     }
 
     ngOnInit() {}
@@ -276,13 +276,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 this.knownInputValues.get(this.analyticsWindowTimeFieldName) || {name:this.analyticsWindowTimeFieldName, value: "30", type: "text"},
             ];
             inputs.forEach(input => {
-                input.inPorts.forEach(port => {
+                var persistDataKey = "analytics.persistData."+input.id
+                this.result.inputs.push(this.knownInputValues.get(persistDataKey) || {name:persistDataKey, value: "false", type: "text"});
+                input.inPorts?.forEach(port => {
                     const selectionKey = "analytics.selection."+input.id+"."+port;
                     this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
                     const criteriaKey = "analytics.criteria."+input.id+"."+port;
                     this.result.inputs.push(this.knownInputValues.get(criteriaKey) || {name:criteriaKey, value: "[]", type: "text"});
                 })
-                input.config.forEach(config => {
+                input.config?.forEach(config => {
                     const configKey = "analytics.conf."+input.id+"."+config.name;
                     this.result.inputs.push(this.knownInputValues.get(configKey) || {name:configKey, value: "", type: "text"});
                 })
@@ -311,6 +313,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     analyticsInputMatchesIotConfig(input: SmartServiceTaskInputDescription, flowInputId: string, configName: string): boolean {
         return input.name == "analytics.conf."+flowInputId+"."+configName
+    }
+
+    analyticsInputMatchesPersistDataField(input: SmartServiceTaskInputDescription, flowInputId: string): boolean {
+        return input.name == "analytics.persistData."+flowInputId
     }
 
     /******************************
@@ -607,16 +613,22 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     ok(): void {
-        this.result.inputs.push({name: "export.request", type: "text", value: this.stringifyExport(this.exportRequest)});
+        let result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; //prevent changes to the result after filtering
+        let temp = result.inputs.filter(e => e.name.startsWith(result.topic+".") &&
+                                            e.name.startsWith("info.") &&
+                                            e.name.startsWith("import.") &&
+                                            e.name.startsWith("export.")); //filter unused inputs (remove existing info, import and export inputs)
+
+        temp.push({name: "export.request", type: "text", value: this.stringifyExport(this.exportRequest)});
 
         this.handleUnknownImportConfigAsJsonObject();
-        this.result.inputs.push({name: "import.request", type: "text", value: this.stringifyImport(this.importRequest)});
+        temp.push({name: "import.request", type: "text", value: this.stringifyImport(this.importRequest)});
 
-        this.result.inputs.push({name: "info.module_type", type: "text", value: this.infoModuleType});
-        this.result.inputs.push({name: "info.module_data", type: "text", value: this.infoModuleData});
+        temp.push({name: "info.module_type", type: "text", value: this.infoModuleType});
+        temp.push({name: "info.module_data", type: "text", value: this.infoModuleData});
 
-        let result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; //prevent changes to the result after filtering
-        const temp = result.inputs.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
+        temp = result.inputs.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
+
         result.inputs = temp;
         this.dialogRef.close(result);
     }

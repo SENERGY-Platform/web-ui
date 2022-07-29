@@ -169,6 +169,19 @@
                     </div>
                     <mat-divider [inset]="true"></mat-divider>
                     <h4 class="mat-h4">Configurations</h4>
+                    <div>
+                      <ng-container *ngFor="let input of result.inputs">
+                        <mat-checkbox
+                                class="checkbox-margin"
+                                *ngIf="analyticsInputMatchesPersistDataField(input, flowInput.id)"
+                                [(ngModel)]="input.value"
+                                stringCheckboxValue
+                                trueValue="true"
+                                falseValue="false">
+                          Persist Data
+                        </mat-checkbox>
+                      </ng-container>
+                    </div>
                     <div *ngFor="let config of flowInput.config">
                       <ng-container *ngFor="let input of result.inputs">
                         <div *ngIf="analyticsInputMatchesIotConfig(input, flowInput.id, config.name)">
@@ -188,6 +201,11 @@
     </mat-tab>
     <mat-tab label="Export">
       <div class="smart-service-task-tab">
+        <div>
+          <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+          </mat-form-field>
+        </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
             <input matInput placeholder="Name" [(ngModel)]="exportRequest.Name" type="text">
@@ -222,11 +240,6 @@
         <div>
           <mat-form-field  color="accent" class="full-width">
             <input matInput placeholder="Topic" [(ngModel)]="exportRequest.Topic" type="text">
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="Measurement" [(ngModel)]="exportRequest.Measurement" type="text">
           </mat-form-field>
         </div>
         <div>
@@ -300,6 +313,8 @@
                   <mat-select [(ngModel)]="value.Type">
                     <mat-option value="string">string</mat-option>
                     <mat-option value="float">float</mat-option>
+                    <mat-option value="bool">bool</mat-option>
+                    <mat-option value="string_json">string_json</mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>
@@ -321,6 +336,11 @@
       <div class="smart-service-task-tab">
         <div>
           <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field  color="accent" class="full-width">
             <input matInput placeholder="Name" [(ngModel)]="importRequest.name" type="text">
           </mat-form-field>
         </div>
@@ -332,11 +352,6 @@
                 {{importType.name}}
               </mat-option>
             </mat-select>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="Kafka Topic" [(ngModel)]="importRequest.kafka_topic" type="text">
           </mat-form-field>
         </div>
       </div>
@@ -373,7 +388,7 @@
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <textarea matInput placeholder="Module-Data" [(ngModel)]="infoModuleData" type="text" isValidJson></textarea>
+            <textarea matInput rows="3" placeholder="Module-Data" [(ngModel)]="infoModuleData" type="text" isValidJson></textarea>
           </mat-form-field>
         </div>
       </div>
