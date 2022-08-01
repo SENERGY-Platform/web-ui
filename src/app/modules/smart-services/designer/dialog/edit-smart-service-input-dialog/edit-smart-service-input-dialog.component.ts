@@ -40,6 +40,8 @@ import {AspectsService} from '../../../../metadata/aspects/shared/aspects.servic
 import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
 import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceTypeAspectModel, DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
+import {CharacteristicsPermSearchModel} from '../../../../metadata/characteristics/shared/characteristics-perm-search.model';
+import {CharacteristicsService} from '../../../../metadata/characteristics/shared/characteristics.service';
 
 @Component({
     templateUrl: './edit-smart-service-input-dialog.component.html',
@@ -52,13 +54,19 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
     deviceClasses: (DeviceClassesPermSearchModel | {name: string})[] = [];
     nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
 
+    characteristics: CharacteristicsPermSearchModel[] = [];
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceInputDialogComponent>,
         private functionsService: FunctionsService,
         private deviceTypesService: DeviceTypeService,
         private deviceClassService: DeviceClassesService,
+        private characteristicsService: CharacteristicsService,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceInputsDescription, element: BpmnElement},
     ) {
+        this.characteristicsService.getCharacteristics("", 9999, 0, "name", "asc").subscribe(value => {
+            this.characteristics = value;
+        });
         this.functionsService.getFunctions("", 9999, 0, "name", "asc").subscribe(value => {
             this.functions = value;
         })
@@ -113,7 +121,9 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
             if(input.multiple) {
                 properties.push({id: "multiple", value: JSON.stringify(input.multiple)});
             }
-            if(input.options && input.options.length > 0) {
+            if(input.characteristic_id) {
+                properties.push({id: "characteristic_id", value: input.characteristic_id});
+            } else if(input.options && input.options.length > 0) {
                 let obj: any = {};
                 input.options.forEach(element => {
                     obj[element.key] = element.value;
@@ -171,6 +181,9 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
                     if(property.id == "multiple" && property.value != "") {
                         result.multiple = JSON.parse(property.value);
                     }
+                    if(property.id == "characteristic_id" && property.value != "") {
+                        result.characteristic_id = property.value;
+                    }
                     if(property.id == "options" && property.value != "") {
                         let obj = JSON.parse(property.value);
                         result.options = Object.entries(obj).map(([k,v]) =>{ return {key: k, value: v}});
@@ -179,6 +192,9 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
                     console.error(e);
                 }
             })
+            if (result.characteristic_id) {
+                result.options = undefined;
+            }
             return result
         });
     }
@@ -294,6 +310,7 @@ interface AbstractInput {
     entity_only?: boolean;
     same_entity?: string;
     options?:{key: string, value: any}[];
+    characteristic_id?: string;
     order: number;
     multiple: boolean;
 }
