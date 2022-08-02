@@ -615,9 +615,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     ok(): void {
         let result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; //prevent changes to the result after filtering
         let temp = result.inputs.filter(e => e.name.startsWith(result.topic+".") &&
-                                            e.name.startsWith("info.") &&
-                                            e.name.startsWith("import.") &&
-                                            e.name.startsWith("export.")); //filter unused inputs (remove existing info, import and export inputs)
+                                            !e.name.startsWith("info.") &&
+                                            !e.name.startsWith("import.") &&
+                                            !e.name.startsWith("export.")); //filter unused inputs (remove existing info, import and export inputs)
 
         temp.push({name: "export.request", type: "text", value: this.stringifyExport(this.exportRequest)});
 
