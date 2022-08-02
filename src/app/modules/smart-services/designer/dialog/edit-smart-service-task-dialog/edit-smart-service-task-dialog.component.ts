@@ -627,7 +627,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         temp.push({name: "info.module_type", type: "text", value: this.infoModuleType});
         temp.push({name: "info.module_data", type: "text", value: this.infoModuleData});
 
-        temp = result.inputs.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
+        temp = temp.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
 
         result.inputs = temp;
         this.dialogRef.close(result);
