@@ -361,17 +361,22 @@
       <div>
         <mat-checkbox class="checkbox-margin" [(ngModel)]="importRequest.generated">Restart</mat-checkbox>
       </div>
-      <div *ngFor="let config of importRequest.configs">
-        <mat-form-field  color="accent" class="full-width" *ngIf="isTextImportConfig(config)">
+      <div *ngFor="let config of importRequest.configs" class="input-with-overwrite">
+        <mat-form-field  color="accent" class="input-with-overwrite-value" *ngIf="isTextImportConfig(config)">
           <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="text">
         </mat-form-field>
-        <mat-form-field  color="accent" class="full-width" *ngIf="isNumberImportConfig(config)">
+        <mat-form-field  color="accent" class="input-with-overwrite-value" *ngIf="isNumberImportConfig(config)">
           <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="number">
         </mat-form-field>
         <mat-checkbox class="checkbox-margin" *ngIf="isBooleanImportConfig(config)" [(ngModel)]="importRequest.restart">{{config.name}}</mat-checkbox>
-        <mat-form-field  color="accent" class="full-width" *ngIf="isUnknownImportConfig(config)">
+        <mat-form-field  color="accent" class="input-with-overwrite-value" *ngIf="isUnknownImportConfig(config)">
           <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="text" isValidJson>
         </mat-form-field>
+        <ng-container *ngFor="let overwrite of importOverwrites">
+          <mat-form-field *ngIf="overwrite.config_name == config.name" color="accent" class="input-with-overwrite-overwrite">
+            <input matInput placeholder="{{config.name}} overwrite with placeholder evaluated as json" [(ngModel)]="overwrite.json_value" type="text">
+          </mat-form-field>
+        </ng-container>
       </div>
     </mat-tab>
     <mat-tab label="Info">

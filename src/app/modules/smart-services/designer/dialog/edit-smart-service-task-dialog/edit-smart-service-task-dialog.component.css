@@ -29,3 +29,17 @@ mat-dialog-actions button:not(:last-child) {
 .edit-smart-service-task-dialog button {
     margin-top: 15px;
 }
+
+.input-with-overwrite {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.input-with-overwrite-value {
+    width: 45%;
+}
+
+.input-with-overwrite-overwrite {
+    width: 45%;
+}

@@ -56,6 +56,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     importRequestConfigValueType: Map<string,string> = new Map();
     importTypes: ImportTypePermissionSearchModel[] = [];
     knownImportTypes: Map<string, ImportTypeModel> = new Map();
+    importOverwrites: {config_name: string, json_value: string}[] = [];
 
     infoModuleType: string = "widget"
     infoModuleData: string = "{\n\n}"
@@ -417,7 +418,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.importRequest.restart = importType.default_restart;
         this.importRequest.configs = importType.configs.map(value => {
             return {name: value.name, value: value.default_value} as ImportInstanceConfigModel;
-        })
+        });
     }
 
     loadImportType(updateConfigs: boolean){
@@ -429,6 +430,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                     this.generateImportFields(importType);
                 }
                 this.handleUnknownImportConfigAsJsonString();
+                this.loadImportConfigOverwrites(importType, !updateConfigs);
             }else{
                 this.importTypeService.getImportType(this.importRequest.import_type_id).subscribe(value => {
                     this.knownImportTypes.set(this.importRequest.import_type_id, value);
@@ -437,9 +439,24 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                         this.generateImportFields(value);
                     }
                     this.handleUnknownImportConfigAsJsonString();
+                    this.loadImportConfigOverwrites(value, !updateConfigs);
                 })
             }
         }
+    }
+
+    private loadImportConfigOverwrites(importType: ImportTypeModel, isInit: boolean) {
+        this.importOverwrites = [];
+        let known: Map<string, string> = new Map();
+        if(isInit) {
+            this.result.inputs.filter(value => value.name.startsWith("import.config.json_overwrite.")).forEach(value => {
+                known.set(value.name.replace("import.config.json_overwrite.", ""), value.value);
+            })
+        }
+        this.importOverwrites = importType.configs.map(value => {
+            return {config_name: value.name, json_value: known.get(value.name) || ""};
+        })
+
     }
 
     set importTypeId(id: string){
@@ -623,6 +640,11 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
         this.handleUnknownImportConfigAsJsonObject();
         temp.push({name: "import.request", type: "text", value: this.stringifyImport(this.importRequest)});
+        this.importOverwrites.forEach(value => {
+            if(value.json_value) {
+                temp.push({name: "import.config.json_overwrite."+value.config_name, type: "text", value: value.json_value})
+            }
+        })
 
         temp.push({name: "info.module_type", type: "text", value: this.infoModuleType});
         temp.push({name: "info.module_data", type: "text", value: this.infoModuleData});
