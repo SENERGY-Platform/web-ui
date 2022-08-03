@@ -221,7 +221,6 @@
             <mat-label>FilterType</mat-label>
             <mat-select [(ngModel)]="exportRequest.FilterType">
               <mat-option value="deviceId">deviceId</mat-option>
-              <mat-option value="pipeId">pipeId</mat-option>
               <mat-option value="operatorId">operatorId</mat-option>
               <mat-option value="import_id">import_id</mat-option>
             </mat-select>
@@ -230,6 +229,7 @@
         <div>
           <mat-form-field  color="accent" class="full-width">
             <input matInput placeholder="Filter" [(ngModel)]="exportRequest.Filter" type="text">
+            <mat-hint *ngIf="exportRequest.FilterType == 'operatorId'">&lt;pipeline-id&gt;:&lt;operator-id&gt; with the operator-id from the flow-parser and not from the operator-repository</mat-hint>
           </mat-form-field>
         </div>
         <div>
