@@ -137,6 +137,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
         id: "smart-service-task-button",
         html: "<button class='bpmn-iot-button' data-action='editSmartServiceTask'>Edit Smart-Service Task</button>",
         editSmartServiceTask: function (element, node) {
+            const taskId = element.id;
             bpmnjs.designerCallbacks.openTaskEditDialog(getTaskInfoFromElement(element), element, function (taskInfo) {
                 toExternalServiceTask(bpmnFactory, replace, selection, element, function (serviceTask, element) {
                     serviceTask.topic = taskInfo.topic;
@@ -157,16 +158,16 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                     var outputs = [];
                     switch (serviceTask.topic){
                         case "process_deployment":
-                            outputs = [createTextOutputParameter(bpmnjs, element.businessObject.id+"_process_deployment_id", "${process_deployment_id}")];
+                            outputs = [createTextOutputParameter(bpmnjs, taskId+"_process_deployment_id", "${process_deployment_id}")];
                             break;
                         case "analytics":
-                            outputs = [createTextOutputParameter(bpmnjs, element.businessObject.id+"_pipeline_id", "${pipeline_id}")];
+                            outputs = [createTextOutputParameter(bpmnjs, taskId+"_pipeline_id", "${pipeline_id}")];
                             break;
                         case "export":
-                            outputs = [createTextOutputParameter(bpmnjs, element.businessObject.id+"_export_id", "${export_id}")];
+                            outputs = [createTextOutputParameter(bpmnjs, taskId+"_export_id", "${export_id}")];
                             break;
                         case "import":
-                            outputs = [createTextOutputParameter(bpmnjs, element.businessObject.id+"_import_id", "${import_id}")];
+                            outputs = [createTextOutputParameter(bpmnjs, taskId+"_import_id", "${import_id}")];
                             break;
                     }
 
