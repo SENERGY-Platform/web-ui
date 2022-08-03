@@ -208,7 +208,7 @@
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="Name" [(ngModel)]="exportRequest.Name" type="text">
+            <input matInput placeholder="Name" [(ngModel)]="exportRequest.Name" type="text" required>
           </mat-form-field>
         </div>
         <div>
@@ -219,7 +219,7 @@
         <div>
           <mat-form-field  color="accent" class="full-width">
             <mat-label>FilterType</mat-label>
-            <mat-select [(ngModel)]="exportRequest.FilterType">
+            <mat-select [(ngModel)]="exportRequest.FilterType" required>
               <mat-option value="deviceId">deviceId</mat-option>
               <mat-option value="operatorId">operatorId</mat-option>
               <mat-option value="import_id">import_id</mat-option>
@@ -228,38 +228,33 @@
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="Filter" [(ngModel)]="exportRequest.Filter" type="text">
+            <input matInput placeholder="Filter" [(ngModel)]="exportRequest.Filter" type="text" required>
             <mat-hint *ngIf="exportRequest.FilterType == 'operatorId'">&lt;pipeline-id&gt;:&lt;operator-id&gt; with the operator-id from the flow-parser and not from the operator-repository</mat-hint>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="EntityName" [(ngModel)]="exportRequest.EntityName" type="text">
+            <input matInput placeholder="EntityName" [(ngModel)]="exportRequest.EntityName" type="text" required>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="Topic" [(ngModel)]="exportRequest.Topic" type="text">
+            <input matInput placeholder="Topic" [(ngModel)]="exportRequest.Topic" type="text" required>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="DatabaseType" [(ngModel)]="exportRequest.DatabaseType" type="text">
+            <input matInput placeholder="ExportDatabaseID" [(ngModel)]="exportRequest.ExportDatabaseID" type="text" required>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="Database" [(ngModel)]="exportRequest.Database" type="text">
+            <input matInput placeholder="TimePath" [(ngModel)]="exportRequest.TimePath" type="text" required>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="DbId" [(ngModel)]="exportRequest.DbId" type="text">
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="TimePath" [(ngModel)]="exportRequest.TimePath" type="text">
+            <input matInput placeholder="TimestampFormat" [(ngModel)]="exportRequest.TimestampFormat" type="text" required>
           </mat-form-field>
         </div>
         <div>
@@ -269,25 +264,20 @@
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="ServiceName" [(ngModel)]="exportRequest.ServiceName" type="text">
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="ServiceName" [(ngModel)]="exportRequest.ServiceName" type="text">
+            <input matInput placeholder="ServiceName" [(ngModel)]="exportRequest.ServiceName" type="text" required>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
             <mat-label>Offset</mat-label>
-            <mat-select [(ngModel)]="exportRequest.Offset">
+            <mat-select [(ngModel)]="exportRequest.Offset" required>
               <mat-option value="largest">largest</mat-option>
               <mat-option value="smallest">smallest</mat-option>
             </mat-select>
           </mat-form-field>
         </div>
         <div>
-          <mat-checkbox class="checkbox-margin" [(ngModel)]="exportRequest.Generated">Generated</mat-checkbox>
+          <mat-checkbox class="checkbox-margin" [(ngModel)]="exportRequest.generated">Generated</mat-checkbox>
         </div>
         <mat-accordion>
           <mat-expansion-panel *ngFor="let value of exportRequest.Values; let i = index">
@@ -299,18 +289,18 @@
             <div>
               <div>
                 <mat-form-field  color="accent" class="full-width">
-                  <input matInput placeholder="Name" [(ngModel)]="value.Name" type="text">
+                  <input matInput placeholder="Name" [(ngModel)]="value.Name" type="text" required>
                 </mat-form-field>
               </div>
               <div>
                 <mat-form-field  color="accent" class="full-width">
-                  <input matInput placeholder="Path" [(ngModel)]="value.Path" type="text">
+                  <input matInput placeholder="Path" [(ngModel)]="value.Path" type="text" required>
                 </mat-form-field>
               </div>
               <div>
                 <mat-form-field  color="accent" class="full-width">
                   <mat-label>Type</mat-label>
-                  <mat-select [(ngModel)]="value.Type">
+                  <mat-select [(ngModel)]="value.Type" required>
                     <mat-option value="string">string</mat-option>
                     <mat-option value="float">float</mat-option>
                     <mat-option value="bool">bool</mat-option>

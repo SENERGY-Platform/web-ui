@@ -16,7 +16,7 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {SmartServiceTaskInputDescription, SmartServiceTaskDescription} from '../../shared/designer.model';
+import {SmartServiceTaskInputDescription, SmartServiceTaskDescription, ServingRequest} from '../../shared/designer.model';
 import {ProcessRepoService} from '../../../../processes/process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../../../../processes/deployments/shared/deployments.service';
 import {ProcessModel} from '../../../../processes/process-repo/shared/process.model';
@@ -26,7 +26,6 @@ import {FlowModel} from '../../../../data/flow-repo/shared/flow.model';
 import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
 import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
 import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../processes/designer/shared/designer.model';
-import {ExportModel} from '../../../../exports/shared/export.model';
 import {ImportInstanceConfigModel, ImportInstancesModel} from '../../../../imports/import-instances/shared/import-instances.model';
 import {ImportTypeModel, ImportTypePermissionSearchModel} from '../../../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
@@ -51,7 +50,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     availableProcessVariables: Map<string,BpmnParameterWithLabel[]> = new Map();
 
-    exportRequest: ExportModel;
+    exportRequest: ServingRequest;
     importRequest: ImportInstancesModel;
     importRequestConfigValueType: Map<string,string> = new Map();
     importTypes: ImportTypePermissionSearchModel[] = [];
@@ -335,36 +334,17 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if(!this.exportRequest.Values){
             this.exportRequest.Values = [];
         }
-        this.exportRequest?.Values.push({Name: "", Path: "", Type: "string", Tag: false, LastValue: null, InstanceID: ""})
+        this.exportRequest?.Values.push({Name: "", Path: "", Type: "string", Tag: false})
     }
 
-    parseExport(str: string): ExportModel {
+    parseExport(str: string): ServingRequest {
         return JSON.parse(str)
     }
 
-    stringifyExport(exp: ExportModel | undefined | null) {
+    stringifyExport(exp: ServingRequest | undefined | null) {
         if(!exp) {
             exp = this.parseExport("{}");
         }
-        let unsetEmptyString = function (value: string | undefined): string | undefined {
-            if(value && value == "") {
-                return undefined;
-            }
-            return value
-        }
-        exp.ID = unsetEmptyString(exp.ID);
-        exp.FilterType = unsetEmptyString(exp.FilterType);
-        exp.Name = unsetEmptyString(exp.Name);
-        exp.Description = unsetEmptyString(exp.Description);
-        exp.EntityName = unsetEmptyString(exp.EntityName);
-        exp.Topic = unsetEmptyString(exp.Topic);
-        exp.Measurement = unsetEmptyString(exp.Measurement);
-        exp.Database = unsetEmptyString(exp.Database);
-        exp.TimePath = unsetEmptyString(exp.TimePath);
-        exp.TimePrecision = unsetEmptyString(exp.TimePrecision);
-        exp.DbId = unsetEmptyString(exp.DbId);
-        exp.DatabaseType = unsetEmptyString(exp.DatabaseType);
-
         return JSON.stringify(exp);
     }
 
@@ -600,6 +580,41 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     isInvalid(): boolean {
         switch (this.result.topic){
+            case "export":
+                if(!this.exportRequest.Name) {
+                    return true;
+                }
+                if(!this.exportRequest.EntityName) {
+                    return true;
+                }
+                if(!this.exportRequest.FilterType) {
+                    return true;
+                }
+                if(!this.exportRequest.Filter) {
+                    return true;
+                }
+                if(!this.exportRequest.Topic) {
+                    return true;
+                }
+                if(!this.exportRequest.ExportDatabaseID) {
+                    return true;
+                }
+                if(!this.exportRequest.TimePath) {
+                    return true;
+                }
+                if(!this.exportRequest.TimestampFormat) {
+                    return true;
+                }
+                if(!this.exportRequest.ServiceName) {
+                    return true;
+                }
+                if(!this.exportRequest.Offset) {
+                    return true;
+                }
+                if(this.exportRequest.Values?.find(value => !value.Name || !value.Path)) {
+                   return true;
+                }
+                return false
             case "import":
                 let invalidJsonConfig = false;
                 this.importRequest?.configs?.forEach(value => {

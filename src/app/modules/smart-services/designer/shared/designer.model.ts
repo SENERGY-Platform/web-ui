@@ -43,3 +43,28 @@ export interface SmartServiceInputProperty {
     id: string;
     value: string;
 }
+
+export interface ServingRequest {
+    FilterType: string
+    Filter: string
+    Name: string
+    EntityName: string
+    ServiceName: string
+    Description?: string
+    Topic: string
+    TimePath: string
+    TimePrecision: string
+    generated: boolean
+    Offset: string
+    ForceUpdate: boolean
+    Values: ServingRequestValue[]
+    ExportDatabaseID: string
+    TimestampFormat: string
+}
+
+export interface ServingRequestValue {
+    Name: string;
+    Path: string;
+    Type: string;
+    Tag?: boolean;
+}
