@@ -369,26 +369,26 @@
               <mat-icon>data_object</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="appendParam(overwrite, param, overwriterJsonInput)">
-                IoT: {{param.label || param.name || param.value}}
+              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="appendParam(overwrite, param, overwriterJsonInput)" [matTooltip]="param.name">
+                IoT: {{param.label || param.name}}
               </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')" (click)="appendParam(overwrite, param, overwriterJsonInput)">
-                Value: {{param.label || param.name || param.value}}
+              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')" (click)="appendParam(overwrite, param, overwriterJsonInput)" [matTooltip]="param.name">
+                Value: {{param.label || param.name}}
               </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="appendParam(overwrite, param, overwriterJsonInput)">
-                Process-Output: {{param.label || param.name || param.value}}
+              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="appendParam(overwrite, param, overwriterJsonInput)" [matTooltip]="param.name">
+                {{param.label || param.name}}
               </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')" (click)="appendParam(overwrite, param, overwriterJsonInput)">
-                Analytics-Output: {{param.label || param.name || param.value}}
+              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')" (click)="appendParam(overwrite, param, overwriterJsonInput)" [matTooltip]="param.name">
+                {{param.label || param.name}}
               </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')" (click)="appendParam(overwrite, param, overwriterJsonInput)">
-                Export-Output: {{param.label || param.name || param.value}}
+              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')" (click)="appendParam(overwrite, param, overwriterJsonInput)" [matTooltip]="param.name">
+                {{param.label || param.name}}
               </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="appendParam(overwrite, param, overwriterJsonInput)">
-                Import-Output: {{param.label || param.name || param.value}}
+              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="appendParam(overwrite, param, overwriterJsonInput)" [matTooltip]="param.name">
+                {{param.label || param.name}}
               </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')" (click)="appendParam(overwrite, param, overwriterJsonInput)">
-                {{param.label || param.name || param.value}}
+              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')" (click)="appendParam(overwrite, param, overwriterJsonInput)" [matTooltip]="param.name">
+                {{param.label || param.name}}
               </button>
             </mat-menu>
           </mat-form-field>

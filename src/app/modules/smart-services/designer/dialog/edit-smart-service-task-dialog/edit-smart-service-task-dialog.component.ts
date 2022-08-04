@@ -531,7 +531,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             return result;
         }
 
-        let add = (key: string, value: BpmnParameterWithLabel[]) => {
+        let add = (key: string, value: BpmnParameterWithLabel[], element?: any) => {
+            if(element && element.name) {
+                value = value.map(e => {
+                    if(!e.label) {
+                        e.label = element.name + ": " + e.name
+                    }
+                    return e;
+                })
+            }
             let temp = result.get(key) || [];
             temp = temp.concat(value);
             result.set(key, temp);
@@ -548,9 +556,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             ) {
                 if(incoming.businessObject.topic) {
                     const topic = incoming.businessObject.topic;
-                    add(topic, incoming.businessObject.extensionElements.values[0].outputParameters)
+                    add(topic, incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
                 } else {
-                    add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters)
+                    add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
                 }
             }
             if (
