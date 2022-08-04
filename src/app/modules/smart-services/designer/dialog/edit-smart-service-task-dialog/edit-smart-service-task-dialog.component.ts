@@ -589,14 +589,17 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         return result;
     }
 
-    appendParam(overwrite: {config_name: string; json_value: string}, param: BpmnParameterWithLabel, element: HTMLInputElement) {
+    appendParam(value: string, param: BpmnParameterWithLabel, element: HTMLInputElement): string {
         const placeholder = "${"+param.name+"}";
         let position = 0;
+        if(!value) {
+            return placeholder;
+        }
         if (element.selectionStart) {
             position = element.selectionStart;
-            overwrite.json_value = [overwrite.json_value.slice(0, position), placeholder, overwrite.json_value.slice(position)].join('')
+            return [value.slice(0, position), placeholder, value.slice(position)].join('')
         } else {
-            overwrite.json_value = overwrite.json_value + placeholder;
+            return value + placeholder;
         }
     }
 
