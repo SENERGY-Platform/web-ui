@@ -154,6 +154,9 @@
                               <mat-option *ngFor="let variable of availableProcessVariables.get('iot_form_fields') || []" [value]="'${'+variable.name+'}'">
                                 {{variable.label || variable.name}}
                               </mat-option>
+                              <mat-option *ngFor="let variable of availableProcessVariables.get('import') || []" [value]="analyticsGetImportIotEntityTemplate(variable)">
+                                {{variable.label || variable.name}}
+                              </mat-option>
                             </mat-select>
                           </mat-form-field>
                           <mat-form-field  color="accent" class="full-width">

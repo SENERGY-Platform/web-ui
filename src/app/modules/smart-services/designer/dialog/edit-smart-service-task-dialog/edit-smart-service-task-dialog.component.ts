@@ -303,6 +303,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         }
     }
 
+    analyticsGetImportIotEntityTemplate(variable: BpmnParameterWithLabel){
+        return "{\"import_selection\": {\"id\":\"${"+variable.name+"}\", \"path\": \"\"}}"
+    }
+
     analyticsInputMatchesIotSelection(input: SmartServiceTaskInputDescription, flowInputId: string, port: string): boolean {
         return input.name == "analytics.selection."+flowInputId+"."+port
     }
