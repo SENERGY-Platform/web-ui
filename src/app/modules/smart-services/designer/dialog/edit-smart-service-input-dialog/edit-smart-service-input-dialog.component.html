@@ -61,6 +61,11 @@
 
                     <ng-container *ngIf="input.iot_selectors">
                         <div>
+                            <mat-checkbox [(ngModel)]="input.entity_only" matTooltip="check if you want the options to only contain the entity itself, without services or paths. tasks that receive this option often need more criteria information.">
+                                EntityOnly
+                            </mat-checkbox>
+                        </div>
+                        <div>
                             <mat-form-field class="full-width" color="accent" >
                                 <mat-label>Iot-Selectors</mat-label>
                                 <mat-select [(ngModel)]="input.iot_selectors" multiple>

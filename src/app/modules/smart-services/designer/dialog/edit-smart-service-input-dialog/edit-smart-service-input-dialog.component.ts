@@ -109,8 +109,8 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
                 })
                 properties.push({id: "criteria_list", value: JSON.stringify(input.criteria_list)});
             }
-            if(input.entity_only) {
-                properties.push({id: "entity_only", value: JSON.stringify(input.criteria_list)});
+            if(input.entity_only && input.iot_selectors && input.iot_selectors.length > 0) {
+                properties.push({id: "entity_only", value: "true"});
             }
             if(input.same_entity) {
                 properties.push({id: "same_entity", value: input.same_entity});
