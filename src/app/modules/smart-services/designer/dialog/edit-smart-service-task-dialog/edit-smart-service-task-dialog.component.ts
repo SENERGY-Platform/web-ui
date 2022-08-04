@@ -544,11 +544,14 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 incoming.businessObject.extensionElements &&
                 incoming.businessObject.extensionElements.values &&
                 incoming.businessObject.extensionElements.values[0] &&
-                incoming.businessObject.extensionElements.values[0].outputParameters &&
-                incoming.businessObject.topic
+                incoming.businessObject.extensionElements.values[0].outputParameters
             ) {
-                const topic = incoming.businessObject.topic;
-                add(topic, incoming.businessObject.extensionElements.values[0].outputParameters)
+                if(incoming.businessObject.topic) {
+                    const topic = incoming.businessObject.topic;
+                    add(topic, incoming.businessObject.extensionElements.values[0].outputParameters)
+                } else {
+                    add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters)
+                }
             }
             if (
                 incoming.businessObject.$type == "bpmn:StartEvent" &&
@@ -576,6 +579,17 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             })
         }
         return result;
+    }
+
+    appendParam(overwrite: {config_name: string; json_value: string}, param: BpmnParameterWithLabel, element: HTMLInputElement) {
+        const placeholder = "${"+param.name+"}";
+        let position = 0;
+        if (element.selectionStart) {
+            position = element.selectionStart;
+            overwrite.json_value = [overwrite.json_value.slice(0, position), placeholder, overwrite.json_value.slice(position)].join('')
+        } else {
+            overwrite.json_value = overwrite.json_value + placeholder;
+        }
     }
 
     isInvalid(): boolean {
