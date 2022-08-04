@@ -35,6 +35,7 @@ import {
 import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
 import {AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
 import {subtract} from 'lodash';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -52,10 +53,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     parsedFlows: Map<string, ParseModel[]> = new Map<string, ParseModel[]>();
     currentParsedFlows: ParseModel[] = []
+    flowSvg: string | SafeHtml = ""
 
     availableProcessVariables: Map<string,BpmnParameterWithLabel[]> = new Map();
-
-    flowIdToOperator: Map<string,ParseModel> = new Map();
 
     exportRequest: ServingRequest;
     importRequest: ImportInstancesModel;
@@ -74,6 +74,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         private flowService: FlowRepoService,
         private flowParser: ParserService,
         private importTypeService: ImportTypesService,
+        private sanitizer: DomSanitizer,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription, element: BpmnElement},
     ) {
         if(!dialogParams.info.topic) {
@@ -274,7 +275,34 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.setFieldValue(this.analyticsWindowTimeFieldName, "text", value.toString())
     }
 
+    getAnalyticsFlowImage(svgIn: string | SafeHtml, input: ParseModel): SafeHtml {
+        if(!svgIn) {
+            return "";
+        }
+        if (typeof svgIn !== 'string') {
+            return "";
+        }
+        const parser = new DOMParser();
+        const svg = parser.parseFromString(svgIn, 'image/svg+xml').getElementsByTagName('svg')[0];
+
+        const elements = svg.getElementsByClassName('joint-cell');
+        // @ts-ignore
+        for (const element of elements) {
+            if (element.attributes['model-id'].value === input.id) {
+                for (const node of element.childNodes) {
+                    if (node.attributes['stroke'] !== undefined && node.attributes['stroke'].value === 'black') {
+                        node.attributes['stroke'].value = 'red';
+                    }
+                }
+            }
+        }
+        return this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
+    }
+
     private ensureAnalyticsFlowParameter(flowId: string) {
+        this.flowService.getFlow(flowId).subscribe(flow => {
+            this.flowSvg = flow?.image || "";
+        })
         let f = (inputs: ParseModel[]) => {
             this.currentParsedFlows = inputs;
             this.result.inputs.forEach(e => this.knownInputValues.set(e.name, e));

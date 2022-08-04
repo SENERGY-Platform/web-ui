@@ -143,6 +143,9 @@
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <div>
+                    <div fxFill>
+                      <div class="image-svg-wrapper" [innerHtml]="getAnalyticsFlowImage(flowSvg, flowInput)"></div>
+                    </div>
                     <div *ngFor="let port of flowInput.inPorts">
                       <mat-divider [inset]="true"></mat-divider>
                       <h4 class="mat-h4">{{port}}</h4>

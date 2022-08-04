@@ -43,3 +43,14 @@ mat-dialog-actions button:not(:last-child) {
 .input-with-overwrite-overwrite {
     width: 45%;
 }
+
+.image-svg-wrapper {
+    height: 300px;
+    width: 720px;
+    background-color: #f5f5f5;
+    margin-bottom: 30px;
+}
+
+.image-svg-wrapper > svg{
+    width: 100%; height: auto;
+}
