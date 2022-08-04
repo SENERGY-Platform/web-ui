@@ -27,9 +27,14 @@ import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
 import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
 import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../processes/designer/shared/designer.model';
 import {ImportInstanceConfigModel, ImportInstancesModel} from '../../../../imports/import-instances/shared/import-instances.model';
-import {ImportTypeModel, ImportTypePermissionSearchModel} from '../../../../imports/import-types/shared/import-types.model';
+import {
+    ImportTypeContentVariableModel,
+    ImportTypeModel,
+    ImportTypePermissionSearchModel
+} from '../../../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
 import {AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
+import {subtract} from 'lodash';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -78,7 +83,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.init = dialogParams.info;
         this.ensureResultFields();
         this.availableProcessVariables = this.getIncomingOutputs(dialogParams.element);
-        this.addPipelineWithOperatorIdOptionsToAvailableVariables()
+        this.addPipelineWithOperatorIdOptionsToAvailableVariables();
+        this.addImportIotEntityWithPathToAvailableVariables();
         this.exportRequest = this.parseExport(this.result.inputs.find(value => value.name == "export.request")?.value || "{}");
         this.importRequest = this.parseImport(this.result.inputs.find(value => value.name == "import.request")?.value || "{}");
         this.importTypeService.listImportTypes("", 9999, 0, "name.asc").subscribe(value => this.importTypes = value);
@@ -572,6 +578,24 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                             value: flowId || ""
                         }]);
                     }
+                    if(topic == "import" && incoming.businessObject.extensionElements.values[0].outputParameters?.length && incoming.businessObject.extensionElements.values[0].outputParameters?.length > 0) {
+                        try{
+                            const importRequestStr = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name == "import.request")?.value;
+                            if(importRequestStr) {
+                                let importRequest = JSON.parse(importRequestStr);
+                                if (importRequest.import_type_id) {
+                                    const importType = importRequest.import_type_id;
+                                    add("import_selection_raw", [{
+                                        name: incoming.businessObject.extensionElements.values[0].outputParameters[0].name,
+                                        label: (incoming.businessObject as any).name,
+                                        value: importType || ""
+                                    }]);
+                                }
+                            }
+                        }catch (e) {
+                            console.error(e);
+                        }
+                    }
                 } else {
                     add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
                 }
@@ -618,6 +642,48 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
             })
         })
+    }
+
+    private addImportIotEntityWithPathToAvailableVariables() {
+        if(!this.availableProcessVariables.get("import_selection")) {
+            this.availableProcessVariables.set("import_selection", []);
+        }
+        let importSelectionRaw = this.availableProcessVariables.get("import_selection_raw")?.filter(value => value.value);
+        importSelectionRaw?.forEach(importSelection => {
+            this.importTypeService.getImportType(importSelection.value).subscribe(importType => {
+                this.getImportTypeOutputPathsFormSubElements(importType.output.sub_content_variables).forEach(path => {
+                    const selection =  "{\"import_selection\": {\"id\":\"${"+importSelection.name+"}\", \"path\": \""+path+"\"}}";
+                    this.availableProcessVariables.get("import_selection")?.push({name: selection, label: importSelection.label + ": " + path, value: ""})
+                })
+            })
+        })
+    }
+
+    private getImportTypeOutputPathsFormSubElements(importOutputs: ImportTypeContentVariableModel[] | null, current?: string[]): string[] {
+        if(!current) {
+            current = [];
+        }
+        if(!importOutputs|| importOutputs.length == 0) {
+            return [current.join(".")]
+        } else {
+            let result: string[] = [];
+            importOutputs.forEach(sub => {
+                result = result.concat(this.getImportTypeOutputPaths(sub, JSON.parse(JSON.stringify(current))))
+            });
+            return result
+        }
+    }
+
+    private getImportTypeOutputPaths(importOutputs: ImportTypeContentVariableModel, current?: string[]): string[] {
+        if(!current) {
+            current = [];
+        }
+        current.push(importOutputs.name);
+        if(!importOutputs.sub_content_variables || importOutputs.sub_content_variables.length == 0) {
+            return [current.join(".")]
+        } else {
+            return this.getImportTypeOutputPathsFormSubElements(importOutputs.sub_content_variables, current);
+        }
     }
 
     appendParam(value: string, param: BpmnParameterWithLabel, element: HTMLInputElement): string {
