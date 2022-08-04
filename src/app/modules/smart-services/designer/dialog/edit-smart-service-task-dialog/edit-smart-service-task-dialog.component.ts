@@ -50,6 +50,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     availableProcessVariables: Map<string,BpmnParameterWithLabel[]> = new Map();
 
+    flowIdToOperator: Map<string,ParseModel> = new Map();
+
     exportRequest: ServingRequest;
     importRequest: ImportInstancesModel;
     importRequestConfigValueType: Map<string,string> = new Map();
@@ -76,6 +78,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.init = dialogParams.info;
         this.ensureResultFields();
         this.availableProcessVariables = this.getIncomingOutputs(dialogParams.element);
+        this.addPipelineWithOperatorIdOptionsToAvailableVariables()
         this.exportRequest = this.parseExport(this.result.inputs.find(value => value.name == "export.request")?.value || "{}");
         this.importRequest = this.parseImport(this.result.inputs.find(value => value.name == "import.request")?.value || "{}");
         this.importTypeService.listImportTypes("", 9999, 0, "name.asc").subscribe(value => this.importTypes = value);
@@ -560,7 +563,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             ) {
                 if(incoming.businessObject.topic) {
                     const topic = incoming.businessObject.topic;
-                    add(topic, incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
+                    add(topic, incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject);
+                    if(topic == "analytics" && incoming.businessObject.extensionElements.values[0].outputParameters?.length && incoming.businessObject.extensionElements.values[0].outputParameters?.length > 0) {
+                        const flowId = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name == "analytics.flow_id")?.value;
+                        add("flow_selection_raw", [{
+                            name: incoming.businessObject.extensionElements.values[0].outputParameters[0].name,
+                            label: (incoming.businessObject as any).name,
+                            value: flowId || ""
+                        }]);
+                    }
                 } else {
                     add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
                 }
@@ -591,6 +602,22 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             })
         }
         return result;
+    }
+
+    private addPipelineWithOperatorIdOptionsToAvailableVariables() {
+        if(!this.availableProcessVariables.get("flow_selection")) {
+            this.availableProcessVariables.set("flow_selection", []);
+        }
+        let flowSelectionRaw = this.availableProcessVariables.get("flow_selection_raw")?.filter(value => value.value);
+        flowSelectionRaw?.forEach(flowSelection => {
+            this.flowParser.getInputs(flowSelection.value).subscribe(fields => {
+                fields?.forEach(value => {
+                    const pipelineFlowSelection = "${"+flowSelection.name+"}:"+value.id;
+                    this.availableProcessVariables.get("flow_selection")?.push({name: pipelineFlowSelection, label: flowSelection.label + ": " + value.name, value: ""})
+                })
+
+            })
+        })
     }
 
     appendParam(value: string, param: BpmnParameterWithLabel, element: HTMLInputElement): string {

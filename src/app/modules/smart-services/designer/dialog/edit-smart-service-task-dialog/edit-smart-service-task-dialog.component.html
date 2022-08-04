@@ -232,30 +232,21 @@
         <div>
           <mat-form-field  color="accent" class="full-width">
             <input matInput placeholder="Filter" [(ngModel)]="exportRequest.Filter" type="text" #filterInput required>
-            <mat-hint *ngIf="exportRequest.FilterType == 'operatorId'">&lt;pipeline-id&gt;:&lt;operator-id&gt; with the operator-id from the flow-parser and not from the operator-repository</mat-hint>
             <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
               <mat-icon>data_object</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="exportRequest.Filter = appendParam(exportRequest.Filter, param, filterInput)" [matTooltip]="param.name">
-                IoT: {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')" (click)="exportRequest.Filter = appendParam(exportRequest.Filter, param, filterInput)" [matTooltip]="param.name">
-                Value: {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="exportRequest.Filter = appendParam(exportRequest.Filter, param, filterInput)" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')" (click)="exportRequest.Filter = appendParam(exportRequest.Filter, param, filterInput)" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')" (click)="exportRequest.Filter = appendParam(exportRequest.Filter, param, filterInput)" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="exportRequest.Filter = appendParam(exportRequest.Filter, param, filterInput)" [matTooltip]="param.name">
-                {{param.label || param.name}}
-              </button>
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')" (click)="exportRequest.Filter = appendParam(exportRequest.Filter, param, filterInput)" [matTooltip]="param.name">
+              <ng-container *ngIf="exportRequest.FilterType == 'operatorId'">
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('flow_selection')" (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+              </ng-container>
+              <ng-container *ngIf="exportRequest.FilterType == 'import_id'">
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+              </ng-container>
+              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')" (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
                 {{param.label || param.name}}
               </button>
             </mat-menu>
