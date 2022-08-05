@@ -40,7 +40,7 @@ export interface ChartsExportMeasurementModel {
     id: string;
     name: string;
     values: ExportValueModel[];
-    dbId?: string;
+    exportDatabaseId?: string;
 }
 
 export interface ChartsExportVAxesModel {

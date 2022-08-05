@@ -38,7 +38,15 @@
                         <mat-radio-button class="radio-button" [value]="targetBroker">Broker</mat-radio-button>
                     </mat-radio-group>
                 </div>
-                <div fxLayout="row" class="source-container" *ngIf="exportForm.controls.targetSelector.value === targetBroker">
+                <mat-form-field fxFlex color="accent" appearance="outline"
+                                *ngIf="exportForm.getRawValue().targetSelector === targetDb">
+                    <mat-label>Database</mat-label>
+                    <mat-select placeholder="Database" formControlName="exportDatabaseId" required>
+                        <mat-option *ngFor="let db of exportDatabases" [value]="db.ID">{{db.Name}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <div fxLayout="row" class="source-container"
+                     *ngIf="exportForm.controls.targetSelector.value === targetBroker">
                     <mat-slide-toggle formControlName="customBrokerEnabled">Custom Broker</mat-slide-toggle>
                 </div>
                 <div fxLayout="column" class="source-container" *ngIf="exportForm.controls.customBrokerEnabled.value">
@@ -146,17 +154,16 @@
                     clicking on it.
                 </div>
 
-                <mat-form-field fxFill color="accent" appearance="outline" *ngIf="exportForm.getRawValue().targetSelector === targetDb">
+                <mat-form-field fxFill color="accent" appearance="outline"
+                                *ngIf="exportForm.getRawValue().targetSelector === targetDb">
                     <mat-label>Time Path</mat-label>
                     <senergy-select-search formControlName="timePath" [options]="getPathsKeyOptions()">
                     </senergy-select-search>
                 </mat-form-field>
 
-                <mat-form-field fxFlex color="accent" appearance="outline" *ngIf="exportForm.getRawValue().targetSelector === targetDb">
-                    <mat-label>Database Type</mat-label>
-                    <mat-select placeholder="Database Type" formControlName="databaseType" required>
-                        <mat-option  value="influxdb">internal InfluxDB</mat-option>
-                    </mat-select>
+                <mat-form-field fxFill color="accent" appearance="outline" *ngIf="isTimescaleSelected()">
+                    <mat-label>Timestamp Format</mat-label>
+                    <input matInput formControlName="timestampFormat" placeholder="Timestamp Format"/>
                 </mat-form-field>
 
                 <mat-checkbox formControlName="allMessages">Consume all messages</mat-checkbox>

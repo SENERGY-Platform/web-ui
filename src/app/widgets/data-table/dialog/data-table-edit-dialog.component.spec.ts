@@ -519,6 +519,8 @@ describe('DataTableEditDialogComponent', () => {
                     Offset: 'largest',
                     Generated: true,
                     Description: 'generated Export',
+                    TimestampFormat: '%Y-%m-%dT%H:%M:%S.%fZ',
+                    ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
                 },
             ]);
         }),

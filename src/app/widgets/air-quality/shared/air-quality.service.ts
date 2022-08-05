@@ -25,14 +25,11 @@ import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashb
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {ExportService} from '../../../modules/exports/shared/export.service';
 import {ImportInstancesService} from '../../../modules/imports/import-instances/shared/import-instances.service';
-import {DBTypeEnum, ExportDataService} from '../../shared/export-data.service';
+import {ExportDataService} from '../../shared/export-data.service';
 import {QueriesRequestElementInfluxModel, QueriesRequestElementTimescaleModel} from '../../shared/export-data.model';
 import {map} from 'rxjs/internal/operators';
+import {environment} from '../../../../environments/environment';
 
-
-interface RequestElementModel extends QueriesRequestElementInfluxModel {
-    dbId?: string;
-}
 
 @Injectable({
     providedIn: 'root',
@@ -90,7 +87,7 @@ export class AirQualityService {
                     if (measurement.is_enabled) {
                         const exportId = measurement.export ? measurement.export.ID : '';
                         const column = measurement.data.column ? measurement.data.column.Name : '';
-                        if (measurement.insideDeviceId !== undefined || measurement.export?.DbId === DBTypeEnum.snrgyTimescale) {
+                        if (measurement.insideDeviceId !== undefined || measurement.export?.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb) {
                             insideMapTimescale.set(requestPayloadTimescale.length, index);
                             const element: QueriesRequestElementTimescaleModel = {
                                 limit: 1,
@@ -98,7 +95,10 @@ export class AirQualityService {
                             if (measurement.insideDeviceId !== undefined && measurement.insideDeviceId !== null) {
                                 element.deviceId = measurement.insideDeviceId;
                                 element.serviceId = measurement.insideServiceId;
-                                element.columns =  [{name: measurement.insideDeviceValuePath || '', math: measurement.math || undefined}];
+                                element.columns = [{
+                                    name: measurement.insideDeviceValuePath || '',
+                                    math: measurement.math || undefined
+                                }];
                             } else {
                                 element.exportId = exportId;
                                 element.columns = [{name: column, math: measurement.math || undefined}];
@@ -151,7 +151,7 @@ export class AirQualityService {
                         }
 
 
-                        if (measurement.outsideDeviceId !== undefined || measurement.outsideExport?.DbId === DBTypeEnum.snrgyTimescale) {
+                        if (measurement.outsideDeviceId !== undefined || measurement.outsideExport?.ExportDatabaseID === environment.exportDatabaseIdInternalTimescaleDb) {
                             const timescaleElement = element as QueriesRequestElementTimescaleModel;
                             if (element.measurement !== '') {
                                 timescaleElement.exportId = element.measurement;
@@ -159,7 +159,10 @@ export class AirQualityService {
                                 timescaleElement.exportId = undefined;
                                 timescaleElement.deviceId = measurement.outsideDeviceId;
                                 timescaleElement.serviceId = measurement.outsideServiceId;
-                                timescaleElement.columns = [{name: measurement.outsideDeviceValuePath || '', math: measurement.outsideMath || undefined}];
+                                timescaleElement.columns = [{
+                                    name: measurement.outsideDeviceValuePath || '',
+                                    math: measurement.outsideMath || undefined
+                                }];
                             }
                             outsideMapTimescale.set(requestPayloadTimescale.length, index);
                             requestPayloadTimescale.push(element);
@@ -174,7 +177,7 @@ export class AirQualityService {
                         if (!p.is_enabled || widget.properties.dwdPollenInfo?.exportId === undefined) {
                             return;
                         }
-                        if (widget.properties.dwdPollenInfo?.exportId === DBTypeEnum.snrgyTimescale) {
+                        if (widget.properties.dwdPollenInfo?.exportDatabaseId === environment.exportDatabaseIdInternalTimescaleDb) {
                             pollenMapTimescale.set(requestPayloadTimescale.length, index);
                             requestPayloadTimescale.push({
                                 exportId: widget.properties.dwdPollenInfo.exportId,

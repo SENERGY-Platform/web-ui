@@ -77,8 +77,9 @@ export interface AirQualityImportExportModel {
     stationId?: string;
     importInstanceId?: string;
     importGenerated?: boolean;
-    exportId?: string;
+    exportId?: string; // TODO whenever set, also set exportDatabaseId
     exportGenerated?: boolean;
+    exportDatabaseId?: string;
 }
 
 // eslint-disable-next-line no-shadow

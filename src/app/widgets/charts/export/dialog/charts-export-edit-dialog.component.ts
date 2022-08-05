@@ -32,8 +32,8 @@ import {DeviceInstancesModel} from '../../../../modules/devices/device-instances
 import {DeviceInstancesService} from '../../../../modules/devices/device-instances/shared/device-instances.service';
 import {DeviceTypeService} from '../../../../modules/metadata/device-types-overview/shared/device-type.service';
 import {DeviceTypeModel} from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
-import {observableToBeFn} from 'rxjs/internal/testing/TestScheduler';
-import {DBTypeEnum, ExportDataService} from '../../../shared/export-data.service';
+import {ExportDataService} from '../../../shared/export-data.service';
+import {environment} from '../../../../../environments/environment';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
@@ -166,14 +166,14 @@ export class ChartsExportEditDialogComponent implements OnInit {
         });
         widget.properties.exports?.forEach((exp) => {
             if ((exp as DeviceInstancesModel).device_type === undefined &&
-                ((exp as ChartsExportMeasurementModel).dbId === undefined || (exp as ChartsExportMeasurementModel).dbId === DBTypeEnum.snrgyInflux)) {
+                ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb)) {
                 this.preloadExportTags(exp.id || '').subscribe();
             }
         });
         this.formGroupController.get('properties.exports')?.valueChanges.subscribe((exports: (ChartsExportMeasurementModel | DeviceInstancesModel)[]) => {
             exports.forEach((exp) => {
                 if ((exp as DeviceInstancesModel).device_type === undefined &&
-                    ((exp as ChartsExportMeasurementModel).dbId === undefined || (exp as ChartsExportMeasurementModel).dbId === DBTypeEnum.snrgyInflux)) {
+                    ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb)) {
                     this.preloadExportTags(exp.id || '').subscribe();
                 }
             });
@@ -229,11 +229,11 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     initDeployments(widget: WidgetModel): Observable<any> {
         const obs: Observable<any>[] = [];
-        obs.push(this.exportService.getExports('', 9999, 0, 'name', 'asc', undefined, undefined, true).pipe(map((exports: ExportResponseModel | null) => {
+        obs.push(this.exportService.getExports(true,'', 9999, 0, 'name', 'asc', undefined, undefined).pipe(map((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances?.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exportList.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, dbId: exportModel.DbId });
+                        this.exportList.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID });
                     }
                     this.exportDeviceList.set('Exports', this.exportList);
                     this.cd.detectChanges();

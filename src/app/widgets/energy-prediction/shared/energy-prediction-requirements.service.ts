@@ -56,7 +56,7 @@ export class EnergyPredictionRequirementsService {
 
     private search(pageSize: number, pageNo: number): Promise<{ found: boolean; hasMore: boolean }> {
         return this.exportService
-            .getExports('', pageSize, pageNo * pageSize, 'created_at', 'desc')
+            .getExports(true, '', pageSize, pageNo * pageSize, 'created_at', 'desc')
             .pipe(
                 map((r) => {
                     if (r === null) {

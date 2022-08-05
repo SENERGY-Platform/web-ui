@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { SingleValueModel } from './single-value.model';
-import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { SingleValueEditDialogComponent } from '../dialog/single-value-edit-dialog.component';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import {DBTypeEnum, ExportDataService} from '../../shared/export-data.service';
-import {
-    LastValuesRequestElementInfluxModel,
-    QueriesRequestElementInfluxModel,
-    QueriesRequestElementTimescaleModel,
-    TimeValuePairModel
-} from '../../shared/export-data.model';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {SingleValueModel} from './single-value.model';
+import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
+import {SingleValueEditDialogComponent} from '../dialog/single-value-edit-dialog.component';
+import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {ErrorHandlerService} from '../../../core/services/error-handler.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {ExportDataService} from '../../shared/export-data.service';
+import {QueriesRequestElementInfluxModel, QueriesRequestElementTimescaleModel} from '../../shared/export-data.model';
+import {environment} from '../../../../environments/environment';
 
 @Injectable({
     providedIn: 'root',
@@ -89,12 +85,12 @@ export class SingleValueService {
                 if (widget.properties.sourceType === 'export' || widget.properties.sourceType === undefined) { // undefined for legacy widgets
                     (requestPayload as QueriesRequestElementInfluxModel).measurement = m.id;
                     (requestPayload as QueriesRequestElementTimescaleModel).exportId = m.id;
-                    switch (m.dbId) {
-                    case DBTypeEnum.snrgyTimescale:
+                    switch (m.exportDatabaseId) {
+                    case environment.exportDatabaseIdInternalTimescaleDb:
                         o = this.exportDataService.queryTimescale([requestPayload]);
                         break;
                     case undefined:
-                    case DBTypeEnum.snrgyInflux:
+                    case environment.influxAPIURL:
                         o = this.exportDataService.queryInflux([requestPayload] as QueriesRequestElementInfluxModel[]);
                         break;
                     default:

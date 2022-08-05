@@ -164,11 +164,11 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc', undefined, undefined, true).subscribe((exports: ExportResponseModel | null) => {
+        this.exportService.getExports(true, '', 9999, 0, 'name', 'asc', undefined, undefined).subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances?.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, dbId: exportModel.DbId});
+                        this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID});
                     }
                 });
             }
@@ -188,7 +188,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             id: this.form.get('measurement')?.value.id,
             name: this.form.get('measurement')?.value.name,
             values: this.form.get('measurement')?.value.values,
-            dbId: this.form.get('measurement')?.value.DbId,
+            exportDatabaseId: this.form.get('measurement')?.value.ExportDatabaseId,
         };
         this.widget.properties.vAxis = this.form.get('vAxis')?.value;
         this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value;

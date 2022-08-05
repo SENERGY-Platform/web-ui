@@ -14,29 +14,36 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { ExportService } from '../../../modules/exports/shared/export.service';
-import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
-import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
+import {Injectable} from '@angular/core';
+import {ExportService} from '../../../modules/exports/shared/export.service';
+import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
+import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {
-    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
+    DeviceTypeAspectNodeModel,
     DeviceTypeFunctionModel,
     DeviceTypeModel,
     DeviceTypeServiceModel,
 } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
-import { DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
-import { forkJoin, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { ExportModel, ExportValueCharacteristicModel, ExportValueModel } from '../../../modules/exports/shared/export.model';
-import { PipelineRegistryService } from '../../../modules/data/pipeline-registry/shared/pipeline-registry.service';
-import { PipelineModel } from '../../../modules/data/pipeline-registry/shared/pipeline.model';
-import { OperatorModel } from '../../../modules/data/operator-repo/shared/operator.model';
-import { OperatorRepoService } from '../../../modules/data/operator-repo/shared/operator-repo.service';
-import { ExportValueTypes } from './data-table.model';
-import { ImportInstancesService } from '../../../modules/imports/import-instances/shared/import-instances.service';
-import { ImportTypesService } from '../../../modules/imports/import-types/shared/import-types.service';
-import { ImportInstancesModel } from '../../../modules/imports/import-instances/shared/import-instances.model';
-import { ImportTypeModel, ImportTypePermissionSearchModel } from '../../../modules/imports/import-types/shared/import-types.model';
+import {DeviceSelectablesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
+import {forkJoin, Observable, of} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {
+    ExportModel,
+    ExportValueCharacteristicModel,
+    ExportValueModel
+} from '../../../modules/exports/shared/export.model';
+import {PipelineRegistryService} from '../../../modules/data/pipeline-registry/shared/pipeline-registry.service';
+import {PipelineModel} from '../../../modules/data/pipeline-registry/shared/pipeline.model';
+import {OperatorModel} from '../../../modules/data/operator-repo/shared/operator.model';
+import {OperatorRepoService} from '../../../modules/data/operator-repo/shared/operator-repo.service';
+import {ExportValueTypes} from './data-table.model';
+import {ImportInstancesService} from '../../../modules/imports/import-instances/shared/import-instances.service';
+import {ImportTypesService} from '../../../modules/imports/import-types/shared/import-types.service';
+import {ImportInstancesModel} from '../../../modules/imports/import-instances/shared/import-instances.model';
+import {
+    ImportTypeModel,
+    ImportTypePermissionSearchModel
+} from '../../../modules/imports/import-types/shared/import-types.model';
 
 @Injectable({
     providedIn: 'root',
@@ -170,7 +177,7 @@ export class DataTableHelperService {
             return of(this.exportCache);
         }
         return this.exportService
-            .getExports('', -1, 0, 'name', 'asc', undefined, undefined, true)
+            .getExports(true, '', -1, 0, 'name', 'asc', undefined, undefined)
             .pipe(map((exports) => (this.exportCache = exports === null ? [] : exports.instances || [])));
     }
 

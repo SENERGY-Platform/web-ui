@@ -29,6 +29,6 @@ export class SingleValueRequirementsService {
     static requirement = 'Needs an export';
 
     requirementsFulfilled(): Observable<boolean> {
-        return this.exportService.getExports('', 1, 0, 'name', 'asc').pipe(map((r) => r !== null && r.total !== undefined && r.total > 0));
+        return this.exportService.getExports(true, '', 1, 0, 'name', 'asc').pipe(map((r) => r !== null && r.total !== undefined && r.total > 0));
     }
 }

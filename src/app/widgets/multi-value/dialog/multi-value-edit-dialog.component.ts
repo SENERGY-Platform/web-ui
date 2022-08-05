@@ -240,7 +240,7 @@ export class MultiValueEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc').subscribe((exports: ExportResponseModel | null) => {
+        this.exportService.getExports(true, '', 9999, 0, 'name', 'asc').subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances?.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {

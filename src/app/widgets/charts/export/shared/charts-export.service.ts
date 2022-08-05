@@ -33,15 +33,15 @@ import {
 } from './charts-export-properties.model';
 import { ChartsExportRequestPayloadGroupModel } from './charts-export-request-payload.model';
 import { ChartsExportRangeTimeTypeEnum } from './charts-export-range-time-type.enum';
-import {DBTypeEnum, ExportDataService} from '../../../shared/export-data.service';
+import {ExportDataService} from '../../../shared/export-data.service';
 import {
     QueriesRequestElementInfluxModel,
     QueriesRequestElementTimescaleModel,
     QueriesRequestFilterModel,
-    QueriesRequestTimeModel, TimeValuePairModel
+    QueriesRequestTimeModel,
 } from '../../../shared/export-data.model';
 import {map} from 'rxjs/internal/operators';
-import {ExportModel} from '../../../../modules/exports/shared/export.model';
+import {environment} from '../../../../../environments/environment';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -125,7 +125,7 @@ export class ChartsExportService {
 
             const exp = widgetProperties.exports?.find(x => x.id === vAxis.instanceId);
             if (exp !== undefined &&
-                ((exp as ChartsExportMeasurementModel).dbId === undefined || (exp as ChartsExportMeasurementModel).dbId === DBTypeEnum.snrgyInflux)) {
+                ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb)) {
                 (newField as QueriesRequestElementInfluxModel).measurement = vAxis.instanceId;
                 influxElements.push(newField);
                 influxResultMapper.push(index);

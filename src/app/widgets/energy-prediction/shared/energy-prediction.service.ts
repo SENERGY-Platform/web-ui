@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { EnergyPredictionColumnModel, EnergyPredictionModel } from './energy-prediction.model';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { EnergyPredictionEditDialogComponent } from '../dialog/energy-prediction-edit-dialog.component';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { environment } from '../../../../environments/environment';
-import { catchError, map } from 'rxjs/operators';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
-import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { HttpClient } from '@angular/common/http';
-import { ChartsExportModel } from '../../charts/export/shared/charts-export.model';
-import { ChartsExportRequestPayloadModel } from '../../charts/export/shared/charts-export-request-payload.model';
-import {DBTypeEnum, ExportDataService} from '../../shared/export-data.service';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {EnergyPredictionColumnModel, EnergyPredictionModel} from './energy-prediction.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
+import {EnergyPredictionEditDialogComponent} from '../dialog/energy-prediction-edit-dialog.component';
+import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {ErrorHandlerService} from '../../../core/services/error-handler.service';
+import {ExportDataService} from '../../shared/export-data.service';
 import {
     LastValuesRequestElementInfluxModel,
     LastValuesRequestElementTimescaleModel,
     TimeValuePairModel
 } from '../../shared/export-data.model';
+import {environment} from "../../../../environments/environment";
 
 @Injectable({
     providedIn: 'root',
@@ -90,12 +85,12 @@ export class EnergyPredictionService {
                 });
 
                 let o:  Observable<TimeValuePairModel[]> | undefined;
-                switch (m.dbId) {
-                case DBTypeEnum.snrgyTimescale:
+                switch (m.exportDatabaseId) {
+                case environment.exportDatabaseIdInternalTimescaleDb:
                     o = this.exportDataService.getLastValuesTimescale(requestPayload);
                     break;
                 case undefined:
-                case DBTypeEnum.snrgyInflux:
+                case environment.exportDatabaseIdInternalInfluxDb:
                     o = this.exportDataService.getLastValuesInflux(requestPayload as LastValuesRequestElementInfluxModel[]);
                     break;
                 default:

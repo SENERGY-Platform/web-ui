@@ -262,7 +262,8 @@ describe('ImportInstanceExportDialogComponent', () => {
             ],
             EntityName: 'name',
             ServiceName: 'urn:infai:ses:import-type:1234',
-            DatabaseType: 'influxdb',
+            ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
+            TimestampFormat: '%Y-%m-%dT%H:%M:%SZ',
         });
         expect(r).toBeDefined();
     });

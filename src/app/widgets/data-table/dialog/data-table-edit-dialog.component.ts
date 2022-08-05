@@ -51,8 +51,8 @@ import {ProcessSchedulerService} from '../../process-scheduler/shared/process-sc
 import {DataTableService} from '../shared/data-table.service';
 import {boundaryValidator, elementDetailsValidator, exportValidator} from './data-table-edit-dialog.validators';
 import {util} from 'jointjs';
-import {DBTypeEnum} from '../../shared/export-data.service';
 import uuid = util.uuid;
+import {environment} from '../../../../environments/environment';
 
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
@@ -363,7 +363,7 @@ export class DataTableEditDialogComponent implements OnInit {
 
         newGroup.get('exportId')?.valueChanges.subscribe((exportId) => {
             this.dataTableHelperService.preloadExportTags(exportId).subscribe();
-            newGroup.get('exportDbId')?.setValue(this.dataTableHelperService.getPreloadedExportById(exportId)?.DbId);
+            newGroup.get('exportDbId')?.setValue(this.dataTableHelperService.getPreloadedExportById(exportId)?.ExportDatabaseID);
         });
 
         if (measurement !== undefined) {
@@ -844,7 +844,7 @@ export class DataTableEditDialogComponent implements OnInit {
                 element.patchValue({exportCreatedByWidget: true});
             }
             element.patchValue({
-                exportDbId: element.get('exportCreatedByWidget')?.value === true ? DBTypeEnum.snrgyInflux : undefined
+                exportDbId: element.get('exportCreatedByWidget')?.value === true ? environment.exportDatabaseIdInternalInfluxDb : undefined
             });
         });
     }
@@ -866,7 +866,7 @@ export class DataTableEditDialogComponent implements OnInit {
                 if (selectedDevice === undefined || selectedService === undefined) {
                     return;
                 }
-                const exports = this.exportService.prepareDeviceServiceExport(selectedDevice, selectedService);
+                const exports = this.exportService.prepareDeviceServiceExport(selectedDevice, selectedService); // TODO timestampFormat
                 if (exports.length !== 1) {
                     console.error('DataTableEditDialogComponent: No support for devices with multiple outputs!');
                     return;
@@ -882,6 +882,7 @@ export class DataTableEditDialogComponent implements OnInit {
             }
             preparedExport.Name = 'Widget: ' + this.formGroup.get('name')?.value;
             preparedExport.Description = 'generated Export';
+            preparedExport.ExportDatabaseID = environment.exportDatabaseIdInternalTimescaleDb;
 
             observables.push(
                 this.exportService.startPipeline(preparedExport).pipe(
@@ -928,6 +929,7 @@ export class DataTableEditDialogComponent implements OnInit {
             Topic: 'analytics-' + operator.name,
             Offset: 'largest',
             Generated: true,
+            TimestampFormat: '%Y-%m-%dT%H:%M:%S.%fZ',
         } as ExportModel;
     }
 
@@ -1100,6 +1102,7 @@ export class DataTableEditDialogComponent implements OnInit {
             Topic: instance.kafka_topic,
             Offset: 'smallest',
             Generated: true,
+            TimestampFormat: '%Y-%m-%dT%H:%M:%SZ',
         } as ExportModel;
     }
 }

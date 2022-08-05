@@ -28,12 +28,13 @@ import {
     TimeValuePairModel
 } from '../shared/export-data.model';
 import {DeviceStatusConfigConvertRuleModel} from '../device-status/shared/device-status-properties.model';
-import {DBTypeEnum, ExportDataService} from '../shared/export-data.service';
+import {ExportDataService} from '../shared/export-data.service';
 import {DataTableOrderEnum, ExportValueTypes} from './shared/data-table.model';
 import {DecimalPipe} from '@angular/common';
 import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {Sort, SortDirection} from '@angular/material/sort';
 import {map} from 'rxjs/internal/operators';
+import {environment} from '../../../environments/environment';
 
 interface DataTableComponentItem {
     name: string;
@@ -203,7 +204,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
                             requestElement.limit = this.widget.properties.dataTable?.valuesPerElement || 1;
                         }
                         // Check element data location
-                        if (element.exportId !== null && element.exportId !== undefined && (element.exportDbId === undefined || element.exportDbId === DBTypeEnum.snrgyInflux)) {
+                        if (element.exportId !== null && element.exportId !== undefined && (element.exportDbId === undefined || element.exportDbId === environment.exportDatabaseIdInternalInfluxDb)) {
                             (requestElement as QueriesRequestElementInfluxModel).measurement = element.exportId;
                             influxRequestPayload.push(requestElement as QueriesRequestElementInfluxModel);
                             influxResultMapper.push(elementIndex);

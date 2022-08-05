@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {environment} from '../../../environments/environment';
 import {
     LastValuesRequestElementInfluxModel,
     LastValuesRequestElementTimescaleModel,
-    QueriesRequestElementInfluxModel, QueriesRequestElementTimescaleModel,
+    QueriesRequestElementInfluxModel,
+    QueriesRequestElementTimescaleModel,
     TimeValuePairModel
 } from './export-data.model';
-import { HttpClient } from '@angular/common/http';
-import {ExportModel} from '../../modules/exports/shared/export.model';
+import {HttpClient} from '@angular/common/http';
 
-export enum DBTypeEnum {
-    snrgyTimescale = 'snrgy/timescale',
-    snrgyInflux = 'snrgy/influx',
-    Unknown = 'unknown'
-}
 
 @Injectable({
     providedIn: 'root',
@@ -84,14 +79,5 @@ export class ExportDataService {
         );
     }
 
-    getDbType(exp: ExportModel): DBTypeEnum {
-        if (exp.DbId === undefined || exp.DbId === null) {
-            return DBTypeEnum.snrgyInflux;
-        }
-        if (exp.DbId === DBTypeEnum.snrgyInflux || exp.DbId === DBTypeEnum.snrgyTimescale) {
-            return exp.DbId;
-        }
-        return DBTypeEnum.Unknown;
-    }
 
 }

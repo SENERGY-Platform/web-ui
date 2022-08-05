@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ImportInstancesModel } from '../shared/import-instances.model';
-import { FormControl, Validators } from '@angular/forms';
-import { ImportTypesService } from '../../import-types/shared/import-types.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { ImportTypeContentVariableModel, ImportTypeModel } from '../../import-types/shared/import-types.model';
-import { ExportService } from '../../../exports/shared/export.service';
-import { ExportModel, ExportValueModel } from '../../../exports/shared/export.model';
-import { SelectionModel } from '@angular/cdk/collections';
-import { MatCheckboxChange } from '@angular/material/checkbox';
-import { MatTable } from '@angular/material/table';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {ImportInstancesModel} from '../shared/import-instances.model';
+import {FormControl, Validators} from '@angular/forms';
+import {ImportTypesService} from '../../import-types/shared/import-types.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {ImportTypeModel} from '../../import-types/shared/import-types.model';
+import {ExportService} from '../../../exports/shared/export.service';
+import {ExportModel, ExportValueModel} from '../../../exports/shared/export.model';
+import {SelectionModel} from '@angular/cdk/collections';
+import {MatCheckboxChange} from '@angular/material/checkbox';
+import {MatTable} from '@angular/material/table';
+import {environment} from '../../../../../environments/environment';
 
 @Component({
     selector: 'senergy-import-instance-export-dialog',
@@ -86,7 +87,8 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             Values: values,
             EntityName: this.data.name,
             ServiceName: this.data.import_type_id,
-            DatabaseType: 'influxdb',
+            ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
+            TimestampFormat: '%Y-%m-%dT%H:%M:%SZ',
         } as ExportModel;
         this.exportService.startPipeline(exp).subscribe(
             (res) => {
@@ -94,7 +96,7 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error creating export', "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Error creating export', 'close', { panelClass: 'snack-bar-error' });
             },
         );
     }

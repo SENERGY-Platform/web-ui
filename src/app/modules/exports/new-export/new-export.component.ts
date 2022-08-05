@@ -25,7 +25,7 @@ import {
     DeviceTypeModel,
     DeviceTypeServiceModel,
 } from '../../metadata/device-types-overview/shared/device-type.model';
-import {ExportModel, ExportValueModel} from '../shared/export.model';
+import {DatabaseType, ExportDatabaseModel, ExportModel, ExportValueModel} from '../shared/export.model';
 import {ExportService} from '../shared/export.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {PipelineModel, PipelineOperatorModel} from '../../data/pipeline-registry/shared/pipeline.model';
@@ -81,7 +81,8 @@ export class NewExportComponent implements OnInit {
         import: [{value: null, disabled: true}, Validators.required],
         operator: [{value: null, disabled: true}, Validators.required],
         pipeline: [{value: null, disabled: true}, Validators.required],
-        databaseType: 'influxdb',
+        exportDatabaseId: [{value: environment.exportDatabaseIdInternalTimescaleDb}, Validators.required],
+        timestampFormat: '',
         exportValues: this.fb.array([] as ExportValueModel[]),
     });
 
@@ -109,6 +110,8 @@ export class NewExportComponent implements OnInit {
     typeStructure = 'https://schema.org/StructuredValue';
 
     id: string | null = null;
+
+    exportDatabases: ExportDatabaseModel[] = [];
 
     constructor(
         private route: ActivatedRoute,
@@ -143,16 +146,19 @@ export class NewExportComponent implements OnInit {
             );
             this.exportForm.controls['targetSelector'].disable({onlySelf: true, emitEvent: false});
         }
-        const array: Observable<DeviceInstancesModel[] | PipelineModel[] | ImportInstancesModel[]>[] = [];
+        const array: Observable<DeviceInstancesModel[] | PipelineModel[] | ImportInstancesModel[] | ExportDatabaseModel[]>[] = [];
 
         array.push(this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc'));
         array.push(this.pipelineRegistryService.getPipelines());
         array.push(this.importInstancesService.listImportInstances('', 9999, 0, 'name.asc'));
+        array.push(this.exportService.getExportDatabases());
 
         forkJoin(array).subscribe((response) => {
             this.devices = response[0] as DeviceInstancesModel[];
             this.pipelines = response[1] as PipelineModel[];
             this.imports = response[2] as ImportInstancesModel[];
+            this.exportDatabases = response[3] as ExportDatabaseModel[];
+            this.exportForm.patchValue({exportDatabaseId: environment.exportDatabaseIdInternalTimescaleDb});
             setTimeout(() => {
                 if (this.id !== null) {
                     const obs = (
@@ -169,6 +175,8 @@ export class NewExportComponent implements OnInit {
                                 customMqttUser: exp.CustomMqttUser,
                                 customMqttPassword: exp.CustomMqttPassword,
                                 customMqttBaseTopic: exp.CustomMqttBaseTopic,
+                                exportDatabaseId: exp.ExportDatabaseID,
+                                timestampFormat: exp.TimestampFormat,
                             });
                             exp.Values.forEach(v => this.addValue(v.Name, v.Path, v.Type, v.Tag));
                             if (exp.Offset === 'smallest') {
@@ -283,7 +291,8 @@ export class NewExportComponent implements OnInit {
             this.export.CustomMqttUser = this.exportForm.value.customMqttUser;
             this.export.CustomMqttPassword = this.exportForm.value.customMqttPassword;
             this.export.CustomMqttBaseTopic = this.exportForm.value.customMqttBaseTopic;
-            this.export.DatabaseType = this.exportForm.value.databaseType;
+            this.export.ExportDatabaseID = this.exportForm.value.exportDatabaseId;
+            this.export.TimestampFormat = this.exportForm.value.timestampFormat;
 
             if (this.exportForm.value.selector === 'device') {
                 this.export.EntityName = this.exportForm.value.device.name;
@@ -366,7 +375,11 @@ export class NewExportComponent implements OnInit {
                     if (!this.id) {
                         this.resetVars();
                         this.exportForm.reset(
-                            {selector: selection, targetSelector: this.targetDb},
+                            {
+                                selector: selection,
+                                targetSelector: this.targetDb,
+                                exportDatabaseId: this.exportForm.get('exportDatabaseId')?.value
+                            },
                             {onlySelf: false, emitEvent: false},
                         );
                         this.exportForm.markAsUntouched();
@@ -588,7 +601,7 @@ export class NewExportComponent implements OnInit {
             }
             this.paths.set('time', 'string');
             this.paths.set('analytics', this.typeStructure);
-            this.exportForm.patchValue({timePath: 'time'});
+            this.exportForm.patchValue({timePath: 'time', timeFormat: '%Y-%m-%dT%H:%M:%S.%fZ'});
             this.autofillValues();
         });
     }
@@ -649,10 +662,21 @@ export class NewExportComponent implements OnInit {
 
     autofillValues() {
         if (this.exportForm.value.timePath === '' || this.exportForm.value.timePath === null) {
-            if (this.exportForm.value.selector === 'pipe' || this.exportForm.value.selector === 'import') {
-                this.exportForm.patchValue({timePath: 'time'}, {onlySelf: true, emitEvent: false});
+            if (this.exportForm.value.selector === 'pipe') {
+                this.exportForm.patchValue({
+                    timePath: 'time',
+                    timestampFormat: '%Y-%m-%dT%H:%M:%S.%fZ'
+                }, {onlySelf: true, emitEvent: false});
+            } else if (this.exportForm.value.selector === 'import') {
+                this.exportForm.patchValue({timePath: 'time', timestampFormat: '%Y-%m-%dT%H:%M:%SZ'}, {
+                    onlySelf: true,
+                    emitEvent: false
+                });
             } else if (this.exportForm.value.selector === 'device') {
-                this.exportForm.patchValue({timePath: this.timeSuggest}, {onlySelf: true, emitEvent: false});
+                this.exportForm.patchValue({timePath: this.timeSuggest, timestampFormat: null}, {
+                    onlySelf: true,
+                    emitEvent: false
+                });
             }
         }
         if (this.exportForm.value.selector === 'import') {
@@ -759,5 +783,9 @@ export class NewExportComponent implements OnInit {
         }
         return this.exportValues.controls.slice(this.offset,
             (this.lastPageEvent.pageIndex + 1) * this.lastPageEvent.pageSize);
+    }
+
+    isTimescaleSelected() {
+        return this.exportDatabases.find((e: ExportDatabaseModel) => e.ID === this.exportForm.getRawValue().exportDatabaseId)?.Type === DatabaseType.timescaledb;
     }
 }

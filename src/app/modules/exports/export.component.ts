@@ -177,6 +177,7 @@ export class ExportComponent implements OnInit, OnDestroy {
                             this.searchField,
                         )
                         : this.exportService.getExports(
+                            false,
                             this.searchText,
                             this.paginator.pageSize,
                             this.paginator.pageSize * this.paginator.pageIndex,

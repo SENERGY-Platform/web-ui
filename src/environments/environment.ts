@@ -87,6 +87,8 @@ export const environment = {
     processFogDeploymentUrl: 'http://localhost',
     processSyncUrl: 'http://localhost',
     equivalentProtocolSegments: '[]',
+    exportDatabaseIdInternalInfluxDb: 'urn:infai:ses:export-db:ac535dbb-4600-4b84-8660-2f40de034644',
+    exportDatabaseIdInternalTimescaleDb: 'urn:infai:ses:export-db:6191c5d3-10ff-4899-bef9-3321ecea109c',
 };
 
 /*

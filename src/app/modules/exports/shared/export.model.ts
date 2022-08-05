@@ -43,8 +43,9 @@ export interface ExportModel {
     CustomMqttBaseTopic?: string;
     CustomMqttUser?: string;
     CustomMqttPassword?: string;
-    DbId?: string;
-    DatabaseType?: string;
+    ExportDatabaseID?: string;
+    ExportDatabase?: ExportDatabaseModel;
+    TimestampFormat?: string;
 }
 
 export interface ExportValueBaseModel {
@@ -62,4 +63,22 @@ export interface ExportValueModel extends ExportValueBaseModel {
 
 export interface ExportValueCharacteristicModel extends ExportValueBaseModel {
     characteristicId: string;
+}
+
+export interface ExportDatabaseModel {
+    ID?: string;
+    Name: string;
+    Description: string;
+    Type: DatabaseType;
+    External: boolean;
+    Url: string;
+    EwFilterTopic: string;
+    UserId: string;
+    Public: boolean;
+}
+
+// eslint-disable-next-line no-shadow
+export enum DatabaseType {
+    influxdb = 'influxdb',
+    timescaledb = 'timescaledb',
 }

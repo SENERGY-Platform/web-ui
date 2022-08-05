@@ -100,7 +100,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     }
 
     initDeployments() {
-        this.exportService.getExports('', 9999, 0, 'name', 'asc', undefined, undefined, true).subscribe((exports: ExportResponseModel | null) => {
+        this.exportService.getExports(true, '', 9999, 0, 'name', 'asc', undefined, undefined).subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances?.forEach((exportModel: ExportModel) => {
                     if (
@@ -108,7 +108,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
                         exportModel.Name !== undefined &&
                         EnergyPredictionRequirementsService.exportHasRequiredValues(exportModel.Values)
                     ) {
-                        this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, dbId: exportModel.DbId });
+                        this.exports.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID });
                     }
                 });
                 this.filteredExports = (this.form.get('export') as FormControl).valueChanges.pipe(

@@ -20,7 +20,14 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { environment } from '../../../../environments/environment';
 import { catchError, map } from 'rxjs/internal/operators';
 import { Observable } from 'rxjs';
-import { ExportModel, ExportResponseModel, ExportValueBaseModel, ExportValueCharacteristicModel, ExportValueModel } from './export.model';
+import {
+    ExportDatabaseModel,
+    ExportModel,
+    ExportResponseModel,
+    ExportValueBaseModel,
+    ExportValueCharacteristicModel,
+    ExportValueModel
+} from './export.model';
 import { DeviceTypeContentVariableModel, DeviceTypeServiceModel } from '../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstancesModel } from '../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesUpdateModel } from '../../devices/device-instances/shared/device-instances-update.model';
@@ -41,6 +48,7 @@ export class ExportService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private deviceService: DeviceInstancesService) {}
 
     getExports(
+        internalOnly: boolean,
         search?: string,
         limit?: number,
         offset?: number,
@@ -48,7 +56,6 @@ export class ExportService {
         order?: string,
         generated?: boolean,
         searchField?: string,
-        internalOnly: boolean = false,
     ): Observable<ExportResponseModel | null> {
         if (searchField === undefined || searchField === null) {
             searchField = 'name';
@@ -118,7 +125,7 @@ export class ExportService {
         deviceInstancesModel: DeviceInstancesModel | DeviceInstancesUpdateModel,
         service: DeviceTypeServiceModel,
     ): ExportModel[] {
-        let device = this.deviceService.addDisplayName(deviceInstancesModel);
+        const device = this.deviceService.addDisplayName(deviceInstancesModel);
         device.name = device.display_name || device.name;
         const exports: ExportModel[] = [];
         service.outputs.forEach((output, index) => {
@@ -168,6 +175,7 @@ export class ExportService {
                 Topic: service.id.replace(/#/g, '_').replace(/:/g, '_'),
                 Offset: 'largest',
                 Generated: true,
+                ExportDatabaseID: environment.exportDatabaseIdInternalInfluxDb, // data already in timescale
             } as ExportModel);
         });
         return exports;
@@ -211,7 +219,7 @@ export class ExportService {
         return false;
     }
 
-    getTimePath(traverse: ExportValueCharacteristicModel[]): { path: string; precision: string | undefined } {
+    getTimePath(traverse: ExportValueCharacteristicModel[]): { path: string; precision: string | undefined;} {
         let path = '';
         let precision: string | undefined;
         traverse.forEach((t: ExportValueCharacteristicModel) => {
@@ -241,6 +249,14 @@ export class ExportService {
                 }
                 return m;
             }),
+        );
+    }
+
+
+    getExportDatabases(): Observable<ExportDatabaseModel[]> {
+        return this.http.get<ExportDatabaseModel[]>(environment.exportService + '/databases').pipe(
+            map((resp) => resp || []),
+            catchError(this.errorHandlerService.handleError(ExportService.name, 'getExportDatabases: Error', [])),
         );
     }
 }

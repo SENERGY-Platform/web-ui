@@ -383,7 +383,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     ngOnInit() {
         const obs: Observable<any>[] = [];
         obs.push(this.getWidgetData());
-        this.exportService.getExports('', 9999, 0, 'name', 'asc', undefined, undefined, true).subscribe((exports: ExportResponseModel | null) => {
+        this.exportService.getExports(true, '', 9999, 0, 'name', 'asc', undefined, undefined).subscribe((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 this.exports = exports.instances || [];
             }
@@ -823,6 +823,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                         exp = matchingExports[0];
                     }
                     this.widget.properties.ubaInfo.exportId = exp.ID;
+                    this.widget.properties.ubaInfo.exportDatabaseId = exp.ExportDatabaseID;
                     this.fillMeasurementsUbaInfo(exp);
                     obs.next();
                     obs.complete();
@@ -850,6 +851,7 @@ export class AirQualityEditDialogComponent implements OnInit {
             }
             this.widget.properties.ubaInfo.exportId = exp.ID;
             this.widget.properties.ubaInfo.exportGenerated = true;
+            this.widget.properties.ubaInfo.exportDatabaseId = exp.ExportDatabaseID;
             this.fillMeasurementsUbaInfo(exp);
             obs.next();
             obs.complete();
@@ -897,6 +899,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                 }
                 this.widget.properties.dwdPollenInfo.exportGenerated = undefined;
                 this.widget.properties.dwdPollenInfo.exportId = undefined;
+                this.widget.properties.dwdPollenInfo.exportDatabaseId = undefined;
             }
             return of(null);
         } else {
@@ -978,6 +981,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                             exp = matchingExports[0];
                         }
                         this.widget.properties.dwdPollenInfo.exportId = exp.ID;
+                        this.widget.properties.dwdPollenInfo.exportDatabaseId = exp.ExportDatabaseID;
                         obs.next();
                         obs.complete();
                     }
@@ -1029,6 +1033,7 @@ export class AirQualityEditDialogComponent implements OnInit {
             }
             this.widget.properties.dwdPollenInfo.exportId = exp.ID;
             this.widget.properties.dwdPollenInfo.exportGenerated = true;
+            this.widget.properties.dwdPollenInfo.exportDatabaseId = exp.ExportDatabaseID;
             obs.next();
             obs.complete();
         });
@@ -1069,6 +1074,8 @@ export class AirQualityEditDialogComponent implements OnInit {
                     EntityName: importInstance.name,
                     Topic: importInstance.kafka_topic,
                     TimePath: 'time',
+                    ExportDatabaseID: environment.timescaleAPIURL,
+                    TimestampFormat: '%Y-%m-%dT%H:%M:%SZ',
                     Generated: true,
                 } as ExportModel),
             ),
@@ -1149,6 +1156,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                         exp = matchingExports[0];
                     }
                     this.widget.properties.yrInfo.exportId = exp.ID;
+                    this.widget.properties.yrInfo.exportDatabaseId = exp.ExportDatabaseID;
                     this.fillMeasurementsYrInfo(exp);
                     obs.next();
                     obs.complete();
@@ -1175,6 +1183,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                 this.widget.properties.yrInfo = {};
             }
             this.widget.properties.yrInfo.exportId = exp.ID;
+            this.widget.properties.yrInfo.exportDatabaseId = exp.ExportDatabaseID;
             this.widget.properties.yrInfo.exportGenerated = true;
             this.fillMeasurementsYrInfo(exp);
             obs.next();

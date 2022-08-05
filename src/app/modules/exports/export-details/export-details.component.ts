@@ -19,7 +19,7 @@ import {Location} from '@angular/common';
 import {ExportModel, ExportValueBaseModel} from '../shared/export.model';
 import {ActivatedRoute} from '@angular/router';
 import {ExportService} from '../shared/export.service';
-import {DBTypeEnum, ExportDataService} from '../../../widgets/shared/export-data.service';
+import {ExportDataService} from '../../../widgets/shared/export-data.service';
 import {
     LastValuesRequestElementInfluxModel,
     LastValuesRequestElementTimescaleModel,
@@ -111,26 +111,30 @@ export class ExportDetailsComponent implements OnInit {
 
     private getLatestValues(): Observable<void> {
         let ob: Observable<TimeValuePairModel[]> = of([]);
-        switch (this.exportDataService.getDbType(this.export)) {
-        case DBTypeEnum.snrgyInflux:
+        switch (this.export.ExportDatabaseID) {
+        case environment.exportDatabaseIdInternalInfluxDb:
             this.hasLastValues = true;
             ob = this.exportDataService.getLastValuesInflux(this.lastValuesRequestElementModels as LastValuesRequestElementInfluxModel[]);
             break;
-        case DBTypeEnum.snrgyTimescale:
+        case environment.exportDatabaseIdInternalTimescaleDb:
             this.hasLastValues = true;
             ob = this.exportDataService.getLastValuesTimescale(this.lastValuesRequestElementModels);
             break;
         default:
             this.hasLastValues = false;
         }
-        return ob.pipe(
-            map((pairs) => {
-                this.export.Values.forEach((_, index) => {
-                    this.export.Values[index].LastValue = pairs[index].value;
-                    this.export.Values[index].LastTimeStamp = '' + pairs[index].time;
-                });
-            }),
-        );
+        if (this.hasLastValues) {
+            return ob.pipe(
+                map((pairs) => {
+                    this.export.Values.forEach((_, index) => {
+                        this.export.Values[index].LastValue = pairs[index].value;
+                        this.export.Values[index].LastTimeStamp = '' + pairs[index].time;
+                    });
+                }),
+            );
+        } else {
+            return of();
+        }
     }
 
     goBack() {
