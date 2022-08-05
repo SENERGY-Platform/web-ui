@@ -752,9 +752,6 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 if(!this.exportRequest.TimePath) {
                     return true;
                 }
-                if(!this.exportRequest.TimestampFormat) {
-                    return true;
-                }
                 if(!this.exportRequest.ServiceName) {
                     return true;
                 }
