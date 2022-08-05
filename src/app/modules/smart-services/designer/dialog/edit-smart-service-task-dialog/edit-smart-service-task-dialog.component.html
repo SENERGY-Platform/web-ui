@@ -133,19 +133,25 @@
             </mat-form-field>
           </div>
 
+          <div *ngIf="flowSvg"
+               class="image-svg-wrapper"
+               [innerHtml]="getAnalyticsFlowImage(flowSvg, currentFlowInputId)"
+                (click)="analyticsSvgSelectOperator($event)">
+          </div>
+
           <div>
             <mat-card>
               <mat-accordion>
-                <mat-expansion-panel *ngFor="let flowInput of currentParsedFlows">
+                <mat-expansion-panel
+                        *ngFor="let flowInput of currentParsedFlows"
+                        [expanded]="currentFlowInputId == flowInput.id"
+                        (opened)="currentFlowInputId = flowInput.id">
                   <mat-expansion-panel-header>
                     <mat-panel-title>
                       {{flowInput.name}}
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <div>
-                    <div fxFill>
-                      <div class="image-svg-wrapper" [innerHtml]="getAnalyticsFlowImage(flowSvg, flowInput)"></div>
-                    </div>
                     <div *ngFor="let port of flowInput.inPorts">
                       <mat-divider [inset]="true"></mat-divider>
                       <h4 class="mat-h4">{{port}}</h4>

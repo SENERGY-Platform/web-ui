@@ -33,7 +33,7 @@ import {
     ImportTypePermissionSearchModel
 } from '../../../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
-import {AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
+import {AbstractControl, FormGroup, ValidationErrors, ValidatorFn} from '@angular/forms';
 import {subtract} from 'lodash';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 
@@ -54,6 +54,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     parsedFlows: Map<string, ParseModel[]> = new Map<string, ParseModel[]>();
     currentParsedFlows: ParseModel[] = []
     flowSvg: string | SafeHtml = ""
+    currentFlowInputId: string = ""
 
     availableProcessVariables: Map<string,BpmnParameterWithLabel[]> = new Map();
 
@@ -275,7 +276,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.setFieldValue(this.analyticsWindowTimeFieldName, "text", value.toString())
     }
 
-    getAnalyticsFlowImage(svgIn: string | SafeHtml, input: ParseModel): SafeHtml {
+    getAnalyticsFlowImage(svgIn: string | SafeHtml, inputId: string): SafeHtml {
         if(!svgIn) {
             return "";
         }
@@ -288,7 +289,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         const elements = svg.getElementsByClassName('joint-cell');
         // @ts-ignore
         for (const element of elements) {
-            if (element.attributes['model-id'].value === input.id) {
+            if (element.attributes['model-id'].value === inputId) {
                 for (const node of element.childNodes) {
                     if (node.attributes['stroke'] !== undefined && node.attributes['stroke'].value === 'black') {
                         node.attributes['stroke'].value = 'red';
@@ -297,6 +298,28 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             }
         }
         return this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
+    }
+
+    analyticsSvgSelectOperatorGetEventNodeId(node: any): string{
+        if(!node){
+            return "";
+        }
+        if (
+            node?.attributes &&
+            node?.attributes['data-type'] !== undefined &&
+            node?.attributes['data-type'].value === 'senergy.NodeElement'
+        ) {
+            return node.attributes['model-id'].value
+        } else {
+            return this.analyticsSvgSelectOperatorGetEventNodeId(node.parentNode)
+        }
+    }
+
+    analyticsSvgSelectOperator($event: MouseEvent) {
+        const id = this.analyticsSvgSelectOperatorGetEventNodeId($event.target);
+        if(id){
+            this.currentFlowInputId = id;
+        }
     }
 
     private ensureAnalyticsFlowParameter(flowId: string) {
