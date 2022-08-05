@@ -108,13 +108,13 @@
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field  color="accent" class="full-width">
-              <mat-label>Flow</mat-label>
-              <mat-select [(ngModel)]="analyticsFlowId">
-                <mat-option *ngFor="let flow of flows" [value]="flow._id">
-                  {{flow.name}}
-                </mat-option>
-              </mat-select>
+            <mat-form-field class="form-field full-width" color="accent">
+              <senergy-select-search placeholder="Flow"
+                                     [(ngModel)]="analyticsFlowId"
+                                     [options]="flows || []"
+                                     useOptionViewProperty="name"
+                                     useOptionValueProperty="_id">
+              </senergy-select-search>
             </mat-form-field>
           </div>
           <div>
