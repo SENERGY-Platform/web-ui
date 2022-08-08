@@ -1,0 +1,65 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+
+<mat-dialog-content class="edit-smart-service-json-extraction-dialog">
+  <mat-accordion>
+    <mat-expansion-panel *ngFor="let exportInfo of exports; let i = index" [expanded]="opened[i]">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{exportInfo.OutputName}} = {{exportInfo.JsonSource}}{{exportInfo.FieldPath.startsWith(".") || exportInfo.FieldPath.startsWith("[") || exportInfo.FieldPath == "" ? exportInfo.FieldPath : "."+exportInfo.FieldPath}}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div>
+        <div>
+          <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="name of the new variable" [(ngModel)]="exportInfo.OutputName">
+          </mat-form-field>
+        </div>
+        <div>
+          <div>
+            <mat-form-field class="form-field full-width" color="accent">
+              <senergy-select-search placeholder="variable with json string"
+                                     [(ngModel)]="exportInfo.JsonSource"
+                                     [options]="availableProcessVariables.get('all') || []"
+                                     useOptionViewProperty="name"
+                                     useOptionValueProperty="name">
+              </senergy-select-search>
+            </mat-form-field>
+          </div>
+        </div>
+        <div>
+          <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="path to the value in the source json string" [(ngModel)]="exportInfo.FieldPath">
+          </mat-form-field>
+        </div>
+        <div>
+          <button mat-icon-button matTooltip="Remove Extraction" (click)="removeExtraction(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+  <div>
+    <button mat-raised-button color="accent" (click)="addExtraction()">Add Extraction</button>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" (click)="ok()" [disabled]="isInvalid()">Ok</button>
+</mat-dialog-actions>

@@ -58,6 +58,9 @@ import {
     EditSmartServiceInputDialogComponent
 } from './designer/dialog/edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
 import {CheckboxValueDirective} from './designer/shared/string-check-box.directive';
+import {
+    EditSmartServiceJsonExtractionDialogComponent
+} from './designer/dialog/edit-smart-service-json-extraction-dialog/edit-smart-service-json-extraction-dialog.component';
 
 const designs = {
     path: 'smart-services/designs',
@@ -134,6 +137,7 @@ const designer = {
         SmartServiceDesignerComponent,
         EditSmartServiceTaskDialogComponent,
         EditSmartServiceInputDialogComponent,
+        EditSmartServiceJsonExtractionDialogComponent,
         CheckboxValueDirective
     ],
 })

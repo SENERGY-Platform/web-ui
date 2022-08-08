@@ -153,26 +153,80 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                                 inputs.push(createTextInputParameter(bpmnjs, input.name, input.value))
                                 break;
                         }
-                    })
+                    });
 
                     var outputs = [];
+                    taskInfo.outputs.forEach(input => {
+                        switch(input.type) {
+                            case "script":
+                                outputs.push(createScriptOutputParameter(bpmnjs, input.name, input.value))
+                                break;
+                            case "text":
+                                outputs.push(createTextOutputParameter(bpmnjs, input.name, input.value))
+                                break;
+                        }
+                    })
+
                     switch (serviceTask.topic){
                         case "process_deployment":
-                            outputs = [createTextOutputParameter(bpmnjs, taskId+"_process_deployment_id", "${process_deployment_id}")];
+                            outputs.push(createTextOutputParameter(bpmnjs, taskId+"_process_deployment_id", "${process_deployment_id}"));
                             break;
                         case "analytics":
-                            outputs = [createTextOutputParameter(bpmnjs, taskId+"_pipeline_id", "${pipeline_id}")];
+                            outputs.push(createTextOutputParameter(bpmnjs, taskId+"_pipeline_id", "${pipeline_id}"));
                             break;
                         case "export":
-                            outputs = [createTextOutputParameter(bpmnjs, taskId+"_export_id", "${export_id}")];
+                            outputs.push(createTextOutputParameter(bpmnjs, taskId+"_export_id", "${export_id}"));
                             break;
                         case "import":
-                            outputs = [createTextOutputParameter(bpmnjs, taskId+"_import_id", "${import_id}")];
+                            outputs.push(createTextOutputParameter(bpmnjs, taskId+"_import_id", "${import_id}"));
                             break;
                     }
 
                     var inputOutput = createInputOutput(bpmnjs, inputs, outputs);
                     setExtentionsElement(bpmnjs, serviceTask, inputOutput);
+
+                    refresh();
+                });
+            });
+            return true;
+        }
+    });
+
+    group.entries.push({
+        id: "smart-service-extract-button",
+        html: "<button class='bpmn-iot-button' data-action='extractJsonFields'>Extract Field from JSON</button>",
+        extractJsonFields: function (element, node) {
+            const taskId = element.id;
+            bpmnjs.designerCallbacks.openExtractJsonFieldsDialog(getTaskInputOutputInfoFromElement(element), element, function (taskInfo) {
+                toTask(bpmnFactory, replace, selection, element, function (task, element) {
+                    task.name = taskInfo.name
+
+                    var inputs = [];
+                    taskInfo.inputs.forEach(input => {
+                        switch(input.type) {
+                            case "script":
+                                inputs.push(createScriptInputParameter(bpmnjs, input.name, input.value))
+                                break;
+                            case "text":
+                                inputs.push(createTextInputParameter(bpmnjs, input.name, input.value))
+                                break;
+                        }
+                    });
+
+                    var outputs = [];
+                    taskInfo.outputs.forEach(input => {
+                        switch(input.type) {
+                            case "script":
+                                outputs.push(createScriptOutputParameter(bpmnjs, input.name, input.value))
+                                break;
+                            case "text":
+                                outputs.push(createTextOutputParameter(bpmnjs, input.name, input.value))
+                                break;
+                        }
+                    })
+
+                    var inputOutput = createInputOutput(bpmnjs, inputs, outputs);
+                    setExtentionsElement(bpmnjs, task, inputOutput);
 
                     refresh();
                 });
@@ -243,6 +297,57 @@ function toExternalServiceTask(bpmnFactory, replace, selection, element, additio
     }
 }
 
+
+function toTask(bpmnFactory, replace, selection, element, additionalChanges) {
+    var target = {
+        type: 'bpmn:Task'
+    };
+    var hints = {};
+
+    var type = target.type;
+    var oldBusinessObject = element.businessObject;
+
+    var newBusinessObject = bpmnFactory.create(type);
+
+    var newElement = {
+        type: type,
+        businessObject: newBusinessObject
+    };
+
+    // initialize special properties defined in target definition
+    assign(newBusinessObject, pick(target, CUSTOM_PROPERTIES));
+
+    newBusinessObject.name = oldBusinessObject.name;
+
+    // retain loop characteristics if the target element is not an event sub process
+    if (!isEventSubProcess(newBusinessObject)) {
+        newBusinessObject.loopCharacteristics = oldBusinessObject.loopCharacteristics;
+    }
+
+    // retain default flow's reference between inclusive <-> exclusive gateways and activities
+    if ((is(oldBusinessObject, 'bpmn:ExclusiveGateway') || is(oldBusinessObject, 'bpmn:InclusiveGateway') ||
+            is(oldBusinessObject, 'bpmn:Activity')) &&
+        (is(newBusinessObject, 'bpmn:ExclusiveGateway') || is(newBusinessObject, 'bpmn:InclusiveGateway') ||
+            is(newBusinessObject, 'bpmn:Activity')))
+    {
+        newBusinessObject.default = oldBusinessObject.default;
+    }
+
+    if (oldBusinessObject.isForCompensation) {
+        newBusinessObject.isForCompensation = true;
+    }
+
+    if(additionalChanges){
+        additionalChanges(newBusinessObject, newElement);
+    }
+
+    newElement = replace.replaceElement(element, newElement, hints);
+
+    if (hints.select !== false) {
+        selection.select(newElement);
+    }
+}
+
 var getSmartServiceInputsForElement = function (element) {
     var inputs = []; //[{id:"", label:"", type:"", default_value:"", properties:[{id:"", value:""}]}]
     if (element.businessObject.extensionElements && element.businessObject.extensionElements.values) {
@@ -264,6 +369,33 @@ var getSmartServiceInputsForElement = function (element) {
     return {
         inputs: inputs
     }
+}
+
+var getTaskInputOutputInfoFromElement = function (element) {
+    var result = {
+        name: element.businessObject.name || "",
+        inputs: [],
+        outputs: []
+    }
+
+    if (element.businessObject.extensionElements && element.businessObject.extensionElements.values) {
+        const extensionValues = element.businessObject.extensionElements.values;
+        extensionValues[0].inputParameters.forEach(input => {
+            if (input.definition && input.definition.scriptFormat) {
+                result.inputs.push({type: "script", name: input.name, value: input.definition.value})
+            } else {
+                result.inputs.push({type: "text", name: input.name, value: input.value})
+            }
+        });
+        extensionValues[0].outputParameters.forEach(output => {
+            if (output.definition && output.definition.scriptFormat) {
+                result.outputs.push({type: "script", name: output.name, value: output.definition.value})
+            } else {
+                result.outputs.push({type: "text", name: output.name, value: output.value})
+            }
+        });
+    }
+    return result;
 }
 
 var getTaskInfoFromElement = function (element) {
@@ -350,6 +482,16 @@ var createOutputParameter = function (bpmnjs, name, value, definition) {
 var createTextOutputParameter = function (bpmnjs, name, value) {
     return createOutputParameter(bpmnjs, name, value, null)
 };
+
+var createScriptOutputParameter = function (bpmnjs, name, value) {
+    var moddle = bpmnjs.get('moddle');
+    var script = moddle.create('camunda:Script', {
+        scriptFormat: "Javascript",
+        value: value
+    });
+    return createOutputParameter(bpmnjs, name, null, script)
+};
+
 
 var createFormData = function (bpmnjs, fields) {
     var moddle = bpmnjs.get('moddle');

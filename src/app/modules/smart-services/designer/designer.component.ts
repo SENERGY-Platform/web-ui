@@ -33,11 +33,19 @@ import {
 import {SmartServiceDesignModel} from '../designs/shared/design.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import * as ServicePropertiesProvider from './smart-service-properties-provider';
-import {SmartServiceInputsDescription, SmartServiceTaskInputDescription, SmartServiceTaskDescription} from './shared/designer.model';
+import {
+    SmartServiceInputsDescription,
+    SmartServiceTaskInputDescription,
+    SmartServiceTaskDescription,
+    SmartServiceTaskInputOutputDescription
+} from './shared/designer.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {EditSmartServiceTaskDialogComponent} from './dialog/edit-smart-service-task-dialog/edit-smart-service-task-dialog.component';
 import {BpmnElement} from '../../processes/designer/shared/designer.model';
 import {EditSmartServiceInputDialogComponent} from './dialog/edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
+import {
+    EditSmartServiceJsonExtractionDialogComponent
+} from './dialog/edit-smart-service-json-extraction-dialog/edit-smart-service-json-extraction-dialog.component';
 
 @Component({
     selector: 'smart-service-designer',
@@ -104,6 +112,18 @@ export class SmartServiceDesignerComponent implements OnInit {
                     dialogConfig.data = { info: initInfo, element: element };
                     const editDialogRef = that.dialog.open(EditSmartServiceTaskDialogComponent, dialogConfig);
                     editDialogRef.afterClosed().subscribe((value: SmartServiceTaskDescription) => {
+                        if (value) {
+                            callback(value);
+                        }
+                    });
+                },
+
+                openExtractJsonFieldsDialog: function (initInfo: SmartServiceTaskInputOutputDescription, element: BpmnElement, callback: (info: SmartServiceTaskInputOutputDescription) => void ) {
+                    const dialogConfig = new MatDialogConfig();
+                    dialogConfig.disableClose = false;
+                    dialogConfig.data = { info: initInfo, element: element };
+                    const editDialogRef = that.dialog.open(EditSmartServiceJsonExtractionDialogComponent, dialogConfig);
+                    editDialogRef.afterClosed().subscribe((value: SmartServiceTaskInputOutputDescription) => {
                         if (value) {
                             callback(value);
                         }

@@ -18,7 +18,8 @@
 export interface SmartServiceTaskDescription {
     name: string;
     topic: string;
-    inputs: SmartServiceTaskInputDescription[]
+    inputs: SmartServiceTaskInputDescription[];
+    outputs: SmartServiceTaskInputDescription[];
 }
 
 export interface SmartServiceTaskInputDescription {
@@ -67,4 +68,10 @@ export interface ServingRequestValue {
     Path: string;
     Type: string;
     Tag?: boolean;
+}
+
+export interface SmartServiceTaskInputOutputDescription {
+    name: string;
+    inputs: SmartServiceTaskInputDescription[];
+    outputs: SmartServiceTaskInputDescription[];
 }
