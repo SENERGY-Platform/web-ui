@@ -144,7 +144,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                     serviceTask.name = taskInfo.name
 
                     var inputs = [];
-                    taskInfo.inputs.forEach(input => {
+                    taskInfo.inputs?.forEach(input => {
                         switch(input.type) {
                             case "script":
                                 inputs.push(createScriptInputParameter(bpmnjs, input.name, input.value))
@@ -156,7 +156,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                     });
 
                     var outputs = [];
-                    taskInfo.outputs.forEach(input => {
+                    taskInfo.outputs?.forEach(input => {
                         switch(input.type) {
                             case "script":
                                 outputs.push(createScriptOutputParameter(bpmnjs, input.name, input.value))
@@ -202,7 +202,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                     task.name = taskInfo.name
 
                     var inputs = [];
-                    taskInfo.inputs.forEach(input => {
+                    taskInfo.inputs?.forEach(input => {
                         switch(input.type) {
                             case "script":
                                 inputs.push(createScriptInputParameter(bpmnjs, input.name, input.value))
@@ -214,7 +214,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                     });
 
                     var outputs = [];
-                    taskInfo.outputs.forEach(input => {
+                    taskInfo.outputs?.forEach(input => {
                         switch(input.type) {
                             case "script":
                                 outputs.push(createScriptOutputParameter(bpmnjs, input.name, input.value))

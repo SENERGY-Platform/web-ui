@@ -198,7 +198,33 @@
                       <ng-container *ngFor="let input of result.inputs">
                         <div *ngIf="analyticsInputMatchesIotConfig(input, flowInput.id, config.name)">
                           <mat-form-field  color="accent" class="full-width">
-                            <input matInput placeholder="{{config.name}}" [(ngModel)]="input.value">
+                            <input matInput placeholder="{{config.name}}" [(ngModel)]="input.value" #configInput>
+                            <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+                              <mat-icon>data_object</mat-icon>
+                            </button>
+                            <mat-menu #menu="matMenu">
+                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
+                                Value: {{param.label || param.name}}
+                              </button>
+                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
+                                {{param.label || param.name}}
+                              </button>
+                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
+                                {{param.label || param.name}}
+                              </button>
+                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
+                                {{param.label || param.name}}
+                              </button>
+                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
+                                {{param.label || param.name}}
+                              </button>
+                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
+                                {{param.label || param.name}}
+                              </button>
+                              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="input.value = appendParam(input.value, param, configInput)" [matTooltip]="param.name">
+                                IoT: {{param.label || param.name}}
+                              </button>
+                            </mat-menu>
                           </mat-form-field>
                         </div>
                       </ng-container>
