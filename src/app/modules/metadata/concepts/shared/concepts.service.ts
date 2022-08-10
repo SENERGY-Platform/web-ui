@@ -17,7 +17,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
+import {
+    ConverterExtension, ConverterExtensionTryRequest,
+    ConverterExtensionTryResult,
+    DeviceTypeConceptModel
+} from '../../device-types-overview/shared/device-type.model';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
@@ -30,6 +34,12 @@ import { forkJoin } from 'rxjs';
 })
 export class ConceptsService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+
+    tryConverterExtension(extensionTryRequest: ConverterExtensionTryRequest): Observable<ConverterExtensionTryResult | null> {
+        return this.http
+            .post<ConverterExtensionTryResult>(environment.marshallerUrl + '/converter/extension-call', extensionTryRequest)
+            .pipe(catchError(this.errorHandlerService.handleError(ConceptsService.name, 'tryConverterExtension', null)));
+    }
 
     createConcept(concept: DeviceTypeConceptModel): Observable<DeviceTypeConceptModel | null> {
         return this.http

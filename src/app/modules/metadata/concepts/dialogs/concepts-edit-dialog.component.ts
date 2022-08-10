@@ -17,7 +17,11 @@
 import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {FormArray, FormControl, Validators} from '@angular/forms';
-import { DeviceTypeCharacteristicsModel, DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
+import {
+    ConverterExtensionTryRequest,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeConceptModel
+} from '../../device-types-overview/shared/device-type.model';
 import { ConceptsService } from '../shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../shared/concepts-characteristics.model';
 import {CharacteristicsService} from "../../characteristics/shared/characteristics.service";
@@ -38,6 +42,11 @@ export class ConceptsEditDialogComponent implements OnInit {
     characteristics: CharacteristicsPermSearchModel[] = [];
     concept: DeviceTypeConceptModel|undefined;
     ready = false;
+
+    testinput: string = "0"
+    testformula: string = "x"
+    testerr: string | null | undefined
+    testoutput: string = ""
 
     constructor(
         private dialogRef: MatDialogRef<ConceptsEditDialogComponent>,
@@ -89,6 +98,31 @@ export class ConceptsEditDialogComponent implements OnInit {
                 this.concept.conversions = [];
             }
             this.concept.conversions.push({from: "", to: "", distance: 1, formula: "", placeholder_name: "x"});
+        }
+    }
+
+    tryFormula() {
+        try{
+            let input = JSON.parse(this.testinput);
+            this.conceptsService.tryConverterExtension({
+                input: input,
+                extension: {
+                    from: "",
+                    to: "",
+                    formula: this.testformula,
+                    distance: 0,
+                    placeholder_name: "x"
+                }
+            }).subscribe(value => {
+                if(!value) {
+                    this.testerr = "error on try call";
+                } else {
+                    this.testerr = value?.error;
+                    this.testoutput = JSON.stringify(value?.output);
+                }
+            })
+        } catch (e) {
+            this.testerr = e.toString();
         }
     }
 

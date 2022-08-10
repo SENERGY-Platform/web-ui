@@ -174,3 +174,13 @@ export enum DeviceTypeInteractionEnum {
     Request = 'request',
     EventAndRequest = 'event+request',
 }
+
+export interface ConverterExtensionTryRequest {
+    extension: ConverterExtension
+    input: any
+}
+
+export interface ConverterExtensionTryResult {
+    error: string | null | undefined
+    output: any
+}

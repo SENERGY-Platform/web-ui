@@ -49,3 +49,12 @@ mat-dialog-actions button:not(:last-child) {
     margin-top: 20px;
     margin-bottom: 20px;
 }
+
+.code-tryout {
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
+.code-tryout mat-icon {
+    transform: scale(2);
+}
