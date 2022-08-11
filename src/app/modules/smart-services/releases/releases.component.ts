@@ -52,6 +52,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     searchText = '';
     selectedItems: ProcessModel[] = [];
     rowHeight = 282;
+    latest: boolean = true;
 
     private limitInit = 54;
     private limit = this.limitInit;
@@ -99,6 +100,11 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
         }
     }
 
+    toggleLatest(){
+        this.latest = !this.latest;
+        this.getRepoItems(true);
+    }
+
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
         this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
@@ -133,7 +139,8 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
             .getExtendedReleaseList(
                 this.limit,
                 this.offset,
-                this.searchText
+                this.searchText,
+                this.latest
             )
             .subscribe((repoItems: SmartServiceExtendedReleaseModel[]) => {
                 this.animationDone = true;

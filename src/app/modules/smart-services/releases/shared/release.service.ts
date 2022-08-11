@@ -29,10 +29,13 @@ export class SmartServiceReleasesService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
 
-    getExtendedReleaseList(limit: number, offset: number, search: string) : Observable<SmartServiceExtendedReleaseModel[]> {
+    getExtendedReleaseList(limit: number, offset: number, search: string, latest: boolean) : Observable<SmartServiceExtendedReleaseModel[]> {
         const params = ['limit=' + limit, 'offset=' + offset];
         if (search != "") {
             params.push('search=' + encodeURIComponent(search));
+        }
+        if(latest) {
+            params.push("latest=true");
         }
         const paramsStr = params.join('&');
         return this.http
@@ -43,10 +46,13 @@ export class SmartServiceReleasesService {
             );
     }
 
-    getReleaseList(limit: number, offset: number, search: string) : Observable<SmartServiceReleaseModel[]> {
-        const params = ['limit=' + limit, 'offset=' + offset, 'permissions_info=true'];
+    getReleaseList(limit: number, offset: number, search: string, latest: boolean) : Observable<SmartServiceReleaseModel[]> {
+        const params = ['limit=' + limit, 'offset=' + offset];
         if (search != "") {
             params.push('search=' + encodeURIComponent(search));
+        }
+        if(latest) {
+            params.push("latest=true");
         }
         const paramsStr = params.join('&');
         return this.http
