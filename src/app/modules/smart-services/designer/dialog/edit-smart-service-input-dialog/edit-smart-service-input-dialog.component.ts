@@ -121,6 +121,9 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
             if(input.multiple) {
                 properties.push({id: "multiple", value: JSON.stringify(input.multiple)});
             }
+            if(input.optional) {
+                properties.push({id: "optional", value: JSON.stringify(input.optional)});
+            }
             if(input.characteristic_id) {
                 properties.push({id: "characteristic_id", value: input.characteristic_id});
             } else if(input.options && input.options.length > 0) {
@@ -153,7 +156,8 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
                 default_value: input.default_value,
 
                 order: 0,
-                multiple: false
+                multiple: false,
+                optional: false,
             } as AbstractInput;
             input.properties.forEach(property => {
                 try {
@@ -180,6 +184,9 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
                     }
                     if(property.id == "multiple" && property.value != "") {
                         result.multiple = JSON.parse(property.value);
+                    }
+                    if(property.id == "optional" && property.value != "") {
+                        result.optional = JSON.parse(property.value);
                     }
                     if(property.id == "characteristic_id" && property.value != "") {
                         result.characteristic_id = property.value;
@@ -275,7 +282,8 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
             label: "",
             type: "string",
             order: 0,
-            multiple: false
+            multiple: false,
+            optional: false
         });
     }
 
@@ -313,4 +321,5 @@ interface AbstractInput {
     characteristic_id?: string;
     order: number;
     multiple: boolean;
+    optional: boolean;
 }

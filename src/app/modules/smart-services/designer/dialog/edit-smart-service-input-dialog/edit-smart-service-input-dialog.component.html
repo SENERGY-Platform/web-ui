@@ -54,6 +54,13 @@
                     </div>
 
                     <div>
+                        <mat-checkbox [(ngModel)]="input.optional">
+                            Optional
+                        </mat-checkbox>
+                    </div>
+
+
+                    <div>
                         <mat-checkbox [checked]="isIotInputProvider(input)" (change)="useIotSelectors($event.checked, input)">
                             IoT
                         </mat-checkbox>
