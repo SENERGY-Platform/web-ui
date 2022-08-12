@@ -42,7 +42,7 @@ export class SmartServiceReleasesService {
             .get<SmartServiceExtendedReleaseModel[]>(environment.smartServiceRepoUrl + '/extended-releases?'+paramsStr)
             .pipe(
                 map((resp) => resp || []),
-                catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getReleaseList()', []))
+                catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getExtendedReleaseList()', []))
             );
     }
 
@@ -66,7 +66,13 @@ export class SmartServiceReleasesService {
     getRelease(id: string): Observable<SmartServiceReleaseModel | null> {
         return this.http
             .get<SmartServiceReleaseModel>(environment.smartServiceRepoUrl + '/releases/' + id)
-            .pipe(catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getProcessModel()', null)));
+            .pipe(catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getRelease()', null)));
+    }
+
+    getExtendedRelease(id: string): Observable<SmartServiceExtendedReleaseModel | null> {
+        return this.http
+            .get<SmartServiceExtendedReleaseModel>(environment.smartServiceRepoUrl + '/extended-releases/' + id)
+            .pipe(catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'getExtendedRelease()', null)));
     }
 
     deleteRelease(id: string): Observable<{ status: number }> {

@@ -46,6 +46,8 @@ import {EditSmartServiceInputDialogComponent} from './dialog/edit-smart-service-
 import {
     EditSmartServiceJsonExtractionDialogComponent
 } from './dialog/edit-smart-service-json-extraction-dialog/edit-smart-service-json-extraction-dialog.component';
+import {SmartServiceReleasesService} from '../releases/shared/release.service';
+import {SmartServiceExtendedReleaseModel} from '../releases/shared/release.model';
 
 @Component({
     selector: 'smart-service-designer',
@@ -55,6 +57,7 @@ import {
 export class SmartServiceDesignerComponent implements OnInit {
     modeler: any;
     id = '';
+    releaseId = '';
     ready = false;
     name = ''
     description = ''
@@ -64,6 +67,7 @@ export class SmartServiceDesignerComponent implements OnInit {
         private route: ActivatedRoute,
         protected auth: AuthorizationService,
         protected designsService: SmartServiceDesignsService,
+        protected releaseService: SmartServiceReleasesService,
         private snackBar: MatSnackBar,
         private dialogService: DialogsService,
         private router: Router,
@@ -74,6 +78,7 @@ export class SmartServiceDesignerComponent implements OnInit {
         setTimeout(() => {
             const that = this;
             this.id = this.route.snapshot.paramMap.get('id') || '';
+            this.releaseId =this.route.snapshot.paramMap.get('releaseId') || '';
 
             this.modeler = new Modeler({
                 container: '#js-canvas',
@@ -143,10 +148,12 @@ export class SmartServiceDesignerComponent implements OnInit {
                 }
             };
 
-            if (this.id === '') {
-                this.newDesignDiagram();
-            } else {
+            if (this.releaseId !== "") {
+                this.loadReleaseDiagram(this.releaseId);
+            } else if (this.id != '') {
                 this.loadDesignDiagram(this.id);
+            } else {
+                this.newDesignDiagram();
             }
             this.ready = true;
         }, 1000);
@@ -154,6 +161,17 @@ export class SmartServiceDesignerComponent implements OnInit {
 
     loadDesignDiagram(id: string) {
         this.designsService.getDesign(id).subscribe((resp: SmartServiceDesignModel | null) => {
+            if (resp !== null) {
+                const xml = resp.bpmn_xml;
+                this.name = resp.name;
+                this.description = resp.description;
+                this.modeler.importXML(xml, this.handleError);
+            }
+        });
+    }
+
+    loadReleaseDiagram(id: string) {
+        this.releaseService.getExtendedRelease(id).subscribe((resp: SmartServiceExtendedReleaseModel | null) => {
             if (resp !== null) {
                 const xml = resp.bpmn_xml;
                 this.name = resp.name;

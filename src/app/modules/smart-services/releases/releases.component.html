@@ -74,6 +74,10 @@
                                             <mat-icon>share</mat-icon>
                                             <span>Share</span>
                                         </button>
+                                        <button mat-menu-item routerLink="/smart-services/releases/designer/{{item.value.id}}">
+                                            <mat-icon>edit</mat-icon>
+                                            <span>Export to Designer</span>
+                                        </button>
                                         <button mat-menu-item (click)="downloadDiagram(item.value)">
                                             <mat-icon>cloud_download</mat-icon>
                                             <span>Download BPMN</span>

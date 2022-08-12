@@ -76,6 +76,11 @@ const releases = {
     data: { header: 'Repository' },
 };
 
+const designerReleaseExport = {
+    path: 'smart-services/releases/designer/:releaseId',
+    component: SmartServiceDesignerComponent,
+    data: { header: 'Designer' },
+};
 const designerEdit = {
     path: 'smart-services/designer/:id',
     component: SmartServiceDesignerComponent,
@@ -97,6 +102,7 @@ const designer = {
             releases,
             designer,
             designerEdit,
+            designerReleaseExport
         ]),
         FlexLayoutModule,
         CoreModule,
