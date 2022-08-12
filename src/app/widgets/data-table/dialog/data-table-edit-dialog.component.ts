@@ -312,13 +312,20 @@ export class DataTableEditDialogComponent implements OnInit {
             .get('elementDetails')
             ?.get('device')
             ?.get('serviceId')
-            ?.valueChanges.subscribe(() => this.onServiceSelected(newGroup));
+            ?.valueChanges.subscribe(() => {
+                this.onServiceSelected(newGroup);
+                this.onExportValueSelected(newGroup);
+            }
+            );
 
         newGroup
             .get('elementDetails')
             ?.get('device')
             ?.get('deviceId')
-            ?.valueChanges.subscribe(() => this.runChangeDetection()); // avoids changedAfterChecked error
+            ?.valueChanges.subscribe(() => {
+                this.onExportValueSelected(newGroup);
+                this.runChangeDetection();  // avoids changedAfterChecked error
+            });
 
         newGroup
             .get('elementDetails')
