@@ -574,6 +574,10 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         return s;
     }
 
+    stopPropagation($event: Event) {
+        $event.stopPropagation();
+    }
+
     private selectSingleElement() {
         if (!this.empty || !this.autoSelectSingleElement) {
             return;
