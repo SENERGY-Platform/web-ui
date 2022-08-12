@@ -513,12 +513,12 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         if (this.options?.forEach) {
             this.options.forEach((v, k) => {
                 const filtered = v.filter((option) => {
-                    if (Array.isArray(this.select.selected)) {
-                        if (this.select.selected.find((sel) => sel.value === this.getOptionValue(option)) !== undefined) {
+                    if (Array.isArray(this.value)) {
+                        if (this.value.find((sel) => sel.value === this.getOptionValue(option)) !== undefined) {
                             selected = this.appendInsertFilterMap(selected, k, option).m;
                             return true;
                         }
-                    } else if (this.select.selected?.value === this.getOptionValue(option)) {
+                    } else if (this.value === this.getOptionValue(option)) {
                         selected = this.appendInsertFilterMap(selected, k, option).m;
                         return true;
                     }
