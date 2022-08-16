@@ -133,11 +133,25 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
                 })
                 properties.push({id: "options", value: JSON.stringify(obj)});
             }
+            var defaultValue = input.default_value;
+            if(defaultValue === undefined || defaultValue === null) {
+                switch (input.type) {
+                    case "string":
+                        defaultValue = "";
+                        break;
+                    case "long":
+                        defaultValue = 0;
+                        break;
+                    case "boolean":
+                        defaultValue = false;
+                        break;
+                }
+            }
             return {
                 id: input.id,
                 label: input.label,
                 type: input.type,
-                default_value: input.default_value,
+                default_value: defaultValue,
                 properties: properties
             }
         });
