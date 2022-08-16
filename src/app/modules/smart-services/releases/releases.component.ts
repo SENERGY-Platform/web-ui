@@ -182,7 +182,8 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
                     image: this.provideImg(repoItem.svg_xml),
                     shared: repoItem.permissions_info.shared,
                     permissions: repoItem.permissions_info.permissions,
-                    created_at: repoItem.created_at
+                    created_at: repoItem.created_at,
+                    error: repoItem.error
                 }),
             );
         });

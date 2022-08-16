@@ -56,6 +56,9 @@
                                     <mat-icon matTooltip="{{item.value.created_at * 1000 | date:'medium'}}" class="info-icon-color info-icon">
                                         calendar_month
                                     </mat-icon>
+                                    <mat-icon *ngIf="item.value.error" matTooltip="{{item.value.error}}" color="warn">
+                                        warning
+                                    </mat-icon>
                                     <div fxFlex></div>
                                     <button mat-icon-button matTooltip="Delete" color="accent"
                                             (click)="deleteRelease(item.value)"
