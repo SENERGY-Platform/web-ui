@@ -54,11 +54,12 @@
                   <div *ngIf="processTaskMatches(input, taskId, 'selection')">
                     <mat-form-field  color="accent" class="full-width">
                       <mat-label>IoT-Selection</mat-label>
-                      <mat-select [(ngModel)]="input.value">
-                        <mat-option *ngFor="let variable of availableProcessVariables.get('iot_form_fields') || []" [value]="'${'+variable.name+'}'">
-                          {{variable.label || variable.name}}
-                        </mat-option>
-                      </mat-select>
+                      <senergy-select-search placeholder="IoT-Selection"
+                                             [(ngModel)]="input.value"
+                                             [options]="availableProcessIotSelections"
+                                             useOptionViewProperty="name"
+                                             useOptionValueProperty="value">
+                      </senergy-select-search>
                     </mat-form-field>
                     <mat-form-field  color="accent" class="full-width">
                       <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>
@@ -159,14 +160,12 @@
                         <div *ngIf="analyticsInputMatchesIotSelection(input, flowInput.id, port)">
                           <mat-form-field  color="accent" class="full-width">
                             <mat-label>IoT-Selection</mat-label>
-                            <mat-select [(ngModel)]="input.value">
-                              <mat-option *ngFor="let variable of availableProcessVariables.get('iot_form_fields') || []" [value]="'${'+variable.name+'}'">
-                                {{variable.label || variable.name}}
-                              </mat-option>
-                              <mat-option *ngFor="let variable of availableProcessVariables.get('import_selection') || []" [value]="variable.name">
-                                {{variable.label || variable.name}}
-                              </mat-option>
-                            </mat-select>
+                            <senergy-select-search placeholder="IoT-Selection"
+                                                   [(ngModel)]="input.value"
+                                                   [options]="availableAnalyticsIotSelections"
+                                                   useOptionViewProperty="name"
+                                                   useOptionValueProperty="value">
+                            </senergy-select-search>
                           </mat-form-field>
                           <mat-form-field  color="accent" class="full-width">
                             <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>

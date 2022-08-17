@@ -64,6 +64,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     importTypes: ImportTypePermissionSearchModel[] = [];
     knownImportTypes: Map<string, ImportTypeModel> = new Map();
     importOverwrites: {config_name: string, json_value: string}[] = [];
+    availableAnalyticsIotSelections: {name: string, value: string}[];
+    availableProcessIotSelections: {name: string, value: string}[];
 
     infoModuleType: string = "widget"
     infoModuleData: string = "{\n\n}"
@@ -85,6 +87,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.init = dialogParams.info;
         this.ensureResultFields();
         this.availableProcessVariables = this.getIncomingOutputs(dialogParams.element);
+        this.availableAnalyticsIotSelections = this.getAvailableAnalyticsIotSelections();
+        this.availableProcessIotSelections = this.getAvailableProcessIotSelections();
         this.addPipelineWithOperatorIdOptionsToAvailableVariables();
         this.addImportIotEntityWithPathToAvailableVariables();
         this.exportRequest = this.parseExport(this.result.inputs.find(value => value.name == "export.request")?.value || "{}");
@@ -121,6 +125,14 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     /******************************
      *      Processes
      ******************************/
+
+    getAvailableProcessIotSelections(): {name: string, value: string}[]  {
+        let result:  {name: string, value: string}[] = [];
+        this.availableProcessVariables.get('iot_form_fields')?.forEach(field => {
+            result.push({name: field.label || field.name, value: '${'+field.name+'}'});
+        });
+        return result;
+    }
 
     private ensureProcessTaskParameter(id: string) {
         this.result.inputs.forEach(e => this.knownInputValues.set(e.name, e));
@@ -381,6 +393,17 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     analyticsInputMatchesPersistDataField(input: SmartServiceTaskInputDescription, flowInputId: string): boolean {
         return input.name == "analytics.persistData."+flowInputId
+    }
+
+    getAvailableAnalyticsIotSelections(): {name: string, value: string}[] {
+        let result:  {name: string, value: string}[] = [];
+        this.availableProcessVariables.get('iot_form_fields')?.forEach(field => {
+            result.push({name: field.label || field.name, value: '${'+field.name+'}'});
+        });
+        this.availableProcessVariables.get('import_selection')?.forEach(field => {
+            result.push({name: field.label || field.name, value: field.name});
+        });
+        return result;
     }
 
     /******************************
