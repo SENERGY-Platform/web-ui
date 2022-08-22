@@ -140,6 +140,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
                 this.limit,
                 this.offset,
                 this.searchText,
+                "r",
                 this.latest
             )
             .subscribe((repoItems: SmartServiceExtendedReleaseModel[]) => {
