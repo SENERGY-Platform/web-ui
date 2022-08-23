@@ -59,6 +59,7 @@ export class DeviceInstancesDialogService {
             const lastValueElements: LastValuesRequestElementTimescaleModel[] = [];
             const serviceOutputCounts: number[] = [];
             deviceType?.services.forEach((service, serviceIndex) => {
+                serviceOutputCounts[serviceIndex] = 0;
                 service.outputs.forEach(output => {
                     this.deviceTypeService.getValuePaths(output.content_variable).forEach(path => {
                         lastValueElements.push({
