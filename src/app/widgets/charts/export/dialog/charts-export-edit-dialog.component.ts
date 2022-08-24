@@ -53,7 +53,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
     dashboardId: string;
     widgetId: string;
-    chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart'];
+    chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart', 'PieChart'];
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
     groupTypes = [

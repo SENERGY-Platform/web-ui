@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {forkJoin, Observable} from 'rxjs';
-import { ChartsModel } from '../../shared/charts.model';
-import { ElementSizeService } from '../../../../core/services/element-size.service';
-import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { ChartDataTableModel } from '../../../../core/components/chart/chart-data-table.model';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
-import { ChartsExportEditDialogComponent } from '../dialog/charts-export-edit-dialog.component';
-import { WidgetModel, WidgetPropertiesModels } from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { ErrorModel } from '../../../../core/model/error.model';
+import {ChartsModel} from '../../shared/charts.model';
+import {ElementSizeService} from '../../../../core/services/element-size.service';
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
+import {ChartDataTableModel} from '../../../../core/components/chart/chart-data-table.model';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
+import {ChartsExportEditDialogComponent} from '../dialog/charts-export-edit-dialog.component';
+import {WidgetModel, WidgetPropertiesModels} from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import {DashboardManipulationEnum} from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {ErrorModel} from '../../../../core/model/error.model';
 import {
     ChartsExportMeasurementModel,
     ChartsExportPropertiesModel,
     ChartsExportVAxesModel
 } from './charts-export-properties.model';
-import { ChartsExportRequestPayloadGroupModel } from './charts-export-request-payload.model';
-import { ChartsExportRangeTimeTypeEnum } from './charts-export-range-time-type.enum';
+import {ChartsExportRequestPayloadGroupModel} from './charts-export-request-payload.model';
+import {ChartsExportRangeTimeTypeEnum} from './charts-export-range-time-type.enum';
 import {ExportDataService} from '../../../shared/export-data.service';
 import {
     QueriesRequestElementInfluxModel,
@@ -55,7 +55,8 @@ export class ChartsExportService {
         private errorHandlerService: ErrorHandlerService,
         private dialog: MatDialog,
         private dashboardService: DashboardService,
-    ) {}
+    ) {
+    }
 
     openEditDialog(dashboardId: string, widgetId: string): void {
         const dialogConfig = new MatDialogConfig();
@@ -77,6 +78,7 @@ export class ChartsExportService {
     getData(properties: WidgetPropertiesModels): Observable<any[][] | null> {
         const widgetProperties = properties as ChartsExportPropertiesModel;
         const time: QueriesRequestTimeModel = {};
+        const limit = properties.chartType === 'PieChart' ? 1 : undefined;
         let group: ChartsExportRequestPayloadGroupModel | undefined;
 
         if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Relative && widgetProperties.time) {
@@ -106,11 +108,12 @@ export class ChartsExportService {
                     },
                 ],
                 groupTime: group?.time !== '' ? group?.time : undefined,
+                limit,
                 time,
             };
             const filters: QueriesRequestFilterModel[] = [];
             vAxis.tagSelection?.forEach((tagFilter) => {
-                filters.push({ column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1] });
+                filters.push({column: tagFilter.split('!')[0], type: '=', value: tagFilter.split('!')[1]});
             });
             if (vAxis.filterType !== undefined) {
                 filters.push({
@@ -142,11 +145,17 @@ export class ChartsExportService {
         const obs: Observable<{ source: string; res: any[][][] }>[] = [];
 
         if (influxElements.length > 0) {
-            obs.push(this.exportDataService.queryInflux(influxElements).pipe(map(res => ({source: 'influx', res: res || []}))));
+            obs.push(this.exportDataService.queryInflux(influxElements).pipe(map(res => ({
+                source: 'influx',
+                res: res || []
+            }))));
         }
 
         if (timescaleElements.length > 0) {
-            obs.push(this.exportDataService.queryTimescale(timescaleElements).pipe(map(res => ({source: 'timescale', res: res || []}))));
+            obs.push(this.exportDataService.queryTimescale(timescaleElements).pipe(map(res => ({
+                source: 'timescale',
+                res: res || []
+            }))));
         }
 
         return forkJoin(obs).pipe(map(res => {
@@ -191,14 +200,15 @@ export class ChartsExportService {
                     // no data
                     observer.next(this.setProcessInstancesStatusValues(widget, new ChartDataTableModel([[]])));
                 } else {
-                    observer.next(this.setProcessInstancesStatusValues(widget, this.setData(resp, widget.properties.vAxes || [])));
+                    observer.next(this.setProcessInstancesStatusValues(widget, this.setData(resp, widget.properties)));
                 }
                 observer.complete();
             });
         });
     }
 
-    private setData(series: any[][], vAxes: ChartsExportVAxesModel[]): ChartDataTableModel {
+    private setData(series: any[][], properties: WidgetPropertiesModels): ChartDataTableModel {
+        const vAxes = properties.vAxes || [];
         const indices: { index: number; conversions: { from: string; to: number }[]; conversionDefault?: number; type: string }[] = [];
         const header: string[] = ['time'];
         if (vAxes) {
@@ -234,6 +244,13 @@ export class ChartsExportService {
             });
             dataTable.data.push(dataPoint);
         });
+        if (properties.chartType === 'PieChart') {
+            const transposed: any[] = [['', '']];
+            dataTable.data.slice(1).forEach((row, i) => {
+                transposed.push([header[i + 1], row.slice(1).find(x => x != null)]);
+            });
+            dataTable.data = transposed;
+        }
         return dataTable;
     }
 
@@ -242,7 +259,7 @@ export class ChartsExportService {
 
         // Remove all elements from color array that are missing in the dataTable
         const colors = this.getColorArray(widget.properties.vAxes || []);
-        if (widget.properties.vAxes && dataTable.data.length > 0) {
+        if (widget.properties.vAxes && dataTable.data.length > 0 && widget.properties.chartType !== 'PieChart') {
             const deleteColorIndices: number[] = [];
             widget.properties.vAxes.forEach((vAxes, index) => {
                 if (dataTable.data[0].indexOf(vAxes.valueAlias || vAxes.valueName) === -1) {
@@ -268,7 +285,6 @@ export class ChartsExportService {
                 },
                 height: element.height,
                 width: element.width,
-                legend: 'none',
                 curveType: widget.properties.curvedFunction ? 'function' : '',
                 vAxis: {
                     viewWindowMode:
@@ -278,13 +294,17 @@ export class ChartsExportService {
                 vAxes: {
                     0: {title: widget.properties.vAxisLabel},
                 },
-                explorer: {
+                explorer: widget.properties.chartType === 'PieChart' ? undefined : {
                     actions: ['dragToZoom', 'rightClickToReset'],
                     axis: 'horizontal',
                     keepInBounds: true,
                     maxZoomIn: 0.001,
                 },
                 interpolateNulls: true,
+                legend: widget.properties.chartType !== 'PieChart' ? 'none' : {
+                    position: 'labeled',
+                },
+                pieSliceText: widget.properties.chartType !== 'PieChart' ? undefined : 'none',
             },
         );
         if (
@@ -300,12 +320,12 @@ export class ChartsExportService {
             v.displayOnSecondVAxis === true ? secondAxisSeries.push(idx) : firstAxesSeries.push(idx),
         );
         if (chartModel.options?.vAxes !== undefined && secondAxisSeries.length > 0) {
-            chartModel.options.vAxes['1'] = { title: widget.properties.secondVAxisLabel };
+            chartModel.options.vAxes['1'] = {title: widget.properties.secondVAxisLabel};
             chartModel.options.series = {};
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            firstAxesSeries.forEach((i) => (chartModel.options!.series[i] = { targetAxisIndex: 0 }));
+            firstAxesSeries.forEach((i) => (chartModel.options!.series[i] = {targetAxisIndex: 0}));
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            secondAxisSeries.forEach((i) => (chartModel.options!.series[i] = { targetAxisIndex: 1 }));
+            secondAxisSeries.forEach((i) => (chartModel.options!.series[i] = {targetAxisIndex: 1}));
         }
         return chartModel;
     }
