@@ -15,19 +15,19 @@
  */
 
 import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
-import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import { DeploymentsService } from '../../../../modules/processes/deployments/shared/deployments.service';
-import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
-import { DashboardResponseMessageModel } from '../../../../modules/dashboard/shared/dashboard-response-message.model';
-import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ExportService } from '../../../../modules/exports/shared/export.service';
-import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../../modules/exports/shared/export.model';
-import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../shared/charts-export-properties.model';
-import { ChartsExportRangeTimeTypeEnum } from '../shared/charts-export-range-time-type.enum';
-import { MatTableDataSource } from '@angular/material/table';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget.model';
+import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
+import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
+import {DashboardResponseMessageModel} from '../../../../modules/dashboard/shared/dashboard-response-message.model';
+import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {ExportService} from '../../../../modules/exports/shared/export.service';
+import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
+import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
+import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
+import {MatTableDataSource} from '@angular/material/table';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {forkJoin, Observable, of} from 'rxjs';
-import { map } from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
 import {DeviceInstancesService} from '../../../../modules/devices/device-instances/shared/device-instances.service';
 import {DeviceTypeService} from '../../../../modules/metadata/device-types-overview/shared/device-type.service';
@@ -53,7 +53,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
     dashboardId: string;
     widgetId: string;
-    chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart', 'PieChart'];
+    chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart', 'PieChart', 'Timeline'];
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
     timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
     groupTypes = [
@@ -139,6 +139,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
             properties: this._formBuilder.group({
                 chartType: widget.properties.chartType,
                 curvedFunction: this._formBuilder.control(widget.properties.curvedFunction),
+                breakInterval: this._formBuilder.control(widget.properties.breakInterval),
                 exports: this._formBuilder.control(widget.properties.exports),
                 timeRangeType: widget.properties.timeRangeType,
                 time: this._formBuilder.group({
@@ -229,11 +230,16 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     initDeployments(widget: WidgetModel): Observable<any> {
         const obs: Observable<any>[] = [];
-        obs.push(this.exportService.getExports(true,'', 9999, 0, 'name', 'asc', undefined, undefined).pipe(map((exports: ExportResponseModel | null) => {
+        obs.push(this.exportService.getExports(true, '', 9999, 0, 'name', 'asc', undefined, undefined).pipe(map((exports: ExportResponseModel | null) => {
             if (exports !== null) {
                 exports.instances?.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exportList.push({ id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID });
+                        this.exportList.push({
+                            id: exportModel.ID,
+                            name: exportModel.Name,
+                            values: exportModel.Values,
+                            exportDatabaseId: exportModel.ExportDatabaseID
+                        });
                     }
                     this.exportDeviceList.set('Exports', this.exportList);
                     this.cd.detectChanges();
@@ -275,7 +281,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.formGroupController.patchValue({ properties: { vAxes: this.dataSource.data } });
+        this.formGroupController.patchValue({properties: {vAxes: this.dataSource.data}});
         this.dashboardService
             .updateWidget(this.dashboardId, this.formGroupController.value)
             .subscribe((resp: DashboardResponseMessageModel) => {
@@ -311,9 +317,9 @@ export class ChartsExportEditDialogComponent implements OnInit {
                         ?.value.findIndex(
                             (item: ChartsExportVAxesModel) =>
                                 item.instanceId === newVAxis.instanceId &&
-                            item.exportName === newVAxis.exportName &&
-                            item.valueName === newVAxis.valueName &&
-                            item.valueType === newVAxis.valueType,
+                                item.exportName === newVAxis.exportName &&
+                                item.valueName === newVAxis.valueName &&
+                                item.valueType === newVAxis.valueType,
                         );
                     if (index === -1) {
                         newData.get(selectedElement.name)?.push(newVAxis);
@@ -327,10 +333,10 @@ export class ChartsExportEditDialogComponent implements OnInit {
                         ?.value.filter(
                             (item: ChartsExportVAxesModel) =>
                                 item.isDuplicate &&
-                            item.instanceId === newVAxis.instanceId &&
-                            item.exportName === newVAxis.exportName &&
-                            item.valueName === newVAxis.valueName &&
-                            item.valueType === newVAxis.valueType,
+                                item.instanceId === newVAxis.instanceId &&
+                                item.exportName === newVAxis.exportName &&
+                                item.valueName === newVAxis.valueName &&
+                                item.valueType === newVAxis.valueType,
                         );
                     newSelection.push(...duplicates);
                 });
@@ -344,7 +350,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                         if (dt === null) {
                             return;
                         }
-                        this.deviceTypes.set(( selectedElement as DeviceInstancesModel).device_type.id, dt);
+                        this.deviceTypes.set((selectedElement as DeviceInstancesModel).device_type.id, dt);
                         return dt;
                     }));
                 }
@@ -370,7 +376,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                                         (item: ChartsExportVAxesModel) =>
                                             item.serviceId === newVAxis.serviceId &&
                                             item.deviceId === newVAxis.deviceId &&
-                                            item.valueName ===  newVAxis.valueName
+                                            item.valueName === newVAxis.valueName
                                     );
                                 if (index === -1) {
                                     newData.get(selectedElement.name)?.push(newVAxis);
@@ -386,7 +392,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                                             item.isDuplicate &&
                                             item.serviceId === newVAxis.serviceId &&
                                             item.deviceId === newVAxis.deviceId &&
-                                            item.valueName ===  newVAxis.valueName
+                                            item.valueName === newVAxis.valueName
                                     );
                                 newSelection.push(...duplicates);
                             });
@@ -470,9 +476,18 @@ export class ChartsExportEditDialogComponent implements OnInit {
         if (element.conversions === undefined) {
             element.conversions = [];
         }
-        element.conversions.push({ from: element.__from, to: element.__to });
+        let from = element.__from;
+        if (element.valueType !== 'string') {
+            from = JSON.parse(from);
+        }
+        let to = element.__to;
+        if (this.chartType.value !== 'Timeline') {
+            to = JSON.parse(to);
+        }
+        element.conversions.push({from, to, color: element.__color});
         element.__from = undefined;
         element.__to = undefined;
+        element.__color = undefined;
     }
 
     getTags(element: ChartsExportVAxesModel): Map<string, { value: string; parent: string }[]> {
@@ -490,7 +505,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 res.forEach((v, k) =>
                     m.set(
                         k,
-                        v.map((t) => ({ value: t, parent: k })),
+                        v.map((t) => ({value: t, parent: k})),
                     ),
                 );
                 this.exportTags?.set(exportId, m);
@@ -515,18 +530,18 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     private translateTypeDeviceToExport(type: string): string {
-        switch(type) {
-        case this.typeString:
-            return 'string';
-        case this.typeFloat:
-            return 'float';
-        case this.typeInteger:
-            return 'int';
-        case this.typeBoolean:
-            return 'bool';
-        case this.typeList:
-        case this.typeStructure:
-            return 'string_json';
+        switch (type) {
+            case this.typeString:
+                return 'string';
+            case this.typeFloat:
+                return 'float';
+            case this.typeInteger:
+                return 'int';
+            case this.typeBoolean:
+                return 'bool';
+            case this.typeList:
+            case this.typeStructure:
+                return 'string_json';
         }
         console.error('unknown type ' + type);
         return '';

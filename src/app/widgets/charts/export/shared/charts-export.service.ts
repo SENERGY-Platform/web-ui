@@ -200,16 +200,17 @@ export class ChartsExportService {
                     // no data
                     observer.next(this.setProcessInstancesStatusValues(widget, new ChartDataTableModel([[]])));
                 } else {
-                    observer.next(this.setProcessInstancesStatusValues(widget, this.setData(resp, widget.properties)));
+                    const tableData = this.setData(resp, widget.properties);
+                    observer.next(this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors));
                 }
                 observer.complete();
             });
         });
     }
 
-    private setData(series: any[][], properties: WidgetPropertiesModels): ChartDataTableModel {
+    private setData(series: any[][], properties: WidgetPropertiesModels): { table: ChartDataTableModel; colors?: string[] } {
         const vAxes = properties.vAxes || [];
-        const indices: { index: number; conversions: { from: string; to: number }[]; conversionDefault?: number; type: string }[] = [];
+        const indices: { index: number; conversions: { from: any; to: any }[]; conversionDefault?: number; type: string }[] = [];
         const header: string[] = ['time'];
         if (vAxes) {
             vAxes.forEach((vAxis: ChartsExportVAxesModel, index) => {
@@ -227,9 +228,9 @@ export class ChartsExportService {
         const dataTable = new ChartDataTableModel([header]);
 
         series.forEach((item: (string | number | boolean)[]) => {
-            const dataPoint: (Date | number | null)[] = [new Date(item[0] as string)];
+            const dataPoint: (Date | number | string | null)[] = [new Date(item[0] as string)];
             indices.forEach((resp) => {
-                let value = item[resp.index];
+                let value = item[resp.index] as any;
                 if (value === null || value === undefined) {
                     dataPoint.push(null);
                     return;
@@ -237,10 +238,10 @@ export class ChartsExportService {
                 const matchingRule = resp.conversions.find((rule) => rule.from === value);
                 if (matchingRule !== undefined) {
                     value = matchingRule.to;
-                } else if (resp.type === 'string' && resp.conversionDefault !== undefined) {
+                } else if (resp.type === 'string' || resp.type === 'boolean' && resp.conversionDefault !== undefined) {
                     value = resp.conversionDefault;
                 }
-                dataPoint.push(Math.fround(value as number));
+                dataPoint.push(value);
             });
             dataTable.data.push(dataPoint);
         });
@@ -250,15 +251,90 @@ export class ChartsExportService {
                 transposed.push([header[i + 1], row.slice(1).find(x => x != null)]);
             });
             dataTable.data = transposed;
+        } else if (properties.chartType === 'Timeline') {
+            let breakInterval = -1;
+            let breakValue = 0;
+            let breakUnit = '';
+            if (properties.breakInterval?.endsWith('m')) {
+                breakUnit = 'm';
+                breakInterval = 1000 * 60;
+            }
+            if (properties.breakInterval?.endsWith('h')) {
+                breakUnit = 'h';
+                breakInterval = 1000 * 60 * 60;
+            }
+            if (properties.breakInterval?.endsWith('d')) {
+                breakUnit = 'd';
+                breakInterval = 1000 * 60 * 60 * 24;
+            }
+            if (breakInterval !== -1) {
+                breakValue = Number(properties.breakInterval?.split(breakUnit)[0]);
+                breakInterval *= breakValue;
+            }
+            const allSlices: any[][] = [];
+            const offset = 60 * 1000 * (new Date(0).getTimezoneOffset());
+            const colors: string[] = [customColor];
+            header.slice(1).forEach((head, j) => {
+                const slices: any[][] = [[]];
+                let end: any;
+                let value: string | undefined;
+                const filteredRows = dataTable.data.filter(r => r[j + 1] !== null);
+                for (let i = 1; i < filteredRows.length; i++) {
+                    const slice = slices[slices.length - 1];
+                    let title = head;
+                    if (breakInterval !== -1 && slices.indexOf(slice) > 0) {
+                        title += ' -' + (slices.indexOf(slice) * breakValue) + breakUnit;
+                    }
+                    if (filteredRows[i][j + 1] != null) {
+                        if (value === undefined) {
+                            end = filteredRows[i][0];
+                            value = '' + filteredRows[i][j + 1];
+                        } else if ('' + filteredRows[i][j + 1] !== value || i === filteredRows.length - 1) {
+                            let start = filteredRows[i][0] as Date;
+                            if (breakInterval > -1) {
+                                if (Math.floor(end / breakInterval) > Math.floor(start.valueOf() / breakInterval) && i === filteredRows.length - 1) {
+                                    start = new Date(offset);
+                                } else {
+                                    start = new Date(start.valueOf() % breakInterval);
+                                }
+                                end = new Date((end) % breakInterval);
+                                if (end.valueOf() >= breakInterval + offset) {
+                                    end = new Date(breakInterval + offset - 1);
+                                }
+                                if (start.valueOf() > end.valueOf()) {
+                                    start = new Date(start.valueOf() - breakInterval);
+                                }
+                            }
+                            if (slice.findIndex((s: any[]) => /*s[0] === title &&*/ s[1] === value) === -1 && allSlices.findIndex(s => s[1] === value) === -1 && slices.findIndex(s => s.findIndex(sub => sub[1] === value) !== -1) === -1) {
+                                colors.push(properties.vAxes?.[j].conversions?.find(c => c.to === value)?.color || properties.vAxes?.[j].color || customColor);
+                            }
+                            slice.push([title, value, start, end]);
+                            value = '' + filteredRows[i][j + 1];
+                            end = filteredRows[i][0];
+                        } else if (breakInterval > -1 && Math.floor((slice.length > 0 ? slice[0][0].valueOf() : end) / breakInterval) > Math.floor((filteredRows[i][0] as Date).valueOf() / breakInterval)) {
+                            if (slice.findIndex((s: any[]) => /*s[0] === title &&*/ s[1] === value) === -1 && allSlices.findIndex(s => s[1] === value) === -1 && slices.findIndex(s => s.findIndex(sub => sub[1] === value) !== -1) === -1) {
+                                colors.push(properties.vAxes?.[j].conversions?.find(c => c.to === value)?.color || properties.vAxes?.[j].color || customColor);
+                            }
+                            slice.push([title, value, new Date(offset), new Date(breakInterval + offset - 1)]);
+                            end = filteredRows[i][0];
+                            slices.push([]);
+                        }
+                    }
+                }
+                allSlices.push(...slices.filter(s => s.length > 0));
+            });
+            dataTable.data = [['', '', '', '']];
+            allSlices.forEach(s => dataTable.data.push(...s));
+            return {table: dataTable, colors};
         }
-        return dataTable;
+        return {table: dataTable};
     }
 
-    private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel): ChartsModel {
+    private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[]): ChartsModel {
         const element = this.elementSizeService.getHeightAndWidthByElementId(widget.id, 5);
 
         // Remove all elements from color array that are missing in the dataTable
-        const colors = this.getColorArray(widget.properties.vAxes || []);
+        const colors = colorOverride || this.getColorArray(widget.properties.vAxes || []);
         if (widget.properties.vAxes && dataTable.data.length > 0 && widget.properties.chartType !== 'PieChart') {
             const deleteColorIndices: number[] = [];
             widget.properties.vAxes.forEach((vAxes, index) => {

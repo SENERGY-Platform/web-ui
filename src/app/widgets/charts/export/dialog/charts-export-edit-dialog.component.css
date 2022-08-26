@@ -54,3 +54,8 @@ mat-dialog-actions button:not(:last-child) {
     display: inline-block;
     width: 37%;
 }
+
+.from-to-color {
+    display: inline-block;
+    width: 23%;
+}

@@ -34,6 +34,7 @@ export interface ChartsExportPropertiesModel {
     timeRangeType?: string;
     time?: ChartsExportRequestPayloadTimeModel;
     group?: ChartsExportRequestPayloadGroupModel;
+    breakInterval?: string;
 }
 
 export interface ChartsExportMeasurementModel {
@@ -59,6 +60,6 @@ export interface ChartsExportVAxesModel {
     tagSelection?: string[];
     isDuplicate?: boolean;
     displayOnSecondVAxis?: boolean;
-    conversions?: { from: string; to: number }[];
+    conversions?: { from: any; to: any; color?: string }[];
     conversionDefault?: number;
 }

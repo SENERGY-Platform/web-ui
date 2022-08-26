@@ -42,6 +42,13 @@
                         <mat-slide-toggle formControlName="curvedFunction"> Curved?
                         </mat-slide-toggle>
                     </td>
+                    <td *ngIf="chartType.value === 'Timeline'">
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-label>Break interval</mat-label>
+                            <input type="text" matInput placeholder="e.g. 1m, 1h, 1d"
+                                   formControlName="breakInterval">
+                        </mat-form-field>
+                    </td>
                 </tr>
             </table>
 
@@ -234,27 +241,34 @@
                         -->
                         <mat-form-field class="from-to" color="accent">
                             <mat-label>To</mat-label>
-                            <input matInput placeholder="To" type="number" [(ngModel)]="element.conversionDefault">
+                            <input matInput placeholder="To" type="text" [(ngModel)]="element.conversionDefault">
                         </mat-form-field>
                     </div>
                     <div mat-menu-item (click)="$event.stopPropagation()">
-                        <mat-form-field class="from-to" color="accent">
+                        <mat-form-field class="{{chartType.value === 'Timeline' ? 'from-to-color' : 'from-to'}}" color="accent">
                             <mat-label>From</mat-label>
                             <input matInput placeholder="From" type="text" [(ngModel)]="element.__from">
                         </mat-form-field>
                         -->
-                        <mat-form-field class="from-to" color="accent">
+                        <mat-form-field class="{{chartType.value === 'Timeline' ? 'from-to-color' : 'from-to'}}" color="accent">
                             <mat-label>To</mat-label>
-                            <input matInput placeholder="To" type="number" [(ngModel)]="element.__to">
+                            <input matInput placeholder="To" type="text" [(ngModel)]="element.__to">
+                        </mat-form-field>
+                        <span *ngIf="chartType.value === 'Timeline'"> : </span>
+                        <mat-form-field class="from-to-color" color="accent" *ngIf="chartType.value === 'Timeline'">
+                            <mat-label>Color</mat-label>
+                            <input matInput placeholder="Color" type="text" [(ngModel)]="element.__color">
                         </mat-form-field>
                         <button mat-icon-button (click)="addConversion(element)" disableRipple [disabled]="element.__from === undefined || element.__to === undefined">
                             <mat-icon color="accent">add</mat-icon>
                         </button>
                     </div>
                     <div *ngFor="let rule of element.conversions; let index=index" mat-menu-item (click)="$event.stopPropagation()">
-                        <span class="from-to">{{rule.from}}</span>
+                        <span class="{{chartType.value === 'Timeline' ? 'from-to-color' : 'from-to'}}">{{rule.from}}</span>
                         -->
-                        <span class="from-to">{{rule.to}}</span>
+                        <span class="{{chartType.value === 'Timeline' ? 'from-to-color' : 'from-to'}}">{{rule.to}}</span>
+                        <span *ngIf="chartType.value === 'Timeline'"> : </span>
+                        <span class="from-to-color">{{rule.color}}</span>
                         <button mat-icon-button (click)="deleteConversion(element, index, $event)" disableRipple>
                             <mat-icon color="warn">delete</mat-icon>
                         </button>
