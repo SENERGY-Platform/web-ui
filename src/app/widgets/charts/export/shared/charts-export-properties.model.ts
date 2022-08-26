@@ -31,6 +31,7 @@ export interface ChartsExportPropertiesModel {
     measurement?: ChartsExportMeasurementModel; // deprecated
     math?: string;
     curvedFunction?: boolean;
+    calculateIntervals?: boolean;
     timeRangeType?: string;
     time?: ChartsExportRequestPayloadTimeModel;
     group?: ChartsExportRequestPayloadGroupModel;

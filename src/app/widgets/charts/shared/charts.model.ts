@@ -28,6 +28,7 @@ export class ChartsModel {
             height?: number;
             width?: number;
             pieSliceText?: string;
+            sliceVisibilityThreshold?: number;
             curveType?: string;
             tooltip?: {
                 trigger?: string;

@@ -139,6 +139,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
             properties: this._formBuilder.group({
                 chartType: widget.properties.chartType,
                 curvedFunction: this._formBuilder.control(widget.properties.curvedFunction),
+                calculateIntervals: this._formBuilder.control(widget.properties.calculateIntervals),
                 breakInterval: this._formBuilder.control(widget.properties.breakInterval),
                 exports: this._formBuilder.control(widget.properties.exports),
                 timeRangeType: widget.properties.timeRangeType,
@@ -481,7 +482,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
             from = JSON.parse(from);
         }
         let to = element.__to;
-        if (this.chartType.value !== 'Timeline') {
+        if (this.chartType.value !== 'Timeline' && this.chartType.value !== 'PieChart') {
             to = JSON.parse(to);
         }
         element.conversions.push({from, to, color: element.__color});

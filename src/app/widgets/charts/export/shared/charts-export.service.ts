@@ -78,7 +78,7 @@ export class ChartsExportService {
     getData(properties: WidgetPropertiesModels): Observable<any[][] | null> {
         const widgetProperties = properties as ChartsExportPropertiesModel;
         const time: QueriesRequestTimeModel = {};
-        const limit = properties.chartType === 'PieChart' ? 1 : undefined;
+        const limit = properties.chartType === 'PieChart' && properties.calculateIntervals !== true ? 1 : undefined;
         let group: ChartsExportRequestPayloadGroupModel | undefined;
 
         if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Relative && widgetProperties.time) {
@@ -246,11 +246,26 @@ export class ChartsExportService {
             dataTable.data.push(dataPoint);
         });
         if (properties.chartType === 'PieChart') {
-            const transposed: any[] = [['', '']];
-            dataTable.data.slice(1).forEach((row, i) => {
-                transposed.push([header[i + 1], row.slice(1).find(x => x != null)]);
-            });
-            dataTable.data = transposed;
+            if (properties.calculateIntervals !== true) {
+                const transposed: any[] = [['', '']];
+                dataTable.data.slice(1).forEach((row, i) => {
+                    transposed.push([header[i + 1], row.slice(1).find(x => x != null)]);
+                });
+                dataTable.data = transposed;
+            } else {
+                const res = this.transformTableForTimeline(dataTable.data, properties.vAxes || []);
+                dataTable.data = [['', '']];
+                res.table.slice(1).forEach(r => {
+                    const val = (r[3] as Date).valueOf() - (r[2] as Date).valueOf();
+                    const i = dataTable.data.findIndex(s => s[0] === r[1]);
+                    if (i !== -1) {
+                        (dataTable.data[i][1] as number) += val;
+                    } else {
+                        dataTable.data.push([r[1], val]);
+                    }
+                });
+                return  {table: dataTable, colors: res.colors.slice(1)};
+            }
         } else if (properties.chartType === 'Timeline') {
             let breakInterval = -1;
             let breakValue = 0;
@@ -271,61 +286,9 @@ export class ChartsExportService {
                 breakValue = Number(properties.breakInterval?.split(breakUnit)[0]);
                 breakInterval *= breakValue;
             }
-            const allSlices: any[][] = [];
-            const offset = 60 * 1000 * (new Date(0).getTimezoneOffset());
-            const colors: string[] = [customColor];
-            header.slice(1).forEach((head, j) => {
-                const slices: any[][] = [[]];
-                let end: any;
-                let value: string | undefined;
-                const filteredRows = dataTable.data.filter(r => r[j + 1] !== null);
-                for (let i = 1; i < filteredRows.length; i++) {
-                    const slice = slices[slices.length - 1];
-                    let title = head;
-                    if (breakInterval !== -1 && slices.indexOf(slice) > 0) {
-                        title += ' -' + (slices.indexOf(slice) * breakValue) + breakUnit;
-                    }
-                    if (filteredRows[i][j + 1] != null) {
-                        if (value === undefined) {
-                            end = filteredRows[i][0];
-                            value = '' + filteredRows[i][j + 1];
-                        } else if ('' + filteredRows[i][j + 1] !== value || i === filteredRows.length - 1) {
-                            let start = filteredRows[i][0] as Date;
-                            if (breakInterval > -1) {
-                                if (Math.floor(end / breakInterval) > Math.floor(start.valueOf() / breakInterval) && i === filteredRows.length - 1) {
-                                    start = new Date(offset);
-                                } else {
-                                    start = new Date(start.valueOf() % breakInterval);
-                                }
-                                end = new Date((end) % breakInterval);
-                                if (end.valueOf() >= breakInterval + offset) {
-                                    end = new Date(breakInterval + offset - 1);
-                                }
-                                if (start.valueOf() > end.valueOf()) {
-                                    start = new Date(start.valueOf() - breakInterval);
-                                }
-                            }
-                            if (slice.findIndex((s: any[]) => /*s[0] === title &&*/ s[1] === value) === -1 && allSlices.findIndex(s => s[1] === value) === -1 && slices.findIndex(s => s.findIndex(sub => sub[1] === value) !== -1) === -1) {
-                                colors.push(properties.vAxes?.[j].conversions?.find(c => c.to === value)?.color || properties.vAxes?.[j].color || customColor);
-                            }
-                            slice.push([title, value, start, end]);
-                            value = '' + filteredRows[i][j + 1];
-                            end = filteredRows[i][0];
-                        } else if (breakInterval > -1 && Math.floor((slice.length > 0 ? slice[0][0].valueOf() : end) / breakInterval) > Math.floor((filteredRows[i][0] as Date).valueOf() / breakInterval)) {
-                            if (slice.findIndex((s: any[]) => /*s[0] === title &&*/ s[1] === value) === -1 && allSlices.findIndex(s => s[1] === value) === -1 && slices.findIndex(s => s.findIndex(sub => sub[1] === value) !== -1) === -1) {
-                                colors.push(properties.vAxes?.[j].conversions?.find(c => c.to === value)?.color || properties.vAxes?.[j].color || customColor);
-                            }
-                            slice.push([title, value, new Date(offset), new Date(breakInterval + offset - 1)]);
-                            end = filteredRows[i][0];
-                            slices.push([]);
-                        }
-                    }
-                }
-                allSlices.push(...slices.filter(s => s.length > 0));
-            });
-            dataTable.data = [['', '', '', '']];
-            allSlices.forEach(s => dataTable.data.push(...s));
-            return {table: dataTable, colors};
+            const res = this.transformTableForTimeline(dataTable.data, properties.vAxes || [], breakInterval, breakValue, breakUnit);
+            dataTable.data = res.table;
+            return {table: dataTable, colors: res.colors};
         }
         return {table: dataTable};
     }
@@ -381,6 +344,7 @@ export class ChartsExportService {
                     position: 'labeled',
                 },
                 pieSliceText: widget.properties.chartType !== 'PieChart' ? undefined : 'none',
+                sliceVisibilityThreshold: widget.properties.chartType !== 'PieChart' || dataTable.data.length > 5 ? undefined : 0,
             },
         );
         if (
@@ -413,4 +377,63 @@ export class ChartsExportService {
         });
         return array;
     }
+
+    private transformTableForTimeline(dat: any[][], vAxes: ChartsExportVAxesModel[], breakInterval: number = -1, breakValue: number = 0, breakUnit: string = ''): {table: any[][]; colors: string[]} {
+        const allSlices: any[][] = [];
+        const offset = 60 * 1000 * (new Date(0).getTimezoneOffset());
+        const colors: string[] = [customColor];
+        const header = dat[0];
+        header.slice(1).forEach((head, j) => {
+            const slices: any[][] = [[]];
+            let end: any;
+            let value: string | undefined;
+            const filteredRows = dat.filter(r => r[j + 1] !== null);
+            for (let i = 1; i < filteredRows.length; i++) {
+                const slice = slices[slices.length - 1];
+                let title = head;
+                if (breakInterval !== -1 && slices.indexOf(slice) > 0) {
+                    title += ' -' + (slices.indexOf(slice) * breakValue) + breakUnit;
+                }
+                if (filteredRows[i][j + 1] != null) {
+                    if (value === undefined) {
+                        end = filteredRows[i][0];
+                        value = '' + filteredRows[i][j + 1];
+                    } else if ('' + filteredRows[i][j + 1] !== value || i === filteredRows.length - 1) {
+                        let start = filteredRows[i][0] as Date;
+                        if (breakInterval > -1) {
+                            if (Math.floor(end / breakInterval) > Math.floor(start.valueOf() / breakInterval) && i === filteredRows.length - 1) {
+                                start = new Date(offset);
+                            } else {
+                                start = new Date(start.valueOf() % breakInterval);
+                            }
+                            end = new Date((end) % breakInterval);
+                            if (end.valueOf() >= breakInterval + offset) {
+                                end = new Date(breakInterval + offset - 1);
+                            }
+                            if (start.valueOf() > end.valueOf()) {
+                                start = new Date(start.valueOf() - breakInterval);
+                            }
+                        }
+                        if (slice.findIndex((s: any[]) => s[1] === value) === -1 && allSlices.findIndex(s => s[1] === value) === -1 && slices.findIndex(s => s.findIndex(sub => sub[1] === value) !== -1) === -1) {
+                            colors.push(vAxes?.[j].conversions?.find(c => c.to === value)?.color || vAxes?.[j].color || customColor);
+                        }
+                        slice.push([title, value, start, end]);
+                        value = '' + filteredRows[i][j + 1];
+                        end = filteredRows[i][0];
+                    } else if (breakInterval > -1 && Math.floor((slice.length > 0 ? slice[0][0].valueOf() : end) / breakInterval) > Math.floor((filteredRows[i][0] as Date).valueOf() / breakInterval)) {
+                        if (slice.findIndex((s: any[]) => s[1] === value) === -1 && allSlices.findIndex(s => s[1] === value) === -1 && slices.findIndex(s => s.findIndex(sub => sub[1] === value) !== -1) === -1) {
+                            colors.push(vAxes?.[j].conversions?.find(c => c.to === value)?.color || vAxes?.[j].color || customColor);
+                        }
+                        slice.push([title, value, new Date(offset), new Date(breakInterval + offset - 1)]);
+                        end = filteredRows[i][0];
+                        slices.push([]);
+                    }
+                }
+            }
+            allSlices.push(...slices.filter(s => s.length > 0));
+        });
+        const table = [['', '', '', '']];
+        allSlices.forEach(s => table.push(...s));
+        return {table, colors};
+}
 }
