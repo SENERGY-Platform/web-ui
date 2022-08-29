@@ -136,7 +136,7 @@ export class ChartsExportService {
                 (newField as QueriesRequestElementTimescaleModel).exportId = vAxis.instanceId;
                 (newField as QueriesRequestElementTimescaleModel).serviceId = vAxis.serviceId;
                 (newField as QueriesRequestElementTimescaleModel).deviceId = vAxis.deviceId;
-                newField.columns[0].name = vAxis.valuePath || '';
+                newField.columns[0].name = vAxis.valuePath || vAxis.valueName || '';
                 timescaleElements.push(newField);
                 timescaleResultMapper.push(index);
             }
