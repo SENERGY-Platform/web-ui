@@ -20,7 +20,7 @@ import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/internal/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { PermissionsResourceModel } from './permissions-resource.model';
+import {PermissionsResourceBaseModel, PermissionsResourceModel} from './permissions-resource.model';
 import { PermissionsGroupModel, PermissionsUserModel } from './permissions-user.model';
 import { PermissionsRightsModel } from './permissions-rights.model';
 import { PermissionsResponseModel } from './permissions-response.model';
@@ -54,9 +54,28 @@ export class PermissionsService {
                 environment.permissionSearchUrl + '/v3/administrate/rights/' + encodeURIComponent(kind) + '/' + encodeURIComponent(id),
             )
             .pipe(
-                map((resp) => resp || []),
+                map((resp) => resp || {} as PermissionsResourceModel),
                 catchError(
                     this.errorHandlerService.handleError(PermissionsService.name, 'getResourcePermissions', {} as PermissionsResourceModel),
+                ),
+            );
+    }
+
+    //key is the kafka key this permission command will be published to. is optional
+    setResourcePermissions(kind: string, id: string, rights: PermissionsResourceBaseModel, key?: string): Observable<boolean> {
+        let query = "";
+        if(key){
+            query = "?key="+encodeURIComponent(key);
+        }
+        return this.http
+            .put<PermissionsResourceBaseModel>(
+                environment.permissionCommandUrl + '/v3/administrate/rights/' + encodeURIComponent(kind) + '/' + encodeURIComponent(id)+query,
+                rights
+            )
+            .pipe(
+                map((_) => true),
+                catchError(
+                    this.errorHandlerService.handleError(PermissionsService.name, 'getResourcePermissions', false),
                 ),
             );
     }
@@ -71,84 +90,6 @@ export class PermissionsService {
         return this.http
             .get<PermissionsUserModel>(environment.usersServiceUrl + '/user/name/' + userName)
             .pipe(catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getUserByName', null)));
-    }
-
-    removeUserRight(user: string, kind: string, resourceId: string): Observable<PermissionsResponseModel> {
-        return this.http
-            .delete<PermissionsResponseModel>(
-                environment.permissionCommandUrl +
-                    '/user/' +
-                    encodeURIComponent(user) +
-                    '/' +
-                    encodeURIComponent(kind) +
-                    '/' +
-                    encodeURIComponent(resourceId),
-            )
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(PermissionsService.name, 'removeUserRight', { status: 'Error removeUserRight!' }),
-                ),
-            );
-    }
-
-    setUserRight(user: string, kind: string, resourceId: string, rights: PermissionsRightsModel): Observable<PermissionsResponseModel> {
-        return this.http
-            .put<any>(
-                environment.permissionCommandUrl +
-                    '/user/' +
-                    encodeURIComponent(user) +
-                    '/' +
-                    encodeURIComponent(kind) +
-                    '/' +
-                    encodeURIComponent(resourceId) +
-                    '/' +
-                    PermissionsService.rightObjToStr(rights),
-                {},
-            )
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(PermissionsService.name, 'setUserRight', { status: 'Error setUserRight!' }),
-                ),
-            );
-    }
-
-    removeRoleRight(user: string, kind: string, resourceId: string): Observable<PermissionsResponseModel> {
-        return this.http
-            .delete<PermissionsResponseModel>(
-                environment.permissionCommandUrl +
-                    '/group/' +
-                    encodeURIComponent(user) +
-                    '/' +
-                    encodeURIComponent(kind) +
-                    '/' +
-                    encodeURIComponent(resourceId),
-            )
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(PermissionsService.name, 'removeRoleRight', { status: 'Error removeRoleRight!' }),
-                ),
-            );
-    }
-
-    setRoleRight(user: string, kind: string, resourceId: string, rights: PermissionsRightsModel): Observable<PermissionsResponseModel> {
-        return this.http
-            .put<any>(
-                environment.permissionCommandUrl +
-                    '/group/' +
-                    encodeURIComponent(user) +
-                    '/' +
-                    encodeURIComponent(kind) +
-                    '/' +
-                    encodeURIComponent(resourceId) +
-                    '/' +
-                    PermissionsService.rightObjToStr(rights),
-                {},
-            )
-            .pipe(
-                catchError(
-                    this.errorHandlerService.handleError(PermissionsService.name, 'setRoleRight', { status: 'Error setRoleRight!' }),
-                ),
-            );
     }
 
     getRoles(): Observable<PermissionsGroupModel[]> {

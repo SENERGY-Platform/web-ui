@@ -38,7 +38,6 @@ export class PermissionDialogComponent implements OnInit {
     userId: null | string = null;
     displayedColumns: string[] = ['user', 'isRole', 'read', 'write', 'execute', 'administrate', 'action'];
     permissions: PermissionsEditModel[] = [];
-    deletedPermissions: PermissionsEditModel[] = [];
 
     constructor(
         private dialogRef: MatDialogRef<PermissionDialogComponent>,
@@ -68,23 +67,11 @@ export class PermissionDialogComponent implements OnInit {
     }
 
     save(): void {
-        const permissionOut: PermissionsEditModel[] = [];
-        let index = 0;
-        this.deletedPermissions.forEach((deletedPerm: PermissionsEditModel) => {
-            permissionOut.push(deletedPerm);
-            permissionOut[index++].deleted = true;
-        });
-
-        this.permissions.forEach((permission: PermissionsEditModel) => {
-            permissionOut.push(permission);
-            permissionOut[index++].deleted = false;
-        });
-
-        this.dialogRef.close(permissionOut);
+        this.dialogRef.close(this.permissions);
     }
 
     deleteRow(index: number) {
-        this.deletedPermissions = this.deletedPermissions.concat(this.permissions.splice(index, 1));
+        this.permissions.splice(index, 1)
         this.table.renderRows();
     }
 

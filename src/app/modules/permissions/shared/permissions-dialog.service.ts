@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin, Observable } from 'rxjs';
 import { catchError } from 'rxjs/internal/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { PermissionsResourceModel } from './permissions-resource.model';
+import {PermissionsResourceBaseModel, PermissionsResourceModel} from './permissions-resource.model';
 import { PermissionsUserModel } from './permissions-user.model';
 import { PermissionsRightsModel } from './permissions-rights.model';
 import { PermissionsEditModel } from './permissions-edit.model';
@@ -41,7 +41,8 @@ export class PermissionsDialogService {
         public snackBar: MatSnackBar,
     ) {}
 
-    openPermissionDialog(kind: string, id: string, name: string): void {
+    //key is the kafka key this permission command will be published to. is optional
+    openPermissionDialog(kind: string, id: string, name: string, key?: string): void {
         const permissionsIn: PermissionsEditModel[] = [];
 
         this.permissionsService.getResourcePermissions(kind, id).subscribe((permissionsModel: PermissionsResourceModel) => {
@@ -67,12 +68,12 @@ export class PermissionsDialogService {
                 users.forEach((user: PermissionsUserModel, index: number) => {
                     permissionsIn[index].userName = user.username;
                 });
-                this.openPermDialog(name, permissionsIn, kind, id);
+                this.openPermDialog(name, permissionsIn, kind, id, key);
             });
         });
     }
 
-    private openPermDialog(name: string, permissionsIn: PermissionsEditModel[], kind: string, id: string) {
+    private openPermDialog(name: string, permissionsIn: PermissionsEditModel[], kind: string, id: string, key?: string) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {
@@ -83,7 +84,7 @@ export class PermissionsDialogService {
 
         editDialogRef.afterClosed().subscribe((permissionsOut: PermissionsEditModel[]) => {
             if (permissionsOut !== undefined) {
-                this.savePermDialogChanges(permissionsOut, kind, id);
+                this.savePermDialogChanges(permissionsOut, kind, id, key);
             }
         });
     }
@@ -98,32 +99,25 @@ export class PermissionsDialogService {
         return forkJoin(array).pipe(catchError(this.errorHandlerService.handleError(PermissionsDialogService.name, 'getUserNames', [])));
     }
 
-    private savePermDialogChanges(permissions: PermissionsEditModel[], kind: string, id: string): void {
-        const array: Observable<any>[] = [];
+    private savePermDialogChanges(permissions: PermissionsEditModel[], kind: string, id: string, key?: string): void {
+        let request: PermissionsResourceBaseModel = {
+            group_rights: {},
+            user_rights: {}
+        }
         permissions.forEach((permission: PermissionsEditModel) => {
-            if (permission.deleted) {
-                if (permission.isRole === true) {
-                    array.push(this.permissionsService.removeRoleRight(permission.userName, kind, id));
-                } else {
-                    array.push(this.permissionsService.removeUserRight(permission.userId, kind, id));
-                }
+            if (permission.isRole === true) {
+                request.group_rights[permission.userName] = permission.userRights
             } else {
-                if (permission.isRole === true) {
-                    array.push(this.permissionsService.setRoleRight(permission.userName, kind, id, permission.userRights));
-                } else {
-                    array.push(this.permissionsService.setUserRight(permission.userId, kind, id, permission.userRights));
-                }
+                request.user_rights[permission.userId] = permission.userRights
             }
         });
 
-        forkJoin(array).subscribe((responses: PermissionsResponseModel[]) => {
-            const countOk = responses.filter((response: PermissionsResponseModel) => response.status === 'ok').length;
-
-            if (countOk === responses.length) {
+        this.permissionsService.setResourcePermissions(kind, id, request, key).subscribe(value => {
+            if(value) {
                 this.snackBar.open('Permission saved successfully.', '', { duration: 2000 });
             } else {
                 this.snackBar.open('Error while saving permission!', "close", { panelClass: "snack-bar-error" });
             }
-        });
+        })
     }
 }

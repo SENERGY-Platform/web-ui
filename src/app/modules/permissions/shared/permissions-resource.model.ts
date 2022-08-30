@@ -16,9 +16,12 @@
 
 import { PermissionsRightsModel } from './permissions-rights.model';
 
-export interface PermissionsResourceModel {
+export interface PermissionsResourceModel extends PermissionsResourceBaseModel {
     creator: string;
     resource_id: string;
+}
+
+export interface PermissionsResourceBaseModel {
     user_rights: {
         [key: string]: PermissionsRightsModel;
     };

@@ -176,6 +176,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
             this.repoItems.push(
                 this._formBuilder.group({
                     id: repoItem.id,
+                    design_id: repoItem.design_id,
                     name: repoItem.name,
                     description: repoItem.description,
                     svg_xml: repoItem.svg_xml,
@@ -242,6 +243,6 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     }
 
     permission(release: SmartServiceReleaseModel): void {
-        this.permissionsDialogService.openPermissionDialog('smart_service_releases', release.id, release.name);
+        this.permissionsDialogService.openPermissionDialog('smart_service_releases', release.id, release.name, release.design_id+"/"+release.id+"_rights");
     }
 }
