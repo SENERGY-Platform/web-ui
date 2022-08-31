@@ -27,6 +27,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 export class WidgetHeaderComponent implements OnInit {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
+    @Input() warnText = '';
 
     constructor(private dashboardService: DashboardService) {}
 

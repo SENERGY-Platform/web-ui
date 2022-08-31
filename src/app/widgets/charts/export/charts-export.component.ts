@@ -38,6 +38,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     configureWidget = false;
     error = false;
     errorMessage = {} as ErrorModel;
+    sizeLimit = 10000;
+    size = 0;
 
     private resizeTimeout = 0;
 
@@ -93,6 +95,10 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                             this.error = false;
                             this.chartExportData = resp;
                             this.ready = true;
+                        }
+                        this.size = (this.chartExportData?.dataTable?.length || 0) * ((this.chartExportData?.dataTable?.[0]?.length || 0)-1);
+                        if (this.size > this.sizeLimit) {
+                            console.warn('Chart Widget ' + this.widget.name +' uses ' + this.size + ' points which is above the recommended limit of ' + this.sizeLimit);
                         }
                     });
                 } else {

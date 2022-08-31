@@ -19,6 +19,12 @@
         {{widget.name}}
     </mat-card-title>
     <div fxFlex *ngIf="zoom"></div>
+    <mat-icon *ngIf="warnText !== ''"
+              color="warn"
+              [ngClass]="{'padded-icon': zoom}"
+              matTooltip="{{warnText}}">
+        warning
+    </mat-icon>
     <div *ngIf="zoom">
         <button mat-icon-button color="accent" (click)="refresh()" matTooltip="refresh">
             <mat-icon>refresh</mat-icon>
