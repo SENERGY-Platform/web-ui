@@ -58,6 +58,7 @@ import {MatTableModule} from '@angular/material/table';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {InputDialogComponent} from './dialogs/input-dialog.component';
 import {IsJsonValidatorDirective} from './validators/is-json-validator.directive';
+import {GenericValidator} from './validators/generc-validator.directive';
 
 @NgModule({
     imports: [
@@ -105,7 +106,8 @@ import {IsJsonValidatorDirective} from './validators/is-json-validator.directive
         NotificationDialogComponent,
         SelectSearchComponent,
         ClosableSnackBarComponent,
-        IsJsonValidatorDirective
+        IsJsonValidatorDirective,
+        GenericValidator,
     ],
     exports: [
         SidenavComponent,
@@ -122,7 +124,8 @@ import {IsJsonValidatorDirective} from './validators/is-json-validator.directive
         WidgetNoDataComponent,
         SelectSearchComponent,
         ClosableSnackBarComponent,
-        IsJsonValidatorDirective
+        IsJsonValidatorDirective,
+        GenericValidator
     ],
 })
 export class CoreModule {

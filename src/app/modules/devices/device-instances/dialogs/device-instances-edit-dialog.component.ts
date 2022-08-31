@@ -18,6 +18,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {Attribute, DeviceInstancesModel} from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
+import {AbstractControl, FormControl, ValidationErrors} from '@angular/forms';
 
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
@@ -90,4 +91,34 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
             } as Attribute)
         }
     }
+
+    isValid(): boolean {
+        if(!this.localIdFieldIsValid()) {
+            return false;
+        }
+        return true;
+    }
+
+    localIdFieldIsValid(): boolean{
+        return isValidLocalId(this.device.local_id);
+    }
+
+    isValidLocalIdValidator(c: AbstractControl): ValidationErrors | null {
+        if (isValidLocalId(c.value)) {
+            return null;
+        }else{
+            return {
+                validateLocalId: {
+                    valid: false
+                }
+            }
+        }
+    }
+}
+
+function isValidLocalId(value: string): boolean {
+    if(!value) {
+        return true;
+    }
+    return !(value.includes && (value.includes("#") || value.includes("+") || value.includes("/")))
 }

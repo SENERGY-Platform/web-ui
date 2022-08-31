@@ -545,7 +545,16 @@ export class DeviceTypesComponent implements OnInit {
         } else {
             return this._formBuilder.group({
                 id: [{value: deviceTypeService.id, disabled: true}],
-                local_id: [deviceTypeService.local_id],
+                local_id: [deviceTypeService.local_id, function (c: FormControl) {
+                    if(c.value.includes && (c.value.includes("#") || c.value.includes("+") || c.value.includes("/"))) {
+                        return {
+                            validateLocalId: {
+                                valid: false
+                            }
+                        }
+                    }
+                    return null
+                }],
                 service_group_key: [deviceTypeService.service_group_key],
                 name: [deviceTypeService.name, Validators.required],
                 description: [deviceTypeService.description],
