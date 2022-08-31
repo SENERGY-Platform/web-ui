@@ -141,7 +141,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
     }
 
     getTemperatureMeasurementsString(elements?: AcControlElementModel[], unique: boolean = false) {
-        let values = elements?.filter(e => e !== null)?.map(e => e.value);
+        let values = elements?.filter(e => e.value !== null)?.map(e => e.value);
         if (unique) {
             const m = new Map();
             values?.forEach(v => m.set(v, null));
