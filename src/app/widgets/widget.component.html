@@ -84,6 +84,9 @@
   <div *ngSwitchCase="'data_table'" fxFill>
     <senergy-data-table [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-data-table>
   </div>
+  <div *ngSwitchCase="'ac_control'" fxFill>
+    <senergy-ac-control [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-ac-control>
+  </div>
   <div *ngSwitchDefault>
     <div>default</div>
   </div>

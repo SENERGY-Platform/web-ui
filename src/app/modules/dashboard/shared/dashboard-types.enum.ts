@@ -33,4 +33,5 @@ export enum DashboardTypesEnum {
     ProcessScheduler = 'process_scheduler',
     DeviceStatus = 'device_status',
     DataTable = 'data_table',
+    AcControl = 'ac_control',
 }

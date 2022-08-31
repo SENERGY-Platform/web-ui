@@ -74,7 +74,7 @@ export class DeviceTypeService {
         );
     }
 
-    getDeviceTypeFiltered(filter: { function_id: string; device_class_id: string; aspect_id: string }[]): Observable<DeviceTypeModel[]> {
+    getDeviceTypeFiltered(filter: { function_id: string; device_class_id?: string; aspect_id?: string }[]): Observable<DeviceTypeModel[]> {
         return this.http
             .get<DeviceTypeModel[]>(environment.deviceRepoUrl + '/device-types?filter=' + JSON.stringify(filter))
             .pipe(catchError(this.errorHandlerService.handleError(DeviceTypeService.name, 'getDeviceType: error', null)))

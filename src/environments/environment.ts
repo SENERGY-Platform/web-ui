@@ -64,6 +64,7 @@ export const environment = {
     marshallerUrl: 'http://localhost',
     waitingRoomUrl: 'http://localhost',
     waitingRoomWsUrl: '',
+    deviceCommandUrl: 'http://localhost',
     /** Semantic Keys **/
     timeStampCharacteristicId: 'urn:infai:ses:characteristic:xxxxxx-xxxx-xxxxx-xxxx',
     timeStampCharacteristicUnixSecondsId: 'urn:infai:ses:characteristic:xxxxxx-xxxx-xxxxx-xxxx',
@@ -89,6 +90,21 @@ export const environment = {
     equivalentProtocolSegments: '[]',
     exportDatabaseIdInternalInfluxDb: 'urn:infai:ses:export-db:ac535dbb-4600-4b84-8660-2f40de034644',
     exportDatabaseIdInternalTimescaleDb: 'urn:infai:ses:export-db:6191c5d3-10ff-4899-bef9-3321ecea109c',
+    getTargetTemperatureFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getCleaningRequiredFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getOnOffFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    setOnFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    setOffFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getAcModeFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    setAcModeFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getLockedFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    setUnlockedFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    setLockedFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    setTargetTemperatureFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getFanSpeedLevelFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    setFanSpeedLevelFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getFanSpeedLevelAutomaticFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    setFanSpeedLevelAutomaticFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
 };
 
 /*

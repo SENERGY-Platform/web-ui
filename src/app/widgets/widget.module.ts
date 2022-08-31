@@ -96,6 +96,8 @@ import {DataTableEditDialogComponent} from './data-table/dialog/data-table-edit-
 import {RangeSliderComponent} from './range-slider/range-slider.component';
 import {RangeSliderEditDialogComponent} from './range-slider/dialogs/range-slider-edit-dialog.component';
 import {MatSliderModule} from '@angular/material/slider';
+import { AcControlComponent } from './ac-control/ac-control.component';
+import {AcControlEditDialogComponent} from "./ac-control/dialog/ac-control-edit-dialog.component";
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 
@@ -184,6 +186,8 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         DeviceStatusEditDialogComponent,
         DataTableComponent,
         DataTableEditDialogComponent,
+        AcControlComponent,
+        AcControlEditDialogComponent,
     ],
     exports: [
         SwitchComponent,

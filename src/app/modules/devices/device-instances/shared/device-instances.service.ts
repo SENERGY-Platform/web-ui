@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { environment } from '../../../../../environments/environment';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
+import {environment} from '../../../../../environments/environment';
 import {catchError, map, reduce, share} from 'rxjs/internal/operators';
 import {
     DeviceFilterCriteriaModel,
@@ -27,13 +27,13 @@ import {
     DeviceSelectablesFullModel,
     DeviceSelectablesModel,
 } from './device-instances.model';
-import { Observable } from 'rxjs';
+import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel, DeviceInstancesHistoryModelWithId} from './device-instances-history.model';
-import { MatDialog } from '@angular/material/dialog';
-import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
-import { DeviceInstancesUpdateModel } from './device-instances-update.model';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { UtilService } from '../../../../core/services/util.service';
+import {MatDialog} from '@angular/material/dialog';
+import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
+import {DeviceInstancesUpdateModel} from './device-instances-update.model';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {UtilService} from '../../../../core/services/util.service';
 
 @Injectable({
     providedIn: 'root',
@@ -50,7 +50,8 @@ export class DeviceInstancesService {
         private deviceTypeService: DeviceTypeService,
         private snackBar: MatSnackBar,
         private utilService: UtilService,
-    ) {}
+    ) {
+    }
 
     listUsedDeviceTypeIds(): Observable<string[]> {
         return this.http
@@ -94,15 +95,15 @@ export class DeviceInstancesService {
         return this.http
             .get<DeviceInstancesModel[]>(
                 environment.apiAggregatorUrl +
-                    '/devices?limit=' +
-                    limit +
-                    '&offset=' +
-                    offset +
-                    '&sort=' +
-                    sortBy +
-                    '.' +
-                    sortOrder +
-                    (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText)),
+                '/devices?limit=' +
+                limit +
+                '&offset=' +
+                offset +
+                '&sort=' +
+                sortBy +
+                '.' +
+                sortOrder +
+                (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText)),
             )
             .pipe(
                 map((resp) => resp || []),
@@ -133,7 +134,7 @@ export class DeviceInstancesService {
         if (!device.display_name) {
             device.display_name = device.name;
             device.attributes?.forEach((attr) => {
-                if(attr.key == this.nicknameAttributeKey) {
+                if (attr.key == this.nicknameAttributeKey) {
                     device.display_name = attr.value;
                 }
             })
@@ -152,17 +153,17 @@ export class DeviceInstancesService {
         return this.http
             .get<DeviceInstancesModel[]>(
                 environment.apiAggregatorUrl +
-                    '/devices?state=' +
-                    state +
-                    '&sort=' +
-                    value +
-                    '.' +
-                    order +
-                    '&limit=' +
-                    limit +
-                    '&offset=' +
-                    offset +
-                    (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText)),
+                '/devices?state=' +
+                state +
+                '&sort=' +
+                value +
+                '.' +
+                order +
+                '&limit=' +
+                limit +
+                '&offset=' +
+                offset +
+                (searchText === '' ? '' : '&search=' + encodeURIComponent(searchText)),
             )
             .pipe(
                 map((resp) => resp || []),
@@ -190,7 +191,7 @@ export class DeviceInstancesService {
 
     deleteDeviceInstances(ids: string[]): Observable<DeviceInstancesUpdateModel | null> {
         return this.http
-            .request<DeviceInstancesUpdateModel>('DELETE', environment.deviceManagerUrl + '/devices', { body: ids })
+            .request<DeviceInstancesUpdateModel>('DELETE', environment.deviceManagerUrl + '/devices', {body: ids})
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstances', null)));
     }
 
@@ -205,18 +206,18 @@ export class DeviceInstancesService {
         return this.http
             .get<DeviceInstancesModel[]>(
                 environment.apiAggregatorUrl +
-                    '/devices?limit=' +
-                    limit +
-                    '&offset=' +
-                    offset +
-                    '&sort=' +
-                    feature +
-                    '.' +
-                    order +
-                    '&' +
-                    tagType +
-                    '=' +
-                    tag,
+                '/devices?limit=' +
+                limit +
+                '&offset=' +
+                offset +
+                '&sort=' +
+                feature +
+                '.' +
+                order +
+                '&' +
+                tagType +
+                '=' +
+                tag,
             )
             .pipe(
                 map((resp) => resp || []),
@@ -236,20 +237,20 @@ export class DeviceInstancesService {
         return this.http
             .get<DeviceInstancesModel[]>(
                 environment.apiAggregatorUrl +
-                    '/devices?sort=' +
-                    feature +
-                    '.' +
-                    order +
-                    '&' +
-                    tagType +
-                    '=' +
-                    tag +
-                    '&state=' +
-                    state +
-                    '&limit=' +
-                    limit +
-                    '&offset=' +
-                    offset,
+                '/devices?sort=' +
+                feature +
+                '.' +
+                order +
+                '&' +
+                tagType +
+                '=' +
+                tag +
+                '&state=' +
+                state +
+                '&limit=' +
+                limit +
+                '&offset=' +
+                offset,
             )
             .pipe(
                 map((resp) => resp || []),
@@ -316,14 +317,16 @@ export class DeviceInstancesService {
     }
 
     getDeviceInstancesByDeviceTypes(
-        ids: string[],
-        state: null | 'connected' | 'disconnected' | 'unknown',
-    ): Observable<DeviceInstancesModel[]> {
-        let url = environment.apiAggregatorUrl + '/device-types-devices';
-        if (state != null) {
-            url += '?state=' + state;
-        }
-        return this.http.post<DeviceInstancesModel[]>(url, { ids }).pipe(
+        ids: string[], limit: number, offset: number): Observable<DeviceInstancesPermSearchModel[]> {
+        return this.http.post<DeviceInstancesPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query', {
+            resource: 'devices', find: {
+                filter: {
+                    limit, offset, condition: {
+                        feature: 'features.device_type_id', operation: 'any_value_in_feature', value: ids
+                    }
+                }
+            }
+        }).pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByDeviceType', [])),
         );
@@ -335,9 +338,7 @@ export class DeviceInstancesService {
         protocolBlocklist?: string[] | null | undefined,
         interactionFilter?: string | null | undefined,
     ): Observable<DeviceSelectablesModel[]> {
-        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter, false) as Observable<
-            DeviceSelectablesModel[]
-        >;
+        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter, false) as Observable<DeviceSelectablesModel[]>;
     }
 
     getDeviceSelectionsFull(
@@ -399,7 +400,7 @@ export class DeviceInstancesService {
 
     getDeviceHistory(limit: number, offset: number, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
         return this.http
-            .get<DeviceInstancesHistoryModelWithId[]>(environment.apiAggregatorUrl + '/devices?offset='+offset+'&limit='+limit+'&log='+logDuration)
+            .get<DeviceInstancesHistoryModelWithId[]>(environment.apiAggregatorUrl + '/devices?offset=' + offset + '&limit=' + limit + '&log=' + logDuration)
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory', [])),
@@ -409,7 +410,7 @@ export class DeviceInstancesService {
 
     getDeviceHistoryAfter(limit: number, afterId: string, afterName: string, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
         return this.http
-            .get<DeviceInstancesHistoryModelWithId[]>(environment.apiAggregatorUrl + '/devices?after.id='+afterId+'&after.sort_field_value='+ encodeURIComponent(JSON.stringify(afterName)) +'&limit='+limit+'&log='+logDuration)
+            .get<DeviceInstancesHistoryModelWithId[]>(environment.apiAggregatorUrl + '/devices?after.id=' + afterId + '&after.sort_field_value=' + encodeURIComponent(JSON.stringify(afterName)) + '&limit=' + limit + '&log=' + logDuration)
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceHistory', [])),
@@ -422,20 +423,20 @@ export class DeviceInstancesService {
             var limit = batchsize;
             var last: DeviceInstancesHistoryModelWithId | null = null;
             var offset = 0;
-            var getDeviceHistoryBatch: ()=>void;
-            var next = (value: DeviceInstancesHistoryModelWithId[])=> {
+            var getDeviceHistoryBatch: () => void;
+            var next = (value: DeviceInstancesHistoryModelWithId[]) => {
                 if (value && value.length) {
                     last = value[value.length - 1];
                     offset = offset + limit;
                     subscriber.next(value);
                 }
-                if(!value || !value.length || value.length < limit) {
+                if (!value || !value.length || value.length < limit) {
                     subscriber.complete()
-                }else{
+                } else {
                     getDeviceHistoryBatch()
                 }
             }
-            getDeviceHistoryBatch = ()=>{
+            getDeviceHistoryBatch = () => {
                 //use this if clause if you want to switch later to search with after parameter
                 //if (last && offset+limit > 10000) {
                 if (last) {
@@ -450,16 +451,14 @@ export class DeviceInstancesService {
 
     getDeviceHistory7d(): Observable<DeviceInstancesHistoryModel[] | null> {
         if (this.getDeviceHistoryObservable7d === null) {
-            this.getDeviceHistoryObservable7d = this.getDeviceHistoryAll(1000, '7d').
-            pipe(reduce((acc, value) => acc.concat(value)));
+            this.getDeviceHistoryObservable7d = this.getDeviceHistoryAll(1000, '7d').pipe(reduce((acc, value) => acc.concat(value)));
         }
         return this.getDeviceHistoryObservable7d;
     }
 
     getDeviceHistory1h(): Observable<DeviceInstancesHistoryModel[] | null> {
         if (this.getDeviceHistoryObservable1h === null) {
-            this.getDeviceHistoryObservable1h = this.getDeviceHistoryAll(1000, '1h').
-            pipe(reduce((acc, value) => acc.concat(value)));
+            this.getDeviceHistoryObservable1h = this.getDeviceHistoryAll(1000, '1h').pipe(reduce((acc, value) => acc.concat(value)));
         }
         return this.getDeviceHistoryObservable1h;
     }
@@ -483,7 +482,7 @@ export class DeviceInstancesService {
         return this.http
             .post<DeviceInstancesPermSearchModel[] | null>(environment.permissionSearchUrl + '/v3/query', {
                 resource: 'devices',
-                list_ids: { ids },
+                list_ids: {ids},
             })
             .pipe(map((res) => res || []));
     }

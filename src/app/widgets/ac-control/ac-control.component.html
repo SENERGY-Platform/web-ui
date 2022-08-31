@@ -1,0 +1,141 @@
+<!--
+  ~ Copyright 2022 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<mat-card>
+    <senergy-widget-header [widget]="widget"></senergy-widget-header>
+    <mat-card-content class="content-size">
+        <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+        <div *ngIf="ready && widget.properties.acControl === undefined" fxFill fxLayout="column"
+             fxLayoutAlign="center center">
+            <div>Please configure widget!</div>
+        </div>
+        <div *ngIf="ready && widget.properties.acControl !== undefined" fxLayout="column" fxFill class="container"
+             fxLayoutAlign="space-between">
+            <div fxLayout="row" fxLayoutAlign="center center" style="min-height: 42px">
+                <mat-icon *ngIf="widget.properties.acControl?.getCleaningRequired?.value === true" color="warn"
+                          matTooltip="Cleaning Required!">warning
+                </mat-icon>
+                <div *ngIf="widget.properties.acControl?.getTargetTemperature !== undefined"
+                     style="font-size: xx-large;">{{getTemperatureMeasurementsString(widget.properties.acControl?.getTargetTemperature, true)}}
+                </div>
+                <mat-icon *ngIf="widget.properties.acControl?.getTemperatureMeasurements !== undefined" inline>
+                    fiber_manual_record
+                </mat-icon>
+                <div *ngIf="widget.properties.acControl?.getTemperatureMeasurements !== undefined"
+                     style="font-size: large;">
+                    ({{getTemperatureMeasurementsString(widget.properties.acControl?.getTemperatureMeasurements)}})
+                </div>
+            </div>
+            <div fxLayout="row" fxLayoutAlign="space-between">
+                <button *ngIf="widget.properties.acControl?.getOnOff !== undefined" mat-icon-button color="accent"
+                        (click)="togglePower()">
+                    <mat-icon *ngIf="widget.properties.acControl?.getOnOff?.value === true">power</mat-icon>
+                    <mat-icon *ngIf="widget.properties.acControl?.getOnOff?.value !== true">power_off</mat-icon>
+                </button>
+                <button *ngIf="widget.properties.acControl?.setModeAuto !== undefined" mat-icon-button
+                        [color]="widget.properties.acControl?.getMode?.value === widget.properties.acControl?.setModeAuto?.value ? 'warn': 'accent'"
+                        (click)="runCommand(widget.properties.acControl?.setModeAuto, widget.properties.acControl?.setModeAuto?.value)">
+                    <mat-icon>auto_mode</mat-icon>
+                </button>
+                <button *ngIf="widget.properties.acControl?.setModeCool !== undefined" mat-icon-button color="accent"
+                        [color]="widget.properties.acControl?.getMode?.value === widget.properties.acControl?.setModeCool?.value ? 'warn': 'accent'"
+                        (click)="runCommand(widget.properties.acControl?.setModeCool, widget.properties.acControl?.setModeCool?.value)">
+                    <mat-icon>ac_unit</mat-icon>
+                </button>
+                <button *ngIf="widget.properties.acControl?.setModeHeat !== undefined" mat-icon-button color="accent"
+                        [color]="widget.properties.acControl?.getMode?.value === widget.properties.acControl?.setModeHeat?.value ? 'warn': 'accent'"
+                        (click)="runCommand(widget.properties.acControl?.setModeHeat, widget.properties.acControl?.setModeHeat?.value)">
+                    <mat-icon>local_fire_department</mat-icon>
+                </button>
+                <button *ngIf="widget.properties.acControl?.setModeVent !== undefined" mat-icon-button color="accent"
+                        [color]="widget.properties.acControl?.getMode?.value === widget.properties.acControl?.setModeVent?.value ? 'warn': 'accent'"
+                        (click)="runCommand(widget.properties.acControl?.setModeVent, widget.properties.acControl?.setModeVent?.value)">
+                    <mat-icon>air</mat-icon>
+                </button>
+                <button *ngIf="widget.properties.acControl?.setModeDry !== undefined" mat-icon-button color="accent"
+                        [color]="widget.properties.acControl?.getMode?.value === widget.properties.acControl?.setModeDry?.value ? 'warn': 'accent'"
+                        (click)="runCommand(widget.properties.acControl?.setModeDry, widget.properties.acControl?.setModeDry?.value)">
+                    <mat-icon>water_drop</mat-icon>
+                </button>
+                <button *ngIf="widget.properties.acControl?.getLocked !== undefined" mat-icon-button color="accent"
+                        (click)="toggleLocked()">
+                    <mat-icon *ngIf="widget.properties.acControl?.getLocked?.value === false">lock_open</mat-icon>
+                    <mat-icon *ngIf="widget.properties.acControl?.getLocked?.value === true">lock_open</mat-icon>
+                </button>
+            </div>
+            <div *ngIf="widget.properties.acControl?.getFanSpeedLevel !== undefined && widget.properties.acControl?.setFanSpeedLevel !== undefined"
+                 fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-icon inline>air</mat-icon>
+                <mat-slider [min]="0" [max]=100 [step]="1"
+                            [value]="widget.properties.acControl?.getFanSpeedLevel?.value || 0"
+                            thumbLabel
+                            (valueChange)="runCommand(widget.properties.acControl?.setFanSpeedLevel, $event)"></mat-slider>
+                %
+            </div>
+            <div *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic !== undefined && widget.properties.acControl?.setFanSpeedLevelAutomatic !== undefined"
+                 fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-icon inline>air</mat-icon>
+                <button *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic?.value !== 'AUTO'"
+                        mat-stroked-button color="accent"
+                        (click)="runCommand(widget.properties.acControl?.setFanSpeedLevelAutomatic, 'AUTO')">Auto
+                </button>
+                <button *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic?.value === 'AUTO'" mat-flat-button
+                        color="accent">Auto
+                </button>
+
+                <button *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic?.value !== 'LOW'"
+                        mat-stroked-button color="accent"
+                        (click)="runCommand(widget.properties.acControl?.setFanSpeedLevelAutomatic, 'LOW')">Low
+                </button>
+                <button *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic?.value === 'LOW'" mat-flat-button
+                        color="accent">LOW
+                </button>
+
+                <button *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic?.value !== 'MID'"
+                        mat-stroked-button color="accent"
+                        (click)="runCommand(widget.properties.acControl?.setFanSpeedLevelAutomatic, 'MID')">Mid
+                </button>
+                <button *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic?.value === 'MID'" mat-flat-button
+                        color="accent">Mid
+                </button>
+
+                <button *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic?.value !== 'HIGH'"
+                        mat-stroked-button color="accent"
+                        (click)="runCommand(widget.properties.acControl?.setFanSpeedLevelAutomatic, 'HIGH')">High
+                </button>
+                <button *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic?.value === 'HIGH'" mat-flat-button
+                        color="accent">High
+                </button>
+            </div>
+            <div *ngIf="widget.properties.acControl?.getTargetTemperature !== undefined && widget.properties.acControl?.setTargetTemperature !== undefined"
+                 fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-icon inline>device_thermostat</mat-icon>
+                <mat-slider [min]="widget.properties.acControl?.minTarget || 15"
+                            [max]="widget.properties.acControl?.maxTarget || 30"
+                            [step]="widget.properties.acControl?.tempStep || 1"
+                            [value]="(widget.properties.acControl?.getTargetTemperature || [{value:0}])[0].value"
+                            (valueChange)="setAllTargets($event)"
+                            thumbLabel></mat-slider>
+                °C
+            </div>
+        </div>
+    </mat-card-content>
+    <div>
+        <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget"
+                               (editEvent)="edit()"></senergy-widget-footer>
+    </div>
+</mat-card>
+
