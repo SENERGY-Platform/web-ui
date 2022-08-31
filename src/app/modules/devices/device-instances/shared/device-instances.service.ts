@@ -328,6 +328,10 @@ export class DeviceInstancesService {
             }
         }).pipe(
             map((resp) => resp || []),
+            map(resp => {
+                this.addDisplayNames(resp);
+                return resp;
+            }),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByDeviceType', [])),
         );
     }

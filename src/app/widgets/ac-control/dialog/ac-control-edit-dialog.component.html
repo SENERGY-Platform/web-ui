@@ -26,7 +26,7 @@
         <mat-form-field color="accent">
             <mat-label>Device</mat-label>
             <senergy-select-search [options]="deviceInstances"
-                                   useOptionViewProperty="name"
+                                   useOptionViewProperty="display_name"
                                    placeholder="Device" ngDefaultControl formControlName="deviceId"
                                    useOptionValueProperty="id" [required]="true">
             </senergy-select-search>
