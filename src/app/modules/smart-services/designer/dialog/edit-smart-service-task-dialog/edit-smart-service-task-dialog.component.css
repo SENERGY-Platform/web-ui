@@ -54,3 +54,13 @@ mat-dialog-actions button:not(:last-child) {
 .image-svg-wrapper > svg{
     width: 100%; height: auto;
 }
+
+.process-start-input {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.process-start-input-field {
+    width: 45%;
+}

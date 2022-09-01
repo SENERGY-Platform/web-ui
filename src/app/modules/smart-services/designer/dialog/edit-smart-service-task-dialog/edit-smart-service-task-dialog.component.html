@@ -100,6 +100,70 @@
         </div>
       </div>
     </mat-tab>
+    <mat-tab label="Process-Start">
+      <div class="smart-service-task-tab">
+        <div>
+          <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="Deployment-ID" [(ngModel)]="processStart.deployment_id">
+            <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+              <mat-icon>data_object</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="processStart.deployment_id = '${'+param.name+'}'" [matTooltip]="param.name">
+                {{param.label || param.name}}
+              </button>
+            </mat-menu>
+          </mat-form-field>
+        </div>
+        <div>
+          <div *ngFor="let input of processStart.inputs; let i = index" class="process-start-input">
+            <mat-form-field color="accent" class="process-start-input-field">
+                <input matInput placeholder="Input-Name" [(ngModel)]="input.key">
+            </mat-form-field>
+            <mat-form-field color="accent" class="process-start-input-field">
+              <input matInput placeholder="Input-Value" [(ngModel)]="input.value" #processStartInput>
+              <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+                <mat-icon>data_object</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
+                  Value: {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('analytics')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('export')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
+                  IoT: {{param.label || param.name}}
+                </button>
+              </mat-menu>
+            </mat-form-field>
+            <button mat-icon-button (click)="removeProcessStartInput(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <button mat-icon-button (click)="addProcessStartInput()">
+            <mat-icon matTooltip="add process input">add</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-tab>
     <mat-tab label="Analytics">
       <div class="smart-service-task-tab">
         <div class="smart-service-task-tab">

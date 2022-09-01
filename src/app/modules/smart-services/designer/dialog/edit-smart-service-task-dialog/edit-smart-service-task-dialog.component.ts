@@ -33,8 +33,6 @@ import {
     ImportTypePermissionSearchModel
 } from '../../../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
-import {AbstractControl, FormGroup, ValidationErrors, ValidatorFn} from '@angular/forms';
-import {subtract} from 'lodash';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 
 @Component({
@@ -44,7 +42,7 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 export class EditSmartServiceTaskDialogComponent implements OnInit {
     init: SmartServiceTaskDescription;
     result: SmartServiceTaskDescription;
-    tabs: string[] = ["process_deployment", "analytics", "export", "import", "info"]
+    tabs: string[] = ["process_deployment", "process_deployment_start", "analytics", "export", "import", "info"]
 
     flows: FlowModel[] | null = null
     processModels: ProcessModel[] | null = null
@@ -69,6 +67,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     infoModuleType: string = "widget"
     infoModuleData: string = "{\n\n}"
+
+    processStart: ProcessStartModel = {deployment_id: "", inputs: []};
 
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
@@ -100,6 +100,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
         this.infoModuleType = this.result.inputs.find(value => value.name == "info.module_type")?.value || "widget";
         this.infoModuleData = this.result.inputs.find(value => value.name == "info.module_data")?.value || "{\n\n}";
+        this.processStart = this.inputsToProcessStartModel(this.result.inputs)
     }
 
     ngOnInit() {}
@@ -120,6 +121,52 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     set activeIndex(index: number) {
         this.result.topic = this.tabs[index]
         this.ensureResultFields();
+    }
+
+    /******************************
+     *      Processes-Start
+     ******************************/
+
+
+    private inputsToProcessStartModel(inputs: SmartServiceTaskInputDescription[]): ProcessStartModel {
+        let result: ProcessStartModel = {
+            deployment_id: "",
+            inputs: []
+        };
+        inputs?.forEach(value => {
+            if(value.name == "process_deployment_start.process_deployment_id") {
+                result.deployment_id = value.value;
+            }
+            if(value.name.startsWith("process_deployment_start.input.")){
+                const key = value.name.replace("process_deployment_start.input.", "");
+                result.inputs.push({key: key, value: value.value})
+            }
+        })
+        return result;
+    }
+
+    private processStartModelToInputs(processStart: ProcessStartModel): SmartServiceTaskInputDescription[] {
+        let result: SmartServiceTaskInputDescription[] = [{
+            name: "process_deployment_start.process_deployment_id",
+            value: processStart.deployment_id,
+            type: "text"
+        }];
+        processStart.inputs.forEach(value => {
+            result.push({
+                name: "process_deployment_start.input."+value.key,
+                value: value.value,
+                type: "text"
+            });
+        })
+        return result;
+    }
+
+    removeProcessStartInput(index: number) {
+        this.processStart.inputs.splice(index, 1);
+    }
+
+    addProcessStartInput(){
+        this.processStart.inputs.push({key: "", value: ""})
     }
 
     /******************************
@@ -857,9 +904,21 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         temp.push({name: "info.module_type", type: "text", value: this.infoModuleType});
         temp.push({name: "info.module_data", type: "text", value: this.infoModuleData});
 
+        temp = temp.concat(this.processStartModelToInputs(this.processStart))
+
         temp = temp.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
 
         result.inputs = temp;
         this.dialogRef.close(result);
     }
+}
+
+interface ProcessStartModel {
+    deployment_id: string;
+    inputs: ProcessStartInputModel[];
+}
+
+interface ProcessStartInputModel{
+    key: string;
+    value: string;
 }
