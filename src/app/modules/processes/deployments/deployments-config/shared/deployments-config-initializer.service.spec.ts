@@ -642,6 +642,7 @@ describe('DeploymentsConfigInitializerService', () => {
                             event_id: '',
                             flow_id: '',
                             value: '',
+                            use_marshaller: false,
                             selection: {
                                 filter_criteria: {
                                     aspect_id: 'urn:infai:ses:aspect:a7470d73-dde3-41fc-92bd-f16bb28f2da6',
@@ -702,6 +703,7 @@ describe('DeploymentsConfigInitializerService', () => {
                             event_id: '',
                             flow_id: '',
                             value: '',
+                            use_marshaller: false,
                             selection: {
                                 selection_options_index: -1,
                                 show: false,
