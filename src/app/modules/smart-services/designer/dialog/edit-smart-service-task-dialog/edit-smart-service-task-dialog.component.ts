@@ -181,7 +181,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         return result;
     }
 
-    private ensureProcessTaskParameter(id: string) {
+    ensureProcessTaskParameter(id: string) {
         this.result.inputs.forEach(e => this.knownInputValues.set(e.name, e));
         if(!this.selectedProcessModelPreparation || this.selectedProcessModelPreparation.id != id) {
             this.processDeployment.getPreparedDeployments(id).subscribe(value => {
@@ -210,6 +210,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                             this.result.inputs.push(this.knownInputValues.get(eventFlowKey) || {name:eventFlowKey, value: "", type: "text"});
                             const eventValueKey = "process_deployment."+element.bpmn_id+".event.value";
                             this.result.inputs.push(this.knownInputValues.get(eventValueKey) || {name:eventValueKey, value: "", type: "text"});
+                            const eventMarshallerKey = "process_deployment."+element.bpmn_id+".event.use_marshaller";
+                            this.result.inputs.push(this.knownInputValues.get(eventMarshallerKey) || {name:eventMarshallerKey, value: "true", type: "text"});
                         }
                         if(element.time_event){
                             const eventTimeKey = "process_deployment."+element.bpmn_id+".time";
@@ -258,17 +260,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     processProcessModelIdFieldName = "process_deployment.process_model_id"
-    get processProcessModelId(): string {
-        return this.getFieldValue(this.processProcessModelIdFieldName, "text", "")
-    }
-
-    set processProcessModelId(value: string) {
-        this.setFieldValue(this.processProcessModelIdFieldName, "text", value)
-        this.ensureProcessTaskParameter(value)
-    }
-
     processProcessNameFieldName = "process_deployment.name"
     get processProcessName(): string {
+        this.getFieldValue(this.processProcessModelIdFieldName, "text", ""); //ensure existence of process model id input
         return this.getFieldValue(this.processProcessNameFieldName, "text", "")
     }
 
@@ -888,8 +882,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         let result = JSON.parse(JSON.stringify(this.result)) as SmartServiceTaskDescription; //prevent changes to the result after filtering
         let temp = result.inputs.filter(e => e.name.startsWith(result.topic+".") &&
                                             !e.name.startsWith("info.") &&
+                                            !e.name.startsWith("process_deployment_start.") &&
                                             !e.name.startsWith("import.") &&
-                                            !e.name.startsWith("export.")); //filter unused inputs (remove existing info, import and export inputs)
+                                            !e.name.startsWith("export.")); //filter unused inputs (remove existing info, process_deployment_start, import and export inputs)
 
         temp.push({name: "export.request", type: "text", value: this.stringifyExport(this.exportRequest)});
 

@@ -24,16 +24,20 @@
             <input matInput placeholder="Task-Name" [(ngModel)]="result.name">
           </mat-form-field>
         </div>
-        <div>
-          <mat-form-field  color="accent" class="full-width">
-            <mat-label>Process-Model</mat-label>
-            <mat-select [(ngModel)]="processProcessModelId">
-              <mat-option *ngFor="let model of processModels" [value]="model.id">
-                {{model.name}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+        <ng-container *ngFor="let input of result.inputs">
+          <div *ngIf="input.name == 'process_deployment.process_model_id'">
+            <mat-form-field  color="accent" class="full-width">
+              <mat-label>Process-Model</mat-label>
+              <senergy-select-search placeholder="Process-Model"
+                                     [(ngModel)]="input.value"
+                                     [options]="processModels || []"
+                                     (selectionChange)="ensureProcessTaskParameter($event.value)"
+                                     useOptionViewProperty="name"
+                                     useOptionValueProperty="id">
+              </senergy-select-search>
+            </mat-form-field>
+          </div>
+        </ng-container>
         <div>
           <mat-form-field  color="accent" class="full-width">
             <input matInput placeholder="Deployment-Name" [(ngModel)]="processProcessName" required>
@@ -85,6 +89,18 @@
                       <input matInput placeholder="Event-Value" [(ngModel)]="input.value">
                     </mat-form-field>
                   </div>
+                  <div *ngIf="processTaskMatches(input, taskId, 'event.use_marshaller')">
+                    <mat-checkbox
+                            class="checkbox-margin"
+                            *ngIf="processTaskMatches(input, taskId, 'event.use_marshaller')"
+                            [(ngModel)]="input.value"
+                            stringCheckboxValue
+                            trueValue="true"
+                            falseValue="false">
+                      Use Marshaller
+                    </mat-checkbox>
+                  </div>
+
                   <ng-container *ngFor="let parameter of getProcessTaskParameter(taskId)">
                     <div *ngIf="processTaskMatches(input, taskId, 'parameter.'+parameter)">
                       <mat-form-field  color="accent" class="full-width">
