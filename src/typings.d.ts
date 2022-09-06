@@ -23,7 +23,6 @@ declare module 'bpmn-js-properties-panel/lib/provider/camunda/element-templates'
 declare module 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 declare module 'bpmn-js/lib/features/palette/PaletteProvider';
 declare module 'camunda-bpmn-moddle/resources/camunda.json';
-declare module 'senergy-properties-provider';
 
 interface NodeModule {
     id: string;

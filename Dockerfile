@@ -7,14 +7,6 @@ ADD package.json .
 ADD package-lock.json .
 RUN npm ci --unsafe-perm
 
-# install properties-provider
-ARG branch=master
-ENV SOURCE=https://github.com/SENERGY-Platform/properties-provider/archive/${branch}.tar.gz
-# force update of properties provider, date is always different and prevents caching
-ARG DATE
-RUN echo $DATE
-RUN echo "Installing properties-provider from: "$SOURCE
-RUN npm install $SOURCE
 
 # copy sourcecode and build
 COPY . .
