@@ -211,7 +211,11 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                             const eventValueKey = "process_deployment."+element.bpmn_id+".event.value";
                             this.result.inputs.push(this.knownInputValues.get(eventValueKey) || {name:eventValueKey, value: "", type: "text"});
                             const eventMarshallerKey = "process_deployment."+element.bpmn_id+".event.use_marshaller";
-                            this.result.inputs.push(this.knownInputValues.get(eventMarshallerKey) || {name:eventMarshallerKey, value: "true", type: "text"});
+                            let useMarshaller = "false";
+                            if (element.message_event.use_marshaller) {
+                                useMarshaller = "true";
+                            }
+                            this.result.inputs.push(this.knownInputValues.get(eventMarshallerKey) || {name:eventMarshallerKey, value: useMarshaller, type: "text"});
                         }
                         if(element.time_event){
                             const eventTimeKey = "process_deployment."+element.bpmn_id+".time";

@@ -120,6 +120,7 @@ export class DeploymentsConfigInitializerService {
             value: messageEvent.value,
             flow_id: messageEvent.flow_id,
             event_id: messageEvent.event_id,
+            use_marshaller: messageEvent.use_marshaller,
             selection: this.initSelectionFormGroup(messageEvent.selection, false),
         });
     }

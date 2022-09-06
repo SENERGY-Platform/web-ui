@@ -86,6 +86,7 @@ export interface V2DeploymentsPreparedMsgEventModel {
     value: string;
     flow_id: string;
     event_id: string;
+    use_marshaller: boolean;
     selection: V2DeploymentsPreparedSelectionModel;
 }
 
