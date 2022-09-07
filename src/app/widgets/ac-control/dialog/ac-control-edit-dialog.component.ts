@@ -101,6 +101,7 @@ export class AcControlEditDialogComponent implements OnInit {
             environment.setFanSpeedLevelFunctionId,
             environment.getFanSpeedLevelAutomaticFunctionId,
             environment.setFanSpeedLevelAutomaticFunctionId,
+            environment.getBatteryLevelFunctionId,
         ];
         dt?.services.forEach(s => {
             s.outputs.forEach(o => this.traverseDataStructure(s.id, o.content_variable, functionIds, mappings));
@@ -179,6 +180,10 @@ export class AcControlEditDialogComponent implements OnInit {
         if (mappings.has(environment.setFanSpeedLevelAutomaticFunctionId)) {
             const m = mappings.get(environment.setFanSpeedLevelAutomaticFunctionId)?.[0];
             this.widget.properties.acControl.setFanSpeedLevelAutomatic = this.getElement(m, environment.setFanSpeedLevelAutomaticFunctionId);
+        }
+        if (mappings.has(environment.getBatteryLevelFunctionId)) {
+            const m = mappings.get(environment.getBatteryLevelFunctionId)?.[0];
+            this.widget.properties.acControl.getBatteryLevel = this.getElement(m, environment.getBatteryLevelFunctionId);
         }
         console.log(this.widget); // TODO
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {

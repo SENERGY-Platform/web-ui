@@ -113,6 +113,10 @@ export class AcControlComponent implements OnInit, OnDestroy {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             m.set(this.toCommand(this.widget.properties.acControl!.getFanSpeedLevelAutomatic!, null), this.widget.properties.acControl!.getFanSpeedLevelAutomatic!);
         }
+        if (this.widget.properties.acControl?.getBatteryLevel !== undefined) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            m.set(this.toCommand(this.widget.properties.acControl!.getBatteryLevel!, null), this.widget.properties.acControl!.getBatteryLevel!);
+        }
 
         if (m.size === 0) {
             this.ready = true;

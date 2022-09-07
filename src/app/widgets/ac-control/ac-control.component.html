@@ -23,7 +23,7 @@
             <div>Please configure widget!</div>
         </div>
         <div *ngIf="ready && widget.properties.acControl !== undefined" fxLayout="column" fxFill class="container"
-             fxLayoutAlign="space-between">
+             fxLayoutAlign="space-evenly">
             <div fxLayout="row" fxLayoutAlign="center center" style="min-height: 42px">
                 <mat-icon *ngIf="widget.properties.acControl?.getCleaningRequired?.value === true" color="warn"
                           matTooltip="Cleaning Required!">warning
@@ -34,9 +34,12 @@
                 <mat-icon *ngIf="widget.properties.acControl?.getTemperatureMeasurements !== undefined" inline>
                     fiber_manual_record
                 </mat-icon>
-                <div *ngIf="widget.properties.acControl?.getTemperatureMeasurements !== undefined"
+                <div *ngIf="widget.properties.acControl?.getTemperatureMeasurements !== undefined || widget.properties.acControl?.getBatteryLevel !== undefined"
                      style="font-size: large;">
-                    ({{getTemperatureMeasurementsString(widget.properties.acControl?.getTemperatureMeasurements)}})
+                    ({{getTemperatureMeasurementsString(widget.properties.acControl?.getTemperatureMeasurements)}}
+                    <ng-container *ngIf="widget.properties.acControl?.getBatteryLevel !== undefined">
+                        {{widget.properties.acControl?.getTemperatureMeasurements !== undefined ? ', ' : ''}}
+                        {{widget.properties.acControl?.getBatteryLevel?.value}} %</ng-container>)
                 </div>
             </div>
             <div fxLayout="row" fxLayoutAlign="space-between">

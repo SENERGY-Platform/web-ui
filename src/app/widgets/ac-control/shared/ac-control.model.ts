@@ -40,6 +40,7 @@ export interface AcControlPropertiesModel {
         setFanSpeedLevel?: AcControlElementModel;
         getFanSpeedLevelAutomatic?: AcControlElementModel;
         setFanSpeedLevelAutomatic?: AcControlElementModel;
+        getBatteryLevel?: AcControlElementModel;
     };
 }
 

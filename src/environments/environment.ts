@@ -105,6 +105,7 @@ export const environment = {
     setFanSpeedLevelFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     getFanSpeedLevelAutomaticFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     setFanSpeedLevelAutomaticFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    getBatteryLevelFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
 };
 
 /*
