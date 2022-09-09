@@ -98,6 +98,13 @@
                                    formControlName="last">
                         </mat-form-field>
                     </td>
+                    <td fxFlex="66%" *ngIf="timeRangeType.value === timeRangeEnum.RelativeAhead" formGroupName="time">
+                        <mat-form-field color="accent" class="full-width">
+                            <mat-label>Ahead</mat-label>
+                            <input type="text" matInput placeholder="e.g. 15m, 1h"
+                                   formControlName="ahead">
+                        </mat-form-field>
+                    </td>
                     <td fxFlex="33%" *ngIf="timeRangeType.value === timeRangeEnum.Absolute" formGroupName="time">
                         <mat-form-field color="accent" class="full-width">
                             <mat-label>Start</mat-label>

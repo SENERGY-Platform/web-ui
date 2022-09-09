@@ -85,6 +85,10 @@ export class ChartsExportService {
             time.last = widgetProperties.time.last;
         }
 
+        if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.RelativeAhead && widgetProperties.time) {
+            time.ahead = widgetProperties.time.ahead;
+        }
+
         if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute && widgetProperties.time) {
             time.start = new Date(widgetProperties.time.start as string).toISOString();
             time.end = new Date(widgetProperties.time.end as string).toISOString();

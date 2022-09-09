@@ -23,6 +23,7 @@ export interface ChartsExportRequestPayloadModel {
 
 export interface ChartsExportRequestPayloadTimeModel {
     last: string | undefined;
+    ahead: string | undefined;
     start: string | undefined;
     end: string | undefined;
 }

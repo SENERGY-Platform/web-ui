@@ -17,5 +17,6 @@
 // eslint-disable-next-line no-shadow
 export enum ChartsExportRangeTimeTypeEnum {
     Relative = 'relative',
+    RelativeAhead = 'relative ahead',
     Absolute = 'absolute',
 }

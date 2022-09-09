@@ -68,6 +68,7 @@ export interface QueriesRequestFilterModel {
 
 export interface QueriesRequestTimeModel {
     end?: string;
+    ahead?: string;
     last?: string;
     start?: string;
 }

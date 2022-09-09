@@ -55,7 +55,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     widgetId: string;
     chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart', 'PieChart', 'Timeline'];
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
-    timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.Absolute];
+    timeRangeTypes = [this.timeRangeEnum.Relative,  this.timeRangeEnum.RelativeAhead, this.timeRangeEnum.Absolute];
     groupTypes = [
         'mean',
         'sum',
@@ -145,6 +145,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 timeRangeType: widget.properties.timeRangeType,
                 time: this._formBuilder.group({
                     last: widget.properties.time ? widget.properties.time.last : '',
+                    ahead: widget.properties.time ? widget.properties.time.ahead : '',
                     start: widget.properties.time ? widget.properties.time.start : '',
                     end: widget.properties.time ? widget.properties.time.end : '',
                 }),
@@ -443,6 +444,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
             widget.properties.timeRangeType = 'relative';
             widget.properties.time = {
                 last: '1d',
+                ahead: '',
                 start: '',
                 end: '',
             };
