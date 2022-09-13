@@ -33,6 +33,8 @@ import { TaskConfigDialogComponent } from '../dialogs/task-config-dialog/task-co
 import { NotificationConfigDialogComponent } from '../dialogs/notification-config-dialog/notification-config-dialog.component';
 import { FilterCriteriaDialogResultModel } from './designer-dialog.model';
 import { FilterCriteriaDialogComponent } from '../dialogs/filter-criteria-dialog/filter-criteria-dialog.component';
+import {ProcessIoDesignerInfo} from '../../process-io/shared/process-io.model';
+import {ProcessIoDesignerDialogComponent} from '../dialogs/process-io-designer-dialog/process-io-designer-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -139,5 +141,12 @@ export class DesignerDialogService {
         dialogConfig.disableClose = false;
         dialogConfig.data = { aspect, iotfunction: iotFunction, characteristic };
         return this.dialog.open(FilterCriteriaDialogComponent, dialogConfig).afterClosed();
+    }
+
+    openProcessIoDialog(info: ProcessIoDesignerInfo): Observable<ProcessIoDesignerInfo | null> {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = { info: info };
+        return this.dialog.open(ProcessIoDesignerDialogComponent, dialogConfig).afterClosed();
     }
 }

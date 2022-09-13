@@ -1,0 +1,101 @@
+<!--
+  ~ Copyright 2022 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+
+<h2 mat-dialog-title>Process-IO</h2>
+
+<mat-dialog-content class="process-io-designer-dialog">
+  <mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Set
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div>
+        <div *ngFor="let set of info.set; let i = index" class="variables">
+          <mat-form-field color="accent">
+            <mat-select placeholder="Binding" [(ngModel)]="set.binding" required>
+              <mat-option value="global">
+                global
+              </mat-option>
+              <mat-option value="instance">
+                instance
+              </mat-option>
+              <mat-option value="definition">
+                definition
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="third-width">
+            <input matInput placeholder="Key" [(ngModel)]="set.key" type="text" required>
+          </mat-form-field>
+          <mat-form-field class="third-width">
+            <input matInput placeholder="Value" [(ngModel)]="set.value" type="text">
+          </mat-form-field>
+          <button mat-icon-button (click)="removeSet(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <button mat-icon-button color="accent" (click)="addSet()">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+    </mat-expansion-panel>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Get
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div>
+        <div *ngFor="let set of info.get; let i = index" class="variables">
+          <mat-form-field color="accent">
+            <mat-select placeholder="Binding" [(ngModel)]="set.binding" required>
+              <mat-option value="global">
+                global
+              </mat-option>
+              <mat-option value="instance">
+                instance
+              </mat-option>
+              <mat-option value="definition">
+                definition
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="third-width">
+            <input matInput placeholder="Key" [(ngModel)]="set.key" type="text" required>
+          </mat-form-field>
+          <mat-form-field class="third-width">
+            <input matInput placeholder="Output-Name" [(ngModel)]="set.outputVariableName" type="text" required>
+          </mat-form-field>
+          <button mat-icon-button  (click)="removeGet(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <button mat-icon-button color="accent" (click)="addGet()">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end center">
+  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+  <button mat-raised-button color="accent" [disabled]="isInvalid()" (click)="ok()">Ok</button>
+</mat-dialog-actions>
+

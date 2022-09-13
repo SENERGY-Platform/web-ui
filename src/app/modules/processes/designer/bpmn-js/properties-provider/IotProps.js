@@ -19,6 +19,7 @@ var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
 var extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper');
 var ImplementationTypeHelper = require('bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper');
 var helper = require('./helper');
+const {ProcessIoDesignerInfoSet} = require("../../../process-io/shared/process-io.model");
 const typeString = "https://schema.org/Text";
 const typeInteger = "https://schema.org/Integer";
 const typeFloat = "https://schema.org/Float";
@@ -362,6 +363,127 @@ module.exports = {
                 }
             });
         }
+    },
+
+    io: function (group, element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+        var refresh = function () {
+            eventBus.fire('elements.changed', {elements: [element]});
+        };
+
+        function getProcessIoBulkRequestFromElement(processIoConfig, element){
+            var result = {
+                set: [],
+                get: []
+            }
+            var bo = getBusinessObject(element);
+            var extentionElements = bo.extensionElements;
+            if (extentionElements && extentionElements.values && extentionElements.values[0]) {
+                var inputs = extentionElements.values[0].inputParameters;
+                var outputs = extentionElements.values[0].outputParameters;
+                for (var i = 0; i < inputs.length; i++) {
+                    var inputName = inputs[i].name;
+                    var inputValue = inputs[i].value;
+                    if(inputName.startsWith(processIoConfig.processIoReadPrefix)){
+                        var key = inputValue;
+                        if(key.startsWith(processIoConfig.processIoDefinitionPlaceholder)){
+                            definitionBound = true;
+                            key = key.slice(processIoConfig.processIoDefinitionPlaceholder.length);
+                        }
+                        if(key.startsWith("_")){
+                            key = key.slice(1);
+                        }
+                        var instanceBound = false;
+                        if(key.startsWith(processIoConfig.processIoInstancePlaceholder)){
+                            instanceBound = true;
+                            key = key.slice(processIoConfig.processIoInstancePlaceholder.length);
+                        }
+                        if(key.startsWith("_")){
+                            key = key.slice(1);
+                        }
+                        var localVariableName = inputName.slice(processIoConfig.processIoReadPrefix.length);
+                        var outputVariableName = localVariableName;
+
+                        var searchedOutput = "${"+localVariableName+"}";
+                        for (var j = 0; j < outputs.length; j++) {
+                            var outputName = outputs[j].name;
+                            var outputValue = outputs[j].value;
+                            if(outputValue === searchedOutput) {
+                                outputVariableName = outputName;
+                                break
+                            }
+                        }
+
+                        result.get.push({key: key, instanceBound: instanceBound, definitionBound: definitionBound, outputVariableName: outputVariableName});
+                    }
+                    if(inputName.startsWith(processIoConfig.processIoWritePrefix)){
+                        var key = inputName.slice(processIoConfig.processIoWritePrefix.length);
+                        var definitionBound = false;
+                        if(key.startsWith(processIoConfig.processIoDefinitionPlaceholder)){
+                            definitionBound = true;
+                            key = key.slice(processIoConfig.processIoDefinitionPlaceholder.length);
+                        }
+                        if(key.startsWith("_")){
+                            key = key.slice(1);
+                        }
+                        var instanceBound = false;
+                        if(key.startsWith(processIoConfig.processIoInstancePlaceholder)){
+                            instanceBound = true;
+                            key = key.slice(processIoConfig.processIoInstancePlaceholder.length);
+                        }
+                        if(key.startsWith("_")){
+                            key = key.slice(1);
+                        }
+                        result.set.push({key: key, instanceBound: instanceBound, definitionBound: definitionBound, value: inputValue});
+                    }
+                }
+            }
+            return result;
+        }
+
+        group.entries.push({
+            id: "process-io-button",
+            html: "<button class='process-io-button' data-action='openProcessIoDialog'>Process-IO</button>",
+            openProcessIoDialog: function (element, node) {
+                bpmnjs.designerCallbacks.getProcessIoConfigs(function (processIoConfig){
+                    bpmnjs.designerCallbacks.openProcessIoDialog(getProcessIoBulkRequestFromElement(processIoConfig, element), function (processIoDesignerInfos) {
+                        helper.toExternalServiceTask(bpmnFactory, replace, selection, element, function (serviceTask, element) {
+                            serviceTask.topic = processIoConfig.processIoWorkerTopic;
+
+                            var inputs = [];
+                            var outputs = [];
+
+                            var createProcessIoKey = function (info) {
+                                var result = info.key;
+                                if(info.instanceBound) {
+                                    result = processIoConfig.processIoInstancePlaceholder+"_"+result
+                                }
+                                if(info.definitionBound) {
+                                    result = processIoConfig.processIoDefinitionPlaceholder+"_"+result
+                                }
+                                return result;
+                            }
+
+                            processIoDesignerInfos.set.forEach(function (setInfo) {
+                                inputs.push(createTextInputParameter(bpmnjs, processIoConfig.processIoWritePrefix+createProcessIoKey(setInfo), setInfo.value));
+                            });
+
+                            processIoDesignerInfos.get.forEach(function (getInfo) {
+                                inputs.push(createTextInputParameter(bpmnjs, processIoConfig.processIoReadPrefix+getInfo.outputVariableName+"_local", createProcessIoKey(getInfo)));
+                                outputs.push(createOutputParameter(bpmnjs, getInfo.outputVariableName, "${"+getInfo.outputVariableName+"_local}"))
+                            });
+
+                            var inputOutput = createInputOutput(bpmnjs, inputs, outputs);
+                            setExtentionsElement(bpmnjs, serviceTask, inputOutput);
+
+                            refresh();
+                        });
+                    });
+                })
+                return true;
+            }
+        });
+
+
     },
 
     external: function (group, element, bpmnjs, eventBus, bpmnFactory, replace, selection) {

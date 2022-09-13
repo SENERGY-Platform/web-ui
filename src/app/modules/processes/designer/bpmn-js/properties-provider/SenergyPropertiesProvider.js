@@ -33,6 +33,7 @@ function SenergyPropertiesProvider(eventBus, canvas, bpmnFactory, elementRegistr
         camundaTabs[0].groups.unshift(createIotInfoGroup(element, bpmnjs));
         camundaTabs[0].groups.unshift(createIotMsgEventGroup(element, bpmnjs, eventBus, modeling));
         camundaTabs[0].groups.unshift(createIotExternalTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
+        camundaTabs[0].groups.unshift(createProcessIoTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
         camundaTabs[0].groups.unshift(createHelperGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
         camundaTabs[0].groups.unshift(createInfluxTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
         camundaTabs[0].groups.unshift(createTimeEventHelperGroup(element, bpmnjs, eventBus, modeling));
@@ -74,6 +75,17 @@ function createIotExternalTaskGroup(element, bpmnjs, eventBus, bpmnFactory, repl
         enabled: isTask
     };
     iotProps.external(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
+    return iotGroup;
+}
+
+function createProcessIoTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection) {
+    var iotGroup = {
+        id: 'process-io',
+        label: 'Process-IO',
+        entries: [],
+        enabled: isTask
+    };
+    iotProps.io(iotGroup, element, bpmnjs, eventBus, bpmnFactory, replace, selection);
     return iotGroup;
 }
 

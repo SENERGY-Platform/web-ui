@@ -70,6 +70,8 @@ import { DesignerSnackBarComponent } from './designer/snack-bar/designer-snack-b
 import { MatBadgeModule } from '@angular/material/badge';
 import { FilterCriteriaDialogComponent } from './designer/dialogs/filter-criteria-dialog/filter-criteria-dialog.component';
 import { DeploymentsStartParameterDialogComponent } from './deployments/dialogs/deployments-start-parameter-dialog.component';
+import {ProcessIoDesignerDialogComponent} from './designer/dialogs/process-io-designer-dialog/process-io-designer-dialog.component';
+import {MatExpansionModule} from '@angular/material/expansion';
 
 const processRepo = {
     path: 'processes/repository',
@@ -148,6 +150,7 @@ const processDesigner = {
         MatTabsModule,
         MatChipsModule,
         MatBadgeModule,
+        MatExpansionModule,
     ],
     declarations: [
         ProcessRepoComponent,
@@ -173,6 +176,7 @@ const processDesigner = {
         FilterCriteriaDialogComponent,
         NotificationConfigDialogComponent,
         DesignerSnackBarComponent,
+        ProcessIoDesignerDialogComponent
     ],
 })
 export class ProcessesModule {}

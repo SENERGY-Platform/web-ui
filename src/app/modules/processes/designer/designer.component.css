@@ -40,6 +40,11 @@
     width: 160px !important;
 }
 
+#js-properties-panel ::ng-deep .process-io-button {
+    position: static !important;
+    width: 160px !important;
+}
+
 .process-designer-container ::ng-deep .djs-palette.two-column.open {
     width: 47px;
 }

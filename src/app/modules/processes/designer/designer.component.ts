@@ -41,6 +41,7 @@ import { DesignerErrorModel } from './shared/designer-error.model';
 import { DesignerSnackBarComponent } from './snack-bar/designer-snack-bar.component';
 import { defaultIfEmpty } from 'rxjs/operators';
 import { FilterCriteriaDialogResultModel } from './shared/designer-dialog.model';
+import {DefaultProcessIoDesignerConfig, ProcessIoDesignerConfig, ProcessIoDesignerInfo} from '../process-io/shared/process-io.model';
 
 @Component({
     selector: 'senergy-process-designer',
@@ -101,6 +102,18 @@ export class ProcessDesignerComponent implements OnInit {
             });
 
             this.modeler.designerCallbacks = {
+                getProcessIoConfigs: (callback: (config: ProcessIoDesignerConfig) => void) => {
+                    callback(DefaultProcessIoDesignerConfig);
+                },
+                openProcessIoDialog: (initialInfo: ProcessIoDesignerInfo, callback: (resultInfo: ProcessIoDesignerInfo,)=>void) => {
+                    that.designerDialogService
+                        .openProcessIoDialog(initialInfo)
+                        .subscribe((result: ProcessIoDesignerInfo | null) => {
+                            if (result) {
+                                callback(result);
+                            }
+                        });
+                },
                 selectIotFilterCriteria: (
                     aspect: string,
                     iotFunction: string,
