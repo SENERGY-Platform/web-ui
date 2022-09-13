@@ -19,10 +19,10 @@
 
 <mat-dialog-content class="process-io-designer-dialog">
   <mat-accordion>
-    <mat-expansion-panel>
+    <mat-expansion-panel [expanded]="info.set.length > 0 && info.get.length == 0">
       <mat-expansion-panel-header>
         <mat-panel-title>
-          Set
+          Set {{info.set.length}}
         </mat-panel-title>
       </mat-expansion-panel-header>
       <div>
@@ -40,10 +40,10 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field class="third-width">
+          <mat-form-field class="third-width" color="accent">
             <input matInput placeholder="Key" [(ngModel)]="set.key" type="text" required>
           </mat-form-field>
-          <mat-form-field class="third-width">
+          <mat-form-field class="third-width" color="accent">
             <input matInput placeholder="Value" [(ngModel)]="set.value" type="text">
           </mat-form-field>
           <button mat-icon-button (click)="removeSet(i)">
@@ -55,10 +55,10 @@
         </button>
       </div>
     </mat-expansion-panel>
-    <mat-expansion-panel>
+    <mat-expansion-panel [expanded]="info.get.length > 0 && info.set.length == 0">
       <mat-expansion-panel-header>
         <mat-panel-title>
-          Get
+          Get {{info.get.length}}
         </mat-panel-title>
       </mat-expansion-panel-header>
       <div>
@@ -76,10 +76,10 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field class="third-width">
+          <mat-form-field class="third-width" color="accent">
             <input matInput placeholder="Key" [(ngModel)]="set.key" type="text" required>
           </mat-form-field>
-          <mat-form-field class="third-width">
+          <mat-form-field class="third-width" color="accent">
             <input matInput placeholder="Output-Name" [(ngModel)]="set.outputVariableName" type="text" required>
           </mat-form-field>
           <button mat-icon-button  (click)="removeGet(i)">
