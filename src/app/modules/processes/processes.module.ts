@@ -74,6 +74,7 @@ import {ProcessIoDesignerDialogComponent} from './designer/dialogs/process-io-de
 import {MatExpansionModule} from '@angular/material/expansion';
 import {ProcessIoVariablesComponent} from './process-io/variables/variables.component';
 import {ShortKeyPipe} from './process-io/shared/short-key.pipe';
+import {ProcessIoVariableEditDialogComponent} from './process-io/dialogs/process-io-variable-edit-dialog.component';
 
 const processRepo = {
     path: 'processes/repository',
@@ -188,7 +189,8 @@ const processIo = {
         DesignerSnackBarComponent,
         ProcessIoDesignerDialogComponent,
         ProcessIoVariablesComponent,
-        ShortKeyPipe
+        ShortKeyPipe,
+        ProcessIoVariableEditDialogComponent
     ],
 })
 export class ProcessesModule {}

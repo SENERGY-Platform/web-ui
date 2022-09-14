@@ -57,4 +57,22 @@ export class ProcessIoService {
                 catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'remove', { status: 500 })),
             );
     }
+
+    set(variable: ProcessIoVariable): Observable<{ status: number }> {
+        return this.http
+            .put(environment.processIoUrl + '/variables/'+encodeURIComponent(variable.key), variable,{
+                responseType: 'text',
+                observe: 'response',
+            })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'set', { status: 500 })),
+            );
+    }
+
+    get(key: string): Observable<ProcessIoVariable | null> {
+        return this.http
+            .get<ProcessIoVariable>(environment.processIoUrl + '/variables/'+encodeURIComponent(key))
+            .pipe(catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'get', null)));
+    }
 }

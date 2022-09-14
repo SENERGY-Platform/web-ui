@@ -61,3 +61,10 @@ table {
 .variables-container ::ng-deep .mat-tab-header {
     min-height: 54px;
 }
+
+.fab {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    z-index: 100;
+}

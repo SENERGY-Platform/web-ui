@@ -23,6 +23,10 @@ import {MatSort} from '@angular/material/sort';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import {DialogsService} from '../../../../core/services/dialogs.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {DeviceInstancesEditDialogComponent} from '../../../devices/device-instances/dialogs/device-instances-edit-dialog.component';
+import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
+import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variable-edit-dialog.component';
 
 
 
@@ -34,7 +38,7 @@ import {DialogsService} from '../../../../core/services/dialogs.service';
 export class ProcessIoVariablesComponent implements AfterViewInit{
     limit: number = 0 //all variables
     offset: number = 0
-    sort: string = "key.asc"
+    sort: string = "unix_timestamp_in_s.desc"
 
     @ViewChild('matSort', { static: false }) matSort!: MatSort;
 
@@ -45,6 +49,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit{
         private processIoService: ProcessIoService,
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
+        private dialog: MatDialog,
     ) {
         this.loadVariables();
     }
@@ -68,6 +73,73 @@ export class ProcessIoVariablesComponent implements AfterViewInit{
         this.dataSource.sort = this.matSort;
         this.dataSource.sort.sortChange.subscribe(() => {
             this.updateSortAndPagination()
+        });
+    }
+
+    edit(variable: ProcessIoVariable){
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {
+            variable: JSON.parse(JSON.stringify(variable)), // create copy of object
+            enableKey: false,
+            enableDefinitionId: false,
+            enableInstanceId: false
+        };
+
+        const editDialogRef = this.dialog.open(ProcessIoVariableEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((result: ProcessIoVariable | null) => {
+            if (result) {
+                this.processIoService.set(result).subscribe(value => {
+                    if(value.status >= 300){
+                        this.snackBar.open('Error while updating process-io variable!', "close", { panelClass: "snack-bar-error" });
+                    }else {
+                        this.updateSortAndPagination();
+                    }
+                })
+            }
+        });
+    }
+
+    add(){
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = false;
+        dialogConfig.data = {
+            variable: {
+                key: "",
+                value: null,
+                process_definition_id: "",
+                process_instance_id: "",
+                unix_timestamp_in_s: 0
+            },
+            enableKey: true,
+            enableDefinitionId: false,
+            enableInstanceId: false
+        };
+
+        const editDialogRef = this.dialog.open(ProcessIoVariableEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((result: ProcessIoVariable | null) => {
+            if (result) {
+                this.processIoService.get(result.key).subscribe(existing => {
+                    if(existing){
+                        if(existing.unix_timestamp_in_s > 0) {
+                            this.snackBar.open('process-io variable with this key already exists', "close", { panelClass: "snack-bar-error" });
+                        } else {
+                            this.processIoService.set(result).subscribe(value => {
+                                if(value.status >= 300){
+                                    this.snackBar.open('Error while setting process-io variable!', "close", { panelClass: "snack-bar-error" });
+                                }else {
+                                    this.updateSortAndPagination();
+                                }
+                            })
+                        }
+                    } else {
+                        this.snackBar.open('Error while checking for existing process-io variable!', "close", { panelClass: "snack-bar-error" });
+                    }
+                })
+
+            }
         });
     }
 
