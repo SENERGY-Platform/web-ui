@@ -72,6 +72,8 @@ import { FilterCriteriaDialogComponent } from './designer/dialogs/filter-criteri
 import { DeploymentsStartParameterDialogComponent } from './deployments/dialogs/deployments-start-parameter-dialog.component';
 import {ProcessIoDesignerDialogComponent} from './designer/dialogs/process-io-designer-dialog/process-io-designer-dialog.component';
 import {MatExpansionModule} from '@angular/material/expansion';
+import {ProcessIoVariablesComponent} from './process-io/variables/variables.component';
+import {ShortKeyPipe} from './process-io/shared/short-key.pipe';
 
 const processRepo = {
     path: 'processes/repository',
@@ -109,6 +111,13 @@ const processDesigner = {
     data: { header: 'Designer' },
 };
 
+const processIo = {
+    path: 'processes/io',
+    pathMatch: 'full',
+    component: ProcessIoVariablesComponent,
+    data: { header: 'Process-IO' },
+};
+
 @NgModule({
     imports: [
         RouterModule.forChild([
@@ -118,6 +127,7 @@ const processDesigner = {
             processDesignerEdit,
             processDesigner,
             processDeploymentsConfig,
+            processIo
         ]),
         FlexLayoutModule,
         CoreModule,
@@ -176,7 +186,9 @@ const processDesigner = {
         FilterCriteriaDialogComponent,
         NotificationConfigDialogComponent,
         DesignerSnackBarComponent,
-        ProcessIoDesignerDialogComponent
+        ProcessIoDesignerDialogComponent,
+        ProcessIoVariablesComponent,
+        ShortKeyPipe
     ],
 })
 export class ProcessesModule {}

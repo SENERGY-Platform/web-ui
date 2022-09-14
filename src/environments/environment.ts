@@ -29,6 +29,7 @@ export const environment = {
     theme: env.theme || 'senergy',
     title: env.title || 'SENERGY',
     /** URLs **/
+    processIoUrl: '',
     smartServiceRepoUrl: '',
     processDeploymentUrl: 'http://localhost',
     processServiceUrl: 'http://localhost',

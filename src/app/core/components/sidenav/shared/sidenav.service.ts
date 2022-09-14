@@ -68,13 +68,20 @@ export class SidenavService implements OnDestroy {
             );
         }
 
+
+        let processPages = [
+            new SidenavPageModel('Designer', 'link', 'create', '/processes/designer'),
+            new SidenavPageModel('Repository', 'link', 'storage', '/processes/repository'),
+            new SidenavPageModel('Deployments', 'link', 'publish', '/processes/deployments'),
+            new SidenavPageModel('Monitor', 'link', 'search', '/processes/monitor'),
+        ];
+
+        if(environment.processIoUrl){
+            processPages.push( new SidenavPageModel('IO', 'link', 'table_chart', '/processes/io'))
+        }
+
         sections.push(
-            new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', [
-                new SidenavPageModel('Designer', 'link', 'create', '/processes/designer'),
-                new SidenavPageModel('Repository', 'link', 'storage', '/processes/repository'),
-                new SidenavPageModel('Deployments', 'link', 'publish', '/processes/deployments'),
-                new SidenavPageModel('Monitor', 'link', 'search', '/processes/monitor'),
-            ]),
+            new SidenavSectionModel('Processes', 'toggle', 'timeline', '/processes', processPages),
         );
 
         sections.push(

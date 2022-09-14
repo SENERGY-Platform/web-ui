@@ -1,0 +1,63 @@
+/*
+ * Copyright 2020 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+.variables-container ::ng-deep .mat-tab-body-content {
+    overflow: hidden;
+}
+
+.variables-container ::ng-deep .mat-tab-body-wrapper {
+    height: calc(100vh - 118px);
+}
+
+.variables-container ::ng-deep .mat-tab-header {
+    min-height: 54px;
+}
+
+.variables-container {
+    height: 100%;
+}
+
+.variables-container > div{
+    height: 100%;
+}
+
+.main-panel {
+    height: calc(100% - 106px);
+    overflow-y: auto;
+}
+
+.table-container {
+    position: relative;
+    max-height: calc(100vh - 300px);
+    overflow: auto;
+}
+
+table {
+    width: 100%;
+}
+
+.variables-container ::ng-deep .mat-tab-body-content {
+    overflow: hidden;
+}
+
+.variables-container ::ng-deep .mat-tab-body-wrapper {
+    height: calc(100vh - 118px);
+}
+
+.variables-container ::ng-deep .mat-tab-header {
+    min-height: 54px;
+}

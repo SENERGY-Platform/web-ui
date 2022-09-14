@@ -54,3 +54,11 @@ export interface ProcessIoDesignerInfoGet {
     instanceBound: boolean
     definitionBound: boolean
 }
+
+export interface ProcessIoVariable {
+    key: string
+    value: any
+    process_definition_id: string
+    process_instance_id: string
+    unix_timestamp_in_s: number
+}
