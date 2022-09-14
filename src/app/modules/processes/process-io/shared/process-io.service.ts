@@ -45,4 +45,16 @@ export class ProcessIoService {
             .get<ProcessIoVariable[]>(environment.processIoUrl + '/variables?'+query.join("&"))
             .pipe(catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'listVariables', null)));
     }
+
+    remove(key: string): Observable<{ status: number }> {
+        return this.http
+            .delete(environment.processIoUrl + '/variables/'+encodeURIComponent(key), {
+                responseType: 'text',
+                observe: 'response',
+            })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'remove', { status: 500 })),
+            );
+    }
 }

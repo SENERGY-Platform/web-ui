@@ -20,6 +20,9 @@ import {ProcessIoVariable} from '../shared/process-io.model';
 import {MatTableDataSource} from '@angular/material/table';
 import {MonitorProcessModel} from '../../monitor/shared/monitor-process.model';
 import {MatSort} from '@angular/material/sort';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
+import {DialogsService} from '../../../../core/services/dialogs.service';
 
 
 
@@ -35,13 +38,13 @@ export class ProcessIoVariablesComponent implements AfterViewInit{
 
     @ViewChild('matSort', { static: false }) matSort!: MatSort;
 
-    variables: ProcessIoVariable[] = []
-
     dataSource = new MatTableDataSource<ProcessIoVariable>();
-    displayedColumns: string[] = ["unix_timestamp_in_s", "key", "process_instance_id", "process_definition_id", "value"]
+    displayedColumns: string[] = ["unix_timestamp_in_s", "key", "process_instance_id", "process_definition_id", "value", "action"]
 
     constructor(
-        private processIoService: ProcessIoService
+        private processIoService: ProcessIoService,
+        private snackBar: MatSnackBar,
+        private dialogsService: DialogsService,
     ) {
         this.loadVariables();
     }
@@ -56,8 +59,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit{
     loadVariables(){
         this.processIoService.listVariables(this.limit, this.offset, this.sort).subscribe(value => {
             if(value){
-                this.variables = value;
-                this.dataSource.data = this.variables || [];
+                this.dataSource.data = value || [];
             }
         })
     }
@@ -67,6 +69,25 @@ export class ProcessIoVariablesComponent implements AfterViewInit{
         this.dataSource.sort.sortChange.subscribe(() => {
             this.updateSortAndPagination()
         });
+    }
+
+    remove(key: string){
+        this.dialogsService
+            .openDeleteDialog('Process-IO Variable')
+            .afterClosed()
+            .subscribe((variableDelete: boolean) => {
+                if (variableDelete) {
+                    this.processIoService.remove(key).subscribe(value => {
+                        if(value.status >= 300){
+                            this.snackBar.open('Error while deleting process-io variable!', "close", { panelClass: "snack-bar-error" });
+                        }else {
+                            this.dataSource.data = this.dataSource.data.filter(value1 => {
+                                return value1.key != key
+                            })
+                        }
+                    })
+                }
+            });
     }
 
 }
