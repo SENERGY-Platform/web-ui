@@ -20,7 +20,7 @@
                    matSortDirection="desc" matSortDisableClear>
                 <ng-container matColumnDef="unix_timestamp_in_s">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-                    <td mat-cell *matCellDef="let element"> {{element.unix_timestamp_in_s | date:'short'}} </td>
+                    <td mat-cell *matCellDef="let element"> {{element.unix_timestamp_in_s * 1000 | date:'medium'}} </td>
                 </ng-container>
 
                 <ng-container matColumnDef="key">
