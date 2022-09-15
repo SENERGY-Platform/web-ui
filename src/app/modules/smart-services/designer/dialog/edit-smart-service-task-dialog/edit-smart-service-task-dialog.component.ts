@@ -101,6 +101,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.infoModuleType = this.result.inputs.find(value => value.name == "info.module_type")?.value || "widget";
         this.infoModuleData = this.result.inputs.find(value => value.name == "info.module_data")?.value || "{\n\n}";
         this.processStart = this.inputsToProcessStartModel(this.result.inputs);
+
+        (document as any).foo = this.availableProcessVariables
     }
 
     ngOnInit() {}

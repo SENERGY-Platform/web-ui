@@ -126,10 +126,10 @@
         <div>
           <mat-form-field  color="accent" class="full-width">
             <input matInput placeholder="Deployment-ID" [(ngModel)]="processStart.deployment_id">
-            <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+            <button mat-icon-button matSuffix [matMenuTriggerFor]="menuDeploymentId">
               <mat-icon>data_object</mat-icon>
             </button>
-            <mat-menu #menu="matMenu">
+            <mat-menu #menuDeploymentId="matMenu">
               <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="processStart.deployment_id = '${'+param.name+'}'" [matTooltip]="param.name">
                 {{param.label || param.name}}
               </button>
@@ -143,10 +143,10 @@
             </mat-form-field>
             <mat-form-field color="accent" class="process-start-input-field">
               <input matInput placeholder="Input-Value" [(ngModel)]="input.value" #processStartInput>
-              <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+              <button mat-icon-button matSuffix [matMenuTriggerFor]="menuInputValue">
                 <mat-icon>data_object</mat-icon>
               </button>
-              <mat-menu #menu="matMenu">
+              <mat-menu #menuInputValue="matMenu">
                 <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')" (click)="input.value = appendParam(input.value, param, processStartInput)" [matTooltip]="param.name">
                   Value: {{param.label || param.name}}
                 </button>
@@ -346,10 +346,10 @@
         <div>
           <mat-form-field  color="accent" class="full-width">
             <input matInput placeholder="Filter" [(ngModel)]="exportRequest.Filter" type="text" #filterInput required>
-            <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+            <button mat-icon-button matSuffix [matMenuTriggerFor]="menuFilter">
               <mat-icon>data_object</mat-icon>
             </button>
-            <mat-menu #menu="matMenu">
+            <mat-menu #menuFilter="matMenu">
               <ng-container *ngIf="exportRequest.FilterType == 'operatorId'">
                 <button mat-menu-item *ngFor="let param of availableProcessVariables.get('flow_selection')" (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
                   {{param.label || param.name}}
@@ -499,10 +499,10 @@
         <ng-container *ngFor="let overwrite of importOverwrites">
           <mat-form-field *ngIf="overwrite.config_name == config.name" color="accent" class="input-with-overwrite-overwrite">
             <input matInput placeholder="{{config.name}} overwrite with placeholder evaluated as json" [(ngModel)]="overwrite.json_value" type="text" #overwriterJsonInput>
-            <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+            <button mat-icon-button matSuffix [matMenuTriggerFor]="menuImportOverwrites">
               <mat-icon>data_object</mat-icon>
             </button>
-            <mat-menu #menu="matMenu">
+            <mat-menu #menuImportOverwrites="matMenu">
               <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="overwrite.json_value = appendParam(overwrite.json_value, param, overwriterJsonInput)" [matTooltip]="param.name">
                 IoT: {{param.label || param.name}}
               </button>
