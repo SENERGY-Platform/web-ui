@@ -100,7 +100,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
         this.infoModuleType = this.result.inputs.find(value => value.name == "info.module_type")?.value || "widget";
         this.infoModuleData = this.result.inputs.find(value => value.name == "info.module_data")?.value || "{\n\n}";
-        this.processStart = this.inputsToProcessStartModel(this.result.inputs)
+        this.processStart = this.inputsToProcessStartModel(this.result.inputs);
     }
 
     ngOnInit() {}
@@ -774,6 +774,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                     const selection =  "{\"import_selection\": {\"id\":\"${"+importSelection.name+"}\", \"path\": \""+path+"\"}}";
                     this.availableProcessVariables.get("import_selection")?.push({name: selection, label: importSelection.label + ": " + path, value: ""})
                 })
+                this.availableAnalyticsIotSelections = this.getAvailableAnalyticsIotSelections();
             })
         })
     }
