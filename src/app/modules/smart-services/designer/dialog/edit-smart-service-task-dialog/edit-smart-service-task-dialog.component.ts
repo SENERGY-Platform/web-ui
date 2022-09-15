@@ -34,6 +34,8 @@ import {
 } from '../../../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../../../imports/import-types/shared/import-types.service';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {ExportService} from '../../../../exports/shared/export.service';
+import {ExportDatabaseModel} from '../../../../exports/shared/export.model';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -70,6 +72,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     processStart: ProcessStartModel = {deployment_id: "", inputs: []};
 
+    exportDatabaseList: ExportDatabaseModel[] = [];
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
         private processRepo: ProcessRepoService,
@@ -78,6 +82,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         private flowParser: ParserService,
         private importTypeService: ImportTypesService,
         private sanitizer: DomSanitizer,
+        private exportService: ExportService,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription, element: BpmnElement},
     ) {
         if(!dialogParams.info.topic) {
@@ -110,8 +115,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if(!this.processModels && this.result.topic == processDeploymentTopic) {
             this.processRepo.getProcessModels("", 9999, 0, "date", "asc", null).subscribe(value => this.processModels = value);
         }
-
         this.ensureFlowList();
+        this.ensureExportDatabaseList()
     }
 
     get activeIndex(): number {
@@ -454,6 +459,14 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     /******************************
      *      Export
      ******************************/
+
+    ensureExportDatabaseList(){
+        if(this.result.topic == "export" && this.exportDatabaseList.length == 0) {
+            this.exportService.getExportDatabases().subscribe(value => {
+                this.exportDatabaseList = value
+            });
+        }
+    }
 
     removeExportValue(index: number){
         this.exportRequest?.Values?.splice(index, 1);

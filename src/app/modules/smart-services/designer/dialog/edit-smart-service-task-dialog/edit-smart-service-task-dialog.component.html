@@ -378,7 +378,13 @@
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="ExportDatabaseID" [(ngModel)]="exportRequest.ExportDatabaseID" type="text" required>
+            <mat-label>ExportDatabaseID</mat-label>
+            <senergy-select-search placeholder="ExportDatabaseID"
+                                   [(ngModel)]="exportRequest.ExportDatabaseID"
+                                   [options]="exportDatabaseList || []"
+                                   useOptionViewProperty="Name"
+                                   useOptionValueProperty="ID">
+            </senergy-select-search>
           </mat-form-field>
         </div>
         <div>
