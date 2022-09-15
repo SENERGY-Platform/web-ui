@@ -14,59 +14,64 @@
   ~ limitations under the License.
   -->
 <div class="variables-container">
-    <div class="mat-elevation-z1">
-        <div class="table-container">
-            <table #matSort="matSort"  mat-table [dataSource]="dataSource" matSort matSortActive="unix_timestamp_in_s"
-                   matSortDirection="desc" matSortDisableClear>
-                <ng-container matColumnDef="unix_timestamp_in_s">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-                    <td mat-cell *matCellDef="let element"> {{element.unix_timestamp_in_s * 1000 | date:'medium'}} </td>
-                </ng-container>
-
-                <ng-container matColumnDef="key">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Key</th>
-                    <td mat-cell *matCellDef="let element" [matTooltip]="element.key"> {{element.key | short_process_io_key:element.process_definition_id:element.process_instance_id}} </td>
-                </ng-container>
-
-                <ng-container matColumnDef="value">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Value</th>
-                    <td mat-cell *matCellDef="let element"> {{element.value | json}} </td>
-                </ng-container>
-
-                <ng-container matColumnDef="process_instance_id">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Process-Instance</th>
-                    <td mat-cell *matCellDef="let element"> {{element.process_instance_id}} </td>
-                </ng-container>
-
-                <ng-container matColumnDef="process_definition_id">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Process-Definition</th>
-                    <td mat-cell *matCellDef="let element"> {{element.process_definition_id}} </td>
-                </ng-container>
-
-                <ng-container matColumnDef="action">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let element">
-                        <button matTooltip="Edit" mat-icon-button color="accent" (click)="edit(element)">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button matTooltip="Delete" mat-icon-button color="accent" (click)="remove(element.key)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-            </table>
+    <div>
+        <div>
+            <senergy-searchbar fxFlex></senergy-searchbar>
         </div>
+        <div class="mat-elevation-z1">
+            <div class="table-container">
+                <table #matSort="matSort"  mat-table [dataSource]="dataSource" matSort matSortActive="unix_timestamp_in_s"
+                       matSortDirection="desc" matSortDisableClear>
+                    <ng-container matColumnDef="unix_timestamp_in_s">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+                        <td mat-cell *matCellDef="let element"> {{element.unix_timestamp_in_s * 1000 | date:'medium'}} </td>
+                    </ng-container>
 
-        <mat-paginator #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
-                       showFirstLastButtons></mat-paginator>
+                    <ng-container matColumnDef="key">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Key</th>
+                        <td mat-cell *matCellDef="let element" [matTooltip]="element.key"> {{element.key | short_process_io_key:element.process_definition_id:element.process_instance_id}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="value">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Value</th>
+                        <td mat-cell *matCellDef="let element"> {{element.value | json}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="process_instance_id">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Process-Instance</th>
+                        <td mat-cell *matCellDef="let element"> {{element.process_instance_id}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="process_definition_id">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Process-Definition</th>
+                        <td mat-cell *matCellDef="let element"> {{element.process_definition_id}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="action">
+                        <th mat-header-cell *matHeaderCellDef>Actions</th>
+                        <td mat-cell *matCellDef="let element">
+                            <button matTooltip="Edit" mat-icon-button color="accent" (click)="edit(element)">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button matTooltip="Delete" mat-icon-button color="accent" (click)="remove(element.key)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                </table>
+            </div>
+
+            <mat-paginator #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
+                           showFirstLastButtons></mat-paginator>
 
 
-        <button mat-fab class="fab" matTooltip="Add" color="accent" (click)="add()">
-            <mat-icon>add</mat-icon>
-        </button>
+            <button mat-fab class="fab" matTooltip="Add" color="accent" (click)="add()">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
     </div>
 </div>

@@ -30,7 +30,7 @@ import {ProcessIoVariable, VariablesCount} from './process-io.model';
 export class ProcessIoService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
-    listVariables(limit: number, offset: number, sort: string): Observable<ProcessIoVariable[] | null> {
+    listVariables(limit: number, offset: number, sort: string, keyRegex: string): Observable<ProcessIoVariable[] | null> {
         let query: string[] = []
         if(limit){
             query.push("limit="+limit)
@@ -41,14 +41,21 @@ export class ProcessIoService {
         if(sort){
             query.push("sort="+sort)
         }
+        if(keyRegex){
+            query.push("key_regex="+keyRegex)
+        }
         return this.http
             .get<ProcessIoVariable[]>(environment.processIoUrl + '/variables?'+query.join("&"))
             .pipe(catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'listVariables', null)));
     }
 
-    countVariables(): Observable<VariablesCount | null> {
+    countVariables(keyRegex: string): Observable<VariablesCount | null> {
+        let query: string[] = []
+        if(keyRegex){
+            query.push("key_regex="+keyRegex)
+        }
         return this.http
-            .get<VariablesCount>(environment.processIoUrl + '/count/variables')
+            .get<VariablesCount>(environment.processIoUrl + '/count/variables?'+query.join("&"))
             .pipe(catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'countVariables', null)));
     }
 

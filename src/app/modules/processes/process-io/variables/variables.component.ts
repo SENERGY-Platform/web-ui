@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ProcessIoService} from '../shared/process-io.service';
 import {ProcessIoVariable} from '../shared/process-io.model';
 import {MatTableDataSource} from '@angular/material/table';
@@ -28,6 +28,8 @@ import {DeviceInstancesEditDialogComponent} from '../../../devices/device-instan
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variable-edit-dialog.component';
 import {MatPaginator} from '@angular/material/paginator';
+import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
+import {Subscription} from 'rxjs';
 
 
 
@@ -36,10 +38,11 @@ import {MatPaginator} from '@angular/material/paginator';
     templateUrl: './variables.component.html',
     styleUrls: ['./variables.component.css'],
 })
-export class ProcessIoVariablesComponent implements AfterViewInit{
+export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
     limit: number = 20
     offset: number = 0
     sort: string = "unix_timestamp_in_s.desc"
+    keyRegex: string = ""
 
     totalCount: number = 0
 
@@ -49,14 +52,41 @@ export class ProcessIoVariablesComponent implements AfterViewInit{
     dataSource = new MatTableDataSource<ProcessIoVariable>();
     displayedColumns: string[] = ["unix_timestamp_in_s", "key", "process_instance_id", "process_definition_id", "value", "action"]
 
+    private searchSub: Subscription = new Subscription();
+
     constructor(
         private processIoService: ProcessIoService,
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
         private dialog: MatDialog,
+        private searchbarService: SearchbarService,
     ) {
+        this.updateTotal();
         this.loadVariables();
-        this.processIoService.countVariables().subscribe(value => {
+    }
+
+    ngOnDestroy() {
+        this.searchSub.unsubscribe();
+    }
+
+    ngAfterViewInit(): void {
+        this.dataSource.sort = this.matSort;
+        this.dataSource.sort.sortChange.subscribe(() => {
+            this.updateSortAndPagination();
+        });
+        this.paginator.page.subscribe(()=>{
+            this.updateSortAndPagination();
+        })
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.keyRegex = searchText;
+            this.paginator.pageIndex = 0;
+            this.updateTotal();
+            this.updateSortAndPagination();
+        });
+    }
+
+    updateTotal(){
+        this.processIoService.countVariables(this.keyRegex).subscribe(value => {
             if (value) {
                 this.totalCount = value.count
             }
@@ -75,20 +105,10 @@ export class ProcessIoVariablesComponent implements AfterViewInit{
     }
 
     loadVariables(){
-        this.processIoService.listVariables(this.limit, this.offset, this.sort).subscribe(value => {
+        this.processIoService.listVariables(this.limit, this.offset, this.sort, this.keyRegex).subscribe(value => {
             if(value){
                 this.dataSource.data = value || [];
             }
-        })
-    }
-
-    ngAfterViewInit(): void {
-        this.dataSource.sort = this.matSort;
-        this.dataSource.sort.sortChange.subscribe(() => {
-            this.updateSortAndPagination();
-        });
-        this.paginator.page.subscribe(()=>{
-            this.updateSortAndPagination();
         })
     }
 
