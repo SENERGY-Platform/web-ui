@@ -43,6 +43,7 @@
 .table-container {
     position: relative;
     overflow: auto;
+    max-height: calc(100vh - 300px);
 }
 
 table {

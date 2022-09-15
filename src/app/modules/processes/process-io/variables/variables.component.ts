@@ -27,6 +27,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceInstancesEditDialogComponent} from '../../../devices/device-instances/dialogs/device-instances-edit-dialog.component';
 import {DeviceInstancesModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variable-edit-dialog.component';
+import {MatPaginator} from '@angular/material/paginator';
 
 
 
@@ -36,11 +37,14 @@ import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variab
     styleUrls: ['./variables.component.css'],
 })
 export class ProcessIoVariablesComponent implements AfterViewInit{
-    limit: number = 0 //all variables
+    limit: number = 20
     offset: number = 0
     sort: string = "unix_timestamp_in_s.desc"
 
+    totalCount: number = 0
+
     @ViewChild('matSort', { static: false }) matSort!: MatSort;
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     dataSource = new MatTableDataSource<ProcessIoVariable>();
     displayedColumns: string[] = ["unix_timestamp_in_s", "key", "process_instance_id", "process_definition_id", "value", "action"]
@@ -52,11 +56,20 @@ export class ProcessIoVariablesComponent implements AfterViewInit{
         private dialog: MatDialog,
     ) {
         this.loadVariables();
+        this.processIoService.countVariables().subscribe(value => {
+            if (value) {
+                this.totalCount = value.count
+            }
+        })
     }
 
     updateSortAndPagination(){
         if(this.matSort && this.matSort.active){
             this.sort = this.matSort.active+"."+this.matSort.direction;
+        }
+        if(this.paginator){
+            this.limit = this.paginator.pageSize;
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
         }
         this.loadVariables()
     }
@@ -72,8 +85,11 @@ export class ProcessIoVariablesComponent implements AfterViewInit{
     ngAfterViewInit(): void {
         this.dataSource.sort = this.matSort;
         this.dataSource.sort.sortChange.subscribe(() => {
-            this.updateSortAndPagination()
+            this.updateSortAndPagination();
         });
+        this.paginator.page.subscribe(()=>{
+            this.updateSortAndPagination();
+        })
     }
 
     edit(variable: ProcessIoVariable){

@@ -22,7 +22,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 import {Observable, timer} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
-import {ProcessIoVariable} from './process-io.model';
+import {ProcessIoVariable, VariablesCount} from './process-io.model';
 
 @Injectable({
     providedIn: 'root',
@@ -44,6 +44,12 @@ export class ProcessIoService {
         return this.http
             .get<ProcessIoVariable[]>(environment.processIoUrl + '/variables?'+query.join("&"))
             .pipe(catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'listVariables', null)));
+    }
+
+    countVariables(): Observable<VariablesCount | null> {
+        return this.http
+            .get<VariablesCount>(environment.processIoUrl + '/count/variables')
+            .pipe(catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'countVariables', null)));
     }
 
     remove(key: string): Observable<{ status: number }> {

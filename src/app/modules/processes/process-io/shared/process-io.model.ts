@@ -62,3 +62,7 @@ export interface ProcessIoVariable {
     process_instance_id: string
     unix_timestamp_in_s: number
 }
+
+export interface VariablesCount {
+    count: number
+}

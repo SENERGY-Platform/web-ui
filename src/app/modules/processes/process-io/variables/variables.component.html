@@ -60,10 +60,10 @@
 
             </table>
         </div>
-        <!--
-        <mat-paginator #paginatorRunning [length]="totalCountRunning" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
+
+        <mat-paginator #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
                        showFirstLastButtons></mat-paginator>
-        -->
+
 
         <button mat-fab class="fab" matTooltip="Add" color="accent" (click)="add()">
             <mat-icon>add</mat-icon>
