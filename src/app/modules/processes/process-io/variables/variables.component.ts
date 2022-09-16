@@ -78,11 +78,17 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
             this.updateSortAndPagination();
         })
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.keyRegex = searchText;
-            this.paginator.pageIndex = 0;
-            this.updateTotal();
-            this.updateSortAndPagination();
+            if(this.keyRegex != searchText) {
+                this.keyRegex = searchText;
+                this.paginator.pageIndex = 0;
+            }
+            this.refresh()
         });
+    }
+
+    refresh(){
+        this.updateTotal();
+        this.updateSortAndPagination();
     }
 
     updateTotal(){
