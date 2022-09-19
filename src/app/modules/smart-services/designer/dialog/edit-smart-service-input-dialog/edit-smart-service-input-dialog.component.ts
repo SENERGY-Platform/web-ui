@@ -50,8 +50,8 @@ import {CharacteristicsService} from '../../../../metadata/characteristics/share
 export class EditSmartServiceInputDialogComponent implements OnInit {
     abstract: AbstractSmartServiceInput[] = [];
 
-    functions: (FunctionsPermSearchModel | {name: string})[] = [];
-    deviceClasses: (DeviceClassesPermSearchModel | {name: string})[] = [];
+    functions: (FunctionsPermSearchModel | {id?:string, name: string})[] = [];
+    deviceClasses: (DeviceClassesPermSearchModel | {id?:string, name: string})[] = [];
     nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
 
     characteristics: CharacteristicsPermSearchModel[] = [];
@@ -181,6 +181,44 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
 
     compareById(a: any, b: any): boolean {
         return a && b && a.id === b.id;
+    }
+
+    criteriaToLabel(criteria: {interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string}): string {
+        let functionName = ""
+        if(criteria.function_id) {
+            functionName = this.functions.find(v => v.id == criteria.function_id)?.name || criteria.function_id
+        }
+        let deviceClassName = ""
+        if(criteria.device_class_id) {
+            deviceClassName = this.deviceClasses.find(v => v.id == criteria.device_class_id)?.name || criteria.device_class_id
+        }
+        let aspectName = ""
+        if(criteria.aspect_id) {
+            this.nestedAspects.forEach((value, _) => {
+                let temp = value.find(v => v.id == criteria.aspect_id)?.name;
+                if(temp) {
+                    aspectName = temp;
+                }
+            })
+            if(!aspectName) {
+                aspectName = criteria.aspect_id;
+            }
+        }
+
+        let parts: string[] = [];
+        if(criteria.interaction) {
+            parts.push(criteria.interaction)
+        }
+        if(aspectName) {
+            parts.push(aspectName)
+        }
+        if(deviceClassName) {
+            parts.push(deviceClassName)
+        }
+        if(functionName) {
+            parts.push(functionName)
+        }
+        return parts.join(" | ");
     }
 
     close(): void {

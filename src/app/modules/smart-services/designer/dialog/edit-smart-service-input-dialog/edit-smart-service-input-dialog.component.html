@@ -88,7 +88,7 @@
                             <mat-expansion-panel *ngFor="let criteria of input.criteria_list; let i = index">
                                 <mat-expansion-panel-header>
                                     <mat-panel-title>
-                                        {{criteria.interaction}} {{criteria.function_id}} {{criteria.aspect_id}}
+                                        {{criteriaToLabel(criteria)}}
                                     </mat-panel-title>
                                 </mat-expansion-panel-header>
                                 <div>
