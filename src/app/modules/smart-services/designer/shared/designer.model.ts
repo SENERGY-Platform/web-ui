@@ -15,11 +15,14 @@
  */
 
 //{name: "test-task", topic: "test-topic", inputs:[{name: "test-input", type: "text", value: "42"}, {name: "test-script", type: "script", value: '[13]'}]};
+import {AbstractSmartServiceInput} from '../dialog/edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
+
 export interface SmartServiceTaskDescription {
     name: string;
     topic: string;
     inputs: SmartServiceTaskInputDescription[];
     outputs: SmartServiceTaskInputDescription[];
+    smartServiceInputs: SmartServiceInputsDescription;
 }
 
 export interface SmartServiceTaskInputDescription {

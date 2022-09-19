@@ -48,7 +48,7 @@ import {CharacteristicsService} from '../../../../metadata/characteristics/share
     styleUrls: ['./edit-smart-service-input-dialog.component.css'],
 })
 export class EditSmartServiceInputDialogComponent implements OnInit {
-    abstract: AbstractInput[] = [];
+    abstract: AbstractSmartServiceInput[] = [];
 
     functions: (FunctionsPermSearchModel | {name: string})[] = [];
     deviceClasses: (DeviceClassesPermSearchModel | {name: string})[] = [];
@@ -91,136 +91,14 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
     ngOnInit() {}
 
     readAbstractAsDescription(): SmartServiceInputsDescription{
-        let inputs: SmartServiceInput[] = this.abstract.map(input => {
-            let properties: SmartServiceInputProperty[] = [];
-            if(input.description) {
-                properties.push({id: "description", value: input.description});
-            }
-            if(input.iot_selectors && input.iot_selectors.length > 0) {
-                properties.push({id: "iot", value: input.iot_selectors.join(",")});
-            }
-            if(input.criteria_list && input.criteria_list.length > 0) {
-                input.criteria_list = input.criteria_list.map(criteria => {
-                    criteria.function_id = criteria.function_id || undefined;
-                    criteria.aspect_id = criteria.aspect_id || undefined;
-                    criteria.device_class_id = criteria.device_class_id || undefined;
-                    criteria.interaction = criteria.interaction || undefined;
-                    return criteria;
-                })
-                properties.push({id: "criteria_list", value: JSON.stringify(input.criteria_list)});
-            }
-            if(input.entity_only && input.iot_selectors && input.iot_selectors.length > 0) {
-                properties.push({id: "entity_only", value: "true"});
-            }
-            if(input.same_entity) {
-                properties.push({id: "same_entity", value: input.same_entity});
-            }
-            if(input.order !== null && input.order !== undefined) {
-                properties.push({id: "order", value: input.order.toString()});
-            }
-            if(input.multiple) {
-                properties.push({id: "multiple", value: JSON.stringify(input.multiple)});
-            }
-            if(input.optional) {
-                properties.push({id: "optional", value: JSON.stringify(input.optional)});
-            }
-            if(input.characteristic_id) {
-                properties.push({id: "characteristic_id", value: input.characteristic_id});
-            } else if(input.options && input.options.length > 0) {
-                let obj: any = {};
-                input.options.forEach(element => {
-                    obj[element.key] = element.value;
-                })
-                properties.push({id: "options", value: JSON.stringify(obj)});
-            }
-            var defaultValue = input.default_value;
-            if(defaultValue === undefined || defaultValue === null) {
-                switch (input.type) {
-                    case "string":
-                        defaultValue = "";
-                        break;
-                    case "long":
-                        defaultValue = 0;
-                        break;
-                    case "boolean":
-                        defaultValue = false;
-                        break;
-                }
-            }
-            return {
-                id: input.id,
-                label: input.label,
-                type: input.type,
-                default_value: defaultValue,
-                properties: properties
-            }
-        });
-
-        return {
-            inputs: inputs
-        }
+        return abstractSmartServiceInputToSmartServiceInputsDescription(this.abstract)
     }
 
     setAbstractByDescription(value: SmartServiceInputsDescription){
-        this.abstract = value.inputs.map(input => {
-            let result = {
-                id: input.id,
-                label: input.label,
-                type: input.type,
-                default_value: input.default_value,
-
-                order: 0,
-                multiple: false,
-                optional: false,
-            } as AbstractInput;
-            input.properties.forEach(property => {
-                try {
-                    if(property.id == "description" && property.value != "") {
-                        result.description = property.value;
-                    }
-                    if(property.id == "iot" && property.value != "") {
-                        result.iot_selectors = property.value.split(",").map(value => value.trim());
-                    }
-                    if(property.id == "criteria" && property.value != "") {
-                        result.criteria_list = [JSON.parse(property.value)];
-                    }
-                    if(property.id == "criteria_list" && property.value != "") {
-                        result.criteria_list = JSON.parse(property.value);
-                    }
-                    if(property.id == "entity_only" && property.value != "") {
-                        result.entity_only = JSON.parse(property.value);
-                    }
-                    if(property.id == "same_entity" && property.value != "") {
-                        result.same_entity = property.value;
-                    }
-                    if(property.id == "order" && property.value != "") {
-                        result.order = parseInt(property.value);
-                    }
-                    if(property.id == "multiple" && property.value != "") {
-                        result.multiple = JSON.parse(property.value);
-                    }
-                    if(property.id == "optional" && property.value != "") {
-                        result.optional = JSON.parse(property.value);
-                    }
-                    if(property.id == "characteristic_id" && property.value != "") {
-                        result.characteristic_id = property.value;
-                    }
-                    if(property.id == "options" && property.value != "") {
-                        let obj = JSON.parse(property.value);
-                        result.options = Object.entries(obj).map(([k,v]) =>{ return {key: k, value: v}});
-                    }
-                } catch (e){
-                    console.error(e);
-                }
-            })
-            if (result.characteristic_id) {
-                result.options = undefined;
-            }
-            return result
-        });
+        this.abstract = smartServiceInputsDescriptionToAbstractSmartServiceInput(value)
     }
 
-    useIotSelectors(condition: boolean, input: AbstractInput) {
+    useIotSelectors(condition: boolean, input: AbstractSmartServiceInput) {
         if(condition) {
             if(!input.iot_selectors) {
                 input.iot_selectors = [];
@@ -244,17 +122,17 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
         }
     }
 
-    isIotInputProvider(input: AbstractInput): boolean {
+    isIotInputProvider(input: AbstractSmartServiceInput): boolean {
         return !!input.iot_selectors
     }
 
-    removeOption(input: AbstractInput, optionKey: string) {
+    removeOption(input: AbstractSmartServiceInput, optionKey: string) {
         if(input.options) {
             input.options = input.options.filter(value => value.key != optionKey);
         }
     }
 
-    addOption(input: AbstractInput) {
+    addOption(input: AbstractSmartServiceInput) {
         let value;
         switch(input.type){
             case "string":
@@ -274,11 +152,11 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
         }
     }
 
-    removeCriteria(input: AbstractInput, index: number) {
+    removeCriteria(input: AbstractSmartServiceInput, index: number) {
         input.criteria_list?.splice(index, 1);
     }
 
-    addCriteria(input: AbstractInput) {
+    addCriteria(input: AbstractSmartServiceInput) {
         if(input.criteria_list) {
             input.criteria_list?.push({});
         } else {
@@ -314,7 +192,7 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
     }
 }
 
-interface AbstractInput {
+export interface AbstractSmartServiceInput {
     id: string,
     label: string;
     type: string;
@@ -336,4 +214,134 @@ interface AbstractInput {
     order: number;
     multiple: boolean;
     optional: boolean;
+}
+
+export function abstractSmartServiceInputToSmartServiceInputsDescription(abstract: AbstractSmartServiceInput[]): SmartServiceInputsDescription{
+    let inputs: SmartServiceInput[] = abstract.map(input => {
+        let properties: SmartServiceInputProperty[] = [];
+        if(input.description) {
+            properties.push({id: "description", value: input.description});
+        }
+        if(input.iot_selectors && input.iot_selectors.length > 0) {
+            properties.push({id: "iot", value: input.iot_selectors.join(",")});
+        }
+        if(input.criteria_list && input.criteria_list.length > 0) {
+            input.criteria_list = input.criteria_list.map(criteria => {
+                criteria.function_id = criteria.function_id || undefined;
+                criteria.aspect_id = criteria.aspect_id || undefined;
+                criteria.device_class_id = criteria.device_class_id || undefined;
+                criteria.interaction = criteria.interaction || undefined;
+                return criteria;
+            })
+            properties.push({id: "criteria_list", value: JSON.stringify(input.criteria_list)});
+        }
+        if(input.entity_only && input.iot_selectors && input.iot_selectors.length > 0) {
+            properties.push({id: "entity_only", value: "true"});
+        }
+        if(input.same_entity) {
+            properties.push({id: "same_entity", value: input.same_entity});
+        }
+        if(input.order !== null && input.order !== undefined) {
+            properties.push({id: "order", value: input.order.toString()});
+        }
+        if(input.multiple) {
+            properties.push({id: "multiple", value: JSON.stringify(input.multiple)});
+        }
+        if(input.optional) {
+            properties.push({id: "optional", value: JSON.stringify(input.optional)});
+        }
+        if(input.characteristic_id) {
+            properties.push({id: "characteristic_id", value: input.characteristic_id});
+        } else if(input.options && input.options.length > 0) {
+            let obj: any = {};
+            input.options.forEach(element => {
+                obj[element.key] = element.value;
+            })
+            properties.push({id: "options", value: JSON.stringify(obj)});
+        }
+        var defaultValue = input.default_value;
+        if(defaultValue === undefined || defaultValue === null) {
+            switch (input.type) {
+                case "string":
+                    defaultValue = "";
+                    break;
+                case "long":
+                    defaultValue = 0;
+                    break;
+                case "boolean":
+                    defaultValue = false;
+                    break;
+            }
+        }
+        return {
+            id: input.id,
+            label: input.label,
+            type: input.type,
+            default_value: defaultValue,
+            properties: properties
+        }
+    });
+
+    return {
+        inputs: inputs
+    }
+}
+
+export function smartServiceInputsDescriptionToAbstractSmartServiceInput(value: SmartServiceInputsDescription): AbstractSmartServiceInput[]{
+    return value.inputs.map(input => {
+        let result = {
+            id: input.id,
+            label: input.label,
+            type: input.type,
+            default_value: input.default_value,
+
+            order: 0,
+            multiple: false,
+            optional: false,
+        } as AbstractSmartServiceInput;
+        input.properties.forEach(property => {
+            try {
+                if(property.id == "description" && property.value != "") {
+                    result.description = property.value;
+                }
+                if(property.id == "iot" && property.value != "") {
+                    result.iot_selectors = property.value.split(",").map(value => value.trim());
+                }
+                if(property.id == "criteria" && property.value != "") {
+                    result.criteria_list = [JSON.parse(property.value)];
+                }
+                if(property.id == "criteria_list" && property.value != "") {
+                    result.criteria_list = JSON.parse(property.value);
+                }
+                if(property.id == "entity_only" && property.value != "") {
+                    result.entity_only = JSON.parse(property.value);
+                }
+                if(property.id == "same_entity" && property.value != "") {
+                    result.same_entity = property.value;
+                }
+                if(property.id == "order" && property.value != "") {
+                    result.order = parseInt(property.value);
+                }
+                if(property.id == "multiple" && property.value != "") {
+                    result.multiple = JSON.parse(property.value);
+                }
+                if(property.id == "optional" && property.value != "") {
+                    result.optional = JSON.parse(property.value);
+                }
+                if(property.id == "characteristic_id" && property.value != "") {
+                    result.characteristic_id = property.value;
+                }
+                if(property.id == "options" && property.value != "") {
+                    let obj = JSON.parse(property.value);
+                    result.options = Object.entries(obj).map(([k,v]) =>{ return {key: k, value: v}});
+                }
+            } catch (e){
+                console.error(e);
+            }
+        })
+        if (result.characteristic_id) {
+            result.options = undefined;
+        }
+        return result
+    });
 }

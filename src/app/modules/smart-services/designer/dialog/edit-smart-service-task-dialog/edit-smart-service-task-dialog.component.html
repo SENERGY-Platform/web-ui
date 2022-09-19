@@ -50,13 +50,13 @@
             <mat-expansion-panel *ngFor="let taskId of processTaskIds">
               <mat-expansion-panel-header>
                 <mat-panel-title>
-                  {{taskId}}
+                  {{getProcessTaskName(taskId)}} | {{taskId}}
                 </mat-panel-title>
               </mat-expansion-panel-header>
               <div>
                 <ng-container *ngFor="let input of result.inputs">
                   <div *ngIf="processTaskMatches(input, taskId, 'selection')">
-                    <mat-form-field  color="accent" class="full-width">
+                    <mat-form-field  color="accent" class="full-width-minus-button">
                       <mat-label>IoT-Selection</mat-label>
                       <senergy-select-search placeholder="IoT-Selection"
                                              [(ngModel)]="input.value"
@@ -65,6 +65,9 @@
                                              useOptionValueProperty="value">
                       </senergy-select-search>
                     </mat-form-field>
+                    <button mat-icon-button (click)="generateInputForProcessElement(input, taskId)" matTooltip="generate and use input from task criteria">
+                      <mat-icon>playlist_add</mat-icon>
+                    </button>
                     <mat-form-field  color="accent" class="full-width">
                       <input matInput placeholder="IoT-Selection Value" [(ngModel)]="input.value" required>
                     </mat-form-field>

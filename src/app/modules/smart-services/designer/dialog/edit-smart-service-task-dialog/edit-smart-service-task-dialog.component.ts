@@ -16,16 +16,24 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {SmartServiceTaskInputDescription, SmartServiceTaskDescription, ServingRequest} from '../../shared/designer.model';
+import {
+    SmartServiceTaskInputDescription,
+    SmartServiceTaskDescription,
+    ServingRequest,
+    SmartServiceInputsDescription
+} from '../../shared/designer.model';
 import {ProcessRepoService} from '../../../../processes/process-repo/shared/process-repo.service';
 import {DeploymentsService} from '../../../../processes/deployments/shared/deployments.service';
 import {ProcessModel} from '../../../../processes/process-repo/shared/process.model';
-import {V2DeploymentsPreparedModel} from '../../../../processes/deployments/shared/deployments-prepared-v2.model';
+import {
+    V2DeploymentsPreparedFilterCriteriaModel,
+    V2DeploymentsPreparedModel
+} from '../../../../processes/deployments/shared/deployments-prepared-v2.model';
 import {FlowRepoService} from '../../../../data/flow-repo/shared/flow-repo.service';
 import {FlowModel} from '../../../../data/flow-repo/shared/flow.model';
 import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
 import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
-import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../processes/designer/shared/designer.model';
+import {BpmnElement, BpmnParameter, BpmnParameterWithLabel, FormField} from '../../../../processes/designer/shared/designer.model';
 import {ImportInstanceConfigModel, ImportInstancesModel} from '../../../../imports/import-instances/shared/import-instances.model';
 import {
     ImportTypeContentVariableModel,
@@ -36,6 +44,10 @@ import {ImportTypesService} from '../../../../imports/import-types/shared/import
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ExportService} from '../../../../exports/shared/export.service';
 import {ExportDatabaseModel} from '../../../../exports/shared/export.model';
+import {
+    AbstractSmartServiceInput, abstractSmartServiceInputToSmartServiceInputsDescription,
+    smartServiceInputsDescriptionToAbstractSmartServiceInput
+} from '../edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -74,6 +86,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     exportDatabaseList: ExportDatabaseModel[] = [];
 
+    smartServiceInputs: AbstractSmartServiceInput[] = [];
+
+    smartServiceBpmnElement: BpmnElement
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
         private processRepo: ProcessRepoService,
@@ -85,6 +101,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         private exportService: ExportService,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription, element: BpmnElement},
     ) {
+        this.smartServiceBpmnElement = dialogParams.element;
         if(!dialogParams.info.topic) {
             dialogParams.info.topic = this.tabs[0];
         }
@@ -106,6 +123,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.infoModuleType = this.result.inputs.find(value => value.name == "info.module_type")?.value || "widget";
         this.infoModuleData = this.result.inputs.find(value => value.name == "info.module_data")?.value || "{\n\n}";
         this.processStart = this.inputsToProcessStartModel(this.result.inputs);
+        this.smartServiceInputs = smartServiceInputsDescriptionToAbstractSmartServiceInput(dialogParams.info.smartServiceInputs);
     }
 
     ngOnInit() {}
@@ -281,6 +299,43 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     processTaskMatches(input: SmartServiceTaskInputDescription, taskId: string, suffix: string): boolean  {
         return input.name == "process_deployment."+taskId+"."+suffix
+    }
+
+    getProcessTaskName(taskId: string): string {
+        return this.selectedProcessModelPreparation?.elements.find(e => e.bpmn_id == taskId)?.name || taskId
+    }
+
+    generateInputForProcessElement(input: SmartServiceTaskInputDescription,taskId: string){
+        const element = this.selectedProcessModelPreparation?.elements.find(element => element.bpmn_id == taskId);
+        const criteria = element?.task?.selection.filter_criteria || element?.message_event?.selection.filter_criteria;
+        if (criteria) {
+            let current = this.availableProcessVariables.get('iot_form_fields') || [];
+            const interaction = element?.task ? "request" : "event";
+            let newField: AbstractSmartServiceInput = {
+                id: this.smartServiceBpmnElement.id+"_"+taskId+"_selection",
+                type: "string",
+                label: "generated for "+ element?.name,
+                order: 0,
+                multiple: false,
+                optional: false,
+                iot_selectors: ["device", "group", "import"],
+                criteria_list: [{
+                    aspect_id: criteria.aspect_id || undefined,
+                    device_class_id: criteria.device_class_id || undefined,
+                    function_id: criteria.function_id || undefined,
+                    interaction: interaction
+                }],
+            }
+
+            if(!this.smartServiceInputs.find(v => v.id == newField.id) && !current.find(v => v.name == newField.id)){
+                this.smartServiceInputs.push(newField);
+                current.push({name: newField.id, value: "", label: newField.label})
+                this.availableProcessVariables.set("iot_form_fields", current);
+                this.availableProcessIotSelections = this.getAvailableProcessIotSelections();
+                input.value = this.availableProcessIotSelections[this.availableProcessIotSelections.length-1].value;
+            }
+
+        }
     }
 
     /******************************
@@ -922,6 +977,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         temp = temp.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
 
         result.inputs = temp;
+        result.smartServiceInputs = abstractSmartServiceInputToSmartServiceInputsDescription(this.smartServiceInputs);
         this.dialogRef.close(result);
     }
 }

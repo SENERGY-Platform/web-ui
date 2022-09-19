@@ -41,6 +41,7 @@ interface BpmnBusinessObject {
 }
 
 export interface BpmnElement {
+    id: string;
     incoming: BpmnElementRef[];
     businessObject: BpmnBusinessObject;
 }

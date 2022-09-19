@@ -139,6 +139,19 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
         editSmartServiceTask: function (element, node) {
             const taskId = element.id;
             bpmnjs.designerCallbacks.openTaskEditDialog(getTaskInfoFromElement(element), element, function (taskInfo) {
+                //set smart-service inputs
+                var startElement = findStartElement(element);
+                if(startElement){
+                    var fields = taskInfo.smartServiceInputs.inputs.map(fieldDesc => {
+                        return createField(bpmnjs, fieldDesc.id, fieldDesc.label, fieldDesc.type, fieldDesc.default_value, createProperties(bpmnjs, fieldDesc.properties.map(property => {
+                            return createProperty(bpmnjs, property.id, property.value);
+                        })));
+                    })
+
+                    var formData = createFormData(bpmnjs, fields);
+                    setExtentionsElement(bpmnjs, startElement.businessObject, formData);
+                }
+
                 toExternalServiceTask(bpmnFactory, replace, selection, element, function (serviceTask, element) {
                     serviceTask.topic = taskInfo.topic;
                     serviceTask.name = taskInfo.name
@@ -412,11 +425,38 @@ var getTaskInfoFromElement = function (element) {
             }
         })
     }
+    var startElement = findStartElement(element);
     return {
         topic: topic,
         name: name,
-        inputs: inputs
+        inputs: inputs,
+        smartServiceInputs: getSmartServiceInputsForElement(startElement)
     };
+}
+
+var findStartElement = function (element, done){
+    if(!done) {
+        done = [];
+    }
+    if (done.indexOf(element) !== -1) {
+        return null;
+    }
+    done.push(element);
+    if(element.incoming && element.incoming.length) {
+        for (let index = 0; index < element.incoming.length; index++) {
+            const incoming = element.incoming[index].source;
+            if (incoming.businessObject.$type === "bpmn:StartEvent") {
+                return incoming
+            }
+
+            var sub = findStartElement(incoming, done);
+            if(sub) {
+                return sub;
+            }
+        }
+    }
+
+    return null;
 }
 
 var setExtentionsElement = function (bpmnjs, parent, child) {
