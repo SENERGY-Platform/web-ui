@@ -77,11 +77,12 @@
                   <div *ngIf="processTaskMatches(input, taskId, 'event.flow_id')">
                     <mat-form-field  color="accent" class="full-width">
                       <mat-label>Event-Flow</mat-label>
-                      <mat-select [(ngModel)]="input.value">
-                        <mat-option *ngFor="let flow of flows" [value]="flow._id">
-                          {{flow.name}}
-                        </mat-option>
-                      </mat-select>
+                      <senergy-select-search placeholder="Event-Flow"
+                                             [(ngModel)]="input.value"
+                                             [options]="flows || []"
+                                             useOptionViewProperty="name"
+                                             useOptionValueProperty="_id">
+                      </senergy-select-search>
                     </mat-form-field>
                   </div>
                   <div *ngIf="processTaskMatches(input, taskId, 'event.value')">
