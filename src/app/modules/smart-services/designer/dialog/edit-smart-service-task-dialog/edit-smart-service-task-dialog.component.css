@@ -34,6 +34,10 @@ mat-dialog-actions button:not(:last-child) {
     margin-top: 15px;
 }
 
+.process-start-input-delete {
+    margin-top: 0px !important;
+}
+
 .input-with-overwrite {
     width: 100%;
     display: flex;

@@ -192,6 +192,18 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.processStart.inputs.push({key: "", value: ""})
     }
 
+    generateProcessStartInputs(deploymentIdVariableName: string) {
+        const modelId = this.availableProcessVariables.get("process_deployment_to_model")?.find(e => e.name == deploymentIdVariableName)?.value;
+        if(modelId){
+            this.processDeployment.getStartParameter(modelId).subscribe(value => {
+                this.processStart.inputs = [];
+                value.forEach(param => {
+                    this.processStart.inputs.push({key: param.id, value: param.default})
+                })
+            })
+        }
+    }
+
     /******************************
      *      Processes
      ******************************/
@@ -215,7 +227,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                         {name:"process_deployment.name", value: this.selectedProcessModelPreparation.name, type: "text"},
                         this.knownInputValues.get("process_deployment.module_data") || {name:"process_deployment.module_data", value: "{}", type: "text"}
                     ];
-                    this.selectedProcessModelPreparation.elements.forEach(element => {
+                    this.selectedProcessModelPreparation.elements?.forEach(element => {
                         if(element.task){
                             const selectionKey = "process_deployment."+element.bpmn_id+".selection";
                             this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
@@ -781,6 +793,20 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                             }
                         }catch (e) {
                             console.error(e);
+                        }
+                    }
+                    if(topic == "process_deployment"
+                        && incoming.businessObject.extensionElements.values[0].inputParameters?.length
+                        && incoming.businessObject.extensionElements.values[0].outputParameters?.length
+                    ) {
+                        const processModelId = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name == "process_deployment.process_model_id")?.value;
+                        const processDeploymentIdVariable = incoming.businessObject.extensionElements.values[0].outputParameters?.find(value => value.name.endsWith("_process_deployment_id"))?.name;
+                        if (processModelId && processDeploymentIdVariable && processModelId.match(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/)){
+                            add("process_deployment_to_model", [{
+                                name: processDeploymentIdVariable,
+                                label: "",
+                                value: processModelId
+                            }])
                         }
                     }
                 } else {

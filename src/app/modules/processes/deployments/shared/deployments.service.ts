@@ -20,7 +20,7 @@ import { environment } from '../../../../../environments/environment';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, mergeMap, retryWhen } from 'rxjs/internal/operators';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { DeploymentsModel } from './deployments.model';
+import {DeploymentsModel, ProcessStartParameter} from './deployments.model';
 import { CamundaVariable, DeploymentsDefinitionModel } from './deployments-definition.model';
 import { DeploymentsMissingDependenciesModel } from './deployments-missing-dependencies.model';
 import { DeploymentsPreparedModel } from './deployments-prepared.model';
@@ -36,6 +36,12 @@ import { MatDialog } from '@angular/material/dialog';
 })
 export class DeploymentsService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private dialog: MatDialog) {}
+
+    getStartParameter(modelId: string): Observable<ProcessStartParameter[]> {
+        return this.http
+            .get<ProcessStartParameter[]>(environment.processDeploymentUrl + '/v3/start-parameters/' + encodeURIComponent(modelId))
+            .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getStartParameter', [])));
+    }
 
     getAll(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]> {
         let url =

@@ -134,7 +134,7 @@
               <mat-icon>data_object</mat-icon>
             </button>
             <mat-menu #menuDeploymentId="matMenu">
-              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="processStart.deployment_id = '${'+param.name+'}'" [matTooltip]="param.name">
+              <button mat-menu-item *ngFor="let param of availableProcessVariables.get('process_deployment')" (click)="processStart.deployment_id = '${'+param.name+'}'; generateProcessStartInputs(param.name)" [matTooltip]="param.name">
                 {{param.label || param.name}}
               </button>
             </mat-menu>
@@ -174,7 +174,7 @@
                 </button>
               </mat-menu>
             </mat-form-field>
-            <button mat-icon-button (click)="removeProcessStartInput(i)">
+            <button mat-icon-button class="process-start-input-delete" (click)="removeProcessStartInput(i)">
               <mat-icon>delete</mat-icon>
             </button>
           </div>

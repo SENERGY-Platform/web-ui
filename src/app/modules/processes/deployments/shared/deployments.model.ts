@@ -37,3 +37,11 @@ export interface DeploymentsOfflineReasonsModel {
     };
     description: string;
 }
+
+
+export interface ProcessStartParameter{
+    id: string,
+    label: string,
+    type: string,
+    default: string,
+}
