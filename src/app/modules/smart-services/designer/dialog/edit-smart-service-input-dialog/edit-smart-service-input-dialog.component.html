@@ -26,7 +26,7 @@
                 <div>
                     <div>
                         <mat-form-field class="full-width">
-                            <input matInput placeholder="Id" [(ngModel)]="input.id">
+                            <input matInput placeholder="ID" [(ngModel)]="input.id" [generic_validator]="isValidCamundaVariableNameValidator">
                         </mat-form-field>
                     </div>
                     <div>
@@ -230,6 +230,6 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="ok()">Ok</button>
+  <button mat-raised-button color="accent" (click)="ok()" [disabled]="!isValid()">Ok</button>
 </mat-dialog-actions>
 

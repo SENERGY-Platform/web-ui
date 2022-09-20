@@ -42,6 +42,7 @@ import {DeviceTypeService} from '../../../../metadata/device-types-overview/shar
 import {DeviceTypeAspectModel, DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
 import {CharacteristicsPermSearchModel} from '../../../../metadata/characteristics/shared/characteristics-perm-search.model';
 import {CharacteristicsService} from '../../../../metadata/characteristics/shared/characteristics.service';
+import {AbstractControl, ValidationErrors} from '@angular/forms';
 
 @Component({
     templateUrl: './edit-smart-service-input-dialog.component.html',
@@ -89,6 +90,22 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
     }
 
     ngOnInit() {}
+
+    isValidCamundaVariableNameValidator(c: AbstractControl): ValidationErrors | null {
+        const variableName: string = c.value;
+        const err = {
+            validateCamundaVariableName: {
+                valid: false
+            }
+        }
+        if(isValidCamundaVariableName(variableName)) {
+            return null;
+        } else {
+            return err;
+        }
+    }
+
+
 
     readAbstractAsDescription(): SmartServiceInputsDescription{
         return abstractSmartServiceInputToSmartServiceInputsDescription(this.abstract)
@@ -227,6 +244,10 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
 
     ok(): void {
         this.dialogRef.close(this.readAbstractAsDescription());
+    }
+
+    isValid() {
+       return !this.abstract.some(value => !isValidCamundaVariableName(value.id))
     }
 }
 
@@ -382,4 +403,31 @@ export function smartServiceInputsDescriptionToAbstractSmartServiceInput(value: 
         }
         return result
     });
+}
+
+function isValidCamundaVariableName(variableName: string): boolean {
+    if(!variableName) {
+        return false;
+    }
+    //may not start with number
+    if(variableName.match(/^\d/)){
+        return false;
+    }
+    //may not contain whitespaces
+    if(variableName.match(/\s/g)){
+        return false;
+    }
+    //my not contain operators like +, -, *, /, =, >, ?, .
+    if(["+", "-", "*", "\\", "/", "=", ">", "<", "?", ".", "&", "|", ",", "%", "!"].some(e => variableName.includes(e))){
+        return false;
+    }
+    //my not contain literals like null, true, false
+    if(["null", "true", "false"].some(e => variableName.includes(e))){
+        return false;
+    }
+    //my not contain keywords like function, if, then, else, for, between, instance, of, not
+    if(["function", "if", "then", "else", "for", "between", "instance", "of", "not"].some(e => variableName.includes(e))){
+        return false;
+    }
+    return true
 }
