@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { DeviceTypesComponent } from './device-types.component';
-import { CoreModule } from '../../../../core/core.module';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatIconModule } from '@angular/material/icon';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
-import { DeviceTypeService } from '../shared/device-type.service';
-import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import { of } from 'rxjs';
-import { DeviceTypeModel, DeviceTypeProtocolModel, DeviceTypeServiceModel } from '../shared/device-type.model';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { util } from 'jointjs';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {RouterTestingModule} from '@angular/router/testing';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {DeviceTypesComponent} from './device-types.component';
+import {CoreModule} from '../../../../core/core.module';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {ActivatedRoute, convertToParamMap} from '@angular/router';
+import {MatStepperModule} from '@angular/material/stepper';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {MatIconModule} from '@angular/material/icon';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatInputModule} from '@angular/material/input';
+import {DeviceTypeService} from '../shared/device-type.service';
+import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
+import {of} from 'rxjs';
+import {DeviceTypeModel, DeviceTypeProtocolModel, DeviceTypeServiceModel} from '../shared/device-type.model';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {util} from 'jointjs';
 import uuid = util.uuid;
-import { MatTreeModule } from '@angular/material/tree';
+import {MatTreeModule} from '@angular/material/tree';
 
 describe('DeviceTypesComponent', () => {
     let component: DeviceTypesComponent;
@@ -46,7 +46,7 @@ describe('DeviceTypesComponent', () => {
         path: 'metadata/devicetypesoverview/devicetypes/:id',
         pathMatch: 'full',
         component: DeviceTypesComponent,
-        data: { header: 'Devices' },
+        data: {header: 'Devices'},
     };
 
     const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
@@ -143,8 +143,8 @@ describe('DeviceTypesComponent', () => {
         deviceTypeServiceSpy.getControllingFunctions.and.returnValue(of());
         deviceTypeServiceSpy.getMeasuringFunctions.and.returnValue(of());
         deviceTypeServiceSpy.getAspects.and.returnValue(of());
-        deviceTypeServiceSpy.createDeviceType.and.returnValue(of({ id: uuid() }));
-        deviceTypeServiceSpy.updateDeviceType.and.returnValue(of({ id: uuid() }));
+        deviceTypeServiceSpy.createDeviceType.and.returnValue(of({id: uuid()}));
+        deviceTypeServiceSpy.updateDeviceType.and.returnValue(of({id: uuid()}));
 
         TestBed.configureTestingModule({
             imports: [
@@ -170,12 +170,12 @@ describe('DeviceTypesComponent', () => {
                     provide: ActivatedRoute,
                     useValue: {
                         snapshot: {
-                            paramMap: convertToParamMap({ id }),
-                            queryParamMap: convertToParamMap({ function: func }),
+                            paramMap: convertToParamMap({id}),
+                            queryParamMap: convertToParamMap({function: func}),
                         },
                     },
                 },
-                { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
+                {provide: DeviceTypeService, useValue: deviceTypeServiceSpy},
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(DeviceTypesComponent);
@@ -183,7 +183,8 @@ describe('DeviceTypesComponent', () => {
         fixture.detectChanges();
     }
 
-    beforeEach(waitForAsync(() => {}));
+    beforeEach(waitForAsync(() => {
+    }));
 
     it(
         'should create the app',
@@ -304,7 +305,9 @@ describe('DeviceTypesComponent', () => {
                     description: 'serv_desc',
                     protocol_id: 'protocol_1',
                     interaction: 'event',
-                    attributes: [],
+                    attributes: [
+                        {key: 'senergy/time_path', value: '', origin: 'web-ui'}
+                    ],
                     inputs: [
                         {
                             id: '',
@@ -367,7 +370,9 @@ describe('DeviceTypesComponent', () => {
                     description: 'serv_desc',
                     protocol_id: 'protocol_1',
                     interaction: 'event',
-                    attributes: [],
+                    attributes: [
+                        {key: 'senergy/time_path', value: '', origin: 'web-ui'}
+                    ],
                     inputs: [
                         {
                             id: 'input_id_1',

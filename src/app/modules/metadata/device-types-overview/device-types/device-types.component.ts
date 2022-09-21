@@ -51,7 +51,9 @@ import {debounceTime, map, mergeAll} from 'rxjs/internal/operators';
 import {util} from 'jointjs';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import uuid = util.uuid;
-import {DeviceTypesContentVariableJsonDialogComponent} from './dialogs/device-types-content-variable-json-dialog.component';
+import {
+    DeviceTypesContentVariableJsonDialogComponent
+} from './dialogs/device-types-content-variable-json-dialog.component';
 
 interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     tree?: NestedTreeControl<DeviceTypeContentVariableModel>;
@@ -84,6 +86,8 @@ export class DeviceTypesComponent implements OnInit {
     concepts: ConceptsCharacteristicsModel[] = [];
     equivalentProtocolSegments: string[][] = [[]];
     ready = false;
+
+    timeAttributeKey = 'senergy/time_path';
 
     constructor(
         private _formBuilder: FormBuilder,
@@ -183,7 +187,7 @@ export class DeviceTypesComponent implements OnInit {
         dialogConfig.data = {
             contentVariable: {} as DeviceTypeContentVariableModel,
             prohibitedNames: node?.sub_content_variables?.map(s => s.name) || [],
-            name: ""
+            name: ''
         };
         this.dialog
             .open(DeviceTypesContentVariableJsonDialogComponent, dialogConfig)
@@ -543,10 +547,10 @@ export class DeviceTypesComponent implements OnInit {
                 )
             });
         } else {
-            return this._formBuilder.group({
+            const fg = this._formBuilder.group({
                 id: [{value: deviceTypeService.id, disabled: true}],
                 local_id: [deviceTypeService.local_id, function (c: FormControl) {
-                    if(c.value.includes && (c.value.includes("#") || c.value.includes("+") || c.value.includes("/"))) {
+                    if(c.value?.includes && (c.value.includes("#") || c.value.includes("+") || c.value.includes("/"))) {
                         return {
                             validateLocalId: {
                                 valid: false
@@ -570,6 +574,14 @@ export class DeviceTypesComponent implements OnInit {
                     deviceTypeService.attributes ? deviceTypeService.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : []
                 )
             });
+            if ((fg.get('attributes') as FormArray).controls.find(c => c.get('key')?.value === this.timeAttributeKey) === undefined) {
+                (fg.get('attributes') as FormArray).insert(0, this.createAttrGroup({
+                    key: this.timeAttributeKey,
+                    value: '',
+                    origin: 'web-ui'
+                }));
+            }
+            return fg;
         }
     }
 
@@ -603,7 +615,7 @@ export class DeviceTypesComponent implements OnInit {
             });
         } else {
             return this._formBuilder.group({
-                key: [attribute.key],
+                key: [{value: attribute.key, disabled: attribute.key === this.timeAttributeKey}],
                 value: [attribute.value],
                 origin: [attribute.origin],
             });
@@ -678,7 +690,7 @@ export class DeviceTypesComponent implements OnInit {
 
     private reload(deviceType: DeviceTypeModel | null) {
         if (deviceType) {
-            this.router.routeReuseStrategy.shouldReuseRoute = function() {
+            this.router.routeReuseStrategy.shouldReuseRoute = function () {
                 return false;
             };
             this.router.onSameUrlNavigation = 'reload';
@@ -692,7 +704,7 @@ export class DeviceTypesComponent implements OnInit {
         if (deviceTypeSaved) {
             this.snackBar.open('Device type saved successfully.', undefined, {duration: 2000});
         } else {
-            this.snackBar.open('Error while saving the device type!', "close", { panelClass: "snack-bar-error" });
+            this.snackBar.open('Error while saving the device type!', 'close', {panelClass: 'snack-bar-error'});
         }
     }
 
@@ -881,5 +893,30 @@ export class DeviceTypesComponent implements OnInit {
         }
         c.id = undefined;
         c.sub_content_variables?.forEach(sub => this.removeContentVariableIds(sub));
+    }
+
+    getTimePathOptions(i: number): string[] {
+        const characteristicIds = this.concepts.find(c => c.id === environment.dateTimeConceptId)?.characteristics.map(ch => ch.id || '');
+        const paths: string[] = [];
+        (this.secondFormGroup.getRawValue().services[i].outputs).forEach((content: any) => {
+            content?.dataSource?.data?.forEach((cv: DeviceTypeContentVariableModel | undefined) => paths.push(...this.getPathOptionsRec(cv, characteristicIds || [])));
+        });
+        return paths;
+    }
+
+    private getPathOptionsRec(cv: DeviceTypeContentVariableModel | undefined, characteristicIds: string[], result: string[] = [], path: string = ''): string[] {
+        if (cv === undefined) {
+            return result;
+        }
+        if (path.length > 0) {
+            path += '.' + cv.name;
+        } else {
+            path = cv.name || '';
+        }
+        if (cv.characteristic_id !== undefined && characteristicIds.indexOf(cv.characteristic_id) !== -1) {
+            result.push(path);
+        }
+        cv.sub_content_variables?.forEach(sub => this.getPathOptionsRec(sub, characteristicIds, result, path));
+        return result;
     }
 }

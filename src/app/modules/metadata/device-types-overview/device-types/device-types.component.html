@@ -146,9 +146,15 @@
                                                         </mat-form-field>
                                                         =
                                                         <mat-form-field class="third-width" color="accent">
-                                                            <input matInput placeholder="Value" formControlName="value">
+                                                            <input matInput placeholder="Value" formControlName="value" *ngIf="attr.get('key')?.value !== timeAttributeKey">
+                                                            <senergy-select-search [options]="getTimePathOptions(serviceAndIndex.index)" *ngIf="attr.get('key')?.value === timeAttributeKey"
+                                                                                   placeholder="Path"
+                                                                                   formControlName="value"
+                                                                                   noneView="--- None ---">
+                                                            </senergy-select-search>
                                                         </mat-form-field>
-                                                        <button mat-icon-button color="warn" [disabled]="!editable"
+
+                                                        <button mat-icon-button color="warn" [disabled]="!editable || attr.get('key')?.value === timeAttributeKey"
                                                                 (click)="removeServiceAttr(serviceAndIndex.service, i)">
                                                             <mat-icon>delete</mat-icon>
                                                         </button>
