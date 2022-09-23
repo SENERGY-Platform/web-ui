@@ -19,7 +19,7 @@ import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget
 import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {DashboardResponseMessageModel} from '../../../../modules/dashboard/shared/dashboard-response-message.model';
-import {FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn} from '@angular/forms';
 import {ExportService} from '../../../../modules/exports/shared/export.service';
 import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
 import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
@@ -150,7 +150,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                     end: widget.properties.time ? widget.properties.time.end : '',
                 }),
                 group: this._formBuilder.group({
-                    time: widget.properties.group ? widget.properties.group.time : '',
+                    time: [widget.properties.group ? widget.properties.group.time : '', [this.validateInterval]],
                     type: widget.properties.group ? widget.properties.group.type : undefined,
                 }),
                 hAxisLabel: widget.properties.hAxisLabel,
@@ -549,4 +549,20 @@ export class ChartsExportEditDialogComponent implements OnInit {
         console.error('unknown type ' + type);
         return '';
     }
+
+    validateInterval: ValidatorFn = (control: AbstractControl) => {
+        const type = this.formGroupController.get('properties.group.type')?.value;
+        if (type === undefined || type === null || type.length === 0) {
+            return null;
+        }
+        if (control.value === undefined || control.value === null || control.value.length === 0) {
+            return  { validateInterval: { value: control.value } };
+        }
+        const re = new RegExp('\\d+(ns|u|µ|ms|s|m|h|d|w)');
+        const matches = re.exec(control.value);
+        if (matches == null || matches.length === 0 || matches[0].length !== control.value.length) {
+            return  { validateInterval: { value: control.value } };
+        }
+        return null;
+    };
 }
