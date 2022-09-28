@@ -19,6 +19,7 @@ export interface PipelineRequestModel {
     name: string;
     description: string;
     windowTime: number;
+    mergeStrategy: string;
     metrics: boolean;
     consumeAllMessages: boolean;
     nodes: NodeModel[];

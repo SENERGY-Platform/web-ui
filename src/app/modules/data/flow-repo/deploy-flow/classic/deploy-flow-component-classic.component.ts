@@ -55,6 +55,8 @@ export class DeployFlowClassicComponent {
 
     windowTime = 30;
 
+    mergeStrategy = 'inner';
+
     allMessages = false;
 
     metrics = false;
@@ -84,6 +86,7 @@ export class DeployFlowClassicComponent {
             description: '',
             nodes: [],
             windowTime: this.windowTime,
+            mergeStrategy: this.mergeStrategy,
             metrics: this.metrics,
             consumeAllMessages: this.allMessages,
         };

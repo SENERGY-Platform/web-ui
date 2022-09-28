@@ -28,6 +28,7 @@ export interface PipelineModel {
     operators: PipelineOperatorModel[];
     consumeAllMessages?: boolean;
     windowTime?: number;
+    mergeStrategy?: string;
     metrics?: boolean;
 }
 

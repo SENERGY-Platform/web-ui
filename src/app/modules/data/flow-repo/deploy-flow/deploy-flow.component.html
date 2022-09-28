@@ -214,9 +214,15 @@
                 </mat-form-field>
                 <section class="checkbox-section">
                     <mat-checkbox class="checkbox-margin" formControlName="enable_metrics">Enable Metrics</mat-checkbox>
-                    <mat-checkbox class="checkbox-margin" formControlName="consume_all_msgs">Consume all messages
-                    </mat-checkbox>
+                    <mat-checkbox class="checkbox-margin" formControlName="consume_all_msgs">Consume all messages</mat-checkbox>
                 </section>
+                <mat-form-field appearance="fill">
+                    <mat-label>Merge Strategy</mat-label>
+                    <mat-select formControlName="mergeStrategy">
+                        <mat-option value="inner">Inner Join (Default)</mat-option>
+                        <mat-option value="outer">Outer Join</mat-option>
+                    </mat-select>
+                </mat-form-field>
             </mat-expansion-panel>
         </mat-accordion>
         <button mat-fab class="fab" (click)="startPipeline()"  matTooltip="{{editMode ? 'Update' : 'Start'}} Pipeline">

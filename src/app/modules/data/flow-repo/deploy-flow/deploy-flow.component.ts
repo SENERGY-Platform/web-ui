@@ -111,6 +111,7 @@ export class DeployFlowComponent implements OnInit {
         windowTime: 30,
         enable_metrics: false,
         consume_all_msgs: false,
+        mergeStrategy: '',
     });
 
     private static stringArrayKey(s: string[] | null | undefined): string {
@@ -167,6 +168,7 @@ export class DeployFlowComponent implements OnInit {
                         windowTime: pipeline.windowTime || 30,
                         enable_metrics: pipeline.metrics || false,
                         consume_all_msgs: pipeline.consumeAllMessages || false,
+                        mergeStrategy: pipeline.mergeStrategy || 'inner',
                     });
 
                     this.parserService.getInputs(id).subscribe((parseModels: ParseModel[]) => {
@@ -210,6 +212,7 @@ export class DeployFlowComponent implements OnInit {
             windowTime: 30,
             enable_metrics: false,
             consume_all_msgs: false,
+            mergeStrategy: 'inner',
         });
     }
 
@@ -691,6 +694,7 @@ export class DeployFlowComponent implements OnInit {
             pipeReq.consumeAllMessages = this.form.get('consume_all_msgs')?.value;
             pipeReq.metrics = this.form.get('enable_metrics')?.value;
             pipeReq.windowTime = JSON.parse(this.form.get('windowTime')?.value);
+            pipeReq.mergeStrategy = this.form.get('mergeStrategy')?.value;
             pipeReq.nodes = [];
             this.getSubElementAsGroupArray(this.form, 'nodes').forEach((node) => {
                 const nodeModel: NodeModel = {
