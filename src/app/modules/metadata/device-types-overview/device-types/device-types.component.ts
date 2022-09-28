@@ -31,9 +31,9 @@ import {
     DeviceTypeProtocolSegmentModel,
     DeviceTypeServiceGroupModel,
     DeviceTypeServiceModel,
-    functionTypes,
+    functionTypes, SenergyConnectorLocalIdConstraint,
 } from '../shared/device-type.model';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -549,16 +549,7 @@ export class DeviceTypesComponent implements OnInit {
         } else {
             const fg = this._formBuilder.group({
                 id: [{value: deviceTypeService.id, disabled: true}],
-                local_id: [deviceTypeService.local_id, function (c: FormControl) {
-                    if(c.value?.includes && (c.value.includes("#") || c.value.includes("+") || c.value.includes("/"))) {
-                        return {
-                            validateLocalId: {
-                                valid: false
-                            }
-                        }
-                    }
-                    return null
-                }],
+                local_id: [deviceTypeService.local_id, this.createLocalIdValidator()],
                 service_group_key: [deviceTypeService.service_group_key],
                 name: [deviceTypeService.name, Validators.required],
                 description: [deviceTypeService.description],
@@ -582,6 +573,23 @@ export class DeviceTypesComponent implements OnInit {
                 }));
             }
             return fg;
+        }
+    }
+
+    private createLocalIdValidator(): (control: AbstractControl) => ValidationErrors | null {
+        return (c: AbstractControl):ValidationErrors | null => {
+            let protocolId: string = c.parent?.get("protocol_id")?.value;
+            if(!this.protocols.find(p => p.id === protocolId)?.constraints?.includes(SenergyConnectorLocalIdConstraint)){
+                return null
+            }
+            if(c.value?.includes && (c.value.includes("#") || c.value.includes("+") || c.value.includes("/"))) {
+                return {
+                    validateLocalId: {
+                        valid: false
+                    }
+                }
+            }
+            return null
         }
     }
 

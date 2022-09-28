@@ -19,6 +19,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {Attribute, DeviceInstancesModel} from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import {AbstractControl, FormControl, ValidationErrors} from '@angular/forms';
+import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
+import {SenergyConnectorLocalIdConstraint} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
@@ -30,9 +32,12 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     nicknameAttributeKey: string = "shared/nickname";
     nicknameAttributeOrigin: string = "shared"
 
+    protocolConstraints: string[] = [];
+
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesEditDialogComponent>,
         private deviceInstancesService: DeviceInstancesService,
+        private deviceTypeService: DeviceTypeService,
         @Inject(MAT_DIALOG_DATA) private data: { device: DeviceInstancesModel },
     ) {
         this.device = data.device;
@@ -41,6 +46,24 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
                 this.displayname = value.value;
             }
         })
+
+
+        let protocolsToConstraints: Map<string, string[]> = new Map<string, string[]>();
+        this.deviceTypeService.getProtocols(9999, 0, "name", "asc").subscribe(protocols => {
+            if(protocols){
+                protocols.forEach(p => {
+                    protocolsToConstraints.set(p.id, p.constraints);
+                })
+            }
+            this.deviceTypeService.getDeviceType(this.device.device_type.id).subscribe(dt => {
+                if(dt) {
+                    dt.services.forEach(s => {
+                        this.protocolConstraints = this.protocolConstraints.concat(protocolsToConstraints.get(s.protocol_id) || [])
+                    })
+                }
+            })
+        })
+
     }
 
     ngOnInit() {}
@@ -100,11 +123,11 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     }
 
     localIdFieldIsValid(): boolean{
-        return isValidLocalId(this.device.local_id);
+        return !this.protocolConstraints?.includes(SenergyConnectorLocalIdConstraint) || isValidLocalId(this.device.local_id);
     }
 
     isValidLocalIdValidator(c: AbstractControl): ValidationErrors | null {
-        if (isValidLocalId(c.value)) {
+        if (!this.protocolConstraints?.includes(SenergyConnectorLocalIdConstraint) || isValidLocalId(c.value)) {
             return null;
         }else{
             return {

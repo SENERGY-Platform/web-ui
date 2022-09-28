@@ -161,7 +161,10 @@ export interface DeviceTypeProtocolModel {
     name: string;
     handler: string;
     protocol_segments: DeviceTypeProtocolSegmentModel[];
+    constraints: string[]
 }
+
+export const SenergyConnectorLocalIdConstraint = "senergy_connector_local_id"
 
 export interface DeviceTypeProtocolSegmentModel {
     id: string;
