@@ -1074,7 +1074,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                     EntityName: importInstance.name,
                     Topic: importInstance.kafka_topic,
                     TimePath: 'time',
-                    ExportDatabaseID: environment.timescaleAPIURL,
+                    ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
                     TimestampFormat: '%Y-%m-%dT%H:%M:%SZ',
                     Generated: true,
                 } as ExportModel),
