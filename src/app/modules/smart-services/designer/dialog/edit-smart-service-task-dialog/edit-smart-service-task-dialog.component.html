@@ -217,6 +217,15 @@
               <input matInput placeholder="Pipeline Window-Time" [(ngModel)]="analyticsWindowTime" required>
             </mat-form-field>
           </div>
+          <div>
+            <mat-form-field class="full-width" color="accent">
+              <mat-label>Pipeline Merge-Strategy</mat-label>
+              <mat-select [(ngModel)]="analyticsMergeStrategy">
+                <mat-option value="inner">inner</mat-option>
+                <mat-option value="outer">outer</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
           <div *ngIf="flowSvg"
                class="image-svg-wrapper"

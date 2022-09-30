@@ -387,6 +387,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.setFieldValue(this.analyticsPipelineDescFieldName, "text", value)
     }
 
+    analyticsMergeStrategyFieldName = "analytics.merge_strategy"
+    get analyticsMergeStrategy(): string {
+        return this.getFieldValue(this.analyticsMergeStrategyFieldName, "text", "inner")
+    }
+
+    set analyticsMergeStrategy(value: string) {
+        this.setFieldValue(this.analyticsMergeStrategyFieldName, "text", value)
+    }
+
     analyticsWindowTimeFieldName = "analytics.window_time"
     get analyticsWindowTime(): number {
         const temp = parseInt(this.getFieldValue(this.analyticsWindowTimeFieldName, "text", "30"));
@@ -463,6 +472,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 this.knownInputValues.get(this.analyticsPipelineNameFieldName) || {name:this.analyticsPipelineNameFieldName, value: "", type: "text"},
                 this.knownInputValues.get(this.analyticsPipelineDescFieldName) || {name:this.analyticsPipelineDescFieldName, value: "", type: "text"},
                 this.knownInputValues.get(this.analyticsWindowTimeFieldName) || {name:this.analyticsWindowTimeFieldName, value: "30", type: "text"},
+                this.knownInputValues.get(this.analyticsMergeStrategyFieldName) || {name:this.analyticsMergeStrategyFieldName, value: "inner", type: "text"},
             ];
             inputs.forEach(input => {
                 var persistDataKey = "analytics.persistData."+input.id
@@ -719,7 +729,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             return result.value;
         } else {
             this.result.inputs.push({name: name, value: defaultValue, type: type})
-            return ""
+            return defaultValue
         }
     }
 
