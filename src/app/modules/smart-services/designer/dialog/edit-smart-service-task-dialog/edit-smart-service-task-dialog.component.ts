@@ -860,7 +860,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             this.flowParser.getInputs(flowSelection.value).subscribe(fields => {
                 fields?.forEach(value => {
                     const pipelineFlowSelection = "${"+flowSelection.name+"}:"+value.id;
-                    this.availableProcessVariables.get("flow_selection")?.push({name: pipelineFlowSelection, label: flowSelection.label + ": " + value.name, value: ""})
+                    const topic = "analytics-"+value.name;
+                    this.availableProcessVariables.get("flow_selection")?.push({name: pipelineFlowSelection, label: flowSelection.label + ": " + value.name, value: topic})
                 })
 
             })

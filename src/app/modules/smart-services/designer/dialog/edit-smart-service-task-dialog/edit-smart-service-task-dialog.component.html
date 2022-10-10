@@ -364,7 +364,7 @@
             </button>
             <mat-menu #menuFilter="matMenu">
               <ng-container *ngIf="exportRequest.FilterType == 'operatorId'">
-                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('flow_selection')" (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('flow_selection')" (click)="exportRequest.Filter = param.name; exportRequest.Topic = param.value" [matTooltip]="param.name">
                   {{param.label || param.name}}
                 </button>
               </ng-container>
