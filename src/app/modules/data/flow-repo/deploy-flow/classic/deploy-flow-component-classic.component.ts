@@ -108,6 +108,10 @@ export class DeployFlowClassicComponent {
         });
     }
 
+    trimExtendedId(id: string):string{
+        return id.split("$")[0]
+    }
+
     startPipeline() {
         const self = this;
         this.ready = false;
@@ -129,9 +133,9 @@ export class DeployFlowClassicComponent {
                     let deviceIds = '';
                     formDeviceInfo.device.forEach((device) => {
                         if (deviceIds === '') {
-                            deviceIds = device.id;
+                            deviceIds = this.trimExtendedId(device.id);
                         } else {
-                            deviceIds += ',' + device.id;
+                            deviceIds += ',' + this.trimExtendedId(device.id);
                         }
                     });
                     // parse input of form fields
