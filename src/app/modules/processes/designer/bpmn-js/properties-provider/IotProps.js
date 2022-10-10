@@ -162,7 +162,7 @@ function createTaskParameter(bpmnjs, inputs, path, option) {
         return result;
     }
     var inputPaths = getParameterPaths(inputs, path, option);
-    for (i = 0; i < inputPaths.length; i++) {
+    for (var i = 0; i < inputPaths.length; i++) {
         if (option === 'input') {
             result.push(createTextInputParameter(bpmnjs, inputPaths[i].path, inputPaths[i].value));
         }
