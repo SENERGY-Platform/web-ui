@@ -233,8 +233,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                             this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
                             for (let key in element.task.parameter) {
                                 let value = element.task.parameter[key];
-                                const paramKey = "process_deployment."+element.bpmn_id+".parameter."+key;
-                                this.result.inputs.push(this.knownInputValues.get(paramKey) || {name:paramKey, value: value, type: "text"});
+                                if(this.taskParameterShouldBeEditable(value)){
+                                    const paramKey = "process_deployment."+element.bpmn_id+".parameter."+key;
+                                    this.result.inputs.push(this.knownInputValues.get(paramKey) || {name:paramKey, value: value, type: "text"});
+                                }
                             }
                         }
                         if(element.message_event){
@@ -330,7 +332,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 order: 0,
                 multiple: false,
                 optional: false,
-                iot_selectors: ["device", "group", "import"],
+                iot_selectors: ["device", "group", "import", "device_service_group"],
                 criteria_list: [{
                     aspect_id: criteria.aspect_id || undefined,
                     device_class_id: criteria.device_class_id || undefined,
@@ -348,6 +350,12 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             }
 
         }
+    }
+
+    taskParameterShouldBeEditable(value: unknown): boolean {
+        const s = value as string;
+        const matches = s.match(/^\${.*}$/);
+        return !(matches && matches.length);
     }
 
     /******************************
