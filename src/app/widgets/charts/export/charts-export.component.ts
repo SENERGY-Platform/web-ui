@@ -25,6 +25,7 @@ import { Subscription } from 'rxjs';
 import { ErrorModel } from '../../../core/model/error.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { ChartsService } from '../shared/charts.service';
+import { catchError } from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-charts-export',
@@ -36,8 +37,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     ready = false;
     destroy = new Subscription();
     configureWidget = false;
-    error = false;
-    errorMessage = {} as ErrorModel;
+    errorHasOccured = false;
+    errorMessage: string = '';
     sizeLimit = 10000;
     size = 0;
 
@@ -88,11 +89,12 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                 if (this.configureWidget === false) {
                     this.chartsExportService.getChartData(this.widget).subscribe((resp: ChartsModel | ErrorModel) => {
                         if (this.errorHandlerService.checkIfErrorExists(resp)) {
-                            this.error = true;
-                            this.errorMessage = resp;
+                            this.errorHasOccured = true;
+                            this.errorMessage = 'No data';
+                            this.errorHandlerService.logError('Chart Export', 'getChartData', resp)
                             this.ready = true;
                         } else {
-                            this.error = false;
+                            this.errorHasOccured = false;
                             this.chartExportData = resp;
                             this.ready = true;
                         }

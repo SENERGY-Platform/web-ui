@@ -26,10 +26,14 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 export class ErrorHandlerService {
     constructor(private snackBar: MatSnackBar) {}
 
+    logError(service: string, method: string, error: any) {
+        console.error('Error =>> Service: ' + service + ' =>> Method: ' + method);
+        console.error(error);
+    }
+
     handleError<T>(service: string, method: string, result?: T) {
         return (error: HttpErrorResponse): Observable<T> => {
-            console.error('Error =>> Service: ' + service + ' =>> Method: ' + method);
-            console.error(error);
+            this.logError(service, method, error);
             return of(result as T);
         };
     }

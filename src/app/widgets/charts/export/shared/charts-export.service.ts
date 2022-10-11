@@ -42,6 +42,8 @@ import {
 } from '../../../shared/export-data.model';
 import {map} from 'rxjs/internal/operators';
 import {environment} from '../../../../../environments/environment';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 const customColor = '#4484ce'; // /* cc */
 
@@ -75,7 +77,7 @@ export class ChartsExportService {
         });
     }
 
-    getData(properties: WidgetPropertiesModels): Observable<any[][] | null> {
+    getData(properties: WidgetPropertiesModels): Observable<any[][] | null | ErrorModel> {
         const widgetProperties = properties as ChartsExportPropertiesModel;
         const time: QueriesRequestTimeModel = {};
         const limit = properties.chartType === 'PieChart' && properties.calculateIntervals !== true ? 1 : undefined;
@@ -194,15 +196,20 @@ export class ChartsExportService {
                 }
             });
             return table.length === 0 ? null : table;
-        }));
+        }), catchError(err => {
+            const error: ErrorModel = { error: err.message};
+            return of(error);
+        }))
     }
 
     getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
-            this.getData(widget.properties).subscribe((resp: any[][] | null) => {
+            this.getData(widget.properties).subscribe((resp: any[][] | null | ErrorModel) => {
                 if (resp === null) {
                     // no data
                     observer.next(this.setProcessInstancesStatusValues(widget, new ChartDataTableModel([[]])));
+                } else if (this.errorHandlerService.checkIfErrorExists(resp)) {
+                    observer.next(resp);
                 } else {
                     const tableData = this.setData(resp, widget.properties);
                     observer.next(this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors));
