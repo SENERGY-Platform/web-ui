@@ -65,7 +65,8 @@
             <th mat-header-cell *matHeaderCellDef> Read</th>
             <td mat-cell *matCellDef="let element">
                 <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.read"
-                              [disabled]="element.userId === userId || (element.isRole === true && element.userName === 'admin')"></mat-checkbox>
+                              [disabled]="element.userId === userId || (element.isRole === true && element.userName === 'admin')"
+                              [matTooltip]="descriptions.read"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
@@ -75,7 +76,8 @@
             <th mat-header-cell *matHeaderCellDef> Write</th>
             <td mat-cell *matCellDef="let element">
                 <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.write"
-                              [disabled]="element.isRole === true && element.userName === 'admin'"></mat-checkbox>
+                              [disabled]="element.isRole === true && element.userName === 'admin'"
+                              [matTooltip]="descriptions.write"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
@@ -85,7 +87,8 @@
             <th mat-header-cell *matHeaderCellDef> Execute</th>
             <td mat-cell *matCellDef="let element">
                 <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.execute"
-                              [disabled]="element.isRole === true && element.userName === 'admin'"></mat-checkbox>
+                              [disabled]="element.isRole === true && element.userName === 'admin'"
+                              [matTooltip]="descriptions.execute"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>
@@ -95,7 +98,8 @@
             <th mat-header-cell *matHeaderCellDef> Administrate</th>
             <td mat-cell *matCellDef="let element">
                 <mat-checkbox fxLayoutAlign="center center" [(ngModel)]="element.userRights.administrate"
-                              [disabled]="element.userId === userId || (element.isRole === true && element.userName === 'admin')"></mat-checkbox>
+                              [disabled]="element.userId === userId || (element.isRole === true && element.userName === 'admin')"
+                              [matTooltip]="descriptions.administrate"></mat-checkbox>
             </td>
             <td mat-footer-cell *matFooterCellDef>
             </td>

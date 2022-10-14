@@ -39,6 +39,13 @@ export class PermissionDialogComponent implements OnInit {
     displayedColumns: string[] = ['user', 'isRole', 'read', 'write', 'execute', 'administrate', 'action'];
     permissions: PermissionsEditModel[] = [];
 
+    descriptions = {
+        read: "read resource information",
+        write: "write resource information",
+        execute: "use resource information",
+        administrate: "delete resource, change permissions"
+    }
+
     constructor(
         private dialogRef: MatDialogRef<PermissionDialogComponent>,
         private errorHandlerService: ErrorHandlerService,
@@ -49,10 +56,29 @@ export class PermissionDialogComponent implements OnInit {
         data: {
             name: string;
             permissions: PermissionsEditModel[];
+            kind?: string;
         },
     ) {
         this.name = data.name;
         this.permissions = data.permissions;
+        switch (data.kind){
+            case "devices":
+                this.descriptions = {
+                    read: "read device metadata",
+                    write: "write device metadata",
+                    execute: "use device, read sensor-data",
+                    administrate: "delete device, change permissions"
+                }
+                break
+            case "processmodel":
+                break
+            case "hubs":
+                break
+            case "locations":
+                break
+            case "smart_service_releases":
+                break
+        }
     }
 
     ngOnInit() {

@@ -79,6 +79,7 @@ export class PermissionsDialogService {
         dialogConfig.data = {
             name,
             permissions: permissionsIn,
+            kind: kind
         };
         const editDialogRef = this.dialog.open(PermissionDialogComponent, dialogConfig);
 
