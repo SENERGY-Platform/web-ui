@@ -107,7 +107,8 @@ export const environment = {
     getFanSpeedLevelAutomaticFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     setFanSpeedLevelAutomaticFunctionId: 'urn:infai:ses:controlling-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     getBatteryLevelFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-    dateTimeConceptId: 'urn:infai:ses:concept:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+    dateTimeConceptId: 'urn:infai:ses:concept:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    deviceClassThermostat: 'urn:infai:ses:device-class:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
 };
 
 /*

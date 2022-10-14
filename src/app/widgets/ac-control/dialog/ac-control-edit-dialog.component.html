@@ -24,11 +24,12 @@
             <input type="text" matInput placeholder="Widget Name" formControlName="name" required>
         </mat-form-field>
         <mat-form-field color="accent">
-            <mat-label>Device</mat-label>
-            <senergy-select-search [options]="deviceInstances"
-                                   useOptionViewProperty="display_name"
-                                   placeholder="Device" ngDefaultControl formControlName="deviceId"
-                                   useOptionValueProperty="id" [required]="true">
+            <mat-label>Device/Group</mat-label>
+            <senergy-select-search [options]="selectables"
+                                   [getOptionViewValue]="getSelectableName"
+                                   placeholder="Device/Group" ngDefaultControl formControlName="selectable"
+                                   [getOptionValue]="getSelectableId"
+                                   [required]="true">
             </senergy-select-search>
         </mat-form-field>
         <mat-form-field color="accent">

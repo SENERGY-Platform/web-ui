@@ -350,8 +350,10 @@ export class DeviceInstancesService {
         completeServices: boolean,
         protocolBlocklist?: string[] | null | undefined,
         interactionFilter?: string | null | undefined,
+        includeGroups: boolean = true,
+        includeImports: boolean = true,
     ): Observable<DeviceSelectablesFullModel[]> {
-        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter, true, true).pipe(
+        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter, includeGroups, includeImports).pipe(
             map((selectables) => {
                 selectables = selectables as DeviceSelectablesFullModel[];
                 selectables.forEach((s: any) => {

@@ -29,17 +29,18 @@
                           matTooltip="Cleaning Required!">warning
                 </mat-icon>
                 <div *ngIf="widget.properties.acControl?.getTargetTemperature !== undefined"
-                     style="font-size: xx-large;">{{getTemperatureMeasurementsString(widget.properties.acControl?.getTargetTemperature, true)}}
+                     style="font-size: xx-large;">{{joinMeasurementsString(widget.properties.acControl?.getTargetTemperature, true)}}
                 </div>
                 <mat-icon *ngIf="widget.properties.acControl?.getTemperatureMeasurements !== undefined" inline>
                     fiber_manual_record
                 </mat-icon>
                 <div *ngIf="widget.properties.acControl?.getTemperatureMeasurements !== undefined || widget.properties.acControl?.getBatteryLevel !== undefined"
                      style="font-size: large;">
-                    ({{getTemperatureMeasurementsString(widget.properties.acControl?.getTemperatureMeasurements)}}
+                    ({{joinMeasurementsString(widget.properties.acControl?.getTemperatureMeasurements, true)}}
                     <ng-container *ngIf="widget.properties.acControl?.getBatteryLevel !== undefined">
                         {{widget.properties.acControl?.getTemperatureMeasurements !== undefined ? ', ' : ''}}
-                        {{widget.properties.acControl?.getBatteryLevel?.value}} %</ng-container>)
+                        {{joinMeasurementsString([widget.properties.acControl.getBatteryLevel], true, " %")}}
+                        </ng-container>)
                 </div>
             </div>
             <div fxLayout="row" fxLayoutAlign="space-between">
@@ -129,7 +130,7 @@
                 <mat-slider [min]="widget.properties.acControl?.minTarget || 15"
                             [max]="widget.properties.acControl?.maxTarget || 30"
                             [step]="widget.properties.acControl?.tempStep || 1"
-                            [value]="(widget.properties.acControl?.getTargetTemperature || [{value:0}])[0].value"
+                            [value]="(widget.properties.acControl?.getTargetTemperature || [{value:0}])[0]?.value"
                             (valueChange)="setAllTargets($event)"
                             thumbLabel></mat-slider>
                 °C

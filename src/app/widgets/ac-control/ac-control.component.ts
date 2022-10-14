@@ -23,6 +23,7 @@ import {AcControlElementModel} from './shared/ac-control.model';
 import {AcControlEditDialogComponent} from './dialog/ac-control-edit-dialog.component';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {environment} from "../../../environments/environment";
 
 @Component({
     selector: 'senergy-ac-control',
@@ -124,7 +125,6 @@ export class AcControlComponent implements OnInit, OnDestroy {
         }
         const keys = Array.from(m.keys());
         this.deviceCommandService.runCommands(keys).subscribe(resp => {
-            let valueChanged = false;
             resp.forEach((r, i) => {
                 if (r.status_code !== 200) {
                     console.warn(this.widget.name + ' failed to collect data with code ' + r.status_code);
@@ -134,24 +134,37 @@ export class AcControlComponent implements OnInit, OnDestroy {
                 if (elem === undefined) {
                     return;
                 }
-                if (elem.value === r.message[0]) {
-                    return;
+                if (r.message.length === 1) {
+                    if (elem.value === r.message[0]) {
+                        return;
+                    }
+                    elem.value = r.message[0];
+                } else {
+                    elem.value = r.message;
                 }
-                valueChanged = true;
-                elem.value = r.message[0];
             });
             this.ready = true;
         });
     }
 
-    getTemperatureMeasurementsString(elements?: AcControlElementModel[], unique: boolean = false) {
-        let values = elements?.filter(e => e.value !== null)?.map(e => e.value);
+    joinMeasurementsString(elements?: (AcControlElementModel|undefined)[], unique: boolean = false, unit = ' °C') {
+        let values: any[] = [];
+        elements?.filter(e => e !== undefined && e.value !== null)?.forEach(e => {
+            if (e === undefined) {
+                return;
+            }
+            if (Array.isArray(e.value)) {
+                values.push(...e.value);
+            } else {
+                values.push(e.value);
+            }
+        });
         if (unique) {
             const m = new Map();
-            values?.forEach(v => m.set(v, null));
+            values.forEach(v => m.set(v, null));
             values = Array.from(m.keys());
         }
-        return values?.map(n => n + ' °C').join(', ');
+        return values?.map(n => n + unit).join(', ');
     }
 
     togglePower() {
@@ -180,9 +193,11 @@ export class AcControlComponent implements OnInit, OnDestroy {
     private toCommand(e: AcControlElementModel, value: any): DeviceCommandModel {
         return {
             device_id: this.widget.properties.acControl?.deviceId,
+            group_id: this.widget.properties.acControl?.deviceGroupId,
             function_id: e.functionId,
             service_id: e.serviceId,
             aspect_id: e.aspectId,
+            device_class_id: environment.deviceClassThermostat,
             input: value,
         };
     }

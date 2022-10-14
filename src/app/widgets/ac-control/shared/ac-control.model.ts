@@ -16,7 +16,8 @@
 
 export interface AcControlPropertiesModel {
     acControl?: {
-        deviceId: string;
+        deviceId?: string;
+        deviceGroupId?: string;
         minTarget: number;
         maxTarget: number;
         tempStep: number;
@@ -46,7 +47,7 @@ export interface AcControlPropertiesModel {
 
 export interface AcControlElementModel {
     aspectId: string;
-    serviceId: string;
+    serviceId?: string;
     functionId: string;
     value?: any;
 }

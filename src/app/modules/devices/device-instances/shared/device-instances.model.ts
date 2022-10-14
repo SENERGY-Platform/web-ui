@@ -52,6 +52,7 @@ export interface DeviceFilterCriteriaModel {
     function_id?: string;
     device_class_id?: string;
     aspect_id?: string;
+    interaction?: string;
 }
 
 export interface DeviceSelectablesModel {
