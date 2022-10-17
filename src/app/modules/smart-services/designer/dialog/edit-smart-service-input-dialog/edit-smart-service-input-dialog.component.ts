@@ -421,12 +421,12 @@ function isValidCamundaVariableName(variableName: string): boolean {
     if(["+", "-", "*", "\\", "/", "=", ">", "<", "?", ".", "&", "|", ",", "%", "!"].some(e => variableName.includes(e))){
         return false;
     }
-    //my not contain literals like null, true, false
-    if(["null", "true", "false"].some(e => variableName.includes(e))){
+    //my not be literals like null, true, false
+    if(["null", "true", "false"].some(e => variableName == e)){
         return false;
     }
     //my not contain keywords like function, if, then, else, for, between, instance, of, not
-    if(["function", "if", "then", "else", "for", "between", "instance", "of", "not"].some(e => variableName.includes(e))){
+    if(["function", "if", "then", "else", "for", "between", "instance", "of", "not"].some(e => variableName == e)){
         return false;
     }
     return true
