@@ -331,6 +331,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 label: "generated for "+ element?.name,
                 order: 0,
                 multiple: false,
+                auto_select_all: false,
                 optional: false,
                 iot_selectors: ["device", "group", "import", "device_service_group"],
                 criteria_list: [{

@@ -105,8 +105,6 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
         }
     }
 
-
-
     readAbstractAsDescription(): SmartServiceInputsDescription{
         return abstractSmartServiceInputToSmartServiceInputsDescription(this.abstract)
     }
@@ -192,7 +190,8 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
             type: "string",
             order: 0,
             multiple: false,
-            optional: false
+            optional: false,
+            auto_select_all: false
         });
     }
 
@@ -272,6 +271,7 @@ export interface AbstractSmartServiceInput {
     characteristic_id?: string;
     order: number;
     multiple: boolean;
+    auto_select_all: boolean;
     optional: boolean;
 }
 
@@ -305,6 +305,9 @@ export function abstractSmartServiceInputToSmartServiceInputsDescription(abstrac
         }
         if(input.multiple) {
             properties.push({id: "multiple", value: JSON.stringify(input.multiple)});
+        }
+        if(input.auto_select_all) {
+            properties.push({id: "auto_select_all", value: JSON.stringify(input.auto_select_all)});
         }
         if(input.optional) {
             properties.push({id: "optional", value: JSON.stringify(input.optional)});
@@ -353,9 +356,9 @@ export function smartServiceInputsDescriptionToAbstractSmartServiceInput(value: 
             label: input.label,
             type: input.type,
             default_value: input.default_value,
-
             order: 0,
             multiple: false,
+            auto_select_all: false,
             optional: false,
         } as AbstractSmartServiceInput;
         input.properties.forEach(property => {
@@ -383,6 +386,9 @@ export function smartServiceInputsDescriptionToAbstractSmartServiceInput(value: 
                 }
                 if(property.id == "multiple" && property.value != "") {
                     result.multiple = JSON.parse(property.value);
+                }
+                if(property.id == "auto_select_all" && property.value != "") {
+                    result.auto_select_all = JSON.parse(property.value);
                 }
                 if(property.id == "optional" && property.value != "") {
                     result.optional = JSON.parse(property.value);

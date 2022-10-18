@@ -48,8 +48,19 @@
                     </div>
 
                     <div>
-                        <mat-checkbox [(ngModel)]="input.multiple">
+                        <mat-checkbox [(ngModel)]="input.multiple"
+                                      [disabled]="input.auto_select_all"
+                                      matTooltip="may only be deactivated if 'Auto Select All' is deactivated"
+                                      [matTooltipDisabled]="!input.auto_select_all">
                             Multiple
+                        </mat-checkbox>
+                    </div>
+
+                    <div>
+                        <mat-checkbox [(ngModel)]="input.auto_select_all"
+                                      [disabled]="!input.multiple"
+                                      matTooltip="the smart service will use all possible options as value without asking the user; may only be activated if 'Multiple' is activated">
+                            Auto Select All
                         </mat-checkbox>
                     </div>
 
