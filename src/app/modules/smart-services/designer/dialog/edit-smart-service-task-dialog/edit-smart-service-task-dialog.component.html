@@ -567,6 +567,43 @@
         </div>
       </div>
     </mat-tab>
+    <mat-tab label="Device-Repository">
+      <div class="smart-service-task-tab">
+        <div>
+          <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="Task-Name" [(ngModel)]="result.name" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width" color="accent">
+            <mat-label>Operation</mat-label>
+            <mat-select [(ngModel)]="deviceRepositoryWorkerInfo.operation">
+              <mat-option value="create_device_group">Create Device-Group</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <ng-container *ngIf="deviceRepositoryWorkerInfo.operation == 'create_device_group'">
+          <div>
+            <mat-form-field  color="accent" class="full-width">
+              <input matInput placeholder="Device-Group Name" [(ngModel)]="deviceRepositoryWorkerInfo.name" type="text">
+            </mat-form-field>
+          </div>
+          <div >
+            <mat-form-field  color="accent" class="full-width">
+              <input matInput placeholder="List of Devices" [(ngModel)]="deviceRepositoryWorkerInfo.create_device_group.ids" #configInput>
+              <button mat-icon-button matSuffix [matMenuTriggerFor]="menu">
+                <mat-icon>data_object</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')" (click)="deviceRepositoryWorkerInfo.create_device_group.ids = '${'+param.name+'}'" [matTooltip]="param.name">
+                  IoT: {{param.label || param.name}}
+                </button>
+              </mat-menu>
+            </mat-form-field>
+          </div>
+        </ng-container>
+      </div>
+    </mat-tab>
   </mat-tab-group>
 </mat-dialog-content>
 

@@ -56,7 +56,7 @@ import {
 export class EditSmartServiceTaskDialogComponent implements OnInit {
     init: SmartServiceTaskDescription;
     result: SmartServiceTaskDescription;
-    tabs: string[] = ["process_deployment", "process_deployment_start", "analytics", "export", "import", "info"]
+    tabs: string[] = ["process_deployment", "process_deployment_start", "analytics", "export", "import", "info", "device_repository"]
 
     flows: FlowModel[] | null = null
     processModels: ProcessModel[] | null = null
@@ -89,6 +89,20 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     smartServiceInputs: AbstractSmartServiceInput[] = [];
 
     smartServiceBpmnElement: BpmnElement
+
+    deviceRepositoryWorkerInfo: {
+        name: string
+        operation: string
+        create_device_group: {
+            ids: string
+        }
+    } = {
+        name: "",
+        operation: "",
+        create_device_group: {
+            ids: ""
+        }
+    }
 
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
@@ -124,6 +138,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.infoModuleData = this.result.inputs.find(value => value.name == "info.module_data")?.value || "{\n\n}";
         this.processStart = this.inputsToProcessStartModel(this.result.inputs);
         this.smartServiceInputs = smartServiceInputsDescriptionToAbstractSmartServiceInput(dialogParams.info.smartServiceInputs);
+        this.initDeviceRepositoryWorkerInfo(dialogParams.info.inputs)
     }
 
     ngOnInit() {}
@@ -934,6 +949,36 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         }
     }
 
+    deviceRepositoryCreateDeviceGroupFieldKey = "device_repository.create_device_group"
+    deviceRepositoryNameFieldKey = "device_repository.name"
+
+    private initDeviceRepositoryWorkerInfo(inputs: SmartServiceTaskInputDescription[]) {
+        inputs.forEach(input => {
+            if(input.name == this.deviceRepositoryNameFieldKey) {
+                this.deviceRepositoryWorkerInfo.name = input.value
+            }
+            if(input.name == this.deviceRepositoryCreateDeviceGroupFieldKey) {
+                this.deviceRepositoryWorkerInfo.create_device_group.ids = input.value;
+                this.deviceRepositoryWorkerInfo.operation = "create_device_group";
+            }
+        });
+        if(!this.deviceRepositoryWorkerInfo.operation) {
+            this.deviceRepositoryWorkerInfo.operation = "create_device_group";
+        }
+    }
+
+    private deviceRepositoryWorkerInfoToInputs(): SmartServiceTaskInputDescription[] {
+        let result :SmartServiceTaskInputDescription[] = [];
+        switch (this.deviceRepositoryWorkerInfo.operation){
+            case "create_device_group": {
+                result.push({name: this.deviceRepositoryCreateDeviceGroupFieldKey, type: "text", value: this.deviceRepositoryWorkerInfo.create_device_group.ids});
+                result.push({name: this.deviceRepositoryNameFieldKey, type: "text", value: this.deviceRepositoryWorkerInfo.name});
+                break;
+            }
+        }
+        return result;
+    }
+
     isInvalid(): boolean {
         switch (this.result.topic){
             case "export":
@@ -1003,7 +1048,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                                             !e.name.startsWith("info.") &&
                                             !e.name.startsWith("process_deployment_start.") &&
                                             !e.name.startsWith("import.") &&
-                                            !e.name.startsWith("export.")); //filter unused inputs (remove existing info, process_deployment_start, import and export inputs)
+                                            !e.name.startsWith("export.") &&
+                                            !e.name.startsWith("device_repository.")); //filter unused inputs (remove existing info, process_deployment_start, import and export inputs)
 
         temp.push({name: "export.request", type: "text", value: this.stringifyExport(this.exportRequest)});
 
@@ -1018,7 +1064,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         temp.push({name: "info.module_type", type: "text", value: this.infoModuleType});
         temp.push({name: "info.module_data", type: "text", value: this.infoModuleData});
 
-        temp = temp.concat(this.processStartModelToInputs(this.processStart))
+        temp = temp.concat(this.processStartModelToInputs(this.processStart));
+
+        temp = temp.concat(this.deviceRepositoryWorkerInfoToInputs());
 
         temp = temp.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
 
