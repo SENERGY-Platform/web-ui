@@ -33,6 +33,40 @@ import {AspectsPermSearchModel} from '../../../metadata/aspects/shared/aspects-p
 export class DeviceGroupsService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
+    getDeviceGroupsWithoutGenerated(
+        query: string,
+        limit: number,
+        offset: number,
+        feature: string,
+        order: string,
+    ): Observable<DeviceGroupsPermSearchModel[]> {
+        return this.http
+            .post<DeviceGroupsPermSearchModel[]>(environment.permissionSearchUrl + '/v3/query', {
+                resource: 'device-groups',
+                find: {
+                    search: query,
+                    limit: limit,
+                    offset: offset,
+                    rights: 'r',
+                    sort_by: feature,
+                    sort_desc: order == "desc",
+                    filter: {
+                        not: {
+                            condition: {
+                                feature: "features.attribute_list",
+                                operation: "==",
+                                value: "platform/generated=true"
+                            }
+                        }
+                    }
+                },
+            })
+            .pipe(
+                map((resp) => resp || []),
+                catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getDeviceGroupsWithoutGenerated()', [])),
+            );
+    }
+
     getDeviceGroups(
         query: string,
         limit: number,

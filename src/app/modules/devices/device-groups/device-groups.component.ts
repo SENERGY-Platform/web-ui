@@ -57,6 +57,8 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
+    hideGenerated = true;
+
     constructor(
         private dialog: MatDialog,
         private responsiveService: ResponsiveService,
@@ -134,14 +136,22 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         });
     }
 
+    setHideGenerated(hide: boolean){
+        this.hideGenerated = hide;
+        this.getDeviceGroups(true);
+    }
+
     private getDeviceGroups(reset: boolean) {
         if (reset) {
             this.reset();
         }
 
-        this.deviceGroupsService
-            .getDeviceGroups(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
-            .subscribe((deviceGroups: DeviceGroupsPermSearchModel[]) => {
+        let query =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+        if(this.hideGenerated) {
+            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+        }
+
+        query.subscribe((deviceGroups: DeviceGroupsPermSearchModel[]) => {
                 if (deviceGroups.length !== this.limit) {
                     this.allDataLoaded = true;
                 }

@@ -22,6 +22,12 @@
         <senergy-searchbar fxFlex></senergy-searchbar>
         <div fxLayout="row">
             <div fxFlex></div>
+            <button matTooltip="hide generated" mat-icon-button color="accent" (click)="setHideGenerated(true)" *ngIf="!this.hideGenerated">
+                <mat-icon>visibility_off</mat-icon>
+            </button>
+            <button matTooltip="show generated" mat-icon-button color="accent" (click)="setHideGenerated(false)" *ngIf="this.hideGenerated">
+                <mat-icon>visibility</mat-icon>
+            </button>
             <senergy-sort [sortAttributes]="sortAttributes"
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         </div>
