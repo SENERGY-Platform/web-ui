@@ -367,7 +367,7 @@ function toTask(bpmnFactory, replace, selection, element, additionalChanges) {
 
 var getSmartServiceInputsForElement = function (element) {
     var inputs = []; //[{id:"", label:"", type:"", default_value:"", properties:[{id:"", value:""}]}]
-    if (element.businessObject.extensionElements && element.businessObject.extensionElements.values) {
+    if (element && element.businessObject && element.businessObject.extensionElements && element.businessObject.extensionElements.values) {
         const extensionValues = element.businessObject.extensionElements.values;
         extensionValues[0].fields.forEach(field => {
             var properties = [];
