@@ -193,6 +193,10 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                         case "import":
                             outputs.push(createTextOutputParameter(bpmnjs, taskId+"_import_id", "${import_id}"));
                             break;
+                        case "device_repository":
+                            outputs.push(createTextOutputParameter(bpmnjs, taskId+"_device_group_id", "${device_group_id}"));
+                            outputs.push(createTextOutputParameter(bpmnjs, taskId+"_device_group_selection", "${device_group_selection}"));
+                            break;
                     }
 
                     var inputOutput = createInputOutput(bpmnjs, inputs, outputs);

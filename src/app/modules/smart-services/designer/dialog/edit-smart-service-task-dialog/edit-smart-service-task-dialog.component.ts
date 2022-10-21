@@ -843,6 +843,16 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                             }])
                         }
                     }
+                    if(topic == "device_repository"
+                        && incoming.businessObject.extensionElements.values[0].inputParameters?.length
+                        && incoming.businessObject.extensionElements.values[0].outputParameters?.length
+                    ) {
+                        const deviceGroupSelectionVariable = incoming.businessObject.extensionElements.values[0].outputParameters?.find(value => value.name.endsWith("_device_group_selection"))?.name;
+                        if (deviceGroupSelectionVariable) {
+                            add("iot_form_fields", [{name: deviceGroupSelectionVariable, label: "", value: ""}]);
+                            add("group_iot_form_fields", [{name: deviceGroupSelectionVariable, label: "", value: ""}]);
+                        }
+                    }
                 } else {
                     add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
                 }
