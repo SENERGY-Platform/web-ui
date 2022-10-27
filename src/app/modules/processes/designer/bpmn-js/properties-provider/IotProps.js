@@ -229,7 +229,7 @@ function createTaskResults(bpmnjs, outputs) {
     }
     var paths = helper.getOutputPaths(outputs);
     var variables = [];
-    for (i = 0; i < paths.length; i++) {
+    for (var i = 0; i < paths.length; i++) {
         variables.push("${result." + paths[i].join(".") + "}")
     }
     variables.sort();
@@ -246,7 +246,7 @@ function getDeviceTypeServiceFromServiceElement(element) {
     var extentionElements = bo.extensionElements;
     if (extentionElements && extentionElements.values && extentionElements.values[0]) {
         var inputs = extentionElements.values[0].inputParameters;
-        for (i = 0; i < inputs.length; i++) {
+        for (var i = 0; i < inputs.length; i++) {
             if (inputs[i].name == "payload") {
                 var payload = JSON.parse(inputs[i].value);
               return {
