@@ -105,7 +105,8 @@ export class ProcessIoDesignerDialogComponent implements OnInit {
             outputVariableName: "",
             definitionBound: false,
             instanceBound: true,
-            binding: "instance"
+            binding: "instance",
+            defaultValue: "null"
         });
     }
 
@@ -145,7 +146,8 @@ function addBinding(info: ProcessIoDesignerInfo): ProcessIoDesignerInfoWithBindi
             outputVariableName: value.outputVariableName,
             instanceBound: value.instanceBound,
             definitionBound: value.definitionBound,
-            binding: ""
+            binding: "",
+            defaultValue: value.defaultValue
         }
         if(value.instanceBound){
             element.binding = "instance";
@@ -196,6 +198,7 @@ function handleBinding(info: ProcessIoDesignerInfoWithBinding): ProcessIoDesigne
     info.get.forEach(value => {
         let element: ProcessIoDesignerInfoGet = {
             key: value.key,
+            defaultValue:value.defaultValue,
             outputVariableName: value.outputVariableName,
             instanceBound: value.instanceBound,
             definitionBound: value.definitionBound,

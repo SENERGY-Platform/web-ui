@@ -18,6 +18,10 @@
     width: 33%;
 }
 
+.fifth-width {
+    width: 20%;
+}
+
 .variables {
     justify-content: space-between;
     display: flex;

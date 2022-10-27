@@ -16,12 +16,14 @@
 
 export const DefaultProcessIoReadPrefix = "io.read.";
 export const DefaultProcessIoWritePrefix = "io.write.";
+export const DefaultProcessIoReadDefaultPrefix = "io.default."
 export const DefaultProcessIoInstancePlaceholder = "{{InstanceId}}";
 export const DefaultProcessIoDefinitionPlaceholder = "{{DefinitionId}}";
 export const DefaultProcessIoWorkerTopic = "process_io";
 
 export interface ProcessIoDesignerConfig {
     processIoReadPrefix: string
+    processIoReadDefaultPrefix: string
     processIoWritePrefix: string
     processIoInstancePlaceholder: string
     processIoDefinitionPlaceholder: string
@@ -31,6 +33,7 @@ export interface ProcessIoDesignerConfig {
 export const DefaultProcessIoDesignerConfig: ProcessIoDesignerConfig  = {
     processIoReadPrefix: DefaultProcessIoReadPrefix,
     processIoWritePrefix: DefaultProcessIoWritePrefix,
+    processIoReadDefaultPrefix: DefaultProcessIoReadDefaultPrefix,
     processIoInstancePlaceholder: DefaultProcessIoInstancePlaceholder,
     processIoDefinitionPlaceholder: DefaultProcessIoDefinitionPlaceholder,
     processIoWorkerTopic: DefaultProcessIoWorkerTopic
@@ -53,6 +56,7 @@ export interface ProcessIoDesignerInfoGet {
     key: string
     instanceBound: boolean
     definitionBound: boolean
+    defaultValue: string
 }
 
 export interface ProcessIoVariable {

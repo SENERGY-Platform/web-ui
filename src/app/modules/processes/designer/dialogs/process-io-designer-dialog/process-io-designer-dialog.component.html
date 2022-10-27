@@ -62,9 +62,9 @@
         </mat-panel-title>
       </mat-expansion-panel-header>
       <div>
-        <div *ngFor="let set of info.get; let i = index" class="variables">
+        <div *ngFor="let get of info.get; let i = index" class="variables">
           <mat-form-field color="accent">
-            <mat-select placeholder="Binding" [(ngModel)]="set.binding" required>
+            <mat-select placeholder="Binding" [(ngModel)]="get.binding" required>
               <mat-option value="global">
                 global
               </mat-option>
@@ -76,11 +76,14 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field class="third-width" color="accent">
-            <input matInput placeholder="Key" [(ngModel)]="set.key" type="text" required>
+          <mat-form-field class="fifth-width" color="accent">
+            <input matInput placeholder="Key" [(ngModel)]="get.key" type="text" required>
           </mat-form-field>
-          <mat-form-field class="third-width" color="accent">
-            <input matInput placeholder="Output-Name" [(ngModel)]="set.outputVariableName" type="text" required>
+          <mat-form-field class="fifth-width" color="accent">
+            <input matInput placeholder="Output-Name" [(ngModel)]="get.outputVariableName" type="text" required>
+          </mat-form-field>
+          <mat-form-field class="fifth-width" color="accent">
+            <input matInput placeholder="Default-Value" [(ngModel)]="get.defaultValue" type="text" required>
           </mat-form-field>
           <button mat-icon-button  (click)="removeGet(i)">
             <mat-icon>delete</mat-icon>

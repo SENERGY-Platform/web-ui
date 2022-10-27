@@ -384,7 +384,8 @@ module.exports = {
                     var inputName = inputs[i].name;
                     var inputValue = inputs[i].value;
                     if(inputName.startsWith(processIoConfig.processIoReadPrefix)){
-                        var key = inputValue;
+                        var keyWithPlaceholder = inputValue;
+                        var key = keyWithPlaceholder;
                         if(key.startsWith(processIoConfig.processIoDefinitionPlaceholder)){
                             definitionBound = true;
                             key = key.slice(processIoConfig.processIoDefinitionPlaceholder.length);
@@ -413,7 +414,20 @@ module.exports = {
                             }
                         }
 
-                        result.get.push({key: key, instanceBound: instanceBound, definitionBound: definitionBound, outputVariableName: outputVariableName});
+                        var defaultValue = "null";
+                        for (var j = 0; j < inputs.length; j++) {
+                            var defaultCandidateName = inputs[j].name;
+                            var defaultCandidateValue = inputs[j].value;
+                            if(defaultCandidateName.startsWith(processIoConfig.processIoReadDefaultPrefix)){
+                                var defaultCandidateKey = defaultCandidateName.slice(processIoConfig.processIoReadDefaultPrefix.length);
+                                if (defaultCandidateKey == keyWithPlaceholder) {
+                                    defaultValue = defaultCandidateValue;
+                                    break
+                                }
+                            }
+                        }
+
+                        result.get.push({key: key, instanceBound: instanceBound, definitionBound: definitionBound, outputVariableName: outputVariableName, defaultValue: defaultValue});
                     }
                     if(inputName.startsWith(processIoConfig.processIoWritePrefix)){
                         var key = inputName.slice(processIoConfig.processIoWritePrefix.length);
@@ -469,6 +483,7 @@ module.exports = {
 
                             processIoDesignerInfos.get.forEach(function (getInfo) {
                                 inputs.push(createTextInputParameter(bpmnjs, processIoConfig.processIoReadPrefix+getInfo.outputVariableName+"_local", createProcessIoKey(getInfo)));
+                                inputs.push(createTextInputParameter(bpmnjs, processIoConfig.processIoReadDefaultPrefix+createProcessIoKey(getInfo), getInfo.defaultValue));
                                 outputs.push(createOutputParameter(bpmnjs, getInfo.outputVariableName, "${"+getInfo.outputVariableName+"_local}"))
                             });
 
