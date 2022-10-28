@@ -148,7 +148,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
     }
 
     joinMeasurementsString(elements?: (AcControlElementModel|undefined)[], unique: boolean = false, unit = ' °C') {
-        let values: any[] = [];
+        let values: number[] = [];
         elements?.filter(e => e !== undefined && e.value !== null)?.forEach(e => {
             if (e === undefined) {
                 return;
@@ -164,7 +164,11 @@ export class AcControlComponent implements OnInit, OnDestroy {
             values.forEach(v => m.set(v, null));
             values = Array.from(m.keys());
         }
-        return values?.map(n => n + unit).join(', ');
+        if (values.length > 2) {
+            return Math.min(...values) + ' - ' + Math.max(...values) + unit;
+        } else {
+            return values?.map(n => n + unit).join(', ');
+        }
     }
 
     togglePower() {
