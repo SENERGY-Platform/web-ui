@@ -185,10 +185,10 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     save(): void {
         this.widget.properties.measurement = {
-            id: this.form.get('measurement')?.value.id,
-            name: this.form.get('measurement')?.value.name,
-            values: this.form.get('measurement')?.value.values,
-            exportDatabaseId: this.form.get('measurement')?.value.ExportDatabaseId,
+            id: this.form.get('measurement')?.value?.id,
+            name: this.form.get('measurement')?.value?.name,
+            values: this.form.get('measurement')?.value?.values,
+            exportDatabaseId: this.form.get('measurement')?.value?.ExportDatabaseId,
         };
         this.widget.properties.vAxis = this.form.get('vAxis')?.value;
         this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value;

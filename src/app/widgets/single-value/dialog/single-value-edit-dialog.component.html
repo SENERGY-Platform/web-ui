@@ -36,7 +36,7 @@
 
         <mat-form-field color="accent" [fxHide]="form.get('sourceType')?.value !== 'device'">
             <mat-label>Choose Device</mat-label>
-            <senergy-select-search [options]="devices" formControlName="device" useOptionViewProperty="name" [compareWith]="compareIds">
+            <senergy-select-search [options]="devices" formControlName="device" useOptionViewProperty="display_name" [compareWith]="compareIds">
             </senergy-select-search>
         </mat-form-field>
 
