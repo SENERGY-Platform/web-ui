@@ -37,6 +37,7 @@ import {ErrorStateMatcher, MatOption} from '@angular/material/core';
 import {MatInput} from '@angular/material/input';
 import ScrollEvent = JQuery.ScrollEvent;
 import MouseUpEvent = JQuery.MouseUpEvent;
+import {KeyValue} from '@angular/common';
 
 export function useProperty(property: string): (option: any) => any {
     const properties = property.split('.');
@@ -246,15 +247,15 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     /**
      * Percentage of the scrollbar that will trigger a window change.
      */
-    @Input() scrollPercentage = 15;
+    @Input() scrollPercentage = 25;
     /**
      * How many elements will be rendered at a time
      */
-    @Input() scrollWindowSize = 30;
+    @Input() scrollWindowSize = 20;
     /**
      * scrollWindowSize / scrollWindowMoveDivisor = number of elements that will be removed/added to the sliding window
      */
-    @Input() scrollWindowMoveDivisor = 10;
+    @Input() scrollWindowMoveDivisor = 20;
     scrollLowerOffset = 0;
     lastScrollLowerOffset = 0;
     lastScrollPercentage = 0;
@@ -557,12 +558,14 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 size++;
             }
             if (v2.length > 0) {
+                console.log(k); // TODO
                 r2.set(k, v2);
             }
         }
         for (const [k, v] of selected) {
             r2 = this.appendInsertFilterMap(r2, k, v).m;
         }
+        console.log(r2); // TODO
         this.optionsGroups = r2;
         this.cd.detectChanges();
     }
@@ -613,6 +616,8 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             this.ngControl?.reset(this.value);
         }
     }
+
+    originalOrder = (_: KeyValue<string, any>, __: KeyValue<string, any>): number => 0;
 
     private resetSearchIfNoResults() {
         if (this.options === undefined) {
