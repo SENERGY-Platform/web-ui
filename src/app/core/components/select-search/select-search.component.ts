@@ -15,7 +15,8 @@
  */
 
 import {
-    AfterViewInit, ChangeDetectorRef,
+    AfterViewInit,
+    ChangeDetectorRef,
     Component,
     EventEmitter,
     HostBinding,
@@ -262,7 +263,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     optionsGroups: Map<string, any> = new Map();
 
     @ViewChild('searchInput', {static: false}) searchInput!: MatInput;
-    private lastSearch: string|undefined;
+    private lastSearch: string | undefined;
 
     ngOnInit() {
         if (this.useOptionViewProperty !== undefined) {
@@ -514,11 +515,11 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
             this.options.forEach((v, k) => {
                 const filtered = v.filter((option) => {
                     if (Array.isArray(this.value)) {
-                        if (this.value.find((sel) => sel.value === this.getOptionValue(option)) !== undefined) {
+                        if (this.value.find((sel) => this.compareWith(this.getOptionValue(option), sel)) !== undefined) {
                             selected = this.appendInsertFilterMap(selected, k, option).m;
                             return true;
                         }
-                    } else if (this.value === this.getOptionValue(option)) {
+                    } else if (this.compareWith(this.getOptionValue(option), this.value)) {
                         selected = this.appendInsertFilterMap(selected, k, option).m;
                         return true;
                     }
