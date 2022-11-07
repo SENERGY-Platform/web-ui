@@ -92,12 +92,14 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     deviceRepositoryWorkerInfo: {
         name: string
+        key: string
         operation: string
         create_device_group: {
             ids: string
         }
     } = {
         name: "",
+        key: "",
         operation: "",
         create_device_group: {
             ids: ""
@@ -961,6 +963,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     deviceRepositoryCreateDeviceGroupFieldKey = "device_repository.create_device_group"
     deviceRepositoryNameFieldKey = "device_repository.name"
+    deviceRepositoryKeyFieldKey = "device_repository.key"
 
     private initDeviceRepositoryWorkerInfo(inputs: SmartServiceTaskInputDescription[]) {
         inputs.forEach(input => {
@@ -970,6 +973,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             if(input.name == this.deviceRepositoryCreateDeviceGroupFieldKey) {
                 this.deviceRepositoryWorkerInfo.create_device_group.ids = input.value;
                 this.deviceRepositoryWorkerInfo.operation = "create_device_group";
+            }
+            if(input.name == this.deviceRepositoryKeyFieldKey) {
+                this.deviceRepositoryWorkerInfo.key = input.value;
             }
         });
         if(!this.deviceRepositoryWorkerInfo.operation) {
@@ -983,6 +989,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             case "create_device_group": {
                 result.push({name: this.deviceRepositoryCreateDeviceGroupFieldKey, type: "text", value: this.deviceRepositoryWorkerInfo.create_device_group.ids});
                 result.push({name: this.deviceRepositoryNameFieldKey, type: "text", value: this.deviceRepositoryWorkerInfo.name});
+                if (this.deviceRepositoryWorkerInfo.key) {
+                    result.push({name: this.deviceRepositoryKeyFieldKey, type: "text", value: this.deviceRepositoryWorkerInfo.key});
+                }
                 break;
             }
         }
