@@ -33,7 +33,13 @@ import {FlowRepoService} from '../../../../data/flow-repo/shared/flow-repo.servi
 import {FlowModel} from '../../../../data/flow-repo/shared/flow.model';
 import {ParserService} from '../../../../data/flow-repo/shared/parser.service';
 import {ParseModel} from '../../../../data/flow-repo/shared/parse.model';
-import {BpmnElement, BpmnParameter, BpmnParameterWithLabel, FormField} from '../../../../processes/designer/shared/designer.model';
+import {
+    BpmnElement,
+    BpmnParameter,
+    BpmnParameterWithLabel,
+    BpmnBusinessObject,
+    BpmnElementRef
+} from '../../../../processes/designer/shared/designer.model';
 import {ImportInstanceConfigModel, ImportInstancesModel} from '../../../../imports/import-instances/shared/import-instances.model';
 import {
     ImportTypeContentVariableModel,
@@ -794,97 +800,113 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         }
 
         done.push(element);
-        for (let index = 0; index < element.incoming.length; index++) {
-            const incoming = element.incoming[index].source;
-            if (
-                incoming.businessObject.extensionElements &&
-                incoming.businessObject.extensionElements.values &&
-                incoming.businessObject.extensionElements.values[0] &&
-                incoming.businessObject.extensionElements.values[0].outputParameters
-            ) {
-                if(incoming.businessObject.topic) {
-                    const topic = incoming.businessObject.topic;
-                    add(topic, incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject);
-                    if(topic == "analytics" && incoming.businessObject.extensionElements.values[0].outputParameters?.length && incoming.businessObject.extensionElements.values[0].outputParameters?.length > 0) {
-                        const flowId = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name == "analytics.flow_id")?.value;
-                        add("flow_selection_raw", [{
-                            name: incoming.businessObject.extensionElements.values[0].outputParameters[0].name,
-                            label: (incoming.businessObject as any).name,
-                            value: flowId || ""
-                        }]);
-                    }
-                    if(topic == "import" && incoming.businessObject.extensionElements.values[0].outputParameters?.length && incoming.businessObject.extensionElements.values[0].outputParameters?.length > 0) {
-                        try{
-                            const importRequestStr = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name == "import.request")?.value;
-                            if(importRequestStr) {
-                                let importRequest = JSON.parse(importRequestStr);
-                                if (importRequest.import_type_id) {
-                                    const importType = importRequest.import_type_id;
-                                    add("import_selection_raw", [{
-                                        name: incoming.businessObject.extensionElements.values[0].outputParameters[0].name,
-                                        label: (incoming.businessObject as any).name,
-                                        value: importType || ""
-                                    }]);
+        if(element.incoming) {
+            for (let index = 0; index < element.incoming.length; index++) {
+                const incoming = element.incoming[index].source;
+                if (
+                    incoming.businessObject.extensionElements &&
+                    incoming.businessObject.extensionElements.values &&
+                    incoming.businessObject.extensionElements.values[0] &&
+                    incoming.businessObject.extensionElements.values[0].outputParameters
+                ) {
+                    if(incoming.businessObject.topic) {
+                        const topic = incoming.businessObject.topic;
+                        add(topic, incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject);
+                        if(topic == "analytics" && incoming.businessObject.extensionElements.values[0].outputParameters?.length && incoming.businessObject.extensionElements.values[0].outputParameters?.length > 0) {
+                            const flowId = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name == "analytics.flow_id")?.value;
+                            add("flow_selection_raw", [{
+                                name: incoming.businessObject.extensionElements.values[0].outputParameters[0].name,
+                                label: (incoming.businessObject as any).name,
+                                value: flowId || ""
+                            }]);
+                        }
+                        if(topic == "import" && incoming.businessObject.extensionElements.values[0].outputParameters?.length && incoming.businessObject.extensionElements.values[0].outputParameters?.length > 0) {
+                            try{
+                                const importRequestStr = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name == "import.request")?.value;
+                                if(importRequestStr) {
+                                    let importRequest = JSON.parse(importRequestStr);
+                                    if (importRequest.import_type_id) {
+                                        const importType = importRequest.import_type_id;
+                                        add("import_selection_raw", [{
+                                            name: incoming.businessObject.extensionElements.values[0].outputParameters[0].name,
+                                            label: (incoming.businessObject as any).name,
+                                            value: importType || ""
+                                        }]);
+                                    }
                                 }
+                            }catch (e) {
+                                console.error(e);
                             }
-                        }catch (e) {
-                            console.error(e);
                         }
-                    }
-                    if(topic == "process_deployment"
-                        && incoming.businessObject.extensionElements.values[0].inputParameters?.length
-                        && incoming.businessObject.extensionElements.values[0].outputParameters?.length
-                    ) {
-                        const processModelId = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name == "process_deployment.process_model_id")?.value;
-                        const processDeploymentIdVariable = incoming.businessObject.extensionElements.values[0].outputParameters?.find(value => value.name.endsWith("_process_deployment_id"))?.name;
-                        if (processModelId && processDeploymentIdVariable && processModelId.match(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/)){
-                            add("process_deployment_to_model", [{
-                                name: processDeploymentIdVariable,
-                                label: "",
-                                value: processModelId
-                            }])
+                        if(topic == "process_deployment"
+                            && incoming.businessObject.extensionElements.values[0].inputParameters?.length
+                            && incoming.businessObject.extensionElements.values[0].outputParameters?.length
+                        ) {
+                            const processModelId = incoming.businessObject.extensionElements.values[0].inputParameters?.find(value => value.name == "process_deployment.process_model_id")?.value;
+                            const processDeploymentIdVariable = incoming.businessObject.extensionElements.values[0].outputParameters?.find(value => value.name.endsWith("_process_deployment_id"))?.name;
+                            if (processModelId && processDeploymentIdVariable && processModelId.match(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/)){
+                                add("process_deployment_to_model", [{
+                                    name: processDeploymentIdVariable,
+                                    label: "",
+                                    value: processModelId
+                                }])
+                            }
                         }
-                    }
-                    if(topic == "device_repository"
-                        && incoming.businessObject.extensionElements.values[0].inputParameters?.length
-                        && incoming.businessObject.extensionElements.values[0].outputParameters?.length
-                    ) {
-                        const deviceGroupSelectionVariable = incoming.businessObject.extensionElements.values[0].outputParameters?.find(value => value.name.endsWith("_device_group_selection"))?.name;
-                        if (deviceGroupSelectionVariable) {
-                            add("iot_form_fields", [{name: deviceGroupSelectionVariable, label: "", value: ""}]);
-                            add("group_iot_form_fields", [{name: deviceGroupSelectionVariable, label: "", value: ""}]);
+                        if(topic == "device_repository"
+                            && incoming.businessObject.extensionElements.values[0].inputParameters?.length
+                            && incoming.businessObject.extensionElements.values[0].outputParameters?.length
+                        ) {
+                            const deviceGroupSelectionVariable = incoming.businessObject.extensionElements.values[0].outputParameters?.find(value => value.name.endsWith("_device_group_selection"))?.name;
+                            if (deviceGroupSelectionVariable) {
+                                add("iot_form_fields", [{name: deviceGroupSelectionVariable, label: "", value: ""}]);
+                                add("group_iot_form_fields", [{name: deviceGroupSelectionVariable, label: "", value: ""}]);
+                            }
                         }
+                    } else {
+                        add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
                     }
-                } else {
-                    add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
                 }
-            }
-            if (
-                incoming.businessObject.$type == "bpmn:StartEvent" &&
-                incoming.businessObject.extensionElements?.values &&
-                incoming.businessObject.extensionElements.values[0] &&
-                incoming.businessObject.extensionElements.values[0].$type == "camunda:FormData"
-            ) {
-                let formFields = incoming.businessObject.extensionElements.values[0].fields;
-                formFields?.forEach(field => {
-                    add("form_fields", [{name: field.id, label: field.label, value: ""}]);
-                    let iotProperty = field.properties.values.find(property => property.id == "iot") ;
-                    if(iotProperty){
-                        add("iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
-                        iotProperty.value.split(",").forEach(iotKind => {
-                            add(iotKind.trim()+"_iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
-                        })
-                    }else {
-                        add("value_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                if (
+                    incoming.businessObject.$type == "bpmn:StartEvent" &&
+                    incoming.businessObject.extensionElements?.values &&
+                    incoming.businessObject.extensionElements.values[0] &&
+                    incoming.businessObject.extensionElements.values[0].$type == "camunda:FormData"
+                ) {
+                    let formFields = incoming.businessObject.extensionElements.values[0].fields;
+                    formFields?.forEach(field => {
+                        add("form_fields", [{name: field.id, label: field.label, value: ""}]);
+                        let iotProperty = field.properties?.values?.find(property => property.id == "iot") ;
+                        if(iotProperty){
+                            add("iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                            iotProperty.value.split(",").forEach(iotKind => {
+                                add(iotKind.trim()+"_iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                            })
+                        }else {
+                            add("value_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                        }
+                    })
+                    if (incoming.businessObject.eventDefinitions && incoming.businessObject.eventDefinitions){
+                        var defaultStartEvent = this.getDefaultStartEvent(incoming.businessObject?.$parent?.flowElements);
+                        if (defaultStartEvent) {
+                            let sub = this.getIncomingOutputs({id: "", incoming: [{source: { businessObject: defaultStartEvent}} as BpmnElementRef]} as BpmnElement, done);
+                            sub.forEach((value, topic) => {
+                                add(topic, value)
+                            })
+                        }
                     }
+                }
+                let sub = this.getIncomingOutputs(incoming, done);
+                sub.forEach((value, topic) => {
+                    add(topic, value)
                 })
             }
-            let sub = this.getIncomingOutputs(incoming, done);
-            sub.forEach((value, topic) => {
-                add(topic, value)
-            })
         }
+
         return result;
+    }
+
+    private getDefaultStartEvent(elements:  BpmnBusinessObject[] | undefined):  BpmnBusinessObject | undefined{
+        return elements?.find(e => e.$type == "bpmn:StartEvent" && !e?.eventDefinitions)
     }
 
     private addPipelineWithOperatorIdOptionsToAvailableVariables() {

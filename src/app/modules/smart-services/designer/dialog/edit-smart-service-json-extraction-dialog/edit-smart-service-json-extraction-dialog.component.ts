@@ -130,47 +130,49 @@ export class EditSmartServiceJsonExtractionDialogComponent implements OnInit {
         }
 
         done.push(element);
-        for (let index = 0; index < element.incoming.length; index++) {
-            const incoming = element.incoming[index].source;
-            if (
-                incoming.businessObject.extensionElements &&
-                incoming.businessObject.extensionElements.values &&
-                incoming.businessObject.extensionElements.values[0] &&
-                incoming.businessObject.extensionElements.values[0].outputParameters
-            ) {
-                add("all", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
-                if(incoming.businessObject.topic) {
-                    const topic = incoming.businessObject.topic;
-                    add(topic, incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject);
-                } else {
-                    add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
-                }
-            }
-            if (
-                incoming.businessObject.$type == "bpmn:StartEvent" &&
-                incoming.businessObject.extensionElements?.values &&
-                incoming.businessObject.extensionElements.values[0] &&
-                incoming.businessObject.extensionElements.values[0].$type == "camunda:FormData"
-            ) {
-                let formFields = incoming.businessObject.extensionElements.values[0].fields;
-                formFields?.forEach(field => {
-                    add("all", [{name: field.id, label: field.label, value: ""}]);
-                    add("form_fields", [{name: field.id, label: field.label, value: ""}]);
-                    let iotProperty = field.properties.values.find(property => property.id == "iot") ;
-                    if(iotProperty){
-                        add("iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
-                        iotProperty.value.split(",").forEach(iotKind => {
-                            add(iotKind.trim()+"_iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
-                        })
-                    }else {
-                        add("value_form_fields", [{name: field.id, label: field.label, value: ""}]);
+        if(element.incoming) {
+            for (let index = 0; index < element.incoming.length; index++) {
+                const incoming = element.incoming[index].source;
+                if (
+                    incoming.businessObject.extensionElements &&
+                    incoming.businessObject.extensionElements.values &&
+                    incoming.businessObject.extensionElements.values[0] &&
+                    incoming.businessObject.extensionElements.values[0].outputParameters
+                ) {
+                    add("all", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
+                    if(incoming.businessObject.topic) {
+                        const topic = incoming.businessObject.topic;
+                        add(topic, incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject);
+                    } else {
+                        add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
                     }
+                }
+                if (
+                    incoming.businessObject.$type == "bpmn:StartEvent" &&
+                    incoming.businessObject.extensionElements?.values &&
+                    incoming.businessObject.extensionElements.values[0] &&
+                    incoming.businessObject.extensionElements.values[0].$type == "camunda:FormData"
+                ) {
+                    let formFields = incoming.businessObject.extensionElements.values[0].fields;
+                    formFields?.forEach(field => {
+                        add("all", [{name: field.id, label: field.label, value: ""}]);
+                        add("form_fields", [{name: field.id, label: field.label, value: ""}]);
+                        let iotProperty = field.properties.values.find(property => property.id == "iot") ;
+                        if(iotProperty){
+                            add("iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                            iotProperty.value.split(",").forEach(iotKind => {
+                                add(iotKind.trim()+"_iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                            })
+                        }else {
+                            add("value_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                        }
+                    })
+                }
+                let sub = this.getIncomingOutputs(incoming, done);
+                sub.forEach((value, topic) => {
+                    add(topic, value)
                 })
             }
-            let sub = this.getIncomingOutputs(incoming, done);
-            sub.forEach((value, topic) => {
-                add(topic, value)
-            })
         }
         return result;
     }

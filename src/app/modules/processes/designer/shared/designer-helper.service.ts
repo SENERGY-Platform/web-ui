@@ -41,17 +41,19 @@ export class DesignerHelperService {
             return result;
         }
         done.push(element);
-        for (let index = 0; index < element.incoming.length; index++) {
-            const incoming = element.incoming[index].source;
-            if (
-                incoming.businessObject.extensionElements &&
-                incoming.businessObject.extensionElements.values &&
-                incoming.businessObject.extensionElements.values[0] &&
-                incoming.businessObject.extensionElements.values[0].outputParameters
-            ) {
-                result = result.concat(incoming.businessObject.extensionElements.values[0].outputParameters);
+        if(element.incoming) {
+            for (let index = 0; index < element.incoming.length; index++) {
+                const incoming = element.incoming[index].source;
+                if (
+                    incoming.businessObject.extensionElements &&
+                    incoming.businessObject.extensionElements.values &&
+                    incoming.businessObject.extensionElements.values[0] &&
+                    incoming.businessObject.extensionElements.values[0].outputParameters
+                ) {
+                    result = result.concat(incoming.businessObject.extensionElements.values[0].outputParameters);
+                }
+                result = result.concat(this.getIncomingOutputs(incoming, done));
             }
-            result = result.concat(this.getIncomingOutputs(incoming, done));
         }
         return result;
     }

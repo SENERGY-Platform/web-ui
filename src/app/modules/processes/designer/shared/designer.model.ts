@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-interface BpmnElementRef {
+export interface BpmnElementRef {
     source: BpmnElement;
 }
 
@@ -34,16 +34,26 @@ interface BpmnExtensionElements {
     values?: BpmnExtensionElementsValue[];
 }
 
-interface BpmnBusinessObject {
+interface BpmnEventDefinitions {
+    $type: string;
+}
+
+export interface BpmnBusinessObject {
     $type: string;
     topic?: string;
     extensionElements: BpmnExtensionElements;
+    eventDefinitions?: BpmnEventDefinitions;
+    $parent?: BpmnParentElement
 }
 
 export interface BpmnElement {
     id: string;
-    incoming: BpmnElementRef[];
+    incoming?: BpmnElementRef[];
     businessObject: BpmnBusinessObject;
+}
+
+interface BpmnParentElement {
+    flowElements?: BpmnBusinessObject[]
 }
 
 interface HistoricDataConfigInterval {
