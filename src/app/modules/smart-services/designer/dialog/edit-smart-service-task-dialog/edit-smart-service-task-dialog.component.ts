@@ -885,14 +885,17 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                             add("value_form_fields", [{name: field.id, label: field.label, value: ""}]);
                         }
                     })
-                    if (incoming.businessObject.eventDefinitions && incoming.businessObject.eventDefinitions){
-                        var defaultStartEvent = this.getDefaultStartEvent(incoming.businessObject?.$parent?.flowElements);
-                        if (defaultStartEvent) {
-                            let sub = this.getIncomingOutputs({id: "", incoming: [{source: { businessObject: defaultStartEvent}} as BpmnElementRef]} as BpmnElement, done);
-                            sub.forEach((value, topic) => {
-                                add(topic, value)
-                            })
-                        }
+                }
+                if (
+                    incoming.businessObject.$type == "bpmn:StartEvent" &&
+                    incoming.businessObject.eventDefinitions
+                ) {
+                    const defaultStartEvent = this.getDefaultStartEvent(incoming.businessObject?.$parent?.flowElements);
+                    if (defaultStartEvent) {
+                        let sub = this.getIncomingOutputs({id: "", incoming: [{source: { businessObject: defaultStartEvent}} as BpmnElementRef]} as BpmnElement, done);
+                        sub.forEach((value, topic) => {
+                            add(topic, value)
+                        })
                     }
                 }
                 let sub = this.getIncomingOutputs(incoming, done);
