@@ -195,7 +195,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                             break;
                         case "device_repository":
                             outputs.push(createTextOutputParameter(bpmnjs, taskId+"_device_group_id", "${device_group_id}"));
-                            outputs.push(createTextOutputParameter(bpmnjs, taskId+"_device_group_selection", "${device_group_selection}"));
+                            outputs.push(createTextOutputParameter(bpmnjs, taskId+"_device_group_selection", "${device_group_iot_option}"));
                             break;
                     }
 
