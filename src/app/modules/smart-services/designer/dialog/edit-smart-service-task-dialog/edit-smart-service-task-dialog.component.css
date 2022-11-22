@@ -72,3 +72,7 @@ mat-dialog-actions button:not(:last-child) {
 .process-start-input-field {
     width: 45%;
 }
+
+.consume-all-messages-checkbox {
+    margin-bottom: 15px;
+}

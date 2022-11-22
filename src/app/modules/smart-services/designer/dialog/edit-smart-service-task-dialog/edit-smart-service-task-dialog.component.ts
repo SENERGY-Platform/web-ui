@@ -446,6 +446,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.setFieldValue(this.analyticsWindowTimeFieldName, "text", value.toString())
     }
 
+    analyticsConsumeAllMessagesFieldName = "analytics.consume_all_messages"
+    get analyticsConsumeAllMessages(): string {
+        return this.getFieldValue(this.analyticsConsumeAllMessagesFieldName, "text", "false");
+    }
+
+    set analyticsConsumeAllMessages(value: string) {
+        this.setFieldValue(this.analyticsConsumeAllMessagesFieldName, "text", value)
+    }
+
     getAnalyticsFlowImage(svgIn: string | SafeHtml, inputId: string): SafeHtml {
         if(!svgIn) {
             return "";
@@ -505,6 +514,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 this.knownInputValues.get(this.analyticsPipelineDescFieldName) || {name:this.analyticsPipelineDescFieldName, value: "", type: "text"},
                 this.knownInputValues.get(this.analyticsWindowTimeFieldName) || {name:this.analyticsWindowTimeFieldName, value: "30", type: "text"},
                 this.knownInputValues.get(this.analyticsMergeStrategyFieldName) || {name:this.analyticsMergeStrategyFieldName, value: "inner", type: "text"},
+                this.knownInputValues.get(this.analyticsConsumeAllMessagesFieldName) || {name:this.analyticsConsumeAllMessagesFieldName, value: "false", type: "text"},
             ];
             inputs.forEach(input => {
                 var persistDataKey = "analytics.persistData."+input.id

@@ -218,6 +218,16 @@
             </mat-form-field>
           </div>
           <div>
+            <mat-checkbox
+                    class="consume-all-messages-checkbox"
+                    [(ngModel)]="analyticsConsumeAllMessages"
+                    stringCheckboxValue
+                    trueValue="true"
+                    falseValue="false">
+              Consume All Messages
+            </mat-checkbox>
+          </div>
+          <div>
             <mat-form-field class="full-width" color="accent">
               <mat-label>Pipeline Merge-Strategy</mat-label>
               <mat-select [(ngModel)]="analyticsMergeStrategy">
