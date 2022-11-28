@@ -54,6 +54,19 @@ import {
     AbstractSmartServiceInput, abstractSmartServiceInputToSmartServiceInputsDescription,
     smartServiceInputsDescriptionToAbstractSmartServiceInput
 } from '../edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';
+import {FunctionsPermSearchModel} from '../../../../metadata/functions/shared/functions-perm-search.model';
+import {DeviceClassesPermSearchModel} from '../../../../metadata/device-classes/shared/device-classes-perm-search.model';
+import {DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
+import {FunctionsService} from '../../../../metadata/functions/shared/functions.service';
+import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
+import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
+
+class Criteria {
+    interaction?: string;
+    function_id?: string;
+    device_class_id?: string;
+    aspect_id?: string;
+}
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -62,7 +75,7 @@ import {
 export class EditSmartServiceTaskDialogComponent implements OnInit {
     init: SmartServiceTaskDescription;
     result: SmartServiceTaskDescription;
-    tabs: string[] = ["process_deployment", "process_deployment_start", "analytics", "export", "import", "info", "device_repository"]
+    tabs: string[] = ["process_deployment", "process_deployment_start", "analytics", "export", "import", "info", "device_repository", "watcher"]
 
     flows: FlowModel[] | null = null
     processModels: ProcessModel[] | null = null
@@ -112,6 +125,24 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         }
     }
 
+    watcherWorkerInfo: {
+        operation: string
+        maintenance_producer: string
+        interval: string,
+        hash_type: string,
+        devices_by_criteria: {
+            criteria: Criteria[]
+        }
+    } = {
+        operation: "devices_by_criteria",
+        maintenance_producer: "",
+        interval: "1h",
+        hash_type: "deviceids",
+        devices_by_criteria: {
+            criteria: [],
+        }
+    }
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
         private processRepo: ProcessRepoService,
@@ -121,6 +152,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         private importTypeService: ImportTypesService,
         private sanitizer: DomSanitizer,
         private exportService: ExportService,
+        private functionsService: FunctionsService,
+        private deviceTypesService: DeviceTypeService,
+        private deviceClassService: DeviceClassesService,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription, element: BpmnElement},
     ) {
         this.smartServiceBpmnElement = dialogParams.element;
@@ -146,7 +180,27 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.infoModuleData = this.result.inputs.find(value => value.name == "info.module_data")?.value || "{\n\n}";
         this.processStart = this.inputsToProcessStartModel(this.result.inputs);
         this.smartServiceInputs = smartServiceInputsDescriptionToAbstractSmartServiceInput(dialogParams.info.smartServiceInputs);
-        this.initDeviceRepositoryWorkerInfo(dialogParams.info.inputs)
+        this.initDeviceRepositoryWorkerInfo(dialogParams.info.inputs);
+        this.initWatcherInfo(dialogParams.info.inputs);
+
+        this.functionsService.getFunctions("", 9999, 0, "name", "asc").subscribe(value => {
+            this.functions = value;
+        })
+        this.deviceClassService.getDeviceClasses("", 9999, 0, "name", "asc").subscribe(value => {
+            this.deviceClasses = value;
+        })
+        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
+            const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            const asp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+            aspects.forEach(a => {
+                if (!tmp.has(a.root_id)) {
+                    tmp.set(a.root_id, []);
+                }
+                tmp.get(a.root_id)?.push(a);
+            });
+            tmp.forEach((v, k) => asp.set(aspects.find(a => a.id === k)?.name || '', v));
+            this.nestedAspects = asp;
+        });
     }
 
     ngOnInit() {}
@@ -1033,6 +1087,99 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         return result;
     }
 
+
+    functions: (FunctionsPermSearchModel | {id?:string, name: string})[] = [];
+    deviceClasses: (DeviceClassesPermSearchModel | {id?:string, name: string})[] = [];
+    nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
+
+    removeCriteria(list: Criteria[], index: number): Criteria[] {
+        list.splice(index, 1);
+        return list
+    }
+
+    addCriteria(list: Criteria[]): Criteria[] {
+        list.push({interaction: "request", aspect_id: "", device_class_id: "", function_id: ""});
+        return list
+    }
+
+    criteriaToLabel(criteria: {interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string}): string {
+        let functionName = ""
+        if(criteria.function_id) {
+            functionName = this.functions.find(v => v.id == criteria.function_id)?.name || criteria.function_id
+        }
+        let deviceClassName = ""
+        if(criteria.device_class_id) {
+            deviceClassName = this.deviceClasses.find(v => v.id == criteria.device_class_id)?.name || criteria.device_class_id
+        }
+        let aspectName = ""
+        if(criteria.aspect_id) {
+            this.nestedAspects.forEach((value, _) => {
+                let temp = value.find(v => v.id == criteria.aspect_id)?.name;
+                if(temp) {
+                    aspectName = temp;
+                }
+            })
+            if(!aspectName) {
+                aspectName = criteria.aspect_id;
+            }
+        }
+
+        let parts: string[] = [];
+        if(criteria.interaction) {
+            parts.push(criteria.interaction)
+        }
+        if(aspectName) {
+            parts.push(aspectName)
+        }
+        if(deviceClassName) {
+            parts.push(deviceClassName)
+        }
+        if(functionName) {
+            parts.push(functionName)
+        }
+        return parts.join(" | ");
+    }
+
+    watcherMaintenanceProducerFieldKey = "watcher.maintenance_procedure"
+    watcherWatchIntervalFieldKey = "watcher.watch_interval"
+    watcherHashTypeFieldKey = "watcher.hash_type"
+    watcherDevicesByCriteriaFieldKey = "watcher.watch_devices_by_criteria"
+
+    private initWatcherInfo(inputs: SmartServiceTaskInputDescription[]) {
+        inputs.forEach(input => {
+            if(input.name == this.watcherMaintenanceProducerFieldKey) {
+                this.watcherWorkerInfo.maintenance_producer = input.value
+            }
+            if(input.name == this.watcherWatchIntervalFieldKey) {
+                this.watcherWorkerInfo.interval = input.value
+            }
+            if(input.name == this.watcherHashTypeFieldKey) {
+                this.watcherWorkerInfo.hash_type = input.value
+            }
+            if(input.name == this.watcherDevicesByCriteriaFieldKey) {
+                this.watcherWorkerInfo.devices_by_criteria.criteria = JSON.parse(input.value)
+                this.watcherWorkerInfo.operation = "devices_by_criteria";
+            }
+        });
+        if(!this.watcherWorkerInfo.operation) {
+            this.deviceRepositoryWorkerInfo.operation = "devices_by_criteria";
+        }
+    }
+
+    private watcherWorkerInfoToInputs(): SmartServiceTaskInputDescription[] {
+        let result :SmartServiceTaskInputDescription[] = [];
+        result.push({name: this.watcherMaintenanceProducerFieldKey, type: "text", value: this.watcherWorkerInfo.maintenance_producer});
+        result.push({name: this.watcherWatchIntervalFieldKey, type: "text", value: this.watcherWorkerInfo.operation});
+        result.push({name: this.watcherHashTypeFieldKey, type: "text", value: this.watcherWorkerInfo.hash_type});
+        switch (this.watcherWorkerInfo.operation){
+            case "devices_by_criteria": {
+                result.push({name: this.watcherDevicesByCriteriaFieldKey, type: "text", value: JSON.stringify(this.watcherWorkerInfo.devices_by_criteria.criteria)});
+                break;
+            }
+        }
+        return result;
+    }
+
     isInvalid(): boolean {
         switch (this.result.topic){
             case "export":
@@ -1103,6 +1250,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                                             !e.name.startsWith("process_deployment_start.") &&
                                             !e.name.startsWith("import.") &&
                                             !e.name.startsWith("export.") &&
+                                            !e.name.startsWith("watcher.") &&
                                             !e.name.startsWith("device_repository.")); //filter unused inputs (remove existing info, process_deployment_start, import and export inputs)
 
         temp.push({name: "export.request", type: "text", value: this.stringifyExport(this.exportRequest)});
@@ -1121,6 +1269,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         temp = temp.concat(this.processStartModelToInputs(this.processStart));
 
         temp = temp.concat(this.deviceRepositoryWorkerInfoToInputs());
+
+        temp = temp.concat(this.watcherWorkerInfoToInputs())
 
         temp = temp.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
 

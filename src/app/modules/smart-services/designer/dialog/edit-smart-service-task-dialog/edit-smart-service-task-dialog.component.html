@@ -619,6 +619,109 @@
         </ng-container>
       </div>
     </mat-tab>
+    <mat-tab label="Watcher">
+      <div class="smart-service-task-tab">
+        <div>
+          <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="Task-Name" [(ngModel)]="result.name" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="Maintenance-Procedure Msg-Name" [(ngModel)]="watcherWorkerInfo.maintenance_producer" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="Interval" [(ngModel)]="watcherWorkerInfo.interval" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width" color="accent">
+            <mat-label>Hash-Type</mat-label>
+            <mat-select [(ngModel)]="watcherWorkerInfo.hash_type">
+              <mat-option value="deviceids">deviceids</mat-option>
+              <mat-option value="md5">md5</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="full-width" color="accent">
+            <mat-label>Operation</mat-label>
+            <mat-select [(ngModel)]="watcherWorkerInfo.operation">
+              <mat-option value="devices_by_criteria">Watch Devices by Criteria</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <ng-container *ngIf="watcherWorkerInfo.operation == 'devices_by_criteria'">
+          <mat-divider [inset]="true"></mat-divider>
+          <h4 class="mat-h4">Criteria</h4>
+          <mat-accordion>
+            <mat-expansion-panel *ngFor="let criteria of watcherWorkerInfo.devices_by_criteria.criteria; let i = index">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  {{criteriaToLabel(criteria)}}
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div>
+                <div>
+                  <mat-form-field class="full-width">
+                    <mat-label>Interaction</mat-label>
+                    <mat-select [(ngModel)]="criteria.interaction">
+                      <mat-option [value]="undefined">NONE</mat-option>
+                      <mat-option value="event">event</mat-option>
+                      <mat-option value="request">request</mat-option>
+                      <mat-option value="event+request">event+request</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div>
+                  <div>
+                    <mat-form-field class="form-field full-width" color="accent">
+                      <senergy-select-search placeholder="Function"
+                                             [(ngModel)]="criteria.function_id"
+                                             [options]="functions"
+                                             noneView="NONE"
+                                             useOptionViewProperty="name"
+                                             useOptionValueProperty="id">
+                      </senergy-select-search>
+                    </mat-form-field>
+                  </div>
+                  <div>
+                    <mat-form-field class="form-field full-width" color="accent">
+                      <senergy-select-search placeholder="Aspect"
+                                             [(ngModel)]="criteria.aspect_id"
+                                             [options]="nestedAspects"
+                                             noneView="NONE"
+                                             useOptionViewProperty="name"
+                                             useOptionValueProperty="id">
+                      </senergy-select-search>
+                    </mat-form-field>
+                  </div>
+                  <div>
+                    <mat-form-field class="form-field full-width" color="accent">
+                      <senergy-select-search placeholder="Device-Class"
+                                             [(ngModel)]="criteria.device_class_id"
+                                             [options]="deviceClasses"
+                                             noneView="NONE"
+                                             useOptionViewProperty="name"
+                                             useOptionValueProperty="id">
+                      </senergy-select-search>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div>
+                  <button mat-raised-button color="accent" (click)="watcherWorkerInfo.devices_by_criteria.criteria = removeCriteria(watcherWorkerInfo.devices_by_criteria.criteria, i)">Remove Criteria</button>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+          <div>
+            <button mat-raised-button color="accent" (click)="watcherWorkerInfo.devices_by_criteria.criteria = addCriteria(watcherWorkerInfo.devices_by_criteria.criteria)">Add Criteria</button>
+          </div>
+        </ng-container>
+      </div>
+    </mat-tab>
   </mat-tab-group>
 </mat-dialog-content>
 
