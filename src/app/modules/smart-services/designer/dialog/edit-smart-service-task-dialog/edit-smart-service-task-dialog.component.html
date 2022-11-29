@@ -650,6 +650,7 @@
             <mat-label>Operation</mat-label>
             <mat-select [(ngModel)]="watcherWorkerInfo.operation">
               <mat-option value="devices_by_criteria">Watch Devices by Criteria</mat-option>
+              <mat-option value="watch_request">Watch Generic Request</mat-option>
             </mat-select>
           </mat-form-field>
         </div>
@@ -718,6 +719,41 @@
           </mat-accordion>
           <div>
             <button mat-raised-button color="accent" (click)="watcherWorkerInfo.devices_by_criteria.criteria = addCriteria(watcherWorkerInfo.devices_by_criteria.criteria)">Add Criteria</button>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="watcherWorkerInfo.operation == 'watch_request'">
+          <div>
+            <mat-form-field class="full-width" color="accent">
+              <mat-label>Method</mat-label>
+              <mat-select [(ngModel)]="watcherWorkerInfo.request.method">
+                <mat-option value="GET">GET</mat-option>
+                <mat-option value="HEAD">HEAD</mat-option>
+                <mat-option value="POST">POST</mat-option>
+                <mat-option value="PUT">PUT</mat-option>
+                <mat-option value="DELETE">DELETE</mat-option>
+                <mat-option value="PATCH">PATCH</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field  color="accent" class="full-width">
+              <input matInput placeholder="Endpoint" [(ngModel)]="watcherWorkerInfo.request.endpoint" type="text">
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field  color="accent" class="full-width">
+              <input matInput placeholder="Body" [(ngModel)]="watcherWorkerInfo.request.body" type="text" matTooltip="as base64 encoded byte array">
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field  color="accent" class="full-width">
+              <input matInput placeholder="Body" [(ngModel)]="watcherWorkerInfoRequestHeader" type="text" isValidJson>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-checkbox class="checkbox-margin" [(ngModel)]="watcherWorkerInfo.request.add_auth_token" matTooltip="adds the users platform auth token to the request">
+              Add Auth-Token
+            </mat-checkbox>
           </div>
         </ng-container>
       </div>

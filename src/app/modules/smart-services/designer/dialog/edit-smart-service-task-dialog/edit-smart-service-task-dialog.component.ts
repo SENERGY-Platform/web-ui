@@ -61,11 +61,19 @@ import {FunctionsService} from '../../../../metadata/functions/shared/functions.
 import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
 
-class Criteria {
+interface Criteria {
     interaction?: string;
     function_id?: string;
     device_class_id?: string;
     aspect_id?: string;
+}
+
+interface GenericWatcherRequest {
+    method: string
+    endpoint: string
+    body?: string //base64 encoded byte array
+    add_auth_token: boolean
+    header?: {[index:string]: string[]}
 }
 
 @Component({
@@ -133,6 +141,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         devices_by_criteria: {
             criteria: Criteria[]
         }
+        request: GenericWatcherRequest
     } = {
         operation: "devices_by_criteria",
         maintenance_producer: "",
@@ -140,6 +149,13 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         hash_type: "deviceids",
         devices_by_criteria: {
             criteria: [],
+        },
+        request: {
+            method: "GET",
+            endpoint: "http://example.com",
+            body: "",
+            add_auth_token: false,
+            header: {"Accept-Charset":["utf-8"]}
         }
     }
 
@@ -1144,6 +1160,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     watcherWatchIntervalFieldKey = "watcher.watch_interval"
     watcherHashTypeFieldKey = "watcher.hash_type"
     watcherDevicesByCriteriaFieldKey = "watcher.watch_devices_by_criteria"
+    watcherRequestFieldKey = "watcher.watch_request"
 
     private initWatcherInfo(inputs: SmartServiceTaskInputDescription[]) {
         inputs.forEach(input => {
@@ -1159,6 +1176,13 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             if(input.name == this.watcherDevicesByCriteriaFieldKey) {
                 this.watcherWorkerInfo.devices_by_criteria.criteria = JSON.parse(input.value)
                 this.watcherWorkerInfo.operation = "devices_by_criteria";
+            }
+            if(input.name == this.watcherRequestFieldKey) {
+                this.watcherWorkerInfo.request = JSON.parse(input.value);
+                if(!this.watcherWorkerInfo.request.body) {
+                    this.watcherWorkerInfo.request.body = "";
+                }
+                this.watcherWorkerInfo.operation = "watch_request";
             }
         });
         if(!this.watcherWorkerInfo.operation) {
@@ -1176,8 +1200,32 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 result.push({name: this.watcherDevicesByCriteriaFieldKey, type: "text", value: JSON.stringify(this.watcherWorkerInfo.devices_by_criteria.criteria)});
                 break;
             }
+            case "watch_request": {
+                let req = this.watcherWorkerInfo.request
+                if(req.body == "") {
+                    req.body = undefined;
+                }
+                result.push({name: this.watcherRequestFieldKey, type: "text", value: JSON.stringify(req)});
+                break;
+            }
         }
         return result;
+    }
+
+    watcherWorkerInfoRequestHeaderValue = ""
+    get watcherWorkerInfoRequestHeader(): string{
+        if(!this.watcherWorkerInfoRequestHeaderValue) {
+            this.watcherWorkerInfoRequestHeaderValue = JSON.stringify(this.watcherWorkerInfo.request.header);
+        }
+        return this.watcherWorkerInfoRequestHeaderValue
+    }
+
+    set watcherWorkerInfoRequestHeader(str: string){
+        let temp = this.watcherWorkerInfo.request.header;
+        try {
+            temp = JSON.parse(str);
+            this.watcherWorkerInfo.request.header = temp;
+        } catch (e) {}
     }
 
     isInvalid(): boolean {
