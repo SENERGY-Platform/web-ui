@@ -112,6 +112,26 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         });
     }
 
+    showFunction(inputFunction: FunctionsPermSearchModel): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            function: JSON.parse(JSON.stringify(inputFunction)), // create copy of object
+            disabled: true,
+        };
+
+        const editDialogRef = this.dialog.open(FunctionsEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((newFunction: DeviceTypeFunctionModel) => {
+            if (newFunction !== undefined) {
+                this.reset();
+                this.functionsService.updateFunction(newFunction).subscribe((func: DeviceTypeFunctionModel | null) => {
+                    this.reloadAndShowSnackbar(func, 'updat');
+                });
+            }
+        });
+    }
+
     newFunction(): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;

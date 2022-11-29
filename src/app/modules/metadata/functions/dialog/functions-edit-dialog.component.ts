@@ -30,12 +30,15 @@ export class FunctionsEditDialogComponent implements OnInit {
 
     concepts: ConceptsPermSearchModel[] = [];
 
+    disabled: boolean
+
     constructor(
         private conceptsService: ConceptsService,
         private dialogRef: MatDialogRef<FunctionsEditDialogComponent>,
         private _formBuilder: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: { function: FunctionsPermSearchModel },
+        @Inject(MAT_DIALOG_DATA) data: { function: FunctionsPermSearchModel, disabled?:boolean },
     ) {
+        this.disabled = !!data.disabled;
         this.initFunctionFormGroup(data.function);
     }
 
@@ -58,12 +61,22 @@ export class FunctionsEditDialogComponent implements OnInit {
     }
 
     private initFunctionFormGroup(func: FunctionsPermSearchModel): void {
-        this.functionFormGroup = this._formBuilder.group({
-            id: [{ value: func.id, disabled: true }],
-            name: [func.name, Validators.required],
-            display_name: func.display_name,
-            concept_id: func.concept_id,
-            description: func.description,
-        });
+        if(this.disabled) {
+            this.functionFormGroup = this._formBuilder.group({
+                id: [{ value: func.id, disabled: true }],
+                name: [{disabled: true, value: func.name}],
+                display_name: [{disabled: true, value: func.display_name }],
+                concept_id: [{disabled: true, value: func.concept_id }],
+                description: [{disabled: true, value: func.description }],
+            });
+        } else {
+            this.functionFormGroup = this._formBuilder.group({
+                id: [{ value: func.id, disabled: true }],
+                name: [func.name, Validators.required],
+                display_name: func.display_name,
+                concept_id: func.concept_id,
+                description: func.description,
+            });
+        }
     }
 }

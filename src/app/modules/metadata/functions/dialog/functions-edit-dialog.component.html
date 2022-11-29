@@ -43,9 +43,12 @@
     </form>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions fxLayoutAlign="end center" *ngIf="!disabled">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" [disabled]="functionFormGroup.invalid"
             (click)="save()">Save
     </button>
+</mat-dialog-actions>
+<mat-dialog-actions fxLayoutAlign="end center" *ngIf="disabled">
+    <button mat-raised-button color="primary" (click)="close()">Close</button>
 </mat-dialog-actions>
