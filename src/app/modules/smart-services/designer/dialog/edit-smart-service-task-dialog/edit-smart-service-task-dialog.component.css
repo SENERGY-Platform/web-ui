@@ -76,3 +76,14 @@ mat-dialog-actions button:not(:last-child) {
 .consume-all-messages-checkbox {
     margin-bottom: 15px;
 }
+
+.divider {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.maintenanceInput {
+    justify-content: space-between;
+    display: flex;
+    align-items: baseline;
+}

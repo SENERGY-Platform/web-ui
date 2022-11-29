@@ -628,11 +628,6 @@
         </div>
         <div>
           <mat-form-field  color="accent" class="full-width">
-            <input matInput placeholder="Maintenance-Procedure Msg-Name" [(ngModel)]="watcherWorkerInfo.maintenance_producer" type="text">
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field  color="accent" class="full-width">
             <input matInput placeholder="Interval" [(ngModel)]="watcherWorkerInfo.interval" type="text">
           </mat-form-field>
         </div>
@@ -646,8 +641,35 @@
           </mat-form-field>
         </div>
         <div>
+          <mat-form-field  color="accent" class="full-width">
+            <input matInput placeholder="Maintenance-Procedure Event-Msg-Name" [(ngModel)]="watcherWorkerInfo.maintenance_producer" type="text">
+          </mat-form-field>
+        </div>
+        <div>
+          <div class="divider">
+            Maintenance-Inputs
+            <mat-divider></mat-divider>
+          </div>
+          <div *ngFor="let inp of watcherWorkerInfo.maintenance_procedure_inputs; let i = index" class="maintenanceInput">
+            <mat-form-field class="third-width" color="accent" fxFlex>
+              <input matInput placeholder="Key" [(ngModel)]="inp.key" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+            <span style="width: 2em"></span>
+            <mat-form-field class="third-width" color="accent" fxFlex>
+              <input matInput placeholder="Value" [(ngModel)]="inp.value" [ngModelOptions]="{standalone: true}" matTooltip="preferred as json value">
+            </mat-form-field>
+            <button mat-icon-button color="warn" (click)="watcherWorkerInfo.maintenance_procedure_inputs.splice(i, 1)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <button mat-stroked-button color="accent" (click)="watcherWorkerInfo.maintenance_procedure_inputs.push({key: '', value: ''})">Add Input</button>
+          <div class="divider">
+            <mat-divider></mat-divider>
+          </div>
+        </div>
+        <div>
           <mat-form-field class="full-width" color="accent">
-            <mat-label>Operation</mat-label>
+            <mat-label>Watch-Operation</mat-label>
             <mat-select [(ngModel)]="watcherWorkerInfo.operation">
               <mat-option value="devices_by_criteria">Watch Devices by Criteria</mat-option>
               <mat-option value="watch_request">Watch Generic Request</mat-option>

@@ -138,6 +138,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         maintenance_producer: string
         interval: string,
         hash_type: string,
+        maintenance_procedure_inputs: {key: string, value: string}[]
         devices_by_criteria: {
             criteria: Criteria[]
         }
@@ -147,6 +148,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         maintenance_producer: "",
         interval: "1h",
         hash_type: "deviceids",
+        maintenance_procedure_inputs: [],
         devices_by_criteria: {
             criteria: [],
         },
@@ -1161,6 +1163,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     watcherHashTypeFieldKey = "watcher.hash_type"
     watcherDevicesByCriteriaFieldKey = "watcher.watch_devices_by_criteria"
     watcherRequestFieldKey = "watcher.watch_request"
+    watcherMaintenanceProducerInputsPrefix = "watcher.maintenance_procedure_inputs."
 
     private initWatcherInfo(inputs: SmartServiceTaskInputDescription[]) {
         inputs.forEach(input => {
@@ -1176,6 +1179,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             if(input.name == this.watcherDevicesByCriteriaFieldKey) {
                 this.watcherWorkerInfo.devices_by_criteria.criteria = JSON.parse(input.value)
                 this.watcherWorkerInfo.operation = "devices_by_criteria";
+            }
+            if(input.name.startsWith(this.watcherMaintenanceProducerInputsPrefix)){
+                if (!this.watcherWorkerInfo.maintenance_procedure_inputs) {
+                    this.watcherWorkerInfo.maintenance_procedure_inputs = [];
+                }
+                this.watcherWorkerInfo.maintenance_procedure_inputs.push({
+                    key: input.name.slice(this.watcherMaintenanceProducerInputsPrefix.length),
+                    value: input.value
+                })
             }
             if(input.name == this.watcherRequestFieldKey) {
                 this.watcherWorkerInfo.request = JSON.parse(input.value);
@@ -1193,8 +1205,13 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     private watcherWorkerInfoToInputs(): SmartServiceTaskInputDescription[] {
         let result :SmartServiceTaskInputDescription[] = [];
         result.push({name: this.watcherMaintenanceProducerFieldKey, type: "text", value: this.watcherWorkerInfo.maintenance_producer});
-        result.push({name: this.watcherWatchIntervalFieldKey, type: "text", value: this.watcherWorkerInfo.operation});
+        result.push({name: this.watcherWatchIntervalFieldKey, type: "text", value: this.watcherWorkerInfo.interval});
         result.push({name: this.watcherHashTypeFieldKey, type: "text", value: this.watcherWorkerInfo.hash_type});
+        if(this.watcherWorkerInfo.maintenance_procedure_inputs) {
+            this.watcherWorkerInfo.maintenance_procedure_inputs.forEach((v)=> {
+                result.push({name: this.watcherMaintenanceProducerInputsPrefix+v.key, type: "text", value: v.value});
+            })
+        }
         switch (this.watcherWorkerInfo.operation){
             case "devices_by_criteria": {
                 result.push({name: this.watcherDevicesByCriteriaFieldKey, type: "text", value: JSON.stringify(this.watcherWorkerInfo.devices_by_criteria.criteria)});
