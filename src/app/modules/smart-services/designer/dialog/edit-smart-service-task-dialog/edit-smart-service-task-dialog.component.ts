@@ -458,6 +458,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
      *      Analytics
      ******************************/
 
+    analyticsKeyFieldName = "analytics.key"
+    get analyticsKeyId(): string{
+        return this.getFieldValue(this.analyticsKeyFieldName, "text", "")
+    }
+
+    set analyticsKeyId(value: string){
+        this.setFieldValue(this.analyticsKeyFieldName, "text", value)
+    }
+
     analyticsFlowIdFieldName = "analytics.flow_id"
     get analyticsFlowId(): string {
         return this.getFieldValue(this.analyticsFlowIdFieldName, "text", "")

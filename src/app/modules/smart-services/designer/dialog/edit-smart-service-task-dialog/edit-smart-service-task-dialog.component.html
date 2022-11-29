@@ -193,6 +193,11 @@
             </mat-form-field>
           </div>
           <div>
+            <mat-form-field  color="accent" class="full-width">
+              <input matInput placeholder="Key" [(ngModel)]="analyticsKeyId" type="text" matTooltip="optional key used to reference the module for updates">
+            </mat-form-field>
+          </div>
+          <div>
             <mat-form-field class="form-field full-width" color="accent">
               <senergy-select-search placeholder="Flow"
                                      [(ngModel)]="analyticsFlowId"
