@@ -60,13 +60,13 @@
                 <div *ngFor="let _ of allowedValues; let i = index; trackBy: trackByFn" class="allowed-value-container">
                     <mat-form-field *ngIf="showValue()" appearance="outline" color="accent" class="full-width">
                         <input [type]="getType()" matInput [(ngModel)]="allowedValues[i]" [ngModelOptions]="{standalone: true}" (ngModelChange)="refreshFormAllowedValues()">
-                        <button mat-icon-button matSuffix (click)="removeAllowedValue(i)">
+                        <button mat-icon-button matSuffix (click)="removeAllowedValue(i)" [disabled]="disabled">
                             <mat-icon>delete</mat-icon>
                         </button>
                     </mat-form-field>
 
                 </div>
-                <button mat-icon-button (click)="addAllowedValue()">
+                <button mat-icon-button (click)="addAllowedValue()" [disabled]="disabled">
                     <mat-icon>add</mat-icon>
                 </button>
             </div>
@@ -75,7 +75,7 @@
 
     <div *ngIf="isStructureOrList()">
         <div>
-            <button mat-stroked-button color="accent" (click)="addSubCharacteristic()">
+            <button mat-stroked-button color="accent" (click)="addSubCharacteristic()" [disabled]="disabled">
                 <mat-icon>add</mat-icon>
                 Sub Characteristic
             </button>
@@ -90,14 +90,14 @@
                     </button>
                     <span class="node-title">{{node.name}}</span>
                     <span class="spacer"></span>
-                    <button mat-stroked-button color="warn" (click)="deleteSubCharacteristic(node)" class="button-after-spacer">
+                    <button mat-stroked-button color="warn" (click)="deleteSubCharacteristic(node)" class="button-after-spacer" [disabled]="disabled">
                         <mat-icon>delete</mat-icon>
                         Delete
                     </button>
                 </div>
                 <div *ngIf="treeControl.isExpanded(node)">
                     <ng-container>
-                        <senergy-characteristic-element [data]="node" [nested]="true"
+                        <senergy-characteristic-element [data]="node" [nested]="true" [disabled]="disabled"
                                                         (valueChange)="updateSubCharacteristic($event, node)"></senergy-characteristic-element>
                     </ng-container>
                 </div>

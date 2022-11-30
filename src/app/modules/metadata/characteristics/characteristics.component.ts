@@ -170,6 +170,35 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         });
     }
 
+    showCharacteristic(inputCharacteristic: CharacteristicsPermSearchModel): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            characteristic: JSON.parse(JSON.stringify(inputCharacteristic)), // create copy of object
+            disabled: true
+        };
+
+        const editDialogRef = this.dialog.open(CharacteristicsEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((resp: { conceptId: string; characteristic: DeviceTypeCharacteristicsModel }) => {
+            if (resp !== undefined) {
+                const newCharacteristic = resp.characteristic;
+                this.reset();
+                this.characteristicsService
+                    .updateConcept(newCharacteristic)
+                    .subscribe((characteristic: DeviceTypeCharacteristicsModel | null) => {
+                        if (characteristic === null) {
+                            this.snackBar.open('Error while updating the characteristic!', "close", { panelClass: "snack-bar-error" });
+                            this.getCharacteristics(true);
+                        } else {
+                            this.snackBar.open('Characteristic updated successfully.', undefined, {duration: 2000});
+                            this.reloadCharacterisitics(true);
+                        }
+                    });
+            }
+        });
+    }
+
     private getCharacteristics(reset: boolean) {
         if (reset) {
             this.reset();

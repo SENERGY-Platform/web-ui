@@ -30,6 +30,7 @@ export class CharacteristicElementComponent implements OnInit {
 
     @Input() data: DeviceTypeCharacteristicsModel | undefined;
     @Input() nested = false;
+    @Input() disabled = false;
     @Output() valueChange = new EventEmitter<DeviceTypeCharacteristicsModel>();
 
     treeControl = new NestedTreeControl<DeviceTypeCharacteristicsModel>((node) => node.sub_characteristics || []);
@@ -110,6 +111,11 @@ export class CharacteristicElementComponent implements OnInit {
                 });
             }
         });
+        if(this.disabled) {
+            Object.keys(this.form.controls).forEach(key => {
+                this.form.get(key)?.disable();
+            })
+        }
     }
 
 

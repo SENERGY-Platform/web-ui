@@ -52,6 +52,10 @@
                                 <form fxLayout="row" class="footer-buttons">
                                     <div fxFlex></div>
                                     <div [fxLayoutAlign]="'start center'">
+                                        <button (click)="showCharacteristic(characteristic)" *ngIf="!characteristic.permissions.w"
+                                                mat-icon-button color="accent" matTooltip="Info">
+                                            <mat-icon>info</mat-icon>
+                                        </button>
                                         <button (click)="editCharacteristic(characteristic)" [disabled]="!characteristic.permissions.w"
                                                 mat-icon-button color="accent" matTooltip="Edit">
                                             <mat-icon>edit</mat-icon>

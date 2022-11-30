@@ -18,13 +18,17 @@
 
 <mat-dialog-content>
     <form class="form">
-        <senergy-characteristic-element [data]="baseCharacteristic" #characteristicElementComponent></senergy-characteristic-element>
+        <senergy-characteristic-element [data]="baseCharacteristic" [disabled]="disabled" #characteristicElementComponent></senergy-characteristic-element>
     </form>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions fxLayoutAlign="end center" *ngIf="!disabled">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" [disabled]="!this.characteristicElementComponent.isValid()"
             (click)="save()">Save
     </button>
+</mat-dialog-actions>
+
+<mat-dialog-actions fxLayoutAlign="end center" *ngIf="disabled">
+    <button mat-raised-button color="primary" (click)="close()">Close</button>
 </mat-dialog-actions>
