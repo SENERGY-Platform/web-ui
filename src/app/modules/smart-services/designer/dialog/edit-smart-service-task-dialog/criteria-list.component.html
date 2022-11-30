@@ -1,0 +1,72 @@
+<mat-accordion>
+    <mat-expansion-panel *ngFor="let criteria of criteriaList; let i = index">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                {{criteriaToLabel(criteria)}}
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+            <div>
+                <mat-form-field class="full-width">
+                    <mat-label>Interaction</mat-label>
+                    <mat-select [(ngModel)]="criteria.interaction" (selectionChange)="emitUpdate()">
+                        <mat-option [value]="undefined">NONE</mat-option>
+                        <mat-option value="event">event</mat-option>
+                        <mat-option value="request">request</mat-option>
+                        <mat-option value="event+request">event+request</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div>
+                <div>
+                    <mat-form-field class="form-field full-width" color="accent">
+                        <senergy-select-search placeholder="Function"
+                                               [(ngModel)]="criteria.function_id"
+                                               [options]="functions"
+                                               (selectionChange)="emitUpdate()"
+                                               noneView="NONE"
+                                               useOptionViewProperty="name"
+                                               useOptionValueProperty="id">
+                        </senergy-select-search>
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-form-field class="form-field full-width" color="accent">
+                        <senergy-select-search placeholder="Aspect"
+                                               [(ngModel)]="criteria.aspect_id"
+                                               [options]="nestedAspects"
+                                               (selectionChange)="emitUpdate()"
+                                               noneView="NONE"
+                                               useOptionViewProperty="name"
+                                               useOptionValueProperty="id">
+                        </senergy-select-search>
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-form-field class="form-field full-width" color="accent">
+                        <senergy-select-search placeholder="Device-Class"
+                                               [(ngModel)]="criteria.device_class_id"
+                                               [options]="deviceClasses"
+                                               (selectionChange)="emitUpdate()"
+                                               noneView="NONE"
+                                               useOptionViewProperty="name"
+                                               useOptionValueProperty="id">
+                        </senergy-select-search>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div>
+                <button mat-raised-button color="accent"
+                        (click)="criteriaList = removeCriteria(criteriaList, i); emitUpdate()">
+                    Remove Criteria
+                </button>
+            </div>
+        </div>
+    </mat-expansion-panel>
+</mat-accordion>
+<div>
+    <button mat-raised-button color="accent" class="add-criteria-button"
+            (click)="criteriaList = addCriteria(criteriaList); emitUpdate()">
+        Add Criteria
+    </button>
+</div>

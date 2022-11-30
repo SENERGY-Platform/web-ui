@@ -280,9 +280,9 @@
                           </mat-form-field>
                         </div>
                         <div *ngIf="analyticsInputMatchesIotCriteria(input, flowInput.id, port)">
-                          <mat-form-field  color="accent" class="full-width">
-                            <input matInput placeholder="IoT-Criteria" [(ngModel)]="input.value" required>
-                          </mat-form-field>
+                          <mat-divider [inset]="true"></mat-divider>
+                          <h4 class="mat-h4">Criteria</h4>
+                          <criteria-list (on_change)="input.value = $event" [criteria_json]="input.value"></criteria-list>
                         </div>
                       </ng-container>
                     </div>
@@ -774,7 +774,7 @@
           </div>
           <div>
             <mat-form-field  color="accent" class="full-width">
-              <input matInput placeholder="Body" [(ngModel)]="watcherWorkerInfoRequestHeader" type="text" isValidJson>
+              <input matInput placeholder="Headers" [(ngModel)]="watcherWorkerInfoRequestHeader" type="text" isValidJson>
             </mat-form-field>
           </div>
           <div>
