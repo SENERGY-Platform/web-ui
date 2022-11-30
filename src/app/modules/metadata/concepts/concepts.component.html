@@ -49,6 +49,10 @@
                                             <mat-icon>more_vert</mat-icon>
                                         </button>
                                         <mat-menu #menu="matMenu" [overlapTrigger]="false">
+                                            <button mat-menu-item (click)="showConcept(concept)" *ngIf="!concept.permissions.w">
+                                                <mat-icon>info</mat-icon>
+                                                <span>Info</span>
+                                            </button>
                                             <button mat-menu-item (click)="editConcept(concept)" [disabled]="!concept.permissions.w">
                                                 <mat-icon>edit</mat-icon>
                                                 <span>Edit</span>

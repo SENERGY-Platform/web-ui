@@ -48,14 +48,17 @@ export class ConceptsEditDialogComponent implements OnInit {
     testerr: string | null | undefined
     testoutput: string = ""
 
+    disabled: boolean
+
     constructor(
         private dialogRef: MatDialogRef<ConceptsEditDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data: { conceptId: string },
+        @Inject(MAT_DIALOG_DATA) data: { conceptId: string, disabled?: boolean },
         private conceptsService: ConceptsService,
         private characteristicsService: CharacteristicsService,
         private cd: ChangeDetectorRef,
     ) {
         this.conceptId = data.conceptId;
+        this.disabled = !!data.disabled;
     }
 
     ngOnInit(): void {
@@ -76,6 +79,11 @@ export class ConceptsEditDialogComponent implements OnInit {
             this.baseCharacteristicControl.setValue(this.concept?.base_characteristic_id);
             this.ready = true;
             this.cd.detectChanges();
+            if(this.disabled) {
+                this.baseCharacteristicControl.disable();
+                this.nameFormControl.disable();
+                this.characteristicsControl.disable();
+            }
         });
     }
 

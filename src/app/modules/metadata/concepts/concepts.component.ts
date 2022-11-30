@@ -134,6 +134,31 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         });
     }
 
+    showConcept(conceptInput: ConceptsPermSearchModel) {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = {
+            conceptId: conceptInput.id,
+            disabled: true,
+        };
+        const editDialogRef = this.dialog.open(ConceptsEditDialogComponent, dialogConfig);
+
+        editDialogRef.afterClosed().subscribe((editConcept: DeviceTypeConceptModel) => {
+            if (editConcept !== undefined) {
+                this.reset();
+                this.conceptsService.updateConcept(editConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
+                    if (concept === null) {
+                        this.snackBar.open('Error while updating the concept!', "close", { panelClass: "snack-bar-error" });
+                        this.getConcepts(true);
+                    } else {
+                        this.snackBar.open('Concept updated successfully.', undefined, { duration: 2000 });
+                        this.reloadConcepts(true);
+                    }
+                });
+            }
+        });
+    }
+
     deleteConcept(concept: ConceptsPermSearchModel): void {
         this.dialogsService
             .openDeleteDialog('concept ' + concept.name)

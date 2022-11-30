@@ -72,11 +72,11 @@
                     <mat-form-field class="third-width" color="accent">
                         <input matInput placeholder="f({{conversion.placeholder_name}})" [(ngModel)]="conversion.formula" [ngModelOptions]="{standalone: true}" required>
                     </mat-form-field>
-                    <button mat-icon-button color="warn" (click)="removeConversion(i)">
+                    <button mat-icon-button color="warn" (click)="removeConversion(i)" [disabled]="disabled">
                         <mat-icon>delete</mat-icon>
                     </button>
                 </div>
-                <button mat-stroked-button color="accent" (click)="addConversion()">Add Conversion</button>
+                <button mat-stroked-button color="accent" (click)="addConversion()" [disabled]="disabled">Add Conversion</button>
             </ng-container>
         </div>
         <mat-accordion class="code-tryout">
@@ -106,7 +106,11 @@
     </form>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions fxLayoutAlign="end center" *ngIf="!disabled">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()" [disabled]="nameFormControl.invalid || baseCharacteristicControl.invalid">Save</button>
+</mat-dialog-actions>
+
+<mat-dialog-actions fxLayoutAlign="end center" *ngIf="disabled">
+    <button mat-raised-button color="primary" (click)="close()">Close</button>
 </mat-dialog-actions>
