@@ -558,7 +558,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         if (control.value === undefined || control.value === null || control.value.length === 0) {
             return  { validateInterval: { value: control.value } };
         }
-        const re = new RegExp('\\d+(ns|u|µ|ms|s|m|h|d|w)');
+        const re = new RegExp('\\d+(ns|u|µ|ms|s|months|y|m|h|d|w)');
         const matches = re.exec(control.value);
         if (matches == null || matches.length === 0 || matches[0].length !== control.value.length) {
             return  { validateInterval: { value: control.value } };
