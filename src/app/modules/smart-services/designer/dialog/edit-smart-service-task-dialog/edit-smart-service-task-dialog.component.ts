@@ -197,7 +197,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
         this.infoModuleType = this.result.inputs.find(value => value.name == "info.module_type")?.value || "widget";
         this.infoKey = this.result.inputs.find(value => value.name == "info.key")?.value || "";
-        this.infoModuleData = this.result.inputs.find(value => value.name == "info.module_data")?.value || "{\n\n}";
+        this.infoModuleData = this.getModuleDataFromInputs(this.result.inputs);
         this.processStart = this.inputsToProcessStartModel(this.result.inputs);
         this.smartServiceInputs = smartServiceInputsDescriptionToAbstractSmartServiceInput(dialogParams.info.smartServiceInputs);
         this.initDeviceRepositoryWorkerInfo(dialogParams.info.inputs);
@@ -1256,6 +1256,30 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         } catch (e) {}
     }
 
+    private getModuleDataFromInputs(inputs: SmartServiceTaskInputDescription[]): string {
+        return inputs.filter(value => value.name.startsWith("info.module_data"))
+            .sort((a, b) => (a.name < b.name ? -1 : 1))
+            .map(value => value.value)
+            .join("") || "{\n\n}";
+    }
+
+    private getModuleDataInputs(infoModuleData: string): SmartServiceTaskInputDescription[] {
+        let result = [] as SmartServiceTaskInputDescription[];
+        this.chunkString(infoModuleData, 1000).forEach((value: string, i: number) => {
+            let name = "info.module_data";
+            if(i > 0){
+                name = name + "_" + i;
+            }
+            result.push({name: name, type: "text", value: value});
+        })
+        return result;
+    }
+
+    private chunkString(str: string, length: number): string[] {
+        return str.match(new RegExp('[^]{1,' + length + '}', 'g')) || [];
+    }
+
+
     isInvalid(): boolean {
         switch (this.result.topic){
             case "export":
@@ -1340,7 +1364,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         })
 
         temp.push({name: "info.module_type", type: "text", value: this.infoModuleType});
-        temp.push({name: "info.module_data", type: "text", value: this.infoModuleData});
+        temp = temp.concat(this.getModuleDataInputs(this.infoModuleData))
         temp.push({name: "info.key", type: "text", value: this.infoKey});
 
         temp = temp.concat(this.processStartModelToInputs(this.processStart));
