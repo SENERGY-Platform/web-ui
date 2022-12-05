@@ -1326,14 +1326,6 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                     }
                 })
                 return invalidJsonConfig;
-            case "info":
-                let invalidInfoModuleData = false;
-                try{
-                    JSON.parse(this.infoModuleData)
-                } catch (e) {
-                    invalidInfoModuleData = true
-                }
-                return invalidInfoModuleData;
             default:
                 return false;
         }

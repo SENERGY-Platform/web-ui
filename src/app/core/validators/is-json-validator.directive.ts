@@ -24,6 +24,8 @@ import {jsonValidator} from './json.validator';
 })
 export class IsJsonValidatorDirective implements Validator {
     validate(control: AbstractControl): ValidationErrors | null {
+        control.markAsDirty();
+        control.markAsTouched();
         return jsonValidator()(control)
     }
 }
