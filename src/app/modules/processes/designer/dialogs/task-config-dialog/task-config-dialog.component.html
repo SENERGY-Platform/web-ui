@@ -57,6 +57,8 @@
            [formControl]="retriesFormControl">
 </mat-form-field>
 
+<mat-checkbox class="form-filed-checkbox" [formControl]="preferEventsFormControl" matTooltip="check if you prefer stored event values before device requests" matTooltipPosition="right">Prefer Events</mat-checkbox>
+
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" [disabled]="functionFormControl.value === ''" (click)="save()">Save</button>

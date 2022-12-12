@@ -27,6 +27,7 @@ export interface DeviceTypeSelectionRefModel {
     device_class: DeviceTypeDeviceClassModel;
     completionStrategy: string;
     retries: number;
+    prefer_events: boolean;
 }
 
 export interface DeviceTypeSelectionResultModel extends DeviceTypeSelectionRefModel {

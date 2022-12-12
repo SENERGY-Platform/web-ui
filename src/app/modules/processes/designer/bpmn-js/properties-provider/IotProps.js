@@ -108,7 +108,8 @@ function getPayload(connectorInfo, input) {
         label: connectorInfo.function.name,
         input: input ? generateStructure(connectorInfo.characteristic, true) : {},
         characteristic_id: connectorInfo.characteristic.id,
-        retries: connectorInfo.retries
+        retries: connectorInfo.retries,
+        prefer_event: connectorInfo.prefer_events
     }, null, 4)
 }
 
@@ -254,7 +255,8 @@ function getDeviceTypeServiceFromServiceElement(element) {
                 device_class: payload.device_class,
                 aspect: payload.aspect,
                 completionStrategy: bo.get('camunda:topic'),
-                retries: payload.retries
+                retries: payload.retries,
+                prefer_events: payload.prefer_event
               };
             }
         }

@@ -44,6 +44,9 @@ export class TaskConfigDialogComponent implements OnInit {
     functionFormControl = new FormControl({ value: '', disabled: true });
     completionStrategyFormControl = new FormControl('');
     retriesFormControl = new FormControl({ value: 0, disabled: true }, [Validators.min(0), Validators.max(100)]);
+    preferEventsFormControl = new FormControl({ value: false, disabled: true });
+
+
 
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     aspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
@@ -87,6 +90,7 @@ export class TaskConfigDialogComponent implements OnInit {
             characteristic: this.characteristic,
             completionStrategy: this.completionStrategyFormControl.value,
             retries: this.retriesFormControl.value,
+            prefer_events: this.preferEventsFormControl.value
         };
         this.dialogRef.close(this.result);
     }
@@ -117,9 +121,12 @@ export class TaskConfigDialogComponent implements OnInit {
             if (completionStrategy === 'optimistic') {
                 this.retriesFormControl.patchValue(0);
                 this.retriesFormControl.disable();
+                this.preferEventsFormControl.patchValue(false);
+                this.preferEventsFormControl.disable();
             }
             if (completionStrategy === 'pessimistic') {
                 this.retriesFormControl.enable();
+                this.preferEventsFormControl.enable();
             }
         });
     }
@@ -231,11 +238,14 @@ export class TaskConfigDialogComponent implements OnInit {
             this.getBaseCharacteristics(this.selection.function);
             this.completionStrategyFormControl.setValue(this.selection.completionStrategy);
             this.retriesFormControl.setValue(this.selection.retries || 0);
+            this.preferEventsFormControl.setValue(this.selection.prefer_events || false);
             if (this.selection.completionStrategy === 'optimistic') {
                 this.retriesFormControl.disable();
+                this.preferEventsFormControl.disable();
             }
             if (this.selection.completionStrategy === 'pessimistic') {
                 this.retriesFormControl.enable();
+                this.preferEventsFormControl.enable();
             }
         } else {
             this.optionsFormControl.setValue('Controlling');
