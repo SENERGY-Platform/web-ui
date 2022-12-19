@@ -79,6 +79,7 @@ export class DeviceInstancesDialogService {
             dialogConfig.minWidth = '650px';
             if (deviceType) {
                 dialogConfig.data = {
+                    deviceId,
                     services: deviceType.services,
                     lastValueElements,
                     deviceType,

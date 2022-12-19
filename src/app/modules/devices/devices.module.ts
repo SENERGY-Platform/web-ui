@@ -66,6 +66,7 @@ import { NetworksDeleteDialogComponent } from './networks/dialogs/networks-delet
 import { WaitingRoomComponent } from './waiting-room/waiting-room.component';
 import { WaitingRoomDeviceEditDialogComponent } from './waiting-room/dialogs/waiting-room-device-edit-dialog.component';
 import { WaitingRoomMultiWmbusKeyEditDialogComponent } from './waiting-room/dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
+import {MatDatepickerModule} from "@angular/material/datepicker";
 
 const networks = { path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: { header: 'Networks' } };
 const deviceInstances = {
@@ -164,6 +165,7 @@ const locationsEdit = {
             deviceGroupsEdit,
         ]),
         MatTreeModule,
+        MatDatepickerModule,
     ],
     declarations: [
         NetworksComponent,

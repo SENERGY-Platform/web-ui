@@ -20,8 +20,14 @@ import {
     DeviceTypeModel,
     DeviceTypeServiceModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
-import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
+import {
+    LastValuesRequestElementTimescaleModel,
+    QueriesRequestColumnModel,
+    TimeValuePairModel
+} from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
+import {FormBuilder, FormGroup} from '@angular/forms';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
@@ -33,19 +39,29 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
     lastValueArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[][] = [];
     deviceType: DeviceTypeModel;
     serviceOutputCounts: number[] = [];
+    timeControl: FormGroup = this.fb.group({
+        from: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)),
+        to: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0))
+    });
+    downloading = false;
+    deviceId = '';
 
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
         @Inject(MAT_DIALOG_DATA) data: {
+            deviceId: string;
             services: DeviceTypeServiceModel[]; lastValueElements: LastValuesRequestElementTimescaleModel[]; deviceType: DeviceTypeModel; serviceOutputCounts: number[];
         },
         private exportDataService: ExportDataService,
+        private fb: FormBuilder,
+        private snackBar: MatSnackBar,
     ) {
         this.services = data.services;
         this.lastValueElements = data.lastValueElements;
         this.deviceType = data.deviceType;
         this.serviceOutputCounts = data.serviceOutputCounts;
+        this.deviceId = data.deviceId;
     }
 
     ngOnInit() {
@@ -69,5 +85,33 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
 
     close(): void {
         this.dialogRef.close();
+    }
+
+    download(i: number) {
+        const fromIso = this.timeControl.get('from')?.value.toISOString();
+        const toIso = new Date((this.timeControl.get('to')?.value as Date).valueOf() + 86400000).toISOString();
+        this.downloading = true;
+        const columns: QueriesRequestColumnModel[] = [];
+        this.lastValueArray[i].forEach(c => columns.push({name: c.request.columnName}));
+
+        this.exportDataService.queryTimescaleCsv([{
+            serviceId: this.services[i].id,
+            deviceId: this.deviceId,
+            columns,
+            time: {
+                start: fromIso,
+                end: toIso,
+            }
+        }]).subscribe(res => {
+            const dlink: HTMLAnchorElement = document.createElement('a');
+            dlink.download = (this.services[i].name + '-' + fromIso + '-' + toIso + '.csv').replace(/ /g, '_');
+            dlink.href = 'data:text/csv;,' + res;
+            dlink.click(); // this will trigger the dialog window
+            dlink.remove();
+            this.downloading = false;
+        }, (_) => {
+            this.downloading = false;
+            this.snackBar.open('Error downloading data!', 'close', {panelClass: 'snack-bar-error'});
+        });
     }
 }

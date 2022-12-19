@@ -79,5 +79,9 @@ export class ExportDataService {
         );
     }
 
+    queryTimescaleCsv(query: QueriesRequestElementTimescaleModel[]): Observable<string> {
+        const headers = {Accept: 'text/csv'};
+        return this.http.post(environment.timescaleAPIURL + '/queries?format=per_query', query, {headers, responseType: 'text'});
+    }
 
 }
