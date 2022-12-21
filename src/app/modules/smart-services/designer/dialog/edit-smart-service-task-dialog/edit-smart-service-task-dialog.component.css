@@ -32,6 +32,9 @@ mat-dialog-actions button:not(:last-child) {
 
 .edit-smart-service-task-dialog button {
     margin-top: 15px;
+}
+
+.edit-smart-service-task-dialog {
     padding-bottom: 15px;
 }
 
