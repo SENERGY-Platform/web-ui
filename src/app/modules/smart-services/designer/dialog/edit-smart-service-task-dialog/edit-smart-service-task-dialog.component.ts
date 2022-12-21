@@ -238,7 +238,6 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                 getCompletions: function(_: any, session: any, pos: any, ___: any, callback: any) {
                     let line = session.doc.$lines[pos.row].slice(0, pos.column-1);
                     const isNewStatement = line.trim().length == 0 || line.trim().endsWith(";")
-                    console.log(isNewStatement);
                     if(isNewStatement){
                         callback(null, [
                             {
