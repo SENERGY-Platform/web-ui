@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
@@ -60,6 +60,10 @@ import {DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overv
 import {FunctionsService} from '../../../../metadata/functions/shared/functions.service';
 import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
+import * as ace from 'brace';
+import 'brace/mode/javascript';
+import 'brace/ext/language_tools'
+//import * as langTools from 'brace/ext/language_tools';
 
 interface Criteria {
     interaction?: string;
@@ -80,7 +84,7 @@ interface GenericWatcherRequest {
     templateUrl: './edit-smart-service-task-dialog.component.html',
     styleUrls: ['./edit-smart-service-task-dialog.component.css'],
 })
-export class EditSmartServiceTaskDialogComponent implements OnInit {
+export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewInit {
     init: SmartServiceTaskDescription;
     result: SmartServiceTaskDescription;
     tabs: string[] = ["process_deployment", "process_deployment_start", "analytics", "export", "import", "info", "device_repository", "watcher"]
@@ -162,6 +166,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         }
     }
 
+    @ViewChild("preScriptEditor") private preScriptEditor!: ElementRef<HTMLElement>;
+    @ViewChild("postScriptEditor") private postScriptEditor!: ElementRef<HTMLElement>;
+
+
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
         private processRepo: ProcessRepoService,
@@ -222,6 +230,170 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             this.nestedAspects = asp;
         });
     }
+
+    ngAfterViewInit(): void {
+        let langTools = ace.acequire("ace/ext/language_tools");
+        if(langTools){
+            langTools.setCompleters([langTools.snippetCompleter, langTools.textCompleter, langTools.keyWordCompleter, {
+                getCompletions: function(_: any, session: any, pos: any, ___: any, callback: any) {
+                    let line = session.doc.$lines[pos.row].slice(0, pos.column-1);
+                    const isNewStatement = line.trim().length == 0 || line.trim().endsWith(";")
+                    console.log(isNewStatement);
+                    if(isNewStatement){
+                        callback(null, [
+                            {
+                                caption: "variables.read",
+                                value: "var variableValue = variables.read(\"variable-name\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.exists",
+                                value: "var exists = variables.exists(\"variable-name\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.ref",
+                                value: "var ref = variables.ref(\"variable-name\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.derefName",
+                                value: "var variableName = variables.derefName(\"{{.ref}}\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.derefValue",
+                                value: "var variableValue = variables.derefValue(\"{{.ref}}\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.derefTemplate",
+                                value: "var text = variables.derefTemplate(\"template text with multiple {{.ref}} placeholders\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "inputs.get",
+                                value: "var inpValue = inputs.get(\"input-name\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "inputs.exists",
+                                value: "var exists = inputs.exists(\"input-name\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "inputs.list",
+                                value: "var inputValues = inputs.list();",
+                                meta: "static"
+                            },
+                            {
+                                caption: "inputs.listNames",
+                                value: "var inputNames = inputs.listNames();",
+                                meta: "static"
+                            },
+                            {
+                                caption: "outputs.get",
+                                value: "var outputValue = outputs.get(\"output-name\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "outputs.set",
+                                value: "outputs.set(\"output-name\", \"output-value\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "outputs.setJson",
+                                value: "outputs.setJson(\"output-name\", \"output-value\");",
+                                meta: "static"
+                            }
+                        ])
+                    } else {
+                        callback(null, [
+                            {
+                                caption: "variables.write",
+                                value: "variables.write(\"variable-name\", \"any value\");",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.read",
+                                value: "variables.read(\"variable-name\")",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.exists",
+                                value: "variables.exists(\"variable-name\")",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.ref",
+                                value: "variables.ref(\"variable-name\")",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.derefName",
+                                value: "variables.derefName(\"{{.ref}}\")",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.derefValue",
+                                value: "variables.derefValue(\"{{.ref}}\")",
+                                meta: "static"
+                            },
+                            {
+                                caption: "variables.derefTemplate",
+                                value: "variables.derefTemplate(\"template text with multiple {{.ref}} placeholders\")",
+                                meta: "static"
+                            },
+                            {
+                                caption: "inputs.get",
+                                value: "inputs.get(\"input-name\")",
+                                meta: "static"
+                            },
+                            {
+                                caption: "inputs.exists",
+                                value: "inputs.exists(\"input-name\")",
+                                meta: "static"
+                            },
+                            {
+                                caption: "inputs.list",
+                                value: "inputs.list()",
+                                meta: "static"
+                            },
+                            {
+                                caption: "inputs.listNames",
+                                value: "inputs.listNames()",
+                                meta: "static"
+                            },
+                            {
+                                caption: "outputs.get",
+                                value: "outputs.get(\"output-name\")",
+                                meta: "static"
+                            }
+                        ])
+                    }
+                }
+            }]);
+        } else {
+            console.error("unable to load language_tools")
+        }
+        this.setAceEditor(this.preScriptEditor, "prescript");
+        this.setAceEditor(this.postScriptEditor, "postscript");
+    }
+
+    private setAceEditor(element: ElementRef<HTMLElement>, inputNamePrefix: string){
+        if(element) {
+            const editor = ace.edit(element.nativeElement);
+            editor.getSession().setMode('ace/mode/javascript');
+            editor.setOptions({
+                enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true
+            });
+            editor.setValue(this.getChunkedDataFromInputs(inputNamePrefix, this.result.inputs, ""));
+        } else {
+            console.error(inputNamePrefix+" scriptEditor not loaded");
+        }
+    }
+
 
     ngOnInit() {}
 
@@ -1257,18 +1429,28 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     private getModuleDataFromInputs(inputs: SmartServiceTaskInputDescription[]): string {
-        return inputs.filter(value => value.name.startsWith("info.module_data"))
+        return this.getChunkedDataFromInputs("info.module_data", inputs, "{\n\n}")
+    }
+
+    private getChunkedDataFromInputs(inputNamePrefix: string, inputs: SmartServiceTaskInputDescription[], defaultValue: string): string {
+        return inputs.filter(value => value.name.startsWith(inputNamePrefix))
             .sort((a, b) => (a.name < b.name ? -1 : 1))
             .map(value => value.value)
-            .join("") || "{\n\n}";
+            .join("") || defaultValue;
     }
 
     private getModuleDataInputs(infoModuleData: string): SmartServiceTaskInputDescription[] {
+        return this.getChunkedInputs("info.module_data", infoModuleData)
+    }
+
+    private getChunkedInputs(inputNamePrefix: string, value: string): SmartServiceTaskInputDescription[] {
         let result = [] as SmartServiceTaskInputDescription[];
-        this.chunkString(infoModuleData, 1000).forEach((value: string, i: number) => {
-            let name = "info.module_data";
+        const chunks = this.chunkString(value, 1000);
+        const size = chunks.length.toString().length + 1;
+        chunks.forEach((value: string, i: number) => {
+            let name = inputNamePrefix;
             if(i > 0){
-                name = name + "_" + i;
+                name = name + "_" + this.padNumber(i, size);
             }
             result.push({name: name, type: "text", value: value});
         })
@@ -1279,6 +1461,11 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         return str.match(new RegExp('[^]{1,' + length + '}', 'g')) || [];
     }
 
+    padNumber(num:number, size:number): string {
+        let s = num+"";
+        while (s.length < size) s = "0" + s;
+        return s;
+    }
 
     isInvalid(): boolean {
         switch (this.result.topic){
@@ -1363,9 +1550,19 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
         temp = temp.concat(this.deviceRepositoryWorkerInfoToInputs());
 
-        temp = temp.concat(this.watcherWorkerInfoToInputs())
+        temp = temp.concat(this.watcherWorkerInfoToInputs());
 
         temp = temp.filter(e => e.name.startsWith(result.topic+".")); //filter unused inputs
+
+        const preScript = ace.edit(this.preScriptEditor.nativeElement).getValue();
+        if(preScript){
+            temp = temp.concat(this.getChunkedInputs("prescript", preScript));
+        }
+
+        const postScript = ace.edit(this.postScriptEditor.nativeElement).getValue();
+        if(postScript){
+            temp = temp.concat(this.getChunkedInputs("postscript", postScript));
+        }
 
         result.inputs = temp;
         result.smartServiceInputs = abstractSmartServiceInputToSmartServiceInputsDescription(this.smartServiceInputs);

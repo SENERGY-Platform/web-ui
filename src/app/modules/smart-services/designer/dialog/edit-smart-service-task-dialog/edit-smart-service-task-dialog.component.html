@@ -791,6 +791,28 @@
       </div>
     </mat-tab>
   </mat-tab-group>
+  <mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          PreScript
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div>
+        <div #preScriptEditor id="preScriptEditor" class="ace-editor"></div>
+      </div>
+    </mat-expansion-panel>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          PostScript
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div>
+        <div #postScriptEditor id="postScriptEditor" class="ace-editor"></div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">

@@ -36,6 +36,7 @@
     "backbone": "^1.4.0",
     "bpmn-js": "^4.0.0",
     "bpmn-js-properties-panel": "^0.32.1",
+    "brace": "^0.11.1",
     "camunda-bpmn-moddle": "^4.1.0",
     "core-js": "^3.17.3",
     "cronstrue": "^1.96.0",
@@ -45,6 +46,9 @@
     "jquery": "^3.5.1",
     "keycloak-angular": "^8.4.0",
     "keycloak-js": "^15.0.2",
+    "lodash": "^4.17.19",
+    "lodash.assign": "^4.2.0",
+    "lodash.pick": "^4.4.0",
     "moment": "^2.24.0",
     "ng2-google-charts": "^6.1.0",
     "ngx-clipboard": "^12.3.0",
@@ -53,10 +57,7 @@
     "tslib": "^2.0.0",
     "x2js": "^3.4.1",
     "yargs": "^15.4.1",
-    "zone.js": "~0.11.4",
-    "lodash": "^4.17.19",
-    "lodash.assign": "^4.2.0",
-    "lodash.pick": "^4.4.0"
+    "zone.js": "~0.11.4"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^12.2.6",
