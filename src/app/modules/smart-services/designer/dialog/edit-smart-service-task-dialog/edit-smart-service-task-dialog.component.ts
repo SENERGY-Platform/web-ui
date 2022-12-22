@@ -233,144 +233,23 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     }
 
     ngAfterViewInit(): void {
+        let that = this;
         let langTools = ace.acequire("ace/ext/language_tools");
         if(langTools){
-            langTools.setCompleters([langTools.snippetCompleter, langTools.textCompleter, langTools.keyWordCompleter, {
+            langTools.setCompleters([langTools.snippetCompleter, langTools.keyWordCompleter, {
                 getCompletions: function(_: any, session: any, pos: any, ___: any, callback: any) {
-                    let line = session.doc.$lines[pos.row].slice(0, pos.column-1);
-                    const isNewStatement = line.trim().length == 0 || line.trim().endsWith(";")
-                    if(isNewStatement){
-                        callback(null, [
-                            {
-                                caption: "variables.read",
-                                value: "var variableValue = variables.read(\"variable-name\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.exists",
-                                value: "var exists = variables.exists(\"variable-name\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.ref",
-                                value: "var ref = variables.ref(\"variable-name\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.derefName",
-                                value: "var variableName = variables.derefName(\"{{.ref}}\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.derefValue",
-                                value: "var variableValue = variables.derefValue(\"{{.ref}}\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.derefTemplate",
-                                value: "var text = variables.derefTemplate(\"template text with multiple {{.ref}} placeholders\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "inputs.get",
-                                value: "var inpValue = inputs.get(\"input-name\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "inputs.exists",
-                                value: "var exists = inputs.exists(\"input-name\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "inputs.list",
-                                value: "var inputValues = inputs.list();",
-                                meta: "static"
-                            },
-                            {
-                                caption: "inputs.listNames",
-                                value: "var inputNames = inputs.listNames();",
-                                meta: "static"
-                            },
-                            {
-                                caption: "outputs.get",
-                                value: "var outputValue = outputs.get(\"output-name\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "outputs.set",
-                                value: "outputs.set(\"output-name\", \"output-value\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "outputs.setJson",
-                                value: "outputs.setJson(\"output-name\", \"output-value\");",
-                                meta: "static"
-                            }
-                        ])
-                    } else {
-                        callback(null, [
-                            {
-                                caption: "variables.write",
-                                value: "variables.write(\"variable-name\", \"any value\");",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.read",
-                                value: "variables.read(\"variable-name\")",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.exists",
-                                value: "variables.exists(\"variable-name\")",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.ref",
-                                value: "variables.ref(\"variable-name\")",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.derefName",
-                                value: "variables.derefName(\"{{.ref}}\")",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.derefValue",
-                                value: "variables.derefValue(\"{{.ref}}\")",
-                                meta: "static"
-                            },
-                            {
-                                caption: "variables.derefTemplate",
-                                value: "variables.derefTemplate(\"template text with multiple {{.ref}} placeholders\")",
-                                meta: "static"
-                            },
-                            {
-                                caption: "inputs.get",
-                                value: "inputs.get(\"input-name\")",
-                                meta: "static"
-                            },
-                            {
-                                caption: "inputs.exists",
-                                value: "inputs.exists(\"input-name\")",
-                                meta: "static"
-                            },
-                            {
-                                caption: "inputs.list",
-                                value: "inputs.list()",
-                                meta: "static"
-                            },
-                            {
-                                caption: "inputs.listNames",
-                                value: "inputs.listNames()",
-                                meta: "static"
-                            },
-                            {
-                                caption: "outputs.get",
-                                value: "outputs.get(\"output-name\")",
-                                meta: "static"
-                            }
-                        ])
+                    switch (session.$modeId){
+                        case "ace/mode/json":
+                            that.setAceJsonCompleter(callback);
+                            return
+                        case "ace/mode/javascript":
+                            that.setAceJsCompleter(session, pos, callback);
+                            return
+                        default:
+                            console.error("unknown ace editor mode:", session.$modeId)
                     }
+
+
                 }
             }]);
         } else {
@@ -379,6 +258,174 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.setInfoModuleDataAceEditor(this.infoModuleDataEditor);
         this.setAceJsEditor(this.preScriptEditor, "prescript");
         this.setAceJsEditor(this.postScriptEditor, "postscript");
+    }
+
+    private setAceJsCompleter(session: any, pos: any, callback: any){
+        let line = session.doc.$lines[pos.row].slice(0, pos.column-1);
+        const isNewStatement = line.trim().length == 0 || line.trim().endsWith(";")
+        if(isNewStatement){
+            callback(null, [
+                {
+                    caption: "variables.read",
+                    value: "var variableValue = variables.read(\"variable-name\");",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.exists",
+                    value: "var exists = variables.exists(\"variable-name\");",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.ref",
+                    value: "var ref = variables.ref(\"variable-name\");",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.derefName",
+                    value: "var variableName = variables.derefName(\"{{.ref}}\");",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.derefValue",
+                    value: "var variableValue = variables.derefValue(\"{{.ref}}\");",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.derefTemplate",
+                    value: "var text = variables.derefTemplate(\"template text with multiple {{.ref}} placeholders\");",
+                    meta: "static"
+                },
+                {
+                    caption: "inputs.get",
+                    value: "var inpValue = inputs.get(\"input-name\");",
+                    meta: "static"
+                },
+                {
+                    caption: "inputs.exists",
+                    value: "var exists = inputs.exists(\"input-name\");",
+                    meta: "static"
+                },
+                {
+                    caption: "inputs.list",
+                    value: "var inputValues = inputs.list();",
+                    meta: "static"
+                },
+                {
+                    caption: "inputs.listNames",
+                    value: "var inputNames = inputs.listNames();",
+                    meta: "static"
+                },
+                {
+                    caption: "outputs.get",
+                    value: "var outputValue = outputs.get(\"output-name\");",
+                    meta: "static"
+                },
+                {
+                    caption: "outputs.set",
+                    value: "outputs.set(\"output-name\", \"output-value\");",
+                    meta: "static"
+                },
+                {
+                    caption: "outputs.setJson",
+                    value: "outputs.setJson(\"output-name\", \"output-value\");",
+                    meta: "static"
+                }
+            ])
+        } else {
+            callback(null, [
+                {
+                    caption: "variables.write",
+                    value: "variables.write(\"variable-name\", \"any value\");",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.read",
+                    value: "variables.read(\"variable-name\")",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.exists",
+                    value: "variables.exists(\"variable-name\")",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.ref",
+                    value: "variables.ref(\"variable-name\")",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.derefName",
+                    value: "variables.derefName(\"{{.ref}}\")",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.derefValue",
+                    value: "variables.derefValue(\"{{.ref}}\")",
+                    meta: "static"
+                },
+                {
+                    caption: "variables.derefTemplate",
+                    value: "variables.derefTemplate(\"template text with multiple {{.ref}} placeholders\")",
+                    meta: "static"
+                },
+                {
+                    caption: "inputs.get",
+                    value: "inputs.get(\"input-name\")",
+                    meta: "static"
+                },
+                {
+                    caption: "inputs.exists",
+                    value: "inputs.exists(\"input-name\")",
+                    meta: "static"
+                },
+                {
+                    caption: "inputs.list",
+                    value: "inputs.list()",
+                    meta: "static"
+                },
+                {
+                    caption: "inputs.listNames",
+                    value: "inputs.listNames()",
+                    meta: "static"
+                },
+                {
+                    caption: "outputs.get",
+                    value: "outputs.get(\"output-name\")",
+                    meta: "static"
+                }
+            ])
+        }
+    }
+
+    private setAceJsonCompleter(callback: any){
+        let completers = ([] as BpmnParameterWithLabel[])
+            .concat(this.availableProcessVariables.get('iot_form_fields') || [])
+            .concat(this.availableProcessVariables.get('value_form_fields') || [])
+            .concat(this.availableProcessVariables.get('process_deployment') || [])
+            .concat(this.availableProcessVariables.get('analytics') || [])
+            .concat(this.availableProcessVariables.get('export') || [])
+            .concat(this.availableProcessVariables.get('import') || [])
+            .concat(this.availableProcessVariables.get('uncategorized') || [])
+            .map(value => {
+                return {
+                    caption: "process-variable: "+value.name,
+                    value: "${"+value.name+"}",
+                    meta: "static"
+                }
+            })
+        completers = completers.concat(
+            ([] as BpmnParameterWithLabel[])
+                .concat(this.availableProcessVariables.get('iot_form_fields') || [])
+                .concat(this.availableProcessVariables.get('value_form_fields') || [])
+                .map(value => {
+                    return {
+                        caption: "placeholder: "+value.name,
+                        value: "{{."+value.name+"}}",
+                        meta: "static"
+                    }
+                })
+        );
+        callback(null, completers);
     }
 
     private setAceJsEditor(element: ElementRef<HTMLElement>, inputNamePrefix: string){
@@ -400,10 +447,12 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             const editor = ace.edit(element.nativeElement);
             editor.getSession().setMode('ace/mode/json');
             editor.setOptions({
-                enableBasicAutocompletion: false,
-                enableLiveAutocompletion: false
+                enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true
             });
+
             editor.setValue(this.getModuleDataFromInputs( this.result.inputs));
+            (document as any).foo = editor;
         } else {
             console.error("info module data editor not loaded");
         }
