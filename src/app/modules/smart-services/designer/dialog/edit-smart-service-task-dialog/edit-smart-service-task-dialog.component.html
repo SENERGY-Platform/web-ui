@@ -580,10 +580,9 @@
             <input matInput placeholder="Module-Type" [(ngModel)]="infoModuleType" type="text">
           </mat-form-field>
         </div>
-        <div>
-          <mat-form-field  color="accent" class="full-width">
-            <textarea matInput rows="3" placeholder="Module-Data" [(ngModel)]="infoModuleData" type="text" isValidJson></textarea>
-          </mat-form-field>
+        <div class="module-data-editor">
+          <h4>Module-Data</h4>
+          <div #infoModuleDataEditor id="infoModuleDataEditor" class="ace-editor"></div>
         </div>
       </div>
     </mat-tab>

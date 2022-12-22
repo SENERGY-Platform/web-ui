@@ -96,3 +96,7 @@ mat-dialog-actions button:not(:last-child) {
     width: 100%;
     height: 300px;
 }
+
+.module-data-editor{
+    margin-bottom: 15px;
+}

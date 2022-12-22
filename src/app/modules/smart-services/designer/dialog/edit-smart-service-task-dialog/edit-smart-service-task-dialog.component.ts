@@ -62,6 +62,7 @@ import {DeviceTypeService} from '../../../../metadata/device-types-overview/shar
 import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
 import * as ace from 'brace';
 import 'brace/mode/javascript';
+import 'brace/mode/json';
 import 'brace/ext/language_tools'
 //import * as langTools from 'brace/ext/language_tools';
 
@@ -111,7 +112,6 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     availableProcessIotSelections: {name: string, value: string}[];
 
     infoModuleType: string = "widget"
-    infoModuleData: string = "{\n\n}"
     infoKey: string = ""
 
     processStart: ProcessStartModel = {deployment_id: "", inputs: []};
@@ -169,6 +169,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     @ViewChild("preScriptEditor") private preScriptEditor!: ElementRef<HTMLElement>;
     @ViewChild("postScriptEditor") private postScriptEditor!: ElementRef<HTMLElement>;
 
+    @ViewChild("infoModuleDataEditor") private infoModuleDataEditor!: ElementRef<HTMLElement>;
+
 
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
@@ -205,7 +207,6 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
         this.infoModuleType = this.result.inputs.find(value => value.name == "info.module_type")?.value || "widget";
         this.infoKey = this.result.inputs.find(value => value.name == "info.key")?.value || "";
-        this.infoModuleData = this.getModuleDataFromInputs(this.result.inputs);
         this.processStart = this.inputsToProcessStartModel(this.result.inputs);
         this.smartServiceInputs = smartServiceInputsDescriptionToAbstractSmartServiceInput(dialogParams.info.smartServiceInputs);
         this.initDeviceRepositoryWorkerInfo(dialogParams.info.inputs);
@@ -375,11 +376,12 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         } else {
             console.error("unable to load language_tools")
         }
-        this.setAceEditor(this.preScriptEditor, "prescript");
-        this.setAceEditor(this.postScriptEditor, "postscript");
+        this.setInfoModuleDataAceEditor(this.infoModuleDataEditor);
+        this.setAceJsEditor(this.preScriptEditor, "prescript");
+        this.setAceJsEditor(this.postScriptEditor, "postscript");
     }
 
-    private setAceEditor(element: ElementRef<HTMLElement>, inputNamePrefix: string){
+    private setAceJsEditor(element: ElementRef<HTMLElement>, inputNamePrefix: string){
         if(element) {
             const editor = ace.edit(element.nativeElement);
             editor.getSession().setMode('ace/mode/javascript');
@@ -390,6 +392,20 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             editor.setValue(this.getChunkedDataFromInputs(inputNamePrefix, this.result.inputs, ""));
         } else {
             console.error(inputNamePrefix+" scriptEditor not loaded");
+        }
+    }
+
+    private setInfoModuleDataAceEditor(element: ElementRef<HTMLElement>){
+        if(element) {
+            const editor = ace.edit(element.nativeElement);
+            editor.getSession().setMode('ace/mode/json');
+            editor.setOptions({
+                enableBasicAutocompletion: false,
+                enableLiveAutocompletion: false
+            });
+            editor.setValue(this.getModuleDataFromInputs( this.result.inputs));
+        } else {
+            console.error("info module data editor not loaded");
         }
     }
 
@@ -1542,7 +1558,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         })
 
         temp.push({name: "info.module_type", type: "text", value: this.infoModuleType});
-        temp = temp.concat(this.getModuleDataInputs(this.infoModuleData))
+        const infoModuleData = ace.edit(this.infoModuleDataEditor.nativeElement).getValue();
+        if(infoModuleData){
+            temp = temp.concat(this.getChunkedInputs("info.module_data", infoModuleData));
+        }
         temp.push({name: "info.key", type: "text", value: this.infoKey});
 
         temp = temp.concat(this.processStartModelToInputs(this.processStart));
