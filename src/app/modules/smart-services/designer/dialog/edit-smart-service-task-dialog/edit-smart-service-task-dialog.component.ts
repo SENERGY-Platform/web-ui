@@ -266,6 +266,11 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         if(isNewStatement){
             callback(null, [
                 {
+                    caption: "variables.write",
+                    value: "variables.write(\"variable-name\", \"any value\");",
+                    meta: "static"
+                },
+                {
                     caption: "variables.read",
                     value: "var variableValue = variables.read(\"variable-name\");",
                     meta: "static"
@@ -333,11 +338,6 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             ])
         } else {
             callback(null, [
-                {
-                    caption: "variables.write",
-                    value: "variables.write(\"variable-name\", \"any value\");",
-                    meta: "static"
-                },
                 {
                     caption: "variables.read",
                     value: "variables.read(\"variable-name\")",
