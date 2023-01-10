@@ -26,421 +26,421 @@ let Completer = {
         if(isNewStatement){
             callback(null, [
                 {
-    caption: "deviceRepo.GetAspect",
-    value: "var result_as_Aspect = deviceRepo.GetAspect(id_as_string);",
+    caption: "deviceRepo.getAspect",
+    value: "var result_as_Aspect = deviceRepo.getAspect(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectNode",
-    value: "var result_as_AspectNode = deviceRepo.GetAspectNode(id_as_string);",
+    caption: "deviceRepo.getAspectNode",
+    value: "var result_as_AspectNode = deviceRepo.getAspectNode(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectNodes",
-    value: "var result_as_AspectNode_list = deviceRepo.GetAspectNodes();",
+    caption: "deviceRepo.getAspectNodes",
+    value: "var result_as_AspectNode_list = deviceRepo.getAspectNodes();",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectNodesByIdList",
-    value: "var result_as_AspectNode_list = deviceRepo.GetAspectNodesByIdList(ids_as_string_list);",
+    caption: "deviceRepo.getAspectNodesByIdList",
+    value: "var result_as_AspectNode_list = deviceRepo.getAspectNodesByIdList(ids_as_string_list);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectNodesMeasuringFunctions",
-    value: "var result_as_Function_list = deviceRepo.GetAspectNodesMeasuringFunctions(id_as_string, ancestors_as_bool, descendants_as_bool);",
+    caption: "deviceRepo.getAspectNodesMeasuringFunctions",
+    value: "var result_as_Function_list = deviceRepo.getAspectNodesMeasuringFunctions(id_as_string, ancestors_as_bool, descendants_as_bool);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectNodesWithMeasuringFunction",
-    value: "var result_as_AspectNode_list = deviceRepo.GetAspectNodesWithMeasuringFunction(ancestors_as_bool, descendants_as_bool);",
+    caption: "deviceRepo.getAspectNodesWithMeasuringFunction",
+    value: "var result_as_AspectNode_list = deviceRepo.getAspectNodesWithMeasuringFunction(ancestors_as_bool, descendants_as_bool);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspects",
-    value: "var result_as_Aspect_list = deviceRepo.GetAspects();",
+    caption: "deviceRepo.getAspects",
+    value: "var result_as_Aspect_list = deviceRepo.getAspects();",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectsWithMeasuringFunction",
-    value: "var result_as_Aspect_list = deviceRepo.GetAspectsWithMeasuringFunction(ancestors_as_bool, descendants_as_bool);",
+    caption: "deviceRepo.getAspectsWithMeasuringFunction",
+    value: "var result_as_Aspect_list = deviceRepo.getAspectsWithMeasuringFunction(ancestors_as_bool, descendants_as_bool);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetCharacteristic",
-    value: "var result_as_Characteristic = deviceRepo.GetCharacteristic(id_as_string);",
+    caption: "deviceRepo.getCharacteristic",
+    value: "var result_as_Characteristic = deviceRepo.getCharacteristic(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetConceptWithCharacteristics",
-    value: "var result_as_ConceptWithCharacteristics = deviceRepo.GetConceptWithCharacteristics(id_as_string);",
+    caption: "deviceRepo.getConceptWithCharacteristics",
+    value: "var result_as_ConceptWithCharacteristics = deviceRepo.getConceptWithCharacteristics(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetConceptWithoutCharacteristics",
-    value: "var result_as_Concept = deviceRepo.GetConceptWithoutCharacteristics(id_as_string);",
+    caption: "deviceRepo.getConceptWithoutCharacteristics",
+    value: "var result_as_Concept = deviceRepo.getConceptWithoutCharacteristics(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceClass",
-    value: "var result_as_DeviceClass = deviceRepo.GetDeviceClass(id_as_string);",
+    caption: "deviceRepo.getDeviceClass",
+    value: "var result_as_DeviceClass = deviceRepo.getDeviceClass(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceClasses",
-    value: "var result_as_DeviceClass_list = deviceRepo.GetDeviceClasses();",
+    caption: "deviceRepo.getDeviceClasses",
+    value: "var result_as_DeviceClass_list = deviceRepo.getDeviceClasses();",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceClassesControllingFunctions",
-    value: "var result_as_Function_list = deviceRepo.GetDeviceClassesControllingFunctions(id_as_string);",
+    caption: "deviceRepo.getDeviceClassesControllingFunctions",
+    value: "var result_as_Function_list = deviceRepo.getDeviceClassesControllingFunctions(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceClassesFunctions",
-    value: "var result_as_Function_list = deviceRepo.GetDeviceClassesFunctions(id_as_string);",
+    caption: "deviceRepo.getDeviceClassesFunctions",
+    value: "var result_as_Function_list = deviceRepo.getDeviceClassesFunctions(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceClassesWithControllingFunctions",
-    value: "var result_as_DeviceClass_list = deviceRepo.GetDeviceClassesWithControllingFunctions();",
+    caption: "deviceRepo.getDeviceClassesWithControllingFunctions",
+    value: "var result_as_DeviceClass_list = deviceRepo.getDeviceClassesWithControllingFunctions();",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceTypeSelectables",
-    value: "var result_as_DeviceTypeSelectable_list = deviceRepo.GetDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool);",
+    caption: "deviceRepo.getDeviceTypeSelectables",
+    value: "var result_as_DeviceTypeSelectable_list = deviceRepo.getDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetFunction",
-    value: "var result_as_Function = deviceRepo.GetFunction(id_as_string);",
+    caption: "deviceRepo.getFunction",
+    value: "var result_as_Function = deviceRepo.getFunction(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetFunctionsByType",
-    value: "var result_as_Function_list = deviceRepo.GetFunctionsByType(rdfType_as_string);",
+    caption: "deviceRepo.getFunctionsByType",
+    value: "var result_as_Function_list = deviceRepo.getFunctionsByType(rdfType_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetLeafCharacteristics",
-    value: "var result_as_Characteristic_list = deviceRepo.GetLeafCharacteristics();",
+    caption: "deviceRepo.getLeafCharacteristics",
+    value: "var result_as_Characteristic_list = deviceRepo.getLeafCharacteristics();",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetLocation",
-    value: "var result_as_Location = deviceRepo.GetLocation(id_as_string);",
+    caption: "deviceRepo.getLocation",
+    value: "var result_as_Location = deviceRepo.getLocation(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetService",
-    value: "var result_as_Service = deviceRepo.GetService(id_as_string);",
+    caption: "deviceRepo.getService",
+    value: "var result_as_Service = deviceRepo.getService(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ListDeviceTypes",
-    value: "var result_as_DeviceType_list = deviceRepo.ListDeviceTypes(limit_as_int64, offset_as_int64, sort_as_string, filter_as_FilterCriteria_list, includeModified_as_bool, includeUnmodified_as_bool);",
+    caption: "deviceRepo.listDeviceTypes",
+    value: "var result_as_DeviceType_list = deviceRepo.listDeviceTypes(limit_as_int64, offset_as_int64, sort_as_string, filter_as_FilterCriteria_list, includeModified_as_bool, includeUnmodified_as_bool);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ListHubDeviceIds",
-    value: "var result_as_string_list = deviceRepo.ListHubDeviceIds(id_as_string, asLocalId_as_bool);",
+    caption: "deviceRepo.listHubDeviceIds",
+    value: "var result_as_string_list = deviceRepo.listHubDeviceIds(id_as_string, asLocalId_as_bool);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ReadDevice",
-    value: "var result_as_Device = deviceRepo.ReadDevice(id_as_string);",
+    caption: "deviceRepo.readDevice",
+    value: "var result_as_Device = deviceRepo.readDevice(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ReadDeviceByLocalId",
-    value: "var result_as_Device = deviceRepo.ReadDeviceByLocalId(localId_as_string);",
+    caption: "deviceRepo.readDeviceByLocalId",
+    value: "var result_as_Device = deviceRepo.readDeviceByLocalId(localId_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ReadDeviceGroup",
-    value: "var result_as_DeviceGroup = deviceRepo.ReadDeviceGroup(id_as_string);",
+    caption: "deviceRepo.readDeviceGroup",
+    value: "var result_as_DeviceGroup = deviceRepo.readDeviceGroup(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ReadDeviceType",
-    value: "var result_as_DeviceType = deviceRepo.ReadDeviceType(id_as_string);",
+    caption: "deviceRepo.readDeviceType",
+    value: "var result_as_DeviceType = deviceRepo.readDeviceType(id_as_string);",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ReadHub",
-    value: "var result_as_Hub = deviceRepo.ReadHub(id_as_string);",
+    caption: "deviceRepo.readHub",
+    value: "var result_as_Hub = deviceRepo.readHub(id_as_string);",
     meta: "static"
 },
 {
-    caption: "inputs.Exists",
-    value: "var result_as_bool = inputs.Exists(name_as_string);",
+    caption: "inputs.exists",
+    value: "var result_as_bool = inputs.exists(name_as_string);",
     meta: "static"
 },
 {
-    caption: "inputs.Get",
-    value: "var result_as_any = inputs.Get(name_as_string);",
+    caption: "inputs.get",
+    value: "var result_as_any = inputs.get(name_as_string);",
     meta: "static"
 },
 {
-    caption: "inputs.List",
-    value: "var result_as_list = inputs.List();",
+    caption: "inputs.list",
+    value: "var result_as_list = inputs.list();",
     meta: "static"
 },
 {
-    caption: "inputs.ListNames",
-    value: "var result_as_string_list = inputs.ListNames();",
+    caption: "inputs.listNames",
+    value: "var result_as_string_list = inputs.listNames();",
     meta: "static"
 },
 {
-    caption: "outputs.Get",
-    value: "var result_as_any = outputs.Get(name_as_string);",
+    caption: "outputs.get",
+    value: "var result_as_any = outputs.get(name_as_string);",
     meta: "static"
 },
 {
-    caption: "variables.DerefName",
-    value: "var result_as_string = variables.DerefName(ref_as_string);",
+    caption: "variables.derefName",
+    value: "var result_as_string = variables.derefName(ref_as_string);",
     meta: "static"
 },
 {
-    caption: "variables.DerefTemplate",
-    value: "var result_as_string = variables.DerefTemplate(templ_as_string);",
+    caption: "variables.derefTemplate",
+    value: "var result_as_string = variables.derefTemplate(templ_as_string);",
     meta: "static"
 },
 {
-    caption: "variables.DerefValue",
-    value: "var result_as_any = variables.DerefValue(ref_as_string);",
+    caption: "variables.derefValue",
+    value: "var result_as_any = variables.derefValue(ref_as_string);",
     meta: "static"
 },
 {
-    caption: "variables.Exists",
-    value: "var result_as_bool = variables.Exists(name_as_string);",
+    caption: "variables.exists",
+    value: "var result_as_bool = variables.exists(name_as_string);",
     meta: "static"
 },
 {
-    caption: "variables.Read",
-    value: "var result_as_any = variables.Read(name_as_string);",
+    caption: "variables.read",
+    value: "var result_as_any = variables.read(name_as_string);",
     meta: "static"
 },
 {
-    caption: "variables.Ref",
-    value: "var result_as_string = variables.Ref(name_as_string);",
+    caption: "variables.ref",
+    value: "var result_as_string = variables.ref(name_as_string);",
     meta: "static"
 }
             ]);
         } else {
             callback(null, [
                 {
-    caption: "outputs.Set",
-    value: "outputs.Set(name_as_string, value_as_any)",
+    caption: "outputs.set",
+    value: "outputs.set(name_as_string, value_as_any)",
     meta: "static"
 },
 {
-    caption: "outputs.SetJson",
-    value: "outputs.SetJson(name_as_string, value_as_any)",
+    caption: "outputs.setJson",
+    value: "outputs.setJson(name_as_string, value_as_any)",
     meta: "static"
 },
 {
-    caption: "variables.Write",
-    value: "variables.Write(name_as_string, value_as_any)",
+    caption: "variables.write",
+    value: "variables.write(name_as_string, value_as_any)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspect",
-    value: "deviceRepo.GetAspect(id_as_string)",
+    caption: "deviceRepo.getAspect",
+    value: "deviceRepo.getAspect(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectNode",
-    value: "deviceRepo.GetAspectNode(id_as_string)",
+    caption: "deviceRepo.getAspectNode",
+    value: "deviceRepo.getAspectNode(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectNodes",
-    value: "deviceRepo.GetAspectNodes()",
+    caption: "deviceRepo.getAspectNodes",
+    value: "deviceRepo.getAspectNodes()",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectNodesByIdList",
-    value: "deviceRepo.GetAspectNodesByIdList(ids_as_string_list)",
+    caption: "deviceRepo.getAspectNodesByIdList",
+    value: "deviceRepo.getAspectNodesByIdList(ids_as_string_list)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectNodesMeasuringFunctions",
-    value: "deviceRepo.GetAspectNodesMeasuringFunctions(id_as_string, ancestors_as_bool, descendants_as_bool)",
+    caption: "deviceRepo.getAspectNodesMeasuringFunctions",
+    value: "deviceRepo.getAspectNodesMeasuringFunctions(id_as_string, ancestors_as_bool, descendants_as_bool)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectNodesWithMeasuringFunction",
-    value: "deviceRepo.GetAspectNodesWithMeasuringFunction(ancestors_as_bool, descendants_as_bool)",
+    caption: "deviceRepo.getAspectNodesWithMeasuringFunction",
+    value: "deviceRepo.getAspectNodesWithMeasuringFunction(ancestors_as_bool, descendants_as_bool)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspects",
-    value: "deviceRepo.GetAspects()",
+    caption: "deviceRepo.getAspects",
+    value: "deviceRepo.getAspects()",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetAspectsWithMeasuringFunction",
-    value: "deviceRepo.GetAspectsWithMeasuringFunction(ancestors_as_bool, descendants_as_bool)",
+    caption: "deviceRepo.getAspectsWithMeasuringFunction",
+    value: "deviceRepo.getAspectsWithMeasuringFunction(ancestors_as_bool, descendants_as_bool)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetCharacteristic",
-    value: "deviceRepo.GetCharacteristic(id_as_string)",
+    caption: "deviceRepo.getCharacteristic",
+    value: "deviceRepo.getCharacteristic(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetConceptWithCharacteristics",
-    value: "deviceRepo.GetConceptWithCharacteristics(id_as_string)",
+    caption: "deviceRepo.getConceptWithCharacteristics",
+    value: "deviceRepo.getConceptWithCharacteristics(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetConceptWithoutCharacteristics",
-    value: "deviceRepo.GetConceptWithoutCharacteristics(id_as_string)",
+    caption: "deviceRepo.getConceptWithoutCharacteristics",
+    value: "deviceRepo.getConceptWithoutCharacteristics(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceClass",
-    value: "deviceRepo.GetDeviceClass(id_as_string)",
+    caption: "deviceRepo.getDeviceClass",
+    value: "deviceRepo.getDeviceClass(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceClasses",
-    value: "deviceRepo.GetDeviceClasses()",
+    caption: "deviceRepo.getDeviceClasses",
+    value: "deviceRepo.getDeviceClasses()",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceClassesControllingFunctions",
-    value: "deviceRepo.GetDeviceClassesControllingFunctions(id_as_string)",
+    caption: "deviceRepo.getDeviceClassesControllingFunctions",
+    value: "deviceRepo.getDeviceClassesControllingFunctions(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceClassesFunctions",
-    value: "deviceRepo.GetDeviceClassesFunctions(id_as_string)",
+    caption: "deviceRepo.getDeviceClassesFunctions",
+    value: "deviceRepo.getDeviceClassesFunctions(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceClassesWithControllingFunctions",
-    value: "deviceRepo.GetDeviceClassesWithControllingFunctions()",
+    caption: "deviceRepo.getDeviceClassesWithControllingFunctions",
+    value: "deviceRepo.getDeviceClassesWithControllingFunctions()",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetDeviceTypeSelectables",
-    value: "deviceRepo.GetDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool)",
+    caption: "deviceRepo.getDeviceTypeSelectables",
+    value: "deviceRepo.getDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetFunction",
-    value: "deviceRepo.GetFunction(id_as_string)",
+    caption: "deviceRepo.getFunction",
+    value: "deviceRepo.getFunction(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetFunctionsByType",
-    value: "deviceRepo.GetFunctionsByType(rdfType_as_string)",
+    caption: "deviceRepo.getFunctionsByType",
+    value: "deviceRepo.getFunctionsByType(rdfType_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetLeafCharacteristics",
-    value: "deviceRepo.GetLeafCharacteristics()",
+    caption: "deviceRepo.getLeafCharacteristics",
+    value: "deviceRepo.getLeafCharacteristics()",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetLocation",
-    value: "deviceRepo.GetLocation(id_as_string)",
+    caption: "deviceRepo.getLocation",
+    value: "deviceRepo.getLocation(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.GetService",
-    value: "deviceRepo.GetService(id_as_string)",
+    caption: "deviceRepo.getService",
+    value: "deviceRepo.getService(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ListDeviceTypes",
-    value: "deviceRepo.ListDeviceTypes(limit_as_int64, offset_as_int64, sort_as_string, filter_as_FilterCriteria_list, includeModified_as_bool, includeUnmodified_as_bool)",
+    caption: "deviceRepo.listDeviceTypes",
+    value: "deviceRepo.listDeviceTypes(limit_as_int64, offset_as_int64, sort_as_string, filter_as_FilterCriteria_list, includeModified_as_bool, includeUnmodified_as_bool)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ListHubDeviceIds",
-    value: "deviceRepo.ListHubDeviceIds(id_as_string, asLocalId_as_bool)",
+    caption: "deviceRepo.listHubDeviceIds",
+    value: "deviceRepo.listHubDeviceIds(id_as_string, asLocalId_as_bool)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ReadDevice",
-    value: "deviceRepo.ReadDevice(id_as_string)",
+    caption: "deviceRepo.readDevice",
+    value: "deviceRepo.readDevice(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ReadDeviceByLocalId",
-    value: "deviceRepo.ReadDeviceByLocalId(localId_as_string)",
+    caption: "deviceRepo.readDeviceByLocalId",
+    value: "deviceRepo.readDeviceByLocalId(localId_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ReadDeviceGroup",
-    value: "deviceRepo.ReadDeviceGroup(id_as_string)",
+    caption: "deviceRepo.readDeviceGroup",
+    value: "deviceRepo.readDeviceGroup(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ReadDeviceType",
-    value: "deviceRepo.ReadDeviceType(id_as_string)",
+    caption: "deviceRepo.readDeviceType",
+    value: "deviceRepo.readDeviceType(id_as_string)",
     meta: "static"
 },
 {
-    caption: "deviceRepo.ReadHub",
-    value: "deviceRepo.ReadHub(id_as_string)",
+    caption: "deviceRepo.readHub",
+    value: "deviceRepo.readHub(id_as_string)",
     meta: "static"
 },
 {
-    caption: "inputs.Exists",
-    value: "inputs.Exists(name_as_string)",
+    caption: "inputs.exists",
+    value: "inputs.exists(name_as_string)",
     meta: "static"
 },
 {
-    caption: "inputs.Get",
-    value: "inputs.Get(name_as_string)",
+    caption: "inputs.get",
+    value: "inputs.get(name_as_string)",
     meta: "static"
 },
 {
-    caption: "inputs.List",
-    value: "inputs.List()",
+    caption: "inputs.list",
+    value: "inputs.list()",
     meta: "static"
 },
 {
-    caption: "inputs.ListNames",
-    value: "inputs.ListNames()",
+    caption: "inputs.listNames",
+    value: "inputs.listNames()",
     meta: "static"
 },
 {
-    caption: "outputs.Get",
-    value: "outputs.Get(name_as_string)",
+    caption: "outputs.get",
+    value: "outputs.get(name_as_string)",
     meta: "static"
 },
 {
-    caption: "variables.DerefName",
-    value: "variables.DerefName(ref_as_string)",
+    caption: "variables.derefName",
+    value: "variables.derefName(ref_as_string)",
     meta: "static"
 },
 {
-    caption: "variables.DerefTemplate",
-    value: "variables.DerefTemplate(templ_as_string)",
+    caption: "variables.derefTemplate",
+    value: "variables.derefTemplate(templ_as_string)",
     meta: "static"
 },
 {
-    caption: "variables.DerefValue",
-    value: "variables.DerefValue(ref_as_string)",
+    caption: "variables.derefValue",
+    value: "variables.derefValue(ref_as_string)",
     meta: "static"
 },
 {
-    caption: "variables.Exists",
-    value: "variables.Exists(name_as_string)",
+    caption: "variables.exists",
+    value: "variables.exists(name_as_string)",
     meta: "static"
 },
 {
-    caption: "variables.Read",
-    value: "variables.Read(name_as_string)",
+    caption: "variables.read",
+    value: "variables.read(name_as_string)",
     meta: "static"
 },
 {
-    caption: "variables.Ref",
-    value: "variables.Ref(name_as_string)",
+    caption: "variables.ref",
+    value: "variables.ref(name_as_string)",
     meta: "static"
 }
             ]);
