@@ -64,6 +64,7 @@ import * as ace from 'brace';
 import 'brace/mode/javascript';
 import 'brace/mode/json';
 import 'brace/ext/language_tools'
+import {Completer} from './ace-code-completer';
 //import * as langTools from 'brace/ext/language_tools';
 
 interface Criteria {
@@ -243,7 +244,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                             that.setAceJsonCompleter(callback);
                             return
                         case "ace/mode/javascript":
-                            that.setAceJsCompleter(session, pos, callback);
+                            Completer.getCompletions(_, session, pos, ___, callback)
                             return
                         default:
                             console.error("unknown ace editor mode:", session.$modeId)
@@ -258,143 +259,6 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.setInfoModuleDataAceEditor(this.infoModuleDataEditor);
         this.setAceJsEditor(this.preScriptEditor, "prescript");
         this.setAceJsEditor(this.postScriptEditor, "postscript");
-    }
-
-    private setAceJsCompleter(session: any, pos: any, callback: any){
-        let line = session.doc.$lines[pos.row].slice(0, pos.column-1);
-        const isNewStatement = line.trim().length == 0 || line.trim().endsWith(";")
-        if(isNewStatement){
-            callback(null, [
-                {
-                    caption: "variables.write",
-                    value: "variables.write(\"variable-name\", \"any value\");",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.read",
-                    value: "var variableValue = variables.read(\"variable-name\");",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.exists",
-                    value: "var exists = variables.exists(\"variable-name\");",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.ref",
-                    value: "var ref = variables.ref(\"variable-name\");",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.derefName",
-                    value: "var variableName = variables.derefName(\"{{.ref}}\");",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.derefValue",
-                    value: "var variableValue = variables.derefValue(\"{{.ref}}\");",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.derefTemplate",
-                    value: "var text = variables.derefTemplate(\"template text with multiple {{.ref}} placeholders\");",
-                    meta: "static"
-                },
-                {
-                    caption: "inputs.get",
-                    value: "var inpValue = inputs.get(\"input-name\");",
-                    meta: "static"
-                },
-                {
-                    caption: "inputs.exists",
-                    value: "var exists = inputs.exists(\"input-name\");",
-                    meta: "static"
-                },
-                {
-                    caption: "inputs.list",
-                    value: "var inputValues = inputs.list();",
-                    meta: "static"
-                },
-                {
-                    caption: "inputs.listNames",
-                    value: "var inputNames = inputs.listNames();",
-                    meta: "static"
-                },
-                {
-                    caption: "outputs.get",
-                    value: "var outputValue = outputs.get(\"output-name\");",
-                    meta: "static"
-                },
-                {
-                    caption: "outputs.set",
-                    value: "outputs.set(\"output-name\", \"output-value\");",
-                    meta: "static"
-                },
-                {
-                    caption: "outputs.setJson",
-                    value: "outputs.setJson(\"output-name\", \"output-value\");",
-                    meta: "static"
-                }
-            ])
-        } else {
-            callback(null, [
-                {
-                    caption: "variables.read",
-                    value: "variables.read(\"variable-name\")",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.exists",
-                    value: "variables.exists(\"variable-name\")",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.ref",
-                    value: "variables.ref(\"variable-name\")",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.derefName",
-                    value: "variables.derefName(\"{{.ref}}\")",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.derefValue",
-                    value: "variables.derefValue(\"{{.ref}}\")",
-                    meta: "static"
-                },
-                {
-                    caption: "variables.derefTemplate",
-                    value: "variables.derefTemplate(\"template text with multiple {{.ref}} placeholders\")",
-                    meta: "static"
-                },
-                {
-                    caption: "inputs.get",
-                    value: "inputs.get(\"input-name\")",
-                    meta: "static"
-                },
-                {
-                    caption: "inputs.exists",
-                    value: "inputs.exists(\"input-name\")",
-                    meta: "static"
-                },
-                {
-                    caption: "inputs.list",
-                    value: "inputs.list()",
-                    meta: "static"
-                },
-                {
-                    caption: "inputs.listNames",
-                    value: "inputs.listNames()",
-                    meta: "static"
-                },
-                {
-                    caption: "outputs.get",
-                    value: "outputs.get(\"output-name\")",
-                    meta: "static"
-                }
-            ])
-        }
     }
 
     private setAceJsonCompleter(callback: any){
