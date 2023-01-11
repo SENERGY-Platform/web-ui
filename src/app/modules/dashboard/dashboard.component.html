@@ -86,7 +86,7 @@
 
                 </div>
 
-                <gridster *ngIf="zoomedWidgetIndex === null" [options]="options">
+                <gridster *ngIf="zoomedWidgetIndex === null" [options]="options" id="gridster">
                     <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets"
                                    [ngClass]="inDragMode ? 'highlight color-sidenav' : ''"
                                    class="mat-elevation-z1">

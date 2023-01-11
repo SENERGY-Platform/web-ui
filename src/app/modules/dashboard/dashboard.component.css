@@ -20,11 +20,12 @@
 
 gridster {
   background-color: #fafafa;
+  height: calc(100% - 120px);
 }
 
 gridster-item {
   border-radius: 4px;
-  min-height: 282px;
+  min-height: 272px;
 }
 
 .dashboard-container gridster ::ng-deep gridster-preview {
