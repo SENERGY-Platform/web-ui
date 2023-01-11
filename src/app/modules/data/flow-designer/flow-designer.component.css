@@ -83,3 +83,7 @@ h1 {
 .checkbox-margin {
     margin: 0 10px;
 }
+
+#diagram-operators {
+    margin-bottom: 100px;
+}
