@@ -410,6 +410,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.availableProcessVariables.get('iot_form_fields')?.forEach(field => {
             result.push({name: field.label || field.name, value: '${'+field.name+'}'});
         });
+        this.availableProcessVariables.get('import_selection')?.forEach(field => {
+            result.push({name: field.label || field.name, value: field.name});
+        });
         return result;
     }
 
@@ -1130,22 +1133,23 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         importSelectionRaw?.forEach(importSelection => {
             this.importTypeService.getImportType(importSelection.value).subscribe(importType => {
                 this.getImportTypeOutputPathsFormSubElements(importType.output.sub_content_variables).forEach(path => {
-                    const selection =  "{\"import_selection\": {\"id\":\"${"+importSelection.name+"}\", \"path\": \""+path+"\"}}";
-                    this.availableProcessVariables.get("import_selection")?.push({name: selection, label: importSelection.label + ": " + path, value: ""})
+                    const selection =  "{\"import_selection\": {\"id\":\"${"+importSelection.name+"}\", \"path\": \""+path.path+"\", \"characteristic_id\": \""+path.characteristic+"\"}}";
+                    this.availableProcessVariables.get("import_selection")?.push({name: selection, label: importSelection.label + ": " + path.path, value: ""})
                 })
                 this.availableAnalyticsIotSelections = this.getAvailableAnalyticsIotSelections();
+                this.availableProcessIotSelections = this.getAvailableProcessIotSelections();
             })
         })
     }
 
-    private getImportTypeOutputPathsFormSubElements(importOutputs: ImportTypeContentVariableModel[] | null, current?: string[]): string[] {
+    private getImportTypeOutputPathsFormSubElements(importOutputs: ImportTypeContentVariableModel[] | null, current?: string[]): {path: string, characteristic: string}[] {
         if(!current) {
             current = [];
         }
         if(!importOutputs|| importOutputs.length == 0) {
-            return [current.join(".")]
+            return [{path: current.join("."), characteristic: ""}]
         } else {
-            let result: string[] = [];
+            let result: {path: string, characteristic: string}[] = [];
             importOutputs.forEach(sub => {
                 result = result.concat(this.getImportTypeOutputPaths(sub, JSON.parse(JSON.stringify(current))))
             });
@@ -1153,13 +1157,13 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         }
     }
 
-    private getImportTypeOutputPaths(importOutputs: ImportTypeContentVariableModel, current?: string[]): string[] {
+    private getImportTypeOutputPaths(importOutputs: ImportTypeContentVariableModel, current?: string[]): {path: string, characteristic: string}[] {
         if(!current) {
             current = [];
         }
         current.push(importOutputs.name);
         if(!importOutputs.sub_content_variables || importOutputs.sub_content_variables.length == 0) {
-            return [current.join(".")]
+            return [{path: current.join("."), characteristic: importOutputs.characteristic_id||""}]
         } else {
             return this.getImportTypeOutputPathsFormSubElements(importOutputs.sub_content_variables, current);
         }
