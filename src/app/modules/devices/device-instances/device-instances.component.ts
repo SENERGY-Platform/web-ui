@@ -17,7 +17,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { DeviceInstancesService } from './shared/device-instances.service';
-import { DeviceInstancesIntermediateModel, DeviceInstancesModel } from './shared/device-instances.model';
+import { DeviceInstancesIntermediateModel, DeviceInstancesModel, DeviceInstancesPermSearchModel } from './shared/device-instances.model';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { Subscription } from 'rxjs';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
@@ -207,6 +207,8 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
     }
 
     private getDeviceInstances(reset: boolean) {
+        var connectionFilter: null | 'connected' | 'disconnected' | 'unknown' = this.activeIndex === 0 ? null : (tabs[this.activeIndex - 1].state as 'connected' | 'disconnected' | 'unknown')
+
         if (reset) {
             this.setRepoItemsParams(this.limitInit);
             this.reset();
@@ -228,7 +230,7 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
                     this.sortAttribute.value,
                     this.sortAttribute.order,
                     this.routerNetwork.id,
-                    this.activeIndex === 0 ? null : (tabs[this.activeIndex - 1].state as 'connected' | 'disconnected' | 'unknown'),
+                    connectionFilter,
                 )
                 .subscribe((deviceInstances: DeviceInstancesModel[]) => {
                     this.setDevices(deviceInstances);
@@ -237,69 +239,26 @@ export class DeviceInstancesComponent implements OnInit, OnDestroy {
             this.selectedTag = this.routerDeviceType.name;
             this.selectedTagTransformed = this.routerDeviceType.name;
             this.deviceInstancesService
-                .getDeviceInstancesByDeviceType(
-                    this.routerDeviceType.id,
-                    this.limit,
-                    this.offset,
-                    this.sortAttribute.value,
-                    this.sortAttribute.order,
-                    this.activeIndex === 0 ? null : (tabs[this.activeIndex - 1].state as 'connected' | 'disconnected' | 'unknown'),
-                )
+                .getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, connectionFilter)
                 .subscribe((deviceInstances) => {
                     this.setDevices(deviceInstances);
-                });
-        } else {
-            if (this.selectedTag === '') {
-                if (this.activeIndex === 0) {
-                    this.deviceInstancesService
-                        .getDeviceInstances(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
-                        .subscribe((deviceInstances: DeviceInstancesModel[]) => {
-                            this.setDevices(deviceInstances);
-                        });
-                } else {
-                    this.deviceInstancesService
-                        .getDeviceInstancesByState(
-                            this.searchText,
-                            tabs[this.activeIndex - 1].state,
-                            this.limit,
-                            this.offset,
-                            this.sortAttribute.value,
-                            this.sortAttribute.order,
-                        )
-                        .subscribe((deviceInstances: DeviceInstancesModel[]) => {
-                            this.setDevices(deviceInstances);
-                        });
-                }
-            } else {
-                if (this.activeIndex === 0) {
-                    this.deviceInstancesService
-                        .getDeviceInstancesByTag(
-                            this.selectedTagType,
-                            this.selectedTag,
-                            this.sortAttribute.value,
-                            this.sortAttribute.order,
-                            this.limit,
-                            this.offset,
-                        )
-                        .subscribe((deviceInstances: DeviceInstancesModel[]) => {
-                            this.setDevices(deviceInstances);
-                        });
-                } else {
-                    this.deviceInstancesService
-                        .getDeviceInstancesByTagAndState(
-                            this.selectedTagType,
-                            this.selectedTag,
-                            this.limit,
-                            this.offset,
-                            this.sortAttribute.value,
-                            this.sortAttribute.order,
-                            tabs[this.activeIndex - 1].state,
-                        )
-                        .subscribe((deviceInstances: DeviceInstancesModel[]) => {
-                            this.setDevices(deviceInstances);
-                        });
-                }
-            }
+                })
+
+        } else {                    
+                this.deviceInstancesService
+                    .getDeviceInstances(
+                        this.limit,
+                        this.offset,
+                        this.sortAttribute.value,
+                        this.sortAttribute.order,
+                        this.searchText,
+                        this.selectedTagType,
+                        this.selectedTag,
+                        connectionFilter,
+                    )
+                    .subscribe((deviceInstances: DeviceInstancesModel[]) => {
+                        this.setDevices(deviceInstances);
+                    });
         }
     }
 

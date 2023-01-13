@@ -41,6 +41,7 @@ export interface DeviceInstancesIntermediateModel extends DeviceInstancesBaseMod
 
 export interface DeviceInstancesPermSearchModel extends DeviceInstancesIntermediateModel {
     device_type_id: string;
+    annotations: any;
 }
 
 export interface DeviceInstancesModel extends DeviceInstancesIntermediateModel {

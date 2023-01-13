@@ -148,7 +148,7 @@ export class NewExportComponent implements OnInit {
         }
         const array: Observable<DeviceInstancesModel[] | PipelineModel[] | ImportInstancesModel[] | ExportDatabaseModel[]>[] = [];
 
-        array.push(this.deviceInstanceService.getDeviceInstances('', 9999, 0, 'name', 'asc'));
+        array.push(this.deviceInstanceService.getDeviceInstances(9999, 0, 'name', 'asc'));
         array.push(this.pipelineRegistryService.getPipelines());
         array.push(this.importInstancesService.listImportInstances('', 9999, 0, 'name.asc'));
         array.push(this.exportService.getExportDatabases());

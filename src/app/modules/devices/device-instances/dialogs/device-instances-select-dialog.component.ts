@@ -59,7 +59,7 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
 
     load() {
         this.deviceInstancesService
-            .getDeviceInstances(this.searchControl.value, this.limit, this.offset, this.sortBy, this.sortOrder)
+            .getDeviceInstances(this.limit, this.offset, this.sortBy, this.sortOrder, this.searchControl.value)
             .subscribe((devices) => {
                 this.devices.push(...devices);
                 if (this.table !== undefined) {

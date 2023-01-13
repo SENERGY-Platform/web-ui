@@ -258,7 +258,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 }
             }
         })));
-        obs.push(this.deviceInstancesService.getDeviceInstances('', 9999, 0, 'name', 'asc')
+        obs.push(this.deviceInstancesService.getDeviceInstances(9999, 0, 'name', 'asc')
             .pipe(
                 map(devices => this.deviceInstancesService.useDisplayNameAsName(devices)),
                 map(devices => devices as DeviceInstancesModel[]),

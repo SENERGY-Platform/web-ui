@@ -176,7 +176,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     initDevices() {
-        this.deviceInstancesService.getDeviceInstances('', 10000, 0, 'name', 'asc').subscribe(devices => this.devices = devices);
+        this.deviceInstancesService.getDeviceInstances(10000, 0, 'name', 'asc').subscribe(devices => this.devices = devices);
     }
 
     close(): void {
