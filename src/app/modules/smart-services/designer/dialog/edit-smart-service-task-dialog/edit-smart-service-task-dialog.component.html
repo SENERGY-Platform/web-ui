@@ -43,7 +43,16 @@
             <input matInput placeholder="Deployment-Name" [(ngModel)]="processProcessName" required>
           </mat-form-field>
         </div>
-
+        <div>
+          <mat-checkbox
+                  class="checkbox-margin"
+                  [(ngModel)]="processFog"
+                  stringCheckboxValue
+                  trueValue="true"
+                  falseValue="false">
+            Prefer Fog Deployment
+          </mat-checkbox>
+        </div>
         <div>
           <mat-card>
             <mat-accordion>

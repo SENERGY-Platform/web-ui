@@ -511,6 +511,15 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.setFieldValue(this.processProcessNameFieldName, "text", value)
     }
 
+    processFogFieldName = "process_deployment.prefer_fog_deployment"
+    get processFog(): string {
+        return this.getFieldValue(this.processFogFieldName, "text", "false")
+    }
+
+    set processFog(value: string) {
+        this.setFieldValue(this.processFogFieldName, "text", value)
+    }
+
     processTaskMatches(input: SmartServiceTaskInputDescription, taskId: string, suffix: string): boolean  {
         return input.name == "process_deployment."+taskId+"."+suffix
     }
