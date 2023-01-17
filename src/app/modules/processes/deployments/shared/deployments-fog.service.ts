@@ -57,7 +57,7 @@ export class DeploymentsFogService {
         return this.http.get<V2DeploymentsPreparedModel>(url).pipe(
             catchError(this.errorHandlerService.handleError(DeploymentsFogService.name, 'getPreparedDeployments', null)),
             map((deployment) => {
-                deployment?.elements.forEach((element) => {
+                deployment?.elements?.forEach((element) => {
                     element.message_event?.selection.selection_options.forEach((option: any) => {
                         if (option.servicePathOptions === undefined) {
                             return;

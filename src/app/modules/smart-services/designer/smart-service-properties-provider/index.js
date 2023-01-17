@@ -183,6 +183,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, replac
                     switch (serviceTask.topic){
                         case "process_deployment":
                             outputs.push(createTextOutputParameter(bpmnjs, taskId+"_process_deployment_id", "${process_deployment_id}"));
+                            outputs.push(createTextOutputParameter(bpmnjs, taskId+"_done_event", "${done_event}"));
                             let fogInput = inputs.find(value => value.name === "process_deployment.prefer_fog_deployment");
                             if(fogInput && fogInput.value === "true") {
                                 outputs.push(createTextOutputParameter(bpmnjs, taskId+"_is_fog_deployment", "${is_fog_deployment}"));
