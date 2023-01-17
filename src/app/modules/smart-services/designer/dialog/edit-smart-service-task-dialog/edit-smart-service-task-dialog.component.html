@@ -293,6 +293,11 @@
                           <h4 class="mat-h4">Criteria</h4>
                           <criteria-list (on_change)="input.value = $event" [criteria_json]="input.value"></criteria-list>
                         </div>
+                        <div *ngIf="analyticsInputMatchesIotServiceCriteria(input, flowInput.id, port)">
+                          <mat-divider [inset]="true"></mat-divider>
+                          <h4 class="mat-h4">Service-Criteria</h4>
+                          <criteria-list (on_change)="input.value = $event" [criteria_json]="input.value"></criteria-list>
+                        </div>
                       </ng-container>
                     </div>
                     <mat-divider [inset]="true"></mat-divider>

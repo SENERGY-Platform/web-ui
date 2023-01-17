@@ -719,6 +719,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                     this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
                     const criteriaKey = "analytics.criteria."+input.id+"."+port;
                     this.result.inputs.push(this.knownInputValues.get(criteriaKey) || {name:criteriaKey, value: "[]", type: "text"});
+                    const serviceCriteriaKey = "analytics.service_criteria."+input.id+"."+port;
+                    this.result.inputs.push(this.knownInputValues.get(serviceCriteriaKey) || {name:serviceCriteriaKey, value: "[]", type: "text"});
                 })
                 input.config?.forEach(config => {
                     const configKey = "analytics.conf."+input.id+"."+config.name;
@@ -749,6 +751,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
     analyticsInputMatchesIotCriteria(input: SmartServiceTaskInputDescription, flowInputId: string, port: string): boolean {
         return input.name == "analytics.criteria."+flowInputId+"."+port
+    }
+
+    analyticsInputMatchesIotServiceCriteria(input: SmartServiceTaskInputDescription, flowInputId: string, port: string): boolean {
+        return input.name == "analytics.service_criteria."+flowInputId+"."+port
     }
 
     analyticsInputMatchesIotConfig(input: SmartServiceTaskInputDescription, flowInputId: string, configName: string): boolean {
