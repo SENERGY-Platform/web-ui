@@ -43,7 +43,7 @@ export class TaskConfigDialogComponent implements OnInit {
     aspectFormControl = new FormControl('');
     functionFormControl = new FormControl({ value: '', disabled: true });
     completionStrategyFormControl = new FormControl('');
-    retriesFormControl = new FormControl({ value: 0, disabled: true }, [Validators.min(0), Validators.max(100)]);
+    retriesFormControl = new FormControl({ value: 0, disabled: true }, [Validators.min(-1), Validators.max(100)]);
     preferEventsFormControl = new FormControl({ value: false, disabled: true });
 
 
@@ -127,6 +127,7 @@ export class TaskConfigDialogComponent implements OnInit {
             if (completionStrategy === 'pessimistic') {
                 this.retriesFormControl.enable();
                 this.preferEventsFormControl.enable();
+                this.retriesFormControl.patchValue(-1);
             }
         });
     }
