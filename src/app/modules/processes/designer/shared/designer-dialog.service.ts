@@ -31,10 +31,11 @@ import {
 } from '../../../metadata/device-types-overview/shared/device-type-selection.model';
 import { TaskConfigDialogComponent } from '../dialogs/task-config-dialog/task-config-dialog.component';
 import { NotificationConfigDialogComponent } from '../dialogs/notification-config-dialog/notification-config-dialog.component';
-import { FilterCriteriaDialogResultModel } from './designer-dialog.model';
+import {ConditionalEventEditModel, FilterCriteriaDialogResultModel} from './designer-dialog.model';
 import { FilterCriteriaDialogComponent } from '../dialogs/filter-criteria-dialog/filter-criteria-dialog.component';
 import {ProcessIoDesignerInfo} from '../../process-io/shared/process-io.model';
 import {ProcessIoDesignerDialogComponent} from '../dialogs/process-io-designer-dialog/process-io-designer-dialog.component';
+import {ConditionalEventDialogComponent} from '../dialogs/conditional-event-dialog/conditional-event-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -136,11 +137,11 @@ export class DesignerDialogService {
         return this.dialog.open(TaskConfigDialogComponent, dialogConfig).afterClosed();
     }
 
-    openFilterCriteriaDialog(aspect: string, iotFunction: string, characteristic: string): Observable<FilterCriteriaDialogResultModel> {
+    openConditionalEventDialog(msg: ConditionalEventEditModel): Observable<ConditionalEventEditModel> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
-        dialogConfig.data = { aspect, iotfunction: iotFunction, characteristic };
-        return this.dialog.open(FilterCriteriaDialogComponent, dialogConfig).afterClosed();
+        dialogConfig.data = { msg: msg };
+        return this.dialog.open(ConditionalEventDialogComponent, dialogConfig).afterClosed();
     }
 
     openProcessIoDialog(info: ProcessIoDesignerInfo): Observable<ProcessIoDesignerInfo | null> {

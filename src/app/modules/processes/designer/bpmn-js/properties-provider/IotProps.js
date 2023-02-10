@@ -608,7 +608,6 @@ module.exports = {
     },
 
     msgevent: function (group, element, bpmnjs, eventBus, modeling) {
-
         var refresh = function () {
             eventBus.fire('elements.changed', {elements: [element]});
         };
@@ -631,45 +630,61 @@ module.exports = {
             modelProperty : 'senergy:characteristic'
         });
 
-        var useMarshaller = entryFactory.textBox({
-            id : 'use-marshaller-field',
-            label : 'Use Marshaller',
-            modelProperty : 'senergy:use_marshaller'
+        var script = entryFactory.textBox({
+            id : 'script-field',
+            label : 'Script',
+            modelProperty : 'senergy:script'
+        });
+
+        var valueVariableName = entryFactory.textBox({
+            id : 'value-variable-field',
+            label : 'Value Variable Name',
+            modelProperty : 'senergy:value_variable_name'
+        });
+
+        var variables = entryFactory.textBox({
+            id : 'variables-field',
+            label : 'Variables',
+            modelProperty : 'senergy:variables'
+        });
+
+        var qos = entryFactory.textBox({
+            id : 'qos-field',
+            label : 'Qos',
+            modelProperty : 'senergy:qos'
         });
 
         group.entries.push({
-            id: "iot-msg-filter-criteria-select-button",
-            html: "<button class='bpmn-iot-button' data-action='selectIotFilterCriteria'>Event Filter-Criteria</button>",
-            selectIotFilterCriteria: function (element, node) {
-                var selectIotFilterCriteria = bpmnjs.designerCallbacks.selectIotFilterCriteria; //TODO: implement
-
-                if (!selectIotFilterCriteria) {
-                    selectIotFilterCriteria = function (aspect, iotFunction, characteristic, callback) {
-                        console.log(aspect, iotFunction, characteristic);
-                        callback({
-                            aspect:"test-aspect",
-                            iotfunction:"test-function",
-                            characteristic:"test-characteristic",
-                            label: "test-event-label"
-                        } )
-                    };
-
-                    console.log("missing bpmnjs.designerCallbacks.selectIotFilterCriteria(aspect, iotFunction, characteristic, callback)\nexample for function: ", selectIotFilterCriteria);
+            id: "iot-conditional-event-button",
+            html: "<button class='bpmn-iot-button' data-action='editConditionalEvent'>Edit Conditional Event</button>",
+            editConditionalEvent: function (element, node) {
+                var f = bpmnjs.designerCallbacks.editConditionalEvent;
+                if (!f) {
+                    console.log("missing bpmnjs.designerCallbacks.editConditionalEvent()\nexample for function");
                     return
                 }
-
-                selectIotFilterCriteria(
-                    aspect.get(element)["senergy:aspect"],
-                    iotfunction.get(element)["senergy:function"],
-                    characteristic.get(element)["senergy:characteristic"],
-                    function (filterCriteria) {
+                f(
+                    {
+                        aspect: aspect.get(element)["senergy:aspect"],
+                        iotfunction: iotfunction.get(element)["senergy:function"],
+                        characteristic: characteristic.get(element)["senergy:characteristic"],
+                        script: script.get(element)["senergy:script"],
+                        valueVariableName: valueVariableName.get(element)["senergy:value_variable_name"],
+                        variables: variables.get(element)["senergy:variables"],
+                        qos: qos.get(element)["senergy:qos"],
+                    },
+                    function (response) {
                         var update = {
-                            "senergy:aspect": filterCriteria.aspect,
-                            "senergy:function": filterCriteria.iotfunction,
-                            "senergy:characteristic": filterCriteria.characteristic,
+                            "senergy:aspect": response.aspect,
+                            "senergy:function": response.iotfunction,
+                            "senergy:characteristic": response.characteristic,
+                            "senergy:script": response.script,
+                            "senergy:value_variable_name": response.valueVariableName,
+                            "senergy:variables": response.variables,
+                            "senergy:qos": response.qos,
                         };
-                        if(filterCriteria.label){
-                            update["name"] = filterCriteria.label;
+                        if(response.label){
+                            update["name"] = response.label;
                         }
                         modeling.updateProperties(element, update);
                         eventBus.fire('elements.changed', {elements: [element]});
@@ -683,7 +698,10 @@ module.exports = {
         group.entries.push(aspect);
         group.entries.push(iotfunction);
         group.entries.push(characteristic);
-        group.entries.push(useMarshaller);
+        group.entries.push(script);
+        group.entries.push(valueVariableName);
+        group.entries.push(variables);
+        group.entries.push(qos);
     },
 
     influx: function (group, element, bpmnjs, eventBus, bpmnFactory, replace, selection) {

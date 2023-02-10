@@ -40,7 +40,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DesignerErrorModel } from './shared/designer-error.model';
 import { DesignerSnackBarComponent } from './snack-bar/designer-snack-bar.component';
 import { defaultIfEmpty } from 'rxjs/operators';
-import { FilterCriteriaDialogResultModel } from './shared/designer-dialog.model';
+import {ConditionalEventEditModel, FilterCriteriaDialogResultModel} from './shared/designer-dialog.model';
 import {DefaultProcessIoDesignerConfig, ProcessIoDesignerConfig, ProcessIoDesignerInfo} from '../process-io/shared/process-io.model';
 
 @Component({
@@ -114,15 +114,10 @@ export class ProcessDesignerComponent implements OnInit {
                             }
                         });
                 },
-                selectIotFilterCriteria: (
-                    aspect: string,
-                    iotFunction: string,
-                    characteristic: string,
-                    callback: (criteria: FilterCriteriaDialogResultModel) => void,
-                ) => {
+                editConditionalEvent: (m: ConditionalEventEditModel, callback: (result: ConditionalEventEditModel) => void) => {
                     that.designerDialogService
-                        .openFilterCriteriaDialog(aspect, iotFunction, characteristic)
-                        .subscribe((result: FilterCriteriaDialogResultModel) => {
+                        .openConditionalEventDialog(m)
+                        .subscribe((result: ConditionalEventEditModel) => {
                             if (result) {
                                 callback(result);
                             }

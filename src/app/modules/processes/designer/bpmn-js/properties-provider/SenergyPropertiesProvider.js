@@ -92,7 +92,7 @@ function createProcessIoTaskGroup(element, bpmnjs, eventBus, bpmnFactory, replac
 function createIotMsgEventGroup(element, bpmnjs, eventBus, modeling) {
     var iotGroup = {
         id: 'iot-event',
-        label: 'IoT-Message-Event',
+        label: 'Event',
         entries: [],
         enabled: isMsgEvent
     };
