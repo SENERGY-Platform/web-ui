@@ -41,6 +41,7 @@ export interface V2DeploymentsPreparedElementModel {
     order: number;
     time_event: V2DeploymentsPreparedTimeEventModel | null;
     message_event: V2DeploymentsPreparedMsgEventModel | null;
+    conditional_event: ConditionalEventModel | null;
     task: V2DeploymentsPreparedTaskModel | null;
     notification: V2DeploymentsPreparedNotificationModel | null;
 }
@@ -87,6 +88,15 @@ export interface V2DeploymentsPreparedMsgEventModel {
     flow_id: string;
     event_id: string;
     use_marshaller: boolean;
+    selection: V2DeploymentsPreparedSelectionModel;
+}
+
+export interface ConditionalEventModel {
+    script: string;
+    value_variable: string;
+    variables: any;
+    qos: number;
+    event_id: string;
     selection: V2DeploymentsPreparedSelectionModel;
 }
 

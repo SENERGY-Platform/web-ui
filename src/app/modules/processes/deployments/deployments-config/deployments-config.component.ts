@@ -206,6 +206,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         this.changeElementSelectionOption(selectedElementIndex, selectionOptionIndex, 'task');
     }
 
+    changeConditionalEventSelectionOption(selectedElementIndex: number, selectionOptionIndex: number): void {
+        this.changeElementSelectionOption(selectedElementIndex, selectionOptionIndex, 'conditional_event');
+    }
+
     changeEventSelectionOption(selectedElementIndex: number, selectionOptionIndex: number): void {
         this.changeElementSelectionOption(selectedElementIndex, selectionOptionIndex, 'message_event');
     }
@@ -340,6 +344,20 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         };
     }
 
+    getConditionalEventIndex(element: V2DeploymentsPreparedElementModel): (option: V2DeploymentsPreparedSelectionOptionModel) => number {
+        return (option) => {
+            if (element.conditional_event?.selection.selection_options === undefined) {
+                return -1;
+            }
+            return element.conditional_event?.selection.selection_options.findIndex(
+                (o) =>
+                    (o.device && o.device.id === option.device?.id) ||
+                    (o.device_group && o.device_group.id === option.device_group?.id) ||
+                    (o.import && o.import.id === option.import?.id),
+            );
+        };
+    }
+
     getMsgEventIndex(element: V2DeploymentsPreparedElementModel): (option: V2DeploymentsPreparedSelectionOptionModel) => number {
         return (option) => {
             if (element.message_event?.selection.selection_options === undefined) {
@@ -457,6 +475,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 }
                 if (element.message_event) {
                     this.optionGroups.set(index, ProcessDeploymentsConfigComponent.getOptionGroups(element.message_event.selection.selection_options));
+                }
+                if (element.conditional_event) {
+                    this.optionGroups.set(index, ProcessDeploymentsConfigComponent.getOptionGroups(element.conditional_event.selection.selection_options));
                 }
             });
         }

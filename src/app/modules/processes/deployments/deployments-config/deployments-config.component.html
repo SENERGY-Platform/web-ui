@@ -37,6 +37,39 @@
                 <div formArrayName="elements" *ngIf="elements.length > 0">
                     <div [formGroupName]="elementIndex"
                          *ngFor="let element of elements; let elementIndex = index; trackBy:trackByFn">
+                        <div formGroupName="conditional_event" *ngIf="element.conditional_event !== null">
+                            <div formGroupName="selection">
+                                <mat-form-field class="full-width" color="accent">
+                                    <senergy-select-search placeholder="{{element.name}}" [required]="true"
+                                                           formControlName="selection_options_index"
+                                                           [scrollWindowSize]="10000"
+                                                           [options]="optionGroups.get(elementIndex) || []"
+                                                           [getOptionValue]="getConditionalEventIndex(element)"
+                                                           (selectionChange)="changeConditionalEventSelectionOption(elementIndex, $event.value)"
+                                                           [getOptionViewValue]="getViewValue">
+                                    </senergy-select-search>
+                                </mat-form-field>
+
+                                <mat-form-field class="full-width" color="accent" *ngIf="element.conditional_event.selection.show === true">
+                                    <senergy-select-search placeholder="Service" [required]="true"
+                                                           formControlName="selected_service_id"
+                                                           [options]="element.conditional_event.selection.selection_options[element.conditional_event.selection.selection_options_index || 0].services || []"
+                                                           useOptionValueProperty="id"
+                                                           useOptionViewProperty="name">
+                                    </senergy-select-search>
+                                </mat-form-field>
+
+                                <mat-form-field class="full-width" color="accent"
+                                                [fxShow]="getPathOptions(elementIndex, 'conditional_event').length > 1">
+                                    <senergy-select-search placeholder="Path" [required]="true"
+                                                           (selectionChange)="setSelectedPathOptionByElementIndex('conditional_event', elementIndex, $event.value)"
+                                                           [autoSelectSingleElement]="true"
+                                                           [options]="getPathOptions(elementIndex, 'conditional_event')"
+                                                           useOptionViewProperty="path">
+                                    </senergy-select-search>
+                                </mat-form-field>
+                            </div>
+                        </div>
                         <div formGroupName="task" *ngIf="element.task !== null">
                             <table class="full-width">
                                 <tr>

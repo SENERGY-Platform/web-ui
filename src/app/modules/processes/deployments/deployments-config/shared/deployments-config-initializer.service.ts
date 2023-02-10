@@ -18,6 +18,7 @@ import { Injectable } from '@angular/core';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import * as moment from 'moment';
 import {
+    ConditionalEventModel,
     DeploymentsSelectionConfigurableModel,
     DeploymentsSelectionPathOptionModel,
     V2DeploymentsPreparedConfigurableModel,
@@ -80,6 +81,7 @@ export class DeploymentsConfigInitializerService {
             order: element.order,
             time_event: element.time_event ? this.initTimeEventFormGroup(element.time_event) : null,
             message_event: element.message_event ? this.initMessageEventFormGroup(element.message_event) : null,
+            conditional_event: element.conditional_event ? this.initConditionalEventFormGroup(element.conditional_event) : null,
             notification: element.notification,
             task: element.task ? this.initTaskFormGroup(element.task, disable) : null,
         });
@@ -122,6 +124,17 @@ export class DeploymentsConfigInitializerService {
             event_id: messageEvent.event_id,
             use_marshaller: messageEvent.use_marshaller,
             selection: this.initSelectionFormGroup(messageEvent.selection, false),
+        });
+    }
+
+    private initConditionalEventFormGroup(conditionalEvent: ConditionalEventModel): FormGroup {
+        return this._formBuilder.group({
+            script: conditionalEvent.script,
+            value_variable: conditionalEvent.value_variable,
+            variables: conditionalEvent.variables,
+            qos: conditionalEvent.qos,
+            event_id: conditionalEvent.event_id,
+            selection: this.initSelectionFormGroup(conditionalEvent.selection, false),
         });
     }
 
