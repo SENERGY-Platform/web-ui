@@ -227,6 +227,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     order: 0,
                     time_event: null,
                     message_event: null,
+                    conditional_event: null,
                     notification: null,
                     task: {
                         parameter: {},
@@ -320,6 +321,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     order: 0,
                     time_event: null,
                     message_event: null,
+                    conditional_event: null,
                     notification: null,
                     task: {
                         parameter: {},
@@ -701,6 +703,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: null,
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: {
                         retries: 0,
                         parameter: {},
@@ -785,6 +788,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     },
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: null,
                 },
                 {
@@ -795,6 +799,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: null,
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: {
                         retries: 0,
                         parameter: {
@@ -883,6 +888,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     },
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: null,
                 },
                 {
@@ -893,6 +899,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: null,
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: {
                         retries: 0,
                         parameter: {},
@@ -991,6 +998,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: null,
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: {
                         retries: 0,
                         parameter: {},
@@ -1076,6 +1084,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     },
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: null,
                 },
                 {
@@ -1086,6 +1095,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: null,
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: {
                         retries: 0,
                         parameter: {
@@ -1175,6 +1185,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     },
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: null,
                 },
                 {
@@ -1185,6 +1196,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: null,
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: {
                         retries: 0,
                         parameter: {},
@@ -1284,6 +1296,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: null,
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: {
                         retries: 0,
                         parameter: {},
@@ -1380,6 +1393,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     },
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: null,
                 },
                 {
@@ -1390,6 +1404,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: null,
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: {
                         retries: 0,
                         parameter: {
@@ -1489,6 +1504,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     },
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: null,
                 },
                 {
@@ -1499,6 +1515,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                     time_event: null,
                     notification: null,
                     message_event: null,
+                    conditional_event: null,
                     task: {
                         retries: 0,
                         parameter: {},

@@ -338,6 +338,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         time_event: null,
                         notification: null,
                         message_event: null,
+                        conditional_event: null,
                         task: {
                             retries: 0,
                             parameter: {},
@@ -422,6 +423,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         },
                         notification: null,
                         message_event: null,
+                        conditional_event: null,
                         task: null,
                     },
                     {
@@ -432,6 +434,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         time_event: null,
                         notification: null,
                         message_event: null,
+                        conditional_event: null,
                         task: {
                             retries: 0,
                             parameter: {
@@ -520,6 +523,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         },
                         notification: null,
                         message_event: null,
+                        conditional_event: null,
                         task: null,
                     },
                     {
@@ -530,6 +534,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         time_event: null,
                         notification: null,
                         message_event: null,
+                        conditional_event: null,
                         task: {
                             retries: 0,
                             parameter: {},
@@ -638,6 +643,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         order: 0,
                         time_event: null,
                         notification: null,
+                        conditional_event: null,
                         message_event: {
                             event_id: '',
                             flow_id: '',
@@ -699,6 +705,7 @@ describe('DeploymentsConfigInitializerService', () => {
                         order: 0,
                         time_event: null,
                         notification: null,
+                        conditional_event: null,
                         message_event: {
                             event_id: '',
                             flow_id: '',
