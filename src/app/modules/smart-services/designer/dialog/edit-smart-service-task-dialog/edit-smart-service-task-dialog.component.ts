@@ -231,6 +231,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
             tmp.forEach((v, k) => asp.set(aspects.find(a => a.id === k)?.name || '', v));
             this.nestedAspects = asp;
         });
+        let processModelId = this.result.inputs.find(value => value.name == "process_deployment.process_model_id")?.value || ""
+        if (processModelId != "") {
+            this.ensureProcessTaskParameter(processModelId)
+        }
     }
 
     ngAfterViewInit(): void {
@@ -314,9 +318,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                 enableBasicAutocompletion: true,
                 enableLiveAutocompletion: true
             });
-
             editor.setValue(this.getModuleDataFromInputs( this.result.inputs));
-            (document as any).foo = editor;
         } else {
             console.error("info module data editor not loaded");
         }
@@ -427,7 +429,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                         {name:"process_deployment.name", value: this.selectedProcessModelPreparation.name, type: "text"},
                         this.knownInputValues.get("process_deployment.module_data") || {name:"process_deployment.module_data", value: "{}", type: "text"}
                     ];
+                    let elementIds: string[] = [];
                     this.selectedProcessModelPreparation.elements?.forEach(element => {
+                        elementIds.push(element.bpmn_id);
                         if(element.task){
                             const selectionKey = "process_deployment."+element.bpmn_id+".selection";
                             this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
@@ -454,10 +458,24 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                             }
                             this.result.inputs.push(this.knownInputValues.get(eventMarshallerKey) || {name:eventMarshallerKey, value: useMarshaller, type: "text"});
                         }
+                        if(element.conditional_event){
+                            const selectionKey = "process_deployment."+element.bpmn_id+".selection";
+                            this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
+                        }
                         if(element.time_event){
                             const eventTimeKey = "process_deployment."+element.bpmn_id+".time";
                             this.result.inputs.push(this.knownInputValues.get(eventTimeKey) || {name:eventTimeKey, value: element.time_event.time, type: "text"});
                         }
+                    })
+
+                    //remove values of other/previous process-model selections
+                    this.result.inputs = this.result.inputs.filter(input => {
+                        if (input.name.startsWith("process_deployment.") && input.name.split(".").length >= 3 ) { //keep values of other workers/topics and general process_deployment values
+                            return elementIds.some(knownId => {
+                                return input.name.startsWith("process_deployment."+knownId)
+                            })
+                        }
+                        return true
                     })
                 }
             })
@@ -530,7 +548,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
     generateInputForProcessElement(input: SmartServiceTaskInputDescription,taskId: string){
         const element = this.selectedProcessModelPreparation?.elements.find(element => element.bpmn_id == taskId);
-        const criteria = element?.task?.selection.filter_criteria || element?.message_event?.selection.filter_criteria;
+        const criteria = element?.task?.selection.filter_criteria ||
+            element?.message_event?.selection.filter_criteria ||
+            element?.conditional_event?.selection.filter_criteria;
         if (criteria) {
             let current = this.availableProcessVariables.get('iot_form_fields') || [];
             const interaction = element?.task ? "request" : "event";
