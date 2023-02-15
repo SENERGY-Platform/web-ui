@@ -161,6 +161,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             if (element.message_event?.selection?.selection_options !== undefined) {
                 element.message_event.selection.selection_options = [];
             }
+            if (element.conditional_event?.selection?.selection_options !== undefined) {
+                element.conditional_event.selection.selection_options = [];
+            }
             if (element.task?.selection?.selection_options !== undefined) {
                 element.task.selection.selection_options = [];
             }
@@ -399,6 +402,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
         if (element.message_event && element.message_event.selection.selection_options) {
             return element.message_event.selection.selection_options[selectionOptionIndex];
+        }
+        if (element.conditional_event && element.conditional_event.selection.selection_options) {
+            return element.conditional_event.selection.selection_options[selectionOptionIndex];
         }
         return null;
     }

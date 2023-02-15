@@ -558,14 +558,12 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
                 size++;
             }
             if (v2.length > 0) {
-                console.log(k); // TODO
                 r2.set(k, v2);
             }
         }
         for (const [k, v] of selected) {
             r2 = this.appendInsertFilterMap(r2, k, v).m;
         }
-        console.log(r2); // TODO
         this.optionsGroups = r2;
         this.cd.detectChanges();
     }
