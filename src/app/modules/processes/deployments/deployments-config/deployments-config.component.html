@@ -59,6 +59,20 @@
                     </mat-card-content>
                 </mat-card>
 
+                <mat-card class="start-parameter" formArrayName="start_parameter" *ngIf="start_parameter.length > 0">
+                    <mat-card-header>
+                        <mat-card-title>Defaults Start Parameter</mat-card-title>
+                        <mat-card-subtitle>will be used on automatic restarts and as preset for manual starts</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div [formGroupName]="paramIndex" *ngFor="let param of start_parameter; let paramIndex = index; trackBy:trackByFn">
+                            <mat-form-field class="full-width" color="accent">
+                                <input type="text"  matInput placeholder="{{param.label}}" formControlName="default">
+                            </mat-form-field>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
                 <mat-card formArrayName="elements" *ngIf="elements.length > 0" class="deployment-elements">
                     <mat-card-content>
                         <div [formGroupName]="elementIndex"

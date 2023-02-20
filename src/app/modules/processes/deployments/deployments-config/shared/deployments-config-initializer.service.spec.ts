@@ -329,10 +329,10 @@ describe('DeploymentsConfigInitializerService', () => {
                     xml_deployed: '',
                     xml_raw: 'xml_raw',
                 },
+                start_parameter: [],
                 incident_handling: {
                     restart: false,
-                    notify: true,
-                    restart_is_valid_option: false
+                    notify: true
                 },
                 elements: [
                     {
@@ -699,9 +699,9 @@ describe('DeploymentsConfigInitializerService', () => {
                 description: 'test_description',
                 incident_handling: {
                     restart: false,
-                    notify: true,
-                    restart_is_valid_option: false
+                    notify: true
                 },
+                start_parameter: [],
                 diagram: {
                     svg: 'svg',
                     xml_deployed: '',

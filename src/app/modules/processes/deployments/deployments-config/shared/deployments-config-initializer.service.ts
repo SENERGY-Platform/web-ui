@@ -27,7 +27,7 @@ import {
     V2DeploymentsPreparedModel,
     V2DeploymentsPreparedMsgEventModel,
     V2DeploymentsPreparedSelectionModel,
-    V2DeploymentsPreparedSelectionOptionModel,
+    V2DeploymentsPreparedSelectionOptionModel, V2DeploymentsPreparedStartParameterModel,
     V2DeploymentsPreparedTaskModel,
     V2DeploymentsPreparedTimeEventModel,
 } from '../../shared/deployments-prepared-v2.model';
@@ -49,6 +49,7 @@ export class DeploymentsConfigInitializerService {
             executable: deployment.executable,
             version: deployment.version,
             incident_handling: this.initIncidentHandlingFormGroup(deployment.incident_handling),
+            start_parameter: this.initStartParamArray(deployment.start_parameter || [])
         });
     }
 
@@ -76,17 +77,34 @@ export class DeploymentsConfigInitializerService {
     private initIncidentHandlingFormGroup(incident_handling: V2DeploymentsPreparedIncidentHandlingModel | undefined): FormGroup {
         if(incident_handling) {
             return this._formBuilder.group({
-                restart: [{ value: incident_handling.restart, disabled: !incident_handling.restart_is_valid_option }],
+                restart: incident_handling.restart,
                 notify: incident_handling.notify,
-                restart_is_valid_option: [{ value: incident_handling.restart_is_valid_option, disabled: true }],
             });
         } else {
             return this._formBuilder.group({
                 restart: [{ value: false, disabled: true }],
                 notify: true,
-                restart_is_valid_option: [{ value: false, disabled: true }],
             });
         }
+    }
+
+    private initStartParamArray(elements: V2DeploymentsPreparedStartParameterModel[]): FormArray {
+        const array = new FormArray([]);
+        if (elements) {
+            elements.forEach((el: V2DeploymentsPreparedStartParameterModel) => {
+                array.push(this.initStartParamFormGroup(el));
+            });
+        }
+        return array;
+    }
+
+    private initStartParamFormGroup(parameter: V2DeploymentsPreparedStartParameterModel): FormGroup {
+        return this._formBuilder.group({
+            id: [{ value: parameter.id, disabled: true }],
+            label: [{ value: parameter.label, disabled: false }],
+            type: [{ value: parameter.type, disabled: true }],
+            default: [{ value: parameter.default, disabled: false }],
+        });
     }
 
     private initElementFormGroup(element: V2DeploymentsPreparedElementModel, groups: string[]): FormGroup {

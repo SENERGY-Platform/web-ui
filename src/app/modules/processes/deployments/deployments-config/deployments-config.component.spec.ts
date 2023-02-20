@@ -219,10 +219,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 xml_raw: '',
                 xml_deployed: '',
             },
+            start_parameter: [],
             incident_handling: {
                 restart: false,
-                notify: true,
-                restart_is_valid_option: false
+                notify: true
             },
             elements: [
                 {
@@ -318,10 +318,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 xml_raw: '',
                 xml_deployed: '',
             },
+            start_parameter: [],
             incident_handling: {
                 restart: false,
-                notify: true,
-                restart_is_valid_option: false
+                notify: true
             },
             elements: [
                 {
@@ -704,10 +704,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 xml_raw: '',
                 xml_deployed: '',
             },
+            start_parameter: [],
             incident_handling: {
                 restart: false,
-                notify: true,
-                restart_is_valid_option: false
+                notify: true
             },
             elements: [
                 {
@@ -1302,10 +1302,10 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 xml_raw: '',
                 xml_deployed: '',
             },
+            start_parameter: [],
             incident_handling: {
                 restart: false,
-                notify: true,
-                restart_is_valid_option: false
+                notify: true
             },
             elements: [
                 {

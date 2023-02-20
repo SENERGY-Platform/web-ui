@@ -29,7 +29,7 @@ import {
     V2DeploymentsPreparedElementModel,
     V2DeploymentsPreparedFilterCriteriaModel,
     V2DeploymentsPreparedModel, V2DeploymentsPreparedSelectionModel,
-    V2DeploymentsPreparedSelectionOptionModel,
+    V2DeploymentsPreparedSelectionOptionModel, V2DeploymentsPreparedStartParameterModel,
 } from '../shared/deployments-prepared-v2.model';
 import {FlowRepoService} from '../../../data/flow-repo/shared/flow-repo.service';
 import {FlowModel} from '../../../data/flow-repo/shared/flow.model';
@@ -434,6 +434,11 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     get elements(): V2DeploymentsPreparedElementModel[] {
         const elements = this.deploymentFormGroup.get(['elements']) as FormArray;
         return elements.value;
+    }
+
+    get start_parameter(): V2DeploymentsPreparedStartParameterModel[] {
+        const parameters = this.deploymentFormGroup.get(['start_parameter']) as FormArray;
+        return parameters.value;
     }
 
     get elementsFormArray(): FormArray {
