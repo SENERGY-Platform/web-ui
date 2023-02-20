@@ -23,7 +23,7 @@ import {
     DeploymentsSelectionPathOptionModel,
     V2DeploymentsPreparedConfigurableModel,
     V2DeploymentsPreparedConfigurableValueModel,
-    V2DeploymentsPreparedElementModel,
+    V2DeploymentsPreparedElementModel, V2DeploymentsPreparedIncidentHandlingModel,
     V2DeploymentsPreparedModel,
     V2DeploymentsPreparedMsgEventModel,
     V2DeploymentsPreparedSelectionModel,
@@ -47,7 +47,8 @@ export class DeploymentsConfigInitializerService {
             diagram: deployment.diagram,
             elements: this.initElementsArray(deployment.elements),
             executable: deployment.executable,
-            version: deployment.version
+            version: deployment.version,
+            incident_handling: this.initIncidentHandlingFormGroup(deployment.incident_handling),
         });
     }
 
@@ -70,6 +71,22 @@ export class DeploymentsConfigInitializerService {
             });
         }
         return array;
+    }
+
+    private initIncidentHandlingFormGroup(incident_handling: V2DeploymentsPreparedIncidentHandlingModel | undefined): FormGroup {
+        if(incident_handling) {
+            return this._formBuilder.group({
+                restart: [{ value: incident_handling.restart, disabled: !incident_handling.restart_is_valid_option }],
+                notify: incident_handling.notify,
+                restart_is_valid_option: [{ value: incident_handling.restart_is_valid_option, disabled: true }],
+            });
+        } else {
+            return this._formBuilder.group({
+                restart: [{ value: false, disabled: true }],
+                notify: true,
+                restart_is_valid_option: [{ value: false, disabled: true }],
+            });
+        }
     }
 
     private initElementFormGroup(element: V2DeploymentsPreparedElementModel, groups: string[]): FormGroup {

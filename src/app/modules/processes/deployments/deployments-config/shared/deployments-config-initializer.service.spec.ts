@@ -329,6 +329,11 @@ describe('DeploymentsConfigInitializerService', () => {
                     xml_deployed: '',
                     xml_raw: 'xml_raw',
                 },
+                incident_handling: {
+                    restart: false,
+                    notify: true,
+                    restart_is_valid_option: false
+                },
                 elements: [
                     {
                         bpmn_id: 'Task_1954wep',
@@ -692,6 +697,11 @@ describe('DeploymentsConfigInitializerService', () => {
                 id: '',
                 name: 'message_event',
                 description: 'test_description',
+                incident_handling: {
+                    restart: false,
+                    notify: true,
+                    restart_is_valid_option: false
+                },
                 diagram: {
                     svg: 'svg',
                     xml_deployed: '',

@@ -24,8 +24,15 @@ export interface V2DeploymentsPreparedModel {
     description: string;
     diagram: V2DeploymentsPreparedDiagramModel;
     elements: V2DeploymentsPreparedElementModel[];
+    incident_handling?: V2DeploymentsPreparedIncidentHandlingModel;
     executable: boolean;
     version: number;
+}
+
+export interface V2DeploymentsPreparedIncidentHandlingModel{
+    restart: boolean;
+    notify: boolean;
+    restart_is_valid_option: boolean;
 }
 
 export interface V2DeploymentsPreparedDiagramModel {

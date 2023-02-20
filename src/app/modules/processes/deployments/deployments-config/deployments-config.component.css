@@ -39,3 +39,17 @@ table {
 .use_marshaller{
     margin-top: 15px;
 }
+
+.incident-handling {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.deployment-description {
+    margin-bottom: 5px;
+}
+
+.deployment-elements {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}

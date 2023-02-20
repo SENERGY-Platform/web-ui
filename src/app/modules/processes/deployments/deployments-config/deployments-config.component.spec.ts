@@ -219,6 +219,11 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 xml_raw: '',
                 xml_deployed: '',
             },
+            incident_handling: {
+                restart: false,
+                notify: true,
+                restart_is_valid_option: false
+            },
             elements: [
                 {
                     bpmn_id: 'Task_0imkg6m',
@@ -312,6 +317,11 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 svg: '',
                 xml_raw: '',
                 xml_deployed: '',
+            },
+            incident_handling: {
+                restart: false,
+                notify: true,
+                restart_is_valid_option: false
             },
             elements: [
                 {
@@ -693,6 +703,11 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 svg: '',
                 xml_raw: '',
                 xml_deployed: '',
+            },
+            incident_handling: {
+                restart: false,
+                notify: true,
+                restart_is_valid_option: false
             },
             elements: [
                 {
@@ -1286,6 +1301,11 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 svg: '',
                 xml_raw: '',
                 xml_deployed: '',
+            },
+            incident_handling: {
+                restart: false,
+                notify: true,
+                restart_is_valid_option: false
             },
             elements: [
                 {

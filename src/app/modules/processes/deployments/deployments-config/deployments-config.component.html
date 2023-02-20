@@ -24,18 +24,44 @@
                                        useOptionViewProperty="name">
                 </senergy-select-search>
             </mat-form-field>
+
             <form [formGroup]="deploymentFormGroup">
-                <mat-form-field class="full-width" color="accent">
-                    <input type="text" matInput placeholder="Prozessname"
-                           formControlName="name">
-                </mat-form-field>
-                <mat-form-field class="full-width" color="accent">
+                <mat-card class="deployment-description">
+                    <mat-card-content>
+                        <mat-form-field class="full-width" color="accent">
+                            <input type="text" matInput placeholder="Prozessname"
+                                   formControlName="name">
+                        </mat-form-field>
+                        <mat-form-field class="full-width" color="accent">
                     <textarea type="text" matInput placeholder="Process Description"
                               formControlName="description" cdkTextareaAutosize
                               #autosize="cdkTextareaAutosize"></textarea>
-                </mat-form-field>
-                <div formArrayName="elements" *ngIf="elements.length > 0">
-                    <div [formGroupName]="elementIndex"
+                        </mat-form-field>
+                    </mat-card-content>
+                </mat-card>
+
+
+                <mat-card class="incident-handling" formGroupName="incident_handling">
+                    <mat-card-header>
+                        <mat-card-title>On Incident</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div>
+                            <mat-checkbox formControlName="notify">
+                                Notify
+                            </mat-checkbox>
+                        </div>
+                        <div>
+                            <mat-checkbox formControlName="restart">
+                                Restart
+                            </mat-checkbox>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <mat-card formArrayName="elements" *ngIf="elements.length > 0" class="deployment-elements">
+                    <mat-card-content>
+                        <div [formGroupName]="elementIndex"
                          *ngFor="let element of elements; let elementIndex = index; trackBy:trackByFn">
                         <div formGroupName="conditional_event" *ngIf="element.conditional_event !== null">
                             <div formGroupName="selection">
@@ -196,7 +222,8 @@
                                     [time_event]="elementsTimeEvent(elementIndex)"></senergy-process-deployments-config-time-event>
                         </div>
                     </div>
-                </div>
+                    </mat-card-content>
+                </mat-card>
             </form>
         </div>
         <button mat-raised-button color="accent" class="button-save-margin" (click)="save()" [disabled]="deploymentFormGroup.invalid">Save</button>
