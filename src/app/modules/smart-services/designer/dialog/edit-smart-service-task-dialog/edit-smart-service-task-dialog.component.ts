@@ -427,8 +427,17 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                     this.result.inputs = [
                         this.knownInputValues.get("process_deployment.process_model_id") || {name:"process_deployment.process_model_id", value: id, type: "text"},
                         {name:"process_deployment.name", value: this.selectedProcessModelPreparation.name, type: "text"},
-                        this.knownInputValues.get("process_deployment.module_data") || {name:"process_deployment.module_data", value: "{}", type: "text"}
+                        this.knownInputValues.get("process_deployment.module_data") || {name:"process_deployment.module_data", value: "{}", type: "text"},
+                        this.knownInputValues.get(this.processFogFieldName) || {name:this.processFogFieldName, value: "false", type: "text"},
+                        this.knownInputValues.get(this.processRestartFieldName) || {name:this.processRestartFieldName, value: "false", type: "text"},
+                        this.knownInputValues.get(this.processNotifyFieldName) || {name:this.processNotifyFieldName, value: "true", type: "text"}
                     ];
+                    let keep: string[] = [this.processRestartFieldName, this.processNotifyFieldName, this.processFogFieldName];
+                    this.selectedProcessModelPreparation.start_parameter?.forEach(param => {
+                        const selectionKey = "process_deployment.start_parameter.default."+param.id;
+                        keep.push(selectionKey);
+                        this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: param.default, type: "text"});
+                    })
                     let elementIds: string[] = [];
                     this.selectedProcessModelPreparation.elements?.forEach(element => {
                         elementIds.push(element.bpmn_id);
@@ -470,7 +479,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
                     //remove values of other/previous process-model selections
                     this.result.inputs = this.result.inputs.filter(input => {
-                        if (input.name.startsWith("process_deployment.") && input.name.split(".").length >= 3 ) { //keep values of other workers/topics and general process_deployment values
+                        if (!keep.includes(input.name) && input.name.startsWith("process_deployment.") && input.name.split(".").length >= 3 ) { //keep values of other workers/topics and general process_deployment values
                             return elementIds.some(knownId => {
                                 return input.name.startsWith("process_deployment."+knownId)
                             })
@@ -497,9 +506,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     get processTaskIds(): string[]{
         let resultSet = new Map<string, string>();
         this.result.inputs.forEach(input => {
-            if (input.name.startsWith("process_deployment.")) {
+            if (input.name.startsWith("process_deployment.") && !input.name.startsWith("process_deployment.on_incident.") && !input.name.startsWith("process_deployment.start_parameter.default.") ) {
                 const parts = input.name.split(".")
-                if (parts.length > 2) {
+                if (parts.length > 2 ) {
                     resultSet.set(parts[1], parts[1])
                 }
             }
@@ -538,12 +547,42 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         this.setFieldValue(this.processFogFieldName, "text", value)
     }
 
+    processRestartFieldName = "process_deployment.on_incident.restart"
+    get processRestart(): string {
+        return this.getFieldValue(this.processRestartFieldName, "text", "false")
+    }
+
+    set processRestart(value: string) {
+        this.setFieldValue(this.processRestartFieldName, "text", value)
+    }
+
+    processNotifyFieldName = "process_deployment.on_incident.notify"
+    get processNotify(): string {
+        return this.getFieldValue(this.processNotifyFieldName, "text", "true")
+    }
+
+    set processNotify(value: string) {
+        this.setFieldValue(this.processNotifyFieldName, "text", value)
+    }
+
+    processStartParamPrefix = "process_deployment.start_parameter.default."
+    isProcessStartParam(input: SmartServiceTaskInputDescription): boolean  {
+        return input.name.startsWith(this.processStartParamPrefix)
+    }
+
+    getProcessStartParameterName(input: SmartServiceTaskInputDescription): string {
+        if (input.name.startsWith(this.processStartParamPrefix)){
+            return input.name.slice(this.processStartParamPrefix.length);
+        }
+        return ""
+    }
+
     processTaskMatches(input: SmartServiceTaskInputDescription, taskId: string, suffix: string): boolean  {
         return input.name == "process_deployment."+taskId+"."+suffix
     }
 
     getProcessTaskName(taskId: string): string {
-        return this.selectedProcessModelPreparation?.elements.find(e => e.bpmn_id == taskId)?.name || taskId
+        return this.selectedProcessModelPreparation?.elements?.find(e => e.bpmn_id == taskId)?.name || taskId
     }
 
     generateInputForProcessElement(input: SmartServiceTaskInputDescription,taskId: string){

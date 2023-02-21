@@ -54,6 +54,44 @@
           </mat-checkbox>
         </div>
         <div>
+          <mat-checkbox
+                  class="checkbox-margin"
+                  [(ngModel)]="processRestart"
+                  stringCheckboxValue
+                  trueValue="true"
+                  falseValue="false">
+            Restart on Incident
+          </mat-checkbox>
+        </div>
+        <div>
+          <mat-checkbox
+                  class="checkbox-margin"
+                  [(ngModel)]="processNotify"
+                  stringCheckboxValue
+                  trueValue="true"
+                  falseValue="false">
+            Notify on Incident
+          </mat-checkbox>
+        </div>
+        <mat-card>
+          <mat-accordion>
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  Start Parameter Defaults
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <ng-container *ngFor="let input of result.inputs">
+                <div *ngIf="isProcessStartParam(input)">
+                  <mat-form-field class="full-width" color="accent">
+                    <input type="text"  matInput placeholder="{{getProcessStartParameterName(input)}}" [(ngModel)]="input.value">
+                  </mat-form-field>
+                </div>
+              </ng-container>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </mat-card>
+        <div>
           <mat-card>
             <mat-accordion>
             <mat-expansion-panel *ngFor="let taskId of processTaskIds">
