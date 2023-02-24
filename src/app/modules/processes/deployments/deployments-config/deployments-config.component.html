@@ -109,6 +109,13 @@
                                     </senergy-select-search>
                                 </mat-form-field>
                             </div>
+                            <div formGroupName="variables">
+                                <td *ngFor="let item of element.conditional_event.variables | keyvalue; trackBy:trackByFn">
+                                    <mat-form-field class="full-width" color="accent">
+                                        <input type="text" matInput placeholder="{{item.key}}" [formControlName]="'' + item.key">
+                                    </mat-form-field>
+                                </td>
+                            </div>
                         </div>
                         <div formGroupName="task" *ngIf="element.task !== null">
                             <table class="full-width">

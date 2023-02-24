@@ -166,11 +166,15 @@ export class DeploymentsConfigInitializerService {
         return this._formBuilder.group({
             script: conditionalEvent.script,
             value_variable: conditionalEvent.value_variable,
-            variables: conditionalEvent.variables,
+            variables: this.initConditionalEventVariablesFormGroup(conditionalEvent.variables),
             qos: conditionalEvent.qos,
             event_id: conditionalEvent.event_id,
             selection: this.initSelectionFormGroup(conditionalEvent.selection, false),
         });
+    }
+
+    private initConditionalEventVariablesFormGroup(variables: any): FormGroup {
+        return this._formBuilder.group(variables)
     }
 
     private initTimeDurationRawFormGroup(timeEvent: string): FormGroup {

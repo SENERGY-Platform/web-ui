@@ -90,6 +90,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         this.getFlows();
         this.getOperators();
         this.deploymentsService = platformDeploymentsService;
+        (document as any).foo = this;//TODO: remove
     }
 
     ngOnInit() {
