@@ -159,6 +159,15 @@
                       </mat-form-field>
                     </div>
                   </ng-container>
+
+                  <ng-container *ngFor="let variable of getProcessConditionalEventVariables(taskId)">
+                    <div *ngIf="processTaskMatches(input, taskId, 'variables.'+variable)">
+                      <mat-form-field  color="accent" class="full-width">
+                        <input matInput placeholder="{{variable}}" [(ngModel)]="input.value">
+                      </mat-form-field>
+                    </div>
+                  </ng-container>
+
                 </ng-container>
               </div>
             </mat-expansion-panel>

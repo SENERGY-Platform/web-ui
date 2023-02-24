@@ -470,6 +470,13 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                         if(element.conditional_event){
                             const selectionKey = "process_deployment."+element.bpmn_id+".selection";
                             this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: "{}", type: "text"});
+                            if (element.conditional_event.variables) {
+                                for (let key in element.conditional_event.variables) {
+                                    let value = element.conditional_event.variables[key];
+                                    const paramKey = "process_deployment."+element.bpmn_id+".variables."+key;
+                                    this.result.inputs.push(this.knownInputValues.get(paramKey) || {name:paramKey, value: value, type: "text"});
+                                }
+                            }
                         }
                         if(element.time_event){
                             const eventTimeKey = "process_deployment."+element.bpmn_id+".time";
@@ -519,6 +526,17 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
     getProcessTaskParameter(taskId: string): string[]{
         let result: string[] = [];
         const prefix = "process_deployment."+taskId+".parameter.";
+        this.result.inputs.forEach(input => {
+            if (input.name.startsWith(prefix)) {
+                result.push(input.name.slice(prefix.length))
+            }
+        })
+        return result;
+    }
+
+    getProcessConditionalEventVariables(taskId: string): string[]{
+        let result: string[] = [];
+        const prefix = "process_deployment."+taskId+".variables.";
         this.result.inputs.forEach(input => {
             if (input.name.startsWith(prefix)) {
                 result.push(input.name.slice(prefix.length))
