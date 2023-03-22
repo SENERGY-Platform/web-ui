@@ -15,6 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
+import { Observable } from 'rxjs';
 import {AuthorizationProfileModel} from '../components/authorization/authorization-profile.model';
 
 @Injectable({
@@ -56,4 +57,30 @@ export class AuthorizationServiceMock {
     changeUserProfile(userProfile: AuthorizationUserProfileModel): Observable<null | { error: string }> {
 
     }*/
+
+    userIsAdmin(): boolean {
+        return true
+    }
+
+    userIsDeveloper(): boolean {
+        return true
+    }
+
+    loadAllUsers(): Observable<any> {
+        return new Observable(observer => {
+            observer.complete()
+        })
+    }
+    
+    loadAllRoles(): Observable<any> {
+        return new Observable(observer => {
+            observer.complete()
+        })
+    }
+    
+    loadAllClients(): Observable<any> {
+        return new Observable(observer => {
+            observer.complete()
+        })
+    }
 }

@@ -22,6 +22,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MockKeycloakService } from './core/services/keycloak.mock';
+import { AuthorizationServiceMock } from './core/services/authorization.service.mock';
 
 describe('AppComponent', () => {
     let component: AppComponent;
@@ -31,7 +32,7 @@ describe('AppComponent', () => {
         TestBed.configureTestingModule({
             imports: [CoreModule, RouterTestingModule, HttpClientTestingModule, MatSnackBarModule],
             declarations: [AppComponent],
-            providers: [{ provide: KeycloakService, useClass: MockKeycloakService }],
+            providers: [{ provide: KeycloakService, useClass: MockKeycloakService }, { provide: AuthorizationServiceMock, useClass: AuthorizationServiceMock }],
         }).compileComponents();
         fixture = TestBed.createComponent(AppComponent);
         component = fixture.componentInstance;

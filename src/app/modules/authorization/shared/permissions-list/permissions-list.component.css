@@ -1,0 +1,126 @@
+/*
+ *
+ *     Copyright 2018 InfAI (CC SES)
+ *
+ *     Licensed under the Apache License, Version 2.0 (the “License”);
+ *     you may not use this file except in compliance with the License.
+ *     You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *     Unless required by applicable law or agreed to in writing, software
+ *     distributed under the License is distributed on an “AS IS” BASIS,
+ *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *     See the License for the specific language governing permissions and
+ *     limitations under the License.
+ *
+ */
+
+.search {
+    display: flex;
+    align-items: center;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+}
+
+.test mat-card-content div {
+    display: flex;
+    flex-direction: row;
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+.test mat-checkbox {
+    flex: 1 1 0%;
+}
+
+.outer {
+    margin: 50px 100px;
+    padding-bottom: 100px;
+}
+
+.test {
+    margin-bottom: 20px;
+}
+
+.test .mat-form-field {
+    padding-right: 20px;
+}
+
+
+.search i {
+    font-size: 1.5rem;
+    margin-right: 20px;
+    color: grey;
+}
+
+.search mat-card:hover {
+    background: white;
+}
+
+.mat-raised-button {
+    color: white;
+}
+
+.table-container {
+    overflow: auto;
+}
+
+.add div {
+    height: 48px;
+    width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(68, 132, 206);
+    border-radius: 50%;
+}
+
+.fabs {
+    position: fixed;
+    bottom: 30px;
+    right: 40px;
+    text-decoration: none;
+    color: white;
+}
+
+.add {
+    bottom: 30px;
+}
+
+.download {
+    bottom: 170px;
+}
+
+.upload {
+    bottom: 100px;
+}
+
+.spacer-right {
+    margin-right: 5px;
+}
+
+.mat-column-edit, .mat-column-delete, .mat-column-GET, .mat-column-POST, .mat-column-PUT,
+.mat-column-PATCH, .mat-column-DELETE, .mat-column-HEAD, .mat-column-mode {
+    max-width: 90px;
+}
+
+.import-hint {
+    position: fixed;
+    z-index: 999;
+    height: 10em;
+    width: 20em;
+    margin: auto;
+    top: 4em;
+    left: 172px;
+    bottom: 0;
+    right: 0;
+    text-align: center;
+    font-size: 3em;
+}
+
+th.mat-header-cell, td.mat-cell, td.mat-footer-cell {
+    border-bottom-style: hidden;
+}

@@ -16,7 +16,7 @@
 
 import {AfterViewInit, Component} from '@angular/core';
 import {dia, shapes, util, V, Vectorizer} from 'jointjs';
-import * as $ from 'jquery';
+import $ from 'jquery';
 import {DiagramModel} from './shared/diagram.model';
 import uuid = util.uuid;
 

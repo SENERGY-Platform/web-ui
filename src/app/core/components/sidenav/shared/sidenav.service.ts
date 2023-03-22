@@ -25,6 +25,7 @@ import { WaitingRoomService } from '../../../../modules/devices/waiting-room/sha
 import { debounceTime } from 'rxjs/internal/operators';
 import { WaitingRoomEventTypeAuthOk, WaitingRoomEventTypeError } from '../../../../modules/devices/waiting-room/shared/waiting-room.model';
 import {environment} from '../../../../../environments/environment';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
 
 @Injectable({
     providedIn: 'root',
@@ -37,7 +38,7 @@ export class SidenavService implements OnDestroy {
     private section = '';
     private waitingRoomEventCloser?: () => void;
 
-    constructor(private waitingRoomService: WaitingRoomService) {}
+    constructor(private waitingRoomService: WaitingRoomService, private authService: AuthorizationService) {}
 
     ngOnDestroy() {
         if (this.waitingRoomEventCloser) {
@@ -155,6 +156,23 @@ export class SidenavService implements OnDestroy {
                 new SidenavPageModel('Device Types', 'link', 'important_devices', '/metadata/devicetypesoverview'),
             ]),
         );
+
+        // Add admin and devloper sections
+        if(this.authService.userIsAdmin()) {
+            sections.push(
+                new SidenavSectionModel('Admin', 'toggle', 'important_devices', '/admin', [
+                    new SidenavPageModel('User & Client Authorization', 'link', 'important_devices', '/admin/authorization'),
+                ])
+            )
+        }
+
+        if(this.authService.userIsAdmin() || this.authService.userIsDeveloper()) {
+            sections.push(
+                new SidenavSectionModel('Developer', 'toggle', 'important_devices', '/dev', [
+                    new SidenavPageModel('API', 'link', 'important_devices', '/dev/api'),
+                ])
+            )
+        }
 
         return sections;
     }

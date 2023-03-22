@@ -1,0 +1,123 @@
+<!--
+  ~
+  ~     Copyright 2020 InfAI (CC SES)
+  ~
+  ~     Licensed under the Apache License, Version 2.0 (the “License”);
+  ~     you may not use this file except in compliance with the License.
+  ~     You may obtain a copy of the License at
+  ~
+  ~         http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~     Unless required by applicable law or agreed to in writing, software
+  ~     distributed under the License is distributed on an “AS IS” BASIS,
+  ~     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~     See the License for the specific language governing permissions and
+  ~     limitations under the License.
+  ~
+  -->
+
+<h1 mat-dialog-title>Permissions Importieren</h1>
+<div class="medium-text" mat-dialog-content>
+    <div class="radio">
+        <mat-radio-group [formControl]="overwrite">
+            <mat-radio-button class="radio-but" matTooltip="Löscht alle bestehenden Einträge"
+                              value="{{true}}">
+                Überschreiben
+            </mat-radio-button>
+            <mat-radio-button class="radio-but"
+                              matTooltip="Überschreibt Einträge mit gleicher Nutzer/Rolle und Ressource"
+                              value="{{false}}">Hinzufügen
+            </mat-radio-button>
+        </mat-radio-group>
+    </div>
+    <div>
+        <h4>Datei auswählen</h4>
+        <input #fileInput (change)="onFileSelected()" accept=".json" type="file"/>
+        <span *ngIf="(fileInput?.files?.length ?? 0) > 0 && !hasValidFileSelected()" class="warn-text">
+            Bitte valide Datei auswählen
+        </span>
+    </div>
+
+    <mat-table #table *ngIf="policies.length > 0" [dataSource]="policies">
+
+        <ng-container matColumnDef="select">
+            <mat-header-cell *matHeaderCellDef mat-header="select">
+                <mat-checkbox (change)="masterToggle($event.checked)"
+                              [checked]="isAllSelected === true"
+                              [indeterminate]="indeterminate()">
+                </mat-checkbox>
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row; let index = index">
+                <mat-checkbox
+                        (change)="selections[index]= !selections[index] "
+                        [checked]="selections[index] === true">
+                </mat-checkbox>
+            </mat-cell>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="subject">
+            <mat-header-cell *matHeaderCellDef mat-header="subject">Subject</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.subject}}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="GET">
+            <mat-header-cell *matHeaderCellDef mat-header="GET">GET</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <mat-checkbox [checked]="element.actions.includes('GET')" disabled="true"></mat-checkbox>
+            </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="POST">
+            <mat-header-cell *matHeaderCellDef mat-header="POST">POST</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <mat-checkbox [checked]="element.actions.includes('POST')" disabled="true"></mat-checkbox>
+            </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="PATCH">
+            <mat-header-cell *matHeaderCellDef mat-header="PATCH">PATCH</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <mat-checkbox [checked]="element.actions.includes('PATCH')" disabled="true"></mat-checkbox>
+            </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="DELETE">
+            <mat-header-cell *matHeaderCellDef mat-header="DELETE">DELETE</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <mat-checkbox [checked]="element.actions.includes('DELETE')" disabled="true"></mat-checkbox>
+            </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="PUT">
+            <mat-header-cell *matHeaderCellDef mat-header="PUT">PUT</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <mat-checkbox [checked]="element.actions.includes('PUT')" disabled="true"></mat-checkbox>
+            </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="HEAD">
+            <mat-header-cell *matHeaderCellDef mat-header="HEAD">HEAD</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <mat-checkbox [checked]="element.actions.includes('HEAD')" disabled="true"></mat-checkbox>
+            </mat-cell>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="resource">
+            <mat-header-cell *matHeaderCellDef mat-header="resource">Resource</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.resource}}</mat-cell>
+        </ng-container>
+
+
+        <mat-header-row
+                *matHeaderRowDef="['select', 'subject', 'resource', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD']"
+                mat-header-row></mat-header-row>
+        <mat-row
+                *matRowDef="let row; columns: ['select', 'subject', 'resource', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'];"
+                mat-row></mat-row>
+
+    </mat-table>
+</div>
+<div mat-dialog-actions>
+    <button (click)="yes()" [disabled]="!hasValidFileSelected() || overwrite.invalid || !atLeastOnePolicySelected()"
+            [mat-dialog-close]
+            color="primary" mat-button>
+        <strong>Importieren</strong></button>
+    <button (click)="no()" [mat-dialog-close] color="primary" mat-button><strong>Abbrechen</strong></button>
+</div>

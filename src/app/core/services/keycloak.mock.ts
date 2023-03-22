@@ -36,4 +36,8 @@ export class MockKeycloakService {
     loadUserProfile(): Promise<Keycloak.KeycloakProfile> {
         return new Promise<Keycloak.KeycloakProfile>((resolve) => resolve({} as Keycloak.KeycloakProfile));
     }
+
+    isUserInRole(_: string): boolean {
+        return true
+    }
 }

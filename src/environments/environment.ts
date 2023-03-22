@@ -109,6 +109,9 @@ export const environment = {
     getBatteryLevelFunctionId: 'urn:infai:ses:measuring-function:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     dateTimeConceptId: 'urn:infai:ses:concept:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     deviceClassThermostat: 'urn:infai:ses:device-class:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    ladonUrl: 'http://localhost',
+    kongAdminProxyUrl: 'http://localhost',
+    swaggerUrl: 'http://localhost'
 };
 
 /*
