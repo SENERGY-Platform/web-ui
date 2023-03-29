@@ -163,7 +163,7 @@ export class DeviceInstancesService {
             params[tagType] = tag
         }
         if(searchText && searchText !== '') {
-            params['search'] = encodeURIComponent(searchText)
+            params['search'] = searchText
         }
 
         return this.http
