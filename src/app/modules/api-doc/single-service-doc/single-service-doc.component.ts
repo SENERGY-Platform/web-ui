@@ -45,10 +45,12 @@ export class SingleServiceDocComponent implements OnInit {
                     this.ui = SwaggerUI({
                         spec: this.swagger,
                         dom_id: '#swagger',
+                        requestInterceptor: function(req) {
+                            req.headers['Authorization'] = token
+                            return req 
+                        }
                     });
                     this.ready = true;
-
-                    this.ui.authActions.authorize({JWT: {name: "JWT", schema: {type: "apiKey", in: "header", name: "Authorization", description: ""}, value: "Bearer " + token}})
                 });
 
             });
