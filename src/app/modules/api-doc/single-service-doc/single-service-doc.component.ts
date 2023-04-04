@@ -18,13 +18,14 @@
 
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import { AuthorizationService } from 'src/app/core/services/authorization.service';
-import { SwaggerService } from '../shared/swagger/swagger.service';
+import {AuthorizationService} from 'src/app/core/services/authorization.service';
+import {SwaggerService} from '../shared/swagger/swagger.service';
 import SwaggerUI from 'swagger-ui';
+import 'swagger-ui/dist/swagger-ui.css';
 
 
 @Component({
-    selector: 'app-single-service-doc',
+    selector: 'senergy-single-service-doc',
     templateUrl: './single-service-doc.component.html',
     styleUrls: ['./single-service-doc.component.css'],
 })
@@ -45,9 +46,9 @@ export class SingleServiceDocComponent implements OnInit {
                     this.ui = SwaggerUI({
                         spec: this.swagger,
                         dom_id: '#swagger',
-                        requestInterceptor: function(req) {
-                            req.headers['Authorization'] = token
-                            return req 
+                        requestInterceptor(req) {
+                            req.headers['Authorization'] = token;
+                            return req;
                         }
                     });
                     this.ready = true;

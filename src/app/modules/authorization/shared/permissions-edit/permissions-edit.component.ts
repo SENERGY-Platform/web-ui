@@ -29,14 +29,14 @@ import { LadonService } from '../services/ladom.service';
 import { PermissionModel } from '../permission.model';
 
 @Component({
-    selector: 'app-permissions-edit',
+    selector: 'senergy-permissions-edit',
     templateUrl: './permissions-edit.component.html',
     styleUrls: ['./permissions-edit.component.css'],
 })
 export class PermissionsEditComponent implements OnInit {
     public isEditMode = false;
     public endpointControl = new FormControl();
-    public userIsAdmin: boolean = false;
+    public userIsAdmin = false;
     public title: string;
     // all roles and uris and users
     public roles: any[];
@@ -44,7 +44,7 @@ export class PermissionsEditComponent implements OnInit {
     public users: any[];
     public clients: any[];
     // options for autocomplete filter
-    public filteredOptions: Observable<string[]> = new Observable;
+    public filteredOptions: Observable<string[]> = new Observable();
     public permission: PermissionModel;
 
     public form = this.fb.group({
@@ -62,7 +62,7 @@ export class PermissionsEditComponent implements OnInit {
     });
 
     constructor(
-        @Inject(MAT_DIALOG_DATA) data: { permission: PermissionModel, roles: any[], users: any[], clients: any[] },
+        @Inject(MAT_DIALOG_DATA) data: { permission: PermissionModel; roles: any[]; users: any[]; clients: any[] },
         public dialogRef: MatDialogRef<PermissionsEditComponent>,
         private kongService: KongService,
         private fb: FormBuilder,
@@ -91,7 +91,7 @@ export class PermissionsEditComponent implements OnInit {
             console.error('Could not check if user is admin: ' + e);
             this.userIsAdmin = false;
         }
-        
+
         try {
             this.kongService.loadUris().subscribe((uris: string[]) => this.uris = uris);
         } catch (e) {

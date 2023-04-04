@@ -24,7 +24,7 @@ import { PermissionModel } from '../permission.model';
 import {PermissionImportModel} from './permissions-dialog-import.model';
 
 @Component({
-    selector: 'app-permissions-dialog-import',
+    selector: 'senergy-permissions-dialog-import',
     templateUrl: './permissions-dialog-import.component.html',
     styleUrls: ['./permissions-dialog-import.component.css'],
 })
@@ -128,7 +128,7 @@ export class PermissionsDialogImportComponent {
                 }
             }
         }
-        return
+        return;
     }
 
     public addSelected() {

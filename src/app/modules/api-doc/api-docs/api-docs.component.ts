@@ -21,7 +21,7 @@ import { SwaggerModel } from '../shared/swagger/swagger.model';
 import { SwaggerService } from '../shared/swagger/swagger.service';
 
 @Component({
-    selector: 'app-docs',
+    selector: 'senergy-api-docs',
     templateUrl: './api-docs.component.html',
     styleUrls: ['./api-docs.component.css'],
 })

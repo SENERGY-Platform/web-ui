@@ -20,7 +20,7 @@ import {Component} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 
 @Component({
-    selector: 'app-permissions-dialog-delete',
+    selector: 'senergy-permissions-dialog-delete',
     templateUrl: './permissions-dialog-delete.component.html',
     styleUrls: ['./permissions-dialog-delete.component.css'],
 })

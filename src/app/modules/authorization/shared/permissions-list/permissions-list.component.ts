@@ -35,7 +35,7 @@ import {PermissionImportModel} from '../permissions-dialog-import/permissions-di
 import {PermissionsEditComponent} from '../permissions-edit/permissions-edit.component';
 
 @Component({
-    selector: 'app-permissions-list',
+    selector: 'senergy-permissions-list',
     templateUrl: './permissions-list.component.html',
     styleUrls: ['./permissions-list.component.css'],
 })
@@ -55,9 +55,9 @@ export class PermissionsListComponent implements OnInit {
     public users: any[] = [];
     public clients: any[] = [];
     public endpointControl = new FormControl();
-    public filteredOptions: Observable<string[]> = new Observable;
+    public filteredOptions: Observable<string[]> = new Observable();
     public uris: string[] = [];
-    public test: { clientID: string, userId: string, roles: string[], username: string, target_method: string, target_uri: string } = {
+    public test: { clientID: string; userId: string; roles: string[]; username: string; target_method: string; target_uri: string } = {
         clientID: '',
         userId: '',
         roles: [],
@@ -65,7 +65,7 @@ export class PermissionsListComponent implements OnInit {
         target_method: '',
         target_uri: ''
     };
-    public testResult: { GET: boolean, POST: boolean, PUT: boolean, PATCH: boolean, DELETE: boolean, HEAD: boolean } = {
+    public testResult: { GET: boolean; POST: boolean; PUT: boolean; PATCH: boolean; DELETE: boolean; HEAD: boolean } = {
         GET: false,
         POST: false,
         PUT: false,
@@ -86,7 +86,7 @@ export class PermissionsListComponent implements OnInit {
             } else {
                 console.error('Could not load roles from Keycloak. Reason was : ', roles.error);
             }
-        })
+        });
 
         this.authService.loadAllUsers().subscribe((users: any | { error: string }) => {
             if(users != null) {
@@ -94,15 +94,15 @@ export class PermissionsListComponent implements OnInit {
             } else {
                 console.error('Could not load users from Keycloak. Reason was : ', users.error);
             }
-        })
-        
+        });
+
         this.authService.loadAllClients().subscribe((clients: any | { error: string }) => {
             if(clients != null) {
                 this.clients = clients;
             } else {
                 console.error('Could not load clients from Keycloak. Reason was : ', clients.error);
             }
-        })
+        });
     }
 
     private static compare(a: number | string | boolean, b: number | string | boolean, isAsc: boolean) {
@@ -122,7 +122,7 @@ export class PermissionsListComponent implements OnInit {
         try {
             this.kongService.loadUris().subscribe(uris => {
                 this.uris = uris as string[];
-            })
+            });
         } catch (e) {
             console.error('Could not load Uris from kong: ' + e);
         }
@@ -216,25 +216,25 @@ export class PermissionsListComponent implements OnInit {
         data.sort((a, b) => {
             const isAsc = sort.direction === 'asc';
             switch (sort.active) {
-                case 'subject':
-                    return PermissionsListComponent.compare(a.subject, b.subject, isAsc);
-                case 'GET':
-                    return PermissionsListComponent.compare(a.actions.includes('GET'), b.actions.includes('GET'), isAsc);
-                case 'POST':
-                    return PermissionsListComponent.compare(a.actions.includes('POST'), b.actions.includes('POST'), isAsc);
-                case 'PUT':
-                    return PermissionsListComponent.compare(a.actions.includes('PUT'), b.actions.includes('PUT'), isAsc);
-                case 'PATCH':
-                    return PermissionsListComponent.compare(a.actions.includes('PATCH'), b.actions.includes('PATCH'), isAsc);
-                case 'DELETE':
-                    return PermissionsListComponent.compare(a.actions.includes('DELETE'), b.actions.includes('DELETE'), isAsc);
-                case 'HEAD':
-                    return PermissionsListComponent.compare(a.actions.includes('HEAD'), b.actions.includes('HEAD'), isAsc);
-                case 'resource':
-                    return PermissionsListComponent.compare(a.resource, b.resource, isAsc);
+            case 'subject':
+                return PermissionsListComponent.compare(a.subject, b.subject, isAsc);
+            case 'GET':
+                return PermissionsListComponent.compare(a.actions.includes('GET'), b.actions.includes('GET'), isAsc);
+            case 'POST':
+                return PermissionsListComponent.compare(a.actions.includes('POST'), b.actions.includes('POST'), isAsc);
+            case 'PUT':
+                return PermissionsListComponent.compare(a.actions.includes('PUT'), b.actions.includes('PUT'), isAsc);
+            case 'PATCH':
+                return PermissionsListComponent.compare(a.actions.includes('PATCH'), b.actions.includes('PATCH'), isAsc);
+            case 'DELETE':
+                return PermissionsListComponent.compare(a.actions.includes('DELETE'), b.actions.includes('DELETE'), isAsc);
+            case 'HEAD':
+                return PermissionsListComponent.compare(a.actions.includes('HEAD'), b.actions.includes('HEAD'), isAsc);
+            case 'resource':
+                return PermissionsListComponent.compare(a.resource, b.resource, isAsc);
 
-                default:
-                    return 0;
+            default:
+                return 0;
             }
         });
         this.sortedData = data;
@@ -258,7 +258,7 @@ export class PermissionsListComponent implements OnInit {
             const theJSON = JSON.stringify(this.sortedData.filter((p) => p.id !== 'admin-all'));
             return this.sanitizer.bypassSecurityTrustUrl('data:text/json;charset=UTF-8,' + encodeURIComponent(theJSON));
         }
-        return
+        return;
     }
 
     public import() {
