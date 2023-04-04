@@ -81,7 +81,7 @@
             </button>
         </mat-form-field>
     </mat-card>
-    <div class="table-container" fxFlex="auto">
+    <div class="table-container" fxFlex="auto" *ngIf="ready">
         <mat-table #table (matSortChange)="sortData($event)" [dataSource]="sortedData" [hidden]="!ready" matSort>
             <ng-container matColumnDef="select">
                 <th mat-header-cell *matHeaderCellDef>
@@ -200,7 +200,7 @@
         </mat-table>
     </div>
     <div *ngIf="!ready" fxLayout="row" fxLayoutAlign="center center">
-        <mat-spinner [diameter]="50" [strokeWidth]="5" class="position" color="accent"></mat-spinner>
+        <senergy-spinner [show]="!ready"></senergy-spinner>
     </div>
     <span *ngIf="importing" class="import-hint color-accent">Importing takes a few seconds...</span>
 </section>

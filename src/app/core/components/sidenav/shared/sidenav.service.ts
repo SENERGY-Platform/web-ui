@@ -160,16 +160,16 @@ export class SidenavService implements OnDestroy {
         // Add admin and devloper sections
         if(this.authService.userIsAdmin()) {
             sections.push(
-                new SidenavSectionModel('Admin', 'toggle', 'important_devices', '/admin', [
-                    new SidenavPageModel('User & Client Authorization', 'link', 'important_devices', '/admin/authorization'),
+                new SidenavSectionModel('Admin', 'toggle', 'admin_panel_settings', '/admin', [
+                    new SidenavPageModel('User & Client Authorization', 'link', 'security', '/admin/authorization'),
                 ])
             )
         }
 
         if(this.authService.userIsAdmin() || this.authService.userIsDeveloper()) {
             sections.push(
-                new SidenavSectionModel('Developer', 'toggle', 'important_devices', '/dev', [
-                    new SidenavPageModel('API', 'link', 'important_devices', '/dev/api'),
+                new SidenavSectionModel('Developer', 'toggle', 'engineering', '/dev', [
+                    new SidenavPageModel('API', 'link', 'api', '/dev/api'),
                 ])
             )
         }

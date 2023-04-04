@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  ReactiveFormsModule
+    ReactiveFormsModule
 } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { PermissionsListComponent } from './shared/permissions-list/permissions-list.component';
@@ -24,43 +24,45 @@ import { PermissionsDialogDeleteComponent } from './shared/permissions-dialog-de
 import { PermissionsDialogImportComponent } from './shared/permissions-dialog-import/permissions-dialog-import.component';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { RouterModule } from '@angular/router';
+import {CoreModule} from '../../core/core.module';
 
 const listRules = {
-  path: 'admin/authorization',
-  pathMatch: 'full',
-  component: PermissionsListComponent,
-  data: { header: 'Authorization' },
+    path: 'admin/authorization',
+    pathMatch: 'full',
+    component: PermissionsListComponent,
+    data: { header: 'Authorization' },
 };
 
 @NgModule({
-  declarations: [
-    PermissionsListComponent,
-    PermissionsEditComponent,
-    PermissionsDialogImportComponent,
-    PermissionsDialogDeleteComponent
-  ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatIconModule,
-    MatButtonModule,
-    MatAutocompleteModule,
-    MatCheckboxModule,
-    MatCardModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    ReactiveFormsModule,
-    MatTableModule,
-    MatTooltipModule,
-    MatSortModule,
-    MatSnackBarModule,
-    MatProgressSpinnerModule,
-    MatSelectModule,
-    MatRadioModule,
-    MatInputModule,
-    RouterModule.forChild([
-      listRules
-    ])
-  ]
+    declarations: [
+        PermissionsListComponent,
+        PermissionsEditComponent,
+        PermissionsDialogImportComponent,
+        PermissionsDialogDeleteComponent
+    ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatIconModule,
+        MatButtonModule,
+        MatAutocompleteModule,
+        MatCheckboxModule,
+        MatCardModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        ReactiveFormsModule,
+        MatTableModule,
+        MatTooltipModule,
+        MatSortModule,
+        MatSnackBarModule,
+        MatProgressSpinnerModule,
+        MatSelectModule,
+        MatRadioModule,
+        MatInputModule,
+        RouterModule.forChild([
+            listRules
+        ]),
+        CoreModule
+    ]
 })
 export class AuthorizationModule { }

@@ -21,29 +21,10 @@
     padding-bottom: 100px;
 }
 
-.entry-header-image {
-    background-image: url('http://placebear.com/300/200');
-    background-size: cover;
-}
-
 .service-container {
     grid-template-columns: repeat(auto-fit, minmax(33%, 1fr));
     grid-gap: 5px;
     display: grid;
-}
-
-mat-card-title {
-    font-weight: bold !important;
-    font-size: 1.4rem !important;
-}
-
-mat-card-subtitle {
-    font-size: 1rem !important;
-}
-
-mat-card p {
-    font-family: Roboto, Helvetica Neue, sans-serif;
-    font-size: 1rem;
 }
 
 mat-card-actions {
@@ -70,7 +51,7 @@ mat-card-actions {
 }
 
 .api-card:hover {
-    /*background: #c7daf0;*/
+    cursor: pointer;
 }
 
 @media (max-width: 1000px) {
