@@ -108,6 +108,7 @@ const devicetypesEdit = {
         MatTreeModule,
         WidgetModule,
         DragDropModule,
+        MatCheckboxModule
     ],
     declarations: [
         DeviceTypesComponent,

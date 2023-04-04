@@ -51,6 +51,7 @@ export class DeviceTypesContentVariableJsonDialogComponent {
             name: name,
             is_void: false,
             serialization_options: [],
+            omit_empty: false
         };
         if(value === undefined || value === null) {
 

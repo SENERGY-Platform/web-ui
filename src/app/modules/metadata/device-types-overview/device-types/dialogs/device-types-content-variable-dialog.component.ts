@@ -209,6 +209,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 unit_reference: null,
                 value: null,
                 type: null,
+                omit_empty: false,
             });
             if (this.isVoidType()) {
                 this.firstFormGroup.patchValue({
@@ -248,6 +249,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 aspect_id: [{disabled: true, value: this.contentVariable.aspect_id}],
                 function_id: [{disabled: true, value: this.contentVariable.function_id}],
                 is_void: [{disabled: true, value: this.contentVariable.is_void}],
+                emit_empty: [{disabled: true, value: !!this.contentVariable.omit_empty}],
             });
         } else {
             this.firstFormGroup = this._formBuilder.group(
@@ -264,6 +266,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                     aspect_id: [this.contentVariable.aspect_id],
                     function_id: [this.contentVariable.function_id],
                     is_void: [this.contentVariable.is_void],
+                    omit_empty: [!!this.contentVariable.omit_empty],
                 },
                 {validators: typeValueValidator('type', 'value')},
             );

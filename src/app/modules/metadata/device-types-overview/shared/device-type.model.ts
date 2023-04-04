@@ -105,6 +105,7 @@ export interface DeviceTypeContentVariableModel {
     aspect_id?: string;
     function_id?: string;
     is_void: boolean;
+    omit_empty?: boolean;
 }
 
 export interface DeviceTypeConceptModel {

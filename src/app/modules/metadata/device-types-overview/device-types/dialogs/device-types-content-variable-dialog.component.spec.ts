@@ -29,6 +29,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {MatSelectModule} from '@angular/material/select';
 import {MatInputModule} from '@angular/material/input';
 import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 describe('DeviceTypesContentVariableDialog', () => {
     let component: DeviceTypesContentVariableDialogComponent;
@@ -38,7 +39,7 @@ describe('DeviceTypesContentVariableDialog', () => {
         createSpyFromClass<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
     function init(contentVariable: DeviceTypeContentVariableModel, concepts: ConceptsCharacteristicsModel[], functions: DeviceTypeFunctionModel[], aspects: DeviceTypeAspectModel[]) {
         TestBed.configureTestingModule({
-            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatSelectModule, MatInputModule],
+            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatSelectModule, MatInputModule, MatCheckboxModule],
             declarations: [DeviceTypesContentVariableDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: matDialogRefSpy },
@@ -103,6 +104,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 aspect_id: null,
                 function_id: null,
                 is_void: null,
+                omit_empty: false,
             });
         }),
     );
@@ -119,6 +121,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 serialization_options: ['serialization_options'],
                 unit_reference: 'unit_reference',
                 value: 'value',
+                omit_empty: false,
             } as DeviceTypeContentVariableModel;
             init(contentVariable, [], [], []);
             expect(component.typeOptionsControl.value).toBe('primitive');
@@ -136,6 +139,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 aspect_id: null,
                 function_id: null,
                 is_void: null,
+                omit_empty: false,
             });
         }),
     );
@@ -169,6 +173,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 aspect_id: null,
                 function_id: null,
                 is_void: false,
+                omit_empty: false,
             });
         }),
     );
@@ -210,6 +215,7 @@ describe('DeviceTypesContentVariableDialog', () => {
                 aspect_id: null,
                 function_id: null,
                 is_void: null,
+                omit_empty: false,
             });
         }),
     );
