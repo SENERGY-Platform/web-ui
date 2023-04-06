@@ -74,7 +74,7 @@
         <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
             <input matInput placeholder="Unit reference" formControlName="unit_reference">
         </mat-form-field>
-        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType()">
+        <mat-form-field class="full-width" color="accent" *ngIf="isPrimitiveType() && !isVoidType() && !isOmitEmpty()">
             <input matInput placeholder="Value" formControlName="value">
         </mat-form-field>
     </form>

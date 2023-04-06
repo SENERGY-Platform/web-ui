@@ -130,6 +130,9 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
                 this.firstFormGroup.patchValue({value: null});
             }
         }
+        if (this.firstFormGroup.get('omit_empty')?.value) {
+            this.firstFormGroup.patchValue({value: null});
+        }
         this.dialogRef.close(this.firstFormGroup.getRawValue());
     }
 
@@ -139,6 +142,10 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
 
     isVoidType(): boolean {
         return this.typeOptionsControl.value === 'void';
+    }
+
+    isOmitEmpty(): boolean {
+        return !!this.firstFormGroup.get('omit_empty')?.value;
     }
 
     highlightCharacteristics() {
