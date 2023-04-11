@@ -60,7 +60,7 @@ export class DeviceInstancesDialogService {
             const serviceOutputCounts: number[] = [];
             deviceType?.services.forEach((service, serviceIndex) => {
                 serviceOutputCounts[serviceIndex] = 0;
-                service.outputs.forEach(output => {
+                service.outputs?.forEach(output => {
                     this.deviceTypeService.getValuePaths(output.content_variable).forEach(path => {
                         lastValueElements.push({
                             deviceId,
