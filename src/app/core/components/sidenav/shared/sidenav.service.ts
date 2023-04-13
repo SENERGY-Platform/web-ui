@@ -70,7 +70,7 @@ export class SidenavService implements OnDestroy {
         }
 
 
-        let processPages = [
+        const processPages = [
             new SidenavPageModel('Designer', 'link', 'create', '/processes/designer'),
             new SidenavPageModel('Repository', 'link', 'storage', '/processes/repository'),
             new SidenavPageModel('Deployments', 'link', 'publish', '/processes/deployments'),
@@ -78,7 +78,7 @@ export class SidenavService implements OnDestroy {
         ];
 
         if(environment.processIoUrl){
-            processPages.push( new SidenavPageModel('IO', 'link', 'table_chart', '/processes/io'))
+            processPages.push( new SidenavPageModel('IO', 'link', 'table_chart', '/processes/io'));
         }
 
         sections.push(
@@ -108,7 +108,7 @@ export class SidenavService implements OnDestroy {
                     waitingRoom.badge = String(value.total);
                 }
                 if (value && value.total === 0) {
-                    waitingRoom.badge = "";
+                    waitingRoom.badge = '';
                 }
             });
         };
@@ -162,8 +162,9 @@ export class SidenavService implements OnDestroy {
             sections.push(
                 new SidenavSectionModel('Admin', 'toggle', 'admin_panel_settings', '/admin', [
                     new SidenavPageModel('User & Client Authorization', 'link', 'security', '/admin/authorization'),
+                    new SidenavPageModel('Timescale Rules', 'link', 'rule', '/admin/timescale-rules'),
                 ])
-            )
+            );
         }
 
         if(this.authService.userIsAdmin() || this.authService.userIsDeveloper()) {
@@ -171,7 +172,7 @@ export class SidenavService implements OnDestroy {
                 new SidenavSectionModel('Developer', 'toggle', 'engineering', '/dev', [
                     new SidenavPageModel('API', 'link', 'api', '/dev/api'),
                 ])
-            )
+            );
         }
 
         return sections;

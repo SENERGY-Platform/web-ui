@@ -1,0 +1,99 @@
+<!--
+  ~
+  ~   Copyright 2023 InfAI (CC SES)
+  ~
+  ~   Licensed under the Apache License, Version 2.0 (the "License");
+  ~   you may not use this file except in compliance with the License.
+  ~   You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~   Unless required by applicable law or agreed to in writing, software
+  ~   distributed under the License is distributed on an "AS IS" BASIS,
+  ~   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~   See the License for the specific language governing permissions and
+  ~   limitations under the License.
+  ~
+  -->
+
+<h2 mat-dialog-title>Timescale Rule</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="form" fxLayout="column">
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>ID</mat-label>
+                <input matInput formControlName="id">
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Description</mat-label>
+                <input matInput formControlName="description" required>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Group</mat-label>
+                <input matInput formControlName="group" required>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Priority</mat-label>
+                <input matInput formControlName="priority" required type="number">
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Table Reg Ex</mat-label>
+                <input matInput formControlName="table_reg_ex" required>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Users</mat-label>
+                <senergy-select-search [options]="users" [multiple]="true" formControlName="users" useOptionViewProperty="username" useOptionValueProperty="id"></senergy-select-search>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Roles</mat-label>
+                <senergy-select-search [options]="roles" [multiple]="true" formControlName="roles"></senergy-select-search>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Command Template</mat-label>
+                <textarea matInput formControlName="command_template" required cdkTextareaAutosize cdkAutosizeMinRows="5"></textarea>
+            </mat-form-field>
+        </div>
+
+        <div>
+            <mat-form-field color="accent" appearance="outline" fxFill>
+                <mat-label>Delete Template</mat-label>
+                <textarea matInput formControlName="delete_template" cdkTextareaAutosize cdkAutosizeMinRows="1"></textarea>
+            </mat-form-field>
+        </div>
+
+        <div *ngIf="rule?.errors !== null && rule?.errors !== undefined && (rule?.errors?.length || 0) > 0">
+            <mat-form-field color="accent" appearance="outline" fxFill disabled="">
+                <mat-label>Errors</mat-label>
+                <textarea matInput [value]="(rule?.errors || []).join('\n')" cdkTextareaAutosize cdkAutosizeMinRows="1" disabled></textarea>
+            </mat-form-field>
+        </div>
+    </form>
+</mat-dialog-content>
+
+
+<mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid" *ngIf="editable">Save</button>
+</mat-dialog-actions>

@@ -38,7 +38,7 @@ import { MetadataModule } from './modules/metadata/metadata.module';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import {SmartServicesModule} from './modules/smart-services/smart-services.module';
-import { AuthorizationModule } from './modules/authorization/authorization.module';
+import { AdminModule } from './modules/./admin/admin.module';
 import { ApiDocModule } from './modules/api-doc/api-doc.module';
 
 registerLocaleData(localeDe);
@@ -54,7 +54,7 @@ registerLocaleData(localeDe);
         DevicesModule,
         ApiDocModule,
         KeycloakAngularModule,
-        AuthorizationModule,
+        AdminModule,
         DataModule,
         ProcessesModule,
         SmartServicesModule,

@@ -111,7 +111,8 @@ export const environment = {
     deviceClassThermostat: 'urn:infai:ses:device-class:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     ladonUrl: 'http://localhost',
     kongAdminProxyUrl: 'http://localhost',
-    swaggerUrl: 'http://localhost'
+    swaggerUrl: 'http://localhost',
+    timescaleRuleManagerUrl: 'http://localhost',
 };
 
 /*
