@@ -42,6 +42,7 @@ export const environment = {
     brokerExportBroker: 'localhost:1883',
     influxAPIURL: 'http://localhost',
     timescaleAPIURL: 'http://localhost',
+    timescaleAPIDownloadURL: 'http://localhost',
     pipelineRegistryUrl: 'http://localhost',
     flowRepoUrl: 'http://localhost',
     flowEngineUrl: 'http://localhost',

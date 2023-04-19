@@ -27,7 +27,9 @@ import {
 } from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
 import {FormBuilder, FormGroup} from '@angular/forms';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {environment} from '../../../../../environments/environment';
+import {AuthorizationService} from '../../../../core/services/authorization.service';
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
@@ -40,10 +42,9 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
     deviceType: DeviceTypeModel;
     serviceOutputCounts: number[] = [];
     timeControl: FormGroup = this.fb.group({
-        from: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)),
-        to: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0))
+        from: [{value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true}],
+        to: [{value: new Date(new Date().setHours(new Date().getTimezoneOffset() / -60, 0, 0, 0)), disabled: true}],
     });
-    downloading = false;
     deviceId = '';
 
 
@@ -51,11 +52,15 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
         @Inject(MAT_DIALOG_DATA) data: {
             deviceId: string;
-            services: DeviceTypeServiceModel[]; lastValueElements: LastValuesRequestElementTimescaleModel[]; deviceType: DeviceTypeModel; serviceOutputCounts: number[];
+            services: DeviceTypeServiceModel[];
+            lastValueElements: LastValuesRequestElementTimescaleModel[];
+            deviceType: DeviceTypeModel;
+            serviceOutputCounts: number[];
         },
         private exportDataService: ExportDataService,
         private fb: FormBuilder,
-        private snackBar: MatSnackBar,
+        private errorHandlerService: ErrorHandlerService,
+        private authorizationService: AuthorizationService,
     ) {
         this.services = data.services;
         this.lastValueElements = data.lastValueElements;
@@ -73,7 +78,10 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
             this.lastValueArray = [];
             let counter = 0;
             this.deviceType.services.forEach((_, serviceIndex) => {
-                const subArray: { request: LastValuesRequestElementTimescaleModel; response: TimeValuePairModel }[] = [];
+                const subArray: {
+                    request: LastValuesRequestElementTimescaleModel;
+                    response: TimeValuePairModel;
+                }[] = [];
                 lastValues.slice(counter, counter + this.serviceOutputCounts[serviceIndex]).forEach((response, responseIndex) => {
                     subArray.push({request: this.lastValueElements[counter + responseIndex], response});
                 });
@@ -87,14 +95,14 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    download(i: number) {
+    async getDownloadUrl(i: number): Promise<string> {
         const fromIso = this.timeControl.get('from')?.value.toISOString();
         const toIso = new Date((this.timeControl.get('to')?.value as Date).valueOf() + 86400000).toISOString();
-        this.downloading = true;
         const columns: QueriesRequestColumnModel[] = [];
         this.lastValueArray[i].forEach(c => columns.push({name: c.request.columnName}));
 
-        this.exportDataService.queryTimescaleCsv([{
+        const token = await this.authorizationService.getToken();
+        const f = await fetch(environment.timescaleAPIURL + '/prepare-download?query=' + JSON.stringify({
             serviceId: this.services[i].id,
             deviceId: this.deviceId,
             columns,
@@ -102,16 +110,30 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
                 start: fromIso,
                 end: toIso,
             }
-        }]).subscribe(res => {
-            const dlink: HTMLAnchorElement = document.createElement('a');
-            dlink.download = (this.services[i].name + '-' + fromIso + '-' + toIso + '.csv').replace(/ /g, '_');
-            dlink.href = 'data:text/csv;,' + res;
-            dlink.click(); // this will trigger the dialog window
-            dlink.remove();
-            this.downloading = false;
-        }, (_) => {
-            this.downloading = false;
-            this.snackBar.open('Error downloading data!', 'close', {panelClass: 'snack-bar-error'});
-        });
+        }), {headers: {Authorization: token}});
+        if (!f.ok) {
+            throw f.statusText;
+        }
+        const secret = await f.text();
+        return environment.timescaleAPIDownloadURL + '/download/' + secret;
+    }
+
+    async download($event: Event, i: number) {
+        $event.stopPropagation();
+        let url = '';
+        try {
+            url = await this.getDownloadUrl(i);
+        } catch (e) {
+            this.errorHandlerService.handleErrorWithSnackBar('Failed to prepare download', 'DeviceInstancesServiceDialogComponent', 'download', null)(e);
+            return;
+        }
+        const dlink: HTMLAnchorElement = document.createElement('a');
+        const fromIso = this.timeControl.get('from')?.value.toISOString();
+        const toIso = new Date((this.timeControl.get('to')?.value as Date).valueOf() + 86400000).toISOString();
+        dlink.download = (this.services[i].name + '-' + fromIso + '-' + toIso + '.csv').replace(/ /g, '_');
+        dlink.href = url;
+        dlink.click(); // this will trigger the dialog window
+        dlink.remove();
+        console.log(url);
     }
 }

@@ -54,18 +54,17 @@
                 </table>
                 <span *ngIf="lastValueArray[i].length === 0">Service does not provide data</span>
                 <div *ngIf="lastValueArray[i].length > 0">
-                    <mat-form-field appearance="fill" fxFlex color="accent">
+                    <mat-form-field appearance="fill" fxFlex color="accent" (click)="picker.open()">
                         <mat-label>Enter a date range</mat-label>
                         <mat-date-range-input [formGroup]="timeControl" [rangePicker]="picker">
                             <input matStartDate formControlName="from" placeholder="Start date">
                             <input matEndDate formControlName="to" placeholder="End date">
                         </mat-date-range-input>
-                        <mat-datepicker-toggle matPrefix [for]="picker"></mat-datepicker-toggle>
-                        <mat-date-range-picker #picker></mat-date-range-picker>
+                        <mat-datepicker-toggle matPrefix [for]="picker" disabled="false"></mat-datepicker-toggle>
+                        <mat-date-range-picker #picker disabled="false"></mat-date-range-picker>
 
-                        <button matSuffix mat-icon-button [disabled]="downloading" (click)="download(i)">
-                            <mat-icon *ngIf="!downloading">download</mat-icon>
-                            <mat-icon *ngIf="downloading">pending</mat-icon>
+                        <button matSuffix mat-icon-button (click)="download($event, i)">
+                            <mat-icon>download</mat-icon>
                         </button>
                         <mat-error *ngIf="timeControl.controls.from.hasError('matStartDateInvalid')">Invalid start
                             date
