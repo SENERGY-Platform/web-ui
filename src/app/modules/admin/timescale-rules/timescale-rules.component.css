@@ -24,7 +24,6 @@ tr.second th, tr.second td {
     top: 56px;
     background: inherit;
     z-index: 99;
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
     padding: 0 8px;
 }
 
@@ -43,16 +42,11 @@ tr.second th, tr.second td {
     margin-left: 0.5em;
 }
 
-table td {
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
-}
-
 .mat-cell {
     padding: 0 8px;
 }
 
 th.mat-header-cell {
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
     padding: 0 8px;
     position: sticky;
     top: 0;

@@ -1,11 +1,11 @@
 <!--
-  ~ Copyright 2021 InfAI (CC SES)
+  ~ Copyright 2020 InfAI (CC SES)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
   ~ You may obtain a copy of the License at
   ~
-  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~     http://www.apache.org/licenses/LICENSE-2.0
   ~
   ~ Unless required by applicable law or agreed to in writing, software
   ~ distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,67 +13,73 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+  <div class="locations-container">
+    <span fxLayout="row" class="search-refresh">
+        <mat-form-field color="accent" appearance="outline" fxFlex>
+            <input matInput [formControl]="searchControl" placeholder="Search...">
+            <mat-icon matPrefix *ngIf="searchControl.value === ''">search</mat-icon>
+            <button mat-icon-button matPrefix *ngIf="searchControl.value !== ''" (click)="resetSearch()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-form-field>
 
+        <button mat-icon-button (click)="reload()" color="accent" class="refresh">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </span>
 
-<div class="locations-container">
-    <div fxLayout="column">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-    </div>
-    <div class="locations-scroll">
-        <div infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.locations-scroll'"
-             [fromRoot]="true"
-             (scrolled)="onScroll()">
-            <div class="layout-margin" fxLayout="column">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                               *ngIf="locations.length > 0">
-                    <mat-grid-tile class="mat-elevation-z1"
-                                   *ngFor="let location of locations; let i = index">
-                        <div fxFill class="background">
-                            <img class="device-group-image" src="{{location.image}}">
-                        </div>
-                        <mat-grid-tile-footer>
-                            <div fxLayout="column" fxFill>
-                                <div class="truncate footer-item-header" matTooltip="{{location.name}}">
-                                    {{location.name}}
-                                </div>
-                                <form fxLayout="row" class="footer-buttons">
-                                    <div fxFlex></div>
-                                    <div [fxLayoutAlign]="'start center'">
-                                        <button (click)="showDevices(location)"
-                                                mat-icon-button
-                                                color="accent"
-                                                matTooltip="Show Devices">
-                                            <mat-icon>important_devices</mat-icon>
-                                        </button>
-                                        <button (click)="editLocation(location)" mat-icon-button color="accent" matTooltip="Edit">
-                                            <mat-icon>edit</mat-icon>
-                                        </button>
-                                        <button (click)="deleteLocation(location)"
-                                                mat-icon-button
-                                                color="accent"
-                                                matTooltip="Delete">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </mat-grid-tile-footer>
-                    </mat-grid-tile>
-                </mat-grid-list>
-                <div *ngIf="locations.length === 0 && ready">No location found.</div>
-                <senergy-spinner [elementCount]="locations.length" [show]="!ready"></senergy-spinner>
-            </div>
-        </div>
+    <senergy-spinner [show]="!ready"></senergy-spinner>
+    <div *ngIf="locations.length === 0 && ready">No location found.</div>
+
+    <div [hidden]="!ready || locations.length === 0" class="mat-elevation-z1" fxLayout="column"
+         infiniteScroll
+         [infiniteScrollDistance]="1"
+         [infiniteScrollThrottle]="50"
+         [infiniteScrollContainer]="'.locations-container'"
+         [fromRoot]="true"
+         (scrolled)="onScroll()">
+
+        <table mat-table
+               [dataSource]="dataSource" matSort>
+            <ng-container matColumnDef="name">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let location">
+                    {{location.name}}
+                </td>
+            </ng-container>
+          
+            <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef disableClear>Action</th>
+                <td mat-cell *matCellDef="let location"> 
+                            <button (click)="showDevices(location)"
+                                    mat-icon-button
+                                    color="accent"
+                                    matTooltip="Show Devices">
+                                <mat-icon>important_devices</mat-icon>
+                            </button>
+                            <button (click)="editLocation(location)" mat-icon-button color="accent" matTooltip="Edit">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button (click)="deleteLocation(location)"
+                                    mat-icon-button
+                                    color="accent"
+                                    matTooltip="Delete">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                </td>
+            </ng-container>
+          
+
+            <tr mat-header-row
+                *matHeaderRowDef="['name', 'action']; sticky: true"></tr>
+            <tr mat-row
+                *matRowDef="let m; columns: ['name', 'action'];"></tr>
+        </table>
     </div>
 </div>
+
 <button mat-fab class="fab" matTooltip="Add new device class" (click)="newLocation()">
     <mat-icon>add</mat-icon>
 </button>
+
+

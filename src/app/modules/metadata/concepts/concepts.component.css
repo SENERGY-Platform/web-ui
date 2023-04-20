@@ -19,20 +19,6 @@
     margin: 8px;
 }
 
-mat-grid-tile-footer {
-    height: 68px !important;
-    background-color: white !important;
-    color: black !important;
-    padding: 8px !important;
-}
-
-mat-grid-list {
-    margin-bottom: 100px;
-}
-
-mat-grid-tile {
-    border-radius: 4px;
-}
 
 .truncate {
     white-space: nowrap;
@@ -42,12 +28,12 @@ mat-grid-tile {
 
 .concepts-container {
     height: calc(100% - 64px);
-    overflow-y: hidden;
+    padding: 0 8px 8px
+
 }
 
 .concepts-scroll {
     height: calc(100% - 106px);
-    overflow-y: auto;
 }
 
 .background {

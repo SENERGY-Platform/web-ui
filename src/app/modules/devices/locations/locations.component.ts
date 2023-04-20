@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ResponsiveService } from '../../../core/services/responsive.service';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
@@ -28,14 +24,12 @@ import { util } from 'jointjs';
 import { LocationModel } from './shared/locations.model';
 import { LocationsService } from './shared/locations.service';
 import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { FormControl } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
+
 
 @Component({
     selector: 'senergy-locations',
@@ -46,46 +40,40 @@ export class LocationsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
 
     locations: LocationModel[] = [];
-    gridCols = 0;
-    ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
+    instances = []
+    dataSource = new MatTableDataSource(this.locations)
+    @ViewChild(MatSort) sort!: MatSort
 
-    private searchText = '';
+    searchControl = new FormControl('');
+
+    ready = false;
+
     private limit = this.limitInit;
     private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
     constructor(
-        private dialog: MatDialog,
-        private responsiveService: ResponsiveService,
         private locationsService: LocationsService,
-        private searchbarService: SearchbarService,
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
     ) {}
 
     ngOnInit() {
-        this.initGridCols();
-        this.initSearchAndGetLocations();
+        this.getLocations()
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
 
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getLocations(true);
-    }
-
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
             this.ready = false;
             this.offset = this.offset + this.limit;
-            this.getLocations(false);
+            this.getLocations();
         }
     }
 
@@ -107,7 +95,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
                             this.locations.splice(this.locations.indexOf(location), 1);
                             this.snackBar.open('Location deleted successfully.', undefined, { duration: 2000 });
                             this.setLimitOffset(1);
-                            this.reloadLocations(false);
+                            this.reloadLocations();
                         } else {
                             this.snackBar.open('Error while deleting the location!', "close", { panelClass: "snack-bar-error" });
                         }
@@ -127,47 +115,23 @@ export class LocationsComponent implements OnInit, OnDestroy {
         return false;
     }
 
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
-    }
-
-    private initSearchAndGetLocations() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.searchText = searchText;
-            this.getLocations(true);
-        });
-    }
-
-    private getLocations(reset: boolean) {
-        if (reset) {
-            this.reset();
-        }
-
+    private getLocations() {
         this.locationsService
-            .searchLocations(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .searchLocations(this.searchControl.value, this.limit, this.offset, "name", "asc")
             .subscribe((locations: LocationModel[]) => {
                 if (locations.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.locations = this.locations.concat(locations);
+                this.dataSource = new MatTableDataSource(this.locations)
+                this.dataSource.sort = this.sort
                 this.ready = true;
             });
     }
 
-    private reset() {
-        this.locations = [];
-        this.limit = this.limitInit;
-        this.offset = 0;
-        this.allDataLoaded = false;
-        this.ready = false;
-    }
-
-    private reloadLocations(reset: boolean) {
+    private reloadLocations() {
         setTimeout(() => {
-            this.getLocations(reset);
+            this.reload()
         }, 2500);
     }
 
@@ -175,5 +139,19 @@ export class LocationsComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.limit = limit;
         this.offset = this.locations.length;
+    }
+
+
+    reload() {
+        this.locations = [];
+        this.limit = this.limitInit;
+        this.offset = 0;
+        this.allDataLoaded = false;
+        this.ready = false;
+        this.getLocations();
+    }
+
+    resetSearch() {
+        this.searchControl.setValue('');
     }
 }

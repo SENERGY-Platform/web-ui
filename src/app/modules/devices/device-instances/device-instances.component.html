@@ -13,118 +13,120 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="device-instance-container">
+  <div class="device-instance-container">
+    <span fxLayout="row" class="search-refresh">
+        <mat-form-field color="accent" appearance="outline" fxFlex>
+            <input matInput [formControl]="searchControl" placeholder="Search...">
+            <mat-icon matPrefix *ngIf="searchControl.value === ''">search</mat-icon>
+            <button mat-icon-button matPrefix *ngIf="searchControl.value !== ''" (click)="resetSearch()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-form-field>
 
-    <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true"
-                   [(selectedIndex)]="activeIndex"
-                   (selectedIndexChange)="updateTab()"
-                   (animationDone)="animation()">
-        <mat-tab label="All">
-            <div fxLayout="column">
-                <senergy-searchbar fxFlex></senergy-searchbar>
-                <div fxLayout="row">
-                    <div fxFlex></div>
-                    <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
-                        <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
-                                  selected>{{selectedTagTransformed}}
-                            <mat-icon matChipRemove>cancel</mat-icon>
-                        </mat-chip>
-                    </mat-chip-list>
-                    <button mat-icon-button [matMenuTriggerFor]="filterMain" matTooltip="Filter" color="accent">
-                        <mat-icon>filter_alt</mat-icon>
-                    </button>
-                    <mat-menu #filterMain="matMenu">
-                        <button mat-menu-item [matMenuTriggerFor]="filterDeviceType">Device-Type</button>
-                        <button mat-menu-item [matMenuTriggerFor]="filterLocation">Location</button>
-                        <button mat-menu-item [matMenuTriggerFor]="filterNetwork">Network</button>
-                    </mat-menu>
-                    <mat-menu #filterDeviceType="matMenu">
-                        <button mat-menu-item *ngFor="let dt of deviceTypeOptions" (click)="filterByDeviceType(dt)">{{dt.name}}</button>
-                    </mat-menu>
-                    <mat-menu #filterLocation="matMenu">
-                        <button mat-menu-item *ngFor="let location of locationOptions" (click)="filterByLocation(location)">{{location.name}}</button>
-                    </mat-menu>
-                    <mat-menu #filterNetwork="matMenu">
-                        <button mat-menu-item *ngFor="let network of networkOptions" (click)="filterByNetwork(network)">{{network.name}}</button>
-                    </mat-menu>
-                    <senergy-sort [sortAttributes]="sortAttributes"
-                                  (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-                </div>
-            </div>
-            <div class="device-instances-scroll">
+        <button mat-icon-button (click)="reload()" color="accent" class="refresh">
+            <mat-icon>refresh</mat-icon>
+        </button>
 
-                <div infiniteScroll
-                     [infiniteScrollDistance]="1"
-                     [infiniteScrollThrottle]="50"
-                     [infiniteScrollContainer]="'.device-instances-scroll'"
-                     [infiniteScrollDisabled]="!(activeIndex === 0 && animationDone)"
-                     [fromRoot]="true"
-                     (scrolled)="onScroll()">
-                    <div *ngIf="activeIndex === 0 && animationDone">
-                        <senergy-device-instances-grid
-                                [deviceInstances]="deviceInstances"
-                                [ready]="ready"
-                                (tag)="getDevicesByTag($event)"
-                                (itemDeleted)="reloadElement($event)"></senergy-device-instances-grid>
-                    </div>
-                </div>
-            </div>
-        </mat-tab>
-        <mat-tab label="{{tab.label}}" *ngFor="let tab of tabs; let i = index">
-            <div fxLayout="column">
-                <senergy-searchbar fxFlex></senergy-searchbar>
-                <div fxLayout="row">
-                    <div fxFlex></div>
-                <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
-                    <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
-                              selected>{{selectedTagTransformed}}
-                        <mat-icon matChipRemove>cancel</mat-icon>
-                    </mat-chip>
-                </mat-chip-list>
-                    <button mat-icon-button [matMenuTriggerFor]="filterMain" matTooltip="Filter" color="accent">
-                        <mat-icon>filter_alt</mat-icon>
-                    </button>
-                    <mat-menu #filterMain="matMenu">
-                        <button mat-menu-item [matMenuTriggerFor]="filterDeviceType">Device-Type</button>
-                        <button mat-menu-item [matMenuTriggerFor]="filterLocation">Location</button>
-                        <button mat-menu-item [matMenuTriggerFor]="filterNetwork">Network</button>
-                    </mat-menu>
-                    <mat-menu #filterDeviceType="matMenu">
-                        <button mat-menu-item *ngFor="let dt of deviceTypeOptions" (click)="filterByDeviceType(dt)">{{dt.name}}</button>
-                    </mat-menu>
-                    <mat-menu #filterLocation="matMenu">
-                        <button mat-menu-item *ngFor="let location of locationOptions" (click)="filterByLocation(location)">{{location.name}}</button>
-                    </mat-menu>
-                    <mat-menu #filterNetwork="matMenu">
-                        <button mat-menu-item *ngFor="let network of networkOptions" (click)="filterByNetwork(network)">{{network.name}}</button>
-                    </mat-menu>
-                    <senergy-sort [sortAttributes]="sortAttributes"
-                                  (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-                </div>
-            </div>
-            <div class="main-panel-alternative panel-{{tab.label}}">
-                <div infiniteScroll
-                     [infiniteScrollDistance]="1"
-                     [infiniteScrollThrottle]="50"
-                     [infiniteScrollContainer]="'.panel-'+tab.label"
-                     [infiniteScrollDisabled]="!(activeIndex - 1 === i && animationDone)"
-                     [fromRoot]="true"
-                     (scrolled)="onScroll()">
-                    <div *ngIf="activeIndex - 1 === i && animationDone">
-                        <senergy-device-instances-grid
-                                [deviceInstances]="deviceInstances"
-                                [ready]="ready"
-                                (tag)="getDevicesByTag($event)"
-                                (itemDeleted)="reloadElement($event)"></senergy-device-instances-grid>
-                    </div>
-                </div>
-            </div>
-        </mat-tab>
-    </mat-tab-group>
+        <div fxLayout="row">
+            <div fxFlex></div>
+            <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
+                <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
+                          selected>{{selectedTagTransformed}}
+                    <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+            </mat-chip-list>
+            <button mat-icon-button [matMenuTriggerFor]="filterMain" matTooltip="Filter" color="accent">
+                <mat-icon>filter_alt</mat-icon>
+            </button>
+            <mat-menu #filterMain="matMenu">
+                <button mat-menu-item [matMenuTriggerFor]="filterDeviceType">Device-Type</button>
+                <button mat-menu-item [matMenuTriggerFor]="filterLocation">Location</button>
+                <button mat-menu-item [matMenuTriggerFor]="filterNetwork">Network</button>
+            </mat-menu>
+            <mat-menu #filterDeviceType="matMenu">
+                <button mat-menu-item *ngFor="let dt of deviceTypeOptions" (click)="filterByDeviceType(dt)">{{dt.name}}</button>
+            </mat-menu>
+            <mat-menu #filterLocation="matMenu">
+                <button mat-menu-item *ngFor="let location of locationOptions" (click)="filterByLocation(location)">{{location.name}}</button>
+            </mat-menu>
+            <mat-menu #filterNetwork="matMenu">
+                <button mat-menu-item *ngFor="let network of networkOptions" (click)="filterByNetwork(network)">{{network.name}}</button>
+            </mat-menu>
+        </div>
+    </span>
+
+    <div *ngIf="instances.length === 0 && ready">No devices found.</div>
+    <senergy-spinner [show]="!ready"></senergy-spinner>
+
+    <div [hidden]="!ready || instances.length === 0" class="mat-elevation-z1" fxLayout="column"
+         infiniteScroll
+         [infiniteScrollDistance]="1"
+         [infiniteScrollThrottle]="50"
+         [infiniteScrollContainer]="'.device-instance-container'"
+         [fromRoot]="true"
+         (scrolled)="onScroll()">
+
+        <table mat-table
+               [dataSource]="dataSource" matSort>
+            <ng-container matColumnDef="display_name">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let device">
+                    {{device.display_name}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="log_state">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Connection</th>
+                <td mat-cell *matCellDef="let device"> 
+                        <senergy-state-icon [state]="device.log_state"></senergy-state-icon>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="shared">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Shared</th>
+                <td mat-cell *matCellDef="let device"> 
+                        <mat-icon matTooltip="Device is shared" *ngIf="device.shared"
+                                  class="color-sidenav info-icon">share
+                        </mat-icon>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef disableClear>Action</th>
+                <td mat-cell *matCellDef="let device"> 
+                        <button mat-icon-button [matMenuTriggerFor]="deviceMenu" color="accent">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #deviceMenu="matMenu" [overlapTrigger]="false">
+                            <button mat-menu-item (click)="showInfoOfDevice(device)">
+                                <mat-icon>info</mat-icon>
+                                Data
+                            </button>
+                            <button mat-menu-item (click)="exportDevice(device)">
+                                <mat-icon>build</mat-icon>
+                                Export
+                            </button>
+                            <button mat-menu-item (click)="shareDevice(device)" [disabled]="!device.permissions.a">
+                                <mat-icon>share</mat-icon>
+                                Share
+                            </button>
+                            <button mat-menu-item (click)="duplicateDevice(device)" [disabled]="!device.permissions.w">
+                                <mat-icon>content_copy</mat-icon>
+                                Duplicate
+                            </button>
+                            <button mat-menu-item (click)="editDevice(device)" [disabled]="!device.permissions.w">
+                                <mat-icon>edit</mat-icon>
+                                Edit
+                            </button>
+                            <button mat-menu-item (click)="deleteDevice(device)" [disabled]="!device.permissions.a">
+                                <mat-icon>delete</mat-icon>
+                                Delete
+                            </button>
+                        </mat-menu>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row
+                *matHeaderRowDef="['display_name', 'log_state', 'shared', 'action']; sticky: true"></tr>
+            <tr mat-row
+                *matRowDef="let m; columns: ['display_name', 'log_state', 'shared', 'action'];"></tr>
+        </table>
+    </div>
 </div>
-
-
-<senergy-spinner [elementCount]="0" [show]="!animationDone"></senergy-spinner>
-
-
-

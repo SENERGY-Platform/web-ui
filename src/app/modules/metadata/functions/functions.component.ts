@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ResponsiveService } from '../../../core/services/responsive.service';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { FunctionsPermSearchModel } from './shared/functions-perm-search.model';
 import { FunctionsService } from './shared/functions.service';
-import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../device-types-overview/shared/device-type.model';
+import { DeviceTypeFunctionModel } from '../device-types-overview/shared/device-type.model';
 import { FunctionsEditDialogComponent } from './dialog/functions-edit-dialog.component';
 import { FunctionsCreateDialogComponent } from './dialog/functions-create-dialog.component';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { FormControl } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-functions',
@@ -47,49 +39,41 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
 
     functions: FunctionsPermSearchModel[] = [];
-    gridCols = 0;
+    dataSource = new MatTableDataSource(this.functions)
+    @ViewChild(MatSort) sort!: MatSort
+
+    searchControl = new FormControl('');
     ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
     userIsAdmin = false;
 
-    private searchText = '';
     private limit = this.limitInit;
     private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
     constructor(
         private dialog: MatDialog,
-        private responsiveService: ResponsiveService,
         private functionsService: FunctionsService,
-        private searchbarService: SearchbarService,
         private snackBar: MatSnackBar,
-        private router: Router,
         private dialogsService: DialogsService,
         private authService: AuthorizationService,
     ) {}
 
     ngOnInit() {
-        this.initGridCols();
-        this.initSearchAndGetFunctions();
         this.userIsAdmin = this.authService.userIsAdmin();
+        this.getFunctions();
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
 
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getFunctions(true);
-    }
-
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
             this.ready = false;
             this.offset = this.offset + this.limit;
-            this.getFunctions(false);
+            this.getFunctions();
         }
     }
 
@@ -104,7 +88,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
         editDialogRef.afterClosed().subscribe((newFunction: DeviceTypeFunctionModel) => {
             if (newFunction !== undefined) {
-                this.reset();
                 this.functionsService.updateFunction(newFunction).subscribe((func: DeviceTypeFunctionModel | null) => {
                     this.reloadAndShowSnackbar(func, 'updat');
                 });
@@ -124,7 +107,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
         editDialogRef.afterClosed().subscribe((newFunction: DeviceTypeFunctionModel) => {
             if (newFunction !== undefined) {
-                this.reset();
                 this.functionsService.updateFunction(newFunction).subscribe((func: DeviceTypeFunctionModel | null) => {
                     this.reloadAndShowSnackbar(func, 'updat');
                 });
@@ -141,7 +123,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         editDialogRef.afterClosed().subscribe((newFunction: DeviceTypeFunctionModel) => {
             console.log(newFunction);
             if (newFunction !== undefined) {
-                this.reset();
                 this.functionsService.createFunction(newFunction).subscribe((func: DeviceTypeFunctionModel | null) => {
                     this.reloadAndShowSnackbar(func, 'sav');
                 });
@@ -159,42 +140,23 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                         if (resp === true) {
                             this.functions.splice(this.functions.indexOf(func), 1);
                             this.snackBar.open('Function deleted successfully.', undefined, { duration: 2000 });
-                            this.setLimitOffset(1);
-                            this.reloadFunctions(false);
                         } else {
                             this.snackBar.open('Error while deleting the function!', "close", { panelClass: "snack-bar-error" });
                         }
+                        this.reload()
                     });
                 }
             });
     }
 
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
-    }
-
-    private initSearchAndGetFunctions() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.searchText = searchText;
-            this.getFunctions(true);
-        });
-    }
-
-    private getFunctions(reset: boolean) {
-        if (reset) {
-            this.reset();
-        }
-
+    private getFunctions() {
         if (this.functions && this.functions.length) {
             this.functionsService
                 .getFunctionsAfter(
-                    this.searchText,
+                    this.searchControl.value,
                     this.limit,
-                    this.sortAttribute.value,
-                    this.sortAttribute.order,
+                    "name",
+                    "asc",
                     this.functions[this.functions.length - 1],
                 )
                 .subscribe((functions: FunctionsPermSearchModel[]) => {
@@ -202,48 +164,45 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                         this.allDataLoaded = true;
                     }
                     this.functions = this.functions.concat(functions);
+                    this.dataSource = new MatTableDataSource(this.functions)
+                    this.dataSource.sort = this.sort
                     this.ready = true;
                 });
         } else {
             this.functionsService
-                .getFunctions(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+                .getFunctions(this.searchControl.value, this.limit, this.offset, "name", "asc")
                 .subscribe((functions: FunctionsPermSearchModel[]) => {
                     if (functions.length !== this.limit) {
                         this.allDataLoaded = true;
                     }
                     this.functions = this.functions.concat(functions);
+                    this.dataSource = new MatTableDataSource(this.functions)
+                    this.dataSource.sort = this.sort
                     this.ready = true;
                 });
         }
     }
 
-    private reset() {
+    reload() {
         this.functions = [];
         this.limit = this.limitInit;
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
-    }
-
-    private reloadFunctions(reset: boolean) {
-        setTimeout(() => {
-            this.getFunctions(reset);
-        }, 1500);
-    }
-
-    private setLimitOffset(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.functions.length;
+        this.getFunctions();
     }
 
     private reloadAndShowSnackbar(func: DeviceTypeFunctionModel | null, text: string) {
         if (func === null) {
             this.snackBar.open('Error while ' + text + 'ing the function!', "close", { panelClass: "snack-bar-error" });
-            this.getFunctions(true);
+            this.reload()
         } else {
             this.snackBar.open('Function ' + text + 'ed successfully.', undefined, { duration: 2000 });
-            this.reloadFunctions(true);
+            this.reload()
         }
+    }
+
+    resetSearch() {
+        this.searchControl.setValue('');
     }
 }

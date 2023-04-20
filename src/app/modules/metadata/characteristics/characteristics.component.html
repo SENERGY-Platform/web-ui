@@ -15,73 +15,65 @@
   -->
 
 <div class="characteristics-container">
-    <div fxLayout="column">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <mat-chip-list class="offset" *ngIf="selectedTag !== ''">
-                <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent"
-                          selected>{{selectedTag}}
-                    <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-            </mat-chip-list>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-    </div>
-    <div class="characteristics-scroll">
-        <div infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.characteristics-scroll'"
-             [fromRoot]="true"
-             (scrolled)="onScroll()">
-            <div class="layout-margin" fxLayout="column">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                               *ngIf="characteristics.length > 0">
-                    <mat-grid-tile class="mat-elevation-z1"
-                                   *ngFor="let characteristic of characteristics; let i = index">
-                        <div fxFill>
-                            <img class="background" src="src/img/characteristic.jpg">
-                        </div>
-                        <mat-grid-tile-footer>
-                            <div fxLayout="column" fxFill>
-                                <div class="truncate footer-item-header" matTooltip="{{characteristic.name}}">
-                                    {{characteristic.name}}
-                                </div>
-                                <form fxLayout="row" class="footer-buttons">
-                                    <div fxFlex></div>
-                                    <div [fxLayoutAlign]="'start center'">
-                                        <button (click)="showCharacteristic(characteristic)" *ngIf="!characteristic.permissions.w"
-                                                mat-icon-button color="accent" matTooltip="Info">
-                                            <mat-icon>info</mat-icon>
-                                        </button>
-                                        <button (click)="editCharacteristic(characteristic)" [disabled]="!characteristic.permissions.w"
-                                                mat-icon-button color="accent" matTooltip="Edit">
-                                            <mat-icon>edit</mat-icon>
-                                        </button>
-                                        <button (click)="deleteCharacteristic(characteristic)" [disabled]="!characteristic.permissions.a"
-                                                mat-icon-button color="accent" matTooltip="Delete">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </mat-grid-tile-footer>
-                    </mat-grid-tile>
-                </mat-grid-list>
-                <div *ngIf="characteristics.length === 0 && ready">No characteristic found.</div>
-                <senergy-spinner [elementCount]="characteristics.length" [show]="!ready"></senergy-spinner>
-            </div>
-        </div>
+    <span fxLayout="row" class="search-refresh">
+        <mat-form-field color="accent" appearance="outline" fxFlex>
+            <input matInput [formControl]="searchControl" placeholder="Search...">
+            <mat-icon matPrefix *ngIf="searchControl.value === ''">search</mat-icon>
+            <button mat-icon-button matPrefix *ngIf="searchControl.value !== ''" (click)="resetSearch()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-form-field>
+
+        <button mat-icon-button (click)="reload()" color="accent" class="refresh">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </span>
+
+    <div *ngIf="characteristics.length === 0 && ready">No characteristic found.</div>
+    <senergy-spinner [elementCount]="characteristics.length" [show]="!ready"></senergy-spinner>
+
+
+    <div [hidden]="!ready || characteristics.length ===0" class="mat-elevation-z1" fxLayout="column" infiniteScroll
+        [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50" [infiniteScrollContainer]="'.characteristics-container'"
+        [fromRoot]="true" (scrolled)="onScroll()">
+
+        <table mat-table [dataSource]="dataSource" matSort>
+            <ng-container matColumnDef="name">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let characteristic">
+                    {{characteristic.name}}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef disableClear>Action</th>
+                <td mat-cell *matCellDef="let characteristic">
+                    <button mat-icon-button [matMenuTriggerFor]="menu" color="accent">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu" [overlapTrigger]="false">
+                        <button mat-menu-item (click)="showCharacteristic(characteristic)" *ngIf="!characteristic.permissions.w" matTooltip="Info">
+                            <mat-icon>info</mat-icon>
+                            <span>Info</span>
+                        </button>
+                        <button mat-menu-item (click)="editCharacteristic(characteristic)" [disabled]="!characteristic.permissions.w" matTooltip="Edit">
+                            <mat-icon>edit</mat-icon>
+                            <span>Edit</span>
+                        </button>
+                        <button mat-menu-item (click)="deleteCharacteristic(characteristic)" [disabled]="!characteristic.permissions.a" matTooltip="Delete">
+                            <mat-icon>delete</mat-icon>
+                            <span>Delete</span>
+                        </button>
+                    </mat-menu>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['name', 'action']; sticky: true"></tr>
+            <tr mat-row *matRowDef="let m; columns: ['name', 'action'];"></tr>
+        </table>
     </div>
 </div>
 
 <button mat-fab class="fab" matTooltip="Add new characteristic" (click)="newCharacteristic()">
     <mat-icon>add</mat-icon>
 </button>
-
-
-
-
-

@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConceptsNewDialogComponent } from './dialogs/concepts-new-dialog.component';
-import { ResponsiveService } from '../../../core/services/responsive.service';
 import { Router } from '@angular/router';
 import { ConceptsService } from './shared/concepts.service';
 import { Subscription } from 'rxjs';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { ConceptsEditDialogComponent } from './dialogs/concepts-edit-dialog.component';
 import { ConceptsPermSearchModel } from './shared/concepts-perm-search.model';
 import { DeviceTypeConceptModel } from '../device-types-overview/shared/device-type.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { FormControl } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-concepts',
@@ -46,46 +39,39 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
 
     concepts: ConceptsPermSearchModel[] = [];
-    gridCols = 0;
     ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
+    dataSource = new MatTableDataSource(this.concepts)
+    @ViewChild(MatSort) sort!: MatSort
 
-    private searchText = '';
+    searchControl = new FormControl('');
+
     private limit = this.limitInit;
     private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
     constructor(
         private dialog: MatDialog,
-        private responsiveService: ResponsiveService,
         private router: Router,
         private conceptsService: ConceptsService,
-        private searchbarService: SearchbarService,
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
     ) {}
 
     ngOnInit() {
-        this.initGridCols();
-        this.initSearchAndGetValuetypes();
+        this.getConcepts();
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
 
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getConcepts(true);
-    }
-
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
             this.ready = false;
             this.setRepoItemsParams(this.limitInit);
-            this.getConcepts(false);
+            this.getConcepts();
         }
     }
 
@@ -96,15 +82,13 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
         editDialogRef.afterClosed().subscribe((newConcept: DeviceTypeConceptModel) => {
             if (newConcept !== undefined) {
-                this.reset();
                 this.conceptsService.createConcept(newConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
                         this.snackBar.open('Error while creating the concept!', "close", { panelClass: "snack-bar-error" });
-                        this.getConcepts(true);
                     } else {
                         this.snackBar.open('Concept created successfully.', undefined, { duration: 2000 });
-                        this.reloadConcepts(true);
                     }
+                    this.reload();
                 });
             }
         });
@@ -120,15 +104,13 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
         editDialogRef.afterClosed().subscribe((editConcept: DeviceTypeConceptModel) => {
             if (editConcept !== undefined) {
-                this.reset();
                 this.conceptsService.updateConcept(editConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
                         this.snackBar.open('Error while updating the concept!', "close", { panelClass: "snack-bar-error" });
-                        this.getConcepts(true);
                     } else {
                         this.snackBar.open('Concept updated successfully.', undefined, { duration: 2000 });
-                        this.reloadConcepts(true);
                     }
+                    this.reload();
                 });
             }
         });
@@ -145,15 +127,13 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
         editDialogRef.afterClosed().subscribe((editConcept: DeviceTypeConceptModel) => {
             if (editConcept !== undefined) {
-                this.reset();
                 this.conceptsService.updateConcept(editConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
                         this.snackBar.open('Error while updating the concept!', "close", { panelClass: "snack-bar-error" });
-                        this.getConcepts(true);
                     } else {
                         this.snackBar.open('Concept updated successfully.', undefined, { duration: 2000 });
-                        this.reloadConcepts(true);
                     }
+                    this.reload();
                 });
             }
         });
@@ -183,41 +163,27 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.router.navigateByUrl('/metadata/characteristics', { state: concept });
     }
 
-    private getConcepts(reset: boolean) {
-        if (reset) {
-            this.reset();
-        }
+    private getConcepts() {
         this.conceptsService
-            .getConcepts(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .getConcepts(this.searchControl.value, this.limit, this.offset, "name", "asc")
             .subscribe((concepts: ConceptsPermSearchModel[]) => {
                 if (concepts.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.concepts = this.concepts.concat(concepts);
+                this.dataSource = new MatTableDataSource(this.concepts)
+                this.dataSource.sort = this.sort
                 this.ready = true;
             });
     }
 
-    private initSearchAndGetValuetypes() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.searchText = searchText;
-            this.getConcepts(true);
-        });
-    }
-
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
-    }
-
-    private reset() {
+    reload() {
         this.concepts = [];
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
         this.limit = this.limitInit;
+        this.getConcepts();
     }
 
     private setRepoItemsParams(limit: number) {
@@ -228,7 +194,15 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     private reloadConcepts(reset: boolean) {
         setTimeout(() => {
-            this.getConcepts(reset);
+            if(reset) {
+                this.reload();
+            } else {
+                this.getConcepts()
+            }
         }, 1500);
+    }
+
+    resetSearch() {
+        this.searchControl.setValue('');
     }
 }

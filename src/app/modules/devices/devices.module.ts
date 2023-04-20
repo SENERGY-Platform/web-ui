@@ -29,7 +29,6 @@ import { DeviceInstancesEditDialogComponent } from './device-instances/dialogs/d
 import { DeviceInstancesSelectDialogComponent } from './device-instances/dialogs/device-instances-select-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NetworksClearDialogComponent } from './networks/dialogs/networks-clear-dialog.component';
-import { DeviceInstancesGridComponent } from './device-instances/device-instances-grid/device-instances-grid.component';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -176,7 +175,6 @@ const locationsEdit = {
         DeviceInstancesEditDialogComponent,
         DeviceInstancesSelectDialogComponent,
         NetworksClearDialogComponent,
-        DeviceInstancesGridComponent,
         DeviceInstancesExportDialogComponent,
         DeviceGroupsComponent,
         DeviceGroupsEditComponent,

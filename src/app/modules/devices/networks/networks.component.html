@@ -13,48 +13,60 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+  <div class="hubs-container">
+    <span fxLayout="row" class="search-refresh">
+        <mat-form-field color="accent" appearance="outline" fxFlex>
+            <input matInput [formControl]="searchControl" placeholder="Search...">
+            <mat-icon matPrefix *ngIf="searchControl.value === ''">search</mat-icon>
+            <button mat-icon-button matPrefix *ngIf="searchControl.value !== ''" (click)="resetSearch()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-form-field>
 
-<div class="hubs-container">
-    <div fxLayout="column">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-    </div>
-    <div class="hubs-scroll">
-        <div infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.hubs-scroll'"
-             [fromRoot]="true"
-             (scrolled)="onScroll()">
-            <div class="layout-margin" fxLayout="column">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                               *ngIf="networks.length > 0">
-                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let network of networks; let i = index">
-                        <div fxFill>
-                            <img class="widget-image" src="src/img/network-pic.jpeg">
-                        </div>
-                        <mat-grid-tile-footer>
-                            <div fxLayout="column" fxFill>
-                                <div class="truncate footer-item-header" matTooltip="{{network.name}}">
-                                    {{network.name}}
-                                </div>
-                                <div class="truncate footer-item-subtitle">
-                                    Devices: {{network.device_local_ids?.length || 0}}
-                                </div>
-                                <form fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
-                                    <senergy-state-icon [state]="network?.annotations?.connected"></senergy-state-icon>
-                                    <div fxFlex></div>
-                                    <div [fxLayoutAlign]="'start center'">
+        <button mat-icon-button (click)="reload()" color="accent" class="refresh">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </span>
+    <senergy-spinner [show]="!ready"></senergy-spinner>
 
-                                        <button mat-icon-button [matMenuTriggerFor]="menu" color="accent"
-                                                matTooltip="More">
-                                            <mat-icon>more_vert</mat-icon>
-                                        </button>
-                                        <mat-menu #menu="matMenu" [overlapTrigger]="false">
+    <div *ngIf="networks.length === 0 && ready">No network found.</div>
+
+    <div [hidden]="!ready || networks.length ===0" class="mat-elevation-z1" fxLayout="column"
+         infiniteScroll
+         [infiniteScrollDistance]="1"
+         [infiniteScrollThrottle]="50"
+         [infiniteScrollContainer]="'.hubs-container'"
+         [fromRoot]="true"
+         (scrolled)="onScroll()">
+
+        <table mat-table
+               [dataSource]="dataSource" matSort>
+            <ng-container matColumnDef="name">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let network">
+                    {{network.name}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="device_local_ids">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Number of Devices</th>
+                <td mat-cell *matCellDef="let network"> 
+                    {{network.device_local_ids?.length || 0}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="annotations?.connected">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Connection</th>
+                <td mat-cell *matCellDef="let network"> 
+                    <senergy-state-icon [state]="network?.annotations?.connected"></senergy-state-icon>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef disableClear>Action</th>
+                <td mat-cell *matCellDef="let network"> 
+                        <button mat-icon-button [matMenuTriggerFor]="menu" color="accent">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                            
+                        <mat-menu #menu="matMenu" [overlapTrigger]="false">
                                             <button mat-menu-item (click)="showDevices(network)">
                                                 <mat-icon>important_devices</mat-icon>
                                                 <span>Show devices</span>
@@ -71,20 +83,14 @@
                                                 <mat-icon>delete</mat-icon>
                                                 <span>Delete</span>
                                             </button>
-                                        </mat-menu>
-                                    </div>
-                                </form>
-                            </div>
-                        </mat-grid-tile-footer>
-                    </mat-grid-tile>
-                </mat-grid-list>
-                <div *ngIf="networks.length === 0 && ready">No network found.</div>
-                <senergy-spinner [elementCount]="networks.length" [show]="!ready"></senergy-spinner>
-            </div>
-        </div>
+                        </mat-menu>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row
+                *matHeaderRowDef="['name', 'device_local_ids', 'annotations?.connected', 'action']; sticky: true"></tr>
+            <tr mat-row
+                *matRowDef="let m; columns: ['name', 'device_local_ids', 'annotations?.connected', 'action'];"></tr>
+        </table>
     </div>
 </div>
-
-
-
-

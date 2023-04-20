@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { Subscription } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -28,14 +28,11 @@ import { util } from 'jointjs';
 import { DeviceGroupsPermSearchModel } from './shared/device-groups-perm-search.model';
 import { DeviceGroupsService } from './shared/device-groups.service';
 import { DeviceGroupModel } from './shared/device-groups.model';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { FormControl } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
 
 @Component({
     selector: 'senergy-device-groups',
@@ -46,48 +43,42 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
 
     deviceGroups: DeviceGroupsPermSearchModel[] = [];
-    gridCols = 0;
-    ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
+    instances = []
+    dataSource = new MatTableDataSource(this.deviceGroups)
+    @ViewChild(MatSort) sort!: MatSort
 
-    private searchText = '';
+    searchControl = new FormControl('');
+
+    ready = false;
+
     private limit = this.limitInit;
     private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
     hideGenerated = true;
 
     constructor(
-        private dialog: MatDialog,
-        private responsiveService: ResponsiveService,
         private deviceGroupsService: DeviceGroupsService,
-        private searchbarService: SearchbarService,
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
     ) {}
 
     ngOnInit() {
-        this.initGridCols();
-        this.initSearchAndGetDeviceGroups();
+        this.getDeviceGroups();
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
 
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getDeviceGroups(true);
-    }
-
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
             this.ready = false;
             this.offset = this.offset + this.limit;
-            this.getDeviceGroups(false);
+            this.getDeviceGroups();
         }
     }
 
@@ -102,7 +93,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
                             this.deviceGroups.splice(this.deviceGroups.indexOf(deviceGroup), 1);
                             this.snackBar.open('Device-Group deleted successfully.', undefined, { duration: 2000 });
                             this.setLimitOffset(1);
-                            this.reloadDeviceGroups(false);
+                            this.reloadDeviceGroups();
                         } else {
                             this.snackBar.open('Error while deleting the device-group!', "close", { panelClass: "snack-bar-error" });
                         }
@@ -122,33 +113,15 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         return false;
     }
 
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
-    }
-
-    private initSearchAndGetDeviceGroups() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.searchText = searchText;
-            this.getDeviceGroups(true);
-        });
-    }
-
     setHideGenerated(hide: boolean){
         this.hideGenerated = hide;
-        this.getDeviceGroups(true);
+        this.getDeviceGroups();
     }
 
-    private getDeviceGroups(reset: boolean) {
-        if (reset) {
-            this.reset();
-        }
-
-        let query =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+    private getDeviceGroups() {
+        let query =  this.deviceGroupsService.getDeviceGroups(this.searchControl.value, this.limit, this.offset, "name", "asc")
         if(this.hideGenerated) {
-            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchControl.value, this.limit, this.offset, "name", "asc")
         }
 
         query.subscribe((deviceGroups: DeviceGroupsPermSearchModel[]) => {
@@ -156,22 +129,29 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
                     this.allDataLoaded = true;
                 }
                 this.deviceGroups = this.deviceGroups.concat(deviceGroups);
+                this.dataSource = new MatTableDataSource(this.deviceGroups)
+                this.dataSource.sort = this.sort
                 this.ready = true;
             });
     }
 
-    private reset() {
+    public reload() {
         this.deviceGroups = [];
         this.limit = this.limitInit;
         this.offset = 0;
         this.allDataLoaded = false;
         this.ready = false;
+        this.getDeviceGroups();
     }
 
-    private reloadDeviceGroups(reset: boolean) {
+    private reloadDeviceGroups() {
         setTimeout(() => {
-            this.getDeviceGroups(reset);
+            this.reload()
         }, 2500);
+    }
+
+    public resetSearch() {
+        this.searchControl.setValue('');
     }
 
     private setLimitOffset(limit: number) {

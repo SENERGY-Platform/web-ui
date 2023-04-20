@@ -14,28 +14,20 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 import { NetworksService } from './shared/networks.service';
 import { NetworksModel } from './shared/networks.model';
-import { ResponsiveService } from '../../../core/services/responsive.service';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { Subscription } from 'rxjs';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { Router } from '@angular/router';
-import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
 import { MatDialog } from '@angular/material/dialog';
 import { NetworksDeleteDialogComponent } from './dialogs/networks-delete-dialog.component';
 import { DeviceInstancesService } from '../device-instances/shared/device-instances.service';
-
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { FormControl } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-networks',
@@ -44,46 +36,40 @@ const grids = new Map([
 })
 export class NetworksComponent implements OnInit, OnDestroy {
     networks: NetworksModel[] = [];
-    gridCols = 0;
-    ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
+    dataSource = new MatTableDataSource(this.networks)
+    @ViewChild(MatSort) sort!: MatSort
 
-    private searchText = '';
+    searchControl = new FormControl('');
+
+    ready = false;
+
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
 
     constructor(
-        private searchbarService: SearchbarService,
-        private responsiveService: ResponsiveService,
         private networksService: NetworksService,
         private router: Router,
-        private dialogsService: DialogsService,
         private dialog: MatDialog,
         private deviceInstancesService: DeviceInstancesService,
     ) {}
 
     ngOnInit() {
-        this.initGridCols();
-        this.initSearchAndGetNetworks();
+        this.getNetworks();
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
 
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getNetworks(true);
-    }
-
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
             this.setRepoItemsParams(this.limitInit);
-            this.getNetworks(false);
+            this.getNetworks();
         }
     }
 
@@ -111,54 +97,41 @@ export class NetworksComponent implements OnInit, OnDestroy {
                         this.networks.splice(this.networks.indexOf(network), 1);
                         this.setRepoItemsParams(1);
                         setTimeout(() => {
-                            this.getNetworks(false);
+                            this.getNetworks();
                         }, 1000);
                     }
                 });
         });
     }
 
-    private initSearchAndGetNetworks() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.searchText = searchText;
-            this.getNetworks(true);
-        });
-    }
-
-    private getNetworks(reset: boolean) {
-        if (reset) {
-            this.setRepoItemsParams(this.limitInit);
-            this.reset();
-        }
-
+    private getNetworks() {
         this.networksService
-            .searchNetworks(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .searchNetworks(this.searchControl.value, this.limit, this.offset, "name", "asc")
             .subscribe((networks: NetworksModel[]) => {
                 if (networks.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.networks = this.networks.concat(networks);
+                this.dataSource = new MatTableDataSource(this.networks)
+                this.dataSource.sort = this.sort
                 this.ready = true;
             });
-    }
-
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
-    }
-
-    private reset() {
-        this.networks = [];
-        this.offset = 0;
-        this.allDataLoaded = false;
-        this.ready = false;
     }
 
     private setRepoItemsParams(limit: number) {
         this.ready = false;
         this.limit = limit;
         this.offset = this.networks.length;
+    }
+
+    reload() {
+        this.limit = this.limitInit;
+        this.offset = 0;
+        this.networks = [];
+        this.getNetworks();
+    }
+
+    resetSearch() {
+        this.searchControl.setValue('');
     }
 }

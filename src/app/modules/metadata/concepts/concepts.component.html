@@ -15,75 +15,79 @@
   -->
 
 <div class="concepts-container">
-    <div fxLayout="column">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-    </div>
-    <div class="concepts-scroll">
-        <div infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.concepts-scroll'"
-             [fromRoot]="true"
-             (scrolled)="onScroll()">
-            <div class="layout-margin" fxLayout="column">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                               *ngIf="concepts.length > 0">
-                    <mat-grid-tile class="mat-elevation-z1" *ngFor="let concept of concepts; let i = index">
-                        <div fxFill>
-                            <img class="background" src="src/img/concept.jpg">
-                        </div>
-                        <mat-grid-tile-footer>
-                            <div fxLayout="column" fxFill>
-                                <div class="truncate footer-item-header" matTooltip="{{concept.name}}">
-                                    {{concept.name}}
-                                </div>
-                                <form fxLayout="row" class="footer-buttons">
-                                    <div fxFlex></div>
-                                    <div [fxLayoutAlign]="'start center'">
-                                        <button mat-icon-button [matMenuTriggerFor]="menu" color="accent">
-                                            <mat-icon>more_vert</mat-icon>
-                                        </button>
-                                        <mat-menu #menu="matMenu" [overlapTrigger]="false">
-                                            <button mat-menu-item (click)="showConcept(concept)" *ngIf="!concept.permissions.w">
-                                                <mat-icon>info</mat-icon>
-                                                <span>Info</span>
-                                            </button>
-                                            <button mat-menu-item (click)="editConcept(concept)" [disabled]="!concept.permissions.w">
-                                                <mat-icon>edit</mat-icon>
-                                                <span>Edit</span>
-                                            </button>
-                                            <button mat-menu-item (click)="showCharacteristics(concept)">
-                                                <mat-icon>palette</mat-icon>
-                                                <span>Characteristics</span>
-                                            </button>
-                                            <button mat-menu-item (click)="deleteConcept(concept)" [disabled]="!concept.permissions.a">
-                                                <mat-icon>delete</mat-icon>
-                                                <span>Delete</span>
-                                            </button>
-                                        </mat-menu>
-                                    </div>
-                                </form>
-                            </div>
-                        </mat-grid-tile-footer>
-                    </mat-grid-tile>
-                </mat-grid-list>
-                <div *ngIf="concepts.length === 0 && ready">No concept found.</div>
-                <senergy-spinner [elementCount]="concepts.length" [show]="!ready"></senergy-spinner>
-            </div>
-        </div>
+    <span fxLayout="row" class="search-refresh">
+        <mat-form-field color="accent" appearance="outline" fxFlex>
+            <input matInput [formControl]="searchControl" placeholder="Search...">
+            <mat-icon matPrefix *ngIf="searchControl.value === ''">search</mat-icon>
+            <button mat-icon-button matPrefix *ngIf="searchControl.value !== ''" (click)="resetSearch()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-form-field>
+
+        <button mat-icon-button (click)="reload()" color="accent" class="refresh">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </span>
+    
+    <div *ngIf="concepts.length === 0 && ready">No concept found.</div>
+    <senergy-spinner [elementCount]="concepts.length" [show]="!ready"></senergy-spinner>
+
+    <div [hidden]="!ready || concepts.length ===0" class="mat-elevation-z1" fxLayout="column"
+    infiniteScroll
+    [infiniteScrollDistance]="1"
+    [infiniteScrollThrottle]="50"
+    [infiniteScrollContainer]="'.concepts-container'"
+    [fromRoot]="true"
+    (scrolled)="onScroll()">
+
+        <table mat-table
+                [dataSource]="dataSource" matSort>
+            <ng-container matColumnDef="name">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let concept">
+                    {{concept.name}}
+                </td>
+            </ng-container>
+          
+            <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef disableClear>Action</th>
+                <td mat-cell *matCellDef="let concept"> 
+                    <button mat-icon-button [matMenuTriggerFor]="menu" color="accent">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu" [overlapTrigger]="false">
+                        <button mat-menu-item (click)="showConcept(concept)" *ngIf="!concept.permissions.w">
+                            <mat-icon>info</mat-icon>
+                            <span>Info</span>
+                        </button>
+                        <button mat-menu-item (click)="editConcept(concept)" [disabled]="!concept.permissions.w">
+                            <mat-icon>edit</mat-icon>
+                            <span>Edit</span>
+                        </button>
+                        <button mat-menu-item (click)="showCharacteristics(concept)">
+                            <mat-icon>palette</mat-icon>
+                            <span>Characteristics</span>
+                        </button>
+                        <button mat-menu-item (click)="deleteConcept(concept)" [disabled]="!concept.permissions.a">
+                            <mat-icon>delete</mat-icon>
+                            <span>Delete</span>
+                        </button>
+                    </mat-menu>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row
+                *matHeaderRowDef="['name', 'action']; sticky: true"></tr>
+            <tr mat-row
+                *matRowDef="let m; columns: ['name', 'action'];"></tr>
+        </table>
     </div>
 </div>
+
 
 <button mat-fab class="fab" matTooltip="Add new concept" (click)="newConcept()">
     <mat-icon>add</mat-icon>
 </button>
-
-
 
 
 

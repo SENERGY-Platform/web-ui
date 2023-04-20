@@ -20,12 +20,8 @@ import { DevicesStateService } from './shared/devices-state.service';
 import { DevicesStateModel } from './shared/devices-state.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
-import {
-    DeviceInstancesRouterState,
-    DeviceInstancesRouterStateTypesEnum,
-    DeviceInstancesRouterStateTabEnum,
-} from '../../modules/devices/device-instances/device-instances.component';
 import { Router } from '@angular/router';
+import { DeviceInstancesRouterState, DeviceInstancesRouterStateTabEnum } from 'src/app/modules/devices/device-instances/device-instances.component';
 
 @Component({
     selector: 'senergy-devices-state',
