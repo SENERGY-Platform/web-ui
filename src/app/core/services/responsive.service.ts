@@ -39,8 +39,8 @@ export class ResponsiveService {
 
     observeMqAlias(): Observable<string> {
         return new Observable<string>((observer) => {
-            this.observableMedia.media$.subscribe((media: MediaChange) => {
-                observer.next(media.mqAlias);
+            this.observableMedia.asObservable().subscribe((media: MediaChange[]) => {
+                media.forEach(m => observer.next(m.mqAlias));
             });
         });
     }
