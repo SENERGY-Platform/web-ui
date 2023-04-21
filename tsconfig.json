@@ -19,7 +19,7 @@
     "strictNullChecks": true,
     "skipLibCheck": true,
     "allowJs": true,
-    "target": "es5",
+    "target": "es2020",
     "downlevelIteration": true,
     "typeRoots": [
       "node_modules/@types"

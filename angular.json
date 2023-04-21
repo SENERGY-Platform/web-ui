@@ -189,9 +189,10 @@
       }
     }
   },
-  "defaultProject": "senergy-web-ui",
   "cli": {
     "analytics": "62e87629-546a-403a-a1ca-97b9fc601597",
-    "defaultCollection": "@angular-eslint/schematics"
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
   }
 }
