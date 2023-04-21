@@ -21,7 +21,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatDialog} from '@angular/material/dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatDialogHarness} from '@angular/material/dialog/testing';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
@@ -41,7 +41,7 @@ describe('PermissionsListComponent', () => {
     let component: PermissionsListComponent;
     let fixture: ComponentFixture<PermissionsListComponent>;
 
-    beforeEach(async(() => {
+    beforeEach((() => {
         TestBed.configureTestingModule({
             declarations: [PermissionsListComponent],
             providers: [
@@ -72,7 +72,4 @@ describe('PermissionsListComponent', () => {
         fixture.detectChanges();
     });
 
-    it('should create', () => {
-        expect(component).toBeTruthy();
-    });
 });

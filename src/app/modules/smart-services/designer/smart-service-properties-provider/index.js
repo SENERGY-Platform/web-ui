@@ -14,7 +14,6 @@ var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory');
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
 var extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper');
 var ImplementationTypeHelper = require('bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper');
-const {isEventSubProcess} = require("bpmn-js/lib/util/DiUtil");
 const {property} = require("lodash");
 const typeString = "https://schema.org/Text";
 const typeInteger = "https://schema.org/Integer";

@@ -24,10 +24,10 @@ import {
 } from '../../device-types-overview/shared/device-type.model';
 import { ConceptsService } from '../shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../shared/concepts-characteristics.model';
-import {CharacteristicsService} from "../../characteristics/shared/characteristics.service";
-import {CharacteristicsPermSearchModel} from "../../characteristics/shared/characteristics-perm-search.model";
-import {forkJoin, Observable} from "rxjs";
-import {map} from "rxjs/internal/operators";
+import {CharacteristicsService} from '../../characteristics/shared/characteristics.service';
+import {CharacteristicsPermSearchModel} from '../../characteristics/shared/characteristics-perm-search.model';
+import {forkJoin, Observable} from 'rxjs';
+import {map} from 'rxjs/internal/operators';
 
 @Component({
     templateUrl: './concepts-edit-dialog.component.html',
@@ -43,16 +43,16 @@ export class ConceptsEditDialogComponent implements OnInit {
     concept: DeviceTypeConceptModel|undefined;
     ready = false;
 
-    testinput: string = "0"
-    testformula: string = "x"
-    testerr: string | null | undefined
-    testoutput: string = ""
+    testinput = '0';
+    testformula = 'x';
+    testerr: string | null | undefined;
+    testoutput = '';
 
-    disabled: boolean
+    disabled: boolean;
 
     constructor(
         private dialogRef: MatDialogRef<ConceptsEditDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data: { conceptId: string, disabled?: boolean },
+        @Inject(MAT_DIALOG_DATA) data: { conceptId: string; disabled?: boolean },
         private conceptsService: ConceptsService,
         private characteristicsService: CharacteristicsService,
         private cd: ChangeDetectorRef,
@@ -105,31 +105,31 @@ export class ConceptsEditDialogComponent implements OnInit {
             if (!this.concept?.conversions) {
                 this.concept.conversions = [];
             }
-            this.concept.conversions.push({from: "", to: "", distance: 1, formula: "", placeholder_name: "x"});
+            this.concept.conversions.push({from: '', to: '', distance: 1, formula: '', placeholder_name: 'x'});
         }
     }
 
     tryFormula() {
         try{
-            let input = JSON.parse(this.testinput);
+            const input = JSON.parse(this.testinput);
             this.conceptsService.tryConverterExtension({
-                input: input,
+                input,
                 extension: {
-                    from: "",
-                    to: "",
+                    from: '',
+                    to: '',
                     formula: this.testformula,
                     distance: 0,
-                    placeholder_name: "x"
+                    placeholder_name: 'x'
                 }
             }).subscribe(value => {
                 if(!value) {
-                    this.testerr = "error on try call";
+                    this.testerr = 'error on try call';
                 } else {
                     this.testerr = value?.error;
                     this.testoutput = JSON.stringify(value?.output);
                 }
-            })
-        } catch (e) {
+            });
+        } catch (e: any) {
             this.testerr = e.toString();
         }
     }

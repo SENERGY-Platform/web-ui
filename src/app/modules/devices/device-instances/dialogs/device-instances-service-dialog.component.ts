@@ -124,7 +124,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         try {
             url = await this.getDownloadUrl(i);
         } catch (e) {
-            this.errorHandlerService.handleErrorWithSnackBar('Failed to prepare download', 'DeviceInstancesServiceDialogComponent', 'download', null)(e);
+            this.errorHandlerService.handleErrorWithSnackBar('Failed to prepare download', 'DeviceInstancesServiceDialogComponent', 'download', null)(undefined);
             return;
         }
         const dlink: HTMLAnchorElement = document.createElement('a');

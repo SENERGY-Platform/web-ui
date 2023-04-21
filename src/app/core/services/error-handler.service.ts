@@ -32,16 +32,16 @@ export class ErrorHandlerService {
     }
 
     handleError<T>(service: string, method: string, result?: T) {
-        return (error: HttpErrorResponse): Observable<T> => {
+        return (error?: HttpErrorResponse): Observable<T> => {
             this.logError(service, method, error);
             return of(result as T);
         };
     }
 
     handleErrorWithSnackBar<T>(snackbarMessage: string, service: string, method: string, result?: T) {
-        return (error: HttpErrorResponse): Observable<T> => {
-            this.handleError(service, method, result)(error)
-            this.snackBar.open(snackbarMessage, "close", { panelClass: "snack-bar-error" });
+        return (error?: HttpErrorResponse): Observable<T> => {
+            this.handleError(service, method, result)(error);
+            this.snackBar.open(snackbarMessage, 'close', { panelClass: 'snack-bar-error' });
             return of(result as T);
         };
     }
