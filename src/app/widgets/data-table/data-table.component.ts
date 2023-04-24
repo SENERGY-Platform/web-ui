@@ -33,7 +33,7 @@ import {DataTableOrderEnum, ExportValueTypes} from './shared/data-table.model';
 import {DecimalPipe} from '@angular/common';
 import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {Sort, SortDirection} from '@angular/material/sort';
-import {map} from 'rxjs/internal/operators';
+import {map} from 'rxjs/operators';
 import {environment} from '../../../environments/environment';
 
 interface DataTableComponentItem {

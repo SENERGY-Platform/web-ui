@@ -37,7 +37,7 @@ import { ImportInstancesService } from '../../../modules/imports/import-instance
 import { ImportInstancesModel } from '../../../modules/imports/import-instances/shared/import-instances.model';
 import { environment } from '../../../../environments/environment';
 import { ImportTypesService } from '../../../modules/imports/import-types/shared/import-types.service';
-import { mergeMap } from 'rxjs/internal/operators';
+import { mergeMap } from 'rxjs/operators';
 import {DeviceInstancesModel} from "../../../modules/devices/device-instances/shared/device-instances.model";
 import {
     DeviceTypeModel,

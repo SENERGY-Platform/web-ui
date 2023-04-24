@@ -21,7 +21,7 @@ import { environment } from '../../../../environments/environment';
 import { forkJoin, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { catchError } from 'rxjs/internal/operators';
+import { catchError } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel } from './switch-properties.model';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';

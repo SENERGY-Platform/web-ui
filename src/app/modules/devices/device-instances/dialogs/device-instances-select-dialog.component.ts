@@ -20,7 +20,7 @@ import { DeviceInstancesModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { MatTable } from '@angular/material/table';
 import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/internal/operators';
+import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
 
 @Component({

@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { Observable, timer } from 'rxjs';
-import { catchError, map, mergeMap, retryWhen } from 'rxjs/internal/operators';
+import { catchError, map, mergeMap, retryWhen } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import {DeploymentsModel, ProcessStartParameter} from './deployments.model';
 import { CamundaVariable, DeploymentsDefinitionModel } from './deployments-definition.model';

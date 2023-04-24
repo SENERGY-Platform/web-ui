@@ -28,12 +28,10 @@ import {
     DeviceInstancesModel,
     DeviceInstancesPermSearchModel
 } from '../../../modules/devices/device-instances/shared/device-instances.model';
-import {
-    DeviceTypeContentVariableModel,
-    DeviceTypeServiceModel
-} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import {DeviceTypeServiceModel} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
+import {ChartsExportRequestPayloadGroupModel} from "../../charts/export/shared/charts-export-request-payload.model";
 
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
@@ -168,7 +166,12 @@ export class SingleValueEditDialogComponent implements OnInit {
             if (exports !== null) {
                 exports.instances?.forEach((exportModel: ExportModel) => {
                     if (exportModel.ID !== undefined && exportModel.Name !== undefined) {
-                        this.exports.push({id: exportModel.ID, name: exportModel.Name, values: exportModel.Values, exportDatabaseId: exportModel.ExportDatabaseID});
+                        this.exports.push({
+                            id: exportModel.ID,
+                            name: exportModel.Name,
+                            values: exportModel.Values,
+                            exportDatabaseId: exportModel.ExportDatabaseID
+                        });
                     }
                 });
             }
@@ -184,23 +187,25 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     save(): void {
+        this.form.get
+        const measurement = this.form.get('measurement')?.value as ChartsExportMeasurementModel || undefined;
         this.widget.properties.measurement = {
-            id: this.form.get('measurement')?.value?.id,
-            name: this.form.get('measurement')?.value?.name,
-            values: this.form.get('measurement')?.value?.values,
-            exportDatabaseId: this.form.get('measurement')?.value?.ExportDatabaseId,
+            id: measurement?.id,
+            name: measurement?.name,
+            values: measurement?.values,
+            exportDatabaseId: measurement?.ExportDatabaseId,
         };
-        this.widget.properties.vAxis = this.form.get('vAxis')?.value;
-        this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value;
-        this.widget.name = this.form.get('name')?.value;
-        this.widget.properties.type = this.form.get('type')?.value;
-        this.widget.properties.format = this.form.get('format')?.value;
-        this.widget.properties.threshold = this.form.get('threshold')?.value;
-        this.widget.properties.math = this.form.get('math')?.value;
-        this.widget.properties.group = this.form.get('group')?.value;
-        this.widget.properties.device = this.form.get('device')?.value;
-        this.widget.properties.service = this.form.get('service')?.value;
-        this.widget.properties.sourceType = this.form.get('sourceType')?.value;
+        this.widget.properties.vAxis = this.form.get('vAxis')?.value as ExportValueModel || undefined;
+        this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value || undefined;
+        this.widget.name = this.form.get('name')?.value || '';
+        this.widget.properties.type = this.form.get('type')?.value || undefined;
+        this.widget.properties.format = this.form.get('format')?.value || undefined;
+        this.widget.properties.threshold = this.form.get('threshold')?.value || undefined;
+        this.widget.properties.math = this.form.get('math')?.value || undefined;
+        this.widget.properties.group = this.form.get('group')?.value as ChartsExportRequestPayloadGroupModel || undefined;
+        this.widget.properties.device = this.form.get('device')?.value as DeviceInstancesModel || undefined;
+        this.widget.properties.service = this.form.get('service')?.value as DeviceTypeServiceModel || undefined;
+        this.widget.properties.sourceType = this.form.get('sourceType')?.value || undefined;
 
 
         this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {

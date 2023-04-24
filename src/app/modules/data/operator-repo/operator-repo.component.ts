@@ -27,7 +27,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { startWith, switchMap } from 'rxjs/internal/operators';
+import { startWith, switchMap } from 'rxjs/operators';
 import { merge } from 'rxjs/index';
 
 @Component({

@@ -18,7 +18,7 @@ import { ImportTypePermissionSearchModel } from './shared/import-types.model';
 import { ImportTypesService } from './shared/import-types.service';
 import { Sort } from '@angular/material/sort';
 import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/internal/operators';
+import { debounceTime } from 'rxjs/operators';
 import { MatTable } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';

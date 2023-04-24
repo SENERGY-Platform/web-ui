@@ -17,7 +17,7 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/internal/operators';
+import {filter, map, startWith} from 'rxjs/operators';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -40,7 +40,7 @@ export interface TableElement {
 export class SwitchEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
 
-    formControl = new FormControl('');
+    formControl = new FormControl<string | DeploymentsModel>('');
     deployments: DeploymentsModel[] = [];
     filteredDeployments: Observable<DeploymentsModel[]> = new Observable();
 
@@ -84,8 +84,8 @@ export class SwitchEditDialogComponent implements OnInit {
         this.deploymentsService.getAll('', 99999, 0, 'deploymentTime', 'desc', '').subscribe((deployments: DeploymentsModel[]) => {
             this.deployments = deployments;
             this.filteredDeployments = this.formControl.valueChanges.pipe(
-                startWith<string | DeploymentsModel>(''),
-                map((value) => (typeof value === 'string' ? value : value.name)),
+                startWith(''),
+                map((value) => (typeof value === 'string' || value === null ? value : value.name)),
                 map((name) => (name ? this._filter(name) : this.deployments.slice())),
             );
         });
@@ -114,10 +114,12 @@ export class SwitchEditDialogComponent implements OnInit {
     }
 
     addColumn() {
-        if (this.deployments.indexOf(this.formControl.value) >= 0) {
+        let value = this.formControl.value;
+        if (value === null || this.deployments.indexOf(value as DeploymentsModel) >= 0) {
+            value = value as DeploymentsModel;
             this.data.push({
-                name: this.formControl.value.name,
-                id: this.formControl.value.id,
+                name: value.name,
+                id: value.id,
                 trigger: this.newTrigger,
             });
             this.table.renderRows();

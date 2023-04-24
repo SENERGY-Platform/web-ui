@@ -17,7 +17,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
 import { FormControl } from '@angular/forms';
 import { ImportTypePermissionSearchModel } from '../import-types/shared/import-types.model';
-import { debounceTime } from 'rxjs/internal/operators';
+import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
 import { MatTable } from '@angular/material/table';

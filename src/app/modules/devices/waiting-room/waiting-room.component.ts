@@ -26,7 +26,7 @@ import { MatSort } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeAuthOk, WaitingRoomEventTypeSet} from './shared/waiting-room.model';
-import {debounceTime, startWith, switchMap} from 'rxjs/internal/operators';
+import {debounceTime, startWith, switchMap} from 'rxjs/operators';
 import { WaitingRoomService } from './shared/waiting-room.service';
 import { DeviceInstancesModel } from '../device-instances/shared/device-instances.model';
 import { WaitingRoomDeviceEditDialogComponent } from './dialogs/waiting-room-device-edit-dialog.component';

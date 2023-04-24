@@ -29,7 +29,7 @@ import {DeviceInstancesService} from '../../../../../modules/devices/device-inst
 import {
     DeviceInstancesHistoryModel
 } from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
-import {map} from "rxjs/internal/operators";
+import {map} from "rxjs/operators";
 
 const customColor = '#4484ce'; // /* cc */
 const stateTrue = true;

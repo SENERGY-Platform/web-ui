@@ -16,7 +16,7 @@
 
 import { Injectable, Output } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { debounceTime } from 'rxjs/internal/operators';
+import { debounceTime } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',

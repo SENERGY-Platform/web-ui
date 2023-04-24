@@ -19,7 +19,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { MatTable } from '@angular/material/table';
 import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/internal/operators';
+import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
 import { DeviceGroupsPermSearchModel } from '../shared/device-groups-perm-search.model';
 

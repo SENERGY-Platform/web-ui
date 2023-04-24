@@ -17,7 +17,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, Observable } from 'rxjs';
-import { catchError } from 'rxjs/internal/operators';
+import { catchError } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import {PermissionsResourceBaseModel, PermissionsResourceModel} from './permissions-resource.model';
 import { PermissionsUserModel } from './permissions-user.model';

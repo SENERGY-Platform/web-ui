@@ -24,7 +24,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { DevicesStateEditDialogComponent } from '../dialog/devices-state-edit-dialog.component';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {map} from "rxjs/internal/operators";
+import {map} from "rxjs/operators";
 
 @Injectable({
     providedIn: 'root',

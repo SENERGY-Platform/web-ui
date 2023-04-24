@@ -27,7 +27,7 @@ import { ConceptsCharacteristicsModel } from '../shared/concepts-characteristics
 import {CharacteristicsService} from '../../characteristics/shared/characteristics.service';
 import {CharacteristicsPermSearchModel} from '../../characteristics/shared/characteristics-perm-search.model';
 import {forkJoin, Observable} from 'rxjs';
-import {map} from 'rxjs/internal/operators';
+import {map} from 'rxjs/operators';
 
 @Component({
     templateUrl: './concepts-edit-dialog.component.html',

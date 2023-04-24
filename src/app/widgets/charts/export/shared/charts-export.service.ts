@@ -40,7 +40,7 @@ import {
     QueriesRequestFilterModel,
     QueriesRequestTimeModel,
 } from '../../../shared/export-data.model';
-import {map} from 'rxjs/internal/operators';
+import {map} from 'rxjs/operators';
 import {environment} from '../../../../../environments/environment';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';

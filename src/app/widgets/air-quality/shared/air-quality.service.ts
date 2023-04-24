@@ -27,7 +27,7 @@ import {ExportService} from '../../../modules/exports/shared/export.service';
 import {ImportInstancesService} from '../../../modules/imports/import-instances/shared/import-instances.service';
 import {ExportDataService} from '../../shared/export-data.service';
 import {QueriesRequestElementInfluxModel, QueriesRequestElementTimescaleModel} from '../../shared/export-data.model';
-import {map} from 'rxjs/internal/operators';
+import {map} from 'rxjs/operators';
 import {environment} from '../../../../environments/environment';
 
 

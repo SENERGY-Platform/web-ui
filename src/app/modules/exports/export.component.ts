@@ -26,7 +26,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
-import { startWith, switchMap } from 'rxjs/internal/operators';
+import { startWith, switchMap } from 'rxjs/operators';
 import { BrokerExportService } from './shared/broker-export.service';
 import { ActivatedRoute } from '@angular/router';
 

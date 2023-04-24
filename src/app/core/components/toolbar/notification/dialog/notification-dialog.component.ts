@@ -21,7 +21,7 @@ import {NotificationService} from '../shared/notification.service';
 import {PageEvent} from '@angular/material/paginator';
 import {FormBuilder, FormControl, Validators} from '@angular/forms';
 import {forkJoin, Observable} from 'rxjs';
-import {map} from 'rxjs/internal/operators';
+import {map} from 'rxjs/operators';
 import {MatTableDataSource} from '@angular/material/table';
 import {environment} from '../../../../../../environments/environment';
 import {AuthorizationService} from '../../../../services/authorization.service';

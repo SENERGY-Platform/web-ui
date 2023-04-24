@@ -8,7 +8,7 @@ import {DeviceSelectablesFullModel} from '../../../modules/devices/device-instan
 import {DeviceTypeContentVariableModel} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {environment} from '../../../../environments/environment';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
-import {map} from 'rxjs/internal/operators';
+import {map} from 'rxjs/operators';
 import {FormBuilder, Validators} from '@angular/forms';
 import {AcControlElementModel} from '../shared/ac-control.model';
 import {Observable} from 'rxjs';

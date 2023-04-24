@@ -23,7 +23,7 @@ import { DashboardService } from '../../modules/dashboard/shared/dashboard.servi
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { UBAService } from './shared/uba.service';
 import { DWDPollenService } from './shared/dwd-pollen.service';
-import { map } from 'rxjs/internal/operators';
+import { map } from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-air-quality',

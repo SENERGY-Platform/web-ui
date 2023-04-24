@@ -47,7 +47,7 @@ import {MatOption} from '@angular/material/core';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
 import {ConceptsCharacteristicsModel} from '../../concepts/shared/concepts-characteristics.model';
 import {environment} from '../../../../../environments/environment';
-import {debounceTime, map, mergeAll} from 'rxjs/internal/operators';
+import {debounceTime, map, mergeAll} from 'rxjs/operators';
 import {util} from 'jointjs';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import uuid = util.uuid;

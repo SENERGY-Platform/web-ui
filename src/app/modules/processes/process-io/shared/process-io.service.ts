@@ -21,7 +21,7 @@ import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {Observable, timer} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
-import {catchError, map, mergeMap, retryWhen} from 'rxjs/internal/operators';
+import {catchError, map, mergeMap, retryWhen} from 'rxjs/operators';
 import {ProcessIoVariable, VariablesCount} from './process-io.model';
 
 @Injectable({

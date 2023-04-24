@@ -23,7 +23,7 @@ import { forkJoin, Observable } from 'rxjs';
 import { ProcessSchedulerModel } from './process-scheduler.model';
 import { ProcessRepoService } from '../../../modules/processes/process-repo/shared/process-repo.service';
 import { environment } from '../../../../environments/environment';
-import { catchError, map } from 'rxjs/internal/operators';
+import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpResponseBase } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { MatSnackBar } from '@angular/material/snack-bar';

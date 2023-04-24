@@ -18,7 +18,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
-import {catchError, map, reduce, share} from 'rxjs/internal/operators';
+import {catchError, map, reduce, share} from 'rxjs/operators';
 import {
     DeviceFilterCriteriaModel,
     DeviceInstancesBaseModel,

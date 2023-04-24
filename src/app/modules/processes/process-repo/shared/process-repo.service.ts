@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponseBase } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map, mergeMap, retryWhen } from 'rxjs/internal/operators';
+import { catchError, map, mergeMap, retryWhen } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import { ProcessModel } from './process.model';
 import { DesignerProcessModel } from '../../designer/shared/designer.model';

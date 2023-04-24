@@ -40,7 +40,7 @@ import {ImportInstancesService} from '../../imports/import-instances/shared/impo
 import {ImportInstancesModel} from '../../imports/import-instances/shared/import-instances.model';
 import {ImportTypeContentVariableModel, ImportTypeModel} from '../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../imports/import-types/shared/import-types.service';
-import {map} from 'rxjs/internal/operators';
+import {map} from 'rxjs/operators';
 import {AbstractControl, FormArray, FormBuilder, Validators} from '@angular/forms';
 import * as _ from 'lodash';
 import {BrokerExportService} from '../shared/broker-export.service';

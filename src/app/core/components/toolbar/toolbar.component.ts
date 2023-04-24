@@ -17,7 +17,7 @@
 import { Component, OnInit } from '@angular/core';
 import { SidenavService } from '../sidenav/shared/sidenav.service';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { filter, map, mergeMap } from 'rxjs/internal/operators';
+import { filter, map, mergeMap } from 'rxjs/operators';
 import { AuthorizationService } from '../../services/authorization.service';
 import { SettingsDialogService } from '../../../modules/settings/shared/settings-dialog.service';
 import { NotificationService } from './notification/shared/notification.service';

@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map } from 'rxjs/internal/operators';
+import { catchError, map } from 'rxjs/operators';
 import { OperatorModel } from './operator.model';
 import { Observable } from 'rxjs';
 import { ExportService } from '../../../exports/shared/export.service';
