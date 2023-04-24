@@ -24,6 +24,6 @@ const dashboardWithoutId = { path: 'dashboard', redirectTo: 'dashboard/', pathMa
 const dashboard = { path: 'dashboard/:id', component: DashboardComponent, data: { header: 'Dashboard' } };
 
 @NgModule({
-    imports: [RouterModule.forRoot([init, dashboard, dashboardWithoutId], { relativeLinkResolution: 'legacy' })],
+    imports: [RouterModule.forRoot([init, dashboard, dashboardWithoutId], {})],
 })
 export class AppRoutingModule {}

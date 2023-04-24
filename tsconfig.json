@@ -19,7 +19,7 @@
     "strictNullChecks": true,
     "skipLibCheck": true,
     "allowJs": true,
-    "target": "es2020",
+    "target": "ES2022",
     "downlevelIteration": true,
     "typeRoots": [
       "node_modules/@types"
@@ -29,9 +29,14 @@
       "dom"
     ],
     "paths": {
-      "core-js/es7/reflect": ["./node_modules/core-js/proposals/reflect-metadata"],
-      "core-js/es6/*": ["./node_modules/core-js/es/*"]
-    }
+      "core-js/es7/reflect": [
+        "./node_modules/core-js/proposals/reflect-metadata"
+      ],
+      "core-js/es6/*": [
+        "./node_modules/core-js/es/*"
+      ]
+    },
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "strictTemplates": true,

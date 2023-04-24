@@ -32,7 +32,7 @@ import { ProcessSchedulerService } from '../../widgets/process-scheduler/shared/
 import { DataTableService } from '../../widgets/data-table/shared/data-table.service';
 import { AirQualityService } from '../../widgets/air-quality/shared/air-quality.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatTabGroup } from '@angular/material/tabs';
+import { MatLegacyTabGroup as MatTabGroup } from '@angular/material/legacy-tabs';
 
 const grids = new Map([
     ['xs', 1],

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { ImportInstanceConfigModel, ImportInstancesModel } from '../import-instances/shared/import-instances.model';
 import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
 import { ImportTypesService } from '../import-types/shared/import-types.service';
 import { ImportTypeConfigModel, ImportTypeModel } from '../import-types/shared/import-types.model';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { typeValueValidator } from '../validators/type-value-validator';
 
 @Component({

@@ -18,18 +18,18 @@ import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {DeviceTypesContentVariableDialogComponent} from './device-types-content-variable-dialog.component';
 import {CoreModule} from '../../../../../core/core.module';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogModule as MatDialogModule, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {
     DeviceTypeAspectModel,
     DeviceTypeContentVariableModel,
     DeviceTypeFunctionModel
 } from '../../shared/device-type.model';
-import {MatRadioModule} from '@angular/material/radio';
+import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
 import {ReactiveFormsModule} from '@angular/forms';
-import {MatSelectModule} from '@angular/material/select';
-import {MatInputModule} from '@angular/material/input';
+import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
 import {ConceptsCharacteristicsModel} from '../../../concepts/shared/concepts-characteristics.model';
-import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatLegacyCheckboxModule as MatCheckboxModule} from '@angular/material/legacy-checkbox';
 
 describe('DeviceTypesContentVariableDialog', () => {
     let component: DeviceTypesContentVariableDialogComponent;

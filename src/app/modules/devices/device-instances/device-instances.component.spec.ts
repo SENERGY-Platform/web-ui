@@ -17,13 +17,13 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { DeviceInstancesComponent } from './device-instances.component';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
 import { KeycloakService } from 'keycloak-angular';
 import { MockKeycloakService } from '../../../core/services/keycloak.mock';
 import { CoreModule } from '../../../core/core.module';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-tabs';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { DevicesModule } from '../devices.module';
 import { Router } from '@angular/router';

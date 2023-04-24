@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { Attribute, WaitingDeviceModel } from '../shared/waiting-room.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';

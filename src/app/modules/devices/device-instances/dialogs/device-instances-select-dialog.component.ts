@@ -15,10 +15,10 @@
  */
 
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { DeviceInstancesModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
-import { MatTable } from '@angular/material/table';
+import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
 import { FormControl } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';

@@ -18,8 +18,8 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
-import {MatDialogRef} from '@angular/material/dialog';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import { PermissionModel } from '../permission.model';
 import {PermissionImportModel} from './permissions-dialog-import.model';
 

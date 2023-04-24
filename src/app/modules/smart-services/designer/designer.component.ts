@@ -19,7 +19,7 @@ import { AuthorizationService } from '../../../core/services/authorization.servi
 
 import { HttpClient } from '@angular/common/http';
 import {ActivatedRoute, Router} from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import {SmartServiceDesignsService} from '../designs/shared/designs.service';
 import {
     camundaBpmnModdle,
@@ -39,7 +39,7 @@ import {
     SmartServiceTaskDescription,
     SmartServiceTaskInputOutputDescription
 } from './shared/designer.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 import {EditSmartServiceTaskDialogComponent} from './dialog/edit-smart-service-task-dialog/edit-smart-service-task-dialog.component';
 import {BpmnElement} from '../../processes/designer/shared/designer.model';
 import {EditSmartServiceInputDialogComponent} from './dialog/edit-smart-service-input-dialog/edit-smart-service-input-dialog.component';

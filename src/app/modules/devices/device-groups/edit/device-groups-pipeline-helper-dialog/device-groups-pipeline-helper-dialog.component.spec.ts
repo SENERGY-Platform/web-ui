@@ -17,11 +17,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups-pipeline-helper-dialog.component';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogModule as MatDialogModule, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { RouterTestingModule } from '@angular/router/testing';
-import { MatTableModule } from '@angular/material/table';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
+import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip';
+import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox';
 
 describe('DeviceGroupsPipelineHelperDialogComponent', () => {
     let component: DeviceGroupsPipelineHelperDialogComponent;

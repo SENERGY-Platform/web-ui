@@ -16,6 +16,9 @@
 
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';

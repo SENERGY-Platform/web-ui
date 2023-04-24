@@ -19,8 +19,8 @@ import { DeviceStatusEditDialogComponent } from './device-status-edit-dialog.com
 import { CoreModule } from '../../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
+import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogModule as MatDialogModule, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { of } from 'rxjs';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -40,7 +40,7 @@ import {
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatInputModule } from '@angular/material/input';
+import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
 import { By } from '@angular/platform-browser';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { ExportModel, ExportValueCharacteristicModel } from '../../../modules/exports/shared/export.model';

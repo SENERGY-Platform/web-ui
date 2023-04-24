@@ -29,10 +29,10 @@ import {
 } from './device-instances.model';
 import {Observable} from 'rxjs';
 import {DeviceInstancesHistoryModel, DeviceInstancesHistoryModelWithId} from './device-instances-history.model';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesUpdateModel} from './device-instances-update.model';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {UtilService} from '../../../../core/services/util.service';
 
 @Injectable({

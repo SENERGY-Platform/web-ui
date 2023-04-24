@@ -20,7 +20,7 @@ import { SidenavSectionModel } from './sidenav-section.model';
 import { SidenavPageModel } from './sidenav-page.model';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../services/error-handler.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { WaitingRoomService } from '../../../../modules/devices/waiting-room/shared/waiting-room.service';
 import { debounceTime } from 'rxjs/operators';
 import { WaitingRoomEventTypeAuthOk, WaitingRoomEventTypeError } from '../../../../modules/devices/waiting-room/shared/waiting-room.model';

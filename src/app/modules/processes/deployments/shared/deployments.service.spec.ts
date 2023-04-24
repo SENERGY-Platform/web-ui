@@ -21,8 +21,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { CamundaVariable } from './deployments-definition.model';
 import { environment } from '../../../../../environments/environment';
-import { MatDialogModule } from '@angular/material/dialog';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 
 describe('DeploymentsService', () => {
     beforeEach(() => {

@@ -29,7 +29,7 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { DesignerProcessModel } from '../designer/shared/designer.model';
 import { saveAs } from 'file-saver';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { ProcessRepoConditionModel, ProcessRepoConditionsModel } from './shared/process-repo-conditions.model';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';

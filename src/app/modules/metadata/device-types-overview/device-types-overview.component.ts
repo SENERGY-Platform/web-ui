@@ -21,7 +21,7 @@ import { SearchbarService } from '../../../core/components/searchbar/shared/sear
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { DeviceTypeService } from './shared/device-type.service';
 import { DeviceTypePermSearchModel } from './shared/device-type-perm-search.model';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { Router } from '@angular/router';

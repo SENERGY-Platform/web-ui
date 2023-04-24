@@ -23,7 +23,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { DeploymentsModel } from './deployments.model';
 import { CamundaVariable } from './deployments-definition.model';
 import { V2DeploymentsPreparedConfigurableModel, V2DeploymentsPreparedModel } from './deployments-prepared-v2.model';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { DeploymentsFogMetadataModel, DeploymentsFogModel } from './deployments-fog.model';
 import { NetworksService } from '../../../devices/networks/shared/networks.service';
 import { NetworksModel } from '../../../devices/networks/shared/networks.model';

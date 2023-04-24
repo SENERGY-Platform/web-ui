@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { DeploymentsService } from '../shared/deployments.service';
 import { DeploymentsMissingDependenciesModel } from '../shared/deployments-missing-dependencies.model';
 import { DeploymentsOfflineReasonsModel } from '../shared/deployments.model';

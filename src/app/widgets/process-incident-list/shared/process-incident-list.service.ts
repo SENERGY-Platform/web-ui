@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ProcessIncidentListEditDialogComponent } from '../dialogs/process-incident-list-edit-dialog.component';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';

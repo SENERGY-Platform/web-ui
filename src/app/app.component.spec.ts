@@ -20,7 +20,7 @@ import { CoreModule } from './core/core.module';
 import { KeycloakService } from 'keycloak-angular';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
 import { MockKeycloakService } from './core/services/keycloak.mock';
 import { AuthorizationServiceMock } from './core/services/authorization.service.mock';
 

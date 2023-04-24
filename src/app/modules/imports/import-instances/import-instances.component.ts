@@ -20,10 +20,10 @@ import { ImportTypePermissionSearchModel } from '../import-types/shared/import-t
 import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
-import { MatTable } from '@angular/material/table';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
 import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';

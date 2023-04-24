@@ -21,7 +21,7 @@ import { NetworksModel } from './shared/networks.model';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { NetworksDeleteDialogComponent } from './dialogs/networks-delete-dialog.component';
 import { DeviceInstancesService } from '../device-instances/shared/device-instances.service';
 import { MatTableDataSource } from '@angular/material/table';

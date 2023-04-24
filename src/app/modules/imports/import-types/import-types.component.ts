@@ -19,13 +19,13 @@ import { ImportTypesService } from './shared/import-types.service';
 import { Sort } from '@angular/material/sort';
 import { FormControl } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
-import { MatTable } from '@angular/material/table';
+import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
 import { Router } from '@angular/router';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
 import { ImportInstancesModel } from '../import-instances/shared/import-instances.model';
 import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 
 @Component({

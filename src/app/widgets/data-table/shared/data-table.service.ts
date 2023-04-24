@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ExportModel } from '../../../modules/exports/shared/export.model';
 import { ExportService } from '../../../modules/exports/shared/export.service';

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ImportInstancesModel} from '../shared/import-instances.model';
 import {FormControl, Validators} from '@angular/forms';
 import {ImportTypesService} from '../../import-types/shared/import-types.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {ImportTypeModel} from '../../import-types/shared/import-types.model';
 import {ExportService} from '../../../exports/shared/export.service';
 import {ExportModel, ExportValueModel} from '../../../exports/shared/export.model';
 import {SelectionModel} from '@angular/cdk/collections';
-import {MatCheckboxChange} from '@angular/material/checkbox';
-import {MatTable} from '@angular/material/table';
+import {MatLegacyCheckboxChange as MatCheckboxChange} from '@angular/material/legacy-checkbox';
+import {MatLegacyTable as MatTable} from '@angular/material/legacy-table';
 import {environment} from '../../../../../environments/environment';
 
 @Component({

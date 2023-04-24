@@ -17,15 +17,15 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ExportService } from './shared/export.service';
 import { ExportModel, ExportResponseModel } from './shared/export.model';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { ResponsiveService } from '../../core/services/responsive.service';
 import { merge, Subscription } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
 import { MatSort } from '@angular/material/sort';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator';
 import { startWith, switchMap } from 'rxjs/operators';
 import { BrokerExportService } from './shared/broker-export.service';
 import { ActivatedRoute } from '@angular/router';

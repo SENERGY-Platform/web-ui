@@ -19,7 +19,7 @@ import { WidgetModel, WidgetPropertiesModels } from '../../modules/dashboard/sha
 import { RangeSliderService } from './shared/range-slider.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
-import { MatSliderChange } from '@angular/material/slider';
+import { MatLegacySliderChange as MatSliderChange } from '@angular/material/legacy-slider';
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
 import { CamundaVariable } from '../../modules/processes/deployments/shared/deployments-definition.model';
 

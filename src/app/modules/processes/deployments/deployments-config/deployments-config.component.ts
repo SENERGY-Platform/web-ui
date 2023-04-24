@@ -20,7 +20,7 @@ import {ProcessRepoService} from '../../process-repo/shared/process-repo.service
 import {DeploymentsService} from '../shared/deployments.service';
 import {UtilService} from '../../../../core/services/util.service';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import {DeploymentsConfigInitializerService} from './shared/deployments-config-initializer.service';
 import {
@@ -41,7 +41,7 @@ import {OperatorRepoService} from '../../../data/operator-repo/shared/operator-r
 import {OperatorModel} from '../../../data/operator-repo/shared/operator.model';
 import {CharacteristicsService} from '../../../metadata/characteristics/shared/characteristics.service';
 import {DeviceTypeAspectNodeModel} from '../../../metadata/device-types-overview/shared/device-type.model';
-import {MatSelectChange} from '@angular/material/select';
+import {MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
 
 @Component({
     selector: 'senergy-process-deployments-config',

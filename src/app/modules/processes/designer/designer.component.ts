@@ -36,7 +36,7 @@ import { DesignerDialogService } from './shared/designer-dialog.service';
 import { DesignerHelperService } from './shared/designer-helper.service';
 import { ProcessRepoService } from '../process-repo/shared/process-repo.service';
 import { ActivatedRoute } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { DesignerErrorModel } from './shared/designer-error.model';
 import { DesignerSnackBarComponent } from './snack-bar/designer-snack-bar.component';
 import { defaultIfEmpty } from 'rxjs/operators';

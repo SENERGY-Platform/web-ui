@@ -26,7 +26,7 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel } from './switch-properties.model';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
 
 @Injectable({
     providedIn: 'root',

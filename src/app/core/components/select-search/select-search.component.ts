@@ -28,13 +28,14 @@ import {
     Self,
     ViewChild,
 } from '@angular/core';
-import {MatSelect, MatSelectChange} from '@angular/material/select';
-import {MatFormFieldControl} from '@angular/material/form-field';
+import {MatLegacySelect as MatSelect, MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
+import {MatLegacyFormFieldControl as MatFormFieldControl} from '@angular/material/legacy-form-field';
 import {Observable, Subject} from 'rxjs';
 import {ControlValueAccessor, FormControl, NgControl} from '@angular/forms';
 import {coerceBooleanProperty} from '@angular/cdk/coercion';
-import {ErrorStateMatcher, MatOption} from '@angular/material/core';
-import {MatInput} from '@angular/material/input';
+import {ErrorStateMatcher} from '@angular/material/core';
+import {MatLegacyOption as MatOption} from '@angular/material/legacy-core';
+import {MatLegacyInput as MatInput} from '@angular/material/legacy-input';
 import ScrollEvent = JQuery.ScrollEvent;
 import MouseUpEvent = JQuery.MouseUpEvent;
 import {KeyValue} from '@angular/common';

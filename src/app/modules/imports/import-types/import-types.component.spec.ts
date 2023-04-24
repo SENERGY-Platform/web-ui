@@ -20,23 +20,23 @@ import { CoreModule } from '../../../core/core.module';
 import { Router, RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
+import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
 import { FlexModule } from '@angular/flex-layout';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatButtonModule } from '@angular/material/button';
+import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip';
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field';
+import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSelectModule } from '@angular/material/select';
+import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select';
 import { MatTreeModule } from '@angular/material/tree';
 import { WidgetModule } from '../../../widgets/widget.module';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { ImportTypesService } from './shared/import-types.service';
 import { of } from 'rxjs';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-import { MatTableModule } from '@angular/material/table';
+import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
 import { ImportTypePermissionSearchModel } from './shared/import-types.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
@@ -76,7 +76,7 @@ describe('ImportTypesComponent', () => {
             declarations: [ImportTypesComponent],
             imports: [
                 CoreModule,
-                RouterModule.forRoot([], { relativeLinkResolution: 'legacy' }),
+                RouterModule.forRoot([], {}),
                 MatDialogModule,
                 MatSnackBarModule,
                 FlexModule,

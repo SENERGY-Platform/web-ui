@@ -17,7 +17,7 @@
 
 import {Directive, Input, Optional, Self} from '@angular/core';
 import {ControlValueAccessor, NgControl} from '@angular/forms';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatLegacyCheckbox as MatCheckbox } from '@angular/material/legacy-checkbox';
 
 @Directive({
     selector: 'mat-checkbox[stringCheckboxValue]'

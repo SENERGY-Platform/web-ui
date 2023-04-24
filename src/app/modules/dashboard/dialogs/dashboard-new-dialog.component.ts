@@ -15,7 +15,7 @@
  */
 
 import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 
 @Component({
     templateUrl: './dashboard-new-dialog.component.html',

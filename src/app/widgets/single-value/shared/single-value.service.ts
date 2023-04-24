@@ -22,7 +22,7 @@ import {SingleValueEditDialogComponent} from '../dialog/single-value-edit-dialog
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 import {ExportDataService} from '../../shared/export-data.service';
 import {QueriesRequestElementInfluxModel, QueriesRequestElementTimescaleModel} from '../../shared/export-data.model';
 import {environment} from '../../../../environments/environment';

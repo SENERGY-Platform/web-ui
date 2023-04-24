@@ -15,7 +15,7 @@
  */
 
 import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { WidgetModel } from '../shared/dashboard-widget.model';
 import { DashboardTypesEnum } from '../shared/dashboard-types.enum';
 import { Observable } from 'rxjs';

@@ -18,8 +18,8 @@ import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {forkJoin, Observable, Subscription} from 'rxjs';
-import {MatTable} from '@angular/material/table';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatLegacyTable as MatTable} from '@angular/material/legacy-table';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 import {DataTableEditDialogComponent} from './dialog/data-table-edit-dialog.component';
 import {
     QueriesRequestElementInfluxModel,

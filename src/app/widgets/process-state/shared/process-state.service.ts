@@ -25,7 +25,7 @@ import { DeploymentsService } from '../../../modules/processes/deployments/share
 import { catchError } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { ProcessRepoService } from '../../../modules/processes/process-repo/shared/process-repo.service';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
 
 @Injectable({
     providedIn: 'root',

@@ -19,9 +19,9 @@
 import {SelectionModel} from '@angular/cdk/collections';
 import {Component, isDevMode, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Sort, MatSort} from '@angular/material/sort';
-import {MatTableDataSource} from '@angular/material/table';
+import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
 import {DomSanitizer} from '@angular/platform-browser';
 import {interval, Observable} from 'rxjs';
 import {debounce, map, startWith} from 'rxjs/operators';

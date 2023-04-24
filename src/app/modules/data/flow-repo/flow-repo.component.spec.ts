@@ -17,8 +17,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FlowRepoComponent } from './flow-repo.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
+import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { AuthorizationServiceMock } from '../../../core/services/authorization.service.mock';

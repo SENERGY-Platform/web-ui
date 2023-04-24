@@ -19,7 +19,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { RankingListEditDialogComponent } from '../dialogs/ranking-list-edit-dialog.component';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
 
 @Injectable({
     providedIn: 'root',

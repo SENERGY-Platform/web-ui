@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
@@ -26,7 +26,7 @@ import { environment } from '../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpResponseBase } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { ProcessSchedulerScheduleEditDialogComponent } from '../dialogs/process-scheduler-schedule-edit-dialog.component';
 
 @Injectable({

@@ -24,7 +24,7 @@ import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {DesignerProcessModel} from '../../processes/designer/shared/designer.model';
 import {saveAs} from 'file-saver';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';

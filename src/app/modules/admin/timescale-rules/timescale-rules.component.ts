@@ -17,9 +17,9 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {TimescaleRulesService} from './shared/timescale-rules.service';
 import {TimescaleRuleModel} from './shared/timescale-rule.model';
-import {MatTable} from '@angular/material/table';
+import {MatLegacyTable as MatTable} from '@angular/material/legacy-table';
 import {ImportTypePermissionSearchModel} from '../../imports/import-types/shared/import-types.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 import {TimescaleRulesCreateEditComponent} from './timescale-rules-create-edit/timescale-rules-create-edit.component';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';

@@ -15,7 +15,7 @@
  */
 
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
 import { ConceptsNewDialogComponent } from './dialogs/concepts-new-dialog.component';
 import { Router } from '@angular/router';
 import { ConceptsService } from './shared/concepts.service';
@@ -24,7 +24,7 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { ConceptsEditDialogComponent } from './dialogs/concepts-edit-dialog.component';
 import { ConceptsPermSearchModel } from './shared/concepts-perm-search.model';
 import { DeviceTypeConceptModel } from '../device-types-overview/shared/device-type.model';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { FormControl } from '@angular/forms';

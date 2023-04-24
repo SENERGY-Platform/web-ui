@@ -26,7 +26,7 @@ import {
 import {environment} from '../../../../../../environments/environment';
 import {HttpClient} from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../services/error-handler.service';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 import {NotificationDialogComponent} from '../dialog/notification-dialog.component';
 import {AuthorizationService} from '../../../../services/authorization.service';
 import {webSocket, WebSocketSubject} from 'rxjs/webSocket';

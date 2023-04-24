@@ -13,11 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/internal/operators';
-import { MatSort } from '@angular/material/sort';
-import { DeviceInstancesModel } from './shared/device-instances.model';
+
+import { Component, OnDestroy, OnInit } from '@angular/core';
+
+import { DeviceInstancesService } from './shared/device-instances.service';
+import { DeviceInstancesIntermediateModel, DeviceInstancesModel, DeviceInstancesPermSearchModel } from './shared/device-instances.model';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { Subscription } from 'rxjs';
+import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { KeycloakService } from 'keycloak-angular';
+import { TagValuePipe } from '../../../core/pipe/tag-value.pipe';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Navigation, Router } from '@angular/router';
 import { NetworksModel } from '../networks/shared/networks.model';
 import { DeviceTypeBaseModel, DeviceTypeModel } from '../../metadata/device-types-overview/shared/device-type.model';
 import { LocationModel } from '../locations/shared/locations.model';
@@ -66,7 +75,7 @@ export enum DeviceInstancesRouterStateTabEnum {
 export class DeviceInstancesComponent implements OnInit {
 
     constructor(
-        private deviceInstancesService: DeviceInstancesService, 
+        private deviceInstancesService: DeviceInstancesService,
         private router: Router, private deviceInstancesDialogService: DeviceInstancesDialogService,
         private snackBar: MatSnackBar,
         private permissionsDialogService: PermissionsDialogService,

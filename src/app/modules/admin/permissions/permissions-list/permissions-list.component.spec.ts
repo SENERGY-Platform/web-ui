@@ -18,16 +18,16 @@
 
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import {MatCardModule} from '@angular/material/card';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {MatDialogHarness} from '@angular/material/dialog/testing';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatLegacyAutocompleteModule as MatAutocompleteModule } from '@angular/material/legacy-autocomplete';
+import {MatLegacyCardModule as MatCardModule} from '@angular/material/legacy-card';
+import {MatLegacyCheckboxModule as MatCheckboxModule} from '@angular/material/legacy-checkbox';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatLegacyDialogHarness as MatDialogHarness} from '@angular/material/legacy-dialog/testing';
+import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field';
 import {MatIconModule} from '@angular/material/icon';
-import {MatInputModule} from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import {MatTableModule} from '@angular/material/table';
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
+import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select';
+import {MatLegacyTableModule as MatTableModule} from '@angular/material/legacy-table';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { AuthorizationServiceMock } from 'src/app/core/services/authorization.service.mock';

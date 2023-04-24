@@ -16,10 +16,10 @@
 
 import { TestBed } from '@angular/core/testing';
 
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { DeviceInstancesService } from './device-instances.service';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
 
 describe('DeviceInstancesService', () => {
     let service: DeviceInstancesService;

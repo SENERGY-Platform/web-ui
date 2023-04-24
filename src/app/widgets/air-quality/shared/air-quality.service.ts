@@ -17,7 +17,7 @@
 import {Injectable} from '@angular/core';
 import {forkJoin, Observable} from 'rxjs';
 import {AirQualityExternalProvider, AirQualityPropertiesModel, MeasurementModel} from './air-quality.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {AirQualityEditDialogComponent} from '../dialog/air-quality-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
