@@ -48,23 +48,15 @@
             <ng-container matColumnDef="action">
                 <th mat-header-cell *matHeaderCellDef disableClear>Action</th>
                 <td mat-cell *matCellDef="let characteristic">
-                    <button mat-icon-button [matMenuTriggerFor]="menu" color="accent">
-                        <mat-icon>more_vert</mat-icon>
-                    </button>
-                    <mat-menu #menu="matMenu" [overlapTrigger]="false">
-                        <button mat-menu-item (click)="showCharacteristic(characteristic)" *ngIf="!characteristic.permissions.w" matTooltip="Info">
+                        <button mat-icon-button color="accent" (click)="showCharacteristic(characteristic)" *ngIf="!characteristic.permissions.w" matTooltip="Info">
                             <mat-icon>info</mat-icon>
-                            <span>Info</span>
                         </button>
-                        <button mat-menu-item (click)="editCharacteristic(characteristic)" [disabled]="!characteristic.permissions.w" matTooltip="Edit">
+                        <button mat-icon-button color="accent" (click)="editCharacteristic(characteristic)" [disabled]="!characteristic.permissions.w" matTooltip="Edit">
                             <mat-icon>edit</mat-icon>
-                            <span>Edit</span>
                         </button>
-                        <button mat-menu-item (click)="deleteCharacteristic(characteristic)" [disabled]="!characteristic.permissions.a" matTooltip="Delete">
+                        <button mat-icon-button color="accent" (click)="deleteCharacteristic(characteristic)" [disabled]="!characteristic.permissions.a" matTooltip="Delete">
                             <mat-icon>delete</mat-icon>
-                            <span>Delete</span>
                         </button>
-                    </mat-menu>
                 </td>
             </ng-container>
 

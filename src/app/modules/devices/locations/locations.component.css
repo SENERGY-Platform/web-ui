@@ -19,22 +19,16 @@
     margin: 8px;
 }
 
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.mat-column-action {
+    text-align: right;
+    justify-content: flex-end;
 }
 
 .locations-container {
-    height: calc(100% - 64px);
-    overflow-y: hidden;
+    margin-bottom: 170px;
     padding: 0 8px 8px;
 }
 
-.locations-scroll {
-    height: calc(100% - 106px);
-    overflow-y: auto;
-}
 
 .background {
     background-image: url('/src/img/background_deviceTypes.png');

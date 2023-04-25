@@ -18,11 +18,9 @@
     margin: 8px;
 }
 
-mat-grid-tile-footer {
-    height: 110px !important;
-    background-color: white !important;
-    color: black !important;
-    padding: 8px !important;
+.mat-column-action {
+    text-align: right;
+    justify-content: flex-end;
 }
 
 .footer-item-header {
@@ -52,15 +50,9 @@ mat-grid-tile-footer {
 }
 
 .hubs-container {
-    height: calc(100% - 64px);
+    margin-bottom: 170px;
     overflow-y: hidden;
     padding: 0 8px 8px
-}
-
-.hubs-scroll {
-    height: calc(100% - 106px);
-    overflow-y: auto;
-   
 }
 
 .widget-image {

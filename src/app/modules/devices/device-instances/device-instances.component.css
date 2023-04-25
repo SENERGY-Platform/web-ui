@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-.device-instances-scroll {
-    height: calc(100% - 106px);
-    overflow-y: auto;
+.mat-column-action {
+    text-align: right;
+    justify-content: flex-end;
 }
 
 .main-panel-alternative {
@@ -29,8 +29,7 @@
 }
 
 .device-instance-container {
-    height: calc(100% - 64px);
-    overflow-y: auto;
+    margin-bottom: 170px;
     padding: 0 8px 8px;
 }
 

@@ -19,21 +19,14 @@
     margin: 8px;
 }
 
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.mat-column-action {
+    text-align: right;
+    justify-content: flex-end;
 }
 
 .device-groups-container {
-    height: calc(100% - 64px);
-    overflow-y: hidden;
+    margin-bottom: 170px;
     padding: 0 8px 8px;
-}
-
-.device-groups-scroll {
-    height: calc(100% - 106px);
-    overflow-y: auto;
 }
 
 .background {

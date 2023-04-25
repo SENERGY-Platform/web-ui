@@ -62,28 +62,19 @@
             <ng-container matColumnDef="action">
                 <th mat-header-cell *matHeaderCellDef disableClear>Action</th>
                 <td mat-cell *matCellDef="let network"> 
-                        <button mat-icon-button [matMenuTriggerFor]="menu" color="accent">
-                            <mat-icon>more_vert</mat-icon>
-                        </button>
-                            
-                        <mat-menu #menu="matMenu" [overlapTrigger]="false">
-                                            <button mat-menu-item (click)="showDevices(network)">
+                       
+                                            <button mat-icon-button color="accent" (click)="showDevices(network)" matTooltip="Show devices">
                                                 <mat-icon>important_devices</mat-icon>
-                                                <span>Show devices</span>
                                             </button>
-                                            <button mat-menu-item (click)="edit(network)">
+                                            <button mat-icon-button color="accent" (click)="edit(network)" matTooltip="Edit">
                                                 <mat-icon>edit</mat-icon>
-                                                <span>Change name</span>
                                             </button>
-                                            <button mat-menu-item (click)="clear(network)">
+                                            <button mat-icon-button color="accent" (click)="clear(network)" matTooltip="Refresh">
                                                 <mat-icon>refresh</mat-icon>
-                                                <span>Clear</span>
                                             </button>
-                                            <button mat-menu-item (click)="delete(network)">
+                                            <button mat-icon-button color="accent" (click)="delete(network)" matTooltip="Delete">
                                                 <mat-icon>delete</mat-icon>
-                                                <span>Delete</span>
                                             </button>
-                        </mat-menu>
                 </td>
             </ng-container>
 

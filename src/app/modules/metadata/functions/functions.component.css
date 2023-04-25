@@ -20,9 +20,13 @@
 }
 
 .functions-container {
-    height: calc(100% - 64px);
+    margin-bottom: 170px;
     padding: 0 8px 8px
+}
 
+.mat-column-action {
+    text-align: right;
+    justify-content: flex-end;
 }
 
 .background {
