@@ -14,37 +14,31 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 
-import { DeviceInstancesService } from './shared/device-instances.service';
-import { DeviceInstancesIntermediateModel, DeviceInstancesModel, DeviceInstancesPermSearchModel } from './shared/device-instances.model';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { Subscription } from 'rxjs';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { KeycloakService } from 'keycloak-angular';
-import { TagValuePipe } from '../../../core/pipe/tag-value.pipe';
-import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
-import { DialogsService } from '../../../core/services/dialogs.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Navigation, Router } from '@angular/router';
-import { NetworksModel } from '../networks/shared/networks.model';
-import { DeviceTypeBaseModel, DeviceTypeModel } from '../../metadata/device-types-overview/shared/device-type.model';
-import { LocationModel } from '../locations/shared/locations.model';
-import { DeviceInstancesService } from './shared/device-instances.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { Navigation, Router } from '@angular/router';
-import { DeviceInstancesDialogService } from './shared/device-instances-dialog.service';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { ExportService } from '../../exports/shared/export.service';
-import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
-import { DialogsService } from 'src/app/core/services/dialogs.service';
-import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
-import { DeviceInstancesUpdateModel } from './shared/device-instances-update.model';
-import { ExportModel } from '../../exports/shared/export.model';
-import { DeviceInstancesExportDialogComponent } from './dialogs/device-instances-export-dialog.component';
-import { LocationsService } from '../locations/shared/locations.service';
-import { NetworksService } from '../networks/shared/networks.service';
+import {DeviceInstancesService} from './shared/device-instances.service';
+import {DeviceInstancesModel} from './shared/device-instances.model';
+import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import {Navigation, Router} from '@angular/router';
+import {NetworksModel} from '../networks/shared/networks.model';
+import {DeviceTypeBaseModel, DeviceTypeModel} from '../../metadata/device-types-overview/shared/device-type.model';
+import {LocationModel} from '../locations/shared/locations.model';
+import {MatTableDataSource} from '@angular/material/table';
+import {DeviceInstancesDialogService} from './shared/device-instances-dialog.service';
+import {ExportService} from '../../exports/shared/export.service';
+import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
+import {DeviceInstancesUpdateModel} from './shared/device-instances-update.model';
+import {ExportModel} from '../../exports/shared/export.model';
+import {DeviceInstancesExportDialogComponent} from './dialogs/device-instances-export-dialog.component';
+import {LocationsService} from '../locations/shared/locations.service';
+import {NetworksService} from '../networks/shared/networks.service';
+import {debounceTime} from 'rxjs/operators';
+import {MatSort} from '@angular/material/sort';
+import {UntypedFormControl} from '@angular/forms';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -90,12 +84,12 @@ export class DeviceInstancesComponent implements OnInit {
         this.getRouterParams();
     }
 
-    instances: DeviceInstancesModel[] = []
-    dataSource = new MatTableDataSource(this.instances)
-    @ViewChild(MatSort) sort!: MatSort
+    instances: DeviceInstancesModel[] = [];
+    dataSource = new MatTableDataSource(this.instances);
+    @ViewChild(MatSort) sort!: MatSort;
 
-    searchControl = new FormControl('');
-    ready: boolean = false;
+    searchControl = new UntypedFormControl('');
+    ready = false;
     limitInit = 100;
     limit = this.limitInit;
     offset = 0;
@@ -111,13 +105,13 @@ export class DeviceInstancesComponent implements OnInit {
     routerLocation: LocationModel | null = null;
 
     ngOnInit(): void {
-        this.loadFilterOptions()
+        this.loadFilterOptions();
         this.load();
         this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     private load() {
-        this.ready = false
+        this.ready = false;
         if (this.routerLocation !== null) {
             this.selectedTag = this.routerLocation.id;
             this.selectedTagTransformed = this.routerLocation.name;
@@ -131,7 +125,7 @@ export class DeviceInstancesComponent implements OnInit {
                 .getDeviceInstancesByHubId(
                     this.limit,
                     this.offset,
-                    "display_name",
+                    'display_name',
                     'asc',
                     this.routerNetwork.id,
                     null,
@@ -143,33 +137,33 @@ export class DeviceInstancesComponent implements OnInit {
             this.selectedTag = this.routerDeviceType.name;
             this.selectedTagTransformed = this.routerDeviceType.name;
             this.deviceInstancesService
-                .getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.limit, this.offset, "display_name", 'asc', null)
+                .getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.limit, this.offset, 'display_name', 'asc', null)
                 .subscribe((deviceInstances) => {
                     this.setDevices(deviceInstances);
-                })
+                });
 
-        } else {                    
-                this.deviceInstancesService
-                    .getDeviceInstances(
-                        this.limit,
-                        this.offset,
-                        "display_name",
-                        'asc',
-                        this.searchControl.value,
-                        this.selectedTagType,
-                        this.selectedTag,
-                        null,
-                    )
-                    .subscribe((deviceInstances: DeviceInstancesModel[]) => {
-                        this.setDevices(deviceInstances);
-                    });
+        } else {
+            this.deviceInstancesService
+                .getDeviceInstances(
+                    this.limit,
+                    this.offset,
+                    'display_name',
+                    'asc',
+                    this.searchControl.value,
+                    this.selectedTagType,
+                    this.selectedTag,
+                    null,
+                )
+                .subscribe((deviceInstances: DeviceInstancesModel[]) => {
+                    this.setDevices(deviceInstances);
+                });
         }
     }
 
     private setDevices(instances: DeviceInstancesModel[]) {
         this.instances = this.instances.concat(instances);
-        this.dataSource = new MatTableDataSource(this.instances)
-        this.dataSource.sort = this.sort
+        this.dataSource = new MatTableDataSource(this.instances);
+        this.dataSource.sort = this.sort;
         this.ready = true;
     }
 
@@ -207,7 +201,7 @@ export class DeviceInstancesComponent implements OnInit {
         this.routerDeviceType = null;
 
         this.routerDeviceType = dt;
-        this.reload()
+        this.reload();
     }
 
     filterByLocation(location: LocationModel) {
@@ -268,7 +262,7 @@ export class DeviceInstancesComponent implements OnInit {
                             this.instances.splice(this.instances.indexOf(device), 1);
                             this.snackBar.open('Device deleted successfully.', '', { duration: 2000 });
                         } else {
-                            this.snackBar.open('Error while deleting device!', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error while deleting device!', 'close', { panelClass: 'snack-bar-error' });
                         }
                     });
                 }
@@ -299,10 +293,10 @@ export class DeviceInstancesComponent implements OnInit {
                     };
                     this.dialog.open(DeviceInstancesExportDialogComponent, dialogConfig);
                 } else {
-                    this.snackBar.open('Device type has no output services!', "close", { panelClass: "snack-bar-error" });
+                    this.snackBar.open('Device type has no output services!', 'close', { panelClass: 'snack-bar-error' });
                 }
             } else {
-                this.snackBar.open('Could not read device type!', "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Could not read device type!', 'close', { panelClass: 'snack-bar-error' });
             }
         });
     }

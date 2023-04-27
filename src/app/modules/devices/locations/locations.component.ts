@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ResponsiveService } from '../../../core/services/responsive.service';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
-import { DialogsService } from '../../../core/services/dialogs.service';
-import uuid = util.uuid;
-import { util } from 'jointjs';
-import { LocationModel } from './shared/locations.model';
-import { LocationsService } from './shared/locations.service';
-import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
-import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
-
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Subscription} from 'rxjs';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {Router} from '@angular/router';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {LocationModel} from './shared/locations.model';
+import {LocationsService} from './shared/locations.service';
+import {
+    DeviceInstancesRouterState,
+    DeviceInstancesRouterStateTypesEnum
+} from '../device-instances/device-instances.component';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import {UntypedFormControl} from '@angular/forms';
+import {debounceTime} from 'rxjs/operators';
 
 
 @Component({
@@ -43,11 +40,11 @@ export class LocationsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
 
     locations: LocationModel[] = [];
-    instances = []
-    dataSource = new MatTableDataSource(this.locations)
-    @ViewChild(MatSort) sort!: MatSort
+    instances = [];
+    dataSource = new MatTableDataSource(this.locations);
+    @ViewChild(MatSort) sort!: MatSort;
 
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
 
     ready = false;
 
@@ -64,7 +61,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.getLocations()
+        this.getLocations();
         this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
@@ -100,7 +97,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
                             this.setLimitOffset(1);
                             this.reloadLocations();
                         } else {
-                            this.snackBar.open('Error while deleting the location!', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error while deleting the location!', 'close', { panelClass: 'snack-bar-error' });
                         }
                     });
                 }
@@ -120,21 +117,21 @@ export class LocationsComponent implements OnInit, OnDestroy {
 
     private getLocations() {
         this.locationsService
-            .searchLocations(this.searchControl.value, this.limit, this.offset, "name", "asc")
+            .searchLocations(this.searchControl.value, this.limit, this.offset, 'name', 'asc')
             .subscribe((locations: LocationModel[]) => {
                 if (locations.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.locations = this.locations.concat(locations);
-                this.dataSource = new MatTableDataSource(this.locations)
-                this.dataSource.sort = this.sort
+                this.dataSource = new MatTableDataSource(this.locations);
+                this.dataSource.sort = this.sort;
                 this.ready = true;
             });
     }
 
     private reloadLocations() {
         setTimeout(() => {
-            this.reload()
+            this.reload();
         }, 2500);
     }
 

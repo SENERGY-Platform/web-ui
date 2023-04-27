@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { Subscription } from 'rxjs';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
-import { ResponsiveService } from '../../../core/services/responsive.service';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
-import { Router } from '@angular/router';
-import { DialogsService } from '../../../core/services/dialogs.service';
-import uuid = util.uuid;
-import { util } from 'jointjs';
-import { DeviceGroupsPermSearchModel } from './shared/device-groups-perm-search.model';
-import { DeviceGroupsService } from './shared/device-groups.service';
-import { DeviceGroupModel } from './shared/device-groups.model';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
-import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Subscription} from 'rxjs';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {Router} from '@angular/router';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {DeviceGroupsPermSearchModel} from './shared/device-groups-perm-search.model';
+import {DeviceGroupsService} from './shared/device-groups.service';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import {UntypedFormControl} from '@angular/forms';
+import {debounceTime} from 'rxjs/operators';
 
 
 @Component({
@@ -43,11 +36,11 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
 
     deviceGroups: DeviceGroupsPermSearchModel[] = [];
-    instances = []
-    dataSource = new MatTableDataSource(this.deviceGroups)
-    @ViewChild(MatSort) sort!: MatSort
+    instances = [];
+    dataSource = new MatTableDataSource(this.deviceGroups);
+    @ViewChild(MatSort) sort!: MatSort;
 
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
 
     ready = false;
 
@@ -95,7 +88,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
                             this.setLimitOffset(1);
                             this.reloadDeviceGroups();
                         } else {
-                            this.snackBar.open('Error while deleting the device-group!', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error while deleting the device-group!', 'close', { panelClass: 'snack-bar-error' });
                         }
                     });
                 }
@@ -119,20 +112,20 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     }
 
     private getDeviceGroups() {
-        let query =  this.deviceGroupsService.getDeviceGroups(this.searchControl.value, this.limit, this.offset, "name", "asc")
+        let query =  this.deviceGroupsService.getDeviceGroups(this.searchControl.value, this.limit, this.offset, 'name', 'asc');
         if(this.hideGenerated) {
-            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchControl.value, this.limit, this.offset, "name", "asc")
+            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchControl.value, this.limit, this.offset, 'name', 'asc');
         }
 
         query.subscribe((deviceGroups: DeviceGroupsPermSearchModel[]) => {
-                if (deviceGroups.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
-                this.deviceGroups = this.deviceGroups.concat(deviceGroups);
-                this.dataSource = new MatTableDataSource(this.deviceGroups)
-                this.dataSource.sort = this.sort
-                this.ready = true;
-            });
+            if (deviceGroups.length !== this.limit) {
+                this.allDataLoaded = true;
+            }
+            this.deviceGroups = this.deviceGroups.concat(deviceGroups);
+            this.dataSource = new MatTableDataSource(this.deviceGroups);
+            this.dataSource.sort = this.sort;
+            this.ready = true;
+        });
     }
 
     public reload() {
@@ -146,7 +139,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
 
     private reloadDeviceGroups() {
         setTimeout(() => {
-            this.reload()
+            this.reload();
         }, 2500);
     }
 

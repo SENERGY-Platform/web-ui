@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ResponsiveService } from '../../../core/services/responsive.service';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
-import { DialogsService } from '../../../core/services/dialogs.service';
-import { FunctionsPermSearchModel } from './shared/functions-perm-search.model';
-import { FunctionsService } from './shared/functions.service';
-import { DeviceTypeFunctionModel } from '../device-types-overview/shared/device-type.model';
-import { FunctionsEditDialogComponent } from './dialog/functions-edit-dialog.component';
-import { FunctionsCreateDialogComponent } from './dialog/functions-create-dialog.component';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Subscription} from 'rxjs';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {FunctionsPermSearchModel} from './shared/functions-perm-search.model';
+import {FunctionsService} from './shared/functions.service';
+import {DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
+import {FunctionsEditDialogComponent} from './dialog/functions-edit-dialog.component';
+import {FunctionsCreateDialogComponent} from './dialog/functions-create-dialog.component';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
-import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import {UntypedFormControl} from '@angular/forms';
+import {debounceTime} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-functions',
@@ -42,10 +40,10 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     readonly limitInit = 54;
 
     functions: FunctionsPermSearchModel[] = [];
-    dataSource = new MatTableDataSource(this.functions)
-    @ViewChild(MatSort) sort!: MatSort
+    dataSource = new MatTableDataSource(this.functions);
+    @ViewChild(MatSort) sort!: MatSort;
 
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
     ready = false;
     userIsAdmin = false;
 
@@ -144,9 +142,9 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                             this.functions.splice(this.functions.indexOf(func), 1);
                             this.snackBar.open('Function deleted successfully.', undefined, { duration: 2000 });
                         } else {
-                            this.snackBar.open('Error while deleting the function!', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error while deleting the function!', 'close', { panelClass: 'snack-bar-error' });
                         }
-                        this.reload()
+                        this.reload();
                     });
                 }
             });
@@ -158,8 +156,8 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                 .getFunctionsAfter(
                     this.searchControl.value,
                     this.limit,
-                    "name",
-                    "asc",
+                    'name',
+                    'asc',
                     this.functions[this.functions.length - 1],
                 )
                 .subscribe((functions: FunctionsPermSearchModel[]) => {
@@ -167,20 +165,20 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                         this.allDataLoaded = true;
                     }
                     this.functions = this.functions.concat(functions);
-                    this.dataSource = new MatTableDataSource(this.functions)
-                    this.dataSource.sort = this.sort
+                    this.dataSource = new MatTableDataSource(this.functions);
+                    this.dataSource.sort = this.sort;
                     this.ready = true;
                 });
         } else {
             this.functionsService
-                .getFunctions(this.searchControl.value, this.limit, this.offset, "name", "asc")
+                .getFunctions(this.searchControl.value, this.limit, this.offset, 'name', 'asc')
                 .subscribe((functions: FunctionsPermSearchModel[]) => {
                     if (functions.length !== this.limit) {
                         this.allDataLoaded = true;
                     }
                     this.functions = this.functions.concat(functions);
-                    this.dataSource = new MatTableDataSource(this.functions)
-                    this.dataSource.sort = this.sort
+                    this.dataSource = new MatTableDataSource(this.functions);
+                    this.dataSource.sort = this.sort;
                     this.ready = true;
                 });
         }
@@ -197,11 +195,11 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     private reloadAndShowSnackbar(func: DeviceTypeFunctionModel | null, text: string) {
         if (func === null) {
-            this.snackBar.open('Error while ' + text + 'ing the function!', "close", { panelClass: "snack-bar-error" });
-            this.reload()
+            this.snackBar.open('Error while ' + text + 'ing the function!', 'close', { panelClass: 'snack-bar-error' });
+            this.reload();
         } else {
             this.snackBar.open('Function ' + text + 'ed successfully.', undefined, { duration: 2000 });
-            this.reload()
+            this.reload();
         }
     }
 

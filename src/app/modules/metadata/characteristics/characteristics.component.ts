@@ -25,10 +25,10 @@ import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-sear
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {ConceptsPermSearchModel} from '../concepts/shared/concepts-perm-search.model';
-import { MatSort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
-import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
+import {MatSort} from '@angular/material/sort';
+import {MatTableDataSource} from '@angular/material/table';
+import {UntypedFormControl} from '@angular/forms';
+import {debounceTime} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-characteristic',
@@ -40,10 +40,10 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
     characteristics: CharacteristicsPermSearchModel[] = [];
     ready = false;
-    dataSource = new MatTableDataSource(this.characteristics)
-    @ViewChild(MatSort) sort!: MatSort
+    dataSource = new MatTableDataSource(this.characteristics);
+    @ViewChild(MatSort) sort!: MatSort;
 
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
 
     routerConcept: ConceptsPermSearchModel | null = null;
     selectedTag = '';
@@ -64,7 +64,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.getCharacteristics()
+        this.getCharacteristics();
         this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
@@ -89,7 +89,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             if (resp !== undefined) {
                 this.characteristicsService.createCharacteristic(resp.characteristic).subscribe((characteristic) => {
                     if (characteristic === null) {
-                        this.snackBar.open('Error while creating the characteristic!', "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Error while creating the characteristic!', 'close', {panelClass: 'snack-bar-error'});
                         this.reload();
                     } else {
                         this.snackBar.open('Characteristic created successfully.', undefined, {duration: 2000});
@@ -121,7 +121,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                                 this.setRepoItemsParams(1);
                                 this.reloadCharacterisitics(false);
                             } else {
-                                this.snackBar.open('Error while deleting the characteristic!', "close", { panelClass: "snack-bar-error" });
+                                this.snackBar.open('Error while deleting the characteristic!', 'close', {panelClass: 'snack-bar-error'});
                             }
                         });
                 }
@@ -137,18 +137,21 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
         const editDialogRef = this.dialog.open(CharacteristicsEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((resp: { conceptId: string; characteristic: DeviceTypeCharacteristicsModel }) => {
+        editDialogRef.afterClosed().subscribe((resp: {
+            conceptId: string;
+            characteristic: DeviceTypeCharacteristicsModel;
+        }) => {
             if (resp !== undefined) {
                 const newCharacteristic = resp.characteristic;
                 this.characteristicsService
                     .updateConcept(newCharacteristic)
                     .subscribe((characteristic: DeviceTypeCharacteristicsModel | null) => {
                         if (characteristic === null) {
-                            this.snackBar.open('Error while updating the characteristic!', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error while updating the characteristic!', 'close', {panelClass: 'snack-bar-error'});
                         } else {
                             this.snackBar.open('Characteristic updated successfully.', undefined, {duration: 2000});
                         }
-                        this.reload()
+                        this.reload();
                     });
             }
         });
@@ -164,18 +167,21 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
         const editDialogRef = this.dialog.open(CharacteristicsEditDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((resp: { conceptId: string; characteristic: DeviceTypeCharacteristicsModel }) => {
+        editDialogRef.afterClosed().subscribe((resp: {
+            conceptId: string;
+            characteristic: DeviceTypeCharacteristicsModel;
+        }) => {
             if (resp !== undefined) {
                 const newCharacteristic = resp.characteristic;
                 this.characteristicsService
                     .updateConcept(newCharacteristic)
                     .subscribe((characteristic: DeviceTypeCharacteristicsModel | null) => {
                         if (characteristic === null) {
-                            this.snackBar.open('Error while updating the characteristic!', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error while updating the characteristic!', 'close', {panelClass: 'snack-bar-error'});
                         } else {
                             this.snackBar.open('Characteristic updated successfully.', undefined, {duration: 2000});
                         }
-                        this.reload()
+                        this.reload();
                     });
             }
         });
@@ -186,7 +192,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             this.selectedTag = this.routerConcept.name;
         }
         this.characteristicsService
-            .getCharacteristics(this.searchControl.value, this.limit, this.offset, "name", "asc", this.routerConcept?.characteristic_ids || [])
+            .getCharacteristics(this.searchControl.value, this.limit, this.offset, 'name', 'asc', this.routerConcept?.characteristic_ids || [])
             .subscribe((characteristics: CharacteristicsPermSearchModel[]) => {
                 this.setCharacteristics(characteristics);
             });
@@ -197,8 +203,8 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             this.allDataLoaded = true;
         }
         this.characteristics = this.characteristics.concat(characteristics);
-        this.dataSource = new MatTableDataSource(this.characteristics)
-        this.dataSource.sort = this.sort
+        this.dataSource = new MatTableDataSource(this.characteristics);
+        this.dataSource.sort = this.sort;
         this.ready = true;
     }
 
@@ -229,8 +235,8 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
     private reloadCharacterisitics(reset: boolean) {
         setTimeout(() => {
-            if(reset) {
-                this.reload()
+            if (reset) {
+                this.reload();
             } else {
                 this.getCharacteristics();
             }

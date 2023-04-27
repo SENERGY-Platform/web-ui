@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
-import { ConceptsNewDialogComponent } from './dialogs/concepts-new-dialog.component';
-import { Router } from '@angular/router';
-import { ConceptsService } from './shared/concepts.service';
-import { Subscription } from 'rxjs';
-import { DialogsService } from '../../../core/services/dialogs.service';
-import { ConceptsEditDialogComponent } from './dialogs/concepts-edit-dialog.component';
-import { ConceptsPermSearchModel } from './shared/concepts-perm-search.model';
-import { DeviceTypeConceptModel } from '../device-types-overview/shared/device-type.model';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
-import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
+import {Router} from '@angular/router';
+import {ConceptsService} from './shared/concepts.service';
+import {Subscription} from 'rxjs';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
+import {ConceptsPermSearchModel} from './shared/concepts-perm-search.model';
+import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import {UntypedFormControl} from '@angular/forms';
+import {debounceTime} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-concepts',
@@ -40,10 +40,10 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     concepts: ConceptsPermSearchModel[] = [];
     ready = false;
-    dataSource = new MatTableDataSource(this.concepts)
-    @ViewChild(MatSort) sort!: MatSort
+    dataSource = new MatTableDataSource(this.concepts);
+    @ViewChild(MatSort) sort!: MatSort;
 
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
 
     private limit = this.limitInit;
     private offset = 0;
@@ -84,7 +84,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             if (newConcept !== undefined) {
                 this.conceptsService.createConcept(newConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
-                        this.snackBar.open('Error while creating the concept!', "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Error while creating the concept!', 'close', { panelClass: 'snack-bar-error' });
                     } else {
                         this.snackBar.open('Concept created successfully.', undefined, { duration: 2000 });
                     }
@@ -106,7 +106,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             if (editConcept !== undefined) {
                 this.conceptsService.updateConcept(editConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
-                        this.snackBar.open('Error while updating the concept!', "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Error while updating the concept!', 'close', { panelClass: 'snack-bar-error' });
                     } else {
                         this.snackBar.open('Concept updated successfully.', undefined, { duration: 2000 });
                     }
@@ -129,7 +129,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             if (editConcept !== undefined) {
                 this.conceptsService.updateConcept(editConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
-                        this.snackBar.open('Error while updating the concept!', "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Error while updating the concept!', 'close', { panelClass: 'snack-bar-error' });
                     } else {
                         this.snackBar.open('Concept updated successfully.', undefined, { duration: 2000 });
                     }
@@ -152,7 +152,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
                             this.setRepoItemsParams(1);
                             this.reloadConcepts(false);
                         } else {
-                            this.snackBar.open('Error while deleting the concept!', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error while deleting the concept!', 'close', { panelClass: 'snack-bar-error' });
                         }
                     });
                 }
@@ -165,14 +165,14 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     private getConcepts() {
         this.conceptsService
-            .getConcepts(this.searchControl.value, this.limit, this.offset, "name", "asc")
+            .getConcepts(this.searchControl.value, this.limit, this.offset, 'name', 'asc')
             .subscribe((concepts: ConceptsPermSearchModel[]) => {
                 if (concepts.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.concepts = this.concepts.concat(concepts);
-                this.dataSource = new MatTableDataSource(this.concepts)
-                this.dataSource.sort = this.sort
+                this.dataSource = new MatTableDataSource(this.concepts);
+                this.dataSource.sort = this.sort;
                 this.ready = true;
             });
     }
@@ -197,7 +197,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             if(reset) {
                 this.reload();
             } else {
-                this.getConcepts()
+                this.getConcepts();
             }
         }, 1500);
     }

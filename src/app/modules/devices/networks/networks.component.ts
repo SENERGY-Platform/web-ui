@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
-import { NetworksService } from './shared/networks.service';
-import { NetworksModel } from './shared/networks.model';
-import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
-import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../device-instances/device-instances.component';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
-import { NetworksDeleteDialogComponent } from './dialogs/networks-delete-dialog.component';
-import { DeviceInstancesService } from '../device-instances/shared/device-instances.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
-import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
+import {NetworksService} from './shared/networks.service';
+import {NetworksModel} from './shared/networks.model';
+import {Subscription} from 'rxjs';
+import {Router} from '@angular/router';
+import {
+    DeviceInstancesRouterState,
+    DeviceInstancesRouterStateTypesEnum
+} from '../device-instances/device-instances.component';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {NetworksDeleteDialogComponent} from './dialogs/networks-delete-dialog.component';
+import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import {UntypedFormControl} from '@angular/forms';
+import {debounceTime} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-networks',
@@ -36,10 +39,10 @@ import { debounceTime } from 'rxjs/operators';
 })
 export class NetworksComponent implements OnInit, OnDestroy {
     networks: NetworksModel[] = [];
-    dataSource = new MatTableDataSource(this.networks)
-    @ViewChild(MatSort) sort!: MatSort
+    dataSource = new MatTableDataSource(this.networks);
+    @ViewChild(MatSort) sort!: MatSort;
 
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
 
     ready = false;
 
@@ -106,14 +109,14 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     private getNetworks() {
         this.networksService
-            .searchNetworks(this.searchControl.value, this.limit, this.offset, "name", "asc")
+            .searchNetworks(this.searchControl.value, this.limit, this.offset, 'name', 'asc')
             .subscribe((networks: NetworksModel[]) => {
                 if (networks.length !== this.limit) {
                     this.allDataLoaded = true;
                 }
                 this.networks = this.networks.concat(networks);
-                this.dataSource = new MatTableDataSource(this.networks)
-                this.dataSource.sort = this.sort
+                this.dataSource = new MatTableDataSource(this.networks);
+                this.dataSource.sort = this.sort;
                 this.ready = true;
             });
     }
