@@ -22,7 +22,7 @@
         <mat-tab *ngFor="let dashboard of dashboards; let i=index">
             <ng-template mat-tab-label>
                 <span (mouseenter)="mouseEnterHeader(i)" (mouseleave)="mouseLeaveHeader()"
-                       [ngClass]="dragging && mouseHoverHeaderIndex === i ? 'tab-label-drag' : 'tab-label'"> <!-- TODO -->
+                       [ngClass]="dragging && mouseHoverHeaderIndex === i ? 'tab-label-drag' : 'tab-label'">
                     {{dashboard.name}}
                 </span>
             </ng-template>

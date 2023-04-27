@@ -77,7 +77,7 @@ export interface AirQualityImportExportModel {
     stationId?: string;
     importInstanceId?: string;
     importGenerated?: boolean;
-    exportId?: string; // TODO whenever set, also set exportDatabaseId
+    exportId?: string;
     exportGenerated?: boolean;
     exportDatabaseId?: string;
 }

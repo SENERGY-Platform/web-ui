@@ -96,7 +96,7 @@ export class ChartsProcessDeploymentsService {
         return dataTable;
 
         function getTooltipText(date: Date, count: number): string {
-            return date.toLocaleDateString() + '\n' + 'count: ' + count; // todo: translation
+            return date.toLocaleDateString() + '\n' + 'count: ' + count;
         }
     }
 

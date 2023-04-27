@@ -876,7 +876,7 @@ export class DataTableEditDialogComponent implements OnInit {
                 if (selectedDevice === undefined || selectedService === undefined) {
                     return;
                 }
-                const exports = this.exportService.prepareDeviceServiceExport(selectedDevice, selectedService); // TODO timestampFormat
+                const exports = this.exportService.prepareDeviceServiceExport(selectedDevice, selectedService);
                 if (exports.length !== 1) {
                     console.error('DataTableEditDialogComponent: No support for devices with multiple outputs!');
                     return;

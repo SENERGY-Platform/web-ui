@@ -131,7 +131,6 @@ export class AcControlEditDialogComponent implements OnInit {
                     }
                     mappings.get(c.function_id)?.push({aspectId: c.aspect_id});
                 });
-                console.log(mappings); // TODO
                 return mappings;
             }));
         }
@@ -219,7 +218,6 @@ export class AcControlEditDialogComponent implements OnInit {
                     this.widget.properties.acControl.getBatteryLevel = this.getElement(m, environment.getBatteryLevelFunctionId);
                 }
             }), map(_ => {
-                console.log(this.widget); // TODO
                 this.dashboardService.updateWidget(this.dashboardId, this.widget).subscribe((resp: DashboardResponseMessageModel) => {
                     if (resp.message === 'OK') {
                         this.dialogRef.close(this.widget);

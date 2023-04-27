@@ -55,13 +55,7 @@ export class ImportTypesComponent implements OnInit {
 
     ngOnInit(): void {
         this.load();
-        this.searchControl.valueChanges.pipe(map(a => {
-            console.warn('before',Date.now()); // TODO
-            return a;
-        }),debounceTime(300), map(a=> {
-            console.warn('after',Date.now()); // TODO
-            return a;
-        })).subscribe(() => this.reload());
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     details(m: ImportTypePermissionSearchModel) {

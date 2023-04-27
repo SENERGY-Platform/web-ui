@@ -199,7 +199,7 @@ export class DeviceTotalDowntimeService {
         function getTooltipText(date: Date, percentage: number): string {
             const percentageFormatted = Math.round(percentage * 10000) / 100 + '%';
             const timeFormatted = date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-            return timeFormatted + '\n' + 'failure ratio: ' + percentageFormatted; // todo: translation
+            return timeFormatted + '\n' + 'failure ratio: ' + percentageFormatted;
         }
     }
 }

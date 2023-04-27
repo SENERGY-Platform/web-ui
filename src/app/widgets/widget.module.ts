@@ -99,7 +99,7 @@ import {MatLegacySliderModule as MatSliderModule} from '@angular/material/legacy
 import { AcControlComponent } from './ac-control/ac-control.component';
 import {AcControlEditDialogComponent} from './ac-control/dialog/ac-control-edit-dialog.component';
 
-registerLocaleData(localeDe, 'de'); // todo: language;
+registerLocaleData(localeDe, 'de');
 
 @NgModule({
     imports: [
@@ -203,7 +203,7 @@ registerLocaleData(localeDe, 'de'); // todo: language;
         WidgetFooterComponent,
     ],
     providers: [
-        {provide: LOCALE_ID, useValue: 'de'}, // todo: language;
+        {provide: LOCALE_ID, useValue: 'de'},
         DecimalPipe,
     ],
 })

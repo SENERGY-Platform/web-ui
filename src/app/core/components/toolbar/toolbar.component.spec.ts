@@ -32,7 +32,6 @@ import { NotificationService } from './notification/shared/notification.service'
 import { EventEmitter } from '@angular/core';
 
 describe('ToolbarComponent', () => {
-    // TODO
     let component: ToolbarComponent;
     let fixture: ComponentFixture<ToolbarComponent>;
 
