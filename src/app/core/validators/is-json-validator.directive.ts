@@ -19,7 +19,8 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
 import {jsonValidator} from './json.validator';
 
 @Directive({
-    selector: '[appIsValidJson]',
+    // eslint-disable-next-line @angular-eslint/directive-selector
+    selector: '[isValidJson]',
     providers: [{provide: NG_VALIDATORS, useExisting: IsJsonValidatorDirective, multi: true}]
 })
 export class IsJsonValidatorDirective implements Validator {
