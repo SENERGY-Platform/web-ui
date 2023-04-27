@@ -31,7 +31,7 @@ import {
 import {MatLegacySelect as MatSelect, MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
 import {MatLegacyFormFieldControl as MatFormFieldControl} from '@angular/material/legacy-form-field';
 import {Observable, Subject} from 'rxjs';
-import {ControlValueAccessor, FormControl, NgControl} from '@angular/forms';
+import {ControlValueAccessor, FormControl, NgControl, UntypedFormControl} from '@angular/forms';
 import {coerceBooleanProperty} from '@angular/cdk/coercion';
 import {ErrorStateMatcher} from '@angular/material/core';
 import {MatLegacyOption as MatOption} from '@angular/material/legacy-core';
@@ -216,7 +216,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @HostBinding() id = `my-tel-input-${SelectSearchComponent.nextId++}`;
 
     @Output() selectionChange: EventEmitter<MatSelectChange> = new EventEmitter<MatSelectChange>();
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
 
     @HostBinding('attr.aria-describedby') describedBy = '';
 

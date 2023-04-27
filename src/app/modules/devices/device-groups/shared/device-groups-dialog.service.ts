@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
-import { Observable } from 'rxjs/index';
+import { Observable } from 'rxjs';
 import { DeviceGroupsSelectDialogComponent } from '../dialog/device-groups-select-dialog.component';
 
 @Injectable({

@@ -58,7 +58,12 @@
               "node_modules/bpmn-js/dist/assets/diagram-js.css",
               "node_modules/bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css",
               "node_modules/bpmn-js-properties-panel/styles/properties.less",
-              "node_modules/jointjs/css/layout.css"
+              "node_modules/jointjs/css/layout.css",
+              {
+                "input": "node_modules/swagger-ui/dist/swagger-ui.css",
+                "bundleName": "swagger-ui",
+                "inject": false
+              }
             ],
             "scripts": [
               "node_modules/@webcomponents/custom-elements/src/native-shim.js"

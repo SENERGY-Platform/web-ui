@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { PermissionsEditModel } from '../../shared/permissions-edit.model';
-import { FormControl } from '@angular/forms';
-import { AuthorizationService } from '../../../../core/services/authorization.service';
-import { PermissionsGroupModel, PermissionsUserModel } from '../../shared/permissions-user.model';
-import { HttpClient } from '@angular/common/http';
-import { PermissionsService } from '../../shared/permissions.service';
-import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {
+    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+    MatLegacyDialogRef as MatDialogRef
+} from '@angular/material/legacy-dialog';
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
+import {PermissionsEditModel} from '../../shared/permissions-edit.model';
+import {UntypedFormControl} from '@angular/forms';
+import {AuthorizationService} from '../../../../core/services/authorization.service';
+import {PermissionsGroupModel, PermissionsUserModel} from '../../shared/permissions-user.model';
+import {HttpClient} from '@angular/common/http';
+import {PermissionsService} from '../../shared/permissions.service';
+import {MatLegacyTable as MatTable} from '@angular/material/legacy-table';
 
 @Component({
     templateUrl: './permission-dialog.component.html',
@@ -31,8 +34,8 @@ import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
 })
 export class PermissionDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<PermissionsEditModel>;
-    formControl = new FormControl('');
-    groupFormControl = new FormControl('');
+    formControl = new UntypedFormControl('');
+    groupFormControl = new UntypedFormControl('');
     roles: PermissionsGroupModel[] = [];
     name: string;
     userId: null | string = null;
@@ -40,11 +43,11 @@ export class PermissionDialogComponent implements OnInit {
     permissions: PermissionsEditModel[] = [];
 
     descriptions = {
-        read: "read resource information",
-        write: "write resource information",
-        execute: "use resource information",
-        administrate: "delete resource, change permissions"
-    }
+        read: 'read resource information',
+        write: 'write resource information',
+        execute: 'use resource information',
+        administrate: 'delete resource, change permissions'
+    };
 
     constructor(
         private dialogRef: MatDialogRef<PermissionDialogComponent>,
@@ -62,22 +65,22 @@ export class PermissionDialogComponent implements OnInit {
         this.name = data.name;
         this.permissions = data.permissions;
         switch (data.kind){
-            case "devices":
-                this.descriptions = {
-                    read: "read device metadata",
-                    write: "write device metadata",
-                    execute: "use device, read sensor-data",
-                    administrate: "delete device, change permissions"
-                }
-                break
-            case "processmodel":
-                break
-            case "hubs":
-                break
-            case "locations":
-                break
-            case "smart_service_releases":
-                break
+        case 'devices':
+            this.descriptions = {
+                read: 'read device metadata',
+                write: 'write device metadata',
+                execute: 'use device, read sensor-data',
+                administrate: 'delete device, change permissions'
+            };
+            break;
+        case 'processmodel':
+            break;
+        case 'hubs':
+            break;
+        case 'locations':
+            break;
+        case 'smart_service_releases':
+            break;
         }
     }
 
@@ -97,7 +100,7 @@ export class PermissionDialogComponent implements OnInit {
     }
 
     deleteRow(index: number) {
-        this.permissions.splice(index, 1)
+        this.permissions.splice(index, 1);
         this.table.renderRows();
     }
 

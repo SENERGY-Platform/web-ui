@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 
-import { RouterModule } from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 
 import { CoreModule } from '../../core/core.module';
 import { ProcessRepoComponent } from '../processes/process-repo/process-repo.component';
@@ -78,43 +78,43 @@ import {ShortKeyPipe} from './process-io/shared/short-key.pipe';
 import {ProcessIoVariableEditDialogComponent} from './process-io/dialogs/process-io-variable-edit-dialog.component';
 import {ConditionalEventDialogComponent} from './designer/dialogs/conditional-event-dialog/conditional-event-dialog.component';
 
-const processRepo = {
+const processRepo: Route = {
     path: 'processes/repository',
     pathMatch: 'full',
     component: ProcessRepoComponent,
     data: { header: 'Repository' },
 };
-const processDeployments = {
+const processDeployments: Route = {
     path: 'processes/deployments',
     pathMatch: 'full',
     component: ProcessDeploymentsComponent,
     data: { header: 'Deployments' },
 };
-const processDeploymentsConfig = {
+const processDeploymentsConfig: Route = {
     path: 'processes/deployments/config',
     pathMatch: 'full',
     component: ProcessDeploymentsConfigComponent,
     data: { header: 'Deployments' },
 };
-const processMonitor = {
+const processMonitor: Route = {
     path: 'processes/monitor',
     pathMatch: 'full',
     component: ProcessMonitorComponent,
     data: { header: 'Monitor' },
 };
-const processDesignerEdit = {
+const processDesignerEdit: Route = {
     path: 'processes/designer/:id',
     component: ProcessDesignerComponent,
     data: { header: 'Designer' },
 };
-const processDesigner = {
+const processDesigner: Route = {
     path: 'processes/designer',
     pathMatch: 'full',
     component: ProcessDesignerComponent,
     data: { header: 'Designer' },
 };
 
-const processIo = {
+const processIo: Route = {
     path: 'processes/io',
     pathMatch: 'full',
     component: ProcessIoVariablesComponent,

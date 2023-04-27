@@ -15,7 +15,7 @@
  */
 
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { CommonModule } from '@angular/common';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
@@ -62,22 +62,22 @@ import { CharacteristicElementComponent } from './characteristics/dialogs/charac
 import { MatTreeModule } from '@angular/material/tree';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 
-const deviceTypes = {
+const deviceTypes: Route = {
     path: 'metadata/devicetypesoverview',
     pathMatch: 'full',
     component: DeviceTypesOverviewComponent,
     data: { header: 'Device Types' },
 };
-const concepts = { path: 'metadata/concepts', pathMatch: 'full', component: ConceptsComponent, data: { header: 'Concepts' } };
-const characteristics = {
+const concepts: Route = { path: 'metadata/concepts', pathMatch: 'full', component: ConceptsComponent, data: { header: 'Concepts' } };
+const characteristics: Route = {
     path: 'metadata/characteristics',
     pathMatch: 'full',
     component: CharacteristicsComponent,
     data: { header: 'Characteristics' },
 };
-const functions = { path: 'metadata/functions', pathMatch: 'full', component: FunctionsComponent, data: { header: 'Functions' } };
-const aspects = { path: 'metadata/aspects', pathMatch: 'full', component: AspectsComponent, data: { header: 'Aspects' } };
-const deviceClasses = {
+const functions: Route = { path: 'metadata/functions', pathMatch: 'full', component: FunctionsComponent, data: { header: 'Functions' } };
+const aspects: Route = { path: 'metadata/aspects', pathMatch: 'full', component: AspectsComponent, data: { header: 'Aspects' } };
+const deviceClasses: Route = {
     path: 'metadata/deviceclasses',
     pathMatch: 'full',
     component: DeviceClassesComponent,

@@ -19,7 +19,7 @@ import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dia
 import { DeviceInstancesModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
-import { FormControl } from '@angular/forms';
+import {FormControl, UntypedFormControl} from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
 
@@ -34,7 +34,7 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
     dataReady = false;
     sortBy = 'name';
     sortOrder = 'asc';
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
     limitInit = 100;
     limit = this.limitInit;
     offset = 0;

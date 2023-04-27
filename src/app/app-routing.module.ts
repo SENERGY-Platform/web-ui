@@ -15,13 +15,13 @@
  */
 
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 
 import { DashboardComponent } from './modules/dashboard/dashboard.component';
 
-const init = { path: '', redirectTo: 'dashboard/', pathMatch: 'full' };
-const dashboardWithoutId = { path: 'dashboard', redirectTo: 'dashboard/', pathMatch: 'full' };
-const dashboard = { path: 'dashboard/:id', component: DashboardComponent, data: { header: 'Dashboard' } };
+const init: Route = { path: '', redirectTo: 'dashboard/', pathMatch: 'full' };
+const dashboardWithoutId: Route = { path: 'dashboard', redirectTo: 'dashboard/', pathMatch: 'full' };
+const dashboard: Route = { path: 'dashboard/:id', component: DashboardComponent, data: { header: 'Dashboard' } };
 
 @NgModule({
     imports: [RouterModule.forRoot([init, dashboard, dashboardWithoutId], {})],

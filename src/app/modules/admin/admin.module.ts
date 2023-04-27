@@ -24,7 +24,7 @@ import {
     PermissionsDialogImportComponent
 } from './permissions/permissions-dialog-import/permissions-dialog-import.component';
 import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
-import {RouterModule} from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 import {CoreModule} from '../../core/core.module';
 import {TimescaleRulesComponent} from './timescale-rules/timescale-rules.component';
 import {FlexModule} from '@angular/flex-layout';
@@ -34,7 +34,7 @@ import {
     TimescaleRulesCreateEditComponent
 } from './timescale-rules/timescale-rules-create-edit/timescale-rules-create-edit.component';
 
-const listRules = [
+const listRules: Route[] = [
     {
         path: 'admin/authorization',
         pathMatch: 'full',

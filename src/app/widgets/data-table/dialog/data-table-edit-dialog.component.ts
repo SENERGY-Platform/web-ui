@@ -15,7 +15,10 @@
  */
 
 import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {
+    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+    MatLegacyDialogRef as MatDialogRef
+} from '@angular/material/legacy-dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {
@@ -24,7 +27,7 @@ import {
     ExportValueCharacteristicModel
 } from '../../../modules/exports/shared/export.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormControl, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
 import {DeviceStatusConfigConvertRuleModel} from '../../device-status/shared/device-status-properties.model';
 import {
     DataTableElementModel,
@@ -51,8 +54,8 @@ import {ProcessSchedulerService} from '../../process-scheduler/shared/process-sc
 import {DataTableService} from '../shared/data-table.service';
 import {boundaryValidator, elementDetailsValidator, exportValidator} from './data-table-edit-dialog.validators';
 import {util} from 'jointjs';
-import uuid = util.uuid;
 import {environment} from '../../../../environments/environment';
+import uuid = util.uuid;
 
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
@@ -122,7 +125,7 @@ export class DataTableEditDialogComponent implements OnInit {
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
         private exportService: ExportService,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private processSchedulerService: ProcessSchedulerService,
         private cdref: ChangeDetectorRef,
         @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },

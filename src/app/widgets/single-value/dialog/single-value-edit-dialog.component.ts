@@ -15,7 +15,7 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {FormBuilder} from '@angular/forms';
+import {FormBuilder, UntypedFormBuilder} from '@angular/forms';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {ChartsExportMeasurementModel} from '../../charts/export/shared/charts-export-properties.model';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
@@ -31,7 +31,7 @@ import {
 import {DeviceTypeServiceModel} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
-import {ChartsExportRequestPayloadGroupModel} from "../../charts/export/shared/charts-export-request-payload.model";
+import {ChartsExportRequestPayloadGroupModel} from '../../charts/export/shared/charts-export-request-payload.model';
 
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
@@ -90,7 +90,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
         private exportService: ExportService,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private deviceTypeService: DeviceTypeService,
         private deviceInstancesService: DeviceInstancesService,
         @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
@@ -128,9 +128,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             if (service === undefined || service == null) {
                 return;
             }
-            this.paths = this.deviceTypeService.getValuePaths(service.outputs[0].content_variable).map(x => {
-                return {Name: x};
-            });
+            this.paths = this.deviceTypeService.getValuePaths(service.outputs[0].content_variable).map(x => ({Name: x}));
         });
         this.getWidgetData();
     }
@@ -187,13 +185,12 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.form.get
         const measurement = this.form.get('measurement')?.value as ChartsExportMeasurementModel || undefined;
         this.widget.properties.measurement = {
-            id: measurement?.id,
-            name: measurement?.name,
-            values: measurement?.values,
-            exportDatabaseId: measurement?.ExportDatabaseId,
+            id: this.form.get('measurement')?.value?.id,
+            name: this.form.get('measurement')?.value?.name,
+            values: this.form.get('measurement')?.value?.values,
+            exportDatabaseId: this.form.get('measurement')?.value?.ExportDatabaseId,
         };
         this.widget.properties.vAxis = this.form.get('vAxis')?.value as ExportValueModel || undefined;
         this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value || undefined;

@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
+import {Injectable} from '@angular/core';
+import {
+    AbstractControl,
+    FormArray,
+    FormControl,
+    FormGroup, UntypedFormArray,
+    UntypedFormBuilder, UntypedFormGroup,
+    ValidationErrors,
+    ValidatorFn
+} from '@angular/forms';
 import * as moment from 'moment';
 import {
     ConditionalEventModel,
@@ -23,21 +31,22 @@ import {
     DeploymentsSelectionPathOptionModel,
     V2DeploymentsPreparedConfigurableModel,
     V2DeploymentsPreparedConfigurableValueModel,
-    V2DeploymentsPreparedElementModel, V2DeploymentsPreparedIncidentHandlingModel,
+    V2DeploymentsPreparedElementModel,
+    V2DeploymentsPreparedIncidentHandlingModel,
     V2DeploymentsPreparedModel,
     V2DeploymentsPreparedMsgEventModel,
     V2DeploymentsPreparedSelectionModel,
-    V2DeploymentsPreparedSelectionOptionModel, V2DeploymentsPreparedStartParameterModel,
+    V2DeploymentsPreparedSelectionOptionModel,
+    V2DeploymentsPreparedStartParameterModel,
     V2DeploymentsPreparedTaskModel,
     V2DeploymentsPreparedTimeEventModel,
 } from '../../shared/deployments-prepared-v2.model';
-import {DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overview/shared/device-type.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class DeploymentsConfigInitializerService {
-    constructor(private _formBuilder: FormBuilder) {}
+    constructor(private _formBuilder: UntypedFormBuilder) {}
 
     initFormGroup(deployment: V2DeploymentsPreparedModel): FormGroup {
         return this._formBuilder.group({
@@ -53,8 +62,8 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    initConfigurablesArray(configurables: V2DeploymentsPreparedConfigurableModel[] | null): FormArray {
-        const array = new FormArray([]);
+    initConfigurablesArray(configurables: V2DeploymentsPreparedConfigurableModel[] | null): UntypedFormArray {
+        const array = new UntypedFormArray([]);
         if (configurables) {
             configurables.forEach((configurable: V2DeploymentsPreparedConfigurableModel) => {
                 array.push(this.initConfigurableGroup(configurable));
@@ -63,9 +72,9 @@ export class DeploymentsConfigInitializerService {
         return array;
     }
 
-    private initElementsArray(elements: V2DeploymentsPreparedElementModel[]): FormArray {
+    private initElementsArray(elements: V2DeploymentsPreparedElementModel[]): UntypedFormArray {
         const groups: string[] = [];
-        const array = new FormArray([]);
+        const array = new UntypedFormArray([]);
         if (elements) {
             elements.forEach((el: V2DeploymentsPreparedElementModel) => {
                 array.push(this.initElementFormGroup(el, groups));
@@ -74,7 +83,7 @@ export class DeploymentsConfigInitializerService {
         return array;
     }
 
-    private initIncidentHandlingFormGroup(incident_handling: V2DeploymentsPreparedIncidentHandlingModel | undefined): FormGroup {
+    private initIncidentHandlingFormGroup(incident_handling: V2DeploymentsPreparedIncidentHandlingModel | undefined): UntypedFormGroup {
         if(incident_handling) {
             return this._formBuilder.group({
                 restart: incident_handling.restart,
@@ -88,8 +97,8 @@ export class DeploymentsConfigInitializerService {
         }
     }
 
-    private initStartParamArray(elements: V2DeploymentsPreparedStartParameterModel[]): FormArray {
-        const array = new FormArray([]);
+    private initStartParamArray(elements: V2DeploymentsPreparedStartParameterModel[]): UntypedFormArray {
+        const array = new UntypedFormArray([]);
         if (elements) {
             elements.forEach((el: V2DeploymentsPreparedStartParameterModel) => {
                 array.push(this.initStartParamFormGroup(el));
@@ -98,7 +107,7 @@ export class DeploymentsConfigInitializerService {
         return array;
     }
 
-    private initStartParamFormGroup(parameter: V2DeploymentsPreparedStartParameterModel): FormGroup {
+    private initStartParamFormGroup(parameter: V2DeploymentsPreparedStartParameterModel): UntypedFormGroup {
         return this._formBuilder.group({
             id: [{ value: parameter.id, disabled: true }],
             label: [{ value: parameter.label, disabled: false }],
@@ -107,7 +116,7 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    private initElementFormGroup(element: V2DeploymentsPreparedElementModel, groups: string[]): FormGroup {
+    private initElementFormGroup(element: V2DeploymentsPreparedElementModel, groups: string[]): UntypedFormGroup {
         const disable = this.checkIfGroupExistedBefore(groups, element.group);
         return this._formBuilder.group({
             bpmn_id: element.bpmn_id,
@@ -122,7 +131,7 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    private initTimeEventFormGroup(timeEvent: V2DeploymentsPreparedTimeEventModel): FormGroup {
+    private initTimeEventFormGroup(timeEvent: V2DeploymentsPreparedTimeEventModel): UntypedFormGroup {
         return this._formBuilder.group({
             type: timeEvent.type,
             time: timeEvent.time,
@@ -144,7 +153,7 @@ export class DeploymentsConfigInitializerService {
         return false;
     }
 
-    private initTaskFormGroup(task: V2DeploymentsPreparedTaskModel, disable: boolean): FormGroup {
+    private initTaskFormGroup(task: V2DeploymentsPreparedTaskModel, disable: boolean): UntypedFormGroup {
         return this._formBuilder.group({
             retries: task.retries,
             parameter: this.initParameterFormGroup(task.parameter),
@@ -152,7 +161,7 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    private initMessageEventFormGroup(messageEvent: V2DeploymentsPreparedMsgEventModel): FormGroup {
+    private initMessageEventFormGroup(messageEvent: V2DeploymentsPreparedMsgEventModel): UntypedFormGroup {
         return this._formBuilder.group({
             value: messageEvent.value,
             flow_id: messageEvent.flow_id,
@@ -174,10 +183,10 @@ export class DeploymentsConfigInitializerService {
     }
 
     private initConditionalEventVariablesFormGroup(variables: any): FormGroup {
-        return this._formBuilder.group(variables)
+        return this._formBuilder.group(variables);
     }
 
-    private initTimeDurationRawFormGroup(timeEvent: string): FormGroup {
+    private initTimeDurationRawFormGroup(timeEvent: string): UntypedFormGroup {
         return this._formBuilder.group({
             years: [moment.duration(timeEvent).years()],
             months: [moment.duration(timeEvent).months()],
@@ -188,7 +197,7 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    private initSelectionFormGroup(selection: V2DeploymentsPreparedSelectionModel, disable: boolean): FormGroup {
+    private initSelectionFormGroup(selection: V2DeploymentsPreparedSelectionModel, disable: boolean): UntypedFormGroup {
         const selectedOptionIndex = this.getSelectedOptionIndex(selection);
         const group = this._formBuilder.group({
             filter_criteria: selection.filter_criteria,
@@ -204,27 +213,27 @@ export class DeploymentsConfigInitializerService {
         }, {
             validators: [
                 control => {
-                    let selectedGroupId = control.get("selected_device_group_id")?.value;
-                    let selectedPath = control.get("selected_path.path")?.value;
-                    if(!selectedPath || selectedPath == "") {
-                        if( selectedGroupId &&  selectedGroupId != "") {
-                            control.get("selected_path.path")?.setErrors(null);
-                            return
+                    const selectedGroupId = control.get('selected_device_group_id')?.value;
+                    const selectedPath = control.get('selected_path.path')?.value;
+                    if(!selectedPath || selectedPath == '') {
+                        if( selectedGroupId &&  selectedGroupId != '') {
+                            control.get('selected_path.path')?.setErrors(null);
+                            return;
                         } else {
-                            control.get("selected_path.path")?.setErrors({missingSelectedPathForNoneGroup: true});
-                            return
+                            control.get('selected_path.path')?.setErrors({missingSelectedPathForNoneGroup: true});
+                            return;
                         }
                     }
-                    control.get("selected_path.path")?.setErrors(null);
-                    return
+                    control.get('selected_path.path')?.setErrors(null);
+                    return;
                 }
             ]
         });
         return group;
     }
 
-    private initPathOptionsFormArray(pathOptions: DeploymentsSelectionPathOptionModel[], disabled: boolean): FormArray {
-        const array: FormGroup[] = [];
+    private initPathOptionsFormArray(pathOptions: DeploymentsSelectionPathOptionModel[], disabled: boolean): UntypedFormArray {
+        const array: UntypedFormGroup[] = [];
         if (pathOptions !== null) {
             pathOptions.forEach((option: DeploymentsSelectionPathOptionModel) => {
                 array.push(this.iniPathOptionFormControl(option, disabled));
@@ -235,7 +244,7 @@ export class DeploymentsConfigInitializerService {
     }
 
 
-    public iniPathOptionFormControl(pathOption: DeploymentsSelectionPathOptionModel | null, disable: boolean):FormGroup {
+    public iniPathOptionFormControl(pathOption: DeploymentsSelectionPathOptionModel | null, disable: boolean): UntypedFormGroup {
         const that = this;
         return this._formBuilder.group({
             path: [{ value: pathOption?.path, disabled: disable }],
@@ -249,8 +258,8 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    public initConfigurablesFormArray(configurables: undefined | DeploymentsSelectionConfigurableModel[], disabled: boolean): FormArray {
-        const array: FormGroup[] = [];
+    public initConfigurablesFormArray(configurables: undefined | DeploymentsSelectionConfigurableModel[], disabled: boolean): UntypedFormArray {
+        const array: UntypedFormGroup[] = [];
         if (configurables !== undefined && configurables !== null) {
             configurables.forEach((c: DeploymentsSelectionConfigurableModel) => {
                 array.push(this.iniConfigurableFormControl(c, disabled));
@@ -260,7 +269,7 @@ export class DeploymentsConfigInitializerService {
     }
 
 
-    public iniConfigurableFormControl(configurable: DeploymentsSelectionConfigurableModel | null, disable: boolean):FormGroup {
+    public iniConfigurableFormControl(configurable: DeploymentsSelectionConfigurableModel | null, disable: boolean): UntypedFormGroup {
         return this._formBuilder.group({
             path: [{ value: configurable?.path, disabled: disable }],
             characteristic_id: [{ value: configurable?.characteristic_id, disabled: disable }],
@@ -271,7 +280,7 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    private initParameterFormGroup(parameter: any): FormGroup {
+    private initParameterFormGroup(parameter: any): UntypedFormGroup {
         const fbGroup = this._formBuilder.group({});
         for (const [key, value] of Object.entries(parameter)) {
             fbGroup.addControl(key, new FormControl(value));
@@ -279,8 +288,8 @@ export class DeploymentsConfigInitializerService {
         return fbGroup;
     }
 
-    private initSelectionFormArray(selection: V2DeploymentsPreparedSelectionOptionModel[]): FormArray {
-        const array: FormGroup[] = [];
+    private initSelectionFormArray(selection: V2DeploymentsPreparedSelectionOptionModel[]): UntypedFormArray {
+        const array: UntypedFormGroup[] = [];
 
         if (selection !== null) {
             selection.forEach((selectable: V2DeploymentsPreparedSelectionOptionModel) => {
@@ -291,7 +300,7 @@ export class DeploymentsConfigInitializerService {
         return this._formBuilder.array(array);
     }
 
-    private initDeviceSelectionOptionGroup(selectionOption: V2DeploymentsPreparedSelectionOptionModel): FormGroup {
+    private initDeviceSelectionOptionGroup(selectionOption: V2DeploymentsPreparedSelectionOptionModel): UntypedFormGroup {
         return this._formBuilder.group({
             device: [selectionOption.device],
             services: selectionOption.services !== null ? this._formBuilder.array(selectionOption.services) : null,
@@ -309,8 +318,8 @@ export class DeploymentsConfigInitializerService {
         });
     }
 
-    private initConfigurableValueArray(configurables: V2DeploymentsPreparedConfigurableValueModel[]): FormArray {
-        const array = new FormArray([]);
+    private initConfigurableValueArray(configurables: V2DeploymentsPreparedConfigurableValueModel[]): UntypedFormArray {
+        const array = new UntypedFormArray([]);
         if (configurables) {
             configurables.forEach((configurable: V2DeploymentsPreparedConfigurableValueModel) => {
                 array.push(this.initConfigurableValueGroup(configurable));
@@ -319,7 +328,7 @@ export class DeploymentsConfigInitializerService {
         return array;
     }
 
-    private initConfigurableValueGroup(configurableValue: V2DeploymentsPreparedConfigurableValueModel): FormGroup {
+    private initConfigurableValueGroup(configurableValue: V2DeploymentsPreparedConfigurableValueModel): UntypedFormGroup {
         return this._formBuilder.group({
             label: configurableValue.label,
             path: configurableValue.path,
@@ -353,9 +362,9 @@ export class DeploymentsConfigInitializerService {
     private getTimeEventValidator(): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
             if (control.value.type === 'timeDuration'){
-                let duration = moment.duration(control.value.durationUnits);
+                const duration = moment.duration(control.value.durationUnits);
                 if (duration.asSeconds() < 5) {
-                    return {durationLessThan5Seconds: {value: control.value}}
+                    return {durationLessThan5Seconds: {value: control.value}};
                 }
             }
             return null;

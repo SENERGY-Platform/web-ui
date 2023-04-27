@@ -34,7 +34,7 @@ import { first, map } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
-import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
 import { DeviceTypePermSearchModel } from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
 import { MatLegacyOption as MatOption } from '@angular/material/legacy-core';
 import { ConceptsService } from '../../../metadata/concepts/shared/concepts.service';
@@ -73,7 +73,7 @@ export class DeployFlowComponent implements OnInit {
         private deviceGroupsService: DeviceGroupsService,
         private pathOptionsService: PathOptionsService,
         private pipelineRegistryService: PipelineRegistryService,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private conceptsService: ConceptsService,
         private sanitizer: DomSanitizer,
         private operatorRepoService: OperatorRepoService,

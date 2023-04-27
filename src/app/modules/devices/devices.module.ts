@@ -15,7 +15,7 @@
  */
 
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { CommonModule } from '@angular/common';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
@@ -67,52 +67,52 @@ import { WaitingRoomDeviceEditDialogComponent } from './waiting-room/dialogs/wai
 import { WaitingRoomMultiWmbusKeyEditDialogComponent } from './waiting-room/dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
 import {MatDatepickerModule} from "@angular/material/datepicker";
 
-const networks = { path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: { header: 'Networks' } };
-const deviceInstances = {
+const networks: Route = { path: 'devices/networks', pathMatch: 'full', component: NetworksComponent, data: { header: 'Networks' } };
+const deviceInstances: Route = {
     path: 'devices/deviceinstances',
     pathMatch: 'full',
     component: DeviceInstancesComponent,
     data: { header: 'Devices' },
 };
-const deviceGroups = {
+const deviceGroups: Route = {
     path: 'devices/devicegroups',
     pathMatch: 'full',
     component: DeviceGroupsComponent,
     data: { header: 'Groups' },
 };
-const deviceGroupsCreate = {
+const deviceGroupsCreate: Route = {
     path: 'devices/devicegroups/edit',
     pathMatch: 'full',
     component: DeviceGroupsEditComponent,
     data: { header: 'Groups' },
 };
-const deviceGroupsEdit = {
+const deviceGroupsEdit: Route = {
     path: 'devices/devicegroups/edit/:id',
     pathMatch: 'full',
     component: DeviceGroupsEditComponent,
     data: { header: 'Groups' },
 };
 
-const locations = {
+const locations: Route = {
     path: 'devices/locations',
     pathMatch: 'full',
     component: LocationsComponent,
     data: { header: 'Locations' },
 };
-const waitingRoom = {
+const waitingRoom: Route = {
     path: 'devices/waiting-room',
     pathMatch: 'full',
     component: WaitingRoomComponent,
     data: { header: 'Waiting Room' },
 };
 
-const locationsCreate = {
+const locationsCreate: Route = {
     path: 'devices/locations/edit',
     pathMatch: 'full',
     component: LocationsEditComponent,
     data: { header: 'Locations' },
 };
-const locationsEdit = {
+const locationsEdit: Route = {
     path: 'devices/locations/edit/:id',
     pathMatch: 'full',
     component: LocationsEditComponent,

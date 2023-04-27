@@ -48,13 +48,17 @@ export class EnergyPredictionRequirementsService {
             let page = 0;
             let res = { hasMore: true, found: false };
             while (!res.found && res.hasMore) {
-                await this.search(100, page++).then((r) => (res = r));
+                await this.search(100, page++).then((r) => {
+                    if (r !== undefined) {
+                        res = r;
+                    }
+                });
             }
             return res.found;
         });
     }
 
-    private search(pageSize: number, pageNo: number): Promise<{ found: boolean; hasMore: boolean }> {
+    private search(pageSize: number, pageNo: number): Promise<{ found: boolean; hasMore: boolean } | undefined >  {
         return this.exportService
             .getExports(true, '', pageSize, pageNo * pageSize, 'created_at', 'desc')
             .pipe(

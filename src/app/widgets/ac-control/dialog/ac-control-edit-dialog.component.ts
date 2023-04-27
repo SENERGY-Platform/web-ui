@@ -1,6 +1,9 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {
+    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+    MatLegacyDialogRef as MatDialogRef
+} from '@angular/material/legacy-dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
@@ -9,7 +12,7 @@ import {DeviceTypeContentVariableModel} from '../../../modules/metadata/device-t
 import {environment} from '../../../../environments/environment';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {map} from 'rxjs/operators';
-import {FormBuilder, Validators} from '@angular/forms';
+import {UntypedFormBuilder, Validators} from '@angular/forms';
 import {AcControlElementModel} from '../shared/ac-control.model';
 import {Observable} from 'rxjs';
 import {DeviceGroupsService} from '../../../modules/devices/device-groups/shared/device-groups.service';
@@ -55,7 +58,7 @@ export class AcControlEditDialogComponent implements OnInit {
                 private deviceTypeService: DeviceTypeService,
                 private deviceInstancesService: DeviceInstancesService,
                 private deviceGroupsService: DeviceGroupsService,
-                private fb: FormBuilder,
+                private fb: UntypedFormBuilder,
                 @Inject(MAT_DIALOG_DATA) data: { widget: WidgetModel; dashboardId: string },
     ) {
         this.widget = data.widget;

@@ -28,7 +28,7 @@ import {DeviceTypePermSearchModel} from '../../../metadata/device-types-overview
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {DeviceInstancesService} from './device-instances.service';
 import {DeviceInstancesSelectDialogComponent} from '../dialogs/device-instances-select-dialog.component';
-import {Observable} from 'rxjs/index';
+import {Observable} from 'rxjs';
 import {LastValuesRequestElementTimescaleModel, TimeValuePairModel} from '../../../../widgets/shared/export-data.model';
 import {ExportDataService} from '../../../../widgets/shared/export-data.service';
 

@@ -15,7 +15,7 @@
  */
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 import { ImportTypesComponent } from './import-types/import-types.component';
 import { ImportInstancesComponent } from './import-instances/import-instances.component';
 import { WidgetModule } from '../../widgets/widget.module';
@@ -40,31 +40,31 @@ import { MatTreeModule } from '@angular/material/tree';
 import { ImportDeployEditDialogComponent } from './import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import { ImportInstanceExportDialogComponent } from './import-instances/import-instance-export-dialog/import-instance-export-dialog.component';
 
-const types = {
+const types: Route = {
     path: 'imports/types/list',
     pathMatch: 'full',
     component: ImportTypesComponent,
     data: { header: 'Types' },
 };
-const editType = {
+const editType: Route = {
     path: 'imports/types/edit/:id',
     pathMatch: 'full',
     component: ImportTypesCreateEditComponent,
     data: { header: 'Types' },
 };
-const detailsType = {
+const detailsType: Route = {
     path: 'imports/types/details/:id',
     pathMatch: 'full',
     component: ImportTypesCreateEditComponent,
     data: { header: 'Types' },
 };
-const createType = {
+const createType: Route = {
     path: 'imports/types/new',
     pathMatch: 'full',
     component: ImportTypesCreateEditComponent,
     data: { header: 'Types' },
 };
-const instances = {
+const instances: Route = {
     path: 'imports/instances',
     pathMatch: 'full',
     component: ImportInstancesComponent,

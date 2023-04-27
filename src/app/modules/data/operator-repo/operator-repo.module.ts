@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 
-import { RouterModule } from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -35,8 +35,8 @@ import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/
 import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select';
 import { MatLegacyPaginatorModule as MatPaginatorModule } from '@angular/material/legacy-paginator';
 
-const operator = { path: 'data/operator-repo/op', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' } };
-const operatorEdit = { path: 'data/operator-repo/op/:id', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' } };
+const operator: Route = { path: 'data/operator-repo/op', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' } };
+const operatorEdit: Route = { path: 'data/operator-repo/op/:id', pathMatch: 'full', component: OperatorComponent, data: { header: 'Operators' } };
 
 @NgModule({
     imports: [

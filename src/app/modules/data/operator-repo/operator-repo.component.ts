@@ -20,7 +20,7 @@ import { OperatorRepoService } from './shared/operator-repo.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { Subscription } from 'rxjs';
+import { Subscription, merge } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator';
@@ -28,7 +28,6 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
 import { MatSort } from '@angular/material/sort';
 import { startWith, switchMap } from 'rxjs/operators';
-import { merge } from 'rxjs/index';
 
 @Component({
     selector: 'senergy-operator-repo',

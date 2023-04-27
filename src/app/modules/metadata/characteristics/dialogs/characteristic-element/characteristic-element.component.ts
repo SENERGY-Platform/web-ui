@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { DeviceTypeCharacteristicsModel } from '../../../device-types-overview/shared/device-type.model';
-import { FormBuilder } from '@angular/forms';
-import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {DeviceTypeCharacteristicsModel} from '../../../device-types-overview/shared/device-type.model';
+import {UntypedFormBuilder} from '@angular/forms';
+import {NestedTreeControl} from '@angular/cdk/tree';
+import {MatTreeNestedDataSource} from '@angular/material/tree';
 
 @Component({
     selector: 'senergy-characteristic-element',
@@ -26,7 +26,7 @@ import { MatTreeNestedDataSource } from '@angular/material/tree';
     styleUrls: ['./characteristic-element.component.css'],
 })
 export class CharacteristicElementComponent implements OnInit {
-    constructor(private fb: FormBuilder) {}
+    constructor(private fb: UntypedFormBuilder) {}
 
     @Input() data: DeviceTypeCharacteristicsModel | undefined;
     @Input() nested = false;

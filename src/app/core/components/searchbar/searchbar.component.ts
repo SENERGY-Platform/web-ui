@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges } from '@angular/core';
-import { SearchbarService } from './shared/searchbar.service';
-import { FormControl } from '@angular/forms';
+import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges} from '@angular/core';
+import {SearchbarService} from './shared/searchbar.service';
+import {UntypedFormControl} from '@angular/forms';
 
 @Component({
     selector: 'senergy-searchbar',
@@ -26,7 +26,7 @@ import { FormControl } from '@angular/forms';
 export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     @Input() searchTextIn = '';
     @Input() disable = false;
-    formControl = new FormControl(this.searchTextIn);
+    formControl = new UntypedFormControl(this.searchTextIn);
 
     constructor(private searchbarService: SearchbarService) {}
 

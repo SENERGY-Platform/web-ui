@@ -16,7 +16,7 @@
 
 import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
 import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import {FormBuilder, FormControl, UntypedFormBuilder, UntypedFormControl, Validators} from '@angular/forms';
 import {
     DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
@@ -40,8 +40,8 @@ import { Observable } from 'rxjs';
     styleUrls: ['./filter-criteria-dialog.component.css'],
 })
 export class FilterCriteriaDialogComponent implements OnInit {
-    aspectFormControl = new FormControl('');
-    functionFormControl = new FormControl({ value: '', disabled: true });
+    aspectFormControl = new UntypedFormControl('');
+    functionFormControl = new UntypedFormControl({ value: '', disabled: true });
 
     aspects: Map<string, DeviceTypeAspectModel[]> = new Map();
     functions: DeviceTypeFunctionModel[] = [];
@@ -52,7 +52,7 @@ export class FilterCriteriaDialogComponent implements OnInit {
 
     constructor(
         private dialogRef: MatDialogRef<FilterCriteriaDialogComponent>,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private deviceTypeService: DeviceTypeService,
         private conceptsService: ConceptsService,
         @Inject(MAT_DIALOG_DATA)

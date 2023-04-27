@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { AuthorizationService } from '../../../core/services/authorization.service';
-import { AuthorizationProfileModel } from '../../../core/components/authorization/authorization-profile.model';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import {Component, OnInit} from '@angular/core';
+import {AuthorizationService} from '../../../core/services/authorization.service';
+import {AuthorizationProfileModel} from '../../../core/components/authorization/authorization-profile.model';
+import {
+    AbstractControl,
+    FormControl,
+    FormGroup,
+    UntypedFormBuilder,
+    UntypedFormControl,
+    ValidatorFn,
+    Validators
+} from '@angular/forms';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 
 @Component({
     templateUrl: './settings-change-dialog.component.html',
@@ -28,7 +36,7 @@ import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack
 export class SettingsChangeDialogComponent implements OnInit {
     profile: AuthorizationProfileModel = { email: '', firstName: '', lastName: '', username: '' };
     passwordNew = new FormControl('', [Validators.pattern('.*[?|!|#|%|$].*'), Validators.minLength(8), this.forbiddenNameValidator()]);
-    passwordConfirm = new FormControl('', [this.equalValidator()]);
+    passwordConfirm = new UntypedFormControl('', [this.equalValidator()]);
     firstFormGroup!: FormGroup;
     hidePasswordNew = true;
     hidePasswordConfirm = true;
@@ -37,7 +45,7 @@ export class SettingsChangeDialogComponent implements OnInit {
         private authorizationService: AuthorizationService,
         private dialogRef: MatDialogRef<SettingsChangeDialogComponent>,
         private snackBar: MatSnackBar,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
     ) {}
 
     ngOnInit(): void {

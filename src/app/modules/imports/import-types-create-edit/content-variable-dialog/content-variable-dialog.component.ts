@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {
+    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+    MatLegacyDialogRef as MatDialogRef
+} from '@angular/material/legacy-dialog';
 import {ImportTypeContentVariableModel} from '../../import-types/shared/import-types.model';
-import {AbstractControl, FormBuilder, ValidationErrors, Validators} from '@angular/forms';
+import {AbstractControl, UntypedFormBuilder, ValidationErrors, Validators} from '@angular/forms';
 import {
     DeviceTypeAspectModel,
     DeviceTypeCharacteristicsModel,
@@ -82,7 +85,7 @@ export class ContentVariableDialogComponent implements OnInit {
             infoOnly: boolean;
             nameTimeAllowed: boolean;
         },
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private dialogRef: MatDialogRef<ContentVariableDialogComponent>,
     ) {
     }

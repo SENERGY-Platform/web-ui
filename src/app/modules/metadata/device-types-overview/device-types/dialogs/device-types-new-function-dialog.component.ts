@@ -16,7 +16,7 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { FormControl, Validators } from '@angular/forms';
+import {FormControl, UntypedFormControl, Validators} from '@angular/forms';
 import { DeviceTypeFunctionModel, DeviceTypeFunctionType } from '../../shared/device-type.model';
 import { util } from 'jointjs';
 import uuid = util.uuid;
@@ -29,10 +29,10 @@ import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack
     styleUrls: ['./device-types-new-function-dialog.component.css'],
 })
 export class DeviceTypesNewFunctionDialogComponent implements OnInit {
-    nameControl = new FormControl('', [Validators.required]);
-    displayNameControl = new FormControl('');
-    descriptionControl = new FormControl('');
-    conceptControl = new FormControl('');
+    nameControl = new UntypedFormControl('', [Validators.required]);
+    displayNameControl = new UntypedFormControl('');
+    descriptionControl = new UntypedFormControl('');
+    conceptControl = new UntypedFormControl('');
     concepts: ConceptsPermSearchModel[] = [];
     functionType = {} as DeviceTypeFunctionType;
 

@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { ImportTypePermissionSearchModel } from './shared/import-types.model';
-import { ImportTypesService } from './shared/import-types.service';
-import { Sort } from '@angular/material/sort';
-import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
-import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
-import { Router } from '@angular/router';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
-import { ImportInstancesModel } from '../import-instances/shared/import-instances.model';
-import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
-import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
-import { DialogsService } from '../../../core/services/dialogs.service';
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {ImportTypePermissionSearchModel} from './shared/import-types.model';
+import {ImportTypesService} from './shared/import-types.service';
+import {Sort} from '@angular/material/sort';
+import {UntypedFormControl} from '@angular/forms';
+import {debounceTime} from 'rxjs/operators';
+import {MatLegacyTable as MatTable} from '@angular/material/legacy-table';
+import {Router} from '@angular/router';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import {ImportInstancesModel} from '../import-instances/shared/import-instances.model';
+import {ImportDeployEditDialogComponent} from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
+import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 @Component({
     selector: 'senergy-import-types',
@@ -39,7 +39,7 @@ export class ImportTypesComponent implements OnInit {
     importTypes: ImportTypePermissionSearchModel[] = [];
     dataReady = false;
     sort = 'name.asc';
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
     limitInit = 100;
     limit = this.limitInit;
     offset = 0;

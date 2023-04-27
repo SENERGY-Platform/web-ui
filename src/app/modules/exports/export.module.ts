@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 
-import { RouterModule } from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../core/core.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -45,11 +45,11 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatLegacySlideToggleModule as MatSlideToggleModule } from '@angular/material/legacy-slide-toggle';
 
-const exp = { path: 'exports/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'New Export' } };
-const dataExport = { path: 'exports/db', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' } };
-const exportEdit = { path: 'exports/edit/:id', pathMatch: 'full', component: NewExportComponent, data: { header: 'Edit Export' } };
-const details = { path: 'exports/details/:id', pathMatch: 'full', component: ExportDetailsComponent, data: { header: 'Export Details' } };
-const brokerDataExport = { path: 'exports/broker', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' } };
+const exp: Route = { path: 'exports/new', pathMatch: 'full', component: NewExportComponent, data: { header: 'New Export' } };
+const dataExport: Route = { path: 'exports/db', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' } };
+const exportEdit: Route = { path: 'exports/edit/:id', pathMatch: 'full', component: NewExportComponent, data: { header: 'Edit Export' } };
+const details: Route = { path: 'exports/details/:id', pathMatch: 'full', component: ExportDetailsComponent, data: { header: 'Export Details' } };
+const brokerDataExport: Route = { path: 'exports/broker', pathMatch: 'full', component: ExportComponent, data: { header: 'Exports' } };
 
 @NgModule({
     imports: [

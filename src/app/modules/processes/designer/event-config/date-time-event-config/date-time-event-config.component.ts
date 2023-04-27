@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
+import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output} from '@angular/core';
+import {UntypedFormControl, Validators} from '@angular/forms';
 
 @Component({
     selector: 'senergy-date-time-event-config',
@@ -26,9 +26,9 @@ export class DateTimeEventConfigComponent implements OnInit {
     @Input() initial = '';
     @Output() update = new EventEmitter<{ iso: string; text: string }>();
 
-    date = new FormControl(new Date(), Validators.required);
-    hour = new FormControl(0, [Validators.max(23), Validators.min(0)]);
-    minute = new FormControl(0, [Validators.max(59), Validators.min(0)]);
+    date = new UntypedFormControl(new Date(), Validators.required);
+    hour = new UntypedFormControl(0, [Validators.max(23), Validators.min(0)]);
+    minute = new UntypedFormControl(0, [Validators.max(59), Validators.min(0)]);
 
     constructor(@Inject(LOCALE_ID) private localeId: string) {}
 

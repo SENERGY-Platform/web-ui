@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import {MatLegacySnackBar as MatSnackBar, MatLegacySnackBarRef as MatSnackBarRef} from '@angular/material/legacy-snack-bar';
-import { Router } from '@angular/router';
-import { merge, Subscription } from 'rxjs';
-import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator';
-import { MatSort } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
-import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeAuthOk, WaitingRoomEventTypeSet} from './shared/waiting-room.model';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
+import {
+    MatLegacySnackBar as MatSnackBar,
+    MatLegacySnackBarRef as MatSnackBarRef
+} from '@angular/material/legacy-snack-bar';
+import {merge, Subscription} from 'rxjs';
+import {MatLegacyPaginator as MatPaginator} from '@angular/material/legacy-paginator';
+import {MatSort} from '@angular/material/sort';
+import {SelectionModel} from '@angular/cdk/collections';
+import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
+import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeSet} from './shared/waiting-room.model';
 import {debounceTime, startWith, switchMap} from 'rxjs/operators';
-import { WaitingRoomService } from './shared/waiting-room.service';
-import { DeviceInstancesModel } from '../device-instances/shared/device-instances.model';
-import { WaitingRoomDeviceEditDialogComponent } from './dialogs/waiting-room-device-edit-dialog.component';
-import { DialogsService } from '../../../core/services/dialogs.service';
-import { ConfirmDialogComponent } from '../../../core/dialogs/confirm-dialog.component';
-import { WaitingRoomMultiWmbusKeyEditDialogComponent } from './dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
+import {WaitingRoomService} from './shared/waiting-room.service';
+import {DeviceInstancesModel} from '../device-instances/shared/device-instances.model';
+import {WaitingRoomDeviceEditDialogComponent} from './dialogs/waiting-room-device-edit-dialog.component';
+import {DialogsService} from '../../../core/services/dialogs.service';
+import {
+    WaitingRoomMultiWmbusKeyEditDialogComponent
+} from './dialogs/waiting-room-multi-wmbus-key-edit-dialog.component';
 import {ClosableSnackBarComponent} from '../../../core/components/closable-snack-bar/closable-snack-bar.component';
-import {$_} from '@angular/compiler/src/chars';
 
 @Component({
     selector: 'senergy-waiting-room',
@@ -74,7 +75,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearchAndGetDevices();
-        this.initEventNotification()
+        this.initEventNotification();
     }
 
     ngOnDestroy() {
@@ -177,7 +178,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
             if (deviceOut !== undefined) {
                 this.waitingRoomService.updateDevice(deviceOut).subscribe((deviceResp: WaitingDeviceModel | null) => {
                     if (deviceResp === null) {
-                        this.snackBar.open('Error while updating the device!', "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Error while updating the device!', 'close', { panelClass: 'snack-bar-error' });
                     } else {
                         Object.assign(device, deviceOut);
                         this.snackBar.open('Device updated successfully.', undefined, { duration: 2000 });
@@ -227,7 +228,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
                 this.waitingRoomService.updateDevice(deviceOut).subscribe((deviceResp: WaitingDeviceModel | null) => {
                     if (deviceResp === null) {
                         this.ready = true;
-                        this.snackBar.open('Error while updating the device!', "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Error while updating the device!', 'close', { panelClass: 'snack-bar-error' });
                     } else {
                         Object.assign(device, deviceOut);
                         this.waitingRoomService.useDevice(device.local_id).subscribe((response) => {
@@ -238,7 +239,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
                                 });
                                 this.getDevices(true);
                             } else {
-                                this.snackBar.open('Device could not be used', "close", { panelClass: "snack-bar-error" });
+                                this.snackBar.open('Device could not be used', 'close', { panelClass: 'snack-bar-error' });
                             }
                         });
                     }
@@ -296,7 +297,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
                 this.waitingRoomService.updateMultipleDevices(devices).subscribe((devicesResp: WaitingDeviceModel[] | null) => {
                     if (devicesResp === null) {
                         this.ready = true;
-                        this.snackBar.open('Error while updating and using the devices!', "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Error while updating and using the devices!', 'close', { panelClass: 'snack-bar-error' });
                     } else {
                         const deviceIds: string[] = [];
                         this.selection.selected.forEach((device: WaitingDeviceModel) => {
@@ -361,7 +362,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
                             });
                             this.getDevices(true);
                         } else {
-                            this.snackBar.open('Device could not be hidden', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Device could not be hidden', 'close', { panelClass: 'snack-bar-error' });
                         }
                         this.ready = true;
                     });
@@ -414,7 +415,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
                             });
                             this.getDevices(true);
                         } else {
-                            this.snackBar.open('Device could not be shown', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Device could not be shown', 'close', { panelClass: 'snack-bar-error' });
                         }
                         this.ready = true;
                     });
@@ -489,25 +490,25 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         this.waitingRoomService.events(closer => {
             this.eventsCloser = closer;
         })
-        .pipe(debounceTime(1000))
-        .subscribe((msg) => {
-            if (msg.type === WaitingRoomEventTypeSet && !this.idSet.has(msg.payload) && !this.snackBarInstance) {
-                let temp = this.snackBar.openFromComponent(ClosableSnackBarComponent, {
-                    data: {
-                        message: 'New devices found.',
-                        action: 'Reload'
-                    },
-                });
-                temp.onAction().subscribe(_ => {
-                    this.getDevices(false);
-                });
-                temp.afterDismissed().subscribe(_ => {
-                    if (this && this.snackBarInstance) {
-                        this.snackBarInstance = undefined;
-                    }
-                });
-                this.snackBarInstance = temp;
-            }
-        });
+            .pipe(debounceTime(1000))
+            .subscribe((msg) => {
+                if (msg.type === WaitingRoomEventTypeSet && !this.idSet.has(msg.payload) && !this.snackBarInstance) {
+                    const temp = this.snackBar.openFromComponent(ClosableSnackBarComponent, {
+                        data: {
+                            message: 'New devices found.',
+                            action: 'Reload'
+                        },
+                    });
+                    temp.onAction().subscribe(_ => {
+                        this.getDevices(false);
+                    });
+                    temp.afterDismissed().subscribe(_ => {
+                        if (this && this.snackBarInstance) {
+                            this.snackBarInstance = undefined;
+                        }
+                    });
+                    this.snackBarInstance = temp;
+                }
+            });
     }
 }

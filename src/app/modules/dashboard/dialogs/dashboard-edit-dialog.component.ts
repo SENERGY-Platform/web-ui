@@ -16,7 +16,7 @@
 
 import { Component, Inject } from '@angular/core';
 import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { FormControl, Validators } from '@angular/forms';
+import {FormControl, UntypedFormControl, Validators} from '@angular/forms';
 import { DashboardModel } from '../shared/dashboard.model';
 
 @Component({
@@ -25,7 +25,7 @@ import { DashboardModel } from '../shared/dashboard.model';
 })
 export class DashboardEditDialogComponent {
     dashboard: DashboardModel;
-    formControl = new FormControl('', [Validators.required, Validators.minLength(1)]);
+    formControl = new UntypedFormControl('', [Validators.required, Validators.minLength(1)]);
 
     constructor(
         private dialogRef: MatDialogRef<DashboardEditDialogComponent>,

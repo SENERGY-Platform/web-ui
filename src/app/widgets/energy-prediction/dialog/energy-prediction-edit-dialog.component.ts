@@ -16,7 +16,7 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { AbstractControl, FormBuilder, FormControl, ValidatorFn, Validators } from '@angular/forms';
+import {AbstractControl, FormBuilder, FormControl, UntypedFormBuilder, ValidatorFn, Validators} from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -69,7 +69,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
         private exportService: ExportService,
-        private formBuilder: FormBuilder,
+        private formBuilder: UntypedFormBuilder,
         @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
     ) {
         this.dashboardId = data.dashboardId;

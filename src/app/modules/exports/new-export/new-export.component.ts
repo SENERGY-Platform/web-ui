@@ -41,7 +41,7 @@ import {ImportInstancesModel} from '../../imports/import-instances/shared/import
 import {ImportTypeContentVariableModel, ImportTypeModel} from '../../imports/import-types/shared/import-types.model';
 import {ImportTypesService} from '../../imports/import-types/shared/import-types.service';
 import {map} from 'rxjs/operators';
-import {AbstractControl, FormArray, FormBuilder, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, UntypedFormBuilder, Validators} from '@angular/forms';
 import * as _ from 'lodash';
 import {BrokerExportService} from '../shared/broker-export.service';
 import {LegacyPageEvent as PageEvent} from '@angular/material/legacy-paginator';
@@ -127,7 +127,7 @@ export class NewExportComponent implements OnInit {
         public snackBar: MatSnackBar,
         private importInstancesService: ImportInstancesService,
         private importTypesService: ImportTypesService,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
     ) {
         this.id = this.route.snapshot.paramMap.get('id');
 
@@ -233,10 +233,10 @@ export class NewExportComponent implements OnInit {
                                     }
                                 });
                             } else if (exp.FilterType === 'pipeId') {
-                                this.snackBar.open('Outdated export version - Please reconfigure and redeploy the export', "close", {
+                                this.snackBar.open('Outdated export version - Please reconfigure and redeploy the export', 'close', {
                                     duration: 5000,
                                     verticalPosition: 'top',
-                                    panelClass: "snack-bar-error"
+                                    panelClass: 'snack-bar-error'
                                 });
                                 this.exportForm.patchValue({selector: 'pipe'});
                                 this.pipelines.forEach((pipeline) => {
@@ -326,7 +326,7 @@ export class NewExportComponent implements OnInit {
                             duration: 2000,
                         });
                     } else {
-                        this.snackBar.open('Export could not be updated', "close", {panelClass: "snack-bar-error"});
+                        this.snackBar.open('Export could not be updated', 'close', {panelClass: 'snack-bar-error'});
                     }
                     this.ready = true;
                 });
@@ -334,7 +334,7 @@ export class NewExportComponent implements OnInit {
                 const obs = (
                     this.exportForm.get('targetSelector')?.value === this.targetDb ? this.exportService : this.brokerExportService
                 ).startPipeline(this.export);
-                obs.subscribe(function () {
+                obs.subscribe(function() {
                     self.router.navigate(['/exports', self.exportForm.get('targetSelector')?.value === self.targetDb ? 'db' : 'broker']);
                     self.snackBar.open('Export created', undefined, {
                         duration: 2000,
@@ -632,22 +632,22 @@ export class NewExportComponent implements OnInit {
             } else {
                 let type = this.paths.get(this.exportValues.at(id).value.Path);
                 switch (this.paths.get(this.exportValues.at(id).value.Path)) {
-                    case this.typeString:
-                        type = 'string';
-                        break;
-                    case this.typeFloat:
-                        type = 'float';
-                        break;
-                    case this.typeInteger:
-                        type = 'int';
-                        break;
-                    case this.typeBoolean:
-                        type = 'bool';
-                        break;
-                    case this.typeList:
-                    case this.typeStructure:
-                        type = 'string_json';
-                        break;
+                case this.typeString:
+                    type = 'string';
+                    break;
+                case this.typeFloat:
+                    type = 'float';
+                    break;
+                case this.typeInteger:
+                    type = 'int';
+                    break;
+                case this.typeBoolean:
+                    type = 'bool';
+                    break;
+                case this.typeList:
+                case this.typeStructure:
+                    type = 'string_json';
+                    break;
                 }
 
                 this.exportValues.at(id).patchValue({Type: type});

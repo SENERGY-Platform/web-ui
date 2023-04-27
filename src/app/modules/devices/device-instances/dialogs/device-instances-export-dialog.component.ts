@@ -17,7 +17,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ExportModel} from '../../../exports/shared/export.model';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup, UntypedFormArray, UntypedFormBuilder} from '@angular/forms';
 import {ExportService} from '../../../exports/shared/export.service';
 import {forkJoin, Observable} from 'rxjs';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
@@ -29,12 +29,12 @@ import {Router} from '@angular/router';
 })
 export class DeviceInstancesExportDialogComponent implements OnInit {
     exports: ExportModel[] = [];
-    formArray = new FormArray([]);
+    formArray = new UntypedFormArray([]);
 
     constructor(
         private dialogRef: MatDialogRef<DeviceInstancesExportDialogComponent>,
         private exportService: ExportService,
-        private formBuilder: FormBuilder,
+        private formBuilder: UntypedFormBuilder,
         private snackBar: MatSnackBar,
         private router: Router,
         @Inject(MAT_DIALOG_DATA) private data: { exports: ExportModel[] },
@@ -74,7 +74,7 @@ export class DeviceInstancesExportDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error creating exports', "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Error creating exports', 'close', { panelClass: 'snack-bar-error' });
             },
         );
     }

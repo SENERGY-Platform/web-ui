@@ -17,7 +17,7 @@
  */
 
 import {Component, ViewChild} from '@angular/core';
-import {FormControl, Validators} from '@angular/forms';
+import {FormControl, UntypedFormControl, Validators} from '@angular/forms';
 import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import { PermissionModel } from '../permission.model';
@@ -32,7 +32,7 @@ export class PermissionsDialogImportComponent {
 
     // @ts-ignore
     @ViewChild('fileInput') public fileInput: HTMLInputElement;
-    public overwrite = new FormControl(undefined, Validators.required);
+    public overwrite = new UntypedFormControl(undefined, Validators.required);
     public policies: PermissionModel[] = [];
     public fileValid = false;
     public selections: boolean[] = [];

@@ -18,10 +18,11 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
-import { FormControl } from '@angular/forms';
+import {FormControl, UntypedFormControl} from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
 import { DeviceGroupsPermSearchModel } from '../shared/device-groups-perm-search.model';
+import {Route} from "@angular/router";
 
 @Component({
     templateUrl: './device-groups-select-dialog.component.html',
@@ -34,7 +35,7 @@ export class DeviceGroupsSelectDialogComponent implements OnInit {
     dataReady = false;
     sortBy = 'name';
     sortOrder = 'asc';
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
     limitInit = 100;
     limit = this.limitInit;
     offset = 0;

@@ -16,7 +16,7 @@
 
 import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
 import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import {FormArray, FormControl, Validators} from '@angular/forms';
+import {FormArray, FormControl, UntypedFormControl, Validators} from '@angular/forms';
 import {
     ConverterExtensionTryRequest,
     DeviceTypeCharacteristicsModel,
@@ -35,10 +35,10 @@ import {map} from 'rxjs/operators';
 })
 export class ConceptsEditDialogComponent implements OnInit {
     conceptId: string;
-    nameFormControl = new FormControl('', [Validators.required]);
-    idFormControl = new FormControl({ value: '', disabled: true });
-    characteristicsControl = new FormControl('', [Validators.required]);
-    baseCharacteristicControl = new FormControl('', [Validators.required]);
+    nameFormControl = new UntypedFormControl('', [Validators.required]);
+    idFormControl = new UntypedFormControl({ value: '', disabled: true });
+    characteristicsControl = new UntypedFormControl('', [Validators.required]);
+    baseCharacteristicControl = new UntypedFormControl('', [Validators.required]);
     characteristics: CharacteristicsPermSearchModel[] = [];
     concept: DeviceTypeConceptModel|undefined;
     ready = false;

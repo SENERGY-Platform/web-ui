@@ -16,12 +16,11 @@
  *
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {AuthorizationService} from 'src/app/core/services/authorization.service';
 import {SwaggerService} from '../shared/swagger/swagger.service';
 import SwaggerUI from 'swagger-ui';
-import 'swagger-ui/dist/swagger-ui.css';
 
 
 @Component({
@@ -39,6 +38,7 @@ export class SingleServiceDocComponent implements OnInit {
     }
 
     public ngOnInit() {
+
         this.route.params.subscribe((params) => {
             this.swaggerService.getSingleSwagger(decodeURIComponent(params.id)).subscribe((api) => {
                 this.swagger = api;

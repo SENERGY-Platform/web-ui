@@ -16,9 +16,7 @@
   ~
   -->
 <div class="container">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.18.1/swagger-ui.min.css"
-          integrity="sha512-SKHt0bxw6yOYecxnfPBP/HT3k84Wp6Y+e/6HA3YlbphEUNUJg+/L003NnmtvYyO2IRCHB8tllDoSkwOqqEoq5Q=="
-          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="/swagger-ui.css"/> <!-- export defined in angular.json -->
     <div [hidden]="!ready" id="swagger"></div>
     <div *ngIf="!ready" fxLayout="row" fxLayoutAlign="center center">
         <mat-spinner [diameter]="50" [strokeWidth]="5" class="position" color="accent"></mat-spinner>

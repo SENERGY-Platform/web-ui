@@ -14,44 +14,43 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
+import {NgModule} from '@angular/core';
 
-import { RouterModule } from '@angular/router';
-import { OperatorRepoComponent } from './operator-repo/operator-repo.component';
-import { CommonModule } from '@angular/common';
-import { CoreModule } from '../../core/core.module';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { OperatorRepoModule } from './operator-repo/operator-repo.module';
-import { ExportComponent } from '../exports/export.component';
-import { ExportModule } from '../exports/export.module';
-import { FlowDesignerComponent } from './flow-designer/flow-designer.component';
-import { FormsModule } from '@angular/forms';
-import { FlowRepoComponent } from './flow-repo/flow-repo.component';
-import { FlowRepoModule } from './flow-repo/flow-repo.module';
-import { PipelineRegistryComponent } from './pipeline-registry/pipeline-registry.component';
-import { PipelineRegistryModule } from './pipeline-registry/pipeline-registry.module';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { MatIconModule } from '@angular/material/icon';
-import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatLegacyListModule as MatListModule } from '@angular/material/legacy-list';
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
-import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
-import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
-import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card';
-import { MatSortModule } from '@angular/material/sort';
-import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox';
-import { MatLegacyOptionModule as MatOptionModule } from '@angular/material/legacy-core';
-import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select';
-import { MatLegacyPaginatorModule as MatPaginatorModule } from '@angular/material/legacy-paginator';
+import {Route, RouterModule} from '@angular/router';
+import {OperatorRepoComponent} from './operator-repo/operator-repo.component';
+import {CommonModule} from '@angular/common';
+import {CoreModule} from '../../core/core.module';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {OperatorRepoModule} from './operator-repo/operator-repo.module';
+import {ExportModule} from '../exports/export.module';
+import {FlowDesignerComponent} from './flow-designer/flow-designer.component';
+import {FormsModule} from '@angular/forms';
+import {FlowRepoComponent} from './flow-repo/flow-repo.component';
+import {FlowRepoModule} from './flow-repo/flow-repo.module';
+import {PipelineRegistryComponent} from './pipeline-registry/pipeline-registry.component';
+import {PipelineRegistryModule} from './pipeline-registry/pipeline-registry.module';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatIconModule} from '@angular/material/icon';
+import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/legacy-tooltip';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
+import {MatLegacyTableModule as MatTableModule} from '@angular/material/legacy-table';
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
+import {MatLegacyCardModule as MatCardModule} from '@angular/material/legacy-card';
+import {MatSortModule} from '@angular/material/sort';
+import {InfiniteScrollModule} from 'ngx-infinite-scroll';
+import {MatLegacyCheckboxModule as MatCheckboxModule} from '@angular/material/legacy-checkbox';
+import {MatLegacyOptionModule as MatOptionModule} from '@angular/material/legacy-core';
+import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
+import {MatLegacyPaginatorModule as MatPaginatorModule} from '@angular/material/legacy-paginator';
 
-const operatorRepo = { path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Operators' } };
-const designer = { path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
-const designerEdit = { path: 'data/designer/:id', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
-const flowRepo = { path: 'data/flow-repo', pathMatch: 'full', component: FlowRepoComponent, data: { header: 'Flows' } };
-const pipelineRegistry = { path: 'data/pipelines', pathMatch: 'full', component: PipelineRegistryComponent, data: { header: 'Pipelines' } };
+const operatorRepo: Route = { path: 'data/operator-repo', pathMatch: 'full', component: OperatorRepoComponent, data: { header: 'Operators' } };
+const designer: Route = { path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
+const designerEdit: Route = { path: 'data/designer/:id', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
+const flowRepo: Route = { path: 'data/flow-repo', pathMatch: 'full', component: FlowRepoComponent, data: { header: 'Flows' } };
+const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', component: PipelineRegistryComponent, data: { header: 'Pipelines' } };
 
 @NgModule({
     imports: [

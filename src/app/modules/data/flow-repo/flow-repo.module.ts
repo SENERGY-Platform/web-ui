@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 
-import { RouterModule } from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -37,8 +37,8 @@ import { MatLegacySelectModule as MatSelectModule } from '@angular/material/lega
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card';
 import { DeployFlowClassicComponent } from './deploy-flow/classic/deploy-flow-component-classic.component';
 
-const deploy = { path: 'data/flow-repo/deploy/:id', pathMatch: 'full', component: DeployFlowComponent, data: { header: 'Analytics' } };
-const deployClassic = {
+const deploy: Route = { path: 'data/flow-repo/deploy/:id', pathMatch: 'full', component: DeployFlowComponent, data: { header: 'Analytics' } };
+const deployClassic: Route = {
     path: 'data/flow-repo/deploy-classic/:id',
     pathMatch: 'full',
     component: DeployFlowClassicComponent,

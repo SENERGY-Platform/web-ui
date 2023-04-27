@@ -19,7 +19,7 @@ import { ImportInstanceConfigModel, ImportInstancesModel } from '../import-insta
 import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
 import { ImportTypesService } from '../import-types/shared/import-types.service';
 import { ImportTypeConfigModel, ImportTypeModel } from '../import-types/shared/import-types.model';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { typeValueValidator } from '../validators/type-value-validator';
 
@@ -56,7 +56,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
 
     constructor(
         @Inject(MAT_DIALOG_DATA) public data: ImportInstancesModel,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private dialogRef: MatDialogRef<ImportDeployEditDialogComponent>,
         private importTypesService: ImportTypesService,
         private snackBar: MatSnackBar,
@@ -110,7 +110,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error loading import type', "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Error loading import type', 'close', { panelClass: 'snack-bar-error' });
                 this.dialogRef.close();
             },
         );
@@ -155,7 +155,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
             () => this.dialogRef.close(true),
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error saving', "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Error saving', 'close', { panelClass: 'snack-bar-error' });
             },
         );
     }

@@ -15,11 +15,14 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {
+    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+    MatLegacyDialogRef as MatDialogRef
+} from '@angular/material/legacy-dialog';
 import {NotificationBrokerModel, NotificationModel} from '../shared/notification.model';
 import {NotificationService} from '../shared/notification.service';
 import {LegacyPageEvent as PageEvent} from '@angular/material/legacy-paginator';
-import {FormBuilder, FormControl, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormControl, Validators} from '@angular/forms';
 import {forkJoin, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
@@ -62,11 +65,11 @@ export class NotificationDialogComponent implements OnInit {
 
     platformBrokerTooltip = environment.brokerExportBroker + ', Topic: notifications/' + this.authorizationService.getUserId() + ', Use platform credentials';
 
-    platformBrokerActive = new FormControl(false);
+    platformBrokerActive = new UntypedFormControl(false);
 
     constructor(
         private dialogRef: MatDialogRef<NotificationDialogComponent>,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private authorizationService: AuthorizationService,
         @Inject(MAT_DIALOG_DATA) data: { notifications: NotificationModel[]; notificationService: NotificationService },
     ) {

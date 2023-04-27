@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
-import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
-import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
-import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import { CamundaVariable } from '../../../modules/processes/deployments/shared/deployments-definition.model';
-import { checkValueValidator } from './range-slider-edit-dialog.validators';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {UntypedFormBuilder, Validators} from '@angular/forms';
+import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
+import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
+import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {MatLegacyTable as MatTable} from '@angular/material/legacy-table';
+import {
+    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+    MatLegacyDialogRef as MatDialogRef
+} from '@angular/material/legacy-dialog';
+import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
+import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
+import {checkValueValidator} from './range-slider-edit-dialog.validators';
 
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
@@ -56,7 +59,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
         private dialogRef: MatDialogRef<RangeSliderEditDialogComponent>,
         private dashboardService: DashboardService,
         private deploymentsService: DeploymentsService,
-        private formBuilder: FormBuilder,
+        private formBuilder: UntypedFormBuilder,
         @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
     ) {
         this.dashboardId = data.dashboardId;

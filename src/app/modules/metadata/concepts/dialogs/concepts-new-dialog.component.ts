@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
-import { FormControl, Validators } from '@angular/forms';
+import {Component} from '@angular/core';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
+import {UntypedFormControl, Validators} from '@angular/forms';
 
 @Component({
     templateUrl: './concepts-new-dialog.component.html',
     styleUrls: ['./concepts-new-dialog.component.css'],
 })
 export class ConceptsNewDialogComponent {
-    nameControl = new FormControl('', [Validators.required]);
+    nameControl = new UntypedFormControl('', [Validators.required]);
 
     constructor(private dialogRef: MatDialogRef<ConceptsNewDialogComponent>) {}
 

@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 
-import { RouterModule } from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 
 import { CoreModule } from '../../core/core.module';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
@@ -64,31 +64,31 @@ import {
 } from './designer/dialog/edit-smart-service-json-extraction-dialog/edit-smart-service-json-extraction-dialog.component';
 import {CriteriaListComponent} from './designer/dialog/edit-smart-service-task-dialog/criteria-list.component';
 
-const designs = {
+const designs: Route = {
     path: 'smart-services/designs',
     pathMatch: 'full',
     component: SmartServiceDesignsComponent,
     data: { header: 'Repository' },
 };
 
-const releases = {
+const releases: Route = {
     path: 'smart-services/releases',
     pathMatch: 'full',
     component: SmartServiceReleasesComponent,
     data: { header: 'Repository' },
 };
 
-const designerReleaseExport = {
+const designerReleaseExport: Route = {
     path: 'smart-services/releases/designer/:releaseId',
     component: SmartServiceDesignerComponent,
     data: { header: 'Designer' },
 };
-const designerEdit = {
+const designerEdit: Route = {
     path: 'smart-services/designer/:id',
     component: SmartServiceDesignerComponent,
     data: { header: 'Designer' },
 };
-const designer = {
+const designer: Route = {
     path: 'smart-services/designer',
     pathMatch: 'full',
     component: SmartServiceDesignerComponent,

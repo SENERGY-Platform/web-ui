@@ -105,7 +105,7 @@ export class ProcessDesignerComponent implements OnInit {
                 getProcessIoConfigs: (callback: (config: ProcessIoDesignerConfig) => void) => {
                     callback(DefaultProcessIoDesignerConfig);
                 },
-                openProcessIoDialog: (initialInfo: ProcessIoDesignerInfo, callback: (resultInfo: ProcessIoDesignerInfo,)=>void) => {
+                openProcessIoDialog: (initialInfo: ProcessIoDesignerInfo, callback: (resultInfo: ProcessIoDesignerInfo,) => void) => {
                     that.designerDialogService
                         .openProcessIoDialog(initialInfo)
                         .subscribe((result: ProcessIoDesignerInfo | null) => {
@@ -187,7 +187,7 @@ export class ProcessDesignerComponent implements OnInit {
                             }
                             this.designerService
                                 .checkConstraints(this.modeler)
-                                .pipe(defaultIfEmpty<DesignerErrorModel[][]>([]))
+                                .pipe(defaultIfEmpty([]))
                                 .subscribe((responses: DesignerErrorModel[][]) => {
                                     if (this.countErrors(responses) > 0) {
                                         this.showDeviceClassError(responses);
@@ -248,18 +248,18 @@ export class ProcessDesignerComponent implements OnInit {
     save(): void {
         this.designerService
             .checkConstraints(this.modeler)
-            .pipe(defaultIfEmpty<DesignerErrorModel[][]>([]))
+            .pipe(defaultIfEmpty([]))
             .subscribe((responses: DesignerErrorModel[][]) => {
                 if (this.countErrors(responses) > 0) {
                     this.showDeviceClassError(responses);
                 } else {
                     this.saveXML((errXML, processXML) => {
                         if (errXML) {
-                            this.snackBar.open('Error XML! ' + errXML, "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error XML! ' + errXML, 'close', { panelClass: 'snack-bar-error' });
                         } else {
                             this.saveSVG((errSVG, svgXML) => {
                                 if (errSVG) {
-                                    this.snackBar.open('Error SVG! ' + errSVG, "close", { panelClass: "snack-bar-error" });
+                                    this.snackBar.open('Error SVG! ' + errSVG, 'close', { panelClass: 'snack-bar-error' });
                                 } else {
                                     this.processRepoService.saveProcess(this.id, processXML, svgXML).subscribe(() => {
                                         this.snackBar.open('Model saved.', undefined, { duration: 2000 });

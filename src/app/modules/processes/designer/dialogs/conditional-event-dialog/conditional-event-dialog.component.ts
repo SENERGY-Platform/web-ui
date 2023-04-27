@@ -14,34 +14,30 @@
  * limitations under the License.
  */
 
-import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import {Component, Inject, OnInit} from '@angular/core';
 import {
-    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
+    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+    MatLegacyDialogRef as MatDialogRef
+} from '@angular/material/legacy-dialog';
+import {UntypedFormBuilder, UntypedFormControl} from '@angular/forms';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
-    DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
-    DeviceTypeFunctionType,
-    functionTypes,
 } from '../../../../metadata/device-types-overview/shared/device-type.model';
-import {
-    DeviceTypeSelectionRefModel,
-    DeviceTypeSelectionResultModel,
-} from '../../../../metadata/device-types-overview/shared/device-type-selection.model';
-import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
-import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
-import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
-import {ConditionalEventEditModel, FilterCriteriaDialogResultModel} from '../../shared/designer-dialog.model';
-import { Observable } from 'rxjs';
+import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
+import {ConceptsService} from '../../../../metadata/concepts/shared/concepts.service';
+import {ConceptsCharacteristicsModel} from '../../../../metadata/concepts/shared/concepts-characteristics.model';
+import {ConditionalEventEditModel} from '../../shared/designer-dialog.model';
 
 @Component({
     templateUrl: './conditional-event-dialog.component.html',
     styleUrls: ['./conditional-event-dialog.component.css'],
 })
 export class ConditionalEventDialogComponent implements OnInit {
-    aspectFormControl = new FormControl('');
-    functionFormControl = new FormControl({ value: '', disabled: true });
+    aspectFormControl = new UntypedFormControl('');
+    functionFormControl = new UntypedFormControl({ value: '', disabled: true });
 
     aspects: Map<string, DeviceTypeAspectModel[]> = new Map();
     functions: DeviceTypeFunctionModel[] = [];
@@ -53,7 +49,7 @@ export class ConditionalEventDialogComponent implements OnInit {
 
     constructor(
         private dialogRef: MatDialogRef<ConditionalEventDialogComponent>,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private deviceTypeService: DeviceTypeService,
         private conceptsService: ConceptsService,
         @Inject(MAT_DIALOG_DATA)

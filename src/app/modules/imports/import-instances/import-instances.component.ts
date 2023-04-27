@@ -15,7 +15,7 @@
  */
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
-import { FormControl } from '@angular/forms';
+import {FormControl, UntypedFormControl} from '@angular/forms';
 import { ImportTypePermissionSearchModel } from '../import-types/shared/import-types.model';
 import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
@@ -46,7 +46,7 @@ export class ImportInstancesComponent implements OnInit {
     ) {}
 
     instances: ImportInstancesModel[] = [];
-    searchControl = new FormControl('');
+    searchControl = new UntypedFormControl('');
     dataReady = false;
     sort = 'updated_at.desc';
     limitInit = 100;

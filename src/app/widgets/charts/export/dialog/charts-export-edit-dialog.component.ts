@@ -19,13 +19,23 @@ import {WidgetModel} from '../../../../modules/dashboard/shared/dashboard-widget
 import {DeploymentsService} from '../../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {DashboardResponseMessageModel} from '../../../../modules/dashboard/shared/dashboard-response-message.model';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn} from '@angular/forms';
+import {
+    AbstractControl,
+    FormArray,
+    FormControl,
+    UntypedFormBuilder,
+    UntypedFormGroup,
+    ValidatorFn
+} from '@angular/forms';
 import {ExportService} from '../../../../modules/exports/shared/export.service';
 import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
 import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
 import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
 import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {
+    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+    MatLegacyDialogRef as MatDialogRef
+} from '@angular/material/legacy-dialog';
 import {forkJoin, Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
@@ -47,7 +57,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     typeStructure = 'https://schema.org/StructuredValue';
     typeList = 'https://schema.org/ItemList';
 
-    formGroupController = new FormGroup({});
+    formGroupController = new UntypedFormGroup({});
     exportList: ChartsExportMeasurementModel[] = [];
     deviceList: DeviceInstancesModel[] = [];
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
@@ -105,7 +115,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
         private exportDataService: ExportDataService,
         private deviceInstancesService: DeviceInstancesService,
         private deviceTypeService: DeviceTypeService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private cd: ChangeDetectorRef,
         @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string },
     ) {
@@ -534,17 +544,17 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     private translateTypeDeviceToExport(type: string): string {
         switch (type) {
-            case this.typeString:
-                return 'string';
-            case this.typeFloat:
-                return 'float';
-            case this.typeInteger:
-                return 'int';
-            case this.typeBoolean:
-                return 'bool';
-            case this.typeList:
-            case this.typeStructure:
-                return 'string_json';
+        case this.typeString:
+            return 'string';
+        case this.typeFloat:
+            return 'float';
+        case this.typeInteger:
+            return 'int';
+        case this.typeBoolean:
+            return 'bool';
+        case this.typeList:
+        case this.typeStructure:
+            return 'string_json';
         }
         console.error('unknown type ' + type);
         return '';

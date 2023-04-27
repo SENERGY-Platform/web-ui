@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ConceptsService } from '../../concepts/shared/concepts.service';
-import { ConceptsPermSearchModel } from '../../concepts/shared/concepts-perm-search.model';
+import {Component, OnInit} from '@angular/core';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {FormBuilder, FormGroup, UntypedFormControl, Validators} from '@angular/forms';
+import {ConceptsService} from '../../concepts/shared/concepts.service';
+import {ConceptsPermSearchModel} from '../../concepts/shared/concepts-perm-search.model';
+import {util} from 'jointjs';
 import uuid = util.uuid;
-import { util } from 'jointjs';
 
 @Component({
     templateUrl: './functions-create-dialog.component.html',
     styleUrls: ['./functions-create-dialog.component.css'],
 })
 export class FunctionsCreateDialogComponent implements OnInit {
-    optionsFormControl = new FormControl('Controlling');
+    optionsFormControl = new UntypedFormControl('Controlling');
     functionFormGroup!: FormGroup;
 
     concepts: ConceptsPermSearchModel[] = [];
@@ -61,8 +61,8 @@ export class FunctionsCreateDialogComponent implements OnInit {
 
     private optionListener(): void {
         this.generateUuid(this.optionsFormControl.value);
-        this.optionsFormControl.valueChanges.subscribe((option: string) => {
-            this.generateUuid(option);
+        this.optionsFormControl.valueChanges.subscribe((option) => {
+            this.generateUuid(option as string);
         });
     }
 

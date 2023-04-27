@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 
-import { RouterModule } from '@angular/router';
+import {Route, RouterModule} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
 import { PipelineDetailsComponent } from './pipeline-details/pipeline-details.component';
@@ -29,13 +29,13 @@ import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/
 import { FormsModule } from '@angular/forms';
 import { DeployFlowComponent } from '../flow-repo/deploy-flow/deploy-flow.component';
 
-const details = {
+const details: Route = {
     path: 'data/pipelines/details/:id',
     pathMatch: 'full',
     component: PipelineDetailsComponent,
     data: { header: 'Analytics' },
 };
-const edit = { path: 'data/pipelines/edit/:id', pathMatch: 'full', component: DeployFlowComponent, data: { header: 'Analytics' } };
+const edit: Route = { path: 'data/pipelines/edit/:id', pathMatch: 'full', component: DeployFlowComponent, data: { header: 'Analytics' } };
 
 @NgModule({
     imports: [

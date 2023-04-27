@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import {Component, Inject, OnInit} from '@angular/core';
 import {
-    DeviceTypeAspectModel, DeviceTypeAspectNodeModel,
+    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+    MatLegacyDialogRef as MatDialogRef
+} from '@angular/material/legacy-dialog';
+import {FormControl, UntypedFormBuilder, UntypedFormControl, Validators} from '@angular/forms';
+import {
+    DeviceTypeAspectModel,
+    DeviceTypeAspectNodeModel,
     DeviceTypeCharacteristicsModel,
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
@@ -29,22 +33,22 @@ import {
     DeviceTypeSelectionRefModel,
     DeviceTypeSelectionResultModel,
 } from '../../../../metadata/device-types-overview/shared/device-type-selection.model';
-import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
-import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
-import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
+import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
+import {ConceptsService} from '../../../../metadata/concepts/shared/concepts.service';
+import {ConceptsCharacteristicsModel} from '../../../../metadata/concepts/shared/concepts-characteristics.model';
 
 @Component({
     templateUrl: './task-config-dialog.component.html',
     styleUrls: ['./task-config-dialog.component.css'],
 })
 export class TaskConfigDialogComponent implements OnInit {
-    optionsFormControl = new FormControl('');
-    deviceClassFormControl = new FormControl('');
-    aspectFormControl = new FormControl('');
-    functionFormControl = new FormControl({ value: '', disabled: true });
-    completionStrategyFormControl = new FormControl('');
-    retriesFormControl = new FormControl({ value: 0, disabled: true }, [Validators.min(-1), Validators.max(100)]);
-    preferEventsFormControl = new FormControl({ value: false, disabled: true });
+    optionsFormControl = new UntypedFormControl('');
+    deviceClassFormControl = new UntypedFormControl('');
+    aspectFormControl = new UntypedFormControl('');
+    functionFormControl = new UntypedFormControl({ value: '', disabled: true });
+    completionStrategyFormControl = new UntypedFormControl('');
+    retriesFormControl = new UntypedFormControl({ value: 0, disabled: true }, [Validators.min(-1), Validators.max(100)]);
+    preferEventsFormControl = new UntypedFormControl({ value: false, disabled: true });
 
 
 
@@ -61,7 +65,7 @@ export class TaskConfigDialogComponent implements OnInit {
     constructor(
         private dialogRef: MatDialogRef<TaskConfigDialogComponent>,
         private dtService: DeviceTypeService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private deviceTypeService: DeviceTypeService,
         private conceptsService: ConceptsService,
         @Inject(MAT_DIALOG_DATA) private data: { selection: DeviceTypeSelectionRefModel | null },
