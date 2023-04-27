@@ -1,3 +1,4 @@
+/* eslint-env es2020 */
 
 var ImplementationTypeHelper = require('bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper');
 var is = require('bpmn-js/lib/util/ModelUtil').is;

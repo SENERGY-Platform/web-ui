@@ -441,6 +441,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                         if(element.task){
                             const selectionKey = 'process_deployment.'+element.bpmn_id+'.selection';
                             this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: '{}', type: 'text'});
+                            // eslint-disable-next-line guard-for-in
                             for (const key in element.task.parameter) {
                                 const value2 = element.task.parameter[key];
                                 if(this.taskParameterShouldBeEditable(value2)){
@@ -468,6 +469,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
                             const selectionKey = 'process_deployment.'+element.bpmn_id+'.selection';
                             this.result.inputs.push(this.knownInputValues.get(selectionKey) || {name:selectionKey, value: '{}', type: 'text'});
                             if (element.conditional_event.variables) {
+                                // eslint-disable-next-line guard-for-in
                                 for (const key in element.conditional_event.variables) {
                                     const value2 = element.conditional_event.variables[key];
                                     const paramKey = 'process_deployment.'+element.bpmn_id+'.variables.'+key;

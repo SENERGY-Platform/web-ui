@@ -14,6 +14,7 @@
  *    limitations under the License.
  */
 
+/* eslint-env es6 */
 var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory');
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
 var extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper');
