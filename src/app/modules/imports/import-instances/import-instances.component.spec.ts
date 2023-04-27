@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ImportInstancesComponent } from './import-instances.component';
-import { CoreModule } from '../../../core/core.module';
-import { Router, RouterModule } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
-import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
-import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox';
-import { FlexModule } from '@angular/flex-layout';
-import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip';
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field';
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select';
-import { MatTreeModule } from '@angular/material/tree';
-import { WidgetModule } from '../../../widgets/widget.module';
-import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import { ImportInstancesService } from './shared/import-instances.service';
-import { of } from 'rxjs';
-import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
-import { ImportInstancesModel } from './shared/import-instances.model';
-import { DialogsService } from '../../../core/services/dialogs.service';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {ImportInstancesComponent} from './import-instances.component';
+import {CoreModule} from '../../../core/core.module';
+import {Router, RouterModule} from '@angular/router';
+import {ReactiveFormsModule} from '@angular/forms';
+import {HttpClientModule} from '@angular/common/http';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
+import {MatLegacyCheckboxModule as MatCheckboxModule} from '@angular/material/legacy-checkbox';
+import {FlexModule} from '@angular/flex-layout';
+import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/legacy-tooltip';
+import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
+import {MatTreeModule} from '@angular/material/tree';
+import {WidgetModule} from '../../../widgets/widget.module';
+import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
+import {ImportInstancesService} from './shared/import-instances.service';
+import {of} from 'rxjs';
+import {InfiniteScrollModule} from 'ngx-infinite-scroll';
+import {MatLegacyTableModule as MatTableModule} from '@angular/material/legacy-table';
+import {ImportInstancesModel} from './shared/import-instances.model';
+import {DialogsService} from '../../../core/services/dialogs.service';
 
 describe('ImportInstancesComponent', () => {
     let component: ImportInstancesComponent;
@@ -62,13 +62,13 @@ describe('ImportInstancesComponent', () => {
     importInstancesServiceSpy.deleteImportInstance.and.returnValue(of());
 
     const deleteDialogServiceSpy: Spy<DialogsService> = createSpyFromClass(DialogsService);
-    deleteDialogServiceSpy.openDeleteDialog.and.returnValue({ afterClosed: () => of(true) });
+    deleteDialogServiceSpy.openDeleteDialog.and.returnValue({afterClosed: () => of(true)});
 
     const routerSpy: Spy<Router> = createSpyFromClass(Router);
     routerSpy.navigateByUrl.and.returnValue(new Promise(() => true));
 
     const dialogSpy: Spy<MatDialog> = createSpyFromClass(MatDialog);
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(true) });
+    dialogSpy.open.and.returnValue({afterClosed: () => of(true)});
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -96,10 +96,10 @@ describe('ImportInstancesComponent', () => {
                 InfiniteScrollModule,
             ],
             providers: [
-                { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
-                { provide: DialogsService, useValue: deleteDialogServiceSpy },
-                { provide: Router, useValue: routerSpy },
-                { provide: MatDialog, useValue: dialogSpy },
+                {provide: ImportInstancesService, useValue: importInstancesServiceSpy},
+                {provide: DialogsService, useValue: deleteDialogServiceSpy},
+                {provide: Router, useValue: routerSpy},
+                {provide: MatDialog, useValue: dialogSpy},
             ],
         }).compileComponents();
     });
@@ -121,14 +121,12 @@ describe('ImportInstancesComponent', () => {
         expect(importInstancesServiceSpy.deleteImportInstance).toHaveBeenCalled();
     });
 
-    it('should search', () => {
-        jasmine.clock().install();
+    it('should search', fakeAsync(() => {
         importInstancesServiceSpy.listImportInstances.calls.reset();
         component.searchControl.patchValue('search');
-        jasmine.clock().tick(301);
+        tick(301);
         expect(importInstancesServiceSpy.listImportInstances.calls.mostRecent().args[0]).toEqual('search');
-        jasmine.clock().uninstall();
-    });
+    }));
 
     it('should open the edit dialog', () => {
         dialogSpy.open.calls.reset();

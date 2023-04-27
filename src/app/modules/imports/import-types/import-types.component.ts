@@ -18,7 +18,7 @@ import {ImportTypePermissionSearchModel} from './shared/import-types.model';
 import {ImportTypesService} from './shared/import-types.service';
 import {Sort} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
-import {debounceTime} from 'rxjs/operators';
+import {debounceTime, map} from 'rxjs/operators';
 import {MatLegacyTable as MatTable} from '@angular/material/legacy-table';
 import {Router} from '@angular/router';
 import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
@@ -55,7 +55,13 @@ export class ImportTypesComponent implements OnInit {
 
     ngOnInit(): void {
         this.load();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+        this.searchControl.valueChanges.pipe(map(a => {
+            console.warn('before',Date.now()); // TODO
+            return a;
+        }),debounceTime(300), map(a=> {
+            console.warn('after',Date.now()); // TODO
+            return a;
+        })).subscribe(() => this.reload());
     }
 
     details(m: ImportTypePermissionSearchModel) {

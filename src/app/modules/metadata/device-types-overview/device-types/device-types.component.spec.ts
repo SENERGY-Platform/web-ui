@@ -20,7 +20,7 @@ import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {DeviceTypesComponent} from './device-types.component';
 import {CoreModule} from '../../../../core/core.module';
 import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
-import {ActivatedRoute, convertToParamMap} from '@angular/router';
+import {ActivatedRoute, convertToParamMap, Route} from '@angular/router';
 import {MatStepperModule} from '@angular/material/stepper';
 import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
 import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
@@ -42,7 +42,7 @@ import {MatTreeModule} from '@angular/material/tree';
 describe('DeviceTypesComponent', () => {
     let component: DeviceTypesComponent;
     let fixture: ComponentFixture<DeviceTypesComponent>;
-    const devicetypesEdit = {
+    const devicetypesEdit: Route = {
         path: 'metadata/devicetypesoverview/devicetypes/:id',
         pathMatch: 'full',
         component: DeviceTypesComponent,

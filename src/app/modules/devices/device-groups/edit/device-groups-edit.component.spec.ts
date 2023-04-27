@@ -19,7 +19,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { CoreModule } from '../../../../core/core.module';
 import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import {ActivatedRoute, convertToParamMap, Route} from '@angular/router';
 import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field';
 import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select';
 import { MatIconModule } from '@angular/material/icon';
@@ -44,7 +44,7 @@ describe('DeviceGroupsEditComponent', () => {
     let component: DeviceGroupsEditComponent;
     let fixture: ComponentFixture<DeviceGroupsEditComponent>;
 
-    const deviceGroupsEdit = {
+    const deviceGroupsEdit: Route = {
         path: 'devices/devicegroups/edit/:id',
         pathMatch: 'full',
         component: DeviceGroupsEditComponent,

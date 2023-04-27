@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { Keycloak } from 'keycloak-angular/lib/core/services/keycloak.service';
+
+import {KeycloakInstance, KeycloakProfile} from 'keycloak-js';
 
 export class MockKeycloakService {
-    getKeycloakInstance(): Keycloak.KeycloakInstance {
-        return { subject: 'test' } as Keycloak.KeycloakInstance;
+    getKeycloakInstance(): KeycloakInstance {
+        return { subject: 'test' } as KeycloakInstance;
     }
 
     getUsername() {
@@ -33,8 +34,8 @@ export class MockKeycloakService {
         ); // John Doe
     }
 
-    loadUserProfile(): Promise<Keycloak.KeycloakProfile> {
-        return new Promise<Keycloak.KeycloakProfile>((resolve) => resolve({} as Keycloak.KeycloakProfile));
+    loadUserProfile(): Promise<KeycloakProfile> {
+        return new Promise<KeycloakProfile>((resolve) => resolve({} as Keycloak.KeycloakProfile));
     }
 
     isUserInRole(_: string): boolean {
