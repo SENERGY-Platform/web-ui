@@ -17,6 +17,7 @@
 import { Injectable } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { Observable } from 'rxjs';
+import {map} from 'rxjs/operators';
 
 const mqAliases: string[] = ['xs', 'sm', 'md', 'lg', 'xl'];
 
@@ -38,10 +39,6 @@ export class ResponsiveService {
     }
 
     observeMqAlias(): Observable<string> {
-        return new Observable<string>((observer) => {
-            this.observableMedia.asObservable().subscribe((media: MediaChange[]) => {
-                media.forEach(m => observer.next(m.mqAlias));
-            });
-        });
+        return this.observableMedia.asObservable().pipe(map((media: MediaChange[]) => media[0].mqAlias));
     }
 }
