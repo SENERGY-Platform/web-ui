@@ -38,7 +38,7 @@ const grids = new Map([
 ]);
 
 @Component({
-    selector: 'smart-service-releases',
+    selector: 'senergy-smart-service-releases',
     templateUrl: './releases.component.html',
     styleUrls: ['./releases.component.css'],
 })
@@ -52,7 +52,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     searchText = '';
     selectedItems: ProcessModel[] = [];
     rowHeight = 282;
-    latest: boolean = true;
+    latest = true;
 
     private limitInit = 54;
     private limit = this.limitInit;
@@ -140,7 +140,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
                 this.limit,
                 this.offset,
                 this.searchText,
-                "r",
+                'r',
                 this.latest
             )
             .subscribe((repoItems: SmartServiceExtendedReleaseModel[]) => {
@@ -239,10 +239,10 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     }
 
     private showSnackBarError(text: string): void {
-        this.snackBar.open('Error while ' + text + ' !', "close", { panelClass: "snack-bar-error" });
+        this.snackBar.open('Error while ' + text + ' !', 'close', { panelClass: 'snack-bar-error' });
     }
 
     permission(release: SmartServiceReleaseModel): void {
-        this.permissionsDialogService.openPermissionDialog('smart_service_releases', release.id, release.name, release.design_id+"/"+release.id+"_rights");
+        this.permissionsDialogService.openPermissionDialog('smart_service_releases', release.id, release.name, release.design_id+'/'+release.id+'_rights');
     }
 }

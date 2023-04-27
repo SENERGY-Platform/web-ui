@@ -18,7 +18,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {TimescaleRuleModel} from '../shared/timescale-rule.model';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {TimescaleRulesService} from "../shared/timescale-rules.service";
+import {TimescaleRulesService} from '../shared/timescale-rules.service';
 
 @Component({
     selector: 'senergy-timescale-rules-create-edit',

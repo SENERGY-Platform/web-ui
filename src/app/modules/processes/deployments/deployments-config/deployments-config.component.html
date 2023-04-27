@@ -161,13 +161,13 @@
                                         <ng-container formGroupName="selected_path">
                                             <ng-container formGroupName="configurables">
                                                 <div [formGroupName]="configurableIndex">
-                                                    <mat-form-field class="full-width" color="accent" *ngIf="configurable.type=='https://schema.org/Text'">
+                                                    <mat-form-field class="full-width" color="accent" *ngIf="configurable.type==='https://schema.org/Text'">
                                                         <input type="text"  matInput placeholder="{{configurable.path}}" formControlName="value">
                                                     </mat-form-field>
-                                                    <mat-form-field class="full-width" color="accent" *ngIf="configurable.type=='https://schema.org/Integer' || configurable.type=='https://schema.org/Float'">
+                                                    <mat-form-field class="full-width" color="accent" *ngIf="configurable.type==='https://schema.org/Integer' || configurable.type==='https://schema.org/Float'">
                                                         <input type="number"  matInput placeholder="{{configurable.path}}" formControlName="value">
                                                     </mat-form-field>
-                                                    <mat-checkbox *ngIf="configurable.type=='https://schema.org/Boolean'" formControlName="value">
+                                                    <mat-checkbox *ngIf="configurable.type==='https://schema.org/Boolean'" formControlName="value">
                                                         {{configurable.path}}
                                                     </mat-checkbox>
                                                 </div>

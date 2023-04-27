@@ -25,9 +25,9 @@ export interface ConceptsCharacteristicsModel {
 }
 
 export interface ConverterExtension {
-    from: string
-    to: string
-    distance: number
-    formula: string
-    placeholder_name: string
+    from: string;
+    to: string;
+    distance: number;
+    formula: string;
+    placeholder_name: string;
 }

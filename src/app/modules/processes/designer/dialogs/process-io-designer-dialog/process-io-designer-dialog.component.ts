@@ -25,13 +25,13 @@ import {ProcessIoDesignerInfo, ProcessIoDesignerInfoGet, ProcessIoDesignerInfoSe
     styleUrls: ['./process-io-designer-dialog.component.css'],
 })
 export class ProcessIoDesignerDialogComponent implements OnInit {
-    info :ProcessIoDesignerInfoWithBinding;
+    info: ProcessIoDesignerInfoWithBinding;
 
     constructor(
         private dialogRef: MatDialogRef<ProcessIoDesignerDialogComponent>,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { info: ProcessIoDesignerInfo},
     ) {
-       this.info = addBinding(dialogParams.info);
+        this.info = addBinding(dialogParams.info);
     }
 
     ngOnInit() {}
@@ -45,7 +45,7 @@ export class ProcessIoDesignerDialogComponent implements OnInit {
     }
 
     isInvalid(): boolean {
-        let invalidGet = this.info.get.find(value => {
+        const invalidGet = this.info.get.find(value => {
             if (!value.key) {
                 return true;
             }
@@ -55,16 +55,16 @@ export class ProcessIoDesignerDialogComponent implements OnInit {
             return false;
         });
         if(invalidGet){
-            return true
+            return true;
         }
-        let invalidSet = this.info.set.find(value => {
+        const invalidSet = this.info.set.find(value => {
             if (!value.key) {
                 return true;
             }
             return false;
-        })
+        });
         if(invalidSet){
-            return true
+            return true;
         }
         return false;
     }
@@ -81,11 +81,11 @@ export class ProcessIoDesignerDialogComponent implements OnInit {
             this.info.set= [];
         }
         this.info.set.push({
-            key: "",
-            value: "",
+            key: '',
+            value: '',
             definitionBound: false,
             instanceBound: true,
-            binding: "instance"
+            binding: 'instance'
         });
     }
 
@@ -101,12 +101,12 @@ export class ProcessIoDesignerDialogComponent implements OnInit {
             this.info.get= [];
         }
         this.info.get.push({
-            key: "",
-            outputVariableName: "",
+            key: '',
+            outputVariableName: '',
             definitionBound: false,
             instanceBound: true,
-            binding: "instance",
-            defaultValue: "null"
+            binding: 'instance',
+            defaultValue: 'null'
         });
     }
 
@@ -118,125 +118,125 @@ export class ProcessIoDesignerDialogComponent implements OnInit {
 
 
 function addBinding(info: ProcessIoDesignerInfo): ProcessIoDesignerInfoWithBinding {
-    let result: ProcessIoDesignerInfoWithBinding = {
+    const result: ProcessIoDesignerInfoWithBinding = {
         set: [],
         get: []
-    }
+    };
     info.set.forEach(value => {
-        let element: ProcessIoDesignerInfoSetWithBinding = {
+        const element: ProcessIoDesignerInfoSetWithBinding = {
             key: value.key,
             value: value.value,
             instanceBound: value.instanceBound,
             definitionBound: value.definitionBound,
-            binding: ""
-        }
+            binding: ''
+        };
         if(value.instanceBound){
-            element.binding = "instance";
+            element.binding = 'instance';
         } else if (value.definitionBound) {
-            element.binding = "definition";
+            element.binding = 'definition';
         } else {
-            element.binding = "global";
+            element.binding = 'global';
         }
         result.set.push(element);
-    })
+    });
 
     info.get.forEach(value => {
-        let element: ProcessIoDesignerInfoGetWithBinding = {
+        const element: ProcessIoDesignerInfoGetWithBinding = {
             key: value.key,
             outputVariableName: value.outputVariableName,
             instanceBound: value.instanceBound,
             definitionBound: value.definitionBound,
-            binding: "",
+            binding: '',
             defaultValue: value.defaultValue
-        }
+        };
         if(value.instanceBound){
-            element.binding = "instance";
+            element.binding = 'instance';
         } else if (value.definitionBound) {
-            element.binding = "definition";
+            element.binding = 'definition';
         } else {
-            element.binding = "global";
+            element.binding = 'global';
         }
         result.get.push(element);
-    })
+    });
 
-    return result
+    return result;
 }
 
 
 function handleBinding(info: ProcessIoDesignerInfoWithBinding): ProcessIoDesignerInfo {
-    let result: ProcessIoDesignerInfo = {
+    const result: ProcessIoDesignerInfo = {
         set: [],
         get: []
-    }
+    };
     info.set.forEach(value => {
-        let element: ProcessIoDesignerInfoSet = {
+        const element: ProcessIoDesignerInfoSet = {
             key: value.key,
             value: value.value,
             instanceBound: value.instanceBound,
             definitionBound: value.definitionBound,
-        }
+        };
         switch (value.binding) {
-            case "instance":
-                element.instanceBound = true
-                element.definitionBound = false
-                break;
-            case "definition":
-                element.instanceBound = false
-                element.definitionBound = true
-                break;
-            case "global":
-                element.instanceBound = false
-                element.definitionBound = false
-                break;
-            default:
-                element.instanceBound = true
-                element.definitionBound = false
+        case 'instance':
+            element.instanceBound = true;
+            element.definitionBound = false;
+            break;
+        case 'definition':
+            element.instanceBound = false;
+            element.definitionBound = true;
+            break;
+        case 'global':
+            element.instanceBound = false;
+            element.definitionBound = false;
+            break;
+        default:
+            element.instanceBound = true;
+            element.definitionBound = false;
         }
         result.set.push(element);
-    })
+    });
 
     info.get.forEach(value => {
-        let element: ProcessIoDesignerInfoGet = {
+        const element: ProcessIoDesignerInfoGet = {
             key: value.key,
             defaultValue:value.defaultValue,
             outputVariableName: value.outputVariableName,
             instanceBound: value.instanceBound,
             definitionBound: value.definitionBound,
-        }
+        };
         switch (value.binding) {
-            case "instance":
-                element.instanceBound = true
-                element.definitionBound = false
-                break;
-            case "definition":
-                element.instanceBound = false
-                element.definitionBound = true
-                break;
-            case "global":
-                element.instanceBound = false
-                element.definitionBound = false
-                break;
-            default:
-                element.instanceBound = true
-                element.definitionBound = false
+        case 'instance':
+            element.instanceBound = true;
+            element.definitionBound = false;
+            break;
+        case 'definition':
+            element.instanceBound = false;
+            element.definitionBound = true;
+            break;
+        case 'global':
+            element.instanceBound = false;
+            element.definitionBound = false;
+            break;
+        default:
+            element.instanceBound = true;
+            element.definitionBound = false;
         }
         result.get.push(element);
-    })
+    });
 
-    return result
+    return result;
 }
 
 
 
 interface ProcessIoDesignerInfoWithBinding {
-    set: ProcessIoDesignerInfoSetWithBinding[]
-    get: ProcessIoDesignerInfoGetWithBinding[]
+    set: ProcessIoDesignerInfoSetWithBinding[];
+    get: ProcessIoDesignerInfoGetWithBinding[];
 }
 
 interface ProcessIoDesignerInfoSetWithBinding extends ProcessIoDesignerInfoSet {
-    binding: string
+    binding: string;
 }
 
 interface ProcessIoDesignerInfoGetWithBinding extends ProcessIoDesignerInfoGet{
-    binding: string
+    binding: string;
 }

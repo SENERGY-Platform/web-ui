@@ -88,7 +88,7 @@ export class ImportInstancesComponent implements OnInit {
                         },
                         (err) => {
                             console.error(err);
-                            this.snackBar.open('Error deleting', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error deleting', 'close', { panelClass: 'snack-bar-error' });
                         },
                     );
                 }

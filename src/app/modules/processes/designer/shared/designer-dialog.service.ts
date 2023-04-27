@@ -140,14 +140,14 @@ export class DesignerDialogService {
     openConditionalEventDialog(msg: ConditionalEventEditModel): Observable<ConditionalEventEditModel> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
-        dialogConfig.data = { msg: msg };
+        dialogConfig.data = { msg };
         return this.dialog.open(ConditionalEventDialogComponent, dialogConfig).afterClosed();
     }
 
     openProcessIoDialog(info: ProcessIoDesignerInfo): Observable<ProcessIoDesignerInfo | null> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
-        dialogConfig.data = { info: info };
+        dialogConfig.data = { info };
         return this.dialog.open(ProcessIoDesignerDialogComponent, dialogConfig).afterClosed();
     }
 }

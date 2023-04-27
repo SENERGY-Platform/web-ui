@@ -28,9 +28,9 @@ import {SmartServiceDesignModel} from './design.model';
 export class SmartServiceDesignsService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
-    getDesignList(limit: number, offset: number, search: string) : Observable<SmartServiceDesignModel[]> {
+    getDesignList(limit: number, offset: number, search: string): Observable<SmartServiceDesignModel[]> {
         const params = ['limit=' + limit, 'offset=' + offset];
-        if (search != "") {
+        if (search !== '') {
             params.push('search=' + encodeURIComponent(search));
         }
         const paramsStr = params.join('&');
@@ -56,10 +56,10 @@ export class SmartServiceDesignsService {
     }
 
     saveDesign(model: SmartServiceDesignModel): Observable<SmartServiceDesignModel | null> {
-        let id = model.id;
+        const id = model.id;
         if (id === '') {
             return this.http
-                .post<SmartServiceDesignModel>(environment.smartServiceRepoUrl+"/designs", model)
+                .post<SmartServiceDesignModel>(environment.smartServiceRepoUrl+'/designs', model)
                 .pipe(catchError(this.errorHandlerService.handleError(SmartServiceDesignsService.name, 'saveProcess', null)));
         } else {
             return this.http

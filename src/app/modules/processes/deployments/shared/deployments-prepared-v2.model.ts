@@ -25,7 +25,7 @@ export interface V2DeploymentsPreparedModel {
     diagram: V2DeploymentsPreparedDiagramModel;
     elements: V2DeploymentsPreparedElementModel[];
     incident_handling?: V2DeploymentsPreparedIncidentHandlingModel;
-    start_parameter?:V2DeploymentsPreparedStartParameterModel[];
+    start_parameter?: V2DeploymentsPreparedStartParameterModel[];
     executable: boolean;
     version: number;
 }

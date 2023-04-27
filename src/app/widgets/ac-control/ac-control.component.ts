@@ -23,7 +23,7 @@ import {AcControlElementModel} from './shared/ac-control.model';
 import {AcControlEditDialogComponent} from './dialog/ac-control-edit-dialog.component';
 import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {environment} from "../../../environments/environment";
+import {environment} from '../../../environments/environment';
 
 @Component({
     selector: 'senergy-ac-control',
@@ -227,7 +227,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
             acControl.getLocked.value = value;
         }
         if (e === acControl?.setTargetTemperature?.[0] && acControl.getTargetTemperature !== undefined) {
-            acControl.getTargetTemperature?.forEach(e => e.value = value);
+            acControl.getTargetTemperature?.forEach(e2 => e2.value = value);
         }
         if (e === acControl?.setFanSpeedLevel && acControl.getFanSpeedLevel !== undefined) {
             acControl.getFanSpeedLevel.value = value;

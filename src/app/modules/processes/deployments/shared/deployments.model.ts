@@ -40,8 +40,8 @@ export interface DeploymentsOfflineReasonsModel {
 
 
 export interface ProcessStartParameter{
-    id: string,
-    label: string,
-    type: string,
-    default: string,
+    id: string;
+    label: string;
+    type: string;
+    default: string;
 }

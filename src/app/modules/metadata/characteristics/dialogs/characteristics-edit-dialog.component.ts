@@ -35,13 +35,13 @@ export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit
 
     baseCharacteristic: DeviceTypeCharacteristicsModel | undefined = undefined;
 
-    disabled: boolean
+    disabled: boolean;
 
     constructor(
         private conceptsService: ConceptsService,
         private characteristicsService: CharacteristicsService,
         private dialogRef: MatDialogRef<CharacteristicsEditDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data: { characteristic: CharacteristicsPermSearchModel, disabled?: boolean } | null,
+        @Inject(MAT_DIALOG_DATA) data: { characteristic: CharacteristicsPermSearchModel; disabled?: boolean } | null,
     ) {
         if (data !== null) {
             this.characteristicPerm = data.characteristic;

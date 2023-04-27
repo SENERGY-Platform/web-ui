@@ -32,7 +32,7 @@ export interface SwaggerModel {
     schemes: string[];
     swagger: string; // Swagger version
     tags: {
-        description: string,
+        description: string;
         name: string;
     }[];
 }

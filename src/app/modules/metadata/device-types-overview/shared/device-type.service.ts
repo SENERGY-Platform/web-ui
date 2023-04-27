@@ -34,7 +34,7 @@ import { DeviceTypePermSearchModel } from './device-type-perm-search.model';
 import { BpmnSkeletonModel } from './device-type-selection.model';
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { flatMap } from 'rxjs/operators';
-import {flatten} from "lodash";
+import {flatten} from 'lodash';
 
 @Injectable({
     providedIn: 'root',

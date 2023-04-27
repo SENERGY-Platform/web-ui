@@ -230,7 +230,7 @@ export class DeployFlowComponent implements OnInit {
             inputs: this.fb.array([]),
             deploymentType: '',
             operatorId: '',
-            persistData: persistData,
+            persistData,
             configs: this.fb.array([]),
         });
         node.patchValue(newNode);
@@ -912,7 +912,7 @@ export class DeployFlowComponent implements OnInit {
                 joinedValueFilters.forEach((filter) =>
                     nodeModel.inputs?.push({
                         filterType: filter.devicesOrImports[0].startsWith(DeployFlowComponent.IMPORT_PREFIX) ? 'ImportId' : 'deviceId',
-                        filterIds: filter.devicesOrImports.map(value => value.split("$")[0]).join(','), //trim id modifiers and join with ','
+                        filterIds: filter.devicesOrImports.map(value => value.split('$')[0]).join(','), //trim id modifiers and join with ','
                         topicName: filter.topic,
                         values: filter.values,
                     }),

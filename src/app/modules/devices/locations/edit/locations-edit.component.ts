@@ -45,7 +45,7 @@ export class LocationsEditComponent implements OnInit {
 
     debounceTimeInMs = 500;
     rerouteAfterSaveDelayInMs = 2000;
-    isSaving = false
+    isSaving = false;
 
     constructor(
         private _formBuilder: FormBuilder,
@@ -252,7 +252,7 @@ export class LocationsEditComponent implements OnInit {
         if (locationSaved) {
             this.snackBar.open('Location saved successfully.', undefined, { duration: 2000 });
         } else {
-            this.snackBar.open('Error while saving the device group!', "close", { panelClass: "snack-bar-error" });
+            this.snackBar.open('Error while saving the device group!', 'close', { panelClass: 'snack-bar-error' });
         }
     }
 

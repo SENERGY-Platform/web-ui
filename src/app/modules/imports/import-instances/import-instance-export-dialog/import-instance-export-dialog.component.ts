@@ -66,7 +66,7 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error loading import type', "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Error loading import type', 'close', { panelClass: 'snack-bar-error' });
                 this.dialogRef.close();
             },
         );

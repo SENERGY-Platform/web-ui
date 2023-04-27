@@ -67,11 +67,11 @@ export class AcControlEditDialogComponent implements OnInit {
 
     ngOnInit(): void {
         this.deviceInstancesService.getDeviceSelectionsFull([{
-                function_id: environment.setTargetTemperatureFunctionId,
-                interaction: 'request',
-                device_class_id: environment.deviceClassThermostat
-            }],
-            false, null, null, true, false).subscribe(r => {
+            function_id: environment.setTargetTemperatureFunctionId,
+            interaction: 'request',
+            device_class_id: environment.deviceClassThermostat
+        }],
+        false, null, null, true, false).subscribe(r => {
             this.selectables = r;
             this.form = this.fb.group({
                 name: [this.widget.name, Validators.required],

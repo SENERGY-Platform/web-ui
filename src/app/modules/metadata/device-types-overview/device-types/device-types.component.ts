@@ -31,7 +31,7 @@ import {
     DeviceTypeProtocolSegmentModel,
     DeviceTypeServiceGroupModel,
     DeviceTypeServiceModel,
-    functionTypes, SenergyConnectorLocalIdConstraint,
+    functionTypes, senergyConnectorLocalIdConstraint,
 } from '../shared/device-type.model';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
@@ -577,20 +577,20 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private createLocalIdValidator(): (control: AbstractControl) => ValidationErrors | null {
-        return (c: AbstractControl):ValidationErrors | null => {
-            let protocolId: string = c.parent?.get("protocol_id")?.value;
-            if(!this.protocols.find(p => p.id === protocolId)?.constraints?.includes(SenergyConnectorLocalIdConstraint)){
-                return null
+        return (c: AbstractControl): ValidationErrors | null => {
+            const protocolId: string = c.parent?.get('protocol_id')?.value;
+            if(!this.protocols.find(p => p.id === protocolId)?.constraints?.includes(senergyConnectorLocalIdConstraint)){
+                return null;
             }
-            if(c.value?.includes && (c.value.includes("#") || c.value.includes("+") || c.value.includes("/"))) {
+            if(c.value?.includes && (c.value.includes('#') || c.value.includes('+') || c.value.includes('/'))) {
                 return {
                     validateLocalId: {
                         valid: false
                     }
-                }
+                };
             }
-            return null
-        }
+            return null;
+        };
     }
 
     private createServiceGroupFormGroup(deviceTypeServiceGroup?: DeviceTypeServiceGroupModel): FormGroup {
@@ -698,7 +698,7 @@ export class DeviceTypesComponent implements OnInit {
 
     private reload(deviceType: DeviceTypeModel | null) {
         if (deviceType) {
-            this.router.routeReuseStrategy.shouldReuseRoute = function () {
+            this.router.routeReuseStrategy.shouldReuseRoute = function() {
                 return false;
             };
             this.router.onSameUrlNavigation = 'reload';
@@ -852,12 +852,12 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     removeServiceAttr(service: AbstractControl, i: number) {
-        const formArray = (<FormGroup>service).controls['attributes'] as FormArray;
+        const formArray = (service as FormGroup).controls['attributes'] as FormArray;
         formArray.removeAt(i);
     }
 
     addServiceAttr(service: AbstractControl) {
-        const formArray = (<FormGroup>service).controls['attributes'] as FormArray;
+        const formArray = (service as FormGroup).controls['attributes'] as FormArray;
         formArray.push(this.createAttrGroup({origin: 'web-ui'} as Attribute));
     }
 

@@ -245,7 +245,7 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
 
     @HostListener('wheel', ['$event'])
     Wheel(event: WheelEvent) {
-        if((event.target as HTMLInputElement).nodeName == "svg"){
+        if((event.target as HTMLInputElement).nodeName === 'svg'){
             event.preventDefault();
             if (event.deltaY > 0) {
                 this.diagram.zoomOut();
@@ -258,10 +258,11 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
 
     @HostListener('document:mousemove', ['$event'])
     onMouseMove(e: MouseMoveEvent) {
-        if (this.diagram.dragStartPosition != null)
+        if (this.diagram.dragStartPosition != null) {
             this.diagram.paper.translate(
                 e.offsetX - this.diagram.dragStartPosition.x,
                 e.offsetY - this.diagram.dragStartPosition.y);
+        }
     }
 
     private removeSVGNodesByClassNames(svg: SVGElement, tags: string[], classes: string[]) {

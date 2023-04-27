@@ -63,9 +63,9 @@ export class PermissionsService {
 
     //key is the kafka key this permission command will be published to. is optional
     setResourcePermissions(kind: string, id: string, rights: PermissionsResourceBaseModel, key?: string): Observable<boolean> {
-        let query = "";
+        let query = '';
         if(key){
-            query = "?key="+encodeURIComponent(key);
+            query = '?key='+encodeURIComponent(key);
         }
         return this.http
             .put<PermissionsResourceBaseModel>(

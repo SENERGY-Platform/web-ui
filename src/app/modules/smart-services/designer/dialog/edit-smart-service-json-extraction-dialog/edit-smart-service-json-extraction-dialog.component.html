@@ -20,7 +20,7 @@
     <mat-expansion-panel *ngFor="let exportInfo of exports; let i = index" [expanded]="opened[i]">
       <mat-expansion-panel-header>
         <mat-panel-title>
-          {{exportInfo.OutputName}} = {{exportInfo.JsonSource}}{{exportInfo.FieldPath.startsWith(".") || exportInfo.FieldPath.startsWith("[") || exportInfo.FieldPath == "" ? exportInfo.FieldPath : "."+exportInfo.FieldPath}}
+          {{exportInfo.OutputName}} = {{exportInfo.JsonSource}}{{exportInfo.FieldPath.startsWith(".") || exportInfo.FieldPath.startsWith("[") || exportInfo.FieldPath === "" ? exportInfo.FieldPath : "."+exportInfo.FieldPath}}
         </mat-panel-title>
       </mat-expansion-panel-header>
       <div>

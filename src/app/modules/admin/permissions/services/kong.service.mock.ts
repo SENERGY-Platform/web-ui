@@ -26,8 +26,8 @@ export class KongServiceMock {
 
     public loadUris(): Observable<string[]> {
         return new Observable(observer => {
-            observer.next(["path", "path"])
-            observer.complete()
-        })
+            observer.next(['path', 'path']);
+            observer.complete();
+        });
     }
 }

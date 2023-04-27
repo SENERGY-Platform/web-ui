@@ -45,17 +45,17 @@ export class DeviceGroupsService {
                 resource: 'device-groups',
                 find: {
                     search: query,
-                    limit: limit,
-                    offset: offset,
+                    limit,
+                    offset,
                     rights: 'r',
                     sort_by: feature,
-                    sort_desc: order == "desc",
+                    sort_desc: order === 'desc',
                     filter: {
                         not: {
                             condition: {
-                                feature: "features.attribute_list",
-                                operation: "==",
-                                value: "platform/generated=true"
+                                feature: 'features.attribute_list',
+                                operation: '==',
+                                value: 'platform/generated=true'
                             }
                         }
                     }

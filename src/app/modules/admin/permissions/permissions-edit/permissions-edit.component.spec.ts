@@ -32,7 +32,7 @@ describe('PermissionsEditComponent', () => {
             declarations: [PermissionsEditComponent],
             providers: [
                 {provide: MatDialogRef, useValue: {}},
-                {provide: MAT_DIALOG_DATA, useValue: {"permission": {"id": "id", "subject": "admin", "resource": "", "actions": ["GET"]}, "roles": [], "users": [], "clients": []}},
+                {provide: MAT_DIALOG_DATA, useValue: {permission: {id: 'id', subject: 'admin', resource: '', actions: ['GET']}, roles: [], users: [], clients: []}},
                 FormBuilder,
                 {provide: AuthorizationService, useClass: AuthorizationServiceMock},
                 {provide: LadonService, useClass: LadomServiceMock},

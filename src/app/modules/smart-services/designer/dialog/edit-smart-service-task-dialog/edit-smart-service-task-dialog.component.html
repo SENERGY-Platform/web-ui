@@ -25,7 +25,7 @@
           </mat-form-field>
         </div>
         <ng-container *ngFor="let input of result.inputs">
-          <div *ngIf="input.name == 'process_deployment.process_model_id'">
+          <div *ngIf="input.name === 'process_deployment.process_model_id'">
             <mat-form-field  color="accent" class="full-width">
               <mat-label>Process-Model</mat-label>
               <senergy-select-search placeholder="Process-Model"
@@ -309,7 +309,7 @@
               <mat-accordion>
                 <mat-expansion-panel
                         *ngFor="let flowInput of currentParsedFlows"
-                        [expanded]="currentFlowInputId == flowInput.id"
+                        [expanded]="currentFlowInputId === flowInput.id"
                         (opened)="currentFlowInputId = flowInput.id">
                   <mat-expansion-panel-header>
                     <mat-panel-title>
@@ -338,12 +338,12 @@
                         <div *ngIf="analyticsInputMatchesIotCriteria(input, flowInput.id, port)">
                           <mat-divider [inset]="true"></mat-divider>
                           <h4 class="mat-h4">Criteria</h4>
-                          <criteria-list (on_change)="input.value = $event" [criteria_json]="input.value"></criteria-list>
+                          <senergy-criteria-list (changed)="input.value = $event" [criteria_json]="input.value"></senergy-criteria-list>
                         </div>
                         <div *ngIf="analyticsInputMatchesIotServiceCriteria(input, flowInput.id, port)">
                           <mat-divider [inset]="true"></mat-divider>
                           <h4 class="mat-h4">Service-Criteria</h4>
-                          <criteria-list (on_change)="input.value = $event" [criteria_json]="input.value"></criteria-list>
+                          <senergy-criteria-list (changed)="input.value = $event" [criteria_json]="input.value"></senergy-criteria-list>
                         </div>
                       </ng-container>
                     </div>
@@ -439,12 +439,12 @@
               <mat-icon>data_object</mat-icon>
             </button>
             <mat-menu #menuFilter="matMenu">
-              <ng-container *ngIf="exportRequest.FilterType == 'operatorId'">
+              <ng-container *ngIf="exportRequest.FilterType === 'operatorId'">
                 <button mat-menu-item *ngFor="let param of availableProcessVariables.get('flow_selection')" (click)="exportRequest.Filter = param.name; exportRequest.Topic = param.value" [matTooltip]="param.name">
                   {{param.label || param.name}}
                 </button>
               </ng-container>
-              <ng-container *ngIf="exportRequest.FilterType == 'import_id'">
+              <ng-container *ngIf="exportRequest.FilterType === 'import_id'">
                 <button mat-menu-item *ngFor="let param of availableProcessVariables.get('import')" (click)="exportRequest.Filter = param.name" [matTooltip]="param.name">
                   {{param.label || param.name}}
                 </button>
@@ -592,7 +592,7 @@
           <input matInput placeholder="{{config.name}}" [(ngModel)]="config.value" type="text" isValidJson>
         </mat-form-field>
         <ng-container *ngFor="let overwrite of importOverwrites">
-          <mat-form-field *ngIf="overwrite.config_name == config.name" color="accent" class="input-with-overwrite-overwrite">
+          <mat-form-field *ngIf="overwrite.config_name === config.name" color="accent" class="input-with-overwrite-overwrite">
             <input matInput placeholder="{{config.name}} overwrite with placeholder evaluated as json" [(ngModel)]="overwrite.json_value" type="text" #overwriterJsonInput>
             <button mat-icon-button matSuffix [matMenuTriggerFor]="menuImportOverwrites">
               <mat-icon>data_object</mat-icon>
@@ -667,7 +667,7 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <ng-container *ngIf="deviceRepositoryWorkerInfo.operation == 'create_device_group'">
+        <ng-container *ngIf="deviceRepositoryWorkerInfo.operation === 'create_device_group'">
           <div>
             <mat-form-field  color="accent" class="full-width">
               <input matInput placeholder="Device-Group Name" [(ngModel)]="deviceRepositoryWorkerInfo.name" type="text">
@@ -746,7 +746,7 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <ng-container *ngIf="watcherWorkerInfo.operation == 'devices_by_criteria'">
+        <ng-container *ngIf="watcherWorkerInfo.operation === 'devices_by_criteria'">
           <mat-divider [inset]="true"></mat-divider>
           <h4 class="mat-h4">Criteria</h4>
           <mat-accordion>
@@ -813,7 +813,7 @@
             <button mat-raised-button color="accent" (click)="watcherWorkerInfo.devices_by_criteria.criteria = addCriteria(watcherWorkerInfo.devices_by_criteria.criteria)">Add Criteria</button>
           </div>
         </ng-container>
-        <ng-container *ngIf="watcherWorkerInfo.operation == 'watch_request'">
+        <ng-container *ngIf="watcherWorkerInfo.operation === 'watch_request'">
           <div>
             <mat-form-field class="full-width" color="accent">
               <mat-label>Method</mat-label>

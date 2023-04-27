@@ -46,8 +46,6 @@ export class ApiDocsComponent implements OnInit {
 
     public search() {
         const insensitiveQuery = new RegExp(this.query, 'gi');
-        this.swaggerListShown = this.swaggerList.filter((api) => {
-            return insensitiveQuery.test(api.info.description) || insensitiveQuery.test(api.info.title);
-        });
+        this.swaggerListShown = this.swaggerList.filter((api) => insensitiveQuery.test(api.info.description) || insensitiveQuery.test(api.info.title));
     }
 }

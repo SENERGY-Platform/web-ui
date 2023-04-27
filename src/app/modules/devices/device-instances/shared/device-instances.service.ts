@@ -41,7 +41,7 @@ import {UtilService} from '../../../../core/services/util.service';
 export class DeviceInstancesService {
     private getDeviceHistoryObservable7d: Observable<DeviceInstancesHistoryModel[]> | null = null;
     private getDeviceHistoryObservable1h: Observable<DeviceInstancesHistoryModel[]> | null = null;
-    nicknameAttributeKey: string = "shared/nickname";
+    nicknameAttributeKey = 'shared/nickname';
 
     constructor(
         private dialog: MatDialog,
@@ -96,22 +96,22 @@ export class DeviceInstancesService {
     useDisplayNameAsName(devices: DeviceInstancesBaseModel[]): DeviceInstancesBaseModel[] {
         return this.addDisplayNames(devices).map((device) => {
             device.name = device.display_name || device.name;
-            return device
-        })
+            return device;
+        });
     }
 
     addDisplayNames(devices: DeviceInstancesBaseModel[]): DeviceInstancesBaseModel[] {
-        return devices.map(device => this.addDisplayName(device))
+        return devices.map(device => this.addDisplayName(device));
     }
 
     addDisplayName(device: DeviceInstancesBaseModel): DeviceInstancesBaseModel {
         if (!device.display_name) {
             device.display_name = device.name;
             device.attributes?.forEach((attr) => {
-                if (attr.key == this.nicknameAttributeKey) {
+                if (attr.key === this.nicknameAttributeKey) {
                     device.display_name = attr.value;
                 }
-            })
+            });
         }
         return device;
     }
@@ -150,25 +150,25 @@ export class DeviceInstancesService {
         tag?: string,
         connectionState?: null | 'connected' | 'disconnected' | 'unknown',
     ): Observable<DeviceInstancesModel[]> {
-        var params: any = {
-            "sort": feature + '.' + order,
-            'limit': limit,
-            "offset": offset
-        }
+        const params: any = {
+            sort: feature + '.' + order,
+            limit,
+            offset
+        };
 
         if(connectionState) {
-            params['state'] = connectionState
+            params['state'] = connectionState;
         }
         if(tagType) {
-            params[tagType] = tag
+            params[tagType] = tag;
         }
         if(searchText && searchText !== '') {
-            params['search'] = searchText
+            params['search'] = searchText;
         }
 
         return this.http
             .get<DeviceInstancesModel[]>(environment.apiAggregatorUrl + '/devices', {
-                params: params
+                params
             })
             .pipe(
                 map((resp) => resp || []),
@@ -196,7 +196,7 @@ export class DeviceInstancesService {
             value +
             '.' +
             order;
-        if (state != undefined) {
+        if (state !== undefined) {
             url += '&state=' + state;
         }
         return this.http.get<DeviceInstancesModel[]>(url).pipe(
@@ -253,7 +253,7 @@ export class DeviceInstancesService {
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceInstancesByDeviceType', [])),
         );
     }
- 
+
     getDeviceSelections(
         criteria: DeviceFilterCriteriaModel[],
         completeServices: boolean,
@@ -344,22 +344,23 @@ export class DeviceInstancesService {
 
     getDeviceHistoryAll(batchsize: number, logDuration: string): Observable<DeviceInstancesHistoryModelWithId[]> {
         return new Observable<DeviceInstancesHistoryModelWithId[]>(subscriber => {
-            var limit = batchsize;
-            var last: DeviceInstancesHistoryModelWithId | null = null;
-            var offset = 0;
-            var getDeviceHistoryBatch: () => void;
-            var next = (value: DeviceInstancesHistoryModelWithId[]) => {
+            const limit = batchsize;
+            let last: DeviceInstancesHistoryModelWithId | null = null;
+            let offset = 0;
+            // eslint-disable-next-line prefer-const
+            let getDeviceHistoryBatch: () => void;
+            const next = (value: DeviceInstancesHistoryModelWithId[]) => {
                 if (value && value.length) {
                     last = value[value.length - 1];
                     offset = offset + limit;
                     subscriber.next(value);
                 }
                 if (!value || !value.length || value.length < limit) {
-                    subscriber.complete()
+                    subscriber.complete();
                 } else {
-                    getDeviceHistoryBatch()
+                    getDeviceHistoryBatch();
                 }
-            }
+            };
             getDeviceHistoryBatch = () => {
                 //use this if clause if you want to switch later to search with after parameter
                 //if (last && offset+limit > 10000) {
@@ -368,7 +369,7 @@ export class DeviceInstancesService {
                 } else {
                     this.getDeviceHistory(limit, offset, logDuration).subscribe(next);
                 }
-            }
+            };
             getDeviceHistoryBatch();
         });
     }

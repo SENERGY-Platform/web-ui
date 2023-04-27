@@ -29,33 +29,33 @@ import {jsonValidator} from '../../../../../core/validators/json.validator';
     styleUrls: ['./device-types-content-variable-json-dialog.component.css'],
 })
 export class DeviceTypesContentVariableJsonDialogComponent {
-    name: string = "";
-    jsonStr: string = "";
+    name = '';
+    jsonStr = '';
     prohibitedNames: string[] = [];
 
     constructor(
         private dialogRef: MatDialogRef<DeviceTypesContentVariableJsonDialogComponent>,
         @Inject(MAT_DIALOG_DATA)
-            data: {
+        data: {
             contentVariable: DeviceTypeContentVariableModel;
             name: string;
             prohibitedNames: string[];
         },
     ) {
-        this.name = data.name
+        this.name = data.name;
         this.prohibitedNames = data.prohibitedNames;
     }
 
     private valueToContentVariable(name: string, value: any): DeviceTypeContentVariableModel {
-        let result: DeviceTypeContentVariableModel = {
-            name: name,
+        const result: DeviceTypeContentVariableModel = {
+            name,
             is_void: false,
             serialization_options: [],
             omit_empty: false
         };
         if(value === undefined || value === null) {
 
-        } else if (typeof value == "boolean") {
+        } else if (typeof value == 'boolean') {
             result.type = 'https://schema.org/Boolean';
         } else if(typeof value === 'string' || value instanceof String){
             result.type = 'https://schema.org/Text';
@@ -64,8 +64,8 @@ export class DeviceTypesContentVariableJsonDialogComponent {
             result.sub_content_variables = [];
             value.forEach((sub, index)=>{
                 result.sub_content_variables?.push(this.valueToContentVariable(index.toString(), sub));
-            })
-        }else if(typeof value === "object"){
+            });
+        }else if(typeof value === 'object'){
             result.type = 'https://schema.org/StructuredValue';
             result.sub_content_variables = [];
             for (const [k, v] of Object.entries(value)) {
@@ -76,7 +76,7 @@ export class DeviceTypesContentVariableJsonDialogComponent {
         } else if (typeof value === 'number') {
             result.type = 'https://schema.org/Float';
         } else  {
-            console.error("unknown value type in valueToContentVariable()", value);
+            console.error('unknown value type in valueToContentVariable()', value);
         }
         return result;
     }
@@ -86,14 +86,14 @@ export class DeviceTypesContentVariableJsonDialogComponent {
     }
 
     isValid(): boolean {
-        if(this.name.trim() === ""){
+        if(this.name.trim() === ''){
             return false;
         }
         if (this.usesProhibitedName()){
             return false;
         }
         try{
-            JSON.parse(this.jsonStr)
+            JSON.parse(this.jsonStr);
         } catch (e) {
             return false;
         }

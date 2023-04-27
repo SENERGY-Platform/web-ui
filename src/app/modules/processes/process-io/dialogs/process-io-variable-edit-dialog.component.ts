@@ -25,13 +25,13 @@ import {ProcessIoVariable} from '../shared/process-io.model';
 export class ProcessIoVariableEditDialogComponent {
     variable: ProcessIoVariable;
     valueJson: string;
-    enableKey?: boolean
-    enableDefinitionId?: boolean
-    enableInstanceId?: boolean
+    enableKey?: boolean;
+    enableDefinitionId?: boolean;
+    enableInstanceId?: boolean;
 
     constructor(
         private dialogRef: MatDialogRef<ProcessIoVariableEditDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private data: { variable: ProcessIoVariable, enableDefinitionId?: boolean, enableInstanceId?: boolean, enableKey?: boolean },
+        @Inject(MAT_DIALOG_DATA) private data: { variable: ProcessIoVariable; enableDefinitionId?: boolean; enableInstanceId?: boolean; enableKey?: boolean },
     ) {
         this.variable = data.variable;
         this.enableDefinitionId =data.enableDefinitionId;
@@ -50,19 +50,19 @@ export class ProcessIoVariableEditDialogComponent {
     }
 
     countRows(text: string): number{
-        return text.split(/\r?\n|\r/).length
+        return text.split(/\r?\n|\r/).length;
     }
 
     isValid(): boolean {
-        if(this.valueJson.trim() == "") {
-            return false
+        if(this.valueJson.trim() === '') {
+            return false;
         }
         try {
             JSON.parse(this.valueJson);
         } catch (e) {
             return false;
         }
-        return this.variable.key != ""
+        return this.variable.key !== '';
     }
 
 }

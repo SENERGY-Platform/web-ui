@@ -38,7 +38,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     destroy = new Subscription();
     configureWidget = false;
     errorHasOccured = false;
-    errorMessage: string = '';
+    errorMessage = '';
     sizeLimit = 10000;
     size = 0;
 
@@ -91,7 +91,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
                         if (this.errorHandlerService.checkIfErrorExists(resp)) {
                             this.errorHasOccured = true;
                             this.errorMessage = 'No data';
-                            this.errorHandlerService.logError('Chart Export', 'getChartData', resp)
+                            this.errorHandlerService.logError('Chart Export', 'getChartData', resp);
                             this.ready = true;
                         } else {
                             this.errorHasOccured = false;

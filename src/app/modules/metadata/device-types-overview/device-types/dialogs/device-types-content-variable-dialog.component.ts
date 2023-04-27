@@ -67,7 +67,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         private _formBuilder: FormBuilder,
         private deviceTypeHelperService: DeviceTypeHelperService,
         @Inject(MAT_DIALOG_DATA)
-            data: {
+        data: {
             contentVariable: DeviceTypeContentVariableModel;
             disabled: boolean;
             functions: DeviceTypeFunctionModel[];
@@ -152,7 +152,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
         let conceptCharacteristicIds: string[] | undefined;
         if (this.firstFormGroup.get('function_id')?.value != null) {
             const conceptId = this.functions.find(f => f.id === this.firstFormGroup.get('function_id')?.value)?.concept_id;
-            conceptCharacteristicIds = this.concepts.find(c => c.id === conceptId)?.characteristics.map(c => c.id!);
+            conceptCharacteristicIds = this.concepts.find(c => c.id === conceptId)?.characteristics.map(c => c.id || '');
         }
         const type = this.getType();
         this.characteristics.forEach(c => {

@@ -226,7 +226,7 @@ export class DeviceGroupsEditComponent implements OnInit {
         if (deviceGroupSaved) {
             this.snackBar.open('Device-Group saved successfully.', undefined, { duration: 2000 });
         } else {
-            this.snackBar.open('Error while saving the device group!', "close", { panelClass: "snack-bar-error" });
+            this.snackBar.open('Error while saving the device group!', 'close', { panelClass: 'snack-bar-error' });
         }
     }
 
@@ -277,7 +277,7 @@ export class DeviceGroupsEditComponent implements OnInit {
 
         if (idsForRepoSearch.length) {
             this.deviceGroupService.getDeviceListByIds(idsForRepoSearch).subscribe((devices) => {
-                devices = this.deviceInstanceService.useDisplayNameAsName(devices)
+                devices = this.deviceInstanceService.useDisplayNameAsName(devices);
                 for (const device of devices) {
                     this.deviceCache.set(device.id, device);
                 }

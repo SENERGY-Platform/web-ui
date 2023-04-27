@@ -31,31 +31,31 @@ export class ProcessIoService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
     listVariables(limit: number, offset: number, sort: string, keyRegex: string): Observable<ProcessIoVariable[] | null> {
-        let query: string[] = []
+        const query: string[] = [];
         if(limit){
-            query.push("limit="+limit)
+            query.push('limit='+limit);
         }
         if(offset){
-            query.push("offset="+offset)
+            query.push('offset='+offset);
         }
         if(sort){
-            query.push("sort="+sort)
+            query.push('sort='+sort);
         }
         if(keyRegex){
-            query.push("key_regex="+keyRegex)
+            query.push('key_regex='+keyRegex);
         }
         return this.http
-            .get<ProcessIoVariable[]>(environment.processIoUrl + '/variables?'+query.join("&"))
+            .get<ProcessIoVariable[]>(environment.processIoUrl + '/variables?'+query.join('&'))
             .pipe(catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'listVariables', null)));
     }
 
     countVariables(keyRegex: string): Observable<VariablesCount | null> {
-        let query: string[] = []
+        const query: string[] = [];
         if(keyRegex){
-            query.push("key_regex="+keyRegex)
+            query.push('key_regex='+keyRegex);
         }
         return this.http
-            .get<VariablesCount>(environment.processIoUrl + '/count/variables?'+query.join("&"))
+            .get<VariablesCount>(environment.processIoUrl + '/count/variables?'+query.join('&'))
             .pipe(catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'countVariables', null)));
     }
 

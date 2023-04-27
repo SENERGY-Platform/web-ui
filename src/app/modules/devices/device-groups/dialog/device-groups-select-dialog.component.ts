@@ -22,7 +22,7 @@ import {FormControl, UntypedFormControl} from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
 import { DeviceGroupsPermSearchModel } from '../shared/device-groups-perm-search.model';
-import {Route} from "@angular/router";
+import {Route} from '@angular/router';
 
 @Component({
     templateUrl: './device-groups-select-dialog.component.html',

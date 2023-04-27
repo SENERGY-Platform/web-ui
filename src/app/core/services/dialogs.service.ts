@@ -51,9 +51,9 @@ export class DialogsService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
-            title: title,
-            fields: fields,
-            required: required
+            title,
+            fields,
+            required
         };
 
         return this.dialog.open(InputDialogComponent, dialogConfig);

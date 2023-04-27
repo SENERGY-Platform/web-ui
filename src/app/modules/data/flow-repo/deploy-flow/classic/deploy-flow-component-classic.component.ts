@@ -108,8 +108,8 @@ export class DeployFlowClassicComponent {
         });
     }
 
-    trimExtendedId(id: string):string{
-        return id.split("$")[0]
+    trimExtendedId(id: string): string{
+        return id.split('$')[0];
     }
 
     startPipeline() {

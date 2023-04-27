@@ -97,7 +97,7 @@ import {RangeSliderComponent} from './range-slider/range-slider.component';
 import {RangeSliderEditDialogComponent} from './range-slider/dialogs/range-slider-edit-dialog.component';
 import {MatLegacySliderModule as MatSliderModule} from '@angular/material/legacy-slider';
 import { AcControlComponent } from './ac-control/ac-control.component';
-import {AcControlEditDialogComponent} from "./ac-control/dialog/ac-control-edit-dialog.component";
+import {AcControlEditDialogComponent} from './ac-control/dialog/ac-control-edit-dialog.component';
 
 registerLocaleData(localeDe, 'de'); // todo: language;
 

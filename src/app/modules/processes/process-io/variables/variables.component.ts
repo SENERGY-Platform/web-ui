@@ -34,23 +34,23 @@ import {Subscription} from 'rxjs';
 
 
 @Component({
-    selector: 'process-io-variables',
+    selector: 'senergy-process-io-variables',
     templateUrl: './variables.component.html',
     styleUrls: ['./variables.component.css'],
 })
 export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
-    limit: number = 20
-    offset: number = 0
-    sort: string = "unix_timestamp_in_s.desc"
-    keyRegex: string = ""
+    limit = 20;
+    offset = 0;
+    sort = 'unix_timestamp_in_s.desc';
+    keyRegex = '';
 
-    totalCount: number = 0
+    totalCount = 0;
 
     @ViewChild('matSort', { static: false }) matSort!: MatSort;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     dataSource = new MatTableDataSource<ProcessIoVariable>();
-    displayedColumns: string[] = ["unix_timestamp_in_s", "key", "process_instance_id", "process_definition_id", "value", "action"]
+    displayedColumns: string[] = ['unix_timestamp_in_s', 'key', 'process_instance_id', 'process_definition_id', 'value', 'action'];
 
     private searchSub: Subscription = new Subscription();
 
@@ -76,13 +76,13 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         });
         this.paginator.page.subscribe(()=>{
             this.updateSortAndPagination();
-        })
+        });
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            if(this.keyRegex != searchText) {
+            if(this.keyRegex !== searchText) {
                 this.keyRegex = searchText;
                 this.paginator.pageIndex = 0;
             }
-            this.refresh()
+            this.refresh();
         });
     }
 
@@ -94,20 +94,20 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
     updateTotal(){
         this.processIoService.countVariables(this.keyRegex).subscribe(value => {
             if (value) {
-                this.totalCount = value.count
+                this.totalCount = value.count;
             }
-        })
+        });
     }
 
     updateSortAndPagination(){
         if(this.matSort && this.matSort.active){
-            this.sort = this.matSort.active+"."+this.matSort.direction;
+            this.sort = this.matSort.active+'.'+this.matSort.direction;
         }
         if(this.paginator){
             this.limit = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
         }
-        this.loadVariables()
+        this.loadVariables();
     }
 
     loadVariables(){
@@ -115,7 +115,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
             if(value){
                 this.dataSource.data = value || [];
             }
-        })
+        });
     }
 
     edit(variable: ProcessIoVariable){
@@ -134,11 +134,11 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
             if (result) {
                 this.processIoService.set(result).subscribe(value => {
                     if(value.status >= 300){
-                        this.snackBar.open('Error while updating process-io variable!', "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Error while updating process-io variable!', 'close', { panelClass: 'snack-bar-error' });
                     }else {
                         this.updateSortAndPagination();
                     }
-                })
+                });
             }
         });
     }
@@ -148,10 +148,10 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             variable: {
-                key: "",
+                key: '',
                 value: null,
-                process_definition_id: "",
-                process_instance_id: "",
+                process_definition_id: '',
+                process_instance_id: '',
                 unix_timestamp_in_s: 0
             },
             enableKey: true,
@@ -166,20 +166,20 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
                 this.processIoService.get(result.key).subscribe(existing => {
                     if(existing){
                         if(existing.unix_timestamp_in_s > 0) {
-                            this.snackBar.open('process-io variable with this key already exists', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('process-io variable with this key already exists', 'close', { panelClass: 'snack-bar-error' });
                         } else {
                             this.processIoService.set(result).subscribe(value => {
                                 if(value.status >= 300){
-                                    this.snackBar.open('Error while setting process-io variable!', "close", { panelClass: "snack-bar-error" });
+                                    this.snackBar.open('Error while setting process-io variable!', 'close', { panelClass: 'snack-bar-error' });
                                 }else {
                                     this.updateSortAndPagination();
                                 }
-                            })
+                            });
                         }
                     } else {
-                        this.snackBar.open('Error while checking for existing process-io variable!', "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Error while checking for existing process-io variable!', 'close', { panelClass: 'snack-bar-error' });
                     }
-                })
+                });
 
             }
         });
@@ -193,13 +193,11 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
                 if (variableDelete) {
                     this.processIoService.remove(key).subscribe(value => {
                         if(value.status >= 300){
-                            this.snackBar.open('Error while deleting process-io variable!', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error while deleting process-io variable!', 'close', { panelClass: 'snack-bar-error' });
                         }else {
-                            this.dataSource.data = this.dataSource.data.filter(value1 => {
-                                return value1.key != key
-                            })
+                            this.dataSource.data = this.dataSource.data.filter(value1 => value1.key !== key);
                         }
-                    })
+                    });
                 }
             });
     }

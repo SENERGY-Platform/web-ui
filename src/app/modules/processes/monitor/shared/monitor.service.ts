@@ -63,17 +63,17 @@ export class MonitorService {
         value: string,
         order: string,
     ): Observable<MonitorProcessTotalModel> {
-        var url = environment.processServiceUrl + "/v2/history/process-instances?"+
-            filter+"=true" +
-            "&with_total=true" +
-            "&maxResults=" + limit +
-            "&firstResult=" + offset +
-            "&sortBy=" + value +
-            "&sortOrder=" + order
-        if (searchtype == "processDefinitionNameLike") {
-            url = url + "&processDefinitionNameLike="+encodeURIComponent("%"+searchvalue+"%")
+        let url = environment.processServiceUrl + '/v2/history/process-instances?'+
+            filter+'=true' +
+            '&with_total=true' +
+            '&maxResults=' + limit +
+            '&firstResult=' + offset +
+            '&sortBy=' + value +
+            '&sortOrder=' + order;
+        if (searchtype === 'processDefinitionNameLike') {
+            url = url + '&processDefinitionNameLike='+encodeURIComponent('%'+searchvalue+'%');
         } else {
-            url = url + "&"+searchtype+"="+encodeURIComponent(searchvalue)
+            url = url + '&'+searchtype+'='+encodeURIComponent(searchvalue);
         }
         return this.http
             .get<MonitorProcessTotalModel>(url)

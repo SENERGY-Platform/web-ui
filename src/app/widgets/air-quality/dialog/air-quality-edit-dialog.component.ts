@@ -38,14 +38,14 @@ import { ImportInstancesModel } from '../../../modules/imports/import-instances/
 import { environment } from '../../../../environments/environment';
 import { ImportTypesService } from '../../../modules/imports/import-types/shared/import-types.service';
 import { mergeMap } from 'rxjs/operators';
-import {DeviceInstancesModel} from "../../../modules/devices/device-instances/shared/device-instances.model";
+import {DeviceInstancesModel} from '../../../modules/devices/device-instances/shared/device-instances.model';
 import {
     DeviceTypeModel,
     DeviceTypeServiceModel
-} from "../../../modules/metadata/device-types-overview/shared/device-type.model";
-import {DeviceInstancesService} from "../../../modules/devices/device-instances/shared/device-instances.service";
-import {DeviceTypeService} from "../../../modules/metadata/device-types-overview/shared/device-type.service";
-import {ExportDataService} from "../../shared/export-data.service";
+} from '../../../modules/metadata/device-types-overview/shared/device-type.model';
+import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
+import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
+import {ExportDataService} from '../../shared/export-data.service';
 
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',

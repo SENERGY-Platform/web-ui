@@ -26,14 +26,14 @@ import * as moment from 'moment';
 export class DurationDialogComponent implements OnInit {
     initial: string;
     result?: DurationResult;
-    valid = false
+    valid = false;
 
     constructor(
         private dialogRef: MatDialogRef<DurationDialogComponent>,
         @Inject(MAT_DIALOG_DATA) private dialogParams: { initialDuration: string },
     ) {
         this.initial = dialogParams.initialDuration || '';
-        this.valid = this.isValid(moment.duration(this.initial))
+        this.valid = this.isValid(moment.duration(this.initial));
     }
 
     update(updateEvent: DurationResult) {

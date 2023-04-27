@@ -54,22 +54,22 @@ export class ConditionalEventDialogComponent implements OnInit {
         private conceptsService: ConceptsService,
         @Inject(MAT_DIALOG_DATA)
         private data: {
-            msg: ConditionalEventEditModel
+            msg: ConditionalEventEditModel;
         },
     ) {
         this.result = data.msg || {
-            characteristic: "",
-            script: "value == 42",
-            label: "",
-            aspect: "",
-            iotfunction: "",
-            qos: "0",
-            valueVariableName: "value",
-            variables: ""
+            characteristic: '',
+            script: 'value == 42',
+            label: '',
+            aspect: '',
+            iotfunction: '',
+            qos: '0',
+            valueVariableName: 'value',
+            variables: ''
         };
-        this.result.qos = this.result.qos || "0";
-        this.result.valueVariableName = this.result.valueVariableName || "value";
-        this.result.script = this.result.script || "value == 42";
+        this.result.qos = this.result.qos || '0';
+        this.result.valueVariableName = this.result.valueVariableName || 'value';
+        this.result.script = this.result.script || 'value == 42';
     }
 
     ngOnInit() {
@@ -86,7 +86,7 @@ export class ConditionalEventDialogComponent implements OnInit {
         this.result.aspect = this.aspectFormControl.value || '';
         this.result.iotfunction = this.functionFormControl.value?.id || '';
         this.result.characteristic =  this.characteristic?.id || '';
-        this.result.label =  this.functionFormControl.value.name + ' ' + this.characteristic.name + "\n" + this.result.script;
+        this.result.label =  this.functionFormControl.value.name + ' ' + this.characteristic.name + '\n' + this.result.script;
         this.dialogRef.close(this.result);
     }
 
@@ -120,7 +120,7 @@ export class ConditionalEventDialogComponent implements OnInit {
                 functions.forEach((value) => {
                     if (value.id === this.result.iotfunction) {
                         this.functionFormControl.setValue(value);
-                        this.result.iotfunction = ""
+                        this.result.iotfunction = '';
                     }
                 });
             }
@@ -143,7 +143,7 @@ export class ConditionalEventDialogComponent implements OnInit {
                 const sel = aspects.find(value => value.id === this.result.aspect);
                 if (sel !== undefined) {
                     this.aspectFormControl.setValue(sel.id);
-                    this.result.aspect = "";
+                    this.result.aspect = '';
                 }
             }
             this.aspects = asp;

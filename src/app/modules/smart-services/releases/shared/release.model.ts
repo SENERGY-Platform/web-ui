@@ -41,36 +41,36 @@ export interface SmartServiceExtendedReleaseModel extends SmartServiceReleaseMod
             r: boolean;
             w: boolean;
         };
-    }
+    };
 }
 
 
 export interface SmartServiceReleaseInfo {
-    parameter_descriptions: SmartServiceReleaseParameterDescription[]
+    parameter_descriptions: SmartServiceReleaseParameterDescription[];
 }
 
 export interface SmartServiceReleaseParameterDescription {
-    id: string
-    label: string
-    description: string
-    type: string
-    default_value: string
-    multiple: boolean
-    options?: {[key: string]:any}
-    iot_description?: SmartServiceReleaseIotDescription
-    order: number
+    id: string;
+    label: string;
+    description: string;
+    type: string;
+    default_value: string;
+    multiple: boolean;
+    options?: {[key: string]: any};
+    iot_description?: SmartServiceReleaseIotDescription;
+    order: number;
 }
 
 export interface SmartServiceReleaseIotDescription {
-    type_filter: string[]
-    criteria: SmartServiceReleaseCriteria[]
-    entity_only: boolean
-    needs_same_entity_id_in_parameter: string
+    type_filter: string[];
+    criteria: SmartServiceReleaseCriteria[];
+    entity_only: boolean;
+    needs_same_entity_id_in_parameter: string;
 }
 
 export interface SmartServiceReleaseCriteria {
-    interaction ?: string
-    function_id ?: string
-    device_class_id ?: string
-    aspect_id ?: string
+    interaction?: string;
+    function_id?: string;
+    device_class_id?: string;
+    aspect_id?: string;
 }

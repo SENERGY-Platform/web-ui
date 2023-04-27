@@ -173,17 +173,17 @@
                             </mat-form-field>
                         </div>
 
-                        <div *ngIf="input.type == 'string'">
+                        <div *ngIf="input.type === 'string'">
                             <mat-form-field class="full-width">
                                 <input matInput placeholder="Default Value" [(ngModel)]="input.default_value" type="text">
                             </mat-form-field>
                         </div>
-                        <div *ngIf="input.type == 'long'">
+                        <div *ngIf="input.type === 'long'">
                             <mat-form-field class="full-width">
                                 <input matInput placeholder="Default Value" [(ngModel)]="input.default_value" type="number">
                             </mat-form-field>
                         </div>
-                        <div *ngIf="input.type == 'boolean'">
+                        <div *ngIf="input.type === 'boolean'">
                             <mat-radio-group aria-label="Default Value" [(ngModel)]="input.default_value">
                                 <mat-radio-button [value]="true">True</mat-radio-button>
                                 <mat-radio-button [value]="false">False</mat-radio-button>
@@ -209,13 +209,13 @@
                                 <mat-form-field>
                                     <input matInput placeholder="Name" [(ngModel)]="option.key">
                                 </mat-form-field>
-                                <mat-form-field  *ngIf="input.type == 'string'">
+                                <mat-form-field  *ngIf="input.type === 'string'">
                                     <input matInput placeholder="Value" [(ngModel)]="option.value" type="text">
                                 </mat-form-field>
-                                <mat-form-field *ngIf="input.type == 'long'">
+                                <mat-form-field *ngIf="input.type === 'long'">
                                     <input matInput placeholder="Value" [(ngModel)]="option.value" type="number">
                                 </mat-form-field>
-                                <mat-radio-group aria-label="Value" [(ngModel)]="option.value" *ngIf="input.type == 'boolean'">
+                                <mat-radio-group aria-label="Value" [(ngModel)]="option.value" *ngIf="input.type === 'boolean'">
                                     <mat-radio-button [value]="true">True</mat-radio-button>
                                     <mat-radio-button [value]="false">False</mat-radio-button>
                                 </mat-radio-group>

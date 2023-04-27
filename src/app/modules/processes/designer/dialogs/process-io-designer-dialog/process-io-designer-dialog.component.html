@@ -19,7 +19,7 @@
 
 <mat-dialog-content class="process-io-designer-dialog">
   <mat-accordion>
-    <mat-expansion-panel [expanded]="info.set.length > 0 && info.get.length == 0">
+    <mat-expansion-panel [expanded]="info.set.length > 0 && info.get.length === 0">
       <mat-expansion-panel-header>
         <mat-panel-title>
           Set {{info.set.length}}
@@ -55,7 +55,7 @@
         </button>
       </div>
     </mat-expansion-panel>
-    <mat-expansion-panel [expanded]="info.get.length > 0 && info.set.length == 0">
+    <mat-expansion-panel [expanded]="info.get.length > 0 && info.set.length === 0">
       <mat-expansion-panel-header>
         <mat-panel-title>
           Get {{info.get.length}}

@@ -199,7 +199,7 @@ export class ChartsExportService {
         }), catchError(err => {
             const error: ErrorModel = { error: err.message};
             return of(error);
-        }))
+        }));
     }
 
     getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
@@ -446,5 +446,5 @@ export class ChartsExportService {
         const table = [['', '', '', '']];
         allSlices.forEach(s => table.push(...s));
         return {table, colors};
-}
+    }
 }

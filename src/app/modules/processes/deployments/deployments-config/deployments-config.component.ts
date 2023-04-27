@@ -136,7 +136,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                     this.loadCharacteristicNames(deployment);
                     this.cd.detectChanges();
                 } else {
-                    this.snackBar.open('Error while copying the deployment! Probably old version', "close", { panelClass: "snack-bar-error" });
+                    this.snackBar.open('Error while copying the deployment! Probably old version', 'close', { panelClass: 'snack-bar-error' });
                 }
             });
         } else {
@@ -173,7 +173,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             if (resp.status === 200) {
                 this.snackBar.open('Deployment stored successfully.', undefined, { duration: 2000 });
             } else {
-                this.snackBar.open('Error while storing the deployment!', "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Error while storing the deployment!', 'close', { panelClass: 'snack-bar-error' });
             }
         });
     }
@@ -184,16 +184,16 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             const selectedServiceFormControl = element.get(['task', 'selection', 'selected_service_id']);
             selectedServiceFormControl?.valueChanges.subscribe((selectedServiceId: string) => {
                 const selectedPathOption = element.get(['task', 'selection', 'selected_path']);
-                let option: V2DeploymentsPreparedSelectionOptionModel | undefined = that.getSelectedOption(element.get(['task', 'selection'])?.value)
+                const option: V2DeploymentsPreparedSelectionOptionModel | undefined = that.getSelectedOption(element.get(['task', 'selection'])?.value);
                 if (option && option.path_options && option.path_options.get) {
-                    let pathOptions = option.path_options.get(selectedServiceId);
-                    if (pathOptions && pathOptions.length == 1) {
-                        that.setSelectedPathOption(selectedPathOption as FormGroup, pathOptions[0])
+                    const pathOptions = option.path_options.get(selectedServiceId);
+                    if (pathOptions && pathOptions.length === 1) {
+                        that.setSelectedPathOption(selectedPathOption as FormGroup, pathOptions[0]);
                     } else {
-                        that.setSelectedPathOption(selectedPathOption as FormGroup, null)
+                        that.setSelectedPathOption(selectedPathOption as FormGroup, null);
                     }
                 } else {
-                    that.setSelectedPathOption(selectedPathOption as FormGroup, null)
+                    that.setSelectedPathOption(selectedPathOption as FormGroup, null);
                 }
             });
         });
@@ -203,7 +203,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         if (selection.selection_options_index !== undefined) {
             return selection.selection_options[selection.selection_options_index];
         }
-        return undefined
+        return undefined;
     }
 
     changeTaskSelectionOption(selectedElementIndex: number, selectionOptionIndex: number): void {
@@ -244,16 +244,16 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 selectedDeviceId?.patchValue(null);
                 selectedImportId?.patchValue(option.import.id);
             }
-            let defaultSelectedService = that.setSelectedServiceId(elementIndex, selectionOptionIndex, elementType);
+            const defaultSelectedService = that.setSelectedServiceId(elementIndex, selectionOptionIndex, elementType);
             if (defaultSelectedService && option && option.path_options && option.path_options.get) {
-                let pathOptions = option.path_options.get(defaultSelectedService);
-                if (pathOptions && pathOptions.length == 1) {
-                    that.setSelectedPathOption(selectedPathOption as FormGroup, pathOptions[0])
+                const pathOptions = option.path_options.get(defaultSelectedService);
+                if (pathOptions && pathOptions.length === 1) {
+                    that.setSelectedPathOption(selectedPathOption as FormGroup, pathOptions[0]);
                 } else {
-                    that.setSelectedPathOption(selectedPathOption as FormGroup, null)
+                    that.setSelectedPathOption(selectedPathOption as FormGroup, null);
                 }
             }else {
-                that.setSelectedPathOption(selectedPathOption as FormGroup, null)
+                that.setSelectedPathOption(selectedPathOption as FormGroup, null);
             }
         };
 
@@ -274,28 +274,28 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         if (pathOption === null) {
             pathOption = {
                 configurables: [],
-                    functionId: "",
+                functionId: '',
                 value: null,
-                characteristicId: "",
+                characteristicId: '',
                 aspectNode: {} as DeviceTypeAspectNodeModel,
                 isVoid: false,
-                path: "",
-                type: "",
-            } as DeploymentsSelectionPathOptionModel
+                path: '',
+                type: '',
+            } as DeploymentsSelectionPathOptionModel;
         }
         selectedPathOptionFormCtrl?.patchValue(pathOption);
-        const configurables = selectedPathOptionFormCtrl?.get("configurables") as FormArray;
+        const configurables = selectedPathOptionFormCtrl?.get('configurables') as FormArray;
         if (configurables) {
-            configurables.clear()
+            configurables.clear();
             this.deploymentsConfigInitializerService.initConfigurablesFormArray(pathOption.configurables, selectedPathOptionFormCtrl?.disabled === true).controls.forEach(value => {
-                configurables.push(value)
-            })
+                configurables.push(value);
+            });
         }
     }
 
     setSelectedPathOptionByElementIndex(elementType: string, elementIndex: number, pathOption: DeploymentsSelectionPathOptionModel) {
-        const pathFormCtrl = this.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_path') as FormGroup
-        this.setSelectedPathOption(pathFormCtrl, pathOption)
+        const pathFormCtrl = this.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_path') as FormGroup;
+        this.setSelectedPathOption(pathFormCtrl, pathOption);
     }
 
     getElement(elementIndex: number): V2DeploymentsPreparedElementModel {
@@ -308,7 +308,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     setSelectedServiceId(elementIndex: number, selectionOptionIndex: number, elementType: string): string | null {
         const selection = this.deploymentFormGroup.get(['elements', elementIndex, elementType, 'selection']) as FormGroup;
-        const selectedPathOption = selection.get("selected_path") as FormGroup
+        const selectedPathOption = selection.get('selected_path') as FormGroup;
         const services = (
             this.deploymentFormGroup.get([
                 'elements',

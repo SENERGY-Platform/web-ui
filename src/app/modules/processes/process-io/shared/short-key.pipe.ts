@@ -25,15 +25,15 @@ export class ShortKeyPipe implements PipeTransform {
         if(instanceId && result.startsWith(instanceId)){
             result = result.slice(instanceId.length);
         }
-        if(instanceId && result.startsWith("_")){
+        if(instanceId && result.startsWith('_')){
             result = result.slice(1);
         }
         if(definitionId && result.startsWith(definitionId)){
             result = result.slice(definitionId.length);
         }
-        if(definitionId && result.startsWith("_")){
+        if(definitionId && result.startsWith('_')){
             result = result.slice(1);
         }
-        return result
+        return result;
     }
 }

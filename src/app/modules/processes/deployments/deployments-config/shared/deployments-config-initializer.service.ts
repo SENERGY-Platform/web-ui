@@ -83,11 +83,11 @@ export class DeploymentsConfigInitializerService {
         return array;
     }
 
-    private initIncidentHandlingFormGroup(incident_handling: V2DeploymentsPreparedIncidentHandlingModel | undefined): UntypedFormGroup {
-        if(incident_handling) {
+    private initIncidentHandlingFormGroup(incidentHandling: V2DeploymentsPreparedIncidentHandlingModel | undefined): UntypedFormGroup {
+        if(incidentHandling) {
             return this._formBuilder.group({
-                restart: incident_handling.restart,
-                notify: incident_handling.notify,
+                restart: incidentHandling.restart,
+                notify: incidentHandling.notify,
             });
         } else {
             return this._formBuilder.group({
@@ -215,8 +215,8 @@ export class DeploymentsConfigInitializerService {
                 control => {
                     const selectedGroupId = control.get('selected_device_group_id')?.value;
                     const selectedPath = control.get('selected_path.path')?.value;
-                    if(!selectedPath || selectedPath == '') {
-                        if( selectedGroupId &&  selectedGroupId != '') {
+                    if(!selectedPath || selectedPath === '') {
+                        if( selectedGroupId &&  selectedGroupId !== '') {
                             control.get('selected_path.path')?.setErrors(null);
                             return;
                         } else {

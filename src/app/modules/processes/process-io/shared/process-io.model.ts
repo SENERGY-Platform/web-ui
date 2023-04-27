@@ -14,59 +14,59 @@
  * limitations under the License.
  */
 
-export const DefaultProcessIoReadPrefix = "io.read.";
-export const DefaultProcessIoWritePrefix = "io.write.";
-export const DefaultProcessIoReadDefaultPrefix = "io.default."
-export const DefaultProcessIoInstancePlaceholder = "{{InstanceId}}";
-export const DefaultProcessIoDefinitionPlaceholder = "{{DefinitionId}}";
-export const DefaultProcessIoWorkerTopic = "process_io";
+export const defaultProcessIoReadPrefix = 'io.read.';
+export const defaultProcessIoWritePrefix = 'io.write.';
+export const defaultProcessIoReadDefaultPrefix = 'io.default.';
+export const defaultProcessIoInstancePlaceholder = '{{InstanceId}}';
+export const defaultProcessIoDefinitionPlaceholder = '{{DefinitionId}}';
+export const defaultProcessIoWorkerTopic = 'process_io';
 
 export interface ProcessIoDesignerConfig {
-    processIoReadPrefix: string
-    processIoReadDefaultPrefix: string
-    processIoWritePrefix: string
-    processIoInstancePlaceholder: string
-    processIoDefinitionPlaceholder: string
-    processIoWorkerTopic: string
+    processIoReadPrefix: string;
+    processIoReadDefaultPrefix: string;
+    processIoWritePrefix: string;
+    processIoInstancePlaceholder: string;
+    processIoDefinitionPlaceholder: string;
+    processIoWorkerTopic: string;
 }
 
-export const DefaultProcessIoDesignerConfig: ProcessIoDesignerConfig  = {
-    processIoReadPrefix: DefaultProcessIoReadPrefix,
-    processIoWritePrefix: DefaultProcessIoWritePrefix,
-    processIoReadDefaultPrefix: DefaultProcessIoReadDefaultPrefix,
-    processIoInstancePlaceholder: DefaultProcessIoInstancePlaceholder,
-    processIoDefinitionPlaceholder: DefaultProcessIoDefinitionPlaceholder,
-    processIoWorkerTopic: DefaultProcessIoWorkerTopic
-}
+export const defaultProcessIoDesignerConfig: ProcessIoDesignerConfig  = {
+    processIoReadPrefix: defaultProcessIoReadPrefix,
+    processIoWritePrefix: defaultProcessIoWritePrefix,
+    processIoReadDefaultPrefix: defaultProcessIoReadDefaultPrefix,
+    processIoInstancePlaceholder: defaultProcessIoInstancePlaceholder,
+    processIoDefinitionPlaceholder: defaultProcessIoDefinitionPlaceholder,
+    processIoWorkerTopic: defaultProcessIoWorkerTopic
+};
 
 export interface ProcessIoDesignerInfo {
-    set: ProcessIoDesignerInfoSet[]
-    get: ProcessIoDesignerInfoGet[]
+    set: ProcessIoDesignerInfoSet[];
+    get: ProcessIoDesignerInfoGet[];
 }
 
 export interface ProcessIoDesignerInfoSet {
-    key: string
-    instanceBound: boolean
-    definitionBound: boolean
-    value: string
+    key: string;
+    instanceBound: boolean;
+    definitionBound: boolean;
+    value: string;
 }
 
 export interface ProcessIoDesignerInfoGet {
-    outputVariableName: string
-    key: string
-    instanceBound: boolean
-    definitionBound: boolean
-    defaultValue: string
+    outputVariableName: string;
+    key: string;
+    instanceBound: boolean;
+    definitionBound: boolean;
+    defaultValue: string;
 }
 
 export interface ProcessIoVariable {
-    key: string
-    value: any
-    process_definition_id: string
-    process_instance_id: string
-    unix_timestamp_in_s: number
+    key: string;
+    value: any;
+    process_definition_id: string;
+    process_instance_id: string;
+    unix_timestamp_in_s: number;
 }
 
 export interface VariablesCount {
-    count: number
+    count: number;
 }

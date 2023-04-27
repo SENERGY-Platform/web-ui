@@ -2,6 +2,7 @@ import { Directive, Input } from '@angular/core';
 import { AbstractControl, ValidationErrors, NG_VALIDATORS, Validator } from '@angular/forms';
 
 @Directive({
+    // eslint-disable-next-line @angular-eslint/directive-selector
     selector: '[generic_validator]',
     providers: [{ provide: NG_VALIDATORS, useExisting: GenericValidator, multi: true }],
 })
@@ -11,9 +12,9 @@ export class GenericValidator implements Validator {
 
     validate(control: AbstractControl): ValidationErrors | null {
         if(this.generic_validator) {
-            return this.generic_validator(control)
+            return this.generic_validator(control);
         }
-        return null
+        return null;
     }
 
 }

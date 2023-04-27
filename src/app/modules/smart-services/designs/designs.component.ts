@@ -39,7 +39,7 @@ const grids = new Map([
 ]);
 
 @Component({
-    selector: 'smart-service-designs',
+    selector: 'senergy-smart-service-designs',
     templateUrl: './designs.component.html',
     styleUrls: ['./designs.component.css'],
 })
@@ -227,20 +227,20 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
     }
 
     releaseDesign(design: SmartServiceDesignModel): void {
-        this.dialogsService.openInputDialog("Release Name and Description", {name: design.name, description: design.description}, ["name"])
+        this.dialogsService.openInputDialog('Release Name and Description', {name: design.name, description: design.description}, ['name'])
             .afterClosed()
-            .subscribe((result: {name: string, description: string}) => {
+            .subscribe((result: {name: string; description: string}) => {
                 this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
                     if(value) {
                         this.snackBar.open('Release created.', undefined, { duration: 2000 });
                     } else {
                         this.showSnackBarError('creating a release');
                     }
-                })
-            })
+                });
+            });
     }
 
     private showSnackBarError(text: string): void {
-        this.snackBar.open('Error while ' + text + ' !', "close", { panelClass: "snack-bar-error" });
+        this.snackBar.open('Error while ' + text + ' !', 'close', { panelClass: 'snack-bar-error' });
     }
 }

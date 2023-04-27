@@ -59,28 +59,28 @@ export class AuthorizationServiceMock {
     }*/
 
     userIsAdmin(): boolean {
-        return true
+        return true;
     }
 
     userIsDeveloper(): boolean {
-        return true
+        return true;
     }
 
     loadAllUsers(): Observable<any> {
         return new Observable(observer => {
-            observer.complete()
-        })
+            observer.complete();
+        });
     }
-    
+
     loadAllRoles(): Observable<any> {
         return new Observable(observer => {
-            observer.complete()
-        })
+            observer.complete();
+        });
     }
-    
+
     loadAllClients(): Observable<any> {
         return new Observable(observer => {
-            observer.complete()
-        })
+            observer.complete();
+        });
     }
 }

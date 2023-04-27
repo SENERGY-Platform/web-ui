@@ -79,7 +79,7 @@ export class PermissionsDialogService {
         dialogConfig.data = {
             name,
             permissions: permissionsIn,
-            kind: kind
+            kind
         };
         const editDialogRef = this.dialog.open(PermissionDialogComponent, dialogConfig);
 
@@ -101,15 +101,15 @@ export class PermissionsDialogService {
     }
 
     private savePermDialogChanges(permissions: PermissionsEditModel[], kind: string, id: string, key?: string): void {
-        let request: PermissionsResourceBaseModel = {
+        const request: PermissionsResourceBaseModel = {
             group_rights: {},
             user_rights: {}
-        }
+        };
         permissions.forEach((permission: PermissionsEditModel) => {
             if (permission.isRole === true) {
-                request.group_rights[permission.userName] = permission.userRights
+                request.group_rights[permission.userName] = permission.userRights;
             } else {
-                request.user_rights[permission.userId] = permission.userRights
+                request.user_rights[permission.userId] = permission.userRights;
             }
         });
 
@@ -117,8 +117,8 @@ export class PermissionsDialogService {
             if(value) {
                 this.snackBar.open('Permission saved successfully.', '', { duration: 2000 });
             } else {
-                this.snackBar.open('Error while saving permission!', "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Error while saving permission!', 'close', { panelClass: 'snack-bar-error' });
             }
-        })
+        });
     }
 }

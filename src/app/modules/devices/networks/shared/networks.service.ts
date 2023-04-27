@@ -167,7 +167,7 @@ export class NetworksService {
                         if (respMessage) {
                             this.snackBar.open('Hub cleared successfully.', undefined, { duration: 2000 });
                         } else {
-                            this.snackBar.open('Error while clearing the hub!', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error while clearing the hub!', 'close', { panelClass: 'snack-bar-error' });
                         }
                     },
                 );

@@ -47,50 +47,50 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
     styleUrls: ['./edit-smart-service-json-extraction-dialog.component.css'],
 })
 export class EditSmartServiceJsonExtractionDialogComponent implements OnInit {
-    exports: JsonExtract[] = []
-    prefix = "JSON.parse("
-    seperator = ")"
+    exports: JsonExtract[] = [];
+    prefix = 'JSON.parse(';
+    seperator = ')';
 
-    taskName = ""
-    opened: boolean[] = []
+    taskName = '';
+    opened: boolean[] = [];
 
     availableProcessVariables: Map<string,BpmnParameterWithLabel[]> = new Map();
 
     constructor(
         private dialogRef: MatDialogRef<EditSmartServiceJsonExtractionDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskInputOutputDescription, element: BpmnElement},
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskInputOutputDescription; element: BpmnElement},
     ) {
         this.taskName = dialogParams.info.name;
-        this.exports = dialogParams.info.outputs.map(value => this.outputToJsonExtract(value)).filter(value => value != null) as JsonExtract[];
+        this.exports = dialogParams.info.outputs.map(value => this.outputToJsonExtract(value)).filter(value => value !== null) as JsonExtract[];
         this.exports.forEach(_ => this.opened.push(false));
-        if(this.exports.length == 0) {
+        if(this.exports.length === 0) {
             this.opened.push(true);
             this.exports.push({
-                JsonSource: "",
-                OutputName: "",
-                FieldPath: "",
-            })
+                JsonSource: '',
+                OutputName: '',
+                FieldPath: '',
+            });
         }
         this.availableProcessVariables = this.getIncomingOutputs(dialogParams.element);
     }
 
     outputToJsonExtract(outputToJsonExport: SmartServiceTaskInputDescription): JsonExtract | null {
         try{
-            if(outputToJsonExport.type != "script") {
+            if(outputToJsonExport.type !== 'script') {
                 return null;
             }
             if(!outputToJsonExport.value.startsWith(this.prefix)) {
                 return null;
             }
-            let temp = outputToJsonExport.value.substring(this.prefix.length).split(this.seperator);
-            if(temp.length != 2) {
+            const temp = outputToJsonExport.value.substring(this.prefix.length).split(this.seperator);
+            if(temp.length !== 2) {
                 return null;
             }
             return {
                 FieldPath: temp[1],
                 JsonSource: temp[0],
                 OutputName: outputToJsonExport.name
-            }
+            };
         }catch (e) {
             console.error(e);
             return null;
@@ -99,35 +99,35 @@ export class EditSmartServiceJsonExtractionDialogComponent implements OnInit {
 
     jsonExtractToOutput(extract: JsonExtract): SmartServiceTaskInputDescription {
         let path = extract.FieldPath;
-        if(!path.startsWith(".") && !path.startsWith("[")) {
-            path = "."+path;
+        if(!path.startsWith('.') && !path.startsWith('[')) {
+            path = '.'+path;
         }
         return {
             name: extract.OutputName,
-            type: "script",
+            type: 'script',
             value: this.prefix+extract.JsonSource+this.seperator+path
-        }
+        };
     }
 
     getIncomingOutputs(element: BpmnElement, done: BpmnElement[] = []): Map<string,BpmnParameterWithLabel[]> {
-        let result: Map<string,BpmnParameter[]> = new Map<string, BpmnParameterWithLabel[]>();
+        const result: Map<string,BpmnParameter[]> = new Map<string, BpmnParameterWithLabel[]>();
         if (done.indexOf(element) !== -1) {
             return result;
         }
 
-        let add = (key: string, value: BpmnParameterWithLabel[], element?: any) => {
-            if(element && element.name) {
+        const add = (key: string, value: BpmnParameterWithLabel[], element2?: any) => {
+            if(element2 && element2.name) {
                 value = value.map(e => {
                     if(!e.label) {
-                        e.label = element.name + ": " + e.name
+                        e.label = element2.name + ': ' + e.name;
                     }
                     return e;
-                })
+                });
             }
             let temp = result.get(key) || [];
             temp = temp.concat(value);
             result.set(key, temp);
-        }
+        };
 
         done.push(element);
         if(element.incoming) {
@@ -139,39 +139,39 @@ export class EditSmartServiceJsonExtractionDialogComponent implements OnInit {
                     incoming.businessObject.extensionElements.values[0] &&
                     incoming.businessObject.extensionElements.values[0].outputParameters
                 ) {
-                    add("all", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
+                    add('all', incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject);
                     if(incoming.businessObject.topic) {
                         const topic = incoming.businessObject.topic;
                         add(topic, incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject);
                     } else {
-                        add("uncategorized", incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject)
+                        add('uncategorized', incoming.businessObject.extensionElements.values[0].outputParameters, incoming.businessObject);
                     }
                 }
                 if (
-                    incoming.businessObject.$type == "bpmn:StartEvent" &&
+                    incoming.businessObject.$type === 'bpmn:StartEvent' &&
                     incoming.businessObject.extensionElements?.values &&
                     incoming.businessObject.extensionElements.values[0] &&
-                    incoming.businessObject.extensionElements.values[0].$type == "camunda:FormData"
+                    incoming.businessObject.extensionElements.values[0].$type === 'camunda:FormData'
                 ) {
-                    let formFields = incoming.businessObject.extensionElements.values[0].fields;
+                    const formFields = incoming.businessObject.extensionElements.values[0].fields;
                     formFields?.forEach(field => {
-                        add("all", [{name: field.id, label: field.label, value: ""}]);
-                        add("form_fields", [{name: field.id, label: field.label, value: ""}]);
-                        let iotProperty = field.properties.values.find(property => property.id == "iot") ;
+                        add('all', [{name: field.id, label: field.label, value: ''}]);
+                        add('form_fields', [{name: field.id, label: field.label, value: ''}]);
+                        const iotProperty = field.properties.values.find(property => property.id === 'iot') ;
                         if(iotProperty){
-                            add("iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
-                            iotProperty.value.split(",").forEach(iotKind => {
-                                add(iotKind.trim()+"_iot_form_fields", [{name: field.id, label: field.label, value: ""}]);
-                            })
+                            add('iot_form_fields', [{name: field.id, label: field.label, value: ''}]);
+                            iotProperty.value.split(',').forEach(iotKind => {
+                                add(iotKind.trim()+'_iot_form_fields', [{name: field.id, label: field.label, value: ''}]);
+                            });
                         }else {
-                            add("value_form_fields", [{name: field.id, label: field.label, value: ""}]);
+                            add('value_form_fields', [{name: field.id, label: field.label, value: ''}]);
                         }
-                    })
+                    });
                 }
-                let sub = this.getIncomingOutputs(incoming, done);
+                const sub = this.getIncomingOutputs(incoming, done);
                 sub.forEach((value, topic) => {
-                    add(topic, value)
-                })
+                    add(topic, value);
+                });
             }
         }
         return result;
@@ -183,11 +183,11 @@ export class EditSmartServiceJsonExtractionDialogComponent implements OnInit {
     }
 
     addExtraction(){
-        var tempOpended = [];
+        const tempOpended = [];
         this.exports.forEach(_ => tempOpended.push(false));
         tempOpended.push(true);
         this.opened = tempOpended;
-        this.exports?.push({JsonSource: "", FieldPath: "", OutputName: ""});
+        this.exports?.push({JsonSource: '', FieldPath: '', OutputName: ''});
     }
 
     ngOnInit() {}

@@ -19,433 +19,434 @@
  * go generate ./... > ace-code-completer.ts
 */
 
-let Completer = {
-    getCompletions: function(_: any, session: any, pos: any, ___: any, callback: any) {
-        let line = session.doc.$lines[pos.row].slice(0, pos.column-1);
-        const isNewStatement = line.trim().length == 0 || line.trim().endsWith(";");
+const completer = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    getCompletions(_: any, session: any, pos: any, ___: any, callback: any) {
+        const line = session.doc.$lines[pos.row].slice(0, pos.column-1);
+        const isNewStatement = line.trim().length === 0 || line.trim().endsWith(';');
         if(isNewStatement){
             callback(null, [
                 {
-    caption: "deviceRepo.getAspect",
-    value: "var result_as_Aspect = deviceRepo.getAspect(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectNode",
-    value: "var result_as_AspectNode = deviceRepo.getAspectNode(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectNodes",
-    value: "var result_as_AspectNode_list = deviceRepo.getAspectNodes();",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectNodesByIdList",
-    value: "var result_as_AspectNode_list = deviceRepo.getAspectNodesByIdList(ids_as_string_list);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectNodesMeasuringFunctions",
-    value: "var result_as_Function_list = deviceRepo.getAspectNodesMeasuringFunctions(id_as_string, ancestors_as_bool, descendants_as_bool);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectNodesWithMeasuringFunction",
-    value: "var result_as_AspectNode_list = deviceRepo.getAspectNodesWithMeasuringFunction(ancestors_as_bool, descendants_as_bool);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspects",
-    value: "var result_as_Aspect_list = deviceRepo.getAspects();",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectsWithMeasuringFunction",
-    value: "var result_as_Aspect_list = deviceRepo.getAspectsWithMeasuringFunction(ancestors_as_bool, descendants_as_bool);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getCharacteristic",
-    value: "var result_as_Characteristic = deviceRepo.getCharacteristic(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getConceptWithCharacteristics",
-    value: "var result_as_ConceptWithCharacteristics = deviceRepo.getConceptWithCharacteristics(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getConceptWithoutCharacteristics",
-    value: "var result_as_Concept = deviceRepo.getConceptWithoutCharacteristics(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceClass",
-    value: "var result_as_DeviceClass = deviceRepo.getDeviceClass(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceClasses",
-    value: "var result_as_DeviceClass_list = deviceRepo.getDeviceClasses();",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceClassesControllingFunctions",
-    value: "var result_as_Function_list = deviceRepo.getDeviceClassesControllingFunctions(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceClassesFunctions",
-    value: "var result_as_Function_list = deviceRepo.getDeviceClassesFunctions(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceClassesWithControllingFunctions",
-    value: "var result_as_DeviceClass_list = deviceRepo.getDeviceClassesWithControllingFunctions();",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceTypeSelectables",
-    value: "var result_as_DeviceTypeSelectable_list = deviceRepo.getDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getFunction",
-    value: "var result_as_Function = deviceRepo.getFunction(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getFunctionsByType",
-    value: "var result_as_Function_list = deviceRepo.getFunctionsByType(rdfType_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getLeafCharacteristics",
-    value: "var result_as_Characteristic_list = deviceRepo.getLeafCharacteristics();",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getLocation",
-    value: "var result_as_Location = deviceRepo.getLocation(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getService",
-    value: "var result_as_Service = deviceRepo.getService(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.listDeviceTypes",
-    value: "var result_as_DeviceType_list = deviceRepo.listDeviceTypes(limit_as_int64, offset_as_int64, sort_as_string, filter_as_FilterCriteria_list, includeModified_as_bool, includeUnmodified_as_bool);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.listHubDeviceIds",
-    value: "var result_as_string_list = deviceRepo.listHubDeviceIds(id_as_string, asLocalId_as_bool);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.readDevice",
-    value: "var result_as_Device = deviceRepo.readDevice(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.readDeviceByLocalId",
-    value: "var result_as_Device = deviceRepo.readDeviceByLocalId(localId_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.readDeviceGroup",
-    value: "var result_as_DeviceGroup = deviceRepo.readDeviceGroup(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.readDeviceType",
-    value: "var result_as_DeviceType = deviceRepo.readDeviceType(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.readHub",
-    value: "var result_as_Hub = deviceRepo.readHub(id_as_string);",
-    meta: "static"
-},
-{
-    caption: "inputs.exists",
-    value: "var result_as_bool = inputs.exists(name_as_string);",
-    meta: "static"
-},
-{
-    caption: "inputs.get",
-    value: "var result_as_any = inputs.get(name_as_string);",
-    meta: "static"
-},
-{
-    caption: "inputs.list",
-    value: "var result_as_list = inputs.list();",
-    meta: "static"
-},
-{
-    caption: "inputs.listNames",
-    value: "var result_as_string_list = inputs.listNames();",
-    meta: "static"
-},
-{
-    caption: "outputs.get",
-    value: "var result_as_any = outputs.get(name_as_string);",
-    meta: "static"
-},
-{
-    caption: "variables.derefName",
-    value: "var result_as_string = variables.derefName(ref_as_string);",
-    meta: "static"
-},
-{
-    caption: "variables.derefTemplate",
-    value: "var result_as_string = variables.derefTemplate(templ_as_string);",
-    meta: "static"
-},
-{
-    caption: "variables.derefValue",
-    value: "var result_as_any = variables.derefValue(ref_as_string);",
-    meta: "static"
-},
-{
-    caption: "variables.exists",
-    value: "var result_as_bool = variables.exists(name_as_string);",
-    meta: "static"
-},
-{
-    caption: "variables.read",
-    value: "var result_as_any = variables.read(name_as_string);",
-    meta: "static"
-},
-{
-    caption: "variables.ref",
-    value: "var result_as_string = variables.ref(name_as_string);",
-    meta: "static"
-}
+                    caption: 'deviceRepo.getAspect',
+                    value: 'var result_as_Aspect = deviceRepo.getAspect(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectNode',
+                    value: 'var result_as_AspectNode = deviceRepo.getAspectNode(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectNodes',
+                    value: 'var result_as_AspectNode_list = deviceRepo.getAspectNodes();',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectNodesByIdList',
+                    value: 'var result_as_AspectNode_list = deviceRepo.getAspectNodesByIdList(ids_as_string_list);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectNodesMeasuringFunctions',
+                    value: 'var result_as_Function_list = deviceRepo.getAspectNodesMeasuringFunctions(id_as_string, ancestors_as_bool, descendants_as_bool);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectNodesWithMeasuringFunction',
+                    value: 'var result_as_AspectNode_list = deviceRepo.getAspectNodesWithMeasuringFunction(ancestors_as_bool, descendants_as_bool);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspects',
+                    value: 'var result_as_Aspect_list = deviceRepo.getAspects();',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectsWithMeasuringFunction',
+                    value: 'var result_as_Aspect_list = deviceRepo.getAspectsWithMeasuringFunction(ancestors_as_bool, descendants_as_bool);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getCharacteristic',
+                    value: 'var result_as_Characteristic = deviceRepo.getCharacteristic(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getConceptWithCharacteristics',
+                    value: 'var result_as_ConceptWithCharacteristics = deviceRepo.getConceptWithCharacteristics(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getConceptWithoutCharacteristics',
+                    value: 'var result_as_Concept = deviceRepo.getConceptWithoutCharacteristics(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceClass',
+                    value: 'var result_as_DeviceClass = deviceRepo.getDeviceClass(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceClasses',
+                    value: 'var result_as_DeviceClass_list = deviceRepo.getDeviceClasses();',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceClassesControllingFunctions',
+                    value: 'var result_as_Function_list = deviceRepo.getDeviceClassesControllingFunctions(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceClassesFunctions',
+                    value: 'var result_as_Function_list = deviceRepo.getDeviceClassesFunctions(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceClassesWithControllingFunctions',
+                    value: 'var result_as_DeviceClass_list = deviceRepo.getDeviceClassesWithControllingFunctions();',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceTypeSelectables',
+                    value: 'var result_as_DeviceTypeSelectable_list = deviceRepo.getDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getFunction',
+                    value: 'var result_as_Function = deviceRepo.getFunction(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getFunctionsByType',
+                    value: 'var result_as_Function_list = deviceRepo.getFunctionsByType(rdfType_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getLeafCharacteristics',
+                    value: 'var result_as_Characteristic_list = deviceRepo.getLeafCharacteristics();',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getLocation',
+                    value: 'var result_as_Location = deviceRepo.getLocation(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getService',
+                    value: 'var result_as_Service = deviceRepo.getService(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.listDeviceTypes',
+                    value: 'var result_as_DeviceType_list = deviceRepo.listDeviceTypes(limit_as_int64, offset_as_int64, sort_as_string, filter_as_FilterCriteria_list, includeModified_as_bool, includeUnmodified_as_bool);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.listHubDeviceIds',
+                    value: 'var result_as_string_list = deviceRepo.listHubDeviceIds(id_as_string, asLocalId_as_bool);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.readDevice',
+                    value: 'var result_as_Device = deviceRepo.readDevice(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.readDeviceByLocalId',
+                    value: 'var result_as_Device = deviceRepo.readDeviceByLocalId(localId_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.readDeviceGroup',
+                    value: 'var result_as_DeviceGroup = deviceRepo.readDeviceGroup(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.readDeviceType',
+                    value: 'var result_as_DeviceType = deviceRepo.readDeviceType(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.readHub',
+                    value: 'var result_as_Hub = deviceRepo.readHub(id_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'inputs.exists',
+                    value: 'var result_as_bool = inputs.exists(name_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'inputs.get',
+                    value: 'var result_as_any = inputs.get(name_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'inputs.list',
+                    value: 'var result_as_list = inputs.list();',
+                    meta: 'static'
+                },
+                {
+                    caption: 'inputs.listNames',
+                    value: 'var result_as_string_list = inputs.listNames();',
+                    meta: 'static'
+                },
+                {
+                    caption: 'outputs.get',
+                    value: 'var result_as_any = outputs.get(name_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.derefName',
+                    value: 'var result_as_string = variables.derefName(ref_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.derefTemplate',
+                    value: 'var result_as_string = variables.derefTemplate(templ_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.derefValue',
+                    value: 'var result_as_any = variables.derefValue(ref_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.exists',
+                    value: 'var result_as_bool = variables.exists(name_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.read',
+                    value: 'var result_as_any = variables.read(name_as_string);',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.ref',
+                    value: 'var result_as_string = variables.ref(name_as_string);',
+                    meta: 'static'
+                }
             ]);
         } else {
             callback(null, [
                 {
-    caption: "outputs.set",
-    value: "outputs.set(name_as_string, value_as_any)",
-    meta: "static"
-},
-{
-    caption: "outputs.setJson",
-    value: "outputs.setJson(name_as_string, value_as_any)",
-    meta: "static"
-},
-{
-    caption: "variables.write",
-    value: "variables.write(name_as_string, value_as_any)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspect",
-    value: "deviceRepo.getAspect(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectNode",
-    value: "deviceRepo.getAspectNode(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectNodes",
-    value: "deviceRepo.getAspectNodes()",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectNodesByIdList",
-    value: "deviceRepo.getAspectNodesByIdList(ids_as_string_list)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectNodesMeasuringFunctions",
-    value: "deviceRepo.getAspectNodesMeasuringFunctions(id_as_string, ancestors_as_bool, descendants_as_bool)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectNodesWithMeasuringFunction",
-    value: "deviceRepo.getAspectNodesWithMeasuringFunction(ancestors_as_bool, descendants_as_bool)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspects",
-    value: "deviceRepo.getAspects()",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getAspectsWithMeasuringFunction",
-    value: "deviceRepo.getAspectsWithMeasuringFunction(ancestors_as_bool, descendants_as_bool)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getCharacteristic",
-    value: "deviceRepo.getCharacteristic(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getConceptWithCharacteristics",
-    value: "deviceRepo.getConceptWithCharacteristics(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getConceptWithoutCharacteristics",
-    value: "deviceRepo.getConceptWithoutCharacteristics(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceClass",
-    value: "deviceRepo.getDeviceClass(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceClasses",
-    value: "deviceRepo.getDeviceClasses()",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceClassesControllingFunctions",
-    value: "deviceRepo.getDeviceClassesControllingFunctions(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceClassesFunctions",
-    value: "deviceRepo.getDeviceClassesFunctions(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceClassesWithControllingFunctions",
-    value: "deviceRepo.getDeviceClassesWithControllingFunctions()",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getDeviceTypeSelectables",
-    value: "deviceRepo.getDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getFunction",
-    value: "deviceRepo.getFunction(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getFunctionsByType",
-    value: "deviceRepo.getFunctionsByType(rdfType_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getLeafCharacteristics",
-    value: "deviceRepo.getLeafCharacteristics()",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getLocation",
-    value: "deviceRepo.getLocation(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.getService",
-    value: "deviceRepo.getService(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.listDeviceTypes",
-    value: "deviceRepo.listDeviceTypes(limit_as_int64, offset_as_int64, sort_as_string, filter_as_FilterCriteria_list, includeModified_as_bool, includeUnmodified_as_bool)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.listHubDeviceIds",
-    value: "deviceRepo.listHubDeviceIds(id_as_string, asLocalId_as_bool)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.readDevice",
-    value: "deviceRepo.readDevice(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.readDeviceByLocalId",
-    value: "deviceRepo.readDeviceByLocalId(localId_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.readDeviceGroup",
-    value: "deviceRepo.readDeviceGroup(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.readDeviceType",
-    value: "deviceRepo.readDeviceType(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "deviceRepo.readHub",
-    value: "deviceRepo.readHub(id_as_string)",
-    meta: "static"
-},
-{
-    caption: "inputs.exists",
-    value: "inputs.exists(name_as_string)",
-    meta: "static"
-},
-{
-    caption: "inputs.get",
-    value: "inputs.get(name_as_string)",
-    meta: "static"
-},
-{
-    caption: "inputs.list",
-    value: "inputs.list()",
-    meta: "static"
-},
-{
-    caption: "inputs.listNames",
-    value: "inputs.listNames()",
-    meta: "static"
-},
-{
-    caption: "outputs.get",
-    value: "outputs.get(name_as_string)",
-    meta: "static"
-},
-{
-    caption: "variables.derefName",
-    value: "variables.derefName(ref_as_string)",
-    meta: "static"
-},
-{
-    caption: "variables.derefTemplate",
-    value: "variables.derefTemplate(templ_as_string)",
-    meta: "static"
-},
-{
-    caption: "variables.derefValue",
-    value: "variables.derefValue(ref_as_string)",
-    meta: "static"
-},
-{
-    caption: "variables.exists",
-    value: "variables.exists(name_as_string)",
-    meta: "static"
-},
-{
-    caption: "variables.read",
-    value: "variables.read(name_as_string)",
-    meta: "static"
-},
-{
-    caption: "variables.ref",
-    value: "variables.ref(name_as_string)",
-    meta: "static"
-}
+                    caption: 'outputs.set',
+                    value: 'outputs.set(name_as_string, value_as_any)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'outputs.setJson',
+                    value: 'outputs.setJson(name_as_string, value_as_any)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.write',
+                    value: 'variables.write(name_as_string, value_as_any)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspect',
+                    value: 'deviceRepo.getAspect(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectNode',
+                    value: 'deviceRepo.getAspectNode(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectNodes',
+                    value: 'deviceRepo.getAspectNodes()',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectNodesByIdList',
+                    value: 'deviceRepo.getAspectNodesByIdList(ids_as_string_list)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectNodesMeasuringFunctions',
+                    value: 'deviceRepo.getAspectNodesMeasuringFunctions(id_as_string, ancestors_as_bool, descendants_as_bool)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectNodesWithMeasuringFunction',
+                    value: 'deviceRepo.getAspectNodesWithMeasuringFunction(ancestors_as_bool, descendants_as_bool)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspects',
+                    value: 'deviceRepo.getAspects()',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getAspectsWithMeasuringFunction',
+                    value: 'deviceRepo.getAspectsWithMeasuringFunction(ancestors_as_bool, descendants_as_bool)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getCharacteristic',
+                    value: 'deviceRepo.getCharacteristic(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getConceptWithCharacteristics',
+                    value: 'deviceRepo.getConceptWithCharacteristics(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getConceptWithoutCharacteristics',
+                    value: 'deviceRepo.getConceptWithoutCharacteristics(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceClass',
+                    value: 'deviceRepo.getDeviceClass(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceClasses',
+                    value: 'deviceRepo.getDeviceClasses()',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceClassesControllingFunctions',
+                    value: 'deviceRepo.getDeviceClassesControllingFunctions(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceClassesFunctions',
+                    value: 'deviceRepo.getDeviceClassesFunctions(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceClassesWithControllingFunctions',
+                    value: 'deviceRepo.getDeviceClassesWithControllingFunctions()',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getDeviceTypeSelectables',
+                    value: 'deviceRepo.getDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getFunction',
+                    value: 'deviceRepo.getFunction(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getFunctionsByType',
+                    value: 'deviceRepo.getFunctionsByType(rdfType_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getLeafCharacteristics',
+                    value: 'deviceRepo.getLeafCharacteristics()',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getLocation',
+                    value: 'deviceRepo.getLocation(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.getService',
+                    value: 'deviceRepo.getService(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.listDeviceTypes',
+                    value: 'deviceRepo.listDeviceTypes(limit_as_int64, offset_as_int64, sort_as_string, filter_as_FilterCriteria_list, includeModified_as_bool, includeUnmodified_as_bool)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.listHubDeviceIds',
+                    value: 'deviceRepo.listHubDeviceIds(id_as_string, asLocalId_as_bool)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.readDevice',
+                    value: 'deviceRepo.readDevice(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.readDeviceByLocalId',
+                    value: 'deviceRepo.readDeviceByLocalId(localId_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.readDeviceGroup',
+                    value: 'deviceRepo.readDeviceGroup(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.readDeviceType',
+                    value: 'deviceRepo.readDeviceType(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'deviceRepo.readHub',
+                    value: 'deviceRepo.readHub(id_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'inputs.exists',
+                    value: 'inputs.exists(name_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'inputs.get',
+                    value: 'inputs.get(name_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'inputs.list',
+                    value: 'inputs.list()',
+                    meta: 'static'
+                },
+                {
+                    caption: 'inputs.listNames',
+                    value: 'inputs.listNames()',
+                    meta: 'static'
+                },
+                {
+                    caption: 'outputs.get',
+                    value: 'outputs.get(name_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.derefName',
+                    value: 'variables.derefName(ref_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.derefTemplate',
+                    value: 'variables.derefTemplate(templ_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.derefValue',
+                    value: 'variables.derefValue(ref_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.exists',
+                    value: 'variables.exists(name_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.read',
+                    value: 'variables.read(name_as_string)',
+                    meta: 'static'
+                },
+                {
+                    caption: 'variables.ref',
+                    value: 'variables.ref(name_as_string)',
+                    meta: 'static'
+                }
             ]);
         }
     }
-}
+};
 
-export {Completer}
+export {completer};

@@ -38,6 +38,6 @@ export class MockKeycloakService {
     }
 
     isUserInRole(_: string): boolean {
-        return true
+        return true;
     }
 }

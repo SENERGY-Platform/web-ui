@@ -43,7 +43,7 @@ export interface BpmnBusinessObject {
     topic?: string;
     extensionElements: BpmnExtensionElements;
     eventDefinitions?: BpmnEventDefinitions;
-    $parent?: BpmnParentElement
+    $parent?: BpmnParentElement;
 }
 
 export interface BpmnElement {
@@ -53,7 +53,7 @@ export interface BpmnElement {
 }
 
 interface BpmnParentElement {
-    flowElements?: BpmnBusinessObject[]
+    flowElements?: BpmnBusinessObject[];
 }
 
 interface HistoricDataConfigInterval {
@@ -99,11 +99,11 @@ export interface FormField {
     id: string;
     label: string;
     type: string;
-    properties: FormFieldPropertiesWrapper
+    properties: FormFieldPropertiesWrapper;
 }
 
 export interface FormFieldPropertiesWrapper {
-    values: FormFieldProperty[]
+    values: FormFieldProperty[];
 }
 
 export interface FormFieldProperty {

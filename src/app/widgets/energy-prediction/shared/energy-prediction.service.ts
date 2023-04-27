@@ -29,7 +29,7 @@ import {
     LastValuesRequestElementTimescaleModel,
     TimeValuePairModel
 } from '../../shared/export-data.model';
-import {environment} from "../../../../environments/environment";
+import {environment} from '../../../../environments/environment';
 
 @Injectable({
     providedIn: 'root',

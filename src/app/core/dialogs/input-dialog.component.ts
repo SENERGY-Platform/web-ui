@@ -22,13 +22,13 @@ import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDia
     styleUrls: ['./input-dialog.component.css'],
 })
 export class InputDialogComponent {
-    fields: {[key: string]: string}
+    fields: {[key: string]: string};
     title: string;
     required: string[];
 
     Object = Object;
 
-    constructor(private dialogRef: MatDialogRef<InputDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { title: string, fields: {[key: string]: string}, required: string[] | undefined | null}) {
+    constructor(private dialogRef: MatDialogRef<InputDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { title: string; fields: {[key: string]: string}; required: string[] | undefined | null}) {
         this.fields = data.fields;
         this.title = data.title;
         this.required = data.required || [];

@@ -91,7 +91,7 @@ export class AspectsComponent implements OnInit {
                                     this.redraw();
                                     this.snackBar.open('Aspect deleted successfully.', undefined, {duration: 2000});
                                 } else {
-                                    this.snackBar.open('Error while deleting the aspect!', "close", { panelClass: "snack-bar-error" });
+                                    this.snackBar.open('Error while deleting the aspect!', 'close', { panelClass: 'snack-bar-error' });
                                 }
                             });
                         }
@@ -139,7 +139,7 @@ export class AspectsComponent implements OnInit {
 
         obs.subscribe((resp: DeviceTypeAspectModel | null) => {
             if (resp === null) {
-                this.snackBar.open('Error while saving the aspect!', "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Error while saving the aspect!', 'close', { panelClass: 'snack-bar-error' });
             } else {
                 const i = this.dataSource.data.findIndex(x => x === node);
                 if (i !== -1) {
@@ -179,15 +179,15 @@ export class AspectsComponent implements OnInit {
     dropped($event: any, target?: DeviceTypeAspectModel) {
         const node = $event.item.data as DeviceTypeAspectModel;
         if (node === target) {
-            this.snackBar.open('Can\'t move aspect into itself', "close", { panelClass: "snack-bar-error" });
+            this.snackBar.open('Can\'t move aspect into itself', 'close', { panelClass: 'snack-bar-error' });
             return;
         }
         if (target !== undefined && !this.nodeValid(target)) {
-            this.snackBar.open('Can\'t move into invalid aspect', "close", { panelClass: "snack-bar-error" });
+            this.snackBar.open('Can\'t move into invalid aspect', 'close', { panelClass: 'snack-bar-error' });
             return;
         }
         if (target !== undefined && this.hasDescendant(node, target)) {
-            this.snackBar.open('Can\'t move into descendant aspect', "close", { panelClass: "snack-bar-error" });
+            this.snackBar.open('Can\'t move into descendant aspect', 'close', { panelClass: 'snack-bar-error' });
             return;
         }
         this.dialogsService.openConfirmDialog('Move Aspect', 'Do you want to move this aspect? Changes will be saved immediately').afterClosed().subscribe(move => {
@@ -208,7 +208,7 @@ export class AspectsComponent implements OnInit {
             if (root !== undefined) {
                 this.save(root);
             } else {
-                this.snackBar.open('Can\'t find new root for moved Aspect', "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Can\'t find new root for moved Aspect', 'close', { panelClass: 'snack-bar-error' });
             }
             this.deleteNode(node, true);
             this.redraw();

@@ -20,7 +20,7 @@ import {ControlValueAccessor, NgControl} from '@angular/forms';
 import { MatLegacyCheckbox as MatCheckbox } from '@angular/material/legacy-checkbox';
 
 @Directive({
-    selector: 'mat-checkbox[stringCheckboxValue]'
+    selector: 'mat-checkbox[appStringCheckboxValue]'
 })
 export class CheckboxValueDirective implements ControlValueAccessor {
     @Input() trueValue: any = true;

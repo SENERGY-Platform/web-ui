@@ -50,7 +50,7 @@ import {SmartServiceReleasesService} from '../releases/shared/release.service';
 import {SmartServiceExtendedReleaseModel} from '../releases/shared/release.model';
 
 @Component({
-    selector: 'smart-service-designer',
+    selector: 'senergy-smart-service-designer',
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
 })
@@ -59,8 +59,8 @@ export class SmartServiceDesignerComponent implements OnInit {
     id = '';
     releaseId = '';
     ready = false;
-    name = ''
-    description = ''
+    name = '';
+    description = '';
 
     constructor(
         private http: HttpClient,
@@ -111,10 +111,10 @@ export class SmartServiceDesignerComponent implements OnInit {
             });
 
             this.modeler.designerCallbacks = {
-                openTaskEditDialog: function (initInfo: SmartServiceTaskDescription, element: BpmnElement, callback: (info: SmartServiceTaskDescription) => void ) {
+                openTaskEditDialog(initInfo: SmartServiceTaskDescription, element: BpmnElement, callback: (info: SmartServiceTaskDescription) => void ) {
                     const dialogConfig = new MatDialogConfig();
                     dialogConfig.disableClose = false;
-                    dialogConfig.data = { info: initInfo, element: element };
+                    dialogConfig.data = { info: initInfo, element };
                     const editDialogRef = that.dialog.open(EditSmartServiceTaskDialogComponent, dialogConfig);
                     editDialogRef.afterClosed().subscribe((value: SmartServiceTaskDescription) => {
                         if (value) {
@@ -123,10 +123,10 @@ export class SmartServiceDesignerComponent implements OnInit {
                     });
                 },
 
-                openExtractJsonFieldsDialog: function (initInfo: SmartServiceTaskInputOutputDescription, element: BpmnElement, callback: (info: SmartServiceTaskInputOutputDescription) => void ) {
+                openExtractJsonFieldsDialog(initInfo: SmartServiceTaskInputOutputDescription, element: BpmnElement, callback: (info: SmartServiceTaskInputOutputDescription) => void ) {
                     const dialogConfig = new MatDialogConfig();
                     dialogConfig.disableClose = false;
-                    dialogConfig.data = { info: initInfo, element: element };
+                    dialogConfig.data = { info: initInfo, element };
                     const editDialogRef = that.dialog.open(EditSmartServiceJsonExtractionDialogComponent, dialogConfig);
                     editDialogRef.afterClosed().subscribe((value: SmartServiceTaskInputOutputDescription) => {
                         if (value) {
@@ -135,10 +135,10 @@ export class SmartServiceDesignerComponent implements OnInit {
                     });
                 },
 
-                openSmartServiceInputsEditDialog: function (info: SmartServiceInputsDescription, element: BpmnElement, callback: (info: SmartServiceInputsDescription) => void ) {
+                openSmartServiceInputsEditDialog(info: SmartServiceInputsDescription, element: BpmnElement, callback: (info2: SmartServiceInputsDescription) => void ) {
                     const dialogConfig = new MatDialogConfig();
                     dialogConfig.disableClose = false;
-                    dialogConfig.data = { info: info, element: element };
+                    dialogConfig.data = { info, element };
                     const editDialogRef = that.dialog.open(EditSmartServiceInputDialogComponent, dialogConfig);
                     editDialogRef.afterClosed().subscribe((value: SmartServiceInputsDescription) => {
                         if (value) {
@@ -148,9 +148,9 @@ export class SmartServiceDesignerComponent implements OnInit {
                 }
             };
 
-            if (this.releaseId !== "") {
+            if (this.releaseId !== '') {
                 this.loadReleaseDiagram(this.releaseId);
-            } else if (this.id != '') {
+            } else if (this.id !== '') {
                 this.loadDesignDiagram(this.id);
             } else {
                 this.newDesignDiagram();
@@ -202,27 +202,27 @@ export class SmartServiceDesignerComponent implements OnInit {
     save(): void {
         this.saveXML((errXML, processXML) => {
             if (errXML) {
-                this.snackBar.open('Error XML! ' + errXML, "close", { panelClass: "snack-bar-error" });
+                this.snackBar.open('Error XML! ' + errXML, 'close', { panelClass: 'snack-bar-error' });
             } else {
                 this.saveSVG((errSVG, svgXML) => {
                     if (errSVG) {
-                        this.snackBar.open('Error SVG! ' + errSVG, "close", { panelClass: "snack-bar-error" });
+                        this.snackBar.open('Error SVG! ' + errSVG, 'close', { panelClass: 'snack-bar-error' });
                     } else {
-                        this.dialogService.openInputDialog("Design Name and Description", {name: this.name, description: this.description}, ["name"])
+                        this.dialogService.openInputDialog('Design Name and Description', {name: this.name, description: this.description}, ['name'])
                             .afterClosed()
-                            .subscribe((result: {name: string, description: string}) => {
+                            .subscribe((result: {name: string; description: string}) => {
                                 this.name = result.name;
                                 this.description = result.description;
-                                let model = { id: this.id, svg_xml: svgXML, bpmn_xml: processXML, name: result.name, description: result.description, user_id: "" }
-                                this.designsService.saveDesign(model).subscribe((result: SmartServiceDesignModel | null) => {
-                                    if (result) {
+                                const model = { id: this.id, svg_xml: svgXML, bpmn_xml: processXML, name: result.name, description: result.description, user_id: '' };
+                                this.designsService.saveDesign(model).subscribe((result2: SmartServiceDesignModel | null) => {
+                                    if (result2) {
                                         this.snackBar.open('Model saved.', undefined, { duration: 2000 });
-                                        if(this.id == "") {
-                                            this.router.navigate(['/smart-services/designer/'+result.id]);
+                                        if(this.id === '') {
+                                            this.router.navigate(['/smart-services/designer/'+result2.id]);
                                         }
                                     }
                                 });
-                            })
+                            });
                     }
                 });
             }

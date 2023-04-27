@@ -29,13 +29,13 @@ export class SmartServiceReleasesService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
 
-    getExtendedReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean) : Observable<SmartServiceExtendedReleaseModel[]> {
+    getExtendedReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean): Observable<SmartServiceExtendedReleaseModel[]> {
         const params = ['limit=' + limit, 'offset=' + offset, 'rights='+rights];
-        if (search != "") {
+        if (search !== '') {
             params.push('search=' + encodeURIComponent(search));
         }
         if(latest) {
-            params.push("latest=true");
+            params.push('latest=true');
         }
         const paramsStr = params.join('&');
         return this.http
@@ -46,13 +46,13 @@ export class SmartServiceReleasesService {
             );
     }
 
-    getReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean) : Observable<SmartServiceReleaseModel[]> {
+    getReleaseList(limit: number, offset: number, search: string, rights: string, latest: boolean): Observable<SmartServiceReleaseModel[]> {
         const params = ['limit=' + limit, 'offset=' + offset, 'rights='+rights];
-        if (search != "") {
+        if (search !== '') {
             params.push('search=' + encodeURIComponent(search));
         }
         if(latest) {
-            params.push("latest=true");
+            params.push('latest=true');
         }
         const paramsStr = params.join('&');
         return this.http
@@ -84,7 +84,7 @@ export class SmartServiceReleasesService {
 
     createRelease(model: SmartServiceReleaseCreateModel): Observable<SmartServiceReleaseCreateModel | null> {
         return this.http
-            .post<SmartServiceReleaseModel>(environment.smartServiceRepoUrl+"/releases", model)
+            .post<SmartServiceReleaseModel>(environment.smartServiceRepoUrl+'/releases', model)
             .pipe(catchError(this.errorHandlerService.handleError(SmartServiceReleasesService.name, 'saveProcess', null)));
     }
 

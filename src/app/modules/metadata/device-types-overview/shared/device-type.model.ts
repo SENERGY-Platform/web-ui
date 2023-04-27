@@ -117,11 +117,11 @@ export interface DeviceTypeConceptModel {
 }
 
 export interface ConverterExtension {
-    from: string
-    to: string
-    distance: number
-    formula: string
-    placeholder_name: string
+    from: string;
+    to: string;
+    distance: number;
+    formula: string;
+    placeholder_name: string;
 }
 
 export interface DeviceTypeCharacteristicsModel {
@@ -162,10 +162,10 @@ export interface DeviceTypeProtocolModel {
     name: string;
     handler: string;
     protocol_segments: DeviceTypeProtocolSegmentModel[];
-    constraints: string[]
+    constraints: string[];
 }
 
-export const SenergyConnectorLocalIdConstraint = "senergy_connector_local_id"
+export const senergyConnectorLocalIdConstraint = 'senergy_connector_local_id';
 
 export interface DeviceTypeProtocolSegmentModel {
     id: string;
@@ -180,11 +180,11 @@ export enum DeviceTypeInteractionEnum {
 }
 
 export interface ConverterExtensionTryRequest {
-    extension: ConverterExtension
-    input: any
+    extension: ConverterExtension;
+    input: any;
 }
 
 export interface ConverterExtensionTryResult {
-    error: string | null | undefined
-    output: any
+    error: string | null | undefined;
+    output: any;
 }

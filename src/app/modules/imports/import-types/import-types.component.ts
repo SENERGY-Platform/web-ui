@@ -103,7 +103,7 @@ export class ImportTypesComponent implements OnInit {
                         },
                         (err) => {
                             console.error(err);
-                            this.snackBar.open('Error deleting import type', "close", { panelClass: "snack-bar-error" });
+                            this.snackBar.open('Error deleting import type', 'close', { panelClass: 'snack-bar-error' });
                         },
                     );
                 }

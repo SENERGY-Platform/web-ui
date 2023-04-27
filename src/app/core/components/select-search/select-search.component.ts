@@ -225,13 +225,13 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
     @Input() disableRipple: boolean = this.select?.disableRipple;
     @Input() errorStateMatcher: ErrorStateMatcher = this.select?.errorStateMatcher;
     @Input()
-    panelClass: string | string[] | Set<string> | { [key: string]: any } = this.select?.panelClass;
+        panelClass: string | string[] | Set<string> | { [key: string]: any } = this.select?.panelClass;
     @Input()
-    placeholder: string = this.select?.placeholder;
+        placeholder: string = this.select?.placeholder;
     @Input()
-    sortComparator: (a: MatOption, b: MatOption, options: MatOption[]) => number = this.select?.sortComparator;
+        sortComparator: (a: MatOption, b: MatOption, options: MatOption[]) => number = this.select?.sortComparator;
     @Output()
-    openedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+        openedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Input('aria-label') ariaLabel: string = this.select?.ariaLabel;
     @Input('aria-labelledby') ariaLabelledby: string = this.select?.ariaLabelledby;
 
@@ -616,6 +616,7 @@ export class SelectSearchComponent implements MatFormFieldControl<any>, ControlV
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     originalOrder = (_: KeyValue<string, any>, __: KeyValue<string, any>): number => 0;
 
     private resetSearchIfNoResults() {

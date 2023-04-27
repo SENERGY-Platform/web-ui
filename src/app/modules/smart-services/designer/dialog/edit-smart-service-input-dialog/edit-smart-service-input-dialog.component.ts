@@ -51,8 +51,8 @@ import {AbstractControl, ValidationErrors} from '@angular/forms';
 export class EditSmartServiceInputDialogComponent implements OnInit {
     abstract: AbstractSmartServiceInput[] = [];
 
-    functions: (FunctionsPermSearchModel | {id?:string, name: string})[] = [];
-    deviceClasses: (DeviceClassesPermSearchModel | {id?:string, name: string})[] = [];
+    functions: (FunctionsPermSearchModel | {id?: string; name: string})[] = [];
+    deviceClasses: (DeviceClassesPermSearchModel | {id?: string; name: string})[] = [];
     nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
 
     characteristics: CharacteristicsPermSearchModel[] = [];
@@ -63,17 +63,17 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
         private deviceTypesService: DeviceTypeService,
         private deviceClassService: DeviceClassesService,
         private characteristicsService: CharacteristicsService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceInputsDescription, element: BpmnElement},
+        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceInputsDescription; element: BpmnElement},
     ) {
-        this.characteristicsService.getCharacteristics("", 9999, 0, "name", "asc").subscribe(value => {
+        this.characteristicsService.getCharacteristics('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.characteristics = value;
         });
-        this.functionsService.getFunctions("", 9999, 0, "name", "asc").subscribe(value => {
+        this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.functions = value;
-        })
-        this.deviceClassService.getDeviceClasses("", 9999, 0, "name", "asc").subscribe(value => {
+        });
+        this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.deviceClasses = value;
-        })
+        });
         this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
             const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
             const asp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
@@ -97,7 +97,7 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
             validateCamundaVariableName: {
                 valid: false
             }
-        }
+        };
         if(isValidCamundaVariableName(variableName)) {
             return null;
         } else {
@@ -106,11 +106,11 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
     }
 
     readAbstractAsDescription(): SmartServiceInputsDescription{
-        return abstractSmartServiceInputToSmartServiceInputsDescription(this.abstract)
+        return abstractSmartServiceInputToSmartServiceInputsDescription(this.abstract);
     }
 
     setAbstractByDescription(value: SmartServiceInputsDescription){
-        this.abstract = smartServiceInputsDescriptionToAbstractSmartServiceInput(value)
+        this.abstract = smartServiceInputsDescriptionToAbstractSmartServiceInput(value);
     }
 
     useIotSelectors(condition: boolean, input: AbstractSmartServiceInput) {
@@ -138,32 +138,32 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
     }
 
     isIotInputProvider(input: AbstractSmartServiceInput): boolean {
-        return !!input.iot_selectors
+        return !!input.iot_selectors;
     }
 
     removeOption(input: AbstractSmartServiceInput, optionKey: string) {
         if(input.options) {
-            input.options = input.options.filter(value => value.key != optionKey);
+            input.options = input.options.filter(value => value.key !== optionKey);
         }
     }
 
     addOption(input: AbstractSmartServiceInput) {
         let value;
         switch(input.type){
-            case "string":
-                value = "";
-                break;
-            case "long":
-                value = 0;
-                break;
-            case "boolean":
-                value = false;
-                break;
+        case 'string':
+            value = '';
+            break;
+        case 'long':
+            value = 0;
+            break;
+        case 'boolean':
+            value = false;
+            break;
         }
         if(input.options) {
-            input.options.push({key: "", value: value});
+            input.options.push({key: '', value});
         } else {
-            input.options = [{key: "", value: value}];
+            input.options = [{key: '', value}];
         }
     }
 
@@ -185,9 +185,9 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
 
     addInput(){
         this.abstract?.push({
-            id: "",
-            label: "",
-            type: "string",
+            id: '',
+            label: '',
+            type: 'string',
             order: 0,
             multiple: false,
             optional: false,
@@ -200,41 +200,41 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
     }
 
     criteriaToLabel(criteria: {interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string}): string {
-        let functionName = ""
+        let functionName = '';
         if(criteria.function_id) {
-            functionName = this.functions.find(v => v.id == criteria.function_id)?.name || criteria.function_id
+            functionName = this.functions.find(v => v.id === criteria.function_id)?.name || criteria.function_id;
         }
-        let deviceClassName = ""
+        let deviceClassName = '';
         if(criteria.device_class_id) {
-            deviceClassName = this.deviceClasses.find(v => v.id == criteria.device_class_id)?.name || criteria.device_class_id
+            deviceClassName = this.deviceClasses.find(v => v.id === criteria.device_class_id)?.name || criteria.device_class_id;
         }
-        let aspectName = ""
+        let aspectName = '';
         if(criteria.aspect_id) {
             this.nestedAspects.forEach((value, _) => {
-                let temp = value.find(v => v.id == criteria.aspect_id)?.name;
+                const temp = value.find(v => v.id === criteria.aspect_id)?.name;
                 if(temp) {
                     aspectName = temp;
                 }
-            })
+            });
             if(!aspectName) {
                 aspectName = criteria.aspect_id;
             }
         }
 
-        let parts: string[] = [];
+        const parts: string[] = [];
         if(criteria.interaction) {
-            parts.push(criteria.interaction)
+            parts.push(criteria.interaction);
         }
         if(aspectName) {
-            parts.push(aspectName)
+            parts.push(aspectName);
         }
         if(deviceClassName) {
-            parts.push(deviceClassName)
+            parts.push(deviceClassName);
         }
         if(functionName) {
-            parts.push(functionName)
+            parts.push(functionName);
         }
-        return parts.join(" | ");
+        return parts.join(' | ');
     }
 
     close(): void {
@@ -246,12 +246,12 @@ export class EditSmartServiceInputDialogComponent implements OnInit {
     }
 
     isValid() {
-       return !this.abstract.some(value => !isValidCamundaVariableName(value.id))
+        return !this.abstract.some(value => !isValidCamundaVariableName(value.id));
     }
 }
 
 export interface AbstractSmartServiceInput {
-    id: string,
+    id: string;
     label: string;
     type: string;
     default_value?: any;
@@ -267,7 +267,7 @@ export interface AbstractSmartServiceInput {
     }[];
     entity_only?: boolean;
     same_entity?: string;
-    options?:{key: string, value: any}[];
+    options?: {key: string; value: any}[];
     characteristic_id?: string;
     order: number;
     multiple: boolean;
@@ -276,13 +276,13 @@ export interface AbstractSmartServiceInput {
 }
 
 export function abstractSmartServiceInputToSmartServiceInputsDescription(abstract: AbstractSmartServiceInput[]): SmartServiceInputsDescription{
-    let inputs: SmartServiceInput[] = abstract.map(input => {
-        let properties: SmartServiceInputProperty[] = [];
+    const inputs: SmartServiceInput[] = abstract.map(input => {
+        const properties: SmartServiceInputProperty[] = [];
         if(input.description) {
-            properties.push({id: "description", value: input.description});
+            properties.push({id: 'description', value: input.description});
         }
         if(input.iot_selectors && input.iot_selectors.length > 0) {
-            properties.push({id: "iot", value: input.iot_selectors.join(",")});
+            properties.push({id: 'iot', value: input.iot_selectors.join(',')});
         }
         if(input.criteria_list && input.criteria_list.length > 0) {
             input.criteria_list = input.criteria_list.map(criteria => {
@@ -291,48 +291,48 @@ export function abstractSmartServiceInputToSmartServiceInputsDescription(abstrac
                 criteria.device_class_id = criteria.device_class_id || undefined;
                 criteria.interaction = criteria.interaction || undefined;
                 return criteria;
-            })
-            properties.push({id: "criteria_list", value: JSON.stringify(input.criteria_list)});
+            });
+            properties.push({id: 'criteria_list', value: JSON.stringify(input.criteria_list)});
         }
         if(input.entity_only && input.iot_selectors && input.iot_selectors.length > 0) {
-            properties.push({id: "entity_only", value: "true"});
+            properties.push({id: 'entity_only', value: 'true'});
         }
         if(input.same_entity) {
-            properties.push({id: "same_entity", value: input.same_entity});
+            properties.push({id: 'same_entity', value: input.same_entity});
         }
         if(input.order !== null && input.order !== undefined) {
-            properties.push({id: "order", value: input.order.toString()});
+            properties.push({id: 'order', value: input.order.toString()});
         }
         if(input.multiple) {
-            properties.push({id: "multiple", value: JSON.stringify(input.multiple)});
+            properties.push({id: 'multiple', value: JSON.stringify(input.multiple)});
         }
         if(input.auto_select_all) {
-            properties.push({id: "auto_select_all", value: JSON.stringify(input.auto_select_all)});
+            properties.push({id: 'auto_select_all', value: JSON.stringify(input.auto_select_all)});
         }
         if(input.optional) {
-            properties.push({id: "optional", value: JSON.stringify(input.optional)});
+            properties.push({id: 'optional', value: JSON.stringify(input.optional)});
         }
         if(input.characteristic_id) {
-            properties.push({id: "characteristic_id", value: input.characteristic_id});
+            properties.push({id: 'characteristic_id', value: input.characteristic_id});
         } else if(input.options && input.options.length > 0) {
-            let obj: any = {};
+            const obj: any = {};
             input.options.forEach(element => {
                 obj[element.key] = element.value;
-            })
-            properties.push({id: "options", value: JSON.stringify(obj)});
+            });
+            properties.push({id: 'options', value: JSON.stringify(obj)});
         }
-        var defaultValue = input.default_value;
+        let defaultValue = input.default_value;
         if(defaultValue === undefined || defaultValue === null) {
             switch (input.type) {
-                case "string":
-                    defaultValue = "";
-                    break;
-                case "long":
-                    defaultValue = 0;
-                    break;
-                case "boolean":
-                    defaultValue = false;
-                    break;
+            case 'string':
+                defaultValue = '';
+                break;
+            case 'long':
+                defaultValue = 0;
+                break;
+            case 'boolean':
+                defaultValue = false;
+                break;
             }
         }
         return {
@@ -340,18 +340,18 @@ export function abstractSmartServiceInputToSmartServiceInputsDescription(abstrac
             label: input.label,
             type: input.type,
             default_value: defaultValue,
-            properties: properties
-        }
+            properties
+        };
     });
 
     return {
-        inputs: inputs
-    }
+        inputs
+    };
 }
 
 export function smartServiceInputsDescriptionToAbstractSmartServiceInput(value: SmartServiceInputsDescription): AbstractSmartServiceInput[]{
     return value.inputs.map(input => {
-        let result = {
+        const result = {
             id: input.id,
             label: input.label,
             type: input.type,
@@ -363,51 +363,51 @@ export function smartServiceInputsDescriptionToAbstractSmartServiceInput(value: 
         } as AbstractSmartServiceInput;
         input.properties.forEach(property => {
             try {
-                if(property.id == "description" && property.value != "") {
+                if(property.id === 'description' && property.value !== '') {
                     result.description = property.value;
                 }
-                if(property.id == "iot" && property.value != "") {
-                    result.iot_selectors = property.value.split(",").map(value => value.trim());
+                if(property.id === 'iot' && property.value !== '') {
+                    result.iot_selectors = property.value.split(',').map(value2 => value2.trim());
                 }
-                if(property.id == "criteria" && property.value != "") {
+                if(property.id === 'criteria' && property.value !== '') {
                     result.criteria_list = [JSON.parse(property.value)];
                 }
-                if(property.id == "criteria_list" && property.value != "") {
+                if(property.id === 'criteria_list' && property.value !== '') {
                     result.criteria_list = JSON.parse(property.value);
                 }
-                if(property.id == "entity_only" && property.value != "") {
+                if(property.id === 'entity_only' && property.value !== '') {
                     result.entity_only = JSON.parse(property.value);
                 }
-                if(property.id == "same_entity" && property.value != "") {
+                if(property.id === 'same_entity' && property.value !== '') {
                     result.same_entity = property.value;
                 }
-                if(property.id == "order" && property.value != "") {
-                    result.order = parseInt(property.value);
+                if(property.id === 'order' && property.value !== '') {
+                    result.order = parseInt(property.value, 10);
                 }
-                if(property.id == "multiple" && property.value != "") {
+                if(property.id === 'multiple' && property.value !== '') {
                     result.multiple = JSON.parse(property.value);
                 }
-                if(property.id == "auto_select_all" && property.value != "") {
+                if(property.id === 'auto_select_all' && property.value !== '') {
                     result.auto_select_all = JSON.parse(property.value);
                 }
-                if(property.id == "optional" && property.value != "") {
+                if(property.id === 'optional' && property.value !== '') {
                     result.optional = JSON.parse(property.value);
                 }
-                if(property.id == "characteristic_id" && property.value != "") {
+                if(property.id === 'characteristic_id' && property.value !== '') {
                     result.characteristic_id = property.value;
                 }
-                if(property.id == "options" && property.value != "") {
-                    let obj = JSON.parse(property.value);
-                    result.options = Object.entries(obj).map(([k,v]) =>{ return {key: k, value: v}});
+                if(property.id === 'options' && property.value !== '') {
+                    const obj = JSON.parse(property.value);
+                    result.options = Object.entries(obj).map(([k,v]) =>({key: k, value: v}));
                 }
             } catch (e){
                 console.error(e);
             }
-        })
+        });
         if (result.characteristic_id) {
             result.options = undefined;
         }
-        return result
+        return result;
     });
 }
 
@@ -424,16 +424,16 @@ function isValidCamundaVariableName(variableName: string): boolean {
         return false;
     }
     //my not contain operators like +, -, *, /, =, >, ?, .
-    if(["+", "-", "*", "\\", "/", "=", ">", "<", "?", ".", "&", "|", ",", "%", "!"].some(e => variableName.includes(e))){
+    if(['+', '-', '*', '\\', '/', '=', '>', '<', '?', '.', '&', '|', ',', '%', '!'].some(e => variableName.includes(e))){
         return false;
     }
     //my not be literals like null, true, false
-    if(["null", "true", "false"].some(e => variableName == e)){
+    if(['null', 'true', 'false'].some(e => variableName === e)){
         return false;
     }
     //my not contain keywords like function, if, then, else, for, between, instance, of, not
-    if(["function", "if", "then", "else", "for", "between", "instance", "of", "not"].some(e => variableName == e)){
+    if(['function', 'if', 'then', 'else', 'for', 'between', 'instance', 'of', 'not'].some(e => variableName === e)){
         return false;
     }
-    return true
+    return true;
 }

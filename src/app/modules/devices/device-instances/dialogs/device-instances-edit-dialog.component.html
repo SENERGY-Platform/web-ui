@@ -46,7 +46,7 @@
                 <mat-divider></mat-divider>
             </div>
             <div *ngFor="let attr of device.attributes; let i = index" class="attribute">
-                <ng-container *ngIf="attr.key != nicknameAttributeKey">
+                <ng-container *ngIf="attr.key !== nicknameAttributeKey">
                     <mat-form-field class="third-width" color="accent">
                         <input matInput placeholder="Key" [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)">
                     </mat-form-field>

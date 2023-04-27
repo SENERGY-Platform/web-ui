@@ -225,7 +225,7 @@ export class DiagramEditorComponent implements AfterViewInit {
     paperHeight = 600;
     paper!: any;
 
-    public dragStartPosition: {x: number, y: number }  | null = null
+    public dragStartPosition: {x: number; y: number }  | null = null;
 
     constructor() {
     }
@@ -321,19 +321,19 @@ export class DiagramEditorComponent implements AfterViewInit {
         this.graphScale = V(this.paper.viewport).scale();
     }
 
-    public zoomOut () {
+    public zoomOut() {
         this.graphScale.sx -= 0.1;
         this.graphScale.sy -= 0.1;
         this.paperScale(this.graphScale.sx, this.graphScale.sy);
     }
 
-    public zoomIn () {
+    public zoomIn() {
         this.graphScale.sx += 0.1;
         this.graphScale.sy += 0.1;
         this.paperScale(this.graphScale.sx, this.graphScale.sy);
     }
 
-    public resetZoom () {
+    public resetZoom() {
         this.graphScale.sx = 1;
         this.graphScale.sy = 1;
         this.paperScale(this.graphScale.sx, this.graphScale.sy);

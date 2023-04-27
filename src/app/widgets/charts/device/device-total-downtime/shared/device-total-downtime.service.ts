@@ -29,7 +29,7 @@ import {DeviceInstancesService} from '../../../../../modules/devices/device-inst
 import {
     DeviceInstancesHistoryModel
 } from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
-import {map} from "rxjs/operators";
+import {map} from 'rxjs/operators';
 
 const customColor = '#4484ce'; // /* cc */
 const stateTrue = true;
@@ -161,14 +161,14 @@ export class DeviceTotalDowntimeService {
 
         function fillIntervalArray(state: boolean, time: number) {
             switch (state) {
-                case stateTrue: {
-                    interval[intervalIndex].stateConnected += time;
-                    break;
-                }
-                case stateFalse: {
-                    interval[intervalIndex].stateDisconnected += time;
-                    break;
-                }
+            case stateTrue: {
+                interval[intervalIndex].stateConnected += time;
+                break;
+            }
+            case stateFalse: {
+                interval[intervalIndex].stateDisconnected += time;
+                break;
+            }
             }
         }
     }

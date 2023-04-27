@@ -30,13 +30,13 @@ export class FunctionsEditDialogComponent implements OnInit {
 
     concepts: ConceptsPermSearchModel[] = [];
 
-    disabled: boolean
+    disabled: boolean;
 
     constructor(
         private conceptsService: ConceptsService,
         private dialogRef: MatDialogRef<FunctionsEditDialogComponent>,
         private _formBuilder: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: { function: FunctionsPermSearchModel, disabled?:boolean },
+        @Inject(MAT_DIALOG_DATA) data: { function: FunctionsPermSearchModel; disabled?: boolean },
     ) {
         this.disabled = !!data.disabled;
         this.initFunctionFormGroup(data.function);

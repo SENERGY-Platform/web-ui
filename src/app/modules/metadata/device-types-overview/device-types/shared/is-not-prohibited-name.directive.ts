@@ -19,6 +19,7 @@ import {Directive, Input} from '@angular/core';
 import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator} from '@angular/forms';
 
 @Directive({
+    // eslint-disable-next-line @angular-eslint/directive-selector
     selector: '[isNotProhibitedName]',
     providers: [{provide: NG_VALIDATORS, useExisting: IsNotProhibitedNameValidatorDirective, multi: true}]
 })
@@ -29,7 +30,7 @@ export class IsNotProhibitedNameValidatorDirective implements Validator {
         if(this.prohibitedNames.some(p => p === control.value)){
             return { nameValidator: { value: control.value } };
         } else {
-            return null
+            return null;
         }
     }
 }

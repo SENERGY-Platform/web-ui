@@ -219,7 +219,7 @@ export class ExportService {
         return false;
     }
 
-    getTimePath(traverse: ExportValueCharacteristicModel[]): { path: string; precision: string | undefined;} {
+    getTimePath(traverse: ExportValueCharacteristicModel[]): { path: string; precision: string | undefined} {
         let path = '';
         let precision: string | undefined;
         traverse.forEach((t: ExportValueCharacteristicModel) => {

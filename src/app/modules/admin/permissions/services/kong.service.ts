@@ -33,6 +33,6 @@ export class KongService {
     }
 
     public loadUris(): Observable<string[]>{
-        return this.http.get<string[]>(this.baseUrl + '/routes')
+        return this.http.get<string[]>(this.baseUrl + '/routes');
     }
 }

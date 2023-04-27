@@ -97,16 +97,16 @@ export class AuthorizationService {
             .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/users')
             .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllUsers', { error: 'error' })));
     }
-    
+
     loadAllRoles() {
         return this.http
-        .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/roles')
-        .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllRoles', { error: 'error' })));
+            .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/roles')
+            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllRoles', { error: 'error' })));
     }
-    
+
     loadAllClients() {
         return this.http
-        .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/clients')
-        .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllClients', { error: 'error' })));
+            .get<any | { error: string }>(environment.keycloakUrl + '/auth/admin/realms/master/clients')
+            .pipe(catchError(this.errorHandlerService.handleError(AuthorizationService.name, 'loadAllClients', { error: 'error' })));
     }
 }

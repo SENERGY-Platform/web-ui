@@ -33,30 +33,30 @@ interface Criteria {
 }
 
 @Component({
-    selector: 'criteria-list',
+    selector: 'senergy-criteria-list',
     templateUrl: './criteria-list.component.html',
     styleUrls: ['./criteria-list.component.css'],
 })
 export class CriteriaListComponent implements OnInit {
 
-    @Input() criteria_json: string = "[]"
-    @Output() on_change: EventEmitter<string> = new EventEmitter<string>();
+    @Input() criteria_json = '[]';
+    @Output() changed: EventEmitter<string> = new EventEmitter<string>();
 
-    functions: (FunctionsPermSearchModel | {id?:string, name: string})[] = [];
-    deviceClasses: (DeviceClassesPermSearchModel | {id?:string, name: string})[] = [];
+    functions: (FunctionsPermSearchModel | {id?: string; name: string})[] = [];
+    deviceClasses: (DeviceClassesPermSearchModel | {id?: string; name: string})[] = [];
     nestedAspects: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
 
-    criteriaList: Criteria[] = []
+    criteriaList: Criteria[] = [];
 
     constructor(private functionsService: FunctionsService,
                 private deviceTypesService: DeviceTypeService,
                 private deviceClassService: DeviceClassesService) {
-        this.functionsService.getFunctions("", 9999, 0, "name", "asc").subscribe(value => {
+        this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.functions = value;
-        })
-        this.deviceClassService.getDeviceClasses("", 9999, 0, "name", "asc").subscribe(value => {
+        });
+        this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.deviceClasses = value;
-        })
+        });
         this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((aspects: DeviceTypeAspectNodeModel[]) => {
             const tmp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
             const asp: Map<string, DeviceTypeAspectNodeModel[]> = new Map();
@@ -76,54 +76,54 @@ export class CriteriaListComponent implements OnInit {
     }
 
     emitUpdate() {
-        this.on_change.emit(JSON.stringify(this.criteriaList))
+        this.changed.emit(JSON.stringify(this.criteriaList));
     }
 
     removeCriteria(list: Criteria[], index: number): Criteria[] {
         list.splice(index, 1);
-        return list
+        return list;
     }
 
     addCriteria(list: Criteria[]): Criteria[] {
-        list.push({interaction: "request", aspect_id: "", device_class_id: "", function_id: ""});
-        return list
+        list.push({interaction: 'request', aspect_id: '', device_class_id: '', function_id: ''});
+        return list;
     }
 
     criteriaToLabel(criteria: {interaction?: string; function_id?: string; device_class_id?: string; aspect_id?: string}): string {
-        let functionName = ""
+        let functionName = '';
         if(criteria.function_id) {
-            functionName = this.functions.find(v => v.id == criteria.function_id)?.name || criteria.function_id
+            functionName = this.functions.find(v => v.id === criteria.function_id)?.name || criteria.function_id;
         }
-        let deviceClassName = ""
+        let deviceClassName = '';
         if(criteria.device_class_id) {
-            deviceClassName = this.deviceClasses.find(v => v.id == criteria.device_class_id)?.name || criteria.device_class_id
+            deviceClassName = this.deviceClasses.find(v => v.id === criteria.device_class_id)?.name || criteria.device_class_id;
         }
-        let aspectName = ""
+        let aspectName = '';
         if(criteria.aspect_id) {
             this.nestedAspects.forEach((value, _) => {
-                let temp = value.find(v => v.id == criteria.aspect_id)?.name;
+                const temp = value.find(v => v.id === criteria.aspect_id)?.name;
                 if(temp) {
                     aspectName = temp;
                 }
-            })
+            });
             if(!aspectName) {
                 aspectName = criteria.aspect_id;
             }
         }
 
-        let parts: string[] = [];
+        const parts: string[] = [];
         if(criteria.interaction) {
-            parts.push(criteria.interaction)
+            parts.push(criteria.interaction);
         }
         if(aspectName) {
-            parts.push(aspectName)
+            parts.push(aspectName);
         }
         if(deviceClassName) {
-            parts.push(deviceClassName)
+            parts.push(deviceClassName);
         }
         if(functionName) {
-            parts.push(functionName)
+            parts.push(functionName);
         }
-        return parts.join(" | ");
+        return parts.join(' | ');
     }
 }

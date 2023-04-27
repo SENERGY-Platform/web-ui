@@ -20,7 +20,7 @@ import {Attribute, DeviceInstancesModel} from '../shared/device-instances.model'
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import {AbstractControl, FormControl, ValidationErrors} from '@angular/forms';
 import {DeviceTypeService} from '../../../metadata/device-types-overview/shared/device-type.service';
-import {SenergyConnectorLocalIdConstraint} from '../../../metadata/device-types-overview/shared/device-type.model';
+import {senergyConnectorLocalIdConstraint} from '../../../metadata/device-types-overview/shared/device-type.model';
 
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
@@ -28,9 +28,9 @@ import {SenergyConnectorLocalIdConstraint} from '../../../metadata/device-types-
 })
 export class DeviceInstancesEditDialogComponent implements OnInit {
     device: DeviceInstancesModel;
-    displayname: string = "";
-    nicknameAttributeKey: string = "shared/nickname";
-    nicknameAttributeOrigin: string = "shared"
+    displayname = '';
+    nicknameAttributeKey = 'shared/nickname';
+    nicknameAttributeOrigin = 'shared';
 
     protocolConstraints: string[] = [];
 
@@ -42,27 +42,27 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     ) {
         this.device = data.device;
         this.device.attributes?.forEach(value => {
-            if (value.key == this.nicknameAttributeKey) {
+            if (value.key === this.nicknameAttributeKey) {
                 this.displayname = value.value;
             }
-        })
+        });
 
 
-        let protocolsToConstraints: Map<string, string[]> = new Map<string, string[]>();
-        this.deviceTypeService.getProtocols(9999, 0, "name", "asc").subscribe(protocols => {
+        const protocolsToConstraints: Map<string, string[]> = new Map<string, string[]>();
+        this.deviceTypeService.getProtocols(9999, 0, 'name', 'asc').subscribe(protocols => {
             if(protocols){
                 protocols.forEach(p => {
                     protocolsToConstraints.set(p.id, p.constraints);
-                })
+                });
             }
             this.deviceTypeService.getDeviceType(this.device.device_type.id).subscribe(dt => {
                 if(dt) {
                     dt.services.forEach(s => {
-                        this.protocolConstraints = this.protocolConstraints.concat(protocolsToConstraints.get(s.protocol_id) || [])
-                    })
+                        this.protocolConstraints = this.protocolConstraints.concat(protocolsToConstraints.get(s.protocol_id) || []);
+                    });
                 }
-            })
-        })
+            });
+        });
 
     }
 
@@ -77,7 +77,7 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     }
 
     save(): void {
-        this.setDisplayNameAttribute()
+        this.setDisplayNameAttribute();
         this.dialogRef.close(this.device);
     }
 
@@ -96,22 +96,20 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     }
 
     editableAttribute(attr: Attribute) {
-        return !attr.origin || attr.origin == '' || attr.origin == 'web-ui'
+        return !attr.origin || attr.origin === '' || attr.origin === 'web-ui';
     }
 
     private setDisplayNameAttribute() {
         if(!this.device.attributes) {
             this.device.attributes = [];
         }
-        this.device.attributes = this.device.attributes?.filter((value)=>{
-            return value.key != this.nicknameAttributeKey;
-        })
-        if (this.displayname != "") {
+        this.device.attributes = this.device.attributes?.filter((value)=>value.key !== this.nicknameAttributeKey);
+        if (this.displayname !== '') {
             this.device.attributes?.push({
                 key: this.nicknameAttributeKey,
                 origin: this.nicknameAttributeOrigin,
                 value: this.displayname
-            } as Attribute)
+            } as Attribute);
         }
     }
 
@@ -123,18 +121,18 @@ export class DeviceInstancesEditDialogComponent implements OnInit {
     }
 
     localIdFieldIsValid(): boolean{
-        return !this.protocolConstraints?.includes(SenergyConnectorLocalIdConstraint) || isValidLocalId(this.device.local_id);
+        return !this.protocolConstraints?.includes(senergyConnectorLocalIdConstraint) || isValidLocalId(this.device.local_id);
     }
 
     isValidLocalIdValidator(c: AbstractControl): ValidationErrors | null {
-        if (!this.protocolConstraints?.includes(SenergyConnectorLocalIdConstraint) || isValidLocalId(c.value)) {
+        if (!this.protocolConstraints?.includes(senergyConnectorLocalIdConstraint) || isValidLocalId(c.value)) {
             return null;
         }else{
             return {
                 validateLocalId: {
                     valid: false
                 }
-            }
+            };
         }
     }
 }
@@ -143,5 +141,5 @@ function isValidLocalId(value: string): boolean {
     if(!value) {
         return true;
     }
-    return !(value.includes && (value.includes("#") || value.includes("+") || value.includes("/")))
+    return !(value.includes && (value.includes('#') || value.includes('+') || value.includes('/')));
 }

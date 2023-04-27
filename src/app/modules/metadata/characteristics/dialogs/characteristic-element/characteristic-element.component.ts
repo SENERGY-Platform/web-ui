@@ -114,7 +114,7 @@ export class CharacteristicElementComponent implements OnInit {
         if(this.disabled) {
             Object.keys(this.form.controls).forEach(key => {
                 this.form.get(key)?.disable();
-            })
+            });
         }
     }
 
@@ -265,15 +265,15 @@ export class CharacteristicElementComponent implements OnInit {
             newValue = 0;
         }
         if(this.isText()) {
-            newValue = "";
+            newValue = '';
         }
-        let newList = JSON.parse(JSON.stringify(this.form.get('allowed_values')?.value || []));
+        const newList = JSON.parse(JSON.stringify(this.form.get('allowed_values')?.value || []));
         newList.push(newValue);
         this.form.get('allowed_values')?.setValue(newList);
     }
 
     removeAllowedValue(index: number) {
-        let newList = JSON.parse(JSON.stringify(this.form.get('allowed_values')?.value || []));
+        const newList = JSON.parse(JSON.stringify(this.form.get('allowed_values')?.value || []));
         newList.splice(index, 1);
         this.form.get('allowed_values')?.setValue(newList);
     }
