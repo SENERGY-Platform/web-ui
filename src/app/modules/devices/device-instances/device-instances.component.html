@@ -51,7 +51,7 @@
     <div *ngIf="dataSource.data.length === 0 && ready">No devices found.</div>
     <senergy-spinner [show]="!ready"></senergy-spinner>
 
-    <div [hidden]="!ready || dataSource.data.length === 0" class="table-container">
+    <div [hidden]="!ready || dataSource.data.length === 0" class="table-container-with-button table-container">
 
         <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
             <ng-container matColumnDef="select">

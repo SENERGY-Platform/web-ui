@@ -19,7 +19,7 @@
 
     <div *ngIf="dataSource.data.length === 0 && ready">No network found.</div>
 
-    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container">
+    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container table-container-with-button">
         <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
             <ng-container matColumnDef="select">
                 <th mat-header-cell *matHeaderCellDef class="button-column">
@@ -48,7 +48,7 @@
                 </td>
             </ng-container>
             <ng-container matColumnDef="connection">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Connection</th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Connection</th>
                 <td mat-cell *matCellDef="let network">
                     <senergy-state-icon [state]="network?.annotations?.connected"></senergy-state-icon>
                 </td>

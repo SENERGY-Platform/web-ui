@@ -56,6 +56,10 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
     margin-top: 10px;
 }
 
+.table-container-with-button {
+    max-height: calc(100vh);
+}
+
 .table-container table {
     width: 100%;
 }
