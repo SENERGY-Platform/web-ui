@@ -39,6 +39,7 @@ import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {MatLegacyTableModule as MatTableModule} from '@angular/material/legacy-table';
 import {ImportInstancesModel} from './shared/import-instances.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 describe('ImportInstancesComponent', () => {
     let component: ImportInstancesComponent;
@@ -69,6 +70,8 @@ describe('ImportInstancesComponent', () => {
 
     const dialogSpy: Spy<MatDialog> = createSpyFromClass(MatDialog);
     dialogSpy.open.and.returnValue({afterClosed: () => of(true)});
+
+    const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService)
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -123,7 +126,7 @@ describe('ImportInstancesComponent', () => {
 
     it('should search', fakeAsync(() => {
         importInstancesServiceSpy.listImportInstances.calls.reset();
-        component.searchText = 'search';
+        searchbarSpy.changeMessage("search")
         tick(301);
         expect(importInstancesServiceSpy.listImportInstances.calls.mostRecent().args[0]).toEqual('search');
     }));

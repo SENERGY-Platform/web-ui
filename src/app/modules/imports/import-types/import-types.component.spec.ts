@@ -40,6 +40,7 @@ import {MatLegacyTableModule as MatTableModule} from '@angular/material/legacy-t
 import {ImportTypePermissionSearchModel} from './shared/import-types.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 describe('ImportTypesComponent', () => {
     let component: ImportTypesComponent;
@@ -70,6 +71,8 @@ describe('ImportTypesComponent', () => {
     dialogSpy.open.and.returnValue({afterClosed: () => of(true)});
 
     const permissionsDialogServiceSpy: Spy<PermissionsDialogService> = createSpyFromClass(PermissionsDialogService);
+
+    const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService)
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -128,7 +131,7 @@ describe('ImportTypesComponent', () => {
 
     it('should search', fakeAsync(() =>  {
         importTypesServiceSpy.listImportTypes.calls.reset();
-        component.searchText = 'search';
+        searchbarSpy.changeMessage("search")
         tick(301);
         expect(importTypesServiceSpy.listImportTypes.calls.mostRecent().args[0]).toEqual('search');
     }));
