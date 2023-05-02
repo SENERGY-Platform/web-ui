@@ -123,7 +123,7 @@ describe('ImportInstancesComponent', () => {
 
     it('should search', fakeAsync(() => {
         importInstancesServiceSpy.listImportInstances.calls.reset();
-        component.searchControl.patchValue('search');
+        component.searchText = 'search';
         tick(301);
         expect(importInstancesServiceSpy.listImportInstances.calls.mostRecent().args[0]).toEqual('search');
     }));

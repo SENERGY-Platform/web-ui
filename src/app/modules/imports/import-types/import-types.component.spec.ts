@@ -128,7 +128,7 @@ describe('ImportTypesComponent', () => {
 
     it('should search', fakeAsync(() =>  {
         importTypesServiceSpy.listImportTypes.calls.reset();
-        component.searchControl.patchValue('search');
+        component.searchText = 'search';
         tick(301);
         expect(importTypesServiceSpy.listImportTypes.calls.mostRecent().args[0]).toEqual('search');
     }));
