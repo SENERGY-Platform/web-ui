@@ -13,33 +13,21 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="container">
+<div class="container table-search-container">
     <span fxLayout="row" class="search-refresh">
-        <mat-form-field color="accent" appearance="outline" fxFlex>
-            <input matInput [formControl]="searchControl" placeholder="Search...">
-            <mat-icon matPrefix *ngIf="searchControl.value === ''">search</mat-icon>
-            <button mat-icon-button matPrefix *ngIf="searchControl.value !== ''" (click)="resetSearch()">
-                <mat-icon>close</mat-icon>
-            </button>
-        </mat-form-field>
+        <senergy-searchbar></senergy-searchbar>
         <button mat-icon-button (click)="reload()" color="accent" class="refresh">
             <mat-icon>refresh</mat-icon>
         </button>
     </span>
     <senergy-widget-spinner [show]="!dataReady"></senergy-widget-spinner>
 
-    <div *ngIf="dataReady" class="mat-elevation-z1" fxLayout="column"
-         infiniteScroll
-         [infiniteScrollDistance]="1"
-         [infiniteScrollThrottle]="50"
-         [infiniteScrollContainer]="'.container'"
-         [fromRoot]="true"
-         (scrolled)="onScroll()">
+    <div *ngIf="dataReady" class="mat-elevation-z1" fxLayout="column" infiniteScroll [infiniteScrollDistance]="1"
+        [infiniteScrollThrottle]="50" [infiniteScrollContainer]="'.container'" [fromRoot]="true" (scrolled)="onScroll()"
+        class="table-container">
 
-        <table mat-table matSortDisableClear
-               [dataSource]="importTypes" matSort
-               (matSortChange)="matSortChange($event)"
-               matSortActive="name" matSortDirection="asc">
+        <table mat-table matSortDisableClear [dataSource]="importTypes" matSort (matSortChange)="matSortChange($event)"
+            matSortActive="name" matSortDirection="asc">
             <ng-container matColumnDef="name">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
                 <td mat-cell *matCellDef="let m">{{m.name}}</td>
@@ -97,9 +85,11 @@
 
 
             <tr mat-header-row
-                *matHeaderRowDef="['name', 'description', 'image', 'details', 'start', 'share', 'edit', 'delete']; sticky: true"></tr>
+                *matHeaderRowDef="['name', 'description', 'image', 'details', 'start', 'share', 'edit', 'delete']; sticky: true">
+            </tr>
             <tr mat-row
-                *matRowDef="let m; columns: ['name', 'description', 'image', 'details', 'start', 'share', 'edit', 'delete'];"></tr>
+                *matRowDef="let m; columns: ['name', 'description', 'image', 'details', 'start', 'share', 'edit', 'delete'];">
+            </tr>
         </table>
     </div>
 

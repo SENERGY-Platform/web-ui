@@ -35,6 +35,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 @Component({
     selector: 'senergy-networks',
@@ -46,7 +47,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
     dataSource = new MatTableDataSource<NetworksModel>();
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<NetworksModel>(true, []);
-    searchControl = new UntypedFormControl('');
+    searchText: string = ""
     totalCount = 200;
     ready = false;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -55,6 +56,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     constructor(
         private networksService: NetworksService,
+        private searchbarService: SearchbarService,
         private router: Router,
         private dialog: MatDialog,
         private deviceInstancesService: DeviceInstancesService,
@@ -63,11 +65,18 @@ export class NetworksComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-
+        this.initSearch();
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+    }
+
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
+        });
     }
 
     ngAfterViewInit(): void {
@@ -93,7 +102,6 @@ export class NetworksComponent implements OnInit, OnDestroy {
             this.getNetworks()
         });
         this.getNetworks();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     edit(network: NetworksModel) {
@@ -129,7 +137,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
         var offset = this.paginator.pageSize * this.paginator.pageIndex;
 
         this.networksService
-            .searchNetworks(this.searchControl.value, this.pageSize, offset, 'name', 'asc')
+            .searchNetworks(this.searchText, this.pageSize, offset, 'name', 'asc')
             .subscribe((networks: NetworksModel[]) => {
                 this.dataSource.data = networks;
                 this.ready = true;
@@ -141,10 +149,6 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.selectionClear();
         this.getNetworks();
-    }
-
-    resetSearch() {
-        this.searchControl.setValue('');
     }
 
     isAllSelected() {

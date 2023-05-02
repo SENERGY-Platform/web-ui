@@ -26,19 +26,9 @@ tr.second th, tr.second td {
     padding: 0 8px;
 }
 
-.search-refresh {
-    padding: 10px;
-}
-
 .container {
     height: calc(100% - 64px);
     overflow-y: auto;
-    padding: 0 8px 8px
-}
-
-.refresh {
-    margin-top: 0.5em;
-    margin-left: 0.5em;
 }
 
 .mat-cell {
@@ -59,4 +49,9 @@ th.mat-header-cell {
 
 .auto-generated-cell {
     padding-top: 1em;
+}
+
+.search-container {
+    display: flex;
+    flex-direction: row;
 }

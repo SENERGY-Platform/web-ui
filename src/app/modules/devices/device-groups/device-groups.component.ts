@@ -27,6 +27,7 @@ import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 
 @Component({
@@ -42,10 +43,8 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     dataSource = new MatTableDataSource<DeviceGroupsPermSearchModel>();
     @ViewChild(MatSort) sort!: MatSort;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-
-    searchControl = new UntypedFormControl('');
-
     ready = false;
+    searchText: string = ""
 
     private searchSub: Subscription = new Subscription();
 
@@ -57,10 +56,11 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
+        private searchbarService: SearchbarService
     ) {}
 
     ngOnInit() {
-        
+        this.initSearch();
     }
 
     ngAfterViewInit(): void {
@@ -75,11 +75,17 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
             this.getDeviceGroups()
         });
         this.getDeviceGroups();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+    }
+
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
+        });
     }
 
     isAllSelected() {
@@ -136,9 +142,9 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
 
     private getDeviceGroups() {
         var offset = this.paginator.pageSize * this.paginator.pageIndex;
-        let query =  this.deviceGroupsService.getDeviceGroups(this.searchControl.value, this.pageSize, offset, 'name', 'asc');
+        let query =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.pageSize, offset, 'name', 'asc');
         if(this.hideGenerated) {
-            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchControl.value, this.pageSize, offset, 'name', 'asc');
+            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.pageSize, offset, 'name', 'asc');
         }
 
         query.subscribe((deviceGroups: DeviceGroupsPermSearchModel[]) => {
@@ -152,10 +158,6 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.selectionClear();
         this.getDeviceGroups();
-    }
-
-    public resetSearch() {
-        this.searchControl.setValue('');
     }
 
     deleteMultipleItems() {

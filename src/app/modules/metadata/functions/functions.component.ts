@@ -32,6 +32,7 @@ import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 @Component({
     selector: 'senergy-functions',
@@ -45,13 +46,14 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<FunctionsPermSearchModel>(true, []);
     totalCount = 200;
-    searchControl = new UntypedFormControl('');
     ready = false;
     userIsAdmin = false;
     private searchSub: Subscription = new Subscription();
+    searchText: string = ""
 
     constructor(
         private dialog: MatDialog,
+        private searchbarService: SearchbarService,
         private functionsService: FunctionsService,
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
@@ -60,6 +62,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
+        this.initSearch();
     }
 
     ngAfterViewInit(): void {
@@ -74,11 +77,17 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             this.getFunctions()
         });
         this.getFunctions();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+    }
+
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
+        });
     }
 
     editFunction(inputFunction: FunctionsPermSearchModel): void {
@@ -156,7 +165,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         var offset = this.paginator.pageSize * this.paginator.pageIndex;
 
         this.functionsService
-                .getFunctions(this.searchControl.value, this.pageSize, offset, 'name', 'asc')
+                .getFunctions(this.searchText, this.pageSize, offset, 'name', 'asc')
                 .subscribe((functions: FunctionsPermSearchModel[]) => {
                     this.dataSource = new MatTableDataSource(functions);
                     this.dataSource.sort = this.sort;
@@ -179,10 +188,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             this.snackBar.open('Function ' + text + 'ed successfully.', undefined, { duration: 2000 });
             this.reload();
         }
-    }
-
-    resetSearch() {
-        this.searchControl.setValue('');
     }
 
     isAllSelected() {

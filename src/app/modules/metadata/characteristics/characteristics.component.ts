@@ -31,6 +31,7 @@ import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 @Component({
     selector: 'senergy-characteristic',
@@ -44,14 +45,15 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<CharacteristicsPermSearchModel>(true, []);
     totalCount = 200;
-    searchControl = new UntypedFormControl('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     routerConcept: ConceptsPermSearchModel | null = null;
     selectedTag = '';
     private searchSub: Subscription = new Subscription();
+    searchText: string = ""
 
     constructor(
         private dialog: MatDialog,
+        private searchbarService: SearchbarService,
         private characteristicsService: CharacteristicsService,
         private snackBar: MatSnackBar,
         private router: Router,
@@ -61,7 +63,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-
+        this.initSearch();
     }
 
     ngOnDestroy() {
@@ -80,7 +82,13 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             this.getCharacteristics()
         });
         this.getCharacteristics();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+    }
+
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
+        });
     }
 
     newCharacteristic() {
@@ -194,7 +202,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             this.selectedTag = this.routerConcept.name;
         }
         this.characteristicsService
-            .getCharacteristics(this.searchControl.value, this.pageSize, offset, 'name', 'asc', this.routerConcept?.characteristic_ids || [])
+            .getCharacteristics(this.searchText, this.pageSize, offset, 'name', 'asc', this.routerConcept?.characteristic_ids || [])
             .subscribe((characteristics: CharacteristicsPermSearchModel[]) => {
                 this.setCharacteristics(characteristics);
             });
@@ -220,10 +228,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.paginator.pageIndex = 0;
         this.selectionClear();
         this.getCharacteristics();
-    }
-
-    resetSearch() {
-        this.searchControl.setValue('');
     }
 
     isAllSelected() {

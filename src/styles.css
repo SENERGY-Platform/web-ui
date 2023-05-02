@@ -41,10 +41,19 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
     padding: 0 8px 8px;
 }
 
+.table-search-container .search-refresh {
+    align-items: center;
+}
+
+.table-search-container senergy-searchbar {
+    width: 100%;
+}
+
 .table-container {
     max-height: calc(100vh - 300px);
     overflow: auto;
     position: relative;
+    margin-top: 10px;
 }
 
 .table-container table {
@@ -54,3 +63,4 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 .table-container .button-column {
     width: 5%;
 }
+

@@ -31,6 +31,7 @@ import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 
 @Component({
@@ -45,20 +46,21 @@ export class LocationsComponent implements OnInit, OnDestroy {
     dataSource = new MatTableDataSource<LocationModel>();
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<LocationModel>(true, []);
-    searchControl = new UntypedFormControl('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
     private searchSub: Subscription = new Subscription();
+    searchText: string = ""
 
     constructor(
         private locationsService: LocationsService,
+        private searchbarService: SearchbarService,
         private snackBar: MatSnackBar,
         private router: Router,
         private dialogsService: DialogsService,
     ) {}
 
     ngOnInit() {
-     
+        this.initSearch();
     }
 
     ngOnDestroy() {
@@ -77,7 +79,6 @@ export class LocationsComponent implements OnInit, OnDestroy {
             this.getLocations()
         });
         this.getLocations();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     showDevices(location: LocationModel) {
@@ -85,6 +86,13 @@ export class LocationsComponent implements OnInit, OnDestroy {
             state: { type: DeviceInstancesRouterStateTypesEnum.LOCATION, value: location } as DeviceInstancesRouterState,
         });
         return false;
+    }
+
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
+        });
     }
 
     deleteLocation(location: LocationModel): boolean {
@@ -119,7 +127,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
     private getLocations() {
         var offset = this.paginator.pageSize * this.paginator.pageIndex;
         this.locationsService
-            .searchLocations(this.searchControl.value, this.pageSize, offset, 'name', 'asc')
+            .searchLocations(this.searchText, this.pageSize, offset, 'name', 'asc')
             .subscribe((locations: LocationModel[]) => {
                 this.dataSource.data = locations;
                 this.ready = true;
@@ -137,10 +145,6 @@ export class LocationsComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.selectionClear()
         this.getLocations();
-    }
-
-    resetSearch() {
-        this.searchControl.setValue('');
     }
 
     isAllSelected() {

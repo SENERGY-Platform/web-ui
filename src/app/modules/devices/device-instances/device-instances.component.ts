@@ -41,7 +41,8 @@ import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin, Observable, Subscription } from 'rxjs';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -83,6 +84,7 @@ export class DeviceInstancesComponent implements OnInit {
         private networksService: NetworksService,
         private deviceTypesService: DeviceTypeService,
         private dialog: MatDialog,
+        private searchbarService: SearchbarService
     ) {
         this.getRouterParams();
     }
@@ -92,8 +94,8 @@ export class DeviceInstancesComponent implements OnInit {
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<DeviceInstancesModel>(true, []);
     totalCount = 200;
-    searchControl = new UntypedFormControl('');
     ready = false;
+    searchText: string = ""
 
     selectedTag = '';
     selectedTagTransformed = '';
@@ -106,9 +108,11 @@ export class DeviceInstancesComponent implements OnInit {
     routerNetwork: NetworksModel | null = null;
     routerDeviceType: DeviceTypeBaseModel | null = null;
     routerLocation: LocationModel | null = null;
+    private searchSub: Subscription = new Subscription();
 
     ngOnInit(): void {
         this.loadFilterOptions();
+        this.initSearch();
     }
 
     ngAfterViewInit(): void {
@@ -123,7 +127,13 @@ export class DeviceInstancesComponent implements OnInit {
             this.load()
         });
         this.load();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+    }
+
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
+        });
     }
 
     private load() {
@@ -167,7 +177,7 @@ export class DeviceInstancesComponent implements OnInit {
                     offset,
                     'display_name',
                     'asc',
-                    this.searchControl.value,
+                    this.searchText,
                     this.selectedTagType,
                     this.selectedTag,
                     null,
@@ -244,11 +254,7 @@ export class DeviceInstancesComponent implements OnInit {
         this.selectionClear();
         this.load();
     }
-
-    resetSearch() {
-        this.searchControl.setValue('');
-    }
-
+    
     showInfoOfDevice(device: DeviceInstancesModel): void {
         this.deviceInstancesDialogService.openDeviceServiceDialog(device.device_type.id, device.id);
     }

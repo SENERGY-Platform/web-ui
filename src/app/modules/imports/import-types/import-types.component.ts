@@ -27,6 +27,8 @@ import {ImportDeployEditDialogComponent} from '../import-deploy-edit-dialog/impo
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import { Subscription } from 'rxjs';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 @Component({
     selector: 'senergy-import-types',
@@ -39,7 +41,8 @@ export class ImportTypesComponent implements OnInit {
     importTypes: ImportTypePermissionSearchModel[] = [];
     dataReady = false;
     sort = 'name.asc';
-    searchControl = new UntypedFormControl('');
+    searchText: string = ""
+    searchSub: Subscription = new Subscription()
     limitInit = 100;
     limit = this.limitInit;
     offset = 0;
@@ -51,11 +54,19 @@ export class ImportTypesComponent implements OnInit {
         private permissionsDialogService: PermissionsDialogService,
         private snackBar: MatSnackBar,
         private deleteDialog: DialogsService,
+        private searchbarService: SearchbarService
     ) {}
 
     ngOnInit(): void {
         this.load();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+        this.initSearch();
+    }
+
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
+        });
     }
 
     details(m: ImportTypePermissionSearchModel) {
@@ -116,7 +127,7 @@ export class ImportTypesComponent implements OnInit {
     }
 
     load() {
-        this.importTypesService.listImportTypes(this.searchControl.value, this.limit, this.offset, this.sort).subscribe((types) => {
+        this.importTypesService.listImportTypes(this.searchText, this.limit, this.offset, this.sort).subscribe((types) => {
             this.importTypes.push(...types);
             if (this.table !== undefined) {
                 this.table.renderRows();
@@ -130,10 +141,6 @@ export class ImportTypesComponent implements OnInit {
         this.offset = 0;
         this.importTypes = [];
         this.load();
-    }
-
-    resetSearch() {
-        this.searchControl.setValue('');
     }
 
     onScroll() {

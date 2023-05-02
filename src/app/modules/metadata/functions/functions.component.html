@@ -15,20 +15,7 @@
     -->
 
 <div class="functions-container table-search-container">
-    <span fxLayout="row" class="search-refresh">
-        <mat-form-field color="accent" appearance="outline" fxFlex>
-            <input matInput [formControl]="searchControl" placeholder="Search...">
-            <mat-icon matPrefix *ngIf="searchControl.value === ''">search</mat-icon>
-            <button mat-icon-button matPrefix *ngIf="searchControl.value !== ''" (click)="resetSearch()">
-                <mat-icon>close</mat-icon>
-            </button>
-        </mat-form-field>
-
-        <button mat-icon-button (click)="reload()" color="accent" class="refresh">
-            <mat-icon>refresh</mat-icon>
-        </button>
-    </span>
-
+    <senergy-searchbar></senergy-searchbar>
     <div *ngIf="dataSource.data.length === 0 && ready">No functions found.</div>
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 

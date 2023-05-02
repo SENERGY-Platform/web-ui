@@ -31,6 +31,7 @@ import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 @Component({
     selector: 'senergy-concepts',
@@ -45,20 +46,21 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<ConceptsPermSearchModel>(true, []);
     totalCount = 200;
-    searchControl = new UntypedFormControl('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     private searchSub: Subscription = new Subscription();
+    searchText: string = ""
 
     constructor(
         private dialog: MatDialog,
         private router: Router,
+        private searchbarService: SearchbarService,
         private conceptsService: ConceptsService,
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
     ) {}
 
     ngOnInit() {
-    
+        this.initSearch();
     }
 
     ngOnDestroy() {
@@ -77,7 +79,13 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             this.getConcepts()
         });
         this.getConcepts();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+    }
+
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
+        });
     }
 
     newConcept() {
@@ -171,7 +179,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         var offset = this.paginator.pageSize * this.paginator.pageIndex;
 
         this.conceptsService
-            .getConcepts(this.searchControl.value, this.pageSize, offset, 'name', 'asc')
+            .getConcepts(this.searchText, this.pageSize, offset, 'name', 'asc')
             .subscribe((concepts: ConceptsPermSearchModel[]) => {
                 this.dataSource.data = concepts;
                 this.ready = true;
@@ -183,10 +191,6 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.paginator.pageIndex = 0;
         this.selectionClear();
         this.getConcepts();
-    }
-
-    resetSearch() {
-        this.searchControl.setValue('');
     }
 
     isAllSelected() {

@@ -28,6 +28,8 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 
 @Component({
     selector: 'senergy-import-instances',
@@ -43,10 +45,12 @@ export class ImportInstancesComponent implements OnInit {
         private snackBar: MatSnackBar,
         private deleteDialog: DialogsService,
         private router: Router,
+        private searchbarService: SearchbarService
     ) {}
 
     instances: ImportInstancesModel[] = [];
-    searchControl = new UntypedFormControl('');
+    searchText: string = ""
+    searchSub: Subscription = new Subscription()    
     dataReady = false;
     sort = 'updated_at.desc';
     limitInit = 100;
@@ -56,7 +60,14 @@ export class ImportInstancesComponent implements OnInit {
 
     ngOnInit(): void {
         this.load();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+        this.initSearch();
+    }
+
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
+        });
     }
 
     edit(m: ImportInstancesModel) {
@@ -102,7 +113,7 @@ export class ImportInstancesComponent implements OnInit {
 
     load() {
         this.importInstancesService
-            .listImportInstances(this.searchControl.value, this.limit, this.offset, this.sort, this.excludeGenerated)
+            .listImportInstances(this.searchText, this.limit, this.offset, this.sort, this.excludeGenerated)
             .subscribe((inst) => {
                 this.instances.push(...inst);
                 if (this.table !== undefined) {
@@ -117,10 +128,6 @@ export class ImportInstancesComponent implements OnInit {
         this.offset = 0;
         this.instances = [];
         this.load();
-    }
-
-    resetSearch() {
-        this.searchControl.setValue('');
     }
 
     onScroll() {

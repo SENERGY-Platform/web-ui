@@ -15,13 +15,7 @@
   -->
 <div class="device-groups-container table-search-container">
     <span fxLayout="row" class="search-refresh">
-        <mat-form-field color="accent" appearance="outline" fxFlex>
-            <input matInput [formControl]="searchControl" placeholder="Search...">
-            <mat-icon matPrefix *ngIf="searchControl.value === ''">search</mat-icon>
-            <button mat-icon-button matPrefix *ngIf="searchControl.value !== ''" (click)="resetSearch()">
-                <mat-icon>close</mat-icon>
-            </button>
-        </mat-form-field>
+        <senergy-searchbar></senergy-searchbar>
 
         <div fxLayout="row">
             <div fxFlex></div>
@@ -34,11 +28,8 @@
                 <mat-icon>visibility</mat-icon>
             </button>
         </div>
-
-        <button mat-icon-button (click)="reload()" color="accent" class="refresh">
-            <mat-icon>refresh</mat-icon>
-        </button>
     </span>
+    
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
     <div *ngIf="dataSource.data.length === 0 && ready">No device group found.</div>
 

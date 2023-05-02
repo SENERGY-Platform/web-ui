@@ -48,10 +48,9 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<DeviceClassesPermSearchModel>(true, []);
     totalCount = 200
-    searchControl = new UntypedFormControl('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userIsAdmin = false;
-
+    searchText: string = ""
     private searchSub: Subscription = new Subscription();
 
     constructor(
@@ -67,7 +66,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
-       
+        this.initSearch();
     }
 
     ngAfterViewInit(): void {
@@ -81,12 +80,18 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.getDeviceClasses()
         });
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.getDeviceClasses());
         this.getDeviceClasses()
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+    }
+
+    private initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
+        });
     }
 
     editDeviceClass(inputDeviceClass: DeviceClassesPermSearchModel): void {
@@ -153,7 +158,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         var offset = this.paginator.pageSize * this.paginator.pageIndex;
 
         this.deviceClassesService
-            .getDeviceClasses(this.searchControl.value, this.pageSize, offset, "name", "asc")
+            .getDeviceClasses(this.searchText, this.pageSize, offset, "name", "asc")
             .subscribe((deviceClasses: DeviceClassesPermSearchModel[]) => {
                 this.dataSource = new MatTableDataSource(deviceClasses);
                 this.dataSource.sort = this.sort;
@@ -175,10 +180,6 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
             this.snackBar.open('Device class ' + text + 'ed successfully.', undefined, { duration: 2000 });
         }
         this.reload()
-    }
-
-    resetSearch() {
-        this.searchControl.setValue('');
     }
 
     isAllSelected() {

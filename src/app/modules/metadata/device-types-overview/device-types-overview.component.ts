@@ -15,7 +15,6 @@
  */
 
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { ResponsiveService } from '../../../core/services/responsive.service';
@@ -57,17 +56,15 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
 
     constructor(
         private searchbarService: SearchbarService,
-        private responsiveService: ResponsiveService,
         private deviceTypeService: DeviceTypeService,
         private snackBar: MatSnackBar,
-        private deviceInstancesService: DeviceInstancesService,
         private dialogsService: DialogsService,
         private router: Router,
         private deviceInstancesDialogService: DeviceInstancesDialogService,
     ) {}
 
     ngOnInit() {
-        this.initSearchAndGetDeviceTypes();
+        this.initSearch();
     }
 
     ngOnDestroy() {
@@ -152,7 +149,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         return image;
     }
 
-    private initSearchAndGetDeviceTypes() {
+    private initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();

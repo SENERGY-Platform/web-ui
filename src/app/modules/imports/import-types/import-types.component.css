@@ -26,14 +26,9 @@ tr.second th, tr.second td {
     padding: 0 8px;
 }
 
-.search-refresh {
-    padding: 10px;
-}
-
 .container {
     height: calc(100% - 64px);
     overflow-y: auto;
-    padding: 0 8px 8px
 }
 
 .refresh {
