@@ -21,9 +21,6 @@
             <button matTooltip="Show generated" mat-icon-button color="accent" (click)="toggleExcludeGenerated()">
                 <mat-icon>{{excludeGenerated ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
-            <button mat-icon-button (click)="reload()" color="accent">
-                <mat-icon>refresh</mat-icon>
-            </button>
         </div>
     </span>
     <senergy-widget-spinner [show]="!dataReady"></senergy-widget-spinner>

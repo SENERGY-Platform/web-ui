@@ -16,9 +16,6 @@
 <div class="container table-search-container">
     <span fxLayout="row" class="search-refresh">
         <senergy-searchbar></senergy-searchbar>
-        <button mat-icon-button (click)="reload()" color="accent" class="refresh">
-            <mat-icon>refresh</mat-icon>
-        </button>
     </span>
     <senergy-widget-spinner [show]="!dataReady"></senergy-widget-spinner>
 
