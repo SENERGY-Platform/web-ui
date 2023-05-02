@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<div class="concepts-container">
+<div class="concepts-container table-search-container">
     <span fxLayout="row" class="search-refresh">
         <mat-form-field color="accent" appearance="outline" fxFlex>
             <input matInput [formControl]="searchControl" placeholder="Search...">
@@ -29,14 +29,26 @@
         </button>
     </span>
 
-    <div *ngIf="concepts.length === 0 && ready">No concept found.</div>
-    <senergy-spinner [elementCount]="concepts.length" [show]="!ready"></senergy-spinner>
+    <div *ngIf="dataSource.data.length === 0 && ready">No concept found.</div>
+    <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
-    <div [hidden]="!ready || concepts.length ===0" class="mat-elevation-z1" fxLayout="column" infiniteScroll
-        [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50" [infiniteScrollContainer]="'.concepts-container'"
-        [fromRoot]="true" (scrolled)="onScroll()">
+    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container">
 
-        <table mat-table [dataSource]="dataSource" matSort>
+        <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef class="button-column">
+                    <mat-checkbox (change)="$event ? masterToggle() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()">
+                    </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row">
+                    <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+                        [checked]="selection.isSelected(row)">
+                    </mat-checkbox>
+                </td>
+            </ng-container>
+
             <ng-container matColumnDef="name">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
                 <td mat-cell *matCellDef="let concept">
@@ -44,22 +56,38 @@
                 </td>
             </ng-container>
 
-            <ng-container matColumnDef="action">
-                <th mat-header-cell *matHeaderCellDef disableClear>Action</th>
+            <ng-container matColumnDef="info">
+                <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Info</th>
                 <td mat-cell *matCellDef="let concept">
-
-                    <button (click)="showConcept(concept)" *ngIf="!concept.permissions.w" mat-icon-button color="accent"
-                        matTooltip="Info">
+                    <button (click)="showConcept(concept)" mat-icon-button color="accent" matTooltip="Info">
                         <mat-icon>info</mat-icon>
                     </button>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="edit">
+                <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
+                <td mat-cell *matCellDef="let concept">
                     <button (click)="editConcept(concept)" [disabled]="!concept.permissions.w" mat-icon-button
                         color="accent" matTooltip="Edit">
                         <mat-icon>edit</mat-icon>
                     </button>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="characteristic">
+                <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Characteristic</th>
+                <td mat-cell *matCellDef="let concept">
                     <button (click)="showCharacteristics(concept)" mat-icon-button color="accent"
                         matTooltip="Characteristic">
                         <mat-icon>palette</mat-icon>
                     </button>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="delete">
+                <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
+                <td mat-cell *matCellDef="let concept">
                     <button (click)="deleteConcept(concept)" [disabled]="!concept.permissions.a" mat-icon-button
                         color="accent" matTooltip="Delete">
                         <mat-icon>delete</mat-icon>
@@ -67,10 +95,30 @@
                 </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="['name', 'action']; sticky: true"></tr>
-            <tr mat-row *matRowDef="let m; columns: ['name', 'action'];"></tr>
+            <ng-container matColumnDef="header-delete-all">
+                <th mat-header-cell *matHeaderCellDef colspan="10">
+                    <div fxLayout="row">
+                        <div fxLayoutAlign="center center">You have
+                            selected {{selection.selected.length}} items
+                        </div>
+                        <button matTooltip="Delete" mat-icon-button color="accent"
+                                (click)="deleteMultipleItems()">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </th>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
+                [hidden]="selection.selected.length === 0"></tr>
+            <tr mat-header-row *matHeaderRowDef="['select', 'name', 'info', 'edit', 'characteristic', 'delete']; sticky: true">
+            </tr>
+            <tr mat-row *matRowDef="let m; columns: ['select', 'name', 'info', 'edit', 'characteristic', 'delete'];"></tr>
         </table>
     </div>
+
+    <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+    showFirstLastButtons></mat-paginator>
 </div>
 
 

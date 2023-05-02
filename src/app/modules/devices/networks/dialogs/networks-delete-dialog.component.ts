@@ -43,6 +43,7 @@ export class NetworksDeleteDialogComponent implements OnInit {
 
     ngOnInit(): void {
         this.deviceSelection = new SelectionModel<DeviceInstancesModel>(true, []);
+        console.log(this.data)
     }
 
     save() {

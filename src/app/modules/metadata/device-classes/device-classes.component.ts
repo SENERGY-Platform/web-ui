@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { Subscription } from 'rxjs';
+import { debounceTime, forkJoin, Observable, Subscription } from 'rxjs';
 import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
@@ -30,14 +30,11 @@ import { DeviceTypeDeviceClassModel } from '../device-types-overview/shared/devi
 import uuid = util.uuid;
 import { util } from 'jointjs';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { UntypedFormControl } from '@angular/forms';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
     selector: 'senergy-device-classes',
@@ -45,20 +42,17 @@ const grids = new Map([
     styleUrls: ['./device-classes.component.css'],
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy {
-    readonly limitInit = 54;
-
-    deviceClasses: DeviceClassesPermSearchModel[] = [];
-    gridCols = 0;
+    readonly pageSize = 20;
     ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
+    dataSource = new MatTableDataSource<DeviceClassesPermSearchModel>();
+    @ViewChild(MatSort) sort!: MatSort;
+    selection = new SelectionModel<DeviceClassesPermSearchModel>(true, []);
+    totalCount = 200
+    searchControl = new UntypedFormControl('');
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userIsAdmin = false;
 
-    private searchText = '';
-    private limit = this.limitInit;
-    private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
 
     constructor(
         private dialog: MatDialog,
@@ -72,26 +66,27 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.initGridCols();
-        this.initSearchAndGetDeviceClasses();
         this.userIsAdmin = this.authService.userIsAdmin();
+       
+    }
+
+    ngAfterViewInit(): void {
+        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
+            var value = row[sortHeaderId];
+            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
+            return value
+        };
+        this.dataSource.sort = this.sort;
+        
+        this.paginator.page.subscribe(()=>{
+            this.getDeviceClasses()
+        });
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.getDeviceClasses());
+        this.getDeviceClasses()
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
-    }
-
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getDeviceClasses(true);
-    }
-
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.offset = this.offset + this.limit;
-            this.getDeviceClasses(false);
-        }
     }
 
     editDeviceClass(inputDeviceClass: DeviceClassesPermSearchModel): void {
@@ -105,11 +100,10 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
         editDialogRef.afterClosed().subscribe((newDeviceClass: DeviceTypeDeviceClassModel) => {
             if (newDeviceClass !== undefined) {
-                this.reset();
                 this.deviceClassesService
                     .updateDeviceClasses(newDeviceClass)
                     .subscribe((deviceClass: DeviceTypeDeviceClassModel | null) => {
-                        this.reloadAndShowSnackbar(deviceClass, 'updat');
+                        this.reloadAndShowSnackbar(deviceClass, 'update');
                     });
             }
         });
@@ -123,13 +117,11 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
                 if (deleteDeviceClass) {
                     this.deviceClassesService.deleteDeviceClasses(deviceClass.id).subscribe((resp: boolean) => {
                         if (resp === true) {
-                            this.deviceClasses.splice(this.deviceClasses.indexOf(deviceClass), 1);
                             this.snackBar.open('Device class deleted successfully.', undefined, { duration: 2000 });
-                            this.setLimitOffset(1);
-                            this.reloadDeviceClasses(false);
                         } else {
                             this.snackBar.open('Error while deleting the device class!', 'close', { panelClass: 'snack-bar-error' });
                         }
+                        this.reload()
                     });
                 }
             });
@@ -150,7 +142,6 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
         editDialogRef.afterClosed().subscribe((newDeviceClass: DeviceTypeDeviceClassModel) => {
             if (newDeviceClass !== undefined) {
-                this.reset();
                 this.deviceClassesService.createDeviceClass(newDeviceClass).subscribe((deviceClass: DeviceTypeDeviceClassModel | null) => {
                     this.reloadAndShowSnackbar(deviceClass, 'sav');
                 });
@@ -158,63 +149,78 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         });
     }
 
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
-    }
-
-    private initSearchAndGetDeviceClasses() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.searchText = searchText;
-            this.getDeviceClasses(true);
-        });
-    }
-
-    private getDeviceClasses(reset: boolean) {
-        if (reset) {
-            this.reset();
-        }
+    private getDeviceClasses() {
+        var offset = this.paginator.pageSize * this.paginator.pageIndex;
 
         this.deviceClassesService
-            .getDeviceClasses(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .getDeviceClasses(this.searchControl.value, this.pageSize, offset, "name", "asc")
             .subscribe((deviceClasses: DeviceClassesPermSearchModel[]) => {
-                if (deviceClasses.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
-                this.deviceClasses = this.deviceClasses.concat(deviceClasses);
+                this.dataSource = new MatTableDataSource(deviceClasses);
+                this.dataSource.sort = this.sort;
                 this.ready = true;
             });
     }
 
-    private reset() {
-        this.deviceClasses = [];
-        this.limit = this.limitInit;
-        this.offset = 0;
-        this.allDataLoaded = false;
+    reload() {
+        this.paginator.pageIndex = 0;
         this.ready = false;
-    }
-
-    private reloadDeviceClasses(reset: boolean) {
-        setTimeout(() => {
-            this.getDeviceClasses(reset);
-        }, 2500);
-    }
-
-    private setLimitOffset(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.deviceClasses.length;
+        this.selectionClear();
+        this.getDeviceClasses()
     }
 
     private reloadAndShowSnackbar(deviceClass: DeviceTypeDeviceClassModel | null, text: string) {
         if (deviceClass === null) {
             this.snackBar.open('Error while ' + text + 'ing the device class!', 'close', { panelClass: 'snack-bar-error' });
-            this.getDeviceClasses(true);
         } else {
             this.snackBar.open('Device class ' + text + 'ed successfully.', undefined, { duration: 2000 });
-            this.reloadDeviceClasses(true);
         }
+        this.reload()
+    }
+
+    resetSearch() {
+        this.searchControl.setValue('');
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems() {
+        const deletionJobs: Observable<any>[] = [];
+
+        this.dialogsService
+            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' device classes' : ' device class'))
+            .afterClosed()
+            .subscribe((deleteDeviceClass: boolean) => {
+                if (deleteDeviceClass) {
+                    this.selection.selected.forEach((deviceClass: DeviceClassesPermSearchModel) => {
+                        deletionJobs.push(this.deviceClassesService.deleteDeviceClasses(deviceClass.id))
+                    })
+                }
+                
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open('Device classes deleted successfully.', undefined, {duration: 2000});            
+                    } else {
+                        this.snackBar.open('Error while deleting device classes!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload()
+                })
+            });
     }
 }

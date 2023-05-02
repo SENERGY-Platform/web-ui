@@ -15,7 +15,7 @@
  */
 
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription} from 'rxjs';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
@@ -30,6 +30,8 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
     selector: 'senergy-functions',
@@ -37,20 +39,16 @@ import {debounceTime} from 'rxjs/operators';
     styleUrls: ['./functions.component.css'],
 })
 export class FunctionsComponent implements OnInit, OnDestroy {
-    readonly limitInit = 54;
-
-    functions: FunctionsPermSearchModel[] = [];
-    dataSource = new MatTableDataSource(this.functions);
+    readonly pageSize = 20;
+    dataSource = new MatTableDataSource<FunctionsPermSearchModel>();
     @ViewChild(MatSort) sort!: MatSort;
-
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
+    selection = new SelectionModel<FunctionsPermSearchModel>(true, []);
+    totalCount = 200;
     searchControl = new UntypedFormControl('');
     ready = false;
     userIsAdmin = false;
-
-    private limit = this.limitInit;
-    private offset = 0;
     private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
 
     constructor(
         private dialog: MatDialog,
@@ -62,20 +60,25 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
+    }
+
+    ngAfterViewInit(): void {
+        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
+            var value = row[sortHeaderId];
+            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
+            return value
+        };
+        this.dataSource.sort = this.sort;
+        
+        this.paginator.page.subscribe(()=>{
+            this.getFunctions()
+        });
         this.getFunctions();
         this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
-    }
-
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.offset = this.offset + this.limit;
-            this.getFunctions();
-        }
     }
 
     editFunction(inputFunction: FunctionsPermSearchModel): void {
@@ -139,7 +142,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
                 if (deleteFunction) {
                     this.functionsService.deleteFunction(func.id).subscribe((resp: boolean) => {
                         if (resp === true) {
-                            this.functions.splice(this.functions.indexOf(func), 1);
                             this.snackBar.open('Function deleted successfully.', undefined, { duration: 2000 });
                         } else {
                             this.snackBar.open('Error while deleting the function!', 'close', { panelClass: 'snack-bar-error' });
@@ -151,45 +153,21 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }
 
     private getFunctions() {
-        if (this.functions && this.functions.length) {
-            this.functionsService
-                .getFunctionsAfter(
-                    this.searchControl.value,
-                    this.limit,
-                    'name',
-                    'asc',
-                    this.functions[this.functions.length - 1],
-                )
+        var offset = this.paginator.pageSize * this.paginator.pageIndex;
+
+        this.functionsService
+                .getFunctions(this.searchControl.value, this.pageSize, offset, 'name', 'asc')
                 .subscribe((functions: FunctionsPermSearchModel[]) => {
-                    if (functions.length !== this.limit) {
-                        this.allDataLoaded = true;
-                    }
-                    this.functions = this.functions.concat(functions);
-                    this.dataSource = new MatTableDataSource(this.functions);
+                    this.dataSource = new MatTableDataSource(functions);
                     this.dataSource.sort = this.sort;
                     this.ready = true;
-                });
-        } else {
-            this.functionsService
-                .getFunctions(this.searchControl.value, this.limit, this.offset, 'name', 'asc')
-                .subscribe((functions: FunctionsPermSearchModel[]) => {
-                    if (functions.length !== this.limit) {
-                        this.allDataLoaded = true;
-                    }
-                    this.functions = this.functions.concat(functions);
-                    this.dataSource = new MatTableDataSource(this.functions);
-                    this.dataSource.sort = this.sort;
-                    this.ready = true;
-                });
-        }
+        });
     }
 
     reload() {
-        this.functions = [];
-        this.limit = this.limitInit;
-        this.offset = 0;
-        this.allDataLoaded = false;
         this.ready = false;
+        this.paginator.pageIndex = 0;
+        this.selectionClear();
         this.getFunctions();
     }
 
@@ -205,5 +183,48 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     resetSearch() {
         this.searchControl.setValue('');
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems() {
+        const deletionJobs: Observable<any>[] = [];
+
+        this.dialogsService
+            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' functions' : ' function'))
+            .afterClosed()
+            .subscribe((deleteExports: boolean) => {
+                if (deleteExports) {
+                    this.selection.selected.forEach((func: FunctionsPermSearchModel) => {
+                        deletionJobs.push(this.functionsService.deleteFunction(func.id))
+                    });
+                }
+                
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open('Characteristics deleted successfully.', undefined, {duration: 2000});            
+                    } else {
+                        this.snackBar.open('Error while deleting characteristics!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload()
+                })
+            });  
     }
 }

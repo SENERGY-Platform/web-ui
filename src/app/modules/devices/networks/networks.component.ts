@@ -18,7 +18,7 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {NetworksService} from './shared/networks.service';
 import {NetworksModel} from './shared/networks.model';
-import {Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription} from 'rxjs';
 import {Router} from '@angular/router';
 import {
     DeviceInstancesRouterState,
@@ -28,9 +28,13 @@ import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {NetworksDeleteDialogComponent} from './dialogs/networks-delete-dialog.component';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
+import { DialogsService } from 'src/app/core/services/dialogs.service';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 
 @Component({
     selector: 'senergy-networks',
@@ -38,30 +42,27 @@ import {debounceTime} from 'rxjs/operators';
     styleUrls: ['./networks.component.css'],
 })
 export class NetworksComponent implements OnInit, OnDestroy {
-    networks: NetworksModel[] = [];
-    dataSource = new MatTableDataSource(this.networks);
+    readonly pageSize = 20;
+    dataSource = new MatTableDataSource<NetworksModel>();
     @ViewChild(MatSort) sort!: MatSort;
-
+    selection = new SelectionModel<NetworksModel>(true, []);
     searchControl = new UntypedFormControl('');
-
+    totalCount = 200;
     ready = false;
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
-    private limitInit = 54;
-    private limit = this.limitInit;
-    private offset = 0;
     private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
 
     constructor(
         private networksService: NetworksService,
         private router: Router,
         private dialog: MatDialog,
         private deviceInstancesService: DeviceInstancesService,
+        private dialogsService: DialogsService,
+        private snackBar: MatSnackBar,
     ) {}
 
     ngOnInit() {
-        this.getNetworks();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
 
     }
 
@@ -69,11 +70,30 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.searchSub.unsubscribe();
     }
 
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.setRepoItemsParams(this.limitInit);
-            this.getNetworks();
-        }
+    ngAfterViewInit(): void {
+        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
+            var value;
+            if(sortHeaderId == 'connection') {
+                value = row.annotations?.connected;
+            } else if(sortHeaderId == 'number_devices') {
+                if(!row.device_local_ids) {
+                    value = 0;
+                } else {
+                    value = row.device_local_ids?.length;
+                }
+            } else {
+                    value = row[sortHeaderId];
+            }
+            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
+            return value
+        };
+        this.dataSource.sort = this.sort;
+
+        this.paginator.page.subscribe(()=>{
+            this.getNetworks()
+        });
+        this.getNetworks();
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     edit(network: NetworksModel) {
@@ -97,8 +117,6 @@ export class NetworksComponent implements OnInit, OnDestroy {
                 .afterClosed()
                 .subscribe((deleteNetwork: boolean) => {
                     if (deleteNetwork) {
-                        this.networks.splice(this.networks.indexOf(network), 1);
-                        this.setRepoItemsParams(1);
                         setTimeout(() => {
                             this.getNetworks();
                         }, 1000);
@@ -108,33 +126,80 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     private getNetworks() {
+        var offset = this.paginator.pageSize * this.paginator.pageIndex;
+
         this.networksService
-            .searchNetworks(this.searchControl.value, this.limit, this.offset, 'name', 'asc')
+            .searchNetworks(this.searchControl.value, this.pageSize, offset, 'name', 'asc')
             .subscribe((networks: NetworksModel[]) => {
-                if (networks.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
-                this.networks = this.networks.concat(networks);
-                this.dataSource = new MatTableDataSource(this.networks);
-                this.dataSource.sort = this.sort;
+                this.dataSource.data = networks;
                 this.ready = true;
             });
     }
 
-    private setRepoItemsParams(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.networks.length;
-    }
-
     reload() {
-        this.limit = this.limitInit;
-        this.offset = 0;
-        this.networks = [];
+        this.paginator.pageIndex = 0;
+        this.ready = false;
+        this.selectionClear();
         this.getNetworks();
     }
 
     resetSearch() {
         this.searchControl.setValue('');
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems() {
+        this.dialogsService
+        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' networks' : ' network'))
+        .afterClosed()
+        .subscribe((deleteNetworks: boolean) => {
+            if (deleteNetworks) {
+                const deletionJobs: Observable<any>[] = [];
+                var allDeviceIds: string[] = []
+        
+                this.selection.selected.forEach((network: NetworksModel) => {
+                    this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, 'name', 'asc', network.id, null).subscribe((devices) => {
+                        const deviceIds = devices.map((p) => p.id);
+                        allDeviceIds = allDeviceIds.concat(deviceIds)
+
+                        if (deviceIds.length > 0) {
+                            deletionJobs.push(this.deviceInstancesService.deleteDeviceInstances(deviceIds));
+                        }
+                        deletionJobs.push(this.networksService.delete(network.id));
+                    })
+                })
+                
+                forkJoin(deletionJobs).subscribe((resps) => {
+                    const ok = resps.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open('Hub ' + (allDeviceIds.length > 0 ? 'and devices ' : '') + 'deleted successfully.', undefined, {
+                            duration: 2000,
+                        });
+                    } else {
+                        this.snackBar.open('Error while deleting the hub' + (allDeviceIds.length > 0 ? ' and devices' : '') + '!', 'close', { panelClass: 'snack-bar-error' });
+                        this.ready = true;
+                    }
+
+                    this.reload()
+                });
+            }
+        })
     }
 }

@@ -19,17 +19,6 @@
     margin: 8px;
 }
 
-.mat-column-action {
-    text-align: right;
-    justify-content: flex-end;
-}
-
-.locations-container {
-    margin-bottom: 170px;
-    padding: 0 8px 8px;
-}
-
-
 .background {
     background-image: url('/src/img/background_deviceTypes.png');
     background-size: contain;

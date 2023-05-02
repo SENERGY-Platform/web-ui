@@ -34,3 +34,23 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 .mat-content > mat-panel-title, .mat-content > mat-panel-description {
     flex: 0 0 auto;
 }
+
+
+/* General design for data tables */
+.table-search-container {
+    padding: 0 8px 8px;
+}
+
+.table-container {
+    max-height: calc(100vh - 300px);
+    overflow: auto;
+    position: relative;
+}
+
+.table-container table {
+    width: 100%;
+}
+
+.table-container .button-column {
+    width: 5%;
+}

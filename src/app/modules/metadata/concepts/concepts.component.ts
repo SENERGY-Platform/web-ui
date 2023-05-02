@@ -19,7 +19,7 @@ import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} 
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {Router} from '@angular/router';
 import {ConceptsService} from './shared/concepts.service';
-import {Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription} from 'rxjs';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
 import {ConceptsPermSearchModel} from './shared/concepts-perm-search.model';
@@ -29,6 +29,8 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
     selector: 'senergy-concepts',
@@ -36,19 +38,16 @@ import {debounceTime} from 'rxjs/operators';
     styleUrls: ['./concepts.component.css'],
 })
 export class ConceptsComponent implements OnInit, OnDestroy {
-    readonly limitInit = 54;
-
+    readonly pageSize = 20;
     concepts: ConceptsPermSearchModel[] = [];
     ready = false;
     dataSource = new MatTableDataSource(this.concepts);
     @ViewChild(MatSort) sort!: MatSort;
-
+    selection = new SelectionModel<ConceptsPermSearchModel>(true, []);
+    totalCount = 200;
     searchControl = new UntypedFormControl('');
-
-    private limit = this.limitInit;
-    private offset = 0;
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
 
     constructor(
         private dialog: MatDialog,
@@ -59,20 +58,26 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.getConcepts();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+    
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
 
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.setRepoItemsParams(this.limitInit);
-            this.getConcepts();
-        }
+    ngAfterViewInit(): void {
+        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
+            var value = row[sortHeaderId];
+            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
+            return value
+        };
+        this.dataSource.sort = this.sort;
+
+        this.paginator.page.subscribe(()=>{
+            this.getConcepts()
+        });
+        this.getConcepts();
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     newConcept() {
@@ -149,11 +154,10 @@ export class ConceptsComponent implements OnInit, OnDestroy {
                         if (resp === true) {
                             this.concepts.splice(this.concepts.indexOf(concept), 1);
                             this.snackBar.open('Concept deleted successfully.', undefined, { duration: 2000 });
-                            this.setRepoItemsParams(1);
-                            this.reloadConcepts(false);
                         } else {
                             this.snackBar.open('Error while deleting the concept!', 'close', { panelClass: 'snack-bar-error' });
                         }
+                        this.reload()
                     });
                 }
             });
@@ -164,45 +168,67 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     }
 
     private getConcepts() {
+        var offset = this.paginator.pageSize * this.paginator.pageIndex;
+
         this.conceptsService
-            .getConcepts(this.searchControl.value, this.limit, this.offset, 'name', 'asc')
+            .getConcepts(this.searchControl.value, this.pageSize, offset, 'name', 'asc')
             .subscribe((concepts: ConceptsPermSearchModel[]) => {
-                if (concepts.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
-                this.concepts = this.concepts.concat(concepts);
-                this.dataSource = new MatTableDataSource(this.concepts);
-                this.dataSource.sort = this.sort;
+                this.dataSource.data = concepts;
                 this.ready = true;
             });
     }
 
     reload() {
-        this.concepts = [];
-        this.offset = 0;
-        this.allDataLoaded = false;
         this.ready = false;
-        this.limit = this.limitInit;
+        this.paginator.pageIndex = 0;
+        this.selectionClear();
         this.getConcepts();
-    }
-
-    private setRepoItemsParams(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.concepts.length;
-    }
-
-    private reloadConcepts(reset: boolean) {
-        setTimeout(() => {
-            if(reset) {
-                this.reload();
-            } else {
-                this.getConcepts();
-            }
-        }, 1500);
     }
 
     resetSearch() {
         this.searchControl.setValue('');
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems() {
+        const deletionJobs: Observable<any>[] = [];
+
+        this.dialogsService
+        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' concepts' : ' concept'))
+        .afterClosed()
+        .subscribe((deleteConcepts: boolean) => {
+            if (deleteConcepts) {
+                this.selection.selected.forEach((concept: ConceptsPermSearchModel) => {
+                    deletionJobs.push(this.conceptsService.deleteConcept(concept.id))    
+                });
+            }
+            
+            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                if (ok) {
+                    this.snackBar.open('Concepts deleted successfully.', undefined, {duration: 2000});            
+                } else {
+                    this.snackBar.open('Error while deleting concepts!', 'close', {panelClass: 'snack-bar-error'});
+                }
+                this.reload()
+            })
+        });
     }
 }

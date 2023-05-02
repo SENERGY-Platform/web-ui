@@ -19,7 +19,7 @@ import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} 
 import {DeviceTypeCharacteristicsModel} from '../device-types-overview/shared/device-type.model';
 import {Navigation, Router} from '@angular/router';
 import {CharacteristicsService} from './shared/characteristics.service';
-import {Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription} from 'rxjs';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-search.model';
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
@@ -29,6 +29,8 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
     selector: 'senergy-characteristic',
@@ -36,22 +38,17 @@ import {debounceTime} from 'rxjs/operators';
     styleUrls: ['./characteristics.component.css'],
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy {
-    readonly limitInit = 54;
-
-    characteristics: CharacteristicsPermSearchModel[] = [];
+    readonly pageSize = 20;
     ready = false;
-    dataSource = new MatTableDataSource(this.characteristics);
+    dataSource = new MatTableDataSource<CharacteristicsPermSearchModel>();
     @ViewChild(MatSort) sort!: MatSort;
-
+    selection = new SelectionModel<CharacteristicsPermSearchModel>(true, []);
+    totalCount = 200;
     searchControl = new UntypedFormControl('');
-
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     routerConcept: ConceptsPermSearchModel | null = null;
     selectedTag = '';
-
-    private limit = this.limitInit;
-    private offset = 0;
     private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
 
     constructor(
         private dialog: MatDialog,
@@ -64,20 +61,26 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.getCharacteristics();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
 
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.setRepoItemsParams(this.limitInit);
-            this.getCharacteristics();
-        }
+    ngAfterViewInit(): void {
+        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
+            var value = row[sortHeaderId];
+            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
+            return value
+        };
+        this.dataSource.sort = this.sort;
+
+        this.paginator.page.subscribe(()=>{
+            this.getCharacteristics()
+        });
+        this.getCharacteristics();
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     newCharacteristic() {
@@ -90,11 +93,10 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                 this.characteristicsService.createCharacteristic(resp.characteristic).subscribe((characteristic) => {
                     if (characteristic === null) {
                         this.snackBar.open('Error while creating the characteristic!', 'close', {panelClass: 'snack-bar-error'});
-                        this.reload();
                     } else {
                         this.snackBar.open('Characteristic created successfully.', undefined, {duration: 2000});
-                        this.reloadCharacterisitics(true);
                     }
+                    this.reload()
                 });
             }
         });
@@ -116,13 +118,11 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
                         .deleteCharacteristic(characteristic.id)
                         .subscribe((resp: boolean) => {
                             if (resp === true) {
-                                this.characteristics.splice(this.characteristics.indexOf(characteristic), 1);
                                 this.snackBar.open('Characteristic deleted successfully.', undefined, {duration: 2000});
-                                this.setRepoItemsParams(1);
-                                this.reloadCharacterisitics(false);
                             } else {
                                 this.snackBar.open('Error while deleting the characteristic!', 'close', {panelClass: 'snack-bar-error'});
                             }
+                            this.reload()
                         });
                 }
             });
@@ -188,23 +188,20 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     private getCharacteristics() {
+        var offset = this.paginator.pageSize * this.paginator.pageIndex;
+
         if (this.routerConcept !== null) {
             this.selectedTag = this.routerConcept.name;
         }
         this.characteristicsService
-            .getCharacteristics(this.searchControl.value, this.limit, this.offset, 'name', 'asc', this.routerConcept?.characteristic_ids || [])
+            .getCharacteristics(this.searchControl.value, this.pageSize, offset, 'name', 'asc', this.routerConcept?.characteristic_ids || [])
             .subscribe((characteristics: CharacteristicsPermSearchModel[]) => {
                 this.setCharacteristics(characteristics);
             });
     }
 
     private setCharacteristics(characteristics: CharacteristicsPermSearchModel[]) {
-        if (characteristics.length !== this.limit) {
-            this.allDataLoaded = true;
-        }
-        this.characteristics = this.characteristics.concat(characteristics);
-        this.dataSource = new MatTableDataSource(this.characteristics);
-        this.dataSource.sort = this.sort;
+        this.dataSource.data = characteristics;
         this.ready = true;
     }
 
@@ -219,31 +216,58 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     reload() {
-        this.characteristics = [];
-        this.offset = 0;
-        this.allDataLoaded = false;
         this.ready = false;
-        this.limit = this.limitInit;
+        this.paginator.pageIndex = 0;
+        this.selectionClear();
         this.getCharacteristics();
-    }
-
-    private setRepoItemsParams(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.characteristics.length;
-    }
-
-    private reloadCharacterisitics(reset: boolean) {
-        setTimeout(() => {
-            if (reset) {
-                this.reload();
-            } else {
-                this.getCharacteristics();
-            }
-        }, 1500);
     }
 
     resetSearch() {
         this.searchControl.setValue('');
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems() {
+        const deletionJobs: Observable<any>[] = [];
+
+        this.dialogsService
+        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' characteristics' : ' characteristic'))
+        .afterClosed()
+        .subscribe((deleteConcepts: boolean) => {
+            if (deleteConcepts) {
+                this.selection.selected.forEach((characteristic: CharacteristicsPermSearchModel) => {
+                    var job = this.characteristicsService.deleteCharacteristic(characteristic.id)
+                    deletionJobs.push(job)
+                });
+            }
+            
+            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                console.log(deletionJobResults)
+                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                if (ok) {
+                    this.snackBar.open('Characteristics deleted successfully.', undefined, {duration: 2000});            
+                } else {
+                    this.snackBar.open('Error while deleting characteristics!', 'close', {panelClass: 'snack-bar-error'});
+                }
+                this.reload()
+            })
+        });
     }
 }

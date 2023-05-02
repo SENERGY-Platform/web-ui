@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-.mat-column-action {
-    text-align: right;
-    justify-content: flex-end;
-}
-
 .main-panel-alternative {
     height: calc(100% - 106px);
     overflow-y: auto;
@@ -26,11 +21,6 @@
 
 .offset {
     margin-top: 4px;
-}
-
-.device-instance-container {
-    margin-bottom: 170px;
-    padding: 0 8px 8px;
 }
 
 .device-instance-container ::ng-deep .mat-tab-body-content {

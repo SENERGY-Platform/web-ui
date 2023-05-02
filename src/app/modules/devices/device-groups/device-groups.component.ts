@@ -15,7 +15,7 @@
  */
 
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription} from 'rxjs';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
@@ -25,6 +25,8 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
 
 
 @Component({
@@ -33,23 +35,22 @@ import {debounceTime} from 'rxjs/operators';
     styleUrls: ['./device-groups.component.css'],
 })
 export class DeviceGroupsComponent implements OnInit, OnDestroy {
-    readonly limitInit = 54;
-
-    deviceGroups: DeviceGroupsPermSearchModel[] = [];
+    readonly pageSize = 20;
+    selection = new SelectionModel<DeviceGroupsPermSearchModel>(true, []);
+    totalCount = 200;
     instances = [];
-    dataSource = new MatTableDataSource(this.deviceGroups);
+    dataSource = new MatTableDataSource<DeviceGroupsPermSearchModel>();
     @ViewChild(MatSort) sort!: MatSort;
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     searchControl = new UntypedFormControl('');
 
     ready = false;
 
-    private limit = this.limitInit;
-    private offset = 0;
     private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
 
     hideGenerated = true;
+    allDataLoaded: boolean = false
 
     constructor(
         private deviceGroupsService: DeviceGroupsService,
@@ -59,6 +60,20 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
+        
+    }
+
+    ngAfterViewInit(): void {
+        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
+            var value = row[sortHeaderId];
+            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
+            return value
+        };
+        this.dataSource.sort = this.sort;
+        
+        this.paginator.page.subscribe(()=>{
+            this.getDeviceGroups()
+        });
         this.getDeviceGroups();
         this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
@@ -67,12 +82,22 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         this.searchSub.unsubscribe();
     }
 
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.offset = this.offset + this.limit;
-            this.getDeviceGroups();
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
         }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
     }
 
     deleteDeviceGroup(deviceGroup: DeviceGroupsPermSearchModel): boolean {
@@ -83,13 +108,11 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
                 if (deleteDeviceClass) {
                     this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id).subscribe((resp: boolean) => {
                         if (resp === true) {
-                            this.deviceGroups.splice(this.deviceGroups.indexOf(deviceGroup), 1);
                             this.snackBar.open('Device-Group deleted successfully.', undefined, { duration: 2000 });
-                            this.setLimitOffset(1);
-                            this.reloadDeviceGroups();
                         } else {
                             this.snackBar.open('Error while deleting the device-group!', 'close', { panelClass: 'snack-bar-error' });
                         }
+                        this.reload()
                     });
                 }
             });
@@ -112,44 +135,51 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     }
 
     private getDeviceGroups() {
-        let query =  this.deviceGroupsService.getDeviceGroups(this.searchControl.value, this.limit, this.offset, 'name', 'asc');
+        var offset = this.paginator.pageSize * this.paginator.pageIndex;
+        let query =  this.deviceGroupsService.getDeviceGroups(this.searchControl.value, this.pageSize, offset, 'name', 'asc');
         if(this.hideGenerated) {
-            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchControl.value, this.limit, this.offset, 'name', 'asc');
+            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchControl.value, this.pageSize, offset, 'name', 'asc');
         }
 
         query.subscribe((deviceGroups: DeviceGroupsPermSearchModel[]) => {
-            if (deviceGroups.length !== this.limit) {
-                this.allDataLoaded = true;
-            }
-            this.deviceGroups = this.deviceGroups.concat(deviceGroups);
-            this.dataSource = new MatTableDataSource(this.deviceGroups);
-            this.dataSource.sort = this.sort;
+            this.dataSource.data = deviceGroups;
             this.ready = true;
         });
     }
 
     public reload() {
-        this.deviceGroups = [];
-        this.limit = this.limitInit;
-        this.offset = 0;
-        this.allDataLoaded = false;
+        this.paginator.pageIndex = 0;
         this.ready = false;
+        this.selectionClear();
         this.getDeviceGroups();
-    }
-
-    private reloadDeviceGroups() {
-        setTimeout(() => {
-            this.reload();
-        }, 2500);
     }
 
     public resetSearch() {
         this.searchControl.setValue('');
     }
 
-    private setLimitOffset(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.deviceGroups.length;
+    deleteMultipleItems() {
+        const deletionJobs: Observable<any>[] = [];
+
+        this.dialogsService
+        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' device groups' : ' device group'))
+        .afterClosed()
+        .subscribe((deleteConcepts: boolean) => {
+            if (deleteConcepts) {
+                this.selection.selected.forEach((deviceGroup: DeviceGroupsPermSearchModel) => {
+                    deletionJobs.push(this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id));
+                });
+            }
+        
+            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                if (ok) {
+                    this.snackBar.open('Device group deleted successfully.', undefined, {duration: 2000});            
+                } else {
+                    this.snackBar.open('Error while deleting the device group!', 'close', {panelClass: 'snack-bar-error'});
+                }
+                this.reload()
+            })
+        });
     }
 }

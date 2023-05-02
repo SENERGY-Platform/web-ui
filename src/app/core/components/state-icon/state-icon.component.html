@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div fxLayout="column" fxLayoutAlign="center center">
+<div>
     <mat-icon class="padding connected" matTooltip="connected" *ngIf="state === true">cloud</mat-icon>
     <mat-icon class="padding disconnected" matTooltip="disconnected" *ngIf="state === false">cloud_off</mat-icon>
     <mat-icon class="padding color-sidenav" matTooltip="unknown" *ngIf="state === undefined || state === null">help outline</mat-icon>

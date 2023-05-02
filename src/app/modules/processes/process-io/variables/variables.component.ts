@@ -30,6 +30,7 @@ import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variab
 import {MatLegacyPaginator as MatPaginator} from '@angular/material/legacy-paginator';
 import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
 import {Subscription} from 'rxjs';
+import { SelectionModel } from '@angular/cdk/collections';
 
 
 
@@ -39,8 +40,7 @@ import {Subscription} from 'rxjs';
     styleUrls: ['./variables.component.css'],
 })
 export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
-    limit = 20;
-    offset = 0;
+    readonly pageSize = 20;
     sort = 'unix_timestamp_in_s.desc';
     keyRegex = '';
 
@@ -48,9 +48,10 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
 
     @ViewChild('matSort', { static: false }) matSort!: MatSort;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
+    selection = new SelectionModel<ProcessIoVariable>(true, []);
 
     dataSource = new MatTableDataSource<ProcessIoVariable>();
-    displayedColumns: string[] = ['unix_timestamp_in_s', 'key', 'process_instance_id', 'process_definition_id', 'value', 'action'];
+    displayedColumns: string[] = ['select', 'unix_timestamp_in_s', 'key', 'process_instance_id', 'process_definition_id', 'value', 'edit', 'delete'];
 
     private searchSub: Subscription = new Subscription();
 
@@ -62,7 +63,6 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         private searchbarService: SearchbarService,
     ) {
         this.updateTotal();
-        this.loadVariables();
     }
 
     ngOnDestroy() {
@@ -75,18 +75,22 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
             this.updateSortAndPagination();
         });
         this.paginator.page.subscribe(()=>{
-            this.updateSortAndPagination();
+            this.loadVariables();
         });
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             if(this.keyRegex !== searchText) {
                 this.keyRegex = searchText;
                 this.paginator.pageIndex = 0;
             }
-            this.refresh();
+            this.reload();
         });
+
+        this.loadVariables();
     }
 
-    refresh(){
+    reload(){
+        this.selectionClear();
+        this.paginator.pageIndex = 0
         this.updateTotal();
         this.updateSortAndPagination();
     }
@@ -103,15 +107,12 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         if(this.matSort && this.matSort.active){
             this.sort = this.matSort.active+'.'+this.matSort.direction;
         }
-        if(this.paginator){
-            this.limit = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-        }
         this.loadVariables();
     }
 
     loadVariables(){
-        this.processIoService.listVariables(this.limit, this.offset, this.sort, this.keyRegex).subscribe(value => {
+        var offset = this.paginator.pageSize * this.paginator.pageIndex;
+        this.processIoService.listVariables(this.pageSize, offset, this.sort, this.keyRegex).subscribe(value => {
             if(value){
                 this.dataSource.data = value || [];
             }
@@ -201,5 +202,29 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
                 }
             });
     }
+
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems(): void {
+        
+    }
+
 
 }

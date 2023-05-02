@@ -39,6 +39,9 @@ import {MatSort} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
+import { forkJoin, Observable } from 'rxjs';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -83,19 +86,19 @@ export class DeviceInstancesComponent implements OnInit {
     ) {
         this.getRouterParams();
     }
+    readonly pageSize = 20;
 
-    instances: DeviceInstancesModel[] = [];
-    dataSource = new MatTableDataSource(this.instances);
+    dataSource = new MatTableDataSource<DeviceInstancesModel>();
     @ViewChild(MatSort) sort!: MatSort;
-
+    selection = new SelectionModel<DeviceInstancesModel>(true, []);
+    totalCount = 200;
     searchControl = new UntypedFormControl('');
     ready = false;
-    limitInit = 100;
-    limit = this.limitInit;
-    offset = 0;
+
     selectedTag = '';
     selectedTagTransformed = '';
     selectedTagType = '';
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     locationOptions: LocationModel[] = [];
     networkOptions: NetworksModel[] = [];
@@ -106,11 +109,26 @@ export class DeviceInstancesComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadFilterOptions();
+    }
+
+    ngAfterViewInit(): void {
+        this.dataSource.sort = this.sort
+        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
+            var value = row[sortHeaderId];
+            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
+            return value
+        };
+        
+        this.paginator.page.subscribe(()=>{
+            this.load()
+        });
         this.load();
         this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     private load() {
+        var offset = this.paginator.pageSize * this.paginator.pageIndex;
+
         this.ready = false;
         if (this.routerLocation !== null) {
             this.selectedTag = this.routerLocation.id;
@@ -123,8 +141,8 @@ export class DeviceInstancesComponent implements OnInit {
             this.selectedTagTransformed = this.routerNetwork.name;
             this.deviceInstancesService
                 .getDeviceInstancesByHubId(
-                    this.limit,
-                    this.offset,
+                    this.pageSize,
+                    offset,
                     'display_name',
                     'asc',
                     this.routerNetwork.id,
@@ -137,7 +155,7 @@ export class DeviceInstancesComponent implements OnInit {
             this.selectedTag = this.routerDeviceType.name;
             this.selectedTagTransformed = this.routerDeviceType.name;
             this.deviceInstancesService
-                .getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.limit, this.offset, 'display_name', 'asc', null)
+                .getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.pageSize, offset, 'display_name', 'asc', null)
                 .subscribe((deviceInstances) => {
                     this.setDevices(deviceInstances);
                 });
@@ -145,8 +163,8 @@ export class DeviceInstancesComponent implements OnInit {
         } else {
             this.deviceInstancesService
                 .getDeviceInstances(
-                    this.limit,
-                    this.offset,
+                    this.pageSize,
+                    offset,
                     'display_name',
                     'asc',
                     this.searchControl.value,
@@ -161,9 +179,7 @@ export class DeviceInstancesComponent implements OnInit {
     }
 
     private setDevices(instances: DeviceInstancesModel[]) {
-        this.instances = this.instances.concat(instances);
-        this.dataSource = new MatTableDataSource(this.instances);
-        this.dataSource.sort = this.sort;
+        this.dataSource.data = instances;
         this.ready = true;
     }
 
@@ -223,20 +239,14 @@ export class DeviceInstancesComponent implements OnInit {
     }
 
     reload() {
-        this.limit = this.limitInit;
-        this.offset = 0;
-        this.instances = [];
+        this.paginator.pageIndex = 0;
+        this.ready = false;
+        this.selectionClear();
         this.load();
     }
 
     resetSearch() {
         this.searchControl.setValue('');
-    }
-
-    onScroll() {
-        this.limit += this.limitInit;
-        this.offset = this.instances.length;
-        this.load();
     }
 
     showInfoOfDevice(device: DeviceInstancesModel): void {
@@ -259,11 +269,11 @@ export class DeviceInstancesComponent implements OnInit {
                 if (deviceDelete) {
                     this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstancesUpdateModel | null) => {
                         if (resp !== null) {
-                            this.instances.splice(this.instances.indexOf(device), 1);
                             this.snackBar.open('Device deleted successfully.', '', { duration: 2000 });
                         } else {
                             this.snackBar.open('Error while deleting device!', 'close', { panelClass: 'snack-bar-error' });
                         }
+                        this.reload()
                     });
                 }
             });
@@ -319,5 +329,48 @@ export class DeviceInstancesComponent implements OnInit {
                 }
             }
         }
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems() {
+        const deletionJobs: Observable<any>[] = [];
+
+        this.dialogsService
+        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : ' device'))
+        .afterClosed()
+        .subscribe((deleteConcepts: boolean) => {
+            if (deleteConcepts) {
+                this.selection.selected.forEach((device: DeviceInstancesModel) => {
+                    deletionJobs.push(this.deviceInstancesService.deleteDeviceInstance(device.id));
+                });
+            }
+            
+            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                if (ok) {
+                    this.snackBar.open('Devices deleted successfully.', undefined, {duration: 2000});            
+                } else {
+                    this.snackBar.open('Error while deleting devices!', 'close', {panelClass: 'snack-bar-error'});
+                }
+                this.reload()
+            })
+        });
     }
 }

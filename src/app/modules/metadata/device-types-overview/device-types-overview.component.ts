@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
@@ -28,14 +28,11 @@ import { Router } from '@angular/router';
 import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from '../../devices/device-instances/device-instances.component';
 import { DeviceInstancesDialogService } from '../../devices/device-instances/shared/device-instances-dialog.service';
 import { DeviceTypeDeviceClassModel } from './shared/device-type.model';
-
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { SelectionModel } from '@angular/cdk/collections';
+import { UntypedFormControl } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
     selector: 'senergy-device-types',
@@ -43,20 +40,20 @@ const grids = new Map([
     styleUrls: ['./device-types-overview.component.css'],
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
-    readonly limitInit = 54;
+    readonly pageSize = 20;
 
     deviceTypes: DeviceTypePermSearchModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
-    gridCols = 0;
-    ready = false;
-    sortAttributes = new Array(new SortModel('Name', 'name', 'asc'));
 
-    private searchText = '';
-    private limit = this.limitInit;
-    private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
+    dataSource = new MatTableDataSource<DeviceTypePermSearchModel>();
+    @ViewChild(MatSort) sort!: MatSort;
+    selection = new SelectionModel<DeviceTypePermSearchModel>(true, []);
+    totalCount = 200
+    searchControl = new UntypedFormControl('');
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
+    ready = false;
     private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
+    searchText: string = ""
 
     constructor(
         private searchbarService: SearchbarService,
@@ -70,8 +67,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.loadDeviceClasses();
-        this.initGridCols();
         this.initSearchAndGetDeviceTypes();
     }
 
@@ -79,18 +74,18 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.searchSub.unsubscribe();
     }
 
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.reset();
-        this.sortAttribute = sortAttribute;
-        this.getDeviceTypes();
-    }
-
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.setRepoItemsParams(this.limitInit);
-            this.getDeviceTypes();
-        }
+    ngAfterViewInit(): void {
+        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
+            var value = row[sortHeaderId];
+            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
+            return value
+        };
+        this.dataSource.sort = this.sort;
+        
+        this.paginator.page.subscribe(()=>{
+            this.getDeviceTypes()
+        });
+        this.loadDeviceClasses();
     }
 
     delete(deviceTypeInput: DeviceTypePermSearchModel) {
@@ -104,11 +99,10 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
                             const index = this.deviceTypes.indexOf(deviceTypeInput);
                             this.deviceTypes.splice(index, 1);
                             this.snackBar.open('Device type deleted successfully.', '', { duration: 2000 });
-                            this.setRepoItemsParams(1);
-                            this.getDeviceTypes();
                         } else {
                             this.snackBar.open('Error while deleting device type!', 'close', { panelClass: 'snack-bar-error' });
                         }
+                        this.reload();
                     });
                 }
             });
@@ -160,37 +154,27 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
 
     private initSearchAndGetDeviceTypes() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
-            this.reset();
             this.searchText = searchText;
-            this.getDeviceTypes();
+            this.reload();
         });
     }
 
     private getDeviceTypes() {
+        var offset = this.paginator.pageSize * this.paginator.pageIndex;
+
         this.deviceTypeService
-            .getDeviceTypes(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order)
+            .getDeviceTypes(this.searchText, this.pageSize, offset, "name", "asc")
             .subscribe((deviceTypes: DeviceTypePermSearchModel[]) => {
-                if (deviceTypes.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
-                this.deviceTypes = this.deviceTypes.concat(deviceTypes);
+                this.dataSource.data = deviceTypes;
                 this.ready = true;
             });
     }
 
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
-            this.gridCols = grids.get(mqAlias) || 0;
-        });
-    }
 
-    private reset() {
-        this.deviceTypes = [];
-        this.offset = 0;
-        this.allDataLoaded = false;
+    private reload() {
+        this.paginator.pageIndex = 0;
         this.ready = false;
-        this.limit = this.limitInit;
+        this.getDeviceTypes();
     }
 
     private loadDeviceClasses(): void {
@@ -199,9 +183,25 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         });
     }
 
-    private setRepoItemsParams(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.deviceTypes.length;
+    public deleteMultipleItems(): void {
+
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
     }
 }

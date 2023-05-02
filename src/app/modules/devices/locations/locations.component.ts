@@ -15,7 +15,7 @@
  */
 
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription} from 'rxjs';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
@@ -29,6 +29,8 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
 
 
 @Component({
@@ -37,21 +39,16 @@ import {debounceTime} from 'rxjs/operators';
     styleUrls: ['./locations.component.css'],
 })
 export class LocationsComponent implements OnInit, OnDestroy {
-    readonly limitInit = 54;
-
-    locations: LocationModel[] = [];
+    readonly pageSize = 20;
     instances = [];
-    dataSource = new MatTableDataSource(this.locations);
+    totalCount = 200;
+    dataSource = new MatTableDataSource<LocationModel>();
     @ViewChild(MatSort) sort!: MatSort;
-
+    selection = new SelectionModel<LocationModel>(true, []);
     searchControl = new UntypedFormControl('');
-
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
-
-    private limit = this.limitInit;
-    private offset = 0;
     private searchSub: Subscription = new Subscription();
-    private allDataLoaded = false;
 
     constructor(
         private locationsService: LocationsService,
@@ -61,20 +58,26 @@ export class LocationsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.getLocations();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+     
     }
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
 
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.ready = false;
-            this.offset = this.offset + this.limit;
-            this.getLocations();
-        }
+    ngAfterViewInit(): void {
+        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
+            var value = row[sortHeaderId];
+            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
+            return value
+        };
+        this.dataSource.sort = this.sort
+
+        this.paginator.page.subscribe(()=>{
+            this.getLocations()
+        });
+        this.getLocations();
+        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
     }
 
     showDevices(location: LocationModel) {
@@ -92,9 +95,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
                 if (deleteDeviceClass) {
                     this.locationsService.deleteLocation(location.id).subscribe((resp: boolean) => {
                         if (resp === true) {
-                            this.locations.splice(this.locations.indexOf(location), 1);
                             this.snackBar.open('Location deleted successfully.', undefined, { duration: 2000 });
-                            this.setLimitOffset(1);
                             this.reloadLocations();
                         } else {
                             this.snackBar.open('Error while deleting the location!', 'close', { panelClass: 'snack-bar-error' });
@@ -116,15 +117,11 @@ export class LocationsComponent implements OnInit, OnDestroy {
     }
 
     private getLocations() {
+        var offset = this.paginator.pageSize * this.paginator.pageIndex;
         this.locationsService
-            .searchLocations(this.searchControl.value, this.limit, this.offset, 'name', 'asc')
+            .searchLocations(this.searchControl.value, this.pageSize, offset, 'name', 'asc')
             .subscribe((locations: LocationModel[]) => {
-                if (locations.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
-                this.locations = this.locations.concat(locations);
-                this.dataSource = new MatTableDataSource(this.locations);
-                this.dataSource.sort = this.sort;
+                this.dataSource.data = locations;
                 this.ready = true;
             });
     }
@@ -135,23 +132,57 @@ export class LocationsComponent implements OnInit, OnDestroy {
         }, 2500);
     }
 
-    private setLimitOffset(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.locations.length;
-    }
-
-
     reload() {
-        this.locations = [];
-        this.limit = this.limitInit;
-        this.offset = 0;
-        this.allDataLoaded = false;
+        this.paginator.pageIndex = 0;
         this.ready = false;
+        this.selectionClear()
         this.getLocations();
     }
 
     resetSearch() {
         this.searchControl.setValue('');
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems() {
+        const deletionJobs: Observable<any>[] = [];
+
+        this.dialogsService
+        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' locations' : ' location'))
+        .afterClosed()
+        .subscribe((deleteConcepts: boolean) => {
+            if (deleteConcepts) {
+                this.selection.selected.forEach((location: LocationModel) => {
+                    deletionJobs.push(this.locationsService.deleteLocation(location.id));
+                });
+            }
+            
+            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                if (ok) {
+                    this.snackBar.open('Locations deleted successfully.', undefined, {duration: 2000});            
+                } else {
+                    this.snackBar.open('Error while deleting locations!', 'close', {panelClass: 'snack-bar-error'});
+                }
+                this.reload()
+            })
+        });
     }
 }

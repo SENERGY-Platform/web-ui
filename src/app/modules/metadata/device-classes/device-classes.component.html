@@ -15,61 +15,93 @@
   -->
 
 
-<div class="device-classes-container">
-    <div fxLayout="column">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-    </div>
-    <div class="device-classes-scroll">
-        <div infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.device-classes-scroll'"
-             [fromRoot]="true"
-             (scrolled)="onScroll()">
-            <div class="layout-margin" fxLayout="column">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="282px" gutterSize="16px"
-                               *ngIf="deviceClasses.length > 0">
-                    <mat-grid-tile class="mat-elevation-z1"
-                                   *ngFor="let deviceClass of deviceClasses; let i = index">
-                        <div fxFill class="background">
-                            <img class="device-class-image" src="{{deviceClass.image}}">
+<div class="device-classes-container table-search-container">
+    <span fxLayout="row" class="search-refresh">
+        <mat-form-field color="accent" appearance="outline" fxFlex>
+            <input matInput [formControl]="searchControl" placeholder="Search...">
+            <mat-icon matPrefix *ngIf="searchControl.value === ''">search</mat-icon>
+            <button mat-icon-button matPrefix *ngIf="searchControl.value !== ''" (click)="resetSearch()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-form-field>
+
+        <button mat-icon-button (click)="reload()" color="accent" class="refresh">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </span>
+
+    <div *ngIf="dataSource.data.length === 0 && ready">No device class found.</div>
+    <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
+
+    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container">
+
+        <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef class="button-column">
+                    <mat-checkbox (change)="$event ? masterToggle() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()">
+                    </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row">
+                    <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+                        [checked]="selection.isSelected(row)">
+                    </mat-checkbox>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="name">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let deviceClass">
+                    {{deviceClass.name}}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="edit">
+                <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
+                <td mat-cell *matCellDef="let deviceClass">
+                    <button (click)="editDeviceClass(deviceClass)" [disabled]="!deviceClass.permissions.w"
+                        mat-icon-button color="accent" matTooltip="Edit">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="delete">
+                <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
+                <td mat-cell *matCellDef="let deviceClass">
+                    <button (click)="deleteDeviceClass(deviceClass)" [disabled]="!deviceClass.permissions.a"
+                        mat-icon-button color="accent" matTooltip="Delete">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="header-delete-all">
+                <th mat-header-cell *matHeaderCellDef colspan="10">
+                    <div fxLayout="row">
+                        <div fxLayoutAlign="center center">You have
+                            selected {{selection.selected.length}} items
                         </div>
-                        <mat-grid-tile-footer>
-                            <div fxLayout="column" fxFill>
-                                <div class="truncate footer-item-header" matTooltip="{{deviceClass.name}}">
-                                    {{deviceClass.name}}
-                                </div>
-                                <form fxLayout="row" class="footer-buttons">
-                                    <div fxFlex></div>
-                                    <div [fxLayoutAlign]="'start center'">
-                                        <button (click)="editDeviceClass(deviceClass)" [disabled]="!deviceClass.permissions.w"
-                                                mat-icon-button color="accent" matTooltip="Edit">
-                                            <mat-icon>edit</mat-icon>
-                                        </button>
-                                        <button (click)="deleteDeviceClass(deviceClass)"
-                                                [disabled]="!deviceClass.permissions.a"
-                                                mat-icon-button
-                                                color="accent"
-                                                matTooltip="Delete">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </mat-grid-tile-footer>
-                    </mat-grid-tile>
-                </mat-grid-list>
-                <div *ngIf="deviceClasses.length === 0 && ready">No device class found.</div>
-                <senergy-spinner [elementCount]="deviceClasses.length" [show]="!ready"></senergy-spinner>
-            </div>
-        </div>
+                        <button matTooltip="Delete" mat-icon-button color="accent"
+                                (click)="deleteMultipleItems()">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </th>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
+                [hidden]="selection.selected.length === 0"></tr>
+            <tr mat-header-row *matHeaderRowDef="['select', 'name', 'edit', 'delete', ]; sticky: true"></tr>
+            <tr mat-row *matRowDef="let m; columns: ['select', 'name', 'edit', 'delete'];"></tr>
+        </table>
     </div>
+
+    <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+    showFirstLastButtons></mat-paginator>
 </div>
+
 <button mat-fab class="fab" matTooltip="Add new device class" (click)="newDeviceClass()" *ngIf="userIsAdmin">
     <mat-icon>add</mat-icon>
 </button>
