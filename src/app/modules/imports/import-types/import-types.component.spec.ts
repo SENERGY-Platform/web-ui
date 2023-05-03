@@ -73,8 +73,6 @@ describe('ImportTypesComponent', () => {
     const permissionsDialogServiceSpy: Spy<PermissionsDialogService> = createSpyFromClass(PermissionsDialogService);
 
     const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService);
-    var searchSub: BehaviorSubject<string> = new BehaviorSubject("")
-    searchbarSpy.currentSearchText = searchSub;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -132,12 +130,11 @@ describe('ImportTypesComponent', () => {
         expect(importTypesServiceSpy.deleteImportInstance).toHaveBeenCalled();
     });
 
-    it('should search', fakeAsync(() =>  {
+    it('should search', () =>  {
         importTypesServiceSpy.listImportTypes.calls.reset();
-        searchSub.next('search')
-        tick(301);
+        searchbarSpy.changeMessage('search')
         expect(importTypesServiceSpy.listImportTypes.calls.mostRecent().args[0]).toEqual('search');
-    }));
+    });
 
     it('should open the edit view', () => {
         component.edit(permSearchModelExample);

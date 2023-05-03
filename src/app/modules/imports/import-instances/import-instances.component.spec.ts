@@ -72,8 +72,6 @@ describe('ImportInstancesComponent', () => {
     dialogSpy.open.and.returnValue({afterClosed: () => of(true)});
 
     const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService)
-    var searchSub: BehaviorSubject<string> = new BehaviorSubject("")
-    searchbarSpy.currentSearchText = searchSub;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -127,12 +125,11 @@ describe('ImportInstancesComponent', () => {
         expect(importInstancesServiceSpy.deleteImportInstance).toHaveBeenCalled();
     });
 
-    it('should search', fakeAsync(() => {
+    it('should search', () => {
         importInstancesServiceSpy.listImportInstances.calls.reset();
-        searchSub.next('search')
-        tick(301);
+        searchbarSpy.changeMessage('search')
         expect(importInstancesServiceSpy.listImportInstances.calls.mostRecent().args[0]).toEqual('search');
-    }));
+    });
 
     it('should open the edit dialog', () => {
         dialogSpy.open.calls.reset();
