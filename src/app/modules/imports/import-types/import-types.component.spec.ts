@@ -34,7 +34,7 @@ import {MatTreeModule} from '@angular/material/tree';
 import {WidgetModule} from '../../../widgets/widget.module';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {ImportTypesService} from './shared/import-types.service';
-import {of} from 'rxjs';
+import {BehaviorSubject, Observable, of} from 'rxjs';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {MatLegacyTableModule as MatTableModule} from '@angular/material/legacy-table';
 import {ImportTypePermissionSearchModel} from './shared/import-types.model';
@@ -72,7 +72,9 @@ describe('ImportTypesComponent', () => {
 
     const permissionsDialogServiceSpy: Spy<PermissionsDialogService> = createSpyFromClass(PermissionsDialogService);
 
-    const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService)
+    const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService);
+    var searchSub: BehaviorSubject<string> = new BehaviorSubject("")
+    searchbarSpy.currentSearchText = searchSub;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -106,6 +108,7 @@ describe('ImportTypesComponent', () => {
                 {provide: ImportTypesService, useValue: importTypesServiceSpy},
                 {provide: DialogsService, useValue: deleteDialogServiceSpy},
                 {provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy},
+                {provide: SearchbarService, useValue: searchbarSpy},
                 {provide: Router, useValue: routerSpy},
                 {provide: MatDialog, useValue: dialogSpy},
             ],
@@ -131,7 +134,7 @@ describe('ImportTypesComponent', () => {
 
     it('should search', fakeAsync(() =>  {
         importTypesServiceSpy.listImportTypes.calls.reset();
-        searchbarSpy.changeMessage("search")
+        searchSub.next('search')
         tick(301);
         expect(importTypesServiceSpy.listImportTypes.calls.mostRecent().args[0]).toEqual('search');
     }));

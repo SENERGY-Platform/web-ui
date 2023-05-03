@@ -34,7 +34,7 @@ import {MatTreeModule} from '@angular/material/tree';
 import {WidgetModule} from '../../../widgets/widget.module';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {ImportInstancesService} from './shared/import-instances.service';
-import {of} from 'rxjs';
+import {BehaviorSubject, of} from 'rxjs';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {MatLegacyTableModule as MatTableModule} from '@angular/material/legacy-table';
 import {ImportInstancesModel} from './shared/import-instances.model';
@@ -72,6 +72,8 @@ describe('ImportInstancesComponent', () => {
     dialogSpy.open.and.returnValue({afterClosed: () => of(true)});
 
     const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService)
+    var searchSub: BehaviorSubject<string> = new BehaviorSubject("")
+    searchbarSpy.currentSearchText = searchSub;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -102,6 +104,7 @@ describe('ImportInstancesComponent', () => {
                 {provide: ImportInstancesService, useValue: importInstancesServiceSpy},
                 {provide: DialogsService, useValue: deleteDialogServiceSpy},
                 {provide: Router, useValue: routerSpy},
+                {provide: SearchbarService, useValue: searchbarSpy},
                 {provide: MatDialog, useValue: dialogSpy},
             ],
         }).compileComponents();
@@ -126,7 +129,7 @@ describe('ImportInstancesComponent', () => {
 
     it('should search', fakeAsync(() => {
         importInstancesServiceSpy.listImportInstances.calls.reset();
-        searchbarSpy.changeMessage("search")
+        searchSub.next('search')
         tick(301);
         expect(importInstancesServiceSpy.listImportInstances.calls.mostRecent().args[0]).toEqual('search');
     }));
