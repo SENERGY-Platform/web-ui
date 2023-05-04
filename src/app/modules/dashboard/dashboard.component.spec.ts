@@ -45,7 +45,9 @@ describe('DashboardComponent', () => {
     let fixture: ComponentFixture<DashboardComponent>;
 
     const responsiveServiceSpy: Spy<ResponsiveService> = createSpyFromClass<ResponsiveService>(ResponsiveService);
-    const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService);
+    const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService, {
+        observablePropsToSpyOn: ['dashboardObservable', 'dashboardWidgetObservable']
+    });
     const deviceStatusServiceSpy: Spy<DeviceStatusService> = createSpyFromClass<DeviceStatusService>(DeviceStatusService);
 
     beforeEach(
@@ -57,8 +59,6 @@ describe('DashboardComponent', () => {
                     name: 'test-dashboard',
                 },
             ] as DashboardModel[]);
-            dashboardServiceSpy.dashboardObservable = new Subject<DashboardManipulationModel>().asObservable();
-            dashboardServiceSpy.dashboardWidgetObservable = new Subject<DashboardWidgetManipulationModel>().asObservable();
 
             TestBed.configureTestingModule({
                 imports: [

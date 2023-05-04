@@ -35,8 +35,9 @@ describe('ToolbarComponent', () => {
     let component: ToolbarComponent;
     let fixture: ComponentFixture<ToolbarComponent>;
 
-    const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService);
-    notificationServiceSpy.notificationEmitter = new EventEmitter();
+    const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService, {
+        observablePropsToSpyOn: ['notificationEmitter']
+    });
 
     beforeEach(() => {
         TestBed.configureTestingModule({
