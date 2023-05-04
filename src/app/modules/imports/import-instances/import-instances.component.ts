@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
-import {FormControl, UntypedFormControl} from '@angular/forms';
-import { ImportTypePermissionSearchModel } from '../import-types/shared/import-types.model';
-import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
-import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
 import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
 import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
@@ -30,6 +26,7 @@ import { ExportModel } from '../../exports/shared/export.model';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
     selector: 'senergy-import-instances',
@@ -37,7 +34,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./import-instances.component.css'],
 })
 export class ImportInstancesComponent implements OnInit {
-    @ViewChild(MatTable, { static: false }) table!: MatTable<ImportTypePermissionSearchModel>;
+    dataSource = new MatTableDataSource<ImportInstancesModel>();
 
     constructor(
         private importInstancesService: ImportInstancesService,
@@ -48,7 +45,6 @@ export class ImportInstancesComponent implements OnInit {
         private searchbarService: SearchbarService
     ) {}
 
-    instances: ImportInstancesModel[] = [];
     searchText: string = ""
     searchSub: Subscription = new Subscription()    
     dataReady = false;
@@ -118,10 +114,7 @@ export class ImportInstancesComponent implements OnInit {
         this.importInstancesService
             .listImportInstances(this.searchText, this.limit, this.offset, this.sort, this.excludeGenerated)
             .subscribe((inst) => {
-                this.instances.push(...inst);
-                if (this.table !== undefined) {
-                    this.table.renderRows();
-                }
+                this.dataSource.data = inst;
                 this.dataReady = true;
             });
     }
@@ -129,13 +122,12 @@ export class ImportInstancesComponent implements OnInit {
     reload() {
         this.limit = this.limitInit;
         this.offset = 0;
-        this.instances = [];
         this.load();
     }
 
     onScroll() {
         this.limit += this.limitInit;
-        this.offset = this.instances.length;
+        this.offset = this.dataSource.data.length;
         this.load();
     }
 

@@ -29,7 +29,7 @@
         [infiniteScrollThrottle]="50" [infiniteScrollContainer]="'.container'" [fromRoot]="true"
         (scrolled)="onScroll()" class="table-container">
 
-        <table mat-table matSortDisableClear [dataSource]="instances" matSort (matSortChange)="matSortChange($event)"
+        <table mat-table matSortDisableClear [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)"
             matSortActive="updated_at" matSortDirection="desc">
             <ng-container matColumnDef="name">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>

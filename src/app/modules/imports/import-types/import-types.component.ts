@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ImportTypePermissionSearchModel} from './shared/import-types.model';
 import {ImportTypesService} from './shared/import-types.service';
 import {Sort} from '@angular/material/sort';
-import {UntypedFormControl} from '@angular/forms';
-import {debounceTime, map} from 'rxjs/operators';
-import {MatLegacyTable as MatTable} from '@angular/material/legacy-table';
 import {Router} from '@angular/router';
 import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
 import {ImportInstancesModel} from '../import-instances/shared/import-instances.model';
@@ -29,6 +26,7 @@ import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-b
 import {DialogsService} from '../../../core/services/dialogs.service';
 import { Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
     selector: 'senergy-import-types',
@@ -36,9 +34,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./import-types.component.css'],
 })
 export class ImportTypesComponent implements OnInit {
-    @ViewChild(MatTable, { static: false }) table!: MatTable<ImportTypePermissionSearchModel>;
-
-    importTypes: ImportTypePermissionSearchModel[] = [];
+    dataSource = new MatTableDataSource<ImportTypePermissionSearchModel>();
     dataReady = false;
     sort = 'name.asc';
     searchText: string = ""
@@ -132,10 +128,7 @@ export class ImportTypesComponent implements OnInit {
 
     load() {
         this.importTypesService.listImportTypes(this.searchText, this.limit, this.offset, this.sort).subscribe((types) => {
-            this.importTypes.push(...types);
-            if (this.table !== undefined) {
-                this.table.renderRows();
-            }
+            this.dataSource.data = types
             this.dataReady = true;
         });
     }
@@ -143,13 +136,12 @@ export class ImportTypesComponent implements OnInit {
     reload() {
         this.limit = this.limitInit;
         this.offset = 0;
-        this.importTypes = [];
         this.load();
     }
 
     onScroll() {
         this.limit += this.limitInit;
-        this.offset = this.importTypes.length;
+        this.offset = this.dataSource.data.length;
         this.load();
     }
 
