@@ -72,7 +72,7 @@ describe('ImportInstancesComponent', () => {
     dialogSpy.open.and.returnValue({afterClosed: () => of(true)});
 
     const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService, {
-        observablePropsToSpyOn: ['searchText', 'currentSearchText']
+        observablePropsToSpyOn: ['currentSearchText']
     });
 
     beforeEach(async () => {
@@ -129,8 +129,8 @@ describe('ImportInstancesComponent', () => {
 
     it('should search', () => {
         importInstancesServiceSpy.listImportInstances.calls.reset();
-        searchbarSpy.searchText.nextWith("search")
-        searchbarSpy.currentSearchText.nextWith("search")
+        component.ngOnInit();
+        searchbarSpy.currentSearchText.nextWith("search");
         expect(importInstancesServiceSpy.listImportInstances.calls.mostRecent().args[0]).toEqual('search');
     });
 

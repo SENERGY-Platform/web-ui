@@ -73,7 +73,7 @@ describe('ImportTypesComponent', () => {
     const permissionsDialogServiceSpy: Spy<PermissionsDialogService> = createSpyFromClass(PermissionsDialogService);
 
     const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService, {
-        observablePropsToSpyOn: ['searchText', 'currentSearchText']
+        observablePropsToSpyOn: ['currentSearchText']
     });
 
     beforeEach(async () => {
@@ -134,7 +134,7 @@ describe('ImportTypesComponent', () => {
 
     it('should search', () =>  {
         importTypesServiceSpy.listImportTypes.calls.reset();
-        searchbarSpy.searchText.nextWith("search")
+        component.ngOnInit();
         searchbarSpy.currentSearchText.nextWith("search")
         expect(importTypesServiceSpy.listImportTypes.calls.mostRecent().args[0]).toEqual('search');
     });
