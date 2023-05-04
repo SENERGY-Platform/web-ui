@@ -72,7 +72,9 @@ describe('ImportTypesComponent', () => {
 
     const permissionsDialogServiceSpy: Spy<PermissionsDialogService> = createSpyFromClass(PermissionsDialogService);
 
-    const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService);
+    const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService, {
+        observablePropsToSpyOn: ['searchText']
+    });
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -132,7 +134,7 @@ describe('ImportTypesComponent', () => {
 
     it('should search', () =>  {
         importTypesServiceSpy.listImportTypes.calls.reset();
-        searchbarSpy.changeMessage('search')
+        searchbarSpy.searchText.nextWith("search")
         expect(importTypesServiceSpy.listImportTypes.calls.mostRecent().args[0]).toEqual('search');
     });
 

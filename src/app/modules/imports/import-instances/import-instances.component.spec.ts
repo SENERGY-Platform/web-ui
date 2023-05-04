@@ -71,7 +71,9 @@ describe('ImportInstancesComponent', () => {
     const dialogSpy: Spy<MatDialog> = createSpyFromClass(MatDialog);
     dialogSpy.open.and.returnValue({afterClosed: () => of(true)});
 
-    const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService)
+    const searchbarSpy: Spy<SearchbarService> = createSpyFromClass(SearchbarService, {
+        observablePropsToSpyOn: ['searchText']
+    });
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -127,7 +129,7 @@ describe('ImportInstancesComponent', () => {
 
     it('should search', () => {
         importInstancesServiceSpy.listImportInstances.calls.reset();
-        searchbarSpy.changeMessage('search')
+        searchbarSpy.searchText.nextWith("search")
         expect(importInstancesServiceSpy.listImportInstances.calls.mostRecent().args[0]).toEqual('search');
     });
 

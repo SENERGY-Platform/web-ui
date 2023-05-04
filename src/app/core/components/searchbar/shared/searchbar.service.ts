@@ -22,7 +22,7 @@ import { debounceTime } from 'rxjs/operators';
     providedIn: 'root',
 })
 export class SearchbarService {
-    private searchText = new BehaviorSubject('');
+    searchText = new BehaviorSubject('');
 
     @Output() currentSearchText = this.searchText.asObservable().pipe(debounceTime(300));
 
