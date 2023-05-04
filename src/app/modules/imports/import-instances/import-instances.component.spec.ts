@@ -129,7 +129,7 @@ describe('ImportInstancesComponent', () => {
 
     it('should search', () => {
         importInstancesServiceSpy.listImportInstances.calls.reset();
-        component.ngAfterViewInit();
+        component.ngOnInit();
         searchbarSpy.currentSearchText.nextWith("search");
         expect(importInstancesServiceSpy.listImportInstances.calls.mostRecent().args[0]).toEqual('search');
     });

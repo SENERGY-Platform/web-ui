@@ -134,7 +134,7 @@ describe('ImportTypesComponent', () => {
 
     it('should search', () =>  {
         importTypesServiceSpy.listImportTypes.calls.reset();
-        component.ngAfterViewInit();
+        component.ngOnInit();
         searchbarSpy.currentSearchText.nextWith("search")
         expect(importTypesServiceSpy.listImportTypes.calls.mostRecent().args[0]).toEqual('search');
     });
