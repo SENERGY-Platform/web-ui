@@ -66,7 +66,7 @@ describe('ToolbarComponent', () => {
     });
 
     it('should correctly display unread notification counter', () => {
-        notificationServiceSpy.notificationEmitter.emit([
+        notificationServiceSpy.notificationEmitter.nextWith([
             {
                 _id: '0',
                 isRead: false,
@@ -93,7 +93,7 @@ describe('ToolbarComponent', () => {
             },
         ]);
         expect(component.unreadCounter).toBe(2);
-        notificationServiceSpy.notificationEmitter.emit([
+        notificationServiceSpy.notificationEmitter.nextWith([
             {
                 _id: '0',
                 isRead: true,
@@ -120,7 +120,7 @@ describe('ToolbarComponent', () => {
             },
         ]);
         expect(component.unreadCounter).toBe(1);
-        notificationServiceSpy.notificationEmitter.emit([
+        notificationServiceSpy.notificationEmitter.nextWith([
             {
                 _id: '0',
                 isRead: false,
