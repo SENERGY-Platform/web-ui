@@ -59,6 +59,9 @@ export class ImportInstancesComponent implements OnInit {
     excludeGenerated = localStorage.getItem('import.instances.excludeGenerated') === 'true';
 
     ngOnInit(): void {
+    }
+
+    ngAfterViewInit(): void {
         this.load();
         this.initSearch();
     }

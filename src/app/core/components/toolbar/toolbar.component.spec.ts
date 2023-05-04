@@ -29,7 +29,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { NotificationService } from './notification/shared/notification.service';
-import { EventEmitter } from '@angular/core';
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;

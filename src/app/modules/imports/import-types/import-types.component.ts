@@ -58,6 +58,10 @@ export class ImportTypesComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
+       
+    }
+
+    ngAfterViewInit(): void {
         this.load();
         this.initSearch();
     }
