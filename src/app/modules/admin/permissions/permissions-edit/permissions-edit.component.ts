@@ -92,22 +92,29 @@ export class PermissionsEditComponent implements OnInit {
             this.userIsAdmin = false;
         }
 
-        try {
-            this.kongService.loadUris().subscribe((uris: string[]) => this.uris = uris);
-        } catch (e) {
-            console.error('Could not load Uris from kong: ' + e);
-        }
         if (this.isEditMode) {
             this.checkactiveActions();
             this.endpointControl.patchValue(this.permission.resource);
-        }
+        }       
 
-        // autocomplete filter
-        this.filteredOptions = this.endpointControl.valueChanges
-            .pipe(
-                startWith(''),
-                map((value) => this._filter(value)),
-            );
+        this.initAutoComplete();
+    }
+
+    initAutoComplete() {
+        try {
+            this.kongService.loadUris().subscribe(uris => {
+                this.uris = uris as string[];
+
+                 // autocomplete filter
+                this.filteredOptions = this.endpointControl.valueChanges
+                    .pipe(
+                        startWith(''),
+                        map((value) => this._filter(value)),
+                    );
+                });
+        } catch (e) {
+            console.error('Could not load Uris from kong: ' + e);
+        }
     }
 
     public checkactiveActions() {

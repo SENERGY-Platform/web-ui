@@ -112,16 +112,21 @@ export class PermissionsListComponent implements OnInit {
     public ngOnInit() {
         this.loadPolicies();
         this.userIsAdmin = this.authService.userIsAdmin();
-        // autocomplete filter
-        this.filteredOptions = this.endpointControl.valueChanges
-            .pipe(
-                startWith(''),
-                map((value) => this._filter(value)),
-            );
-        this.filteredOptions.pipe(debounce(() => interval(300))).subscribe(() => this.testAccess());
+        this.initAutoComplete();
+    }
+
+    initAutoComplete() {
         try {
             this.kongService.loadUris().subscribe(uris => {
                 this.uris = uris as string[];
+
+                // autocomplete filter
+                this.filteredOptions = this.endpointControl.valueChanges
+                .pipe(
+                    startWith(''),
+                    map((value) => this._filter(value)),
+                );
+            this.filteredOptions.pipe(debounce(() => interval(300))).subscribe(() => this.testAccess());
             });
         } catch (e) {
             console.error('Could not load Uris from kong: ' + e);
