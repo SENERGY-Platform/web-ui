@@ -13,39 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-.button-margin {
-    margin-right: 16px;
-    margin-left: 16px;
-}
-
-tr.second th, tr.second td {
-    position: sticky;
-    top: 56px;
-    background: inherit;
-    z-index: 99;
-    padding: 0 8px;
-}
 
 .container {
     height: calc(100% - 64px);
     overflow-y: auto;
-}
-
-.refresh {
-    margin-top: 0.5em;
-    margin-left: 0.5em;
-}
-
-.mat-cell {
-    padding: 0 8px;
-}
-
-th.mat-header-cell {
-    padding: 0 8px;
-    position: sticky;
-    top: 0;
-    background: inherit;
-    z-index: 100;
 }
 
 .fab {

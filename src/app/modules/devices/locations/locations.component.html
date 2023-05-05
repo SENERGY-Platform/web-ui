@@ -89,7 +89,8 @@
             <tr mat-row *matRowDef="let m; columns: ['select', 'name', 'show', 'edit', 'delete'];"></tr>
         </table>
     </div>
-    <mat-paginator #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
+
+    <mat-paginator [hidden]="!ready || dataSource.data.length === 0" #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
     showFirstLastButtons></mat-paginator>
 </div>
 

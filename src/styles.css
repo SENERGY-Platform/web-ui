@@ -38,7 +38,7 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 
 /* General design for data tables */
 .table-search-container {
-    padding: 0 8px 8px;
+    padding: 8px 8px 8px;
 }
 
 .table-search-container .search-refresh {
@@ -65,6 +65,6 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 }
 
 .table-container .button-column {
-    width: 5%;
+    width: 4%;
 }
 

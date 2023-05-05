@@ -27,6 +27,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
     selector: 'senergy-import-instances',
@@ -46,6 +47,7 @@ export class ImportInstancesComponent implements OnInit {
     ) {}
 
     searchText: string = ""
+    selection = new SelectionModel<ImportInstancesModel>(true, []);
     searchSub: Subscription = new Subscription()    
     dataReady = false;
     sort = 'updated_at.desc';
@@ -148,5 +150,26 @@ export class ImportInstancesComponent implements OnInit {
         this.excludeGenerated = !this.excludeGenerated;
         localStorage.setItem('import.instances.excludeGenerated', '' + this.excludeGenerated);
         this.reload();
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems() {
     }
 }

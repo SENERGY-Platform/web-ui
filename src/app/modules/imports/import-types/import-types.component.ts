@@ -27,6 +27,7 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import { Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
     selector: 'senergy-import-types',
@@ -35,6 +36,7 @@ import { MatTableDataSource } from '@angular/material/table';
 })
 export class ImportTypesComponent implements OnInit {
     dataSource = new MatTableDataSource<ImportTypePermissionSearchModel>();
+    selection = new SelectionModel<ImportTypePermissionSearchModel>(true, []);
     dataReady = false;
     sort = 'name.asc';
     searchText: string = ""
@@ -143,5 +145,26 @@ export class ImportTypesComponent implements OnInit {
 
     add() {
         this.router.navigateByUrl('/imports/types/new');
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems() {
     }
 }
