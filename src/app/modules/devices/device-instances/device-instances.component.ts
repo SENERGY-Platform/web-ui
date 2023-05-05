@@ -119,6 +119,7 @@ export class DeviceInstancesComponent implements OnInit {
         this.dataSource.sort = this.sort
         this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
             var value = row[sortHeaderId];
+            console.log(typeof(value))
             value = (typeof(value) === 'string') ? value.toUpperCase(): value;
             return value
         };

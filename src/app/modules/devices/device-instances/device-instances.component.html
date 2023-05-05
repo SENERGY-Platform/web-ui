@@ -53,7 +53,7 @@
 
     <div [hidden]="!ready || dataSource.data.length === 0" class="table-container-with-button table-container">
 
-        <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
+        <table mat-table [dataSource]="dataSource" matSort matSortActive="display_name" matSortDirection="asc">
             <ng-container matColumnDef="select">
                 <th mat-header-cell *matHeaderCellDef>
                     <mat-checkbox (change)="$event ? masterToggle() : null"
