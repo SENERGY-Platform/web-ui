@@ -16,99 +16,97 @@
 
 <div class="process-repo-container">
 
-    <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true"
-                   (selectedIndexChange)="setIndex($event)"
-                   (animationDone)="animation()">
+    <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight
+        (selectedIndexChange)="setIndex($event)" (animationDone)="animation()">
         <!-- <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Marketplace', 'Shared']"> -->
         <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Shared']">
-            <senergy-searchbar fxFlex></senergy-searchbar>
-            <div fxLayout="row">
-                <div fxFlex></div>
-                <button matTooltip="Delete" mat-icon-button color="accent"
-                        (click)="deleteMultipleItems()"
-                        *ngIf="selectedItems.length > 0 && ready">
-                    <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn">delete</mat-icon>
-                </button>
-                <senergy-sort [sortAttributes]="sortAttributes"
-                              (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-            </div>
-            <div class="main-panel"
-                 infiniteScroll
-                 [infiniteScrollDistance]="1"
-                 [infiniteScrollThrottle]="50"
-                 [scrollWindow]="false"
-                 (scrolled)="onScroll()"
-                 #mainPanel>
-                <div class="layout-margin" fxLayout="column" *ngIf="animationDone" [formGroup]="formGroup">
-                    <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px" formArrayName="repoItems"
-                                   *ngIf="repoItems.length > 0">
-                        <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
-                                       [formGroupName]="i">
-                            <div fxFill>
-                                <img class="widget-image" [src]="item.value.image">
-                            </div>
-                            <mat-grid-tile-footer>
-                                <div fxLayout="column" fxFill>
-                                    <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
-                                        {{item.value.name}}
-                                    </div>
-                                    <div class="truncate footer-item-subtitle"
-                                         matTooltip="{{item.value.date | date:'medium'}}">
-                                        {{item.value.date | date:"medium"}}
-                                    </div>
-                                    <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
-                                        <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
-                                        </mat-checkbox>
-                                        <mat-icon matTooltip="Process is shared" *ngIf="item.value.shared"
-                                                  class="color-sidenav info-icon">share
-                                        </mat-icon>
-                                        <div fxFlex></div>
-                                        <button mat-icon-button color="accent" matTooltip="Edit"
+            <div class="layout-margin">
+                <span class="search-button-container">
+                    <senergy-searchbar></senergy-searchbar>
+                    <div fxLayout="row">
+                        <div fxFlex></div>
+                        <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()"
+                            *ngIf="selectedItems.length > 0 && ready">
+                            <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn">delete</mat-icon>
+                        </button>
+                        <senergy-sort [sortAttributes]="sortAttributes"
+                            (messageEvent)="receiveSortingAttribute($event)">
+                        </senergy-sort>
+                    </div>
+                </span>
+
+                <div infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
+                    [scrollWindow]="false" (scrolled)="onScroll()" #mainPanel class="grid-container">
+                    <div fxLayout="column" *ngIf="animationDone" [formGroup]="formGroup">
+                        <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
+                            formArrayName="repoItems" *ngIf="repoItems.length > 0">
+                            <mat-grid-tile class="mat-elevation-z1"
+                                *ngFor="let item of repoItems.controls, let i = index" [formGroupName]="i">
+                                <div fxFill>
+                                    <img class="widget-image" [src]="item.value.image">
+                                </div>
+                                <mat-grid-tile-footer>
+                                    <div fxLayout="column" fxFill>
+                                        <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
+                                            {{item.value.name}}
+                                        </div>
+                                        <div class="truncate footer-item-subtitle"
+                                            matTooltip="{{item.value.date | date:'medium'}}">
+                                            {{item.value.date | date:"medium"}}
+                                        </div>
+                                        <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
+                                            <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
+                                            </mat-checkbox>
+                                            <mat-icon matTooltip="Process is shared" *ngIf="item.value.shared"
+                                                class="color-sidenav info-icon">share
+                                            </mat-icon>
+                                            <div fxFlex></div>
+                                            <button mat-icon-button color="accent" matTooltip="Edit"
                                                 routerLink="/processes/designer/{{item.value.id}}">
-                                            <mat-icon>edit</mat-icon>
-                                        </button>
-                                        <button mat-icon-button matTooltip="Deploy" color="accent"
+                                                <mat-icon>edit</mat-icon>
+                                            </button>
+                                            <button mat-icon-button matTooltip="Deploy" color="accent"
                                                 (click)="deployProcess(item.value.id)"
                                                 [disabled]="item.value.permissions.x === false">
-                                            <mat-icon>publish</mat-icon>
-                                        </button>
-                                        <button mat-icon-button matTooltip="Delete" color="accent"
+                                                <mat-icon>publish</mat-icon>
+                                            </button>
+                                            <button mat-icon-button matTooltip="Delete" color="accent"
                                                 (click)="deleteProcess(item.value)"
                                                 [disabled]="selectedItems.length > 0">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
+                                                <mat-icon>delete</mat-icon>
+                                            </button>
 
-                                        <button mat-icon-button [matMenuTriggerFor]="processMenu"
-                                                color="accent"
+                                            <button mat-icon-button [matMenuTriggerFor]="processMenu" color="accent"
                                                 matTooltip="More">
-                                            <mat-icon>more_vert</mat-icon>
-                                        </button>
-                                        <mat-menu #processMenu="matMenu" [overlapTrigger]="false">
-                                            <button mat-menu-item (click)="copyProcess(item.value)">
-                                                <mat-icon>content_copy</mat-icon>
-                                                <span>Copy</span>
+                                                <mat-icon>more_vert</mat-icon>
                                             </button>
-                                            <button mat-menu-item (click)="permission(item.value)"
+                                            <mat-menu #processMenu="matMenu" [overlapTrigger]="false">
+                                                <button mat-menu-item (click)="copyProcess(item.value)">
+                                                    <mat-icon>content_copy</mat-icon>
+                                                    <span>Copy</span>
+                                                </button>
+                                                <button mat-menu-item (click)="permission(item.value)"
                                                     [disabled]="item.value.permissions.a === false">
-                                                <mat-icon>share</mat-icon>
-                                                <span>Share</span>
-                                            </button>
-                                            <button mat-menu-item (click)="downloadDiagram(item.value)">
-                                                <mat-icon>cloud_download</mat-icon>
-                                                <span>Download BPMN</span>
-                                            </button>
-                                            <button mat-menu-item (click)="downloadSvg(item.value)">
-                                                <mat-icon>insert_photo</mat-icon>
-                                                <span>Download SVG</span>
-                                            </button>
-                                        </mat-menu>
+                                                    <mat-icon>share</mat-icon>
+                                                    <span>Share</span>
+                                                </button>
+                                                <button mat-menu-item (click)="downloadDiagram(item.value)">
+                                                    <mat-icon>cloud_download</mat-icon>
+                                                    <span>Download BPMN</span>
+                                                </button>
+                                                <button mat-menu-item (click)="downloadSvg(item.value)">
+                                                    <mat-icon>insert_photo</mat-icon>
+                                                    <span>Download SVG</span>
+                                                </button>
+                                            </mat-menu>
+                                        </div>
                                     </div>
-                                </div>
-                            </mat-grid-tile-footer>
-                        </mat-grid-tile>
-                    </mat-grid-list>
-                    <div *ngIf="repoItems.length === 0 && ready">No process models found.</div>
-                    <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
+                                </mat-grid-tile-footer>
+                            </mat-grid-tile>
+                        </mat-grid-list>
+                        <div *ngIf="repoItems.length === 0 && ready">No process models found.</div>
+                        <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
+                    </div>
                 </div>
             </div>
         </mat-tab>
@@ -118,4 +116,3 @@
 <button mat-fab class="fab" matTooltip="Create new process model" routerLink="/processes/designer">
     <mat-icon>add</mat-icon>
 </button>
-

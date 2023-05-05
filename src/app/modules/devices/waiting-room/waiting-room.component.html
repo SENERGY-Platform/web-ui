@@ -16,8 +16,8 @@
 
 
 
-<div class="table-search-container">
-    <span fxLayout="row" class="search-refresh">
+<div class="layout-margin">
+    <span fxLayout="row" class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
 
         <div fxLayout="row">
@@ -34,7 +34,6 @@
     </span>
 
 
-    <div class="layout-margin">
         <div class="mat-elevation-z1" [hidden]="!ready || (devices.length === 0 && ready)">
             <div class="table-container">
                 <table #sort="matSort" mat-table [dataSource]="devicesDataSource" matSort matSortActive="created_at"
@@ -152,7 +151,6 @@
             </div>
             <mat-paginator #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
                 (page)="selectionClear()" showFirstLastButtons></mat-paginator>
-        </div>
         <div *ngIf="devices.length === 0 && ready">No devices found.</div>
     </div>
     <senergy-spinner [show]="!ready"></senergy-spinner>

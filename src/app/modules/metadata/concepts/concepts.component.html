@@ -14,12 +14,15 @@
   ~ limitations under the License.
   -->
 
-<div class="concepts-container table-search-container">
-    <senergy-searchbar></senergy-searchbar>
+<div class="concepts-container layout-margin">
+    <span class="search-button-container">
+        <senergy-searchbar></senergy-searchbar>
+    </span>
+
     <div *ngIf="dataSource.data.length === 0 && ready">No concept found.</div>
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
-    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container">
+    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container table-container-with-button">
 
         <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
             <ng-container matColumnDef="select">
@@ -88,24 +91,24 @@
                         <div fxLayoutAlign="center center">You have
                             selected {{selection.selected.length}} items
                         </div>
-                        <button matTooltip="Delete" mat-icon-button color="accent"
-                                (click)="deleteMultipleItems()">
+                        <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
                             <mat-icon>delete</mat-icon>
                         </button>
                     </div>
                 </th>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
-                [hidden]="selection.selected.length === 0"></tr>
-            <tr mat-header-row *matHeaderRowDef="['select', 'name', 'info', 'edit', 'characteristic', 'delete']; sticky: true">
+            <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0"></tr>
+            <tr mat-header-row
+                *matHeaderRowDef="['select', 'name', 'info', 'edit', 'characteristic', 'delete']; sticky: true">
             </tr>
-            <tr mat-row *matRowDef="let m; columns: ['select', 'name', 'info', 'edit', 'characteristic', 'delete'];"></tr>
+            <tr mat-row *matRowDef="let m; columns: ['select', 'name', 'info', 'edit', 'characteristic', 'delete'];">
+            </tr>
         </table>
     </div>
 
-    <mat-paginator [hidden]="!ready || dataSource.data.length === 0" #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-    showFirstLastButtons></mat-paginator>
+    <mat-paginator [hidden]="!ready || dataSource.data.length === 0" #paginator [length]="totalCount"
+        [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
 </div>
 
 

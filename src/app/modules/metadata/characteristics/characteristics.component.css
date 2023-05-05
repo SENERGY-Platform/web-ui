@@ -15,19 +15,11 @@
  */
 
 
-.layout-margin {
-    margin: 8px;
-}
-
 .mat-column-action {
     text-align: right;
     justify-content: flex-end;
 }
 
-.background {
-    width: 100%;
-    height: 198px;
-}
 
 .device-icon {
     top: 40px;

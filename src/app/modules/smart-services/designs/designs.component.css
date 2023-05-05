@@ -34,15 +34,6 @@
     height: 100%;
 }
 
-.main-panel {
-    height: calc(100% - 106px);
-    overflow-y: auto;
-}
-
-.layout-margin {
-    margin: 8px;
-}
-
 mat-grid-tile {
     background: whitesmoke !important;
     transition: box-shadow 280ms cubic-bezier(.4,0,.2,1);

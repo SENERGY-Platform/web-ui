@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-.layout-margin {
-    margin: 8px;
-}
-
 .truncate {
     white-space: nowrap;
     overflow: hidden;

@@ -14,11 +14,11 @@
   ~ limitations under the License.
   -->
 
-<div fxLayout="column">
-    <senergy-searchbar fxFlex></senergy-searchbar>
-</div>
-
 <div class="layout-margin">
+    <span class="search-button-container">
+        <senergy-searchbar></senergy-searchbar>
+    </span>
+
     <div class="mat-elevation-z1" [hidden]="!ready || (operators.length === 0 && ready)">
         <div class="table-container">
             <table #sort="matSort" mat-table [dataSource]="operatorsDataSource" matSort

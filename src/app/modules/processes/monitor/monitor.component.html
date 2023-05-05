@@ -15,214 +15,229 @@
   -->
 <div class="monitor-container">
     <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight="true"
-                   (selectedIndexChange)="setTabIndex($event)"
-                   (animationDone)="animationDone()"
-                   [(selectedIndex)]="activeIndex">
+        (selectedIndexChange)="setTabIndex($event)" (animationDone)="animationDone()" [(selectedIndex)]="activeIndex">
         <mat-tab label="Running">
-            <div fxLayout="column">
-                <senergy-searchbar fxFlex [disable]="selectedDeployment !== null"></senergy-searchbar>
-                <div fxLayout="row">
-                    <div fxFlex></div>
-                    <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment" color="accent">
-                        <mat-icon>device_hub</mat-icon>
-                    </button>
-                    <mat-menu #deploymentEnvironment="matMenu">
-                        <button mat-menu-item [ngClass]="{'hub-selected': !hub}" (click)="selectHubWithReload(null)">Senergy-Platform</button>
-                        <button mat-menu-item *ngFor="let h of hubList" [ngClass]="{'hub-selected': hub?.id === h.id}" (click)="selectHubWithReload(h)">{{h.name}}</button>
-                    </mat-menu>
-                    <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
-                        <mat-chip [removable]="true" (removed)="removeChip()" color="accent"
-                                  selected>{{selectedDeployment.name}}
-                            <mat-icon matChipRemove>cancel</mat-icon>
-                        </mat-chip>
-                    </mat-chip-list>
-                </div>
-            </div>
-
             <div class="layout-margin">
-                <div class="mat-elevation-z1" [hidden]="animation || isLoadingResultsRunning || totalCountRunning === 0">
-                    <div class="table-container">
-                        <table #sortRunning="matSort"  mat-table [dataSource]="dataSourceRunning" matSort matSortActive="startTime"
-                               matSortDirection="desc" matSortDisableClear>
-                            <ng-container matColumnDef="select">
-                                <th mat-header-cell *matHeaderCellDef>
-                                    <mat-checkbox (change)="$event ? masterToggleRunning() : null"
-                                                  [checked]="selectionRunning.hasValue() && isAllSelectedRunning()"
-                                                  [indeterminate]="selectionRunning.hasValue() && !isAllSelectedRunning()">
-                                    </mat-checkbox>
-                                </th>
-                                <td mat-cell *matCellDef="let row">
-                                    <mat-checkbox (click)="$event.stopPropagation()"
-                                                  (change)="$event ? selectionRunning.toggle(row) : null"
-                                                  [checked]="selectionRunning.isSelected(row)">
-                                    </mat-checkbox>
-                                </td>
-                            </ng-container>
-                            <ng-container matColumnDef="definitionName">
-                                <th mat-header-cell *matHeaderCellDef mat-sort-header>Process</th>
-                                <td mat-cell *matCellDef="let element"> {{element.processDefinitionName}} </td>
-                            </ng-container>
+                <span class="search-button-container">
+                    <senergy-searchbar [disable]="selectedDeployment !== null"></senergy-searchbar>
+                    <div fxLayout="row">
+                        <div fxFlex></div>
+                        <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment"
+                            matTooltip="Deployment Environment" color="accent">
+                            <mat-icon>device_hub</mat-icon>
+                        </button>
+                        <mat-menu #deploymentEnvironment="matMenu">
+                            <button mat-menu-item [ngClass]="{'hub-selected': !hub}"
+                                (click)="selectHubWithReload(null)">Senergy-Platform</button>
+                            <button mat-menu-item *ngFor="let h of hubList"
+                                [ngClass]="{'hub-selected': hub?.id === h.id}"
+                                (click)="selectHubWithReload(h)">{{h.name}}</button>
+                        </mat-menu>
+                        <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
+                            <mat-chip [removable]="true" (removed)="removeChip()" color="accent" selected>
+                                {{selectedDeployment.name}}
+                                <mat-icon matChipRemove>cancel</mat-icon>
+                            </mat-chip>
+                        </mat-chip-list>
+                    </div>
+                </span>
 
-                            <ng-container matColumnDef="id">
-                                <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-                                <td mat-cell *matCellDef="let element"> {{element.id}} </td>
-                            </ng-container>
+                <div>
+                    <div class="mat-elevation-z1"
+                        [hidden]="animation || isLoadingResultsRunning || totalCountRunning === 0">
+                        <div class="table-container">
+                            <table #sortRunning="matSort" mat-table [dataSource]="dataSourceRunning" matSort
+                                matSortActive="startTime" matSortDirection="desc" matSortDisableClear>
+                                <ng-container matColumnDef="select">
+                                    <th mat-header-cell *matHeaderCellDef>
+                                        <mat-checkbox (change)="$event ? masterToggleRunning() : null"
+                                            [checked]="selectionRunning.hasValue() && isAllSelectedRunning()"
+                                            [indeterminate]="selectionRunning.hasValue() && !isAllSelectedRunning()">
+                                        </mat-checkbox>
+                                    </th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-checkbox (click)="$event.stopPropagation()"
+                                            (change)="$event ? selectionRunning.toggle(row) : null"
+                                            [checked]="selectionRunning.isSelected(row)">
+                                        </mat-checkbox>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="definitionName">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Process</th>
+                                    <td mat-cell *matCellDef="let element"> {{element.processDefinitionName}} </td>
+                                </ng-container>
 
-                            <ng-container matColumnDef="startTime">
-                                <th mat-header-cell *matHeaderCellDef mat-sort-header>Start time</th>
-                                <td mat-cell *matCellDef="let element"> {{element.startTime | date:'short'}} </td>
-                            </ng-container>
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+                                    <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+                                </ng-container>
 
-                            <ng-container matColumnDef="action">
-                                <th mat-header-cell *matHeaderCellDef>Action</th>
-                                <td mat-cell *matCellDef="let element">
-                                    <button matTooltip="Stop" mat-icon-button color="accent" (click)="stop(element)">
-                                        <mat-icon>stop</mat-icon>
-                                    </button>
-                                </td>
-                            </ng-container>
-                            <ng-container matColumnDef="header-delete-all">
-                                <th mat-header-cell *matHeaderCellDef colspan="8">
-                                    <div fxLayout="row">
-                                        <div fxLayoutAlign="center center">You have
-                                            selected {{selectionRunning.selected.length}} items
-                                        </div>
+                                <ng-container matColumnDef="startTime">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Start time</th>
+                                    <td mat-cell *matCellDef="let element"> {{element.startTime | date:'short'}} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef>Action</th>
+                                    <td mat-cell *matCellDef="let element">
                                         <button matTooltip="Stop" mat-icon-button color="accent"
-                                                (click)="deleteMultipleItemsRunning()">
+                                            (click)="stop(element)">
                                             <mat-icon>stop</mat-icon>
                                         </button>
-                                    </div>
-                                </th>
-                            </ng-container>
-                            <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
-                                [hidden]="selectionRunning.selected.length === 0"></tr>
-                            <tr mat-header-row *matHeaderRowDef="displayedColumnsRunning"></tr>
-                            <tr mat-row *matRowDef="let row; columns: displayedColumnsRunning;"></tr>
-                        </table>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="header-delete-all">
+                                    <th mat-header-cell *matHeaderCellDef colspan="8">
+                                        <div fxLayout="row">
+                                            <div fxLayoutAlign="center center">You have
+                                                selected {{selectionRunning.selected.length}} items
+                                            </div>
+                                            <button matTooltip="Stop" mat-icon-button color="accent"
+                                                (click)="deleteMultipleItemsRunning()">
+                                                <mat-icon>stop</mat-icon>
+                                            </button>
+                                        </div>
+                                    </th>
+                                </ng-container>
+                                <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
+                                    [hidden]="selectionRunning.selected.length === 0"></tr>
+                                <tr mat-header-row *matHeaderRowDef="displayedColumnsRunning"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumnsRunning;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator #paginatorRunning [length]="totalCountRunning" [pageSize]="20"
+                            [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
                     </div>
-                    <mat-paginator #paginatorRunning [length]="totalCountRunning" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
-                                   showFirstLastButtons></mat-paginator>
+                    <div *ngIf="!animation && !isLoadingResultsRunning && totalCountRunning === 0">No entries found.
+                    </div>
                 </div>
-                <div *ngIf="!animation && !isLoadingResultsRunning && totalCountRunning === 0">No entries found.</div>
             </div>
         </mat-tab>
         <mat-tab label="Finished">
-            <div fxLayout="column">
-                <senergy-searchbar fxFlex [disable]="selectedDeployment !== null"></senergy-searchbar>
-                <div fxLayout="row">
-                    <div fxFlex></div>
-                    <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment" color="accent">
-                        <mat-icon>device_hub</mat-icon>
-                    </button>
-                    <mat-menu #deploymentEnvironment="matMenu">
-                        <button mat-menu-item (click)="selectHubWithReload(null)">Senergy-Platform</button>
-                        <button mat-menu-item *ngFor="let hub of hubList" (click)="selectHubWithReload(hub)">{{hub.name}}</button>
-                    </mat-menu>
-                    <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
-                        <mat-chip [removable]="true" (removed)="removeChip()" color="accent"
-                                  selected>{{selectedDeployment.name}}
-                            <mat-icon matChipRemove>cancel</mat-icon>
-                        </mat-chip>
-                    </mat-chip-list>
-                </div>
-            </div>
-
             <div class="layout-margin">
-                <div class="mat-elevation-z1" [hidden]="animation || isLoadingResultsFinished || totalCountFinished === 0">
-                    <div class="table-container">
-                        <table #sortFinished="matSort" mat-table [dataSource]="dataSourceFinished" matSort matSortActive="startTime"
-                               matSortDirection="desc" matSortDisableClear>
+                <div class="search-button-container">
+                    <senergy-searchbar fxFlex [disable]="selectedDeployment !== null"></senergy-searchbar>
+                    <div fxLayout="row">
+                        <div fxFlex></div>
+                        <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment"
+                            matTooltip="Deployment Environment" color="accent">
+                            <mat-icon>device_hub</mat-icon>
+                        </button>
+                        <mat-menu #deploymentEnvironment="matMenu">
+                            <button mat-menu-item (click)="selectHubWithReload(null)">Senergy-Platform</button>
+                            <button mat-menu-item *ngFor="let hub of hubList"
+                                (click)="selectHubWithReload(hub)">{{hub.name}}</button>
+                        </mat-menu>
+                        <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
+                            <mat-chip [removable]="true" (removed)="removeChip()" color="accent" selected>
+                                {{selectedDeployment.name}}
+                                <mat-icon matChipRemove>cancel</mat-icon>
+                            </mat-chip>
+                        </mat-chip-list>
+                    </div>
+                </div>
 
-                            <ng-container matColumnDef="select">
-                                <th mat-header-cell *matHeaderCellDef>
-                                    <mat-checkbox (change)="$event ? masterToggle() : null"
-                                                  [checked]="selection.hasValue() && isAllSelected()"
-                                                  [indeterminate]="selection.hasValue() && !isAllSelected()">
-                                    </mat-checkbox>
-                                </th>
-                                <td mat-cell *matCellDef="let row">
-                                    <mat-checkbox (click)="$event.stopPropagation()"
-                                                  (change)="$event ? selection.toggle(row) : null"
-                                                  [checked]="selection.isSelected(row)">
-                                    </mat-checkbox>
-                                </td>
-                            </ng-container>
 
-                            <ng-container matColumnDef="definitionName">
-                                <th mat-header-cell *matHeaderCellDef mat-sort-header>Process</th>
-                                <td mat-cell *matCellDef="let element"> {{element.processDefinitionName}} </td>
-                            </ng-container>
+                <div>
+                    <div class="mat-elevation-z1"
+                        [hidden]="animation || isLoadingResultsFinished || totalCountFinished === 0">
+                        <div class="table-container">
+                            <table #sortFinished="matSort" mat-table [dataSource]="dataSourceFinished" matSort
+                                matSortActive="startTime" matSortDirection="desc" matSortDisableClear>
 
-                            <ng-container matColumnDef="id">
-                                <th mat-header-cell *matHeaderCellDef>ID</th>
-                                <td mat-cell *matCellDef="let element"> {{element.id}} </td>
-                            </ng-container>
+                                <ng-container matColumnDef="select">
+                                    <th mat-header-cell *matHeaderCellDef>
+                                        <mat-checkbox (change)="$event ? masterToggle() : null"
+                                            [checked]="selection.hasValue() && isAllSelected()"
+                                            [indeterminate]="selection.hasValue() && !isAllSelected()">
+                                        </mat-checkbox>
+                                    </th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-checkbox (click)="$event.stopPropagation()"
+                                            (change)="$event ? selection.toggle(row) : null"
+                                            [checked]="selection.isSelected(row)">
+                                        </mat-checkbox>
+                                    </td>
+                                </ng-container>
 
-                            <ng-container matColumnDef="startTime">
-                                <th mat-header-cell *matHeaderCellDef mat-sort-header>Start time</th>
-                                <td mat-cell *matCellDef="let element"> {{element.startTime | date:'short'}} </td>
-                            </ng-container>
+                                <ng-container matColumnDef="definitionName">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Process</th>
+                                    <td mat-cell *matCellDef="let element"> {{element.processDefinitionName}} </td>
+                                </ng-container>
 
-                            <ng-container matColumnDef="endTime">
-                                <th mat-header-cell *matHeaderCellDef mat-sort-header>End time</th>
-                                <td mat-cell *matCellDef="let element"> {{element.endTime | date:'short'}} </td>
-                            </ng-container>
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef>ID</th>
+                                    <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+                                </ng-container>
 
-                            <ng-container matColumnDef="duration">
-                                <th mat-header-cell *matHeaderCellDef mat-sort-header>Duration</th>
-                                <td mat-cell *matCellDef="let element"> {{element.durationInMillis / 1000}} </td>
-                            </ng-container>
+                                <ng-container matColumnDef="startTime">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Start time</th>
+                                    <td mat-cell *matCellDef="let element"> {{element.startTime | date:'short'}} </td>
+                                </ng-container>
 
-                            <ng-container matColumnDef="info">
-                                <th mat-header-cell *matHeaderCellDef>Details</th>
-                                <td mat-cell *matCellDef="let element">
-                                    <button mat-icon-button matTooltip="Details" [ngClass]="{'mat-warn': element.state !== 'COMPLETED'}" [disabled]="element.state === 'COMPLETED'"
+                                <ng-container matColumnDef="endTime">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>End time</th>
+                                    <td mat-cell *matCellDef="let element"> {{element.endTime | date:'short'}} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="duration">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Duration</th>
+                                    <td mat-cell *matCellDef="let element"> {{element.durationInMillis / 1000}} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="info">
+                                    <th mat-header-cell *matHeaderCellDef>Details</th>
+                                    <td mat-cell *matCellDef="let element">
+                                        <button mat-icon-button matTooltip="Details"
+                                            [ngClass]="{'mat-warn': element.state !== 'COMPLETED'}"
+                                            [disabled]="element.state === 'COMPLETED'"
                                             (click)="openDetailsDialog(element.id)">
-                                        <mat-icon>info</mat-icon>
-                                    </button>
-                                </td>
-                            </ng-container>
+                                            <mat-icon>info</mat-icon>
+                                        </button>
+                                    </td>
+                                </ng-container>
 
-                            <ng-container matColumnDef="delete">
-                                <th mat-header-cell *matHeaderCellDef>Action</th>
-                                <td mat-cell *matCellDef="let element">
-                                    <button matTooltip="Delete" mat-icon-button color="accent"
+                                <ng-container matColumnDef="delete">
+                                    <th mat-header-cell *matHeaderCellDef>Action</th>
+                                    <td mat-cell *matCellDef="let element">
+                                        <button matTooltip="Delete" mat-icon-button color="accent"
                                             [disabled]="selection.selected.length > 0"
                                             (click)="deleteSingleItem(element)">
-                                        <mat-icon>delete</mat-icon>
-                                    </button>
-                                </td>
-                            </ng-container>
-
-                            <ng-container matColumnDef="header-delete-all">
-                                <th mat-header-cell *matHeaderCellDef colspan="8">
-                                    <div fxLayout="row">
-                                        <div fxLayoutAlign="center center">You have
-                                            selected {{selection.selected.length}} items
-                                        </div>
-                                        <button matTooltip="Delete" mat-icon-button color="accent"
-                                                (click)="deleteMultipleItems()">
                                             <mat-icon>delete</mat-icon>
                                         </button>
-                                    </div>
-                                </th>
-                            </ng-container>
+                                    </td>
+                                </ng-container>
 
-                            <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
-                                [hidden]="selection.selected.length === 0"></tr>
-                            <tr mat-header-row *matHeaderRowDef="displayedColumnsFinished"></tr>
-                            <tr mat-row *matRowDef="let row; columns: displayedColumnsFinished;"></tr>
-                        </table>
+                                <ng-container matColumnDef="header-delete-all">
+                                    <th mat-header-cell *matHeaderCellDef colspan="8">
+                                        <div fxLayout="row">
+                                            <div fxLayoutAlign="center center">You have
+                                                selected {{selection.selected.length}} items
+                                            </div>
+                                            <button matTooltip="Delete" mat-icon-button color="accent"
+                                                (click)="deleteMultipleItems()">
+                                                <mat-icon>delete</mat-icon>
+                                            </button>
+                                        </div>
+                                    </th>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
+                                    [hidden]="selection.selected.length === 0"></tr>
+                                <tr mat-header-row *matHeaderRowDef="displayedColumnsFinished"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumnsFinished;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator #paginatorFinished [length]="totalCountFinished" [pageSize]="20"
+                            [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear()" showFirstLastButtons>
+                        </mat-paginator>
                     </div>
-                    <mat-paginator #paginatorFinished [length]="totalCountFinished" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear()"
-                                   showFirstLastButtons></mat-paginator>
+                    <div *ngIf="!animation && !isLoadingResultsFinished && totalCountFinished === 0">No entries found.
+                    </div>
                 </div>
-                <div *ngIf="!animation && !isLoadingResultsFinished && totalCountFinished === 0">No entries found.</div>
             </div>
         </mat-tab>
     </mat-tab-group>
 </div>
-<senergy-spinner [elementCount]="0" [show]="animation || isLoadingResultsFinished || isLoadingResultsRunning"></senergy-spinner>
-
-
-
+<senergy-spinner [elementCount]="0" [show]="animation || isLoadingResultsFinished || isLoadingResultsRunning">
+</senergy-spinner>

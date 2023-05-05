@@ -14,22 +14,24 @@
   ~ limitations under the License.
   -->
 
-<div class="flow-repo-container">
+<div class="flow-repo-container layout-margin">
     <div fxLayout="column">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <div fxLayout="row">
-            <div fxFlex=""></div>
-            <button matTooltip="Show shared" mat-icon-button (click)="showSharedChanged()"
-                    *ngIf="!this.showShared">
-                <mat-icon>share</mat-icon>
-            </button>
-            <button matTooltip="Hide shared" mat-icon-button color="accent" (click)="showSharedChanged()"
-                    *ngIf="this.showShared">
-                <mat-icon>share</mat-icon>
-            </button>
-            <senergy-sort [sortAttributes]="sortAttributes"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
+        <span class="search-button-container">
+            <senergy-searchbar></senergy-searchbar>
+            <div fxLayout="row">
+                <div fxFlex=""></div>
+                <button matTooltip="Show shared" mat-icon-button (click)="showSharedChanged()"
+                        *ngIf="!this.showShared">
+                    <mat-icon>share</mat-icon>
+                </button>
+                <button matTooltip="Hide shared" mat-icon-button color="accent" (click)="showSharedChanged()"
+                        *ngIf="this.showShared">
+                    <mat-icon>share</mat-icon>
+                </button>
+                <senergy-sort [sortAttributes]="sortAttributes"
+                              (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+            </div>
+        </span>
     </div>
     <div class="flow-repo-scroll">
         <div infiniteScroll
@@ -38,7 +40,7 @@
              [infiniteScrollContainer]="'.flow-repo-scroll'"
              [fromRoot]="true"
              (scrolled)="onScroll()">
-            <div class="layout-margin" fxLayout="column">
+            <div fxLayout="column">
                 <mat-grid-list cols="{{gridCols}}" rowHeight="302px" gutterSize="16px"
                                *ngIf="flows.length > 0">
                     <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of flows">

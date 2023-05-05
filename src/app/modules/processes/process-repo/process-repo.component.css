@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-.process-repo-container ::ng-deep .mat-tab-body-content {
-    overflow: hidden;
+ .process-repo-container ::ng-deep .mat-tab-body-content {
+    overflow: auto;
 }
 
 .process-repo-container ::ng-deep .mat-tab-body-wrapper {
@@ -24,15 +24,6 @@
 
 .process-repo-container ::ng-deep .mat-tab-header {
     min-height: 54px;
-}
-
-.main-panel {
-    height: calc(100% - 106px);
-    overflow-y: auto;
-}
-
-.layout-margin {
-    margin: 8px;
 }
 
 mat-grid-tile {

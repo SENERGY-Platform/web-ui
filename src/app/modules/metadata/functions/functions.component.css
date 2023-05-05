@@ -15,10 +15,6 @@
  */
 
 
-.layout-margin {
-    margin: 8px;
-}
-
 .mat-column-action {
     text-align: right;
     justify-content: flex-end;

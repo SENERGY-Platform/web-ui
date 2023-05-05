@@ -16,10 +16,9 @@
  *
  */
 
- .outer {
-    margin: 50px 100px;
-    padding-bottom: 100px;
-}
+ .layout-margin {
+     margin: 50px 150px;
+ }
 
 .service-container {
     grid-template-columns: repeat(auto-fit, minmax(33%, 1fr));
@@ -70,6 +69,3 @@ mat-card-actions {
     margin-left: 15px;
 }
 
-.card-container {
-    overflow-y: auto;
-}

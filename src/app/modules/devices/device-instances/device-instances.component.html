@@ -14,8 +14,8 @@
   ~ limitations under the License.
   -->
 
-<div class="device-instance-container table-search-container">
-    <span fxLayout="row" class="search-refresh">
+<div class="device-instance-container layout-margin">
+    <span fxLayout="row" class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
 
         <div fxLayout="row">
@@ -51,7 +51,7 @@
     <div *ngIf="dataSource.data.length === 0 && ready">No devices found.</div>
     <senergy-spinner [show]="!ready"></senergy-spinner>
 
-    <div [hidden]="!ready || dataSource.data.length === 0" class="table-container-with-button table-container">
+    <div [hidden]="!ready || dataSource.data.length === 0" class="table-container">
 
         <table mat-table [dataSource]="dataSource" matSort matSortActive="display_name" matSortDirection="asc">
             <ng-container matColumnDef="select">

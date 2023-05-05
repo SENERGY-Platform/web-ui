@@ -14,13 +14,15 @@
     ~ limitations under the License.
     -->
 
-<div class="functions-container table-search-container">
-    <senergy-searchbar></senergy-searchbar>
+<div class="functions-container layout-margin">
+    <span class="search-button-container">
+        <senergy-searchbar></senergy-searchbar>
+    </span>
     <div *ngIf="dataSource.data.length === 0 && ready">No functions found.</div>
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
 
-    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container">
+    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container table-container-with-button">
         <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
             <ng-container matColumnDef="select">
                 <th mat-header-cell *matHeaderCellDef class="button-column">

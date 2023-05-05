@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-.layout-margin {
-    margin: 8px 8px 8px;
-}
-
 .truncate {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+senergy-searchbar {
+    margin-right: 10px;
+}
+
+mat-form-field {
+    margin-bottom: -1.25em;
 }
 
 .warning-icon {

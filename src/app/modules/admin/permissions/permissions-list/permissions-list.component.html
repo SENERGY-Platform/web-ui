@@ -15,11 +15,11 @@
   ~     limitations under the License.
   ~
   -->
-<section *ngIf="userIsAdmin" class="outer" fxLayout="column">
+<section *ngIf="userIsAdmin" class="layout-margin">
     <mat-card *ngIf="ready" class="test">
         <mat-card-title>Rule Tester</mat-card-title>
         <mat-card-content>
-            <div fxLayout="row">
+            <div >
                 <mat-form-field>
                     <mat-select (valueChange)="setTestUser($event)" placeholder="User">
                         <mat-option *ngFor="let user of users" [value]="user">
@@ -37,7 +37,7 @@
                 </mat-form-field>
             </div>
 
-            <div fxLayout="row">
+            <div >
                 <mat-form-field>
                     <mat-select (valueChange)="setTestClient($event)" placeholder="Client">
                         <mat-option *ngFor="let client of clients" [value]="client.clientId">
@@ -58,7 +58,7 @@
                 </mat-form-field>
             </div>
 
-            <div fxLayout="row">
+            <div >
                 <mat-checkbox [checked]="testResult.GET" disabled fxFlex>GET</mat-checkbox>
                 <mat-checkbox [checked]="testResult.POST" disabled fxFlex>POST</mat-checkbox>
                 <mat-checkbox [checked]="testResult.PUT" disabled fxFlex>PUT</mat-checkbox>
@@ -81,7 +81,8 @@
             </button>
         </mat-form-field>
     </mat-card>
-    <div class="table-container" fxFlex="auto" *ngIf="ready">
+
+    <div class="table-container-with-button table-container" *ngIf="ready">
         <mat-table #table (matSortChange)="sortData($event)" [dataSource]="sortedData" [hidden]="!ready" matSort>
             <ng-container matColumnDef="select">
                 <th mat-header-cell *matHeaderCellDef>

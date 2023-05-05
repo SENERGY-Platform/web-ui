@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-
-.layout-margin {
-    margin: 8px;
-}
-
 .background {
     background-image: url('/src/img/background_deviceTypes.png');
     background-size: contain;

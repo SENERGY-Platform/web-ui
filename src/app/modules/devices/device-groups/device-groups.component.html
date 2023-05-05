@@ -13,8 +13,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="device-groups-container table-search-container">
-    <span fxLayout="row" class="search-refresh">
+<div class="device-groups-container layout-margin">
+    <span fxLayout="row" class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
 
         <div fxLayout="row">
@@ -33,7 +33,7 @@
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
     <div *ngIf="dataSource.data.length === 0 && ready">No device group found.</div>
 
-    <div [hidden]="!ready || dataSource.data.length === 0" class="table-container">
+    <div [hidden]="!ready || dataSource.data.length === 0" class="table-container table-container-with-button">
 
         <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
             <ng-container matColumnDef="select">

@@ -13,13 +13,15 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="hubs-container table-search-container">
-    <senergy-searchbar></senergy-searchbar>
-    <senergy-spinner [show]="!ready"></senergy-spinner>
+<div class="hubs-container layout-margin">
+    <span class="search-button-container">
+        <senergy-searchbar></senergy-searchbar>
+    </span>
 
+    <senergy-spinner [show]="!ready"></senergy-spinner>
     <div *ngIf="dataSource.data.length === 0 && ready">No network found.</div>
 
-    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container table-container-with-button">
+    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container">
         <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
             <ng-container matColumnDef="select">
                 <th mat-header-cell *matHeaderCellDef class="button-column">
@@ -113,6 +115,6 @@
         </table>
     </div>
 
-    <mat-paginator [hidden]="!ready || dataSource.data.length === 0" #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-    showFirstLastButtons></mat-paginator>
+    <mat-paginator [hidden]="dataSource.data.length === 0" #paginator [length]="totalCount"
+        [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
 </div>

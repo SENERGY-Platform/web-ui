@@ -15,9 +15,6 @@
  */
 
 
-.layout-margin {
-    margin: 8px;
-}
 
 .aspects-container {
     height: calc(100% - 64px);
@@ -57,11 +54,6 @@ ul {
 .nested-tree-inline {
     position: relative;
     top: 0.85em;
-}
-
-.aspects-container {
-    padding-top: 3em;
-    padding-bottom: 5em;
 }
 
 .root-drop-zone {

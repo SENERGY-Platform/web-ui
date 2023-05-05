@@ -15,7 +15,7 @@
   -->
 
 
-<div class="aspects-container" fxLayout="column" cdkDropListGroup>
+<div class="aspects-container layout-margin" fxLayout="column" cdkDropListGroup>
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree">
         <mat-tree-node *matTreeNodeDef="let node" cdkDropList (cdkDropListDropped)="dropped($event, node)">
             <li class="mat-tree-node" fxLayout="row" matTreeNodeToggle cdkDrag

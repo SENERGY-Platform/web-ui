@@ -35,11 +35,6 @@ mat-form-field {
     flex: 1 1 0%;
 }
 
-.outer {
-    margin: 50px 100px;
-    padding-bottom: 100px;
-}
-
 .test {
     margin-bottom: 20px;
 }
