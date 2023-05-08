@@ -46,6 +46,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<ConceptsPermSearchModel>(true, []);
     totalCount = 200;
+    offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     private searchSub: Subscription = new Subscription();
     searchText: string = ""
@@ -77,6 +78,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
 
         this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getConcepts()
         });
     }
@@ -176,10 +178,8 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     }
 
     private getConcepts() {
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
-
         this.conceptsService
-            .getConcepts(this.searchText, this.pageSize, offset, 'name', 'asc')
+            .getConcepts(this.searchText, this.pageSize, this.offset, 'name', 'asc')
             .subscribe((concepts: ConceptsPermSearchModel[]) => {
                 this.dataSource.data = concepts;
                 this.ready = true;
@@ -188,7 +188,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     reload() {
         this.ready = false;
-        this.paginator.pageIndex = 0;
+        this.offset = 0;
         this.selectionClear();
         this.getConcepts();
     }

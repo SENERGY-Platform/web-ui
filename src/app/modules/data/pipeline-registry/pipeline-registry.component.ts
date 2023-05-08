@@ -24,6 +24,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -39,6 +40,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     totalCount = 200;
 
     @ViewChild(MatSort, { static: false }) sort!: MatSort;
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     constructor(
         private pipelineRegistryService: PipelineRegistryService,
@@ -48,19 +50,25 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     ) {}
 
     ngOnInit() {
-        this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
-            this.dataSource.data = resp;
-            this.ready = true;
-        });
+        this.loadPipelines();
     }
 
     ngAfterViewInit() {
         this.sort.sortChange.subscribe(() => {
-            this.ready = false;
-            this.pipelineRegistryService.getPipelines(this.sort.active + ':' + this.sort.direction).subscribe((resp: PipelineModel[]) => {
-                this.dataSource.data = resp;
-                this.ready = true;
-            });
+            this.loadPipelines();
+        });
+
+        this.paginator.page.subscribe(()=>{
+            this.loadPipelines();
+        });
+    }
+
+    loadPipelines() {
+        this.ready = false;
+        this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
+            this.dataSource.data = resp;
+            this.totalCount = resp.length;
+            this.ready = true;
         });
     }
 

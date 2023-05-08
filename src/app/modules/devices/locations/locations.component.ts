@@ -43,6 +43,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
     readonly pageSize = 20;
     instances = [];
     totalCount = 200;
+    offset = 0;
     dataSource = new MatTableDataSource<LocationModel>();
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<LocationModel>(true, []);
@@ -77,6 +78,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort
 
         this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getLocations()
         });
     }
@@ -125,9 +127,8 @@ export class LocationsComponent implements OnInit, OnDestroy {
     }
 
     private getLocations() {
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
         this.locationsService
-            .searchLocations(this.searchText, this.pageSize, offset, 'name', 'asc')
+            .searchLocations(this.searchText, this.pageSize, this.offset, 'name', 'asc')
             .subscribe((locations: LocationModel[]) => {
                 this.dataSource.data = locations;
                 this.ready = true;
@@ -141,7 +142,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
     }
 
     reload() {
-        this.paginator.pageIndex = 0;
+        this.offset = 0;
         this.ready = false;
         this.selectionClear()
         this.getLocations();

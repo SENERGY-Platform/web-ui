@@ -46,6 +46,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<FunctionsPermSearchModel>(true, []);
     totalCount = 200;
+    offset = 0;
     ready = false;
     userIsAdmin = false;
     private searchSub: Subscription = new Subscription();
@@ -75,6 +76,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getFunctions()
         });
     }
@@ -162,10 +164,8 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }
 
     private getFunctions() {
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
-
         this.functionsService
-                .getFunctions(this.searchText, this.pageSize, offset, 'name', 'asc')
+                .getFunctions(this.searchText, this.pageSize, this.offset, 'name', 'asc')
                 .subscribe((functions: FunctionsPermSearchModel[]) => {
                     this.dataSource = new MatTableDataSource(functions);
                     this.dataSource.sort = this.sort;
@@ -175,7 +175,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
     reload() {
         this.ready = false;
-        this.paginator.pageIndex = 0;
+        this.offset = 0;
         this.selectionClear();
         this.getFunctions();
     }

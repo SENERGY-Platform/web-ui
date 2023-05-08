@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit, } from '@angular/core';
+import { Component, OnInit, ViewChild, } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
 import { Sort } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
@@ -28,6 +28,7 @@ import { Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
     selector: 'senergy-import-instances',
@@ -36,6 +37,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 })
 export class ImportInstancesComponent implements OnInit {
     dataSource = new MatTableDataSource<ImportInstancesModel>();
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     constructor(
         private importInstancesService: ImportInstancesService,
@@ -47,6 +49,8 @@ export class ImportInstancesComponent implements OnInit {
     ) {}
 
     searchText: string = ""
+    readonly pageSize = 20;
+    totalCount = 200;
     selection = new SelectionModel<ImportInstancesModel>(true, []);
     searchSub: Subscription = new Subscription()    
     dataReady = false;
@@ -65,6 +69,13 @@ export class ImportInstancesComponent implements OnInit {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
+        });
+    }
+
+    ngAfterViewInit(): void {
+        this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.load();
         });
     }
 

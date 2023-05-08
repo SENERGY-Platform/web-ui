@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ImportTypePermissionSearchModel} from './shared/import-types.model';
 import {ImportTypesService} from './shared/import-types.service';
 import {Sort} from '@angular/material/sort';
@@ -28,6 +28,7 @@ import { Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
     selector: 'senergy-import-types',
@@ -35,13 +36,16 @@ import { SelectionModel } from '@angular/cdk/collections';
     styleUrls: ['./import-types.component.css'],
 })
 export class ImportTypesComponent implements OnInit {
+    readonly pageSize = 20;
     dataSource = new MatTableDataSource<ImportTypePermissionSearchModel>();
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<ImportTypePermissionSearchModel>(true, []);
     dataReady = false;
     sort = 'name.asc';
     searchText: string = ""
     searchSub: Subscription = new Subscription()
     limitInit = 100;
+    totalCount = 200;
     limit = this.limitInit;
     offset = 0;
 
@@ -58,6 +62,13 @@ export class ImportTypesComponent implements OnInit {
     ngOnInit(): void {
         this.load();
         this.initSearch();
+    }
+
+    ngAfterViewInit(): void {
+        this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.load();
+        });
     }
 
     private initSearch() {

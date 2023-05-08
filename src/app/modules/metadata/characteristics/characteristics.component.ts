@@ -45,6 +45,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<CharacteristicsPermSearchModel>(true, []);
     totalCount = 200;
+    offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     routerConcept: ConceptsPermSearchModel | null = null;
     selectedTag = '';
@@ -80,6 +81,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
 
         this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getCharacteristics()
         });
     }
@@ -196,13 +198,11 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     private getCharacteristics() {
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
-
         if (this.routerConcept !== null) {
             this.selectedTag = this.routerConcept.name;
         }
         this.characteristicsService
-            .getCharacteristics(this.searchText, this.pageSize, offset, 'name', 'asc', this.routerConcept?.characteristic_ids || [])
+            .getCharacteristics(this.searchText, this.pageSize, this.offset, 'name', 'asc', this.routerConcept?.characteristic_ids || [])
             .subscribe((characteristics: CharacteristicsPermSearchModel[]) => {
                 this.setCharacteristics(characteristics);
             });
@@ -225,7 +225,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
     reload() {
         this.ready = false;
-        this.paginator.pageIndex = 0;
+        this.offset = 0;
         this.selectionClear();
         this.getCharacteristics();
     }

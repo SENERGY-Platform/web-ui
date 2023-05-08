@@ -51,6 +51,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userIsAdmin = false;
     searchText: string = ""
+    offset = 0;
     private searchSub: Subscription = new Subscription();
 
     constructor(
@@ -79,6 +80,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceClasses()
         });
     }
@@ -155,10 +157,8 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     }
 
     private getDeviceClasses() {
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
-
         this.deviceClassesService
-            .getDeviceClasses(this.searchText, this.pageSize, offset, "name", "asc")
+            .getDeviceClasses(this.searchText, this.pageSize, this.offset, "name", "asc")
             .subscribe((deviceClasses: DeviceClassesPermSearchModel[]) => {
                 this.dataSource = new MatTableDataSource(deviceClasses);
                 this.dataSource.sort = this.sort;
@@ -167,7 +167,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     }
 
     reload() {
-        this.paginator.pageIndex = 0;
+        this.offset = 0;
         this.ready = false;
         this.selectionClear();
         this.getDeviceClasses()

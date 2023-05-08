@@ -94,6 +94,7 @@ export class DeviceInstancesComponent implements OnInit {
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<DeviceInstancesModel>(true, []);
     totalCount = 200;
+    offset = 0;
     ready = false;
     searchText: string = ""
 
@@ -126,6 +127,7 @@ export class DeviceInstancesComponent implements OnInit {
         };
         
         this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load()
         });
     }
@@ -138,9 +140,8 @@ export class DeviceInstancesComponent implements OnInit {
     }
 
     private load() {
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
-
         this.ready = false;
+
         if (this.routerLocation !== null) {
             this.selectedTag = this.routerLocation.id;
             this.selectedTagTransformed = this.routerLocation.name;
@@ -153,7 +154,7 @@ export class DeviceInstancesComponent implements OnInit {
             this.deviceInstancesService
                 .getDeviceInstancesByHubId(
                     this.pageSize,
-                    offset,
+                    this.offset,
                     'display_name',
                     'asc',
                     this.routerNetwork.id,
@@ -166,7 +167,7 @@ export class DeviceInstancesComponent implements OnInit {
             this.selectedTag = this.routerDeviceType.name;
             this.selectedTagTransformed = this.routerDeviceType.name;
             this.deviceInstancesService
-                .getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.pageSize, offset, 'display_name', 'asc', null)
+                .getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.pageSize, this.offset, 'display_name', 'asc', null)
                 .subscribe((deviceInstances) => {
                     this.setDevices(deviceInstances);
                 });
@@ -175,7 +176,7 @@ export class DeviceInstancesComponent implements OnInit {
             this.deviceInstancesService
                 .getDeviceInstances(
                     this.pageSize,
-                    offset,
+                    this.offset,
                     'display_name',
                     'asc',
                     this.searchText,
@@ -250,7 +251,7 @@ export class DeviceInstancesComponent implements OnInit {
     }
 
     reload() {
-        this.paginator.pageIndex = 0;
+        this.offset = 0;
         this.ready = false;
         this.selectionClear();
         this.load();

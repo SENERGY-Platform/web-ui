@@ -48,6 +48,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<DeviceTypePermSearchModel>(true, []);
     totalCount = 200
+    offset = 0;
     searchControl = new UntypedFormControl('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
@@ -81,6 +82,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceTypes()
         });
     }
@@ -157,10 +159,8 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     private getDeviceTypes() {
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
-
         this.deviceTypeService
-            .getDeviceTypes(this.searchText, this.pageSize, offset, "name", "asc")
+            .getDeviceTypes(this.searchText, this.pageSize, this.offset, "name", "asc")
             .subscribe((deviceTypes: DeviceTypePermSearchModel[]) => {
                 this.dataSource.data = deviceTypes;
                 this.ready = true;
@@ -169,7 +169,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
 
 
     private reload() {
-        this.paginator.pageIndex = 0;
+        this.offset = 0;
         this.ready = false;
         this.getDeviceTypes();
     }

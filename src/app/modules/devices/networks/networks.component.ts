@@ -49,6 +49,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
     selection = new SelectionModel<NetworksModel>(true, []);
     searchText: string = ""
     totalCount = 200;
+    offset = 0;
     ready = false;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
@@ -100,6 +101,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
 
         this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getNetworks()
         });
     }
@@ -135,10 +137,9 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     private getNetworks() {
         this.ready = false;
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
 
         this.networksService
-            .searchNetworks(this.searchText, this.pageSize, offset, 'name', 'asc')
+            .searchNetworks(this.searchText, this.pageSize, this.offset, 'name', 'asc')
             .subscribe((networks: NetworksModel[]) => {
                 this.dataSource.data = networks;
                 this.ready = true;
@@ -146,7 +147,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     reload() {
-        this.paginator.pageIndex = 0;
+        this.offset = 0;
         this.ready = false;
         this.selectionClear();
         this.getNetworks();

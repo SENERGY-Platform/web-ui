@@ -44,6 +44,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
+    offset = 0;
     searchText: string = ""
 
     private searchSub: Subscription = new Subscription();
@@ -73,6 +74,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceGroups()
         });
     }
@@ -141,10 +143,9 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     }
 
     private getDeviceGroups() {
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
-        let query =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.pageSize, offset, 'name', 'asc');
+        let query =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.pageSize, this.offset, 'name', 'asc');
         if(this.hideGenerated) {
-            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.pageSize, offset, 'name', 'asc');
+            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.pageSize, this.offset, 'name', 'asc');
         }
 
         query.subscribe((deviceGroups: DeviceGroupsPermSearchModel[]) => {
@@ -154,7 +155,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
     }
 
     public reload() {
-        this.paginator.pageIndex = 0;
+        this.offset = 0;
         this.ready = false;
         this.selectionClear();
         this.getDeviceGroups();
