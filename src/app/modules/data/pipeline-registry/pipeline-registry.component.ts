@@ -25,6 +25,8 @@ import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
+import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { pipe, Subscription } from 'rxjs';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -38,6 +40,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     displayedColumns: string[] = ['select', 'id', 'name', 'createdat', 'updatedat', 'info', 'edit', 'delete'];
     selection = new SelectionModel<PipelineModel>(true, []);
     totalCount = 200;
+    searchSub: Subscription = new Subscription();
 
     @ViewChild(MatSort, { static: false }) sort!: MatSort;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -46,11 +49,27 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         private pipelineRegistryService: PipelineRegistryService,
         private flowEngineService: FlowEngineService,
         public snackBar: MatSnackBar,
+        private searchbarService: SearchbarService,
         private dialogsService: DialogsService,
     ) {}
 
     ngOnInit() {
-        this.loadPipelines();
+        this.initSearch();
+    }
+
+    initSearch() {
+        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+            this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
+                if(searchText != ""){
+                    this.dataSource.data = resp.filter(pipeline => (pipeline.name.search(searchText) != -1))
+                    console.log(this.dataSource.data)
+                } else {
+                    this.dataSource.data = resp
+                }
+
+                this.ready = true;
+            })
+        })
     }
 
     ngAfterViewInit() {
