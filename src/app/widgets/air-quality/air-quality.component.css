@@ -39,6 +39,7 @@
 
 .icon {
     font-size: 150px;
+    line-height: 150px;
     margin-bottom: 70px;
     padding-left: calc(50% - 75px);
 }
@@ -46,6 +47,7 @@
 .text {
     /*font-size: 18px;*/
     text-align: center;
+    margin-top: 30px;
 }
 
 .right{

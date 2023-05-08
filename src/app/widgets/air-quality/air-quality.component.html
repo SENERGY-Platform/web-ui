@@ -23,7 +23,7 @@
                  [matTooltipShowDelay]="500"
                  fxLayout="column" fxLayoutAlign="space-evenly center" style="height: 100%">
                 <div *ngIf="pros.length === 0" style="width: 100%">
-                    <button mat-icon-button class="icon color-accent" (click)="clicked()">
+                    <button mat-icon-button disableRipple class="icon color-accent" (click)="clicked()">
                         <mat-icon [inline]="true">sentiment_very_satisfied</mat-icon>
                     </button>
                     <div class="text color-accent" [fittext] [maxFontSize]="24">
@@ -31,7 +31,7 @@
                     </div>
                 </div>
                 <div *ngIf="pros.length > 0 && cons.length > 0" style="width: 100%">
-                    <button mat-icon-button class="icon color-accent" (click)="clicked()">
+                    <button mat-icon-button disableRipple class="icon color-accent" (click)="clicked()">
                         <mat-icon [inline]="true">sentiment_dissatisfied</mat-icon>
                     </button>
                     <div class="text color-accent" [fittext] [maxFontSize]="24">
@@ -41,7 +41,7 @@
                     </div>
                 </div>
                 <div *ngIf="pros.length > 0 && cons.length === 0" style="width: 100%">
-                    <button mat-icon-button class="icon color-accent" (click)="clicked()">
+                    <button mat-icon-button disableRipple class="icon color-accent" (click)="clicked()">
                         <mat-icon [inline]="true">sentiment_very_dissatisfied</mat-icon>
                     </button>
                     <div class="text color-warn" [fittext] [maxFontSize]="24">
