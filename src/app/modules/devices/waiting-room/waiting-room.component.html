@@ -33,7 +33,7 @@
         </div>
     </span>
 
-    <div *ngIf="ready && devices.length === 0">No waiting rooms found.</div>
+    <div *ngIf="ready && devices.length === 0">No devices waiting.</div>
 
     <div class="mat-elevation-z1" [hidden]="!ready || (devices.length === 0 && ready)">
         <div class="table-container">
