@@ -65,6 +65,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
+        this.loadDeviceClasses();
     }
 
     ngOnDestroy() {
@@ -82,7 +83,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.getDeviceTypes()
         });
-        this.loadDeviceClasses();
     }
 
     delete(deviceTypeInput: DeviceTypePermSearchModel) {

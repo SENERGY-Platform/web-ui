@@ -113,6 +113,7 @@ export class DeviceInstancesComponent implements OnInit {
     ngOnInit(): void {
         this.loadFilterOptions();
         this.initSearch();
+        this.load();
     }
 
     ngAfterViewInit(): void {
@@ -127,7 +128,6 @@ export class DeviceInstancesComponent implements OnInit {
         this.paginator.page.subscribe(()=>{
             this.load()
         });
-        this.load();
     }
 
     private initSearch() {

@@ -63,6 +63,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initSearch();
+        this.getFunctions();
     }
 
     ngAfterViewInit(): void {
@@ -76,7 +77,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.getFunctions()
         });
-        this.getFunctions();
     }
 
     ngOnDestroy() {

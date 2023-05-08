@@ -43,7 +43,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
     readonly pageSize = 20;
     sort = 'unix_timestamp_in_s.desc';
     keyRegex = '';
-
+    ready = false;
     totalCount = 0;
 
     @ViewChild('matSort', { static: false }) matSort!: MatSort;
@@ -116,6 +116,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
             if(value){
                 this.dataSource.data = value || [];
             }
+            this.ready = true;
         });
     }
 

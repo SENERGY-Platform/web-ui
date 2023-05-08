@@ -61,6 +61,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
+        this.getConcepts();
     }
 
     ngOnDestroy() {
@@ -78,7 +79,6 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.getConcepts()
         });
-        this.getConcepts();
     }
 
     private initSearch() {

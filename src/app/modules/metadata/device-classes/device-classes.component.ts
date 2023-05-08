@@ -67,6 +67,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initSearch();
+        this.getDeviceClasses()
     }
 
     ngAfterViewInit(): void {
@@ -80,7 +81,6 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.getDeviceClasses()
         });
-        this.getDeviceClasses()
     }
 
     ngOnDestroy() {

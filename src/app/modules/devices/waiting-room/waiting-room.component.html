@@ -33,124 +33,125 @@
         </div>
     </span>
 
+    <div *ngIf="ready && devices.length === 0">No waiting rooms found.</div>
 
-        <div class="mat-elevation-z1" [hidden]="!ready || (devices.length === 0 && ready)">
-            <div class="table-container">
-                <table #sort="matSort" mat-table [dataSource]="devicesDataSource" matSort matSortActive="created_at"
-                    matSortDirection="desc" matSortDisableClear>
+    <div class="mat-elevation-z1" [hidden]="!ready || (devices.length === 0 && ready)">
+        <div class="table-container">
+            <table #sort="matSort" mat-table [dataSource]="devicesDataSource" matSort matSortActive="created_at"
+                matSortDirection="desc" matSortDisableClear>
 
-                    <ng-container matColumnDef="select">
-                        <th mat-header-cell *matHeaderCellDef>
-                            <mat-checkbox (change)="$event ? masterToggle() : null"
-                                [checked]="selection.hasValue() && isAllSelected()"
-                                [indeterminate]="selection.hasValue() && !isAllSelected()">
-                            </mat-checkbox>
-                        </th>
-                        <td mat-cell *matCellDef="let row">
-                            <mat-checkbox (click)="$event.stopPropagation()"
-                                (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
-                            </mat-checkbox>
-                        </td>
-                    </ng-container>
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef>
+                        <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()">
+                        </mat-checkbox>
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                        <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
+                        </mat-checkbox>
+                    </td>
+                </ng-container>
 
-                    <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                        <td mat-cell *matCellDef="let element">
-                            <div fxLayout="row">
-                                <div>
-                                    {{element.name}} <mat-icon class="missing_aes_key_icon"
-                                        matTooltip="missing {{wmbusKeyAttributeKey}}" color="warn"
-                                        *ngIf="hasMissingAttribute(element)">vpn_key</mat-icon>
-                                </div>
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                    <td mat-cell *matCellDef="let element">
+                        <div fxLayout="row">
+                            <div>
+                                {{element.name}} <mat-icon class="missing_aes_key_icon"
+                                    matTooltip="missing {{wmbusKeyAttributeKey}}" color="warn"
+                                    *ngIf="hasMissingAttribute(element)">vpn_key</mat-icon>
                             </div>
-                        </td>
-                    </ng-container>
+                        </div>
+                    </td>
+                </ng-container>
 
-                    <ng-container matColumnDef="created_at">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
-                        <td mat-cell *matCellDef="let element"> {{element.created_at | date:'short'}}</td>
-                    </ng-container>
+                <ng-container matColumnDef="created_at">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+                    <td mat-cell *matCellDef="let element"> {{element.created_at | date:'short'}}</td>
+                </ng-container>
 
-                    <ng-container matColumnDef="updated_at">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated</th>
-                        <td mat-cell *matCellDef="let element"> {{element.updated_at | date:'short'}}</td>
-                    </ng-container>
+                <ng-container matColumnDef="updated_at">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated</th>
+                    <td mat-cell *matCellDef="let element"> {{element.updated_at | date:'short'}}</td>
+                </ng-container>
 
-                    <ng-container matColumnDef="edit">
-                        <th mat-header-cell *matHeaderCellDef>Edit</th>
-                        <td mat-cell *matCellDef="let element">
-                            <button mat-icon-button color="accent" matTooltip="Edit" (click)="openEditDialog(element)">
-                                <mat-icon>edit</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
+                <ng-container matColumnDef="edit">
+                    <th mat-header-cell *matHeaderCellDef>Edit</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button color="accent" matTooltip="Edit" (click)="openEditDialog(element)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
 
-                    <ng-container matColumnDef="use">
-                        <th mat-header-cell *matHeaderCellDef>Use</th>
-                        <td mat-cell *matCellDef="let element">
-                            <button matTooltip="use device" mat-icon-button color="accent" (click)="useDevice(element)">
-                                <mat-icon>play_arrow</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
+                <ng-container matColumnDef="use">
+                    <th mat-header-cell *matHeaderCellDef>Use</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button matTooltip="use device" mat-icon-button color="accent" (click)="useDevice(element)">
+                            <mat-icon>play_arrow</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
 
-                    <ng-container matColumnDef="toggle_hide">
-                        <th mat-header-cell *matHeaderCellDef>Visibility</th>
-                        <td mat-cell *matCellDef="let element">
-                            <button *ngIf="element.hidden" matTooltip="show device" mat-icon-button color="accent"
-                                (click)="showDevice(element.local_id)">
-                                <mat-icon>visibility</mat-icon>
-                            </button>
-                            <button *ngIf="!element.hidden" matTooltip="hide device" mat-icon-button color="accent"
-                                (click)="hideDevice(element.local_id)">
+                <ng-container matColumnDef="toggle_hide">
+                    <th mat-header-cell *matHeaderCellDef>Visibility</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button *ngIf="element.hidden" matTooltip="show device" mat-icon-button color="accent"
+                            (click)="showDevice(element.local_id)">
+                            <mat-icon>visibility</mat-icon>
+                        </button>
+                        <button *ngIf="!element.hidden" matTooltip="hide device" mat-icon-button color="accent"
+                            (click)="hideDevice(element.local_id)">
+                            <mat-icon>visibility_off</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="delete">
+                    <th mat-header-cell *matHeaderCellDef>Delete</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button matTooltip="Delete" mat-icon-button color="warn"
+                            (click)="deleteDevice(element.local_id)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="header-multiple">
+                    <th mat-header-cell *matHeaderCellDef colspan="10">
+                        <div fxLayout="row">
+                            <div fxLayoutAlign="center center">You have selected {{selection.selected.length}} items
+                            </div>
+                            <button *ngIf="selectedContainsShown" matTooltip="Hide Selected" mat-icon-button
+                                color="accent" (click)="hideMultipleDevices()">
                                 <mat-icon>visibility_off</mat-icon>
                             </button>
-                        </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="delete">
-                        <th mat-header-cell *matHeaderCellDef>Delete</th>
-                        <td mat-cell *matCellDef="let element">
-                            <button matTooltip="Delete" mat-icon-button color="warn"
-                                (click)="deleteDevice(element.local_id)">
+                            <button *ngIf="selectedContainsHidden" matTooltip="Show Selected" mat-icon-button
+                                color="accent" (click)="showMultipleDevices()">
+                                <mat-icon>visibility</mat-icon>
+                            </button>
+                            <button matTooltip="Use Selected" mat-icon-button color="accent"
+                                (click)="useMultipleDevices()">
+                                <mat-icon>play_arrow</mat-icon>
+                            </button>
+                            <button matTooltip="Delete Selected" mat-icon-button color="accent"
+                                (click)="deleteMultipleDevices()">
                                 <mat-icon>delete</mat-icon>
                             </button>
-                        </td>
-                    </ng-container>
+                        </div>
+                    </th>
+                </ng-container>
 
-                    <ng-container matColumnDef="header-multiple">
-                        <th mat-header-cell *matHeaderCellDef colspan="10">
-                            <div fxLayout="row">
-                                <div fxLayoutAlign="center center">You have selected {{selection.selected.length}} items
-                                </div>
-                                <button *ngIf="selectedContainsShown" matTooltip="Hide Selected" mat-icon-button
-                                    color="accent" (click)="hideMultipleDevices()">
-                                    <mat-icon>visibility_off</mat-icon>
-                                </button>
-                                <button *ngIf="selectedContainsHidden" matTooltip="Show Selected" mat-icon-button
-                                    color="accent" (click)="showMultipleDevices()">
-                                    <mat-icon>visibility</mat-icon>
-                                </button>
-                                <button matTooltip="Use Selected" mat-icon-button color="accent"
-                                    (click)="useMultipleDevices()">
-                                    <mat-icon>play_arrow</mat-icon>
-                                </button>
-                                <button matTooltip="Delete Selected" mat-icon-button color="accent"
-                                    (click)="deleteMultipleDevices()">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </div>
-                        </th>
-                    </ng-container>
-
-                    <tr mat-header-row *matHeaderRowDef="['header-multiple']"
-                        [hidden]="selection.selected.length === 0"></tr>
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                </table>
-            </div>
-            <mat-paginator #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
-                (page)="selectionClear()" showFirstLastButtons></mat-paginator>
+                <tr mat-header-row *matHeaderRowDef="['header-multiple']" [hidden]="selection.selected.length === 0">
+                </tr>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </div>
+        <mat-paginator #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
+            (page)="selectionClear()" showFirstLastButtons></mat-paginator>
         <div *ngIf="devices.length === 0 && ready">No devices found.</div>
     </div>
     <senergy-spinner [show]="!ready"></senergy-spinner>

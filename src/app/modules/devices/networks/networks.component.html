@@ -19,9 +19,9 @@
     </span>
 
     <senergy-spinner [show]="!ready"></senergy-spinner>
-    <div *ngIf="dataSource.data.length === 0 && ready">No network found.</div>
+    <div *ngIf="ready && dataSource.data.length === 0">No network found.</div>
 
-    <div [hidden]="!ready || dataSource.data.length === 0" class="mat-elevation-z1">
+    <div [hidden]="!ready || (dataSource.data.length === 0 && ready)" class="mat-elevation-z1">
         <div class="table-container">
             <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
                 <ng-container matColumnDef="select">

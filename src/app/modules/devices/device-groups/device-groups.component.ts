@@ -61,6 +61,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
+        this.getDeviceGroups();
     }
 
     ngAfterViewInit(): void {
@@ -74,7 +75,6 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.getDeviceGroups()
         });
-        this.getDeviceGroups();
     }
 
     ngOnDestroy() {

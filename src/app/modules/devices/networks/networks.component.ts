@@ -66,6 +66,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
+        this.getNetworks();
     }
 
     ngOnDestroy() {
@@ -101,7 +102,6 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.getNetworks()
         });
-        this.getNetworks();
     }
 
     edit(network: NetworksModel) {
@@ -134,6 +134,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     private getNetworks() {
+        this.ready = false;
         var offset = this.paginator.pageSize * this.paginator.pageIndex;
 
         this.networksService

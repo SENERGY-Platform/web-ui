@@ -17,8 +17,11 @@
     <span class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
     </span>
+    
+    <div *ngIf="dataSource.data.length === 0 && ready">No processes found.</div>
+    <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
-    <div class="mat-elevation-z1">
+    <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
         <div class="table-container table-container-with-button">
             <table #matSort="matSort" mat-table [dataSource]="dataSource" matSort matSortActive="unix_timestamp_in_s"
                 matSortDirection="desc" matSortDisableClear>

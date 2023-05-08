@@ -64,6 +64,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
+        this.getCharacteristics();
     }
 
     ngOnDestroy() {
@@ -81,7 +82,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.getCharacteristics()
         });
-        this.getCharacteristics();
     }
 
     private initSearch() {

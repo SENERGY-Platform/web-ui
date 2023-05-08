@@ -61,6 +61,7 @@ export class LocationsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
+        this.getLocations();
     }
 
     ngOnDestroy() {
@@ -78,7 +79,6 @@ export class LocationsComponent implements OnInit, OnDestroy {
         this.paginator.page.subscribe(()=>{
             this.getLocations()
         });
-        this.getLocations();
     }
 
     showDevices(location: LocationModel) {
