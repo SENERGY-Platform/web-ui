@@ -40,6 +40,7 @@ import {MatLegacyTableModule as MatTableModule} from '@angular/material/legacy-t
 import {ImportInstancesModel} from './shared/import-instances.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 describe('ImportInstancesComponent', () => {
     let component: ImportInstancesComponent;
@@ -85,6 +86,7 @@ describe('ImportInstancesComponent', () => {
                 HttpClientModule,
                 MatDialogModule,
                 MatSnackBarModule,
+                MatPaginatorModule,
                 MatCheckboxModule,
                 FlexModule,
                 MatTooltipModule,

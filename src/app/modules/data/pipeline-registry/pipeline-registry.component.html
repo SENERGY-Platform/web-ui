@@ -15,6 +15,10 @@
   -->
 
 <div class="layout-margin">
+    <span class="search-button-container">
+        <senergy-searchbar></senergy-searchbar>
+    </span>
+
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
     <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">

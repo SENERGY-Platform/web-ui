@@ -41,6 +41,7 @@ import {ImportTypePermissionSearchModel} from './shared/import-types.model';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 describe('ImportTypesComponent', () => {
     let component: ImportTypesComponent;
@@ -87,6 +88,7 @@ describe('ImportTypesComponent', () => {
                 FlexModule,
                 MatTooltipModule,
                 MatButtonModule,
+                MatPaginatorModule,
                 MatIconModule,
                 WidgetModule,
                 HttpClientModule,
