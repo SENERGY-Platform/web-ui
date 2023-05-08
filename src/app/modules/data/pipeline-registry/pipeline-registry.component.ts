@@ -22,6 +22,8 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
 import { MatSort } from '@angular/material/sort';
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -29,11 +31,13 @@ import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack
     styleUrls: ['./pipeline-registry.component.css'],
 })
 export class PipelineRegistryComponent implements OnInit, AfterViewInit {
-    pipes = [] as PipelineModel[];
+    readonly pageSize = 20;
+    dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
     ready = false;
-    displayedColumns: string[] = ['id', 'name', 'createdat', 'updatedat', 'info', 'edit', 'delete'];
+    displayedColumns: string[] = ['select', 'id', 'name', 'createdat', 'updatedat', 'info', 'edit', 'delete'];
+    selection = new SelectionModel<PipelineModel>(true, []);
+    totalCount = 200;
 
-    @ViewChild(MatTable, { static: false }) table!: MatTable<PipelineModel>;
     @ViewChild(MatSort, { static: false }) sort!: MatSort;
 
     constructor(
@@ -45,7 +49,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
         this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
-            this.pipes = resp;
+            this.dataSource.data = resp;
             this.ready = true;
         });
     }
@@ -54,7 +58,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         this.sort.sortChange.subscribe(() => {
             this.ready = false;
             this.pipelineRegistryService.getPipelines(this.sort.active + ':' + this.sort.direction).subscribe((resp: PipelineModel[]) => {
-                this.pipes = resp;
+                this.dataSource.data = resp;
                 this.ready = true;
             });
         });
@@ -68,11 +72,10 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
                 if (deletePipeline) {
                     this.ready = false;
                     this.flowEngineService.deletePipeline(pipe.id).subscribe();
-                    const index = this.pipes.indexOf(pipe);
+                    const index = this.dataSource.data.indexOf(pipe);
                     if (index > -1) {
-                        this.pipes.splice(index, 1);
+                        this.dataSource.data.splice(index, 1);
                     }
-                    this.table.renderRows();
                     this.ready = true;
                     this.snackBar.open('Pipeline deleted', undefined, {
                         duration: 2000,
@@ -83,5 +86,26 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
     isEditable(pipe: PipelineModel): boolean {
         return pipe.operators.findIndex((op) => op.inputSelections !== undefined && op.inputSelections.length > 0) !== -1;
+    }
+
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const currentViewed = this.dataSource.connect().value.length;
+        return numSelected === currentViewed;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selectionClear();
+        } else {
+            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    deleteMultipleItems() {
     }
 }

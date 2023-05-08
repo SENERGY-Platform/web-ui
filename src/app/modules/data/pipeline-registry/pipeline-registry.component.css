@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-table {
-    width: 100%;
-}
-
 
 mat-grid-tile-footer {
     background-color: white !important;
@@ -47,11 +43,6 @@ mat-grid-list {
     margin: auto;
     display: block;
     position: relative;
-}
-
-.main-panel {
-    height: calc(100% - 64px);
-    overflow-y: auto;
 }
 
 .fab {
