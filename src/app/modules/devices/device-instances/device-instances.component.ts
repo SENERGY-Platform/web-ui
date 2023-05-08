@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 
 import {DeviceInstancesService} from './shared/device-instances.service';
 import {DeviceInstancesModel} from './shared/device-instances.model';
@@ -70,7 +70,7 @@ export enum DeviceInstancesRouterStateTabEnum {
     templateUrl: './device-instances.component.html',
     styleUrls: ['./device-instances.component.css'],
 })
-export class DeviceInstancesComponent implements OnInit {
+export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     constructor(
         private deviceInstancesService: DeviceInstancesService,
@@ -113,8 +113,7 @@ export class DeviceInstancesComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadFilterOptions();
-        this.initSearch();
-        this.load();
+        this.initSearch(); // does automatically load data on first page load
     }
 
     ngAfterViewInit(): void {

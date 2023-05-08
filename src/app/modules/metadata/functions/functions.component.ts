@@ -64,7 +64,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initSearch();
-        this.getFunctions();
     }
 
     ngAfterViewInit(): void {

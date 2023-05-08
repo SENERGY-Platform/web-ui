@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {forkJoin, Observable, Subscription} from 'rxjs';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {Router} from '@angular/router';
@@ -39,8 +39,9 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     templateUrl: './locations.component.html',
     styleUrls: ['./locations.component.css'],
 })
-export class LocationsComponent implements OnInit, OnDestroy {
+export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     readonly pageSize = 20;
+    ready = false;
     instances = [];
     totalCount = 200;
     offset = 0;
@@ -48,7 +49,6 @@ export class LocationsComponent implements OnInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<LocationModel>(true, []);
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    ready = false;
     private searchSub: Subscription = new Subscription();
     searchText: string = ""
 
@@ -62,7 +62,6 @@ export class LocationsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
-        this.getLocations();
     }
 
     ngOnDestroy() {

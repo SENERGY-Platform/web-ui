@@ -67,7 +67,6 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
-        this.getNetworks();
     }
 
     ngOnDestroy() {

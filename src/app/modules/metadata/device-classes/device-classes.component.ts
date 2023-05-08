@@ -68,7 +68,6 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initSearch();
-        this.getDeviceClasses()
     }
 
     ngAfterViewInit(): void {

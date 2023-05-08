@@ -62,7 +62,6 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
-        this.getConcepts();
     }
 
     ngOnDestroy() {

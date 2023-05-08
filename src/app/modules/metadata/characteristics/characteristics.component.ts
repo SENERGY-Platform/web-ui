@@ -65,7 +65,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
-        this.getCharacteristics();
     }
 
     ngOnDestroy() {

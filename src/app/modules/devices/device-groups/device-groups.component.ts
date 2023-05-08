@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {forkJoin, Observable, Subscription} from 'rxjs';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {Router} from '@angular/router';
@@ -35,7 +35,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     templateUrl: './device-groups.component.html',
     styleUrls: ['./device-groups.component.css'],
 })
-export class DeviceGroupsComponent implements OnInit, OnDestroy {
+export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     readonly pageSize = 20;
     selection = new SelectionModel<DeviceGroupsPermSearchModel>(true, []);
     totalCount = 200;
@@ -62,7 +62,6 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.initSearch();
-        this.getDeviceGroups();
     }
 
     ngAfterViewInit(): void {

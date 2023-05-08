@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ImportTypePermissionSearchModel} from './shared/import-types.model';
 import {ImportTypesService} from './shared/import-types.service';
 import {Sort} from '@angular/material/sort';

@@ -18,8 +18,9 @@
         <senergy-searchbar></senergy-searchbar>
     </span>
     <senergy-widget-spinner [show]="!dataReady"></senergy-widget-spinner>
+    <div *ngIf="dataReady && dataSource.data.length === 0">No import types found.</div>
 
-    <div class="mat-elevation-z1" *ngIf="dataReady">
+    <div class="mat-elevation-z1" [hidden]="!dataReady || (dataSource.data.length === 0 && dataReady)">
         <div class="table-container">
             <table mat-table matSortDisableClear [dataSource]="dataSource" matSort
                 (matSortChange)="matSortChange($event)" matSortActive="name" matSortDirection="asc">
