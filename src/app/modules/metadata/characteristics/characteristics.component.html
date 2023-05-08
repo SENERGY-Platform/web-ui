@@ -22,84 +22,83 @@
     <div *ngIf="dataSource.data.length === 0 && ready">No characteristic found.</div>
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
+    <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
+        <div class="table-container table-container-with-button">
+            <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef class="button-column">
+                        <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()">
+                        </mat-checkbox>
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                        <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
+                        </mat-checkbox>
+                    </td>
+                </ng-container>
 
-    <div [hidden]="!ready || dataSource.data.length ===0" class="table-container table-container-with-button">
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let characteristic">
+                        {{characteristic.name}}
+                    </td>
+                </ng-container>
 
-        <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc">
-            <ng-container matColumnDef="select">
-                <th mat-header-cell *matHeaderCellDef class="button-column">
-                    <mat-checkbox (change)="$event ? masterToggle() : null"
-                        [checked]="selection.hasValue() && isAllSelected()"
-                        [indeterminate]="selection.hasValue() && !isAllSelected()">
-                    </mat-checkbox>
-                </th>
-                <td mat-cell *matCellDef="let row">
-                    <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
-                        [checked]="selection.isSelected(row)">
-                    </mat-checkbox>
-                </td>
-            </ng-container>
+                <ng-container matColumnDef="info">
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Info</th>
+                    <td mat-cell *matCellDef="let characteristic">
+                        <button mat-icon-button color="accent" (click)="showCharacteristic(characteristic)"
+                            matTooltip="Info">
+                            <mat-icon>info</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
 
-            <ng-container matColumnDef="name">
-                <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
-                <td mat-cell *matCellDef="let characteristic">
-                    {{characteristic.name}}
-                </td>
-            </ng-container>
+                <ng-container matColumnDef="edit">
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
+                    <td mat-cell *matCellDef="let characteristic">
+                        <button mat-icon-button color="accent" (click)="editCharacteristic(characteristic)"
+                            [disabled]="!characteristic.permissions.w" matTooltip="Edit">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
 
-            <ng-container matColumnDef="info">
-                <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Info</th>
-                <td mat-cell *matCellDef="let characteristic">
-                    <button mat-icon-button color="accent" (click)="showCharacteristic(characteristic)"
-                        matTooltip="Info">
-                        <mat-icon>info</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="edit">
-                <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
-                <td mat-cell *matCellDef="let characteristic">
-                    <button mat-icon-button color="accent" (click)="editCharacteristic(characteristic)"
-                        [disabled]="!characteristic.permissions.w" matTooltip="Edit">
-                        <mat-icon>edit</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="delete">
-                <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
-                <td mat-cell *matCellDef="let characteristic">
-                    <button mat-icon-button color="accent" (click)="deleteCharacteristic(characteristic)"
-                        [disabled]="!characteristic.permissions.a" matTooltip="Delete">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="header-delete-all">
-                <th mat-header-cell *matHeaderCellDef colspan="10">
-                    <div fxLayout="row">
-                        <div fxLayoutAlign="center center">You have
-                            selected {{selection.selected.length}} items
-                        </div>
-                        <button matTooltip="Delete" mat-icon-button color="accent"
-                                (click)="deleteMultipleItems()">
+                <ng-container matColumnDef="delete">
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
+                    <td mat-cell *matCellDef="let characteristic">
+                        <button mat-icon-button color="accent" (click)="deleteCharacteristic(characteristic)"
+                            [disabled]="!characteristic.permissions.a" matTooltip="Delete">
                             <mat-icon>delete</mat-icon>
                         </button>
-                    </div>
-                </th>
-            </ng-container>
+                    </td>
+                </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
-                [hidden]="selection.selected.length === 0"></tr>
-            <tr mat-header-row *matHeaderRowDef="['select', 'name', 'info', 'edit', 'delete']; sticky: true"></tr>
-            <tr mat-row *matRowDef="let m; columns: ['select', 'name', 'info', 'edit', 'delete'];"></tr>
-        </table>
+                <ng-container matColumnDef="header-delete-all">
+                    <th mat-header-cell *matHeaderCellDef colspan="10">
+                        <div fxLayout="row">
+                            <div fxLayoutAlign="center center">You have
+                                selected {{selection.selected.length}} items
+                            </div>
+                            <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </th>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
+                </tr>
+                <tr mat-header-row *matHeaderRowDef="['select', 'name', 'info', 'edit', 'delete']; sticky: true"></tr>
+                <tr mat-row *matRowDef="let m; columns: ['select', 'name', 'info', 'edit', 'delete'];"></tr>
+            </table>
+        </div>
+
+        <mat-paginator #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
+            showFirstLastButtons></mat-paginator>
     </div>
-
-    <mat-paginator [hidden]="!ready || dataSource.data.length === 0" #paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 75, 100]"
-    showFirstLastButtons></mat-paginator>
 </div>
 
 <button mat-fab class="fab" matTooltip="Add new characteristic" (click)="newCharacteristic()">

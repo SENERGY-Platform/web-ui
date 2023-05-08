@@ -36,7 +36,8 @@
             <mat-icon>visibility_off</mat-icon>
         </button>
     </span>
-    <div [hidden]="!ready || (exports.length === 0 && ready)">
+
+    <div [hidden]="!ready || (exports.length === 0 && ready)" class="mat-elevation-z1">
         <div class="table-container">
             <table #sort="matSort" mat-table [dataSource]="exportsDataSource" matSort matSortActive="created_at"
                 matSortDirection="desc" matSortDisableClear>
