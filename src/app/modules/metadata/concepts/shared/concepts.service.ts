@@ -121,4 +121,17 @@ export class ConceptsService {
                 catchError(this.errorHandlerService.handleError(ConceptsService.name, 'getConcepts(search)', [])),
             );
     }
+
+    getTotalCountOfConcepts(): Observable<any> {
+        return this.http
+        .get(environment.permissionSearchUrl + '/v3/total/concepts')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    ConceptsService.name,
+                    'getTotalCountOfConcepts',
+                ),
+            ),
+        );
+    }
 }

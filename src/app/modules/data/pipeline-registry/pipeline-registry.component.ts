@@ -26,7 +26,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { pipe, Subscription } from 'rxjs';
+import { forkJoin, Observable, pipe, Subscription } from 'rxjs';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -91,6 +91,11 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         });
     }
 
+    reload() {
+        this.selectionClear();
+        this.loadPipelines();
+    }
+
     deletePipeline(pipe: PipelineModel) {
         this.dialogsService
             .openDeleteDialog('pipeline')
@@ -134,5 +139,29 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     }
 
     deleteMultipleItems() {
+        const deletionJobs: Observable<any>[] = [];
+        var text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' pipelines' : ' pipeline')
+
+        this.dialogsService
+        .openDeleteDialog(text)
+        .afterClosed()
+        .subscribe((deletePipelines: boolean) => {
+            if (deletePipelines) {
+                this.ready = false;
+                this.selection.selected.forEach((pipeline: PipelineModel) => {
+                    deletionJobs.push(this.flowEngineService.deletePipeline(pipeline.id))    
+                });
+            }
+            
+            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                if (ok) {
+                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});            
+                } else {
+                    this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                }
+                this.reload()
+            })
+        });
     }
 }

@@ -61,6 +61,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     ) {}
 
     ngOnInit() {
+        this.locationsService.getTotalCountOfLocations().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
     }
 
@@ -102,6 +103,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
             .afterClosed()
             .subscribe((deleteDeviceClass: boolean) => {
                 if (deleteDeviceClass) {
+                    this.ready = false;
                     this.locationsService.deleteLocation(location.id).subscribe((resp: boolean) => {
                         if (resp === true) {
                             this.snackBar.open('Location deleted successfully.', undefined, { duration: 2000 });
@@ -173,6 +175,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         .afterClosed()
         .subscribe((deleteConcepts: boolean) => {
             if (deleteConcepts) {
+                this.ready = false;
                 this.selection.selected.forEach((location: LocationModel) => {
                     deletionJobs.push(this.locationsService.deleteLocation(location.id));
                 });

@@ -67,6 +67,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
+        this.deviceClassesService.getTotalCountOfDevicesClasses().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
     }
 
@@ -121,6 +122,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
             .afterClosed()
             .subscribe((deleteDeviceClass: boolean) => {
                 if (deleteDeviceClass) {
+                    this.ready = false;
                     this.deviceClassesService.deleteDeviceClasses(deviceClass.id).subscribe((resp: boolean) => {
                         if (resp === true) {
                             this.snackBar.open('Device class deleted successfully.', undefined, { duration: 2000 });
@@ -207,6 +209,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
             .afterClosed()
             .subscribe((deleteDeviceClass: boolean) => {
                 if (deleteDeviceClass) {
+                    this.ready = false;
                     this.selection.selected.forEach((deviceClass: DeviceClassesPermSearchModel) => {
                         deletionJobs.push(this.deviceClassesService.deleteDeviceClasses(deviceClass.id))
                     })

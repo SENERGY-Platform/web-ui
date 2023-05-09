@@ -118,4 +118,18 @@ export class FunctionsService {
             .post<DeviceTypeFunctionModel>(environment.deviceManagerUrl + '/functions', func)
             .pipe(catchError(this.errorHandlerService.handleError(FunctionsService.name, 'createFunction', null)));
     }
+
+
+    getTotalCountOfFunctions(): Observable<any> {
+        return this.http
+        .get(environment.permissionSearchUrl + '/v3/total/functions')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    FunctionsService.name,
+                    'getTotalCountOfFunctions',
+                ),
+            ),
+        );
+    }
 }

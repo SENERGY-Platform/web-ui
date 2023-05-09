@@ -72,4 +72,17 @@ export class DeviceClassesService {
             .post<DeviceTypeDeviceClassModel>(environment.deviceManagerUrl + '/device-classes', deviceClass)
             .pipe(catchError(this.errorHandlerService.handleError(DeviceClassesService.name, 'createDeviceClass', null)));
     }
+
+    getTotalCountOfDevicesClasses(): Observable<any> {
+        return this.http
+        .get(environment.permissionSearchUrl + '/v3/total/device-classes')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    DeviceClassesService.name,
+                    'getTotalCountOfDevicesClasses',
+                ),
+            ),
+        );
+    }
 }

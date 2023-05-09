@@ -62,6 +62,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
+        this.functionsService.getTotalCountOfFunctions().subscribe(totalCount => this.totalCount = totalCount)
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initSearch();
     }
@@ -150,6 +151,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             .afterClosed()
             .subscribe((deleteFunction: boolean) => {
                 if (deleteFunction) {
+                    this.ready = false;
                     this.functionsService.deleteFunction(func.id).subscribe((resp: boolean) => {
                         if (resp === true) {
                             this.snackBar.open('Function deleted successfully.', undefined, { duration: 2000 });
@@ -163,6 +165,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }
 
     private getFunctions() {
+        this.ready = false;
         this.functionsService
                 .getFunctions(this.searchText, this.pageSize, this.offset, 'name', 'asc')
                 .subscribe((functions: FunctionsPermSearchModel[]) => {
@@ -215,6 +218,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             .afterClosed()
             .subscribe((deleteExports: boolean) => {
                 if (deleteExports) {
+                    this.ready = false;
                     this.selection.selected.forEach((func: FunctionsPermSearchModel) => {
                         deletionJobs.push(this.functionsService.deleteFunction(func.id))
                     });

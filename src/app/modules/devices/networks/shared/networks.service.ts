@@ -174,4 +174,18 @@ export class NetworksService {
             }
         });
     }
+
+
+    getTotalCountOfNetworks(): Observable<any> {
+        return this.http
+        .get(environment.permissionSearchUrl + '/v3/total/hubs')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    NetworksService.name,
+                    'getTotalCountOfNetworks',
+                ),
+            ),
+        );
+    }
 }

@@ -15,7 +15,7 @@
  */
 
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { forkJoin, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { DeviceTypeService } from './shared/device-type.service';
@@ -65,6 +65,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
+        this.deviceTypeService.getTotalCountOfDevicesTypes().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
         this.loadDeviceClasses();
     }
@@ -76,7 +77,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     ngAfterViewInit(): void {
         this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
             var value = row[sortHeaderId];
-            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
+            value = (typeof(value) === 'string') ? value.toLowerCase(): value;
             return value
         };
         this.dataSource.sort = this.sort;
@@ -93,6 +94,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
             .afterClosed()
             .subscribe((deviceTypeDelete: boolean) => {
                 if (deviceTypeDelete) {
+                    this.ready = false;
                     this.deviceTypeService.deleteDeviceType(encodeURIComponent(deviceTypeInput.id)).subscribe((deleted: boolean) => {
                         if (deleted) {
                             const index = this.deviceTypes.indexOf(deviceTypeInput);
@@ -159,6 +161,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     private getDeviceTypes() {
+        this.ready = false;
         this.deviceTypeService
             .getDeviceTypes(this.searchText, this.pageSize, this.offset, "name", "asc")
             .subscribe((deviceTypes: DeviceTypePermSearchModel[]) => {
@@ -171,6 +174,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     private reload() {
         this.offset = 0;
         this.ready = false;
+        this.selectionClear();
         this.getDeviceTypes();
     }
 
@@ -181,7 +185,30 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     }
 
     public deleteMultipleItems(): void {
+        const deletionJobs: Observable<any>[] = [];
+        var text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' device types' : ' device type')
 
+        this.dialogsService
+        .openDeleteDialog(text)
+        .afterClosed()
+        .subscribe((deletePipelines: boolean) => {
+            if (deletePipelines) {
+                this.ready = false;
+                this.selection.selected.forEach((deviceType: DeviceTypePermSearchModel) => {
+                    deletionJobs.push(this.deviceTypeService.deleteDeviceType(deviceType.id))    
+                });
+            }
+            
+            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                if (ok) {
+                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});            
+                } else {
+                    this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                }
+                this.reload()
+            })
+        });
     }
 
     isAllSelected() {

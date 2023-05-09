@@ -89,4 +89,17 @@ export class LocationsService {
             .put<LocationModel>(environment.deviceManagerUrl + '/locations/' + encodeURIComponent(location.id), location)
             .pipe(catchError(this.errorHandlerService.handleError(LocationsService.name, 'updateLocation', null)));
     }
+
+    getTotalCountOfLocations(): Observable<any> {
+        return this.http
+        .get(environment.permissionSearchUrl + '/v3/total/locations')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    LocationsService.name,
+                    'getTotalCountOfLocations',
+                ),
+            ),
+        );
+    }
 }

@@ -24,7 +24,7 @@ import {ImportDeployEditDialogComponent} from '../import-deploy-edit-dialog/impo
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import { Subscription } from 'rxjs';
+import { forkJoin, Observable, ObservableNotification, Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -44,9 +44,7 @@ export class ImportTypesComponent implements OnInit {
     sort = 'name.asc';
     searchText: string = ""
     searchSub: Subscription = new Subscription()
-    limitInit = 100;
     totalCount = 200;
-    limit = this.limitInit;
     offset = 0;
 
     constructor(
@@ -56,11 +54,10 @@ export class ImportTypesComponent implements OnInit {
         private permissionsDialogService: PermissionsDialogService,
         private snackBar: MatSnackBar,
         private deleteDialog: DialogsService,
-        private searchbarService: SearchbarService
+        private searchbarService: SearchbarService,
     ) {}
 
     ngOnInit(): void {
-        this.load();
         this.initSearch();
     }
 
@@ -136,21 +133,17 @@ export class ImportTypesComponent implements OnInit {
     }
 
     load() {
-        this.importTypesService.listImportTypes(this.searchText, this.limit, this.offset, this.sort).subscribe((types) => {
+        this.dataReady = false;
+        this.importTypesService.listImportTypes(this.searchText, this.pageSize, this.offset, this.sort).subscribe((types) => {
             this.dataSource.data = types
             this.dataReady = true;
         });
     }
 
     reload() {
-        this.limit = this.limitInit;
         this.offset = 0;
-        this.load();
-    }
-
-    onScroll() {
-        this.limit += this.limitInit;
-        this.offset = this.dataSource.data.length;
+        this.dataReady = false;
+        this.selectionClear();
         this.load();
     }
 
@@ -177,5 +170,29 @@ export class ImportTypesComponent implements OnInit {
     }
 
     deleteMultipleItems() {
+        const deletionJobs: Observable<any>[] = [];
+        var text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' import types' : ' import type')
+
+        this.deleteDialog
+        .openDeleteDialog(text)
+        .afterClosed()
+        .subscribe((deletePipelines: boolean) => {
+            if (deletePipelines) {
+                this.dataReady = false;
+                this.selection.selected.forEach((importType: ImportTypePermissionSearchModel) => {
+                    deletionJobs.push(this.importTypesService.deleteImportInstance(importType.id))    
+                });
+            }
+            
+            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                if (ok) {
+                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});            
+                } else {
+                    this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                }
+                this.reload()
+            })
+        });
     }
 }

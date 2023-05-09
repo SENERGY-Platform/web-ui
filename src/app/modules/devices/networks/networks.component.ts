@@ -66,6 +66,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
+        this.networksService.getTotalCountOfNetworks().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
     }
 

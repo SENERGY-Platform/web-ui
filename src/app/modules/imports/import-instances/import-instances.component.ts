@@ -24,7 +24,7 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { forkJoin, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -55,13 +55,10 @@ export class ImportInstancesComponent implements OnInit {
     searchSub: Subscription = new Subscription()    
     dataReady = false;
     sort = 'updated_at.desc';
-    limitInit = 100;
-    limit = this.limitInit;
     offset = 0;
     excludeGenerated = localStorage.getItem('import.instances.excludeGenerated') === 'true';
 
     ngOnInit(): void {
-        this.load();
         this.initSearch();
     }
 
@@ -101,16 +98,17 @@ export class ImportInstancesComponent implements OnInit {
             .afterClosed()
             .subscribe((del) => {
                 if (del === true) {
+                    this.dataReady = false;
                     this.importInstancesService.deleteImportInstance(m.id).subscribe(
                         () => {
                             this.snackBar.open('Import deleted', 'OK', { duration: 3000 });
-                            this.reload();
                         },
                         (err) => {
                             console.error(err);
                             this.snackBar.open('Error deleting', 'close', { panelClass: 'snack-bar-error' });
                         },
                     );
+                    this.reload();
                 }
             });
     }
@@ -121,8 +119,9 @@ export class ImportInstancesComponent implements OnInit {
     }
 
     load() {
+        this.dataReady = false;
         this.importInstancesService
-            .listImportInstances(this.searchText, this.limit, this.offset, this.sort, this.excludeGenerated)
+            .listImportInstances(this.searchText, this.pageSize, this.offset, this.sort, this.excludeGenerated)
             .subscribe((inst) => {
                 this.dataSource.data = inst;
                 this.dataReady = true;
@@ -130,16 +129,12 @@ export class ImportInstancesComponent implements OnInit {
     }
 
     reload() {
-        this.limit = this.limitInit;
         this.offset = 0;
+        this.selectionClear();
+        this.dataReady = false;
         this.load();
     }
 
-    onScroll() {
-        this.limit += this.limitInit;
-        this.offset = this.dataSource.data.length;
-        this.load();
-    }
 
     export(m: ImportInstancesModel) {
         const config: MatDialogConfig = {
@@ -182,5 +177,29 @@ export class ImportInstancesComponent implements OnInit {
     }
 
     deleteMultipleItems() {
+        const deletionJobs: Observable<any>[] = [];
+        var text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' import instances' : ' import instance')
+
+        this.deleteDialog
+        .openDeleteDialog(text)
+        .afterClosed()
+        .subscribe((deletePipelines: boolean) => {
+            if (deletePipelines) {
+                this.dataReady = false;
+                this.selection.selected.forEach((importInstance: ImportInstancesModel) => {
+                    deletionJobs.push(this.importInstancesService.deleteImportInstance(importInstance.id))    
+                });
+            }
+            
+            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                if (ok) {
+                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});            
+                } else {
+                    this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                }
+                this.reload()
+            })
+        });
     }
 }

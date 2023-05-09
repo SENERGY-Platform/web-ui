@@ -27,8 +27,6 @@ import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-b
 import {ConceptsPermSearchModel} from '../concepts/shared/concepts-perm-search.model';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
-import {UntypedFormControl} from '@angular/forms';
-import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -64,6 +62,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.characteristicsService.getTotalCountOfCharacteristics().subscribe(totalCount => {this.totalCount = totalCount})
         this.initSearch();
     }
 
@@ -123,6 +122,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             .afterClosed()
             .subscribe((deleteCharacteristic: boolean) => {
                 if (deleteCharacteristic) {
+                    this.ready = false;
                     this.characteristicsService
                         .deleteCharacteristic(characteristic.id)
                         .subscribe((resp: boolean) => {
@@ -255,6 +255,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         .afterClosed()
         .subscribe((deleteConcepts: boolean) => {
             if (deleteConcepts) {
+                this.ready = false;
                 this.selection.selected.forEach((characteristic: CharacteristicsPermSearchModel) => {
                     var job = this.characteristicsService.deleteCharacteristic(characteristic.id)
                     deletionJobs.push(job)
@@ -262,7 +263,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             }
             
             forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                console.log(deletionJobResults)
                 const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
                 if (ok) {
                     this.snackBar.open('Characteristics deleted successfully.', undefined, {duration: 2000});            

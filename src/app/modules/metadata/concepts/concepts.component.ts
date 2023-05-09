@@ -61,6 +61,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
+        this.conceptsService.getTotalCountOfConcepts().subscribe(totalCount => {this.totalCount = totalCount})
         this.initSearch();
     }
 
@@ -159,6 +160,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             .afterClosed()
             .subscribe((deleteConcept: boolean) => {
                 if (deleteConcept) {
+                    this.ready = false;
                     this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
                         if (resp === true) {
                             this.concepts.splice(this.concepts.indexOf(concept), 1);
@@ -218,6 +220,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         .afterClosed()
         .subscribe((deleteConcepts: boolean) => {
             if (deleteConcepts) {
+                this.ready = false;
                 this.selection.selected.forEach((concept: ConceptsPermSearchModel) => {
                     deletionJobs.push(this.conceptsService.deleteConcept(concept.id))    
                 });

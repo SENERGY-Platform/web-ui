@@ -98,4 +98,17 @@ export class CharacteristicsService {
                 catchError(this.errorHandlerService.handleError(CharacteristicsService.name, 'getCharacteristics(search)', [])),
             );
     }
+
+    getTotalCountOfCharacteristics(): Observable<any> {
+        return this.http
+        .get(environment.permissionSearchUrl + '/v3/total/characteristics')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    CharacteristicsService.name,
+                    'getTotalCountOfCharacteristics',
+                ),
+            ),
+        );
+    }
 }

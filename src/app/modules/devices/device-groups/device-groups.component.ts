@@ -61,6 +61,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     ) {}
 
     ngOnInit() {
+        this.deviceGroupsService.getTotalCountOfDeviceGroups().subscribe(totalCount => this.totalCount = totalCount)
         this.initSearch();
     }
 
@@ -168,6 +169,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         .afterClosed()
         .subscribe((deleteConcepts: boolean) => {
             if (deleteConcepts) {
+                this.ready = false;
                 this.selection.selected.forEach((deviceGroup: DeviceGroupsPermSearchModel) => {
                     deletionJobs.push(this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id));
                 });

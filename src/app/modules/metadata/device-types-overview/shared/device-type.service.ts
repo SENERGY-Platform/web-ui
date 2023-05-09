@@ -273,4 +273,17 @@ export class DeviceTypeService {
             paths.push({path: name, type: field.type || ''});
         }
     }
+
+    getTotalCountOfDevicesTypes(): Observable<any> {
+        return this.http
+        .get(environment.permissionSearchUrl + '/v3/total/device-types')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    DeviceTypeService.name,
+                    'getTotalCountOfDevicesTypes',
+                ),
+            ),
+        );
+    }
 }

@@ -112,6 +112,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     private searchSub: Subscription = new Subscription();
 
     ngOnInit(): void {
+        this.deviceInstancesService.getTotalCountOfDevices().subscribe(totalCount => this.totalCount = totalCount)
         this.loadFilterOptions();
         this.initSearch(); // does automatically load data on first page load
     }
@@ -273,6 +274,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             .afterClosed()
             .subscribe((deviceDelete: boolean) => {
                 if (deviceDelete) {
+                    this.ready = false;
                     this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstancesUpdateModel | null) => {
                         if (resp !== null) {
                             this.snackBar.open('Device deleted successfully.', '', { duration: 2000 });
@@ -363,6 +365,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         .afterClosed()
         .subscribe((deleteConcepts: boolean) => {
             if (deleteConcepts) {
+                this.ready = false;
                 this.selection.selected.forEach((device: DeviceInstancesModel) => {
                     deletionJobs.push(this.deviceInstancesService.deleteDeviceInstance(device.id));
                 });

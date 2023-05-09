@@ -235,4 +235,17 @@ export class DeviceGroupsService {
                 catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'useDeviceSelectionDeviceGroupHelper()', null)),
             );
     }
+
+    getTotalCountOfDeviceGroups(): Observable<any> {
+        return this.http
+        .get(environment.permissionSearchUrl + '/v3/total/device-groups')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    DeviceGroupsService.name,
+                    'getTotalCountOfDeviceGroups',
+                ),
+            ),
+        );
+    }
 }

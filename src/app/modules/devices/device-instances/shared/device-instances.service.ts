@@ -411,4 +411,17 @@ export class DeviceInstancesService {
             })
             .pipe(map((res) => res || []));
     }
+
+    getTotalCountOfDevices(): Observable<any> {
+        return this.http
+        .get(environment.permissionSearchUrl + '/v3/total/devices')
+        .pipe(
+            catchError(
+                this.errorHandlerService.handleError(
+                    DeviceInstancesService.name,
+                    'getTotalCountOfDevices',
+                ),
+            ),
+        );
+    }
 }

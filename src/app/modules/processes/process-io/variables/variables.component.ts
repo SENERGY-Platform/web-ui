@@ -29,7 +29,7 @@ import {DeviceInstancesModel} from '../../../devices/device-instances/shared/dev
 import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variable-edit-dialog.component';
 import {MatLegacyPaginator as MatPaginator} from '@angular/material/legacy-paginator';
 import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
-import {Subscription} from 'rxjs';
+import {forkJoin, Observable, Subscription} from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
 
 
@@ -44,6 +44,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
     sort = 'unix_timestamp_in_s.desc';
     keyRegex = '';
     ready = false;
+    offset = 0;
     totalCount = 0;
 
     @ViewChild('matSort', { static: false }) matSort!: MatSort;
@@ -69,28 +70,34 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         this.searchSub.unsubscribe();
     }
 
+    ngOnInit() {
+        this.initSearch();
+    }
+
     ngAfterViewInit(): void {
         this.dataSource.sort = this.matSort;
         this.dataSource.sort.sortChange.subscribe(() => {
             this.updateSortAndPagination();
         });
         this.paginator.page.subscribe(()=>{
+            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.loadVariables();
         });
+    }
+
+    initSearch() {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             if(this.keyRegex !== searchText) {
                 this.keyRegex = searchText;
-                this.paginator.pageIndex = 0;
+                this.offset = 0;
             }
             this.reload();
         });
-
-        this.loadVariables();
     }
 
     reload(){
         this.selectionClear();
-        this.paginator.pageIndex = 0
+        this.offset = 0
         this.updateTotal();
         this.updateSortAndPagination();
     }
@@ -111,8 +118,8 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
     }
 
     loadVariables(){
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
-        this.processIoService.listVariables(this.pageSize, offset, this.sort, this.keyRegex).subscribe(value => {
+        this.ready = false;
+        this.processIoService.listVariables(this.pageSize, this.offset, this.sort, this.keyRegex).subscribe(value => {
             if(value){
                 this.dataSource.data = value || [];
             }
@@ -224,7 +231,30 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
     }
 
     deleteMultipleItems(): void {
-        
+        const deletionJobs: Observable<any>[] = [];
+        var text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' processes' : ' process')
+
+        this.dialogsService
+        .openDeleteDialog(text)
+        .afterClosed()
+        .subscribe((deletePipelines: boolean) => {
+            if (deletePipelines) {
+                this.ready = false;
+                this.selection.selected.forEach((variable: ProcessIoVariable) => {
+                    deletionJobs.push(this.processIoService.remove(variable.key))    
+                });
+            }
+            
+            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                if (ok) {
+                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});            
+                } else {
+                    this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                }
+                this.reload()
+            })
+        });
     }
 
 
