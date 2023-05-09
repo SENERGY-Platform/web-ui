@@ -124,6 +124,7 @@ describe('ImportTypesComponent', () => {
     });
 
     it('should create and load data', () => {
+        searchbarSpy.currentSearchText.nextWith("search")
         expect(component).toBeTruthy();
         expect(importTypesServiceSpy.listImportTypes).toHaveBeenCalled();
     });
