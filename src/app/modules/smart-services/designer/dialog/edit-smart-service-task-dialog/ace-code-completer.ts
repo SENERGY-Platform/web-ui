@@ -20,10 +20,9 @@
 */
 
 const completer = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     getCompletions(_: any, session: any, pos: any, ___: any, callback: any) {
         const line = session.doc.$lines[pos.row].slice(0, pos.column-1);
-        const isNewStatement = line.trim().length === 0 || line.trim().endsWith(';');
+        const isNewStatement = line.trim().length == 0 || line.trim().endsWith(';');
         if(isNewStatement){
             callback(null, [
                 {
@@ -108,7 +107,7 @@ const completer = {
                 },
                 {
                     caption: 'deviceRepo.getDeviceTypeSelectables',
-                    value: 'var result_as_DeviceTypeSelectable_list = deviceRepo.getDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool);',
+                    value: 'var result_as_DeviceTypeSelectable_list = deviceRepo.getDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool, servicesMustMatchAllCriteria_as_bool);',
                     meta: 'static'
                 },
                 {
@@ -326,7 +325,7 @@ const completer = {
                 },
                 {
                     caption: 'deviceRepo.getDeviceTypeSelectables',
-                    value: 'deviceRepo.getDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool)',
+                    value: 'deviceRepo.getDeviceTypeSelectables(query_as_FilterCriteria_list, pathPrefix_as_string, includeModified_as_bool, servicesMustMatchAllCriteria_as_bool)',
                     meta: 'static'
                 },
                 {
