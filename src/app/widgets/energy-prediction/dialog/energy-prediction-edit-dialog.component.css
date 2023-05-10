@@ -17,3 +17,7 @@
 table {
     border-spacing: 0px;
 }
+
+td {
+    width: 50%;
+}
