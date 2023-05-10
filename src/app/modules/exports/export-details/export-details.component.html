@@ -19,7 +19,7 @@
         <button mat-icon-button (click)="goBack()" matTooltip="Back"><mat-icon>arrow_back</mat-icon></button>
     </div>
     <div fxLayout="column" class="layout-margin">
-        <mat-card *ngIf="ready" style="margin-bottom:8px;">
+        <mat-card appearance="outlined" *ngIf="ready" style="margin-bottom:8px;">
             <mat-card-header>
                 <mat-card-title>{{export.Name}}</mat-card-title>
                 <mat-card-subtitle>{{export.Description}}</mat-card-subtitle>
@@ -86,7 +86,7 @@
                 </mat-list>
             </mat-card-content>
         </mat-card>
-        <mat-card *ngIf="ready && hasLastValues">
+        <mat-card appearance="outlined" *ngIf="ready && hasLastValues">
             <mat-card-header class="full-width">
                 <mat-card-title>Values</mat-card-title>
                 <span class="fill-remaining-space"></span>

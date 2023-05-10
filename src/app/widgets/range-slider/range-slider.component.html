@@ -14,11 +14,11 @@
   ~ limitations under the License.
   -->
 
-<mat-card class="switch-container">
+<mat-card appearance="outlined" class="switch-container">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <div class="content-box">
         <div fxFill fxLayout="row" fxLayoutAlign="center center">
-            <div [fittext] [maxFontSize]="widget.properties.threshold ? widget.properties.threshold : 128">
+            <div [fittext] [maxFontSize]="64">
                     <span>
                        {{this.widget.properties.rangeSliderValue2}} {{this.widget.properties.selectedUnit}}
                     </span>
@@ -26,8 +26,13 @@
         </div>
     </div>
     <div>
-        <mat-slider [(ngModel)]="widget.properties.active" [min]="widget.properties.selectedMinValue" [max]=widget.properties.selectedMaxValue step="1"
-                    (change)="sliderRange($event)" (input)="sliderRange2($event)"></mat-slider>
+        <mat-slider [(ngModel)]="widget.properties.active" [min]="widget.properties.selectedMinValue || 0"
+                    [max]="widget.properties.selectedMaxValue || 100" step="1" #ngSlider color="accent">
+            <input matSliderThumb
+                   (change)="sliderRange({source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value})"
+                   #ngSliderThumb="matSliderThumb"
+                   (input)="sliderRange2({source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value})"/>
+        </mat-slider>
         <div fxFlex class="drag-handler"></div>
     </div>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>

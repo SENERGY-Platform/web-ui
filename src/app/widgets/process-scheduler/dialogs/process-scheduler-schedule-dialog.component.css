@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}
-
 .checkbox-margin {
     margin: 0 10px;
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DomSanitizer } from '@angular/platform-browser';
 import { SingleValueService } from './shared/single-value.service';
@@ -38,6 +38,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
+    @ViewChild('content', {static: false}) contentBox!: ElementRef;
 
     constructor(
         private iconRegistry: MatIconRegistry,
@@ -60,6 +61,14 @@ export class SingleValueComponent implements OnInit, OnDestroy {
 
     edit() {
         this.singleValueService.openEditDialog(this.dashboardId, this.widget.id);
+    }
+
+    width(): number {
+        return this.contentBox?.nativeElement.scrollWidth || 0;
+    }
+
+    height(): number {
+        return this.contentBox?.nativeElement.scrollHeight || 0;
     }
 
     private update() {

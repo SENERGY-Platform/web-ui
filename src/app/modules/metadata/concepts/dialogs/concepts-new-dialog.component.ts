@@ -15,7 +15,7 @@
  */
 
 import {Component} from '@angular/core';
-import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialogRef} from '@angular/material/dialog';
 import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
 import {UntypedFormControl, Validators} from '@angular/forms';
 

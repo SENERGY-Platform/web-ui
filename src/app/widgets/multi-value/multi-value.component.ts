@@ -23,7 +23,7 @@ import { DashboardService } from '../../modules/dashboard/shared/dashboard.servi
 import { Subscription } from 'rxjs';
 import { MultiValueMeasurement, MultiValueOrderEnum } from './shared/multi-value.model';
 import { Sort } from '@angular/material/sort';
-import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
+import { MatTable } from '@angular/material/table';
 
 @Component({
     selector: 'senergy-multi-value',

@@ -15,14 +15,14 @@
  */
 
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {FormControl, UntypedFormControl, Validators} from '@angular/forms';
 import { DeviceTypeFunctionModel, DeviceTypeFunctionType } from '../../shared/device-type.model';
 import { util } from 'jointjs';
 import uuid = util.uuid;
 import { ConceptsService } from '../../../concepts/shared/concepts.service';
 import { ConceptsPermSearchModel } from '../../../concepts/shared/concepts-perm-search.model';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     templateUrl: './device-types-new-function-dialog.component.html',

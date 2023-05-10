@@ -14,19 +14,21 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="mat-card-image content-size">
+    <mat-card-content>
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
         <div *ngIf="ready && processes.length !== 0" fxLayout="column" fxFill>
             <mat-list>
                 <mat-list-item *ngFor="let process of processes">
-                    <button mat-list-icon mat-icon-button color="accent" matTooltip="edit process model"
-                            routerLink="/processes/designer/{{process.id}}">
-                        <mat-icon class="fix-position">edit</mat-icon>
-                    </button>
-                    <h4 mat-line class="drag-handler">{{process.name}}</h4>
-                    <p mat-line class="drag-handler"> {{process.date | date:'dd.MM.yyyy, HH:mm'}} </p>
+                    <div matListItemTitle class="drag-handler">{{process.name}}</div>
+                    <div matListItemLine class="drag-handler">{{process.date | date:'dd.MM.yyyy, HH:mm'}}</div>
+                    <div matListItemMeta>
+                        <button mat-icon-button color="accent" matTooltip="edit process model"
+                                routerLink="/processes/designer/{{process.id}}" disableRipple (click)="void()">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                    </div>
                 </mat-list-item>
             </mat-list>
         </div>

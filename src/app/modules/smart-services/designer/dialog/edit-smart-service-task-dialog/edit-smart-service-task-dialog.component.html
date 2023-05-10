@@ -73,7 +73,7 @@
             Notify on Incident
           </mat-checkbox>
         </div>
-        <mat-card>
+        <mat-card appearance="outlined">
           <mat-accordion>
             <mat-expansion-panel>
               <mat-expansion-panel-header>
@@ -92,7 +92,7 @@
           </mat-accordion>
         </mat-card>
         <div>
-          <mat-card>
+          <mat-card appearance="outlined">
             <mat-accordion>
             <mat-expansion-panel *ngFor="let taskId of processTaskIds">
               <mat-expansion-panel-header>
@@ -305,7 +305,7 @@
           </div>
 
           <div>
-            <mat-card>
+            <mat-card appearance="outlined">
               <mat-accordion>
                 <mat-expansion-panel
                         *ngFor="let flowInput of currentParsedFlows"

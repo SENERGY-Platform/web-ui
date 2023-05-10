@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-.mat-cell {
+.mat-mdc-cell {
     padding: 0 8px;
 }
 
-.mat-dialog-content {
+.mat-mdc-dialog-content {
     padding-bottom: 2em;
 }

@@ -18,13 +18,13 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
-import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
+import { MatInputModule } from '@angular/material/input';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { DashboardService } from './shared/dashboard.service';
 import { DashboardComponent } from './dashboard.component';
@@ -34,11 +34,11 @@ import { DeviceStatusService } from '../../widgets/device-status/shared/device-s
 import { DashboardModel } from './shared/dashboard.model';
 import { DashboardManipulationModel } from './shared/dashboard-manipulation.model';
 import { DashboardWidgetManipulationModel } from './shared/dashboard-widget-manipulation.model';
-import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu';
-import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-tabs';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
 import { GridsterModule } from 'angular-gridster2';
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
+import { MatButtonModule } from '@angular/material/button';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;

@@ -27,11 +27,6 @@
     display: grid;
 }
 
-mat-card-actions {
-    position: absolute;
-    bottom: 25px;
-}
-
 .search {
     display: flex;
     align-items: center;
@@ -64,10 +59,6 @@ mat-card-actions {
     .service-container {
         grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
     }
-}
-
-.api-description {
-    margin-left: 15px;
 }
 
 .card-container {

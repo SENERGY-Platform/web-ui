@@ -16,9 +16,9 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {
-    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
-    MatLegacyDialogRef as MatDialogRef
-} from '@angular/material/legacy-dialog';
+    MAT_DIALOG_DATA,
+    MatDialogRef
+} from '@angular/material/dialog';
 import {UntypedFormBuilder, UntypedFormControl} from '@angular/forms';
 import {
     DeviceTypeAspectModel,

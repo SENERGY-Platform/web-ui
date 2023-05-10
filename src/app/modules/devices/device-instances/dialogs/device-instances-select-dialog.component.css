@@ -24,6 +24,9 @@
     width: 100%;
 }
 
+/*
+ TODO(mdc-migration): The following rule targets internal classes of dialog that may no longer apply for the MDC version.
+ */
 mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
@@ -57,11 +60,11 @@ table td {
     border-left: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-.mat-cell {
+.mat-mdc-cell {
     padding: 0 8px;
 }
 
-th.mat-header-cell {
+th.mat-mdc-header-cell {
     border-left: 1px solid rgba(0, 0, 0, 0.12);
     padding: 0 8px;
     position: sticky;

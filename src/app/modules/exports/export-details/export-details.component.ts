@@ -30,7 +30,7 @@ import {Observable, of} from 'rxjs';
 import {BrokerExportService} from '../shared/broker-export.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {environment} from '../../../../environments/environment';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {ClipboardService} from 'ngx-clipboard';
 
 @Component({

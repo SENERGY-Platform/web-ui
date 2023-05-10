@@ -18,14 +18,14 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { OperatorModel } from './shared/operator.model';
 import { OperatorRepoService } from './shared/operator-repo.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { Subscription, merge } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
-import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator';
+import { MatPaginator } from '@angular/material/paginator';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { startWith, switchMap } from 'rxjs/operators';
 

@@ -31,11 +31,11 @@ import {ExportService} from '../../../../modules/exports/shared/export.service';
 import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../../modules/exports/shared/export.model';
 import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
 import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
-import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
+import {MatTableDataSource} from '@angular/material/table';
 import {
-    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
-    MatLegacyDialogRef as MatDialogRef
-} from '@angular/material/legacy-dialog';
+    MAT_DIALOG_DATA,
+    MatDialogRef
+} from '@angular/material/dialog';
 import {forkJoin, Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';

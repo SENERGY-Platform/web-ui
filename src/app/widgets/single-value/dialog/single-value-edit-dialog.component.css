@@ -18,14 +18,6 @@ table {
     width: 100%;
 }
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}
-
-::ng-deep .mat-radio-label-content {
-    padding-right: 8px!important;
-}
-
-::ng-deep .mat-radio-label {
-    padding-bottom: 1em;
+mat-radio-group mat-radio-button:not(:first-child) {
+    padding-left: 8px;
 }

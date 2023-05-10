@@ -20,7 +20,7 @@ import { ChartsModel } from '../../../shared/charts.model';
 import { MonitorProcessModel } from '../../../../../modules/processes/monitor/shared/monitor-process.model';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
 import { ElementSizeService } from '../../../../../core/services/element-size.service';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';

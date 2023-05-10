@@ -60,4 +60,6 @@ export class ProcessModelListComponent implements OnInit, OnDestroy {
             }
         });
     }
+
+    void() {}
 }

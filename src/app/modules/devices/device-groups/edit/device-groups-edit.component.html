@@ -29,17 +29,17 @@
 
             <div class="capabilities-container">
                 <mat-label>Capabilities</mat-label>
-                <mat-chip-list aria-label="Capabilities">
-                    <mat-chip *ngFor="let capability of capabilities.value">
+                <mat-chip-listbox aria-label="Capabilities">
+                    <mat-chip-option *ngFor="let capability of capabilities.value">
                         {{capability.interaction}} {{capability.function_description || capability.function_name || capability.function_id}} {{capability.aspect_name || capability.device_class_name}}
-                    </mat-chip>
-                </mat-chip-list>
+                    </mat-chip-option>
+                </mat-chip-listbox>
             </div>
 
             <div class="selected-devices-container">
                 <mat-label>Selected Devices</mat-label>
                 <div *ngIf="selectedForm.value.length > 0">
-                    <mat-card  *ngFor="let item of selectedForm.value" fxLayout="row" fxLayoutAlign="space-between center" class="selected-device-card">
+                    <mat-card  appearance="outlined"  *ngFor="let item of selectedForm.value" fxLayout="row" fxLayoutAlign="space-between center" class="selected-device-card">
                         <div class="selected-device-info">
                             <div matTooltip="{{item.name}}" class="selected-device-name">
                                 {{item.name}}
@@ -91,7 +91,7 @@
             <mat-icon class="pointer" matPrefix *ngIf="searchText.value !== ''" (click)="resetSearchText()">close</mat-icon>
         </mat-form-field>
         <div class="selectable-devices">
-            <mat-card fxLayout="row" fxLayoutAlign="space-between center" *ngFor="let option of selectableForm.value" class="selectable-card">
+            <mat-card appearance="outlined" fxLayout="row" fxLayoutAlign="space-between center" *ngFor="let option of selectableForm.value" class="selectable-card">
                 <div class="selectable-device-info">
                     <div matTooltip="{{option.device.display_name || option.device.name || option.device.id}}" class="selectable-device-name">
                         {{option.device.display_name || option.device.name || option.device.id}}

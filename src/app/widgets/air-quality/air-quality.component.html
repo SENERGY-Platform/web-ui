@@ -14,25 +14,25 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="content-size">
+    <mat-card-content>
         <senergy-widget-spinner [show]="!ready && isWidgetConfigured()"></senergy-widget-spinner>
         <div *ngIf="ready && isWidgetConfigured()" style="height: 100%">
             <div *ngIf="!inDetailView" (click)="clicked()" matTooltip="Click to view details!"
                  [matTooltipShowDelay]="500"
                  fxLayout="column" fxLayoutAlign="space-evenly center" style="height: 100%">
                 <div *ngIf="pros.length === 0" style="width: 100%">
-                    <button mat-icon-button disableRipple class="icon color-accent" (click)="clicked()">
-                        <mat-icon [inline]="true">sentiment_very_satisfied</mat-icon>
+                    <button mat-icon-button disableRipple class="color-accent" (click)="clicked()">
+                        <mat-icon fontIcon="sentiment_very_satisfied"></mat-icon>
                     </button>
                     <div class="text color-accent" [fittext] [maxFontSize]="24">
                         No reason to open a window!
                     </div>
                 </div>
                 <div *ngIf="pros.length > 0 && cons.length > 0" style="width: 100%">
-                    <button mat-icon-button disableRipple class="icon color-accent" (click)="clicked()">
-                        <mat-icon [inline]="true">sentiment_dissatisfied</mat-icon>
+                    <button mat-icon-button disableRipple class="color-accent" (click)="clicked()">
+                        <mat-icon fontIcon="sentiment_dissatisfied"></mat-icon>
                     </button>
                     <div class="text color-accent" [fittext] [maxFontSize]="24">
                         {{pros.length}} reason<span *ngIf="pros.length > 1">s</span> <!-- plural s -->
@@ -41,8 +41,8 @@
                     </div>
                 </div>
                 <div *ngIf="pros.length > 0 && cons.length === 0" style="width: 100%">
-                    <button mat-icon-button disableRipple class="icon color-accent" (click)="clicked()">
-                        <mat-icon [inline]="true">sentiment_very_dissatisfied</mat-icon>
+                    <button mat-icon-button disableRipple class="color-accent" (click)="clicked()">
+                        <mat-icon fontIcon="sentiment_very_dissatisfied"></mat-icon>
                     </button>
                     <div class="text color-warn" [fittext] [maxFontSize]="24">
                         Consider opening a window!

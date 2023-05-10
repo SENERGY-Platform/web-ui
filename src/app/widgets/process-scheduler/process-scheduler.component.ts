@@ -23,9 +23,9 @@ import { DashboardService } from '../../modules/dashboard/shared/dashboard.servi
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
 import { ProcessSchedulerWidgetModel } from './shared/process-scheduler-widget.model';
 import { DeploymentsPreparedModel } from '../../modules/processes/deployments/shared/deployments-prepared.model';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ProcessSchedulerScheduleDialogComponent } from './dialogs/process-scheduler-schedule-dialog.component';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { CronConverterService } from './shared/cron-converter.service';
 import { V2DeploymentsPreparedModel } from '../../modules/processes/deployments/shared/deployments-prepared-v2.model';

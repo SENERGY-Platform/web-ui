@@ -30,12 +30,12 @@
                         <button mat-menu-item [ngClass]="{'hub-selected': !hub}" (click)="selectHubWithReload(null)">Senergy-Platform</button>
                         <button mat-menu-item *ngFor="let h of hubList" [ngClass]="{'hub-selected': hub?.id === h.id}" (click)="selectHubWithReload(h)">{{h.name}}</button>
                     </mat-menu>
-                    <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
-                        <mat-chip [removable]="true" (removed)="removeChip()" color="accent"
+                    <mat-chip-listbox class="offset" *ngIf="selectedDeployment !== null">
+                        <mat-chip-option [removable]="true" (removed)="removeChip()" color="accent"
                                   selected>{{selectedDeployment.name}}
                             <mat-icon matChipRemove>cancel</mat-icon>
-                        </mat-chip>
-                    </mat-chip-list>
+                        </mat-chip-option>
+                    </mat-chip-listbox>
                 </div>
             </div>
 
@@ -118,12 +118,12 @@
                         <button mat-menu-item (click)="selectHubWithReload(null)">Senergy-Platform</button>
                         <button mat-menu-item *ngFor="let hub of hubList" (click)="selectHubWithReload(hub)">{{hub.name}}</button>
                     </mat-menu>
-                    <mat-chip-list class="offset" *ngIf="selectedDeployment !== null">
-                        <mat-chip [removable]="true" (removed)="removeChip()" color="accent"
+                    <mat-chip-listbox class="offset" *ngIf="selectedDeployment !== null">
+                        <mat-chip-option [removable]="true" (removed)="removeChip()" color="accent"
                                   selected>{{selectedDeployment.name}}
                             <mat-icon matChipRemove>cancel</mat-icon>
-                        </mat-chip>
-                    </mat-chip-list>
+                        </mat-chip-option>
+                    </mat-chip-listbox>
                 </div>
             </div>
 

@@ -19,14 +19,14 @@ import { OperatorRepoComponent } from './operator-repo.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { OperatorRepoService } from './shared/operator-repo.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
-import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { AuthorizationServiceMock } from '../../../core/services/authorization.service.mock';
 import { CoreModule } from '../../../core/core.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSortModule } from '@angular/material/sort';
-import { MatLegacyPaginatorModule as MatPaginatorModule } from '@angular/material/legacy-paginator';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 class MockOperatorRepoService {}
 

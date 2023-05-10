@@ -24,7 +24,7 @@ import {
     DeviceInstancesRouterState,
     DeviceInstancesRouterStateTypesEnum
 } from '../device-instances/device-instances.component';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {NetworksDeleteDialogComponent} from './dialogs/networks-delete-dialog.component';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 import {MatTableDataSource} from '@angular/material/table';

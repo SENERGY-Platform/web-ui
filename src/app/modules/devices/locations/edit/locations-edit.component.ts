@@ -18,7 +18,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { LocationsService } from '../shared/locations.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { LocationModel } from '../shared/locations.model';
 import { DeviceInstancesBaseModel } from '../../device-instances/shared/device-instances.model';
 import { debounceTime, delay } from 'rxjs/operators';

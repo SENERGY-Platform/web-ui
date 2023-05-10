@@ -15,17 +15,17 @@
  */
 
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {
-    MatLegacySnackBar as MatSnackBar,
-    MatLegacySnackBarRef as MatSnackBarRef
-} from '@angular/material/legacy-snack-bar';
+    MatSnackBar,
+    MatSnackBarRef
+} from '@angular/material/snack-bar';
 import {merge, Subscription} from 'rxjs';
-import {MatLegacyPaginator as MatPaginator} from '@angular/material/legacy-paginator';
+import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {SelectionModel} from '@angular/cdk/collections';
-import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
+import {MatTableDataSource} from '@angular/material/table';
 import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeSet} from './shared/waiting-room.model';
 import {debounceTime, startWith, switchMap} from 'rxjs/operators';
 import {WaitingRoomService} from './shared/waiting-room.service';

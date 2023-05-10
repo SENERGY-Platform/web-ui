@@ -32,7 +32,7 @@ import {
 } from './device-type.model';
 import { DeviceTypePermSearchModel } from './device-type-perm-search.model';
 import { BpmnSkeletonModel } from './device-type-selection.model';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { flatMap } from 'rxjs/operators';
 import {flatten} from 'lodash';
 

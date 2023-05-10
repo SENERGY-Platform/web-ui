@@ -17,14 +17,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NetworksDeleteDialogComponent } from './networks-delete-dialog.component';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogModule as MatDialogModule, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
-import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
-import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip';
-import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 import { NetworksService } from '../shared/networks.service';
-import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 const deviceInstancesServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass(DeviceInstancesService);
 const networksServiceSpy: Spy<NetworksService> = createSpyFromClass(NetworksService);

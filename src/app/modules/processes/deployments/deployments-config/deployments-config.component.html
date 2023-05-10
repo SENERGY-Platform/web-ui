@@ -26,7 +26,7 @@
             </mat-form-field>
 
             <form [formGroup]="deploymentFormGroup">
-                <mat-card class="deployment-description">
+                <mat-card appearance="outlined" class="deployment-description">
                     <mat-card-content>
                         <mat-form-field class="full-width" color="accent">
                             <input type="text" matInput placeholder="Prozessname"
@@ -41,7 +41,7 @@
                 </mat-card>
 
 
-                <mat-card class="incident-handling" formGroupName="incident_handling">
+                <mat-card appearance="outlined" class="incident-handling" formGroupName="incident_handling">
                     <mat-card-header>
                         <mat-card-title>On Incident</mat-card-title>
                     </mat-card-header>
@@ -59,7 +59,7 @@
                     </mat-card-content>
                 </mat-card>
 
-                <mat-card class="start-parameter" formArrayName="start_parameter" *ngIf="start_parameter.length > 0">
+                <mat-card appearance="outlined" class="start-parameter" formArrayName="start_parameter" *ngIf="start_parameter.length > 0">
                     <mat-card-header>
                         <mat-card-title>Defaults Start Parameter</mat-card-title>
                         <mat-card-subtitle>will be used on automatic restarts and as preset for manual starts</mat-card-subtitle>
@@ -73,7 +73,7 @@
                     </mat-card-content>
                 </mat-card>
 
-                <mat-card formArrayName="elements" *ngIf="elements.length > 0" class="deployment-elements">
+                <mat-card appearance="outlined" formArrayName="elements" *ngIf="elements.length > 0" class="deployment-elements">
                     <mat-card-content>
                         <div [formGroupName]="elementIndex"
                          *ngFor="let element of elements; let elementIndex = index; trackBy:trackByFn">

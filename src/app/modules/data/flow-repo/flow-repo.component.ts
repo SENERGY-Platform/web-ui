@@ -15,7 +15,7 @@
  */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { FlowModel } from './shared/flow.model';
 import { FlowRepoService } from './shared/flow-repo.service';
 import { DialogsService } from '../../../core/services/dialogs.service';

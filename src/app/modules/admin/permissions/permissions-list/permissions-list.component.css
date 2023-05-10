@@ -44,7 +44,7 @@ mat-form-field {
     margin-bottom: 20px;
 }
 
-.test .mat-form-field {
+.test .mat-mdc-form-field {
     padding-right: 20px;
 }
 
@@ -58,7 +58,7 @@ mat-form-field {
     background: white;
 }
 
-.mat-raised-button {
+.mat-mdc-raised-button {
     color: white;
 }
 
@@ -119,6 +119,6 @@ mat-form-field {
     font-size: 3em;
 }
 
-th.mat-header-cell, td.mat-cell, td.mat-footer-cell {
+th.mat-mdc-header-cell, td.mat-mdc-cell, td.mat-mdc-footer-cell {
     border-bottom-style: hidden;
 }

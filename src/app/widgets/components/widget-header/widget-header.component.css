@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-.header-container ::ng-deep .mat-card-header-text {
-    margin: 0px;
+.mat-mdc-card-header-text {
+    margin: 0;
     width: 100%;
 }
 
@@ -26,9 +26,9 @@
     min-height: 32px;
 }
 
-mat-card-title {
+.mat-mdc-card-title {
     height: 24px;
-    margin-bottom: 8px;
+    padding-bottom: 16px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -29,7 +29,7 @@ import {
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
 import { FlowEngineService } from '../../shared/flow-engine.service';
 import { NodeInput, NodeModel, NodeValue, PipelineRequestModel } from '../shared/pipeline-request.model';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     selector: 'senergy-deploy-flow-classic',

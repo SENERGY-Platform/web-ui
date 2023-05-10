@@ -20,7 +20,7 @@
             <div fxLayout="row" fxLayoutAlign="start center" style="margin-bottom:8px;">
                 <button mat-raised-button color="accent" routerLink="/data/pipelines">back</button>
             </div>
-            <mat-card style="margin-bottom:10px;">
+            <mat-card appearance="outlined" style="margin-bottom:10px;">
                 <mat-card-header>
                     <div mat-card-avatar>
                         <mat-icon>timeline</mat-icon>
@@ -36,7 +36,7 @@
                     </div>
                 </mat-card-content>
             </mat-card>
-            <mat-card>
+            <mat-card appearance="outlined">
                 <div fxLayout="column" *ngFor="let operator of pipe.operators">
                     <h3>
                         <mat-icon class="v-align-middle">poll</mat-icon>
@@ -83,7 +83,7 @@
                     </div>
                 </div>
             </mat-card>
-            <mat-card style="margin-top: 10px;">
+            <mat-card appearance="outlined" style="margin-top: 10px;">
                 <div class="widget-image" [innerHtml]="pipe.image"></div>
             </mat-card>
             <section class="checkbox-section">

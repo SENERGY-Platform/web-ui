@@ -14,9 +14,9 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="content-size drag-handler">
+    <mat-card-content class="drag-handler">
         <div *ngIf="!configured" fxFill fxLayout="row" fxLayoutAlign="center center">
             Please configure widget!
         </div>
@@ -25,7 +25,7 @@
             <div class="center-text">Problem fetching data: Operator might have not received data for selected time frame. Check config otherwise.</div>
         </div>
         <div *ngIf="configured && ready && dataReady" fxLayout="column" fxFill>
-            <div fxFlex="1 1 calc(25% - 6px)">
+            <div fxFlex="1 1 calc(25% - 18px)">
                 <div class="widget-icon" fxFill fxFlex="40" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">trending_up</mat-icon>
                 </div>
@@ -42,8 +42,7 @@
                     </div>
                 </div>
             </div>
-            <div fxFlex="8px"></div>
-            <div fxFlex="1 1 calc(25% - 6px)">
+            <div fxFlex="1 1 calc(25% - 18px)" class="mtop">
                 <div class="widget-icon" fxFill fxFlex="40" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">trending_flat</mat-icon>
                 </div>
@@ -59,8 +58,7 @@
                     </div>
                 </div>
             </div>
-            <div fxFlex="8px"></div>
-            <div fxFlex="1 1 calc(25% - 6px)">
+            <div fxFlex="1 1 calc(25% - 18px)" class="mtop">
                 <div class="widget-icon" fxFill fxFlex="40" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">event</mat-icon>
                 </div>
@@ -71,8 +69,7 @@
                     </div>
                 </div>
             </div>
-            <div fxFlex="8px"></div>
-            <div fxFlex="1 1 calc(25% - 6px)">
+            <div fxFlex="1 1 calc(25% - 18px)" class="mtop">
                 <div class="widget-icon" fxFill fxFlex="40" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">euro_symbol</mat-icon>
                 </div>

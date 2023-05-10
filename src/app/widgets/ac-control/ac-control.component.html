@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <mat-card-content class="content-size">
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
@@ -84,9 +84,8 @@
                  fxLayout="row" fxLayoutAlign="space-between center">
                 <mat-icon inline>air</mat-icon>
                 <mat-slider [min]="0" [max]=100 [step]="1"
-                            [value]="widget.properties.acControl?.getFanSpeedLevel?.value || 0"
                             thumbLabel
-                            (valueChange)="runCommand(widget.properties.acControl?.setFanSpeedLevel, $event)"></mat-slider>
+                            (valueChange)="runCommand(widget.properties.acControl?.setFanSpeedLevel, $event)"><input matSliderThumb [value]="widget.properties.acControl?.getFanSpeedLevel?.value || 0" /></mat-slider>
                 %
             </div>
             <div *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic !== undefined && widget.properties.acControl?.setFanSpeedLevelAutomatic !== undefined"
@@ -130,9 +129,8 @@
                 <mat-slider [min]="widget.properties.acControl?.minTarget || 15"
                             [max]="widget.properties.acControl?.maxTarget || 30"
                             [step]="widget.properties.acControl?.tempStep || 1"
-                            [value]="(widget.properties.acControl?.getTargetTemperature || [{value:0}])[0]?.value"
                             (valueChange)="setAllTargets($event)"
-                            thumbLabel></mat-slider>
+                            thumbLabel><input matSliderThumb [value]="(widget.properties.acControl?.getTargetTemperature || [{value:0}])[0]?.value" /></mat-slider>
                 °C
             </div>
         </div>

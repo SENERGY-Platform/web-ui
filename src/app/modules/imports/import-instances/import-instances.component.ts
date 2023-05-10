@@ -17,9 +17,10 @@ import { Component, OnInit, } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
 import { Sort } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
+import { MatTable } from '@angular/material/table';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
@@ -48,7 +49,7 @@ export class ImportInstancesComponent implements OnInit {
 
     searchText: string = ""
     selection = new SelectionModel<ImportInstancesModel>(true, []);
-    searchSub: Subscription = new Subscription()    
+    searchSub: Subscription = new Subscription()
     dataReady = false;
     sort = 'updated_at.desc';
     limitInit = 100;

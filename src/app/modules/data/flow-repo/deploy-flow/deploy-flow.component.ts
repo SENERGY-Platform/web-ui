@@ -29,14 +29,14 @@ import {
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { FlowEngineService } from '../shared/flow-engine.service';
 import { NodeConfig, NodeModel, NodeValue, PipelineInputSelectionModel, PipelineRequestModel } from './shared/pipeline-request.model';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { first, map } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
 import { DeviceTypePermSearchModel } from '../../../metadata/device-types-overview/shared/device-type-perm-search.model';
-import { MatLegacyOption as MatOption } from '@angular/material/legacy-core';
+import { MatOption } from '@angular/material/core';
 import { ConceptsService } from '../../../metadata/concepts/shared/concepts.service';
 import { OperatorInputTopic, PipelineModel, PipelineOperatorModel } from '../../pipeline-registry/shared/pipeline.model';
 import { PipelineRegistryService } from '../../pipeline-registry/shared/pipeline-registry.service';

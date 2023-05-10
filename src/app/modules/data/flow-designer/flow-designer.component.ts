@@ -21,7 +21,7 @@ import { ActivatedRoute } from '@angular/router';
 import { OperatorRepoService } from '../operator-repo/shared/operator-repo.service';
 import { FlowModel, FlowShareModel } from '../flow-repo/shared/flow.model';
 import { DiagramEditorComponent } from '../../../core/components/diagram-editor/diagram-editor.component';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import MouseMoveEvent = JQuery.MouseMoveEvent;
 

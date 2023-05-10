@@ -20,7 +20,7 @@ import {ChartsModel} from '../../shared/charts.model';
 import {ElementSizeService} from '../../../../core/services/element-size.service';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {ChartDataTableModel} from '../../../../core/components/chart/chart-data-table.model';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../../modules/dashboard/shared/dashboard.service';
 import {ChartsExportEditDialogComponent} from '../dialog/charts-export-edit-dialog.component';
 import {WidgetModel, WidgetPropertiesModels} from '../../../../modules/dashboard/shared/dashboard-widget.model';

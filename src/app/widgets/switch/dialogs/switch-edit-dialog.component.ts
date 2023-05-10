@@ -24,8 +24,8 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { SwitchPropertiesDeploymentsModel } from '../shared/switch-properties.model';
-import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
+import { MatTable } from '@angular/material/table';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 export interface TableElement {
     name: string;

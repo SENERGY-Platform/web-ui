@@ -18,7 +18,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {
     DeviceGroupCapability,
     DeviceGroupCriteriaModel,
@@ -30,7 +30,7 @@ import { debounceTime, delay } from 'rxjs/operators';
 import { DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects-perm-search.model';
 import { DeviceClassesPermSearchModel } from '../../../metadata/device-classes/shared/device-classes-perm-search.model';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
 import {DeviceInstancesService} from '../../device-instances/shared/device-instances.service';

@@ -28,14 +28,14 @@
 
     <div [hidden]="!ready" class="card-container" fxFlex="auto">
         <div [hidden]="!ready" class="service-container" fxFlex="auto">
-            <mat-card *ngFor="let element of swaggerListShown; let i = index"
+            <mat-card appearance="outlined" *ngFor="let element of swaggerListShown; let i = index"
                       [routerLink]="['/dev/api/', element.info.title]"
                       class="hover-mat-card entry-card api-card">
                 <mat-card-header>
                     <mat-card-title>{{ element.info.title }}</mat-card-title>
                 </mat-card-header>
                 <mat-card-content>
-                    <p class="api-description">
+                    <p>
                         {{ element.info.description }}
                     </p>
                 </mat-card-content>

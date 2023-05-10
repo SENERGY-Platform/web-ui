@@ -31,7 +31,7 @@
     <div class="devices-container">
         <h2>Device-Groups</h2>
         <div *ngIf="deviceGroupsForm.value.length > 0">
-            <mat-card  *ngFor="let item of deviceGroupsForm.value" fxLayout="row" fxLayoutAlign="space-between center" class="device-card">
+            <mat-card  appearance="outlined"  *ngFor="let item of deviceGroupsForm.value" fxLayout="row" fxLayoutAlign="space-between center" class="device-card">
                 <div class="device-info">
                     <div matTooltip="{{item.name}}" class="device-name">
                         {{item.name}}
@@ -50,7 +50,7 @@
     <div class="devices-container">
         <h2>Devices</h2>
         <div *ngIf="devicesForm.value.length > 0">
-            <mat-card  *ngFor="let item of devicesForm.value" fxLayout="row" fxLayoutAlign="space-between center" class="device-card">
+            <mat-card  appearance="outlined"  *ngFor="let item of devicesForm.value" fxLayout="row" fxLayoutAlign="space-between center" class="device-card">
                 <div class="device-info">
                     <div matTooltip="{{item.name}}" class="device-name">
                         {{item.name}}

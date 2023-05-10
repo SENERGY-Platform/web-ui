@@ -40,7 +40,7 @@ table {
     max-width: 100%
 }
 
-::ng-deep td.mat-cell {
+::ng-deep td.mat-mdc-cell {
     word-wrap: break-word;
     white-space: pre-wrap;
     max-width: calc((80vw - 232px)/2);

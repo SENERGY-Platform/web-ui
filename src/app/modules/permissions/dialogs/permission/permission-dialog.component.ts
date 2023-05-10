@@ -16,9 +16,9 @@
 
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {
-    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
-    MatLegacyDialogRef as MatDialogRef
-} from '@angular/material/legacy-dialog';
+    MAT_DIALOG_DATA,
+    MatDialogRef
+} from '@angular/material/dialog';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {PermissionsEditModel} from '../../shared/permissions-edit.model';
 import {UntypedFormControl} from '@angular/forms';
@@ -26,7 +26,7 @@ import {AuthorizationService} from '../../../../core/services/authorization.serv
 import {PermissionsGroupModel, PermissionsUserModel} from '../../shared/permissions-user.model';
 import {HttpClient} from '@angular/common/http';
 import {PermissionsService} from '../../shared/permissions.service';
-import {MatLegacyTable as MatTable} from '@angular/material/legacy-table';
+import {MatTable} from '@angular/material/table';
 
 @Component({
     templateUrl: './permission-dialog.component.html',

@@ -17,10 +17,10 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { debounceTime, forkJoin, Observable, Subscription } from 'rxjs';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeviceClassesPermSearchModel } from './shared/device-classes-perm-search.model';

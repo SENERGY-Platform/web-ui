@@ -16,16 +16,16 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {
-    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
-    MatLegacyDialogRef as MatDialogRef
-} from '@angular/material/legacy-dialog';
+    MAT_DIALOG_DATA,
+    MatDialogRef
+} from '@angular/material/dialog';
 import {NotificationBrokerModel, NotificationModel} from '../shared/notification.model';
 import {NotificationService} from '../shared/notification.service';
-import {LegacyPageEvent as PageEvent} from '@angular/material/legacy-paginator';
+import {PageEvent} from '@angular/material/paginator';
 import {UntypedFormBuilder, UntypedFormControl, Validators} from '@angular/forms';
 import {forkJoin, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
+import {MatTableDataSource} from '@angular/material/table';
 import {environment} from '../../../../../../environments/environment';
 import {AuthorizationService} from '../../../../services/authorization.service';
 
