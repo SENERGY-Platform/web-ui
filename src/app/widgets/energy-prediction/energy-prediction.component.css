@@ -56,11 +56,9 @@
 
 .values {
     font: 400 16px/18px Roboto,"Helvetica Neue",sans-serif;
+    font-weight: 500;
 }
 
-.widget-icon {
-    margin-top: 6px;
-}
 
 .mtop {
     margin-top: 4px;
