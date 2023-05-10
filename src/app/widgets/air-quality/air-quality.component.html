@@ -21,43 +21,50 @@
         <div *ngIf="ready && isWidgetConfigured()" style="height: 100%">
             <div *ngIf="!inDetailView" (click)="clicked()" matTooltip="Click to view details!"
                  [matTooltipShowDelay]="500"
-                 fxLayout="column" fxLayoutAlign="space-evenly center" style="height: 100%">
+                 fxLayout="column" fxLayoutAlign="space-evenly center">
                 <div *ngIf="pros.length === 0" style="width: 100%">
-                    <button mat-icon-button disableRipple class="color-accent" (click)="clicked()">
-                        <mat-icon fontIcon="sentiment_very_satisfied"></mat-icon>
-                    </button>
-                    <div class="text color-accent" [fittext] [maxFontSize]="24">
+                    <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
+                        <button mat-icon-button class="color-accent" (click)="clicked()">
+                            <mat-icon fontIcon="sentiment_very_satisfied"></mat-icon>
+                        </button>
+                    </div>
+                    <div class="text color-accent">
                         No reason to open a window!
                     </div>
+
                 </div>
                 <div *ngIf="pros.length > 0 && cons.length > 0" style="width: 100%">
-                    <button mat-icon-button disableRipple class="color-accent" (click)="clicked()">
-                        <mat-icon fontIcon="sentiment_dissatisfied"></mat-icon>
-                    </button>
-                    <div class="text color-accent" [fittext] [maxFontSize]="24">
+                    <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
+                        <button mat-icon-button class="color-accent" (click)="clicked()">
+                            <mat-icon fontIcon="sentiment_dissatisfied"></mat-icon>
+                        </button>
+                    </div>
+                    <div class="text color-accent">
                         {{pros.length}} reason<span *ngIf="pros.length > 1">s</span> <!-- plural s -->
                         for and {{cons.length}} reason<span *ngIf="cons.length > 1">s</span> <!-- plural s -->
                         against opening a window!
                     </div>
                 </div>
                 <div *ngIf="pros.length > 0 && cons.length === 0" style="width: 100%">
-                    <button mat-icon-button disableRipple class="color-accent" (click)="clicked()">
-                        <mat-icon fontIcon="sentiment_very_dissatisfied"></mat-icon>
-                    </button>
-                    <div class="text color-warn" [fittext] [maxFontSize]="24">
+                    <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
+                        <button mat-icon-button class="color-accent" (click)="clicked()">
+                            <mat-icon fontIcon="sentiment_very_dissatisfied"></mat-icon>
+                        </button>
+                    </div>
+                    <div class="text color-warn">
                         Consider opening a window!
                     </div>
                 </div>
             </div>
-            <div *ngIf="inDetailView" (click)="clicked()" style="height: 100%" fxLayout="column"  fxFill>
+            <div *ngIf="inDetailView" (click)="clicked()" style="height: 100%" fxLayout="column" fxFill>
                 <mat-list style="overflow: auto; max-height: 100%">
-                    <h2 mat-subheader *ngIf="pros.length > 0">Reasons for opening a window</h2>
+                    <div mat-subheader *ngIf="pros.length > 0">Reasons for opening a window</div>
                     <mat-list-item *ngFor="let pro of pros">
-                        <span matLine [innerHTML]="pro"></span>
+                        <div matListItemLine [innerHTML]="pro"></div>
                     </mat-list-item>
-                    <h2 mat-subheader *ngIf="cons.length > 0">Reasons against opening a window</h2>
+                    <div mat-subheader *ngIf="cons.length > 0">Reasons against opening a window</div>
                     <mat-list-item *ngFor="let con of cons">
-                        <span matLine [innerHTML]="con"></span>
+                        <span matListItemLine [innerHTML]="con"></span>
                     </mat-list-item>
                 </mat-list>
                 <div *ngIf="pros.length === 0 && cons.length === 0" fxFill fxLayout="row" fxLayoutAlign="center center">
