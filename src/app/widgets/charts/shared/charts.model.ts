@@ -66,7 +66,7 @@ export class ChartsModel {
                 0?: { title?: string };
                 1?: { title?: string };
             };
-            legend?: { position: string; textStyle?: { color: string; fontSize: 16 } } | string;
+            legend?: { position: string; textStyle?: { color: string; fontSize: 16 }; alignment?: string } | string;
             is3D?: boolean;
             pieHole?: number;
         },

@@ -113,7 +113,10 @@ export class ChartsProcessInstancesService {
             height: element.height,
             width: element.width,
             pieSliceText: 'value',
-            legend: 'none',
+            legend: {
+                'position': 'top',
+                'alignment': 'center'
+            }
         });
     }
 }
