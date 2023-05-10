@@ -112,10 +112,9 @@ export class ChartsProcessInstancesService {
             chartArea: { width: element.widthPercentage, height: element.heightPercentage },
             height: element.height,
             width: element.width,
-            pieSliceText: 'value',
+            pieSliceText: 'none',
             legend: {
-                'position': 'top',
-                'alignment': 'center'
+                'position': 'labeled',
             }
         });
     }
