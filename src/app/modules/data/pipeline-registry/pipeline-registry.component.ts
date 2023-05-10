@@ -22,6 +22,7 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { MatTable } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { UtilService } from 'src/app/core/services/util.service';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -41,6 +42,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         private flowEngineService: FlowEngineService,
         public snackBar: MatSnackBar,
         private dialogsService: DialogsService,
+        public utilsService: UtilService
     ) {}
 
     ngOnInit() {

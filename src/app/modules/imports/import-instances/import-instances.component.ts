@@ -29,6 +29,7 @@ import { Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
+import { UtilService } from 'src/app/core/services/util.service';
 
 @Component({
     selector: 'senergy-import-instances',
@@ -44,7 +45,8 @@ export class ImportInstancesComponent implements OnInit {
         private snackBar: MatSnackBar,
         private deleteDialog: DialogsService,
         private router: Router,
-        private searchbarService: SearchbarService
+        private searchbarService: SearchbarService,
+        public utilsService: UtilService
     ) {}
 
     searchText: string = ""
@@ -115,6 +117,7 @@ export class ImportInstancesComponent implements OnInit {
             .listImportInstances(this.searchText, this.limit, this.offset, this.sort, this.excludeGenerated)
             .subscribe((inst) => {
                 this.dataSource.data = inst;
+                console.log(inst)
                 this.dataReady = true;
             });
     }

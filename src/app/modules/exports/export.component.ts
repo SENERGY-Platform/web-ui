@@ -29,6 +29,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { startWith, switchMap } from 'rxjs/operators';
 import { BrokerExportService } from './shared/broker-export.service';
 import { ActivatedRoute } from '@angular/router';
+import { UtilService } from 'src/app/core/services/util.service';
 
 @Component({
     selector: 'senergy-export',
@@ -81,6 +82,7 @@ export class ExportComponent implements OnInit, OnDestroy {
         private responsiveService: ResponsiveService,
         private brokerExportService: BrokerExportService,
         private route: ActivatedRoute,
+        public utilsService: UtilService
     ) {}
 
     ngOnInit() {

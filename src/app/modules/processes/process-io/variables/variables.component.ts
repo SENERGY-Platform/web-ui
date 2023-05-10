@@ -31,6 +31,7 @@ import {MatPaginator} from '@angular/material/paginator';
 import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
 import {Subscription} from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
+import { UtilService } from 'src/app/core/services/util.service';
 
 
 
@@ -61,6 +62,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         private dialogsService: DialogsService,
         private dialog: MatDialog,
         private searchbarService: SearchbarService,
+        public utilsService: UtilService
     ) {
         this.updateTotal();
     }

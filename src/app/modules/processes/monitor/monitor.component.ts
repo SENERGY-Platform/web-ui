@@ -32,6 +32,7 @@ import { MatSort } from '@angular/material/sort';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { NetworksModel } from '../../devices/networks/shared/networks.model';
 import { MonitorFogFactory, MonitorFogService } from './shared/monitor-fog.service';
+import { UtilService } from 'src/app/core/services/util.service';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -92,6 +93,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         private router: Router,
         private hubsService: NetworksService,
         private fogMonitorFactory: MonitorFogFactory,
+        public utilsService: UtilService
     ) {
         this.monitorService = plattformMonitorService;
         this.getRouterParams();
