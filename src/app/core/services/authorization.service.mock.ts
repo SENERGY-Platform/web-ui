@@ -16,7 +16,7 @@
 
 import {Injectable} from '@angular/core';
 import { Observable } from 'rxjs';
-import {AuthorizationProfileModel} from '../components/authorization/authorization-profile.model';
+import {AuthorizationProfileModel} from '../model/authorization/authorization-profile.model';
 
 @Injectable({
     providedIn: 'root',

@@ -15,10 +15,10 @@
   -->
 
 <h2 mat-dialog-title>Edit AC Control</h2>
-<senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
 
-<mat-dialog-content *ngIf="ready">
-    <form [formGroup]="form" fxLayout="column">
+<mat-dialog-content >
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    <form *ngIf="ready" [formGroup]="form" fxLayout="column">
         <mat-form-field color="accent">
             <mat-label>Widget Name</mat-label>
             <input type="text" matInput placeholder="Widget Name" formControlName="name" required>

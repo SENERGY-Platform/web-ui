@@ -23,7 +23,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {ChartDataTableModel} from '../../../../../core/components/chart/chart-data-table.model';
+import {ChartDataTableModel} from '../../../../../core/model/chart/chart-data-table.model';
 import {DeviceTotalDowntimeEditDialogComponent} from '../dialogs/device-total-downtime-edit-dialog.component';
 import {DeviceInstancesService} from '../../../../../modules/devices/device-instances/shared/device-instances.service';
 import {

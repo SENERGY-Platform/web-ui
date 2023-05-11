@@ -25,7 +25,7 @@ import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shar
 import { ErrorHandlerService } from '../../../../../core/services/error-handler.service';
 import { DeviceGatewayEditDialogComponent } from '../dialogs/device-gateway-edit-dialog.component';
 import { Observable } from 'rxjs';
-import { ChartDataTableModel } from '../../../../../core/components/chart/chart-data-table.model';
+import { ChartDataTableModel } from '../../../../../core/model/chart/chart-data-table.model';
 import { ChartsModel } from '../../../shared/charts.model';
 import { NetworksService } from '../../../../../modules/devices/networks/shared/networks.service';
 import { NetworksHistoryModel } from '../../../../../modules/devices/networks/shared/networks-history.model';

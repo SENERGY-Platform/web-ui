@@ -21,8 +21,8 @@ import { environment } from '../../../environments/environment';
 import { catchError } from 'rxjs/operators';
 import { ErrorHandlerService } from './error-handler.service';
 import { HttpClient } from '@angular/common/http';
-import { AuthorizationProfileModel } from '../components/authorization/authorization-profile.model';
-import { AuthorizationUserProfileModel } from '../components/authorization/authorization-user-profile.model';
+import { AuthorizationProfileModel } from '../model/authorization/authorization-profile.model';
+import { AuthorizationUserProfileModel } from '../model/authorization/authorization-user-profile.model';
 
 @Injectable({
     providedIn: 'root',

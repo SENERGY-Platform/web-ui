@@ -16,7 +16,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import {AuthorizationProfileModel} from '../../../core/components/authorization/authorization-profile.model';
+import {AuthorizationProfileModel} from '../../../core/model/authorization/authorization-profile.model';
 import {
     AbstractControl,
     FormControl,

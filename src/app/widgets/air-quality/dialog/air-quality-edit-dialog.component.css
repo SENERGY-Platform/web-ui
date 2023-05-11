@@ -48,6 +48,6 @@
     min-width: 50%;
 }
 
-::ng-deep .mat-mdc-select-panel {
-    min-width: fit-content !important;
+senergy-widget-spinner {
+    margin-bottom: 64px;
 }

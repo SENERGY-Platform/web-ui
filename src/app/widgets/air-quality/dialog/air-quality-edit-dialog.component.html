@@ -15,11 +15,10 @@
   -->
 
 <h2 mat-dialog-title>Edit Air Recommendation</h2>
-<senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
 
-<mat-dialog-content *ngIf="ready">
-
-    <mat-vertical-stepper #stepper>
+<mat-dialog-content>
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+    <mat-vertical-stepper  *ngIf="ready" #stepper>
         <mat-step label="Give the widget a name">
             <mat-form-field color="accent">
                 <input type="text" matInput placeholder="Name" [(ngModel)]="name" required>

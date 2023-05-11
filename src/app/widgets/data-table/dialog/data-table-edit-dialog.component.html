@@ -15,10 +15,11 @@
   -->
 
 <h2 mat-dialog-title>Edit Data Table</h2>
-<senergy-widget-spinner [show]="!ready || saving"></senergy-widget-spinner>
 
-<mat-dialog-content *ngIf="ready && !saving">
-    <form [formGroup]="formGroup">
+<mat-dialog-content>
+    <senergy-widget-spinner [show]="!ready || saving"></senergy-widget-spinner>
+
+    <form *ngIf="ready && !saving" [formGroup]="formGroup">
         <table>
             <tr>
                 <td>

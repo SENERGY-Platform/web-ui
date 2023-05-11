@@ -21,13 +21,6 @@ body {
     margin: 0px;
 }
 
-/*
- TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
- */
-.mat-tab-label-active {
-    opacity: 1 !important;
-}
-
 svg > g > g:last-child { pointer-events: none } /* google chart anti flickering fix */
 
 .right-aligned-header > .mat-content { /* to align description in expansion panel  headers to the right, has to be here */

@@ -47,19 +47,8 @@ gridster-item {
   margin: 0px;
 }
 
-/*TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
- */
-.dashboard-container ::ng-deep .mat-tab-label:last-child {
-  min-width: 20px !important;
-  padding-left: 0px;
-  padding-right: 0px;
-}
-
-
-
 .mat-mdc-tab-labels .mat-mdc-tab {
   height: 54px;
-  width: 31px; /*TEST TODO*/
 }
 
 .mdc-tab {
@@ -76,12 +65,6 @@ gridster-item {
   bottom: 15px;
   right: 15px;
   z-index: 100;
-}
-
-/*TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
- */
-.dashboard-container ::ng-deep .mat-tab-body-content {
-  overflow: hidden;
 }
 
 .dashboard-container ::ng-deep .mat-mdc-tab-body-wrapper {

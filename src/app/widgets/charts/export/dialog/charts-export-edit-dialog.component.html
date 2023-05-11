@@ -15,9 +15,10 @@
   -->
 
 <h2 mat-dialog-title>Edit Chart Export</h2>
-<senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-<mat-dialog-content class="form" *ngIf="ready">
-    <div fxLayout="column" [formGroup]="formGroupController">
+<mat-dialog-content class="form">
+    <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+
+    <div *ngIf="ready" fxLayout="column" [formGroup]="formGroupController">
         <mat-form-field color="accent">
             <mat-label>Name</mat-label>
             <input type="text" matInput placeholder="Name" formControlName="name">
@@ -187,7 +188,7 @@
 
     </div>
 
-    <table mat-table [dataSource]="dataSource">
+    <table *ngIf="ready" mat-table [dataSource]="dataSource">
 
         <ng-container matColumnDef="exportName">
             <th mat-header-cell *matHeaderCellDef>Export</th>

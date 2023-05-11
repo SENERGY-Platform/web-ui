@@ -25,7 +25,7 @@ import { DashboardService } from '../../../../../modules/dashboard/shared/dashbo
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { ChartsProcessDeploymentsEditDialogComponent } from '../dialogs/charts-process-deployments-edit-dialog.component';
-import { ChartDataTableModel } from '../../../../../core/components/chart/chart-data-table.model';
+import { ChartDataTableModel } from '../../../../../core/model/chart/chart-data-table.model';
 import { ChartsDataTableModel } from '../../../shared/charts-data-table.model';
 
 const customColor = '#4484ce'; // /* cc */
