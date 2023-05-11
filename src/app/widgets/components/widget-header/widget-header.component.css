@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-.mat-mdc-card-header-text {
+:host ::ng-deep .mat-mdc-card-header-text {
     margin: 0;
     width: 100%;
 }
