@@ -14,9 +14,9 @@
   ~ limitations under the License.
   -->
 
-
+<h2 mat-dialog-title>Smart-Service Task</h2>
 <mat-dialog-content class="edit-smart-service-task-dialog">
-  <mat-tab-group  dynamicHeight="true" [(selectedIndex)]="activeIndex">
+  <mat-tab-group  backgroundColor="accent" color="primary" dynamicHeight="true" [(selectedIndex)]="activeIndex">
     <mat-tab label="Process">
       <div class="smart-service-task-tab">
         <div>
@@ -877,5 +877,5 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="ok()" [disabled]="isInvalid()">Ok</button>
+  <button mat-raised-button color="accent" (click)="ok()" [disabled]="isInvalid()">Save</button>
 </mat-dialog-actions>

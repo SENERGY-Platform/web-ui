@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-
+<h2 mat-dialog-title>Smart-Service Inputs</h2>
 <mat-dialog-content class="edit-smart-service-input-dialog">
         <mat-accordion *ngIf="abstract && abstract.length > 0">
             <mat-expansion-panel *ngFor="let input of abstract; let inputIndex = index">
@@ -242,6 +242,6 @@
 
 <mat-dialog-actions fxLayoutAlign="end center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="ok()" [disabled]="!isValid()">Ok</button>
+  <button mat-raised-button color="accent" (click)="ok()" [disabled]="!isValid()">Save</button>
 </mat-dialog-actions>
 
