@@ -53,7 +53,7 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 }
 
 .table-container-with-button {
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 220px);
 }
 
 .table-container table {

@@ -28,14 +28,12 @@ import {MatDialog} from '@angular/material/dialog';
 import {NetworksDeleteDialogComponent} from './dialogs/networks-delete-dialog.component';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort, Sort} from '@angular/material/sort';
-import {UntypedFormControl} from '@angular/forms';
-import {debounceTime} from 'rxjs/operators';
-import { SelectionModel } from '@angular/cdk/collections';
-import { MatPaginator } from '@angular/material/paginator';
-import { DialogsService } from 'src/app/core/services/dialogs.service';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
-import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import {MatSort} from '@angular/material/sort';
+import {SelectionModel} from '@angular/cdk/collections';
+import {MatPaginator} from '@angular/material/paginator';
+import {DialogsService} from 'src/app/core/services/dialogs.service';
+import {SearchbarService} from 'src/app/core/components/searchbar/shared/searchbar.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
     selector: 'senergy-networks',
@@ -47,7 +45,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
     dataSource = new MatTableDataSource<NetworksModel>();
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<NetworksModel>(true, []);
-    searchText: string = ""
+    searchText = '';
     totalCount = 200;
     ready = false;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -81,7 +79,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     ngAfterViewInit(): void {
         this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
-            var value;
+            let value;
             if(sortHeaderId == 'connection') {
                 value = row.annotations?.connected;
             } else if(sortHeaderId == 'number_devices') {
@@ -91,15 +89,15 @@ export class NetworksComponent implements OnInit, OnDestroy {
                     value = row.device_local_ids?.length;
                 }
             } else {
-                    value = row[sortHeaderId];
+                value = row[sortHeaderId];
             }
             value = (typeof(value) === 'string') ? value.toUpperCase(): value;
-            return value
+            return value;
         };
         this.dataSource.sort = this.sort;
 
         this.paginator.page.subscribe(()=>{
-            this.getNetworks()
+            this.getNetworks();
         });
         this.getNetworks();
     }
@@ -134,7 +132,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     private getNetworks() {
-        var offset = this.paginator.pageSize * this.paginator.pageIndex;
+        const offset = this.paginator.pageSize * this.paginator.pageIndex;
 
         this.networksService
             .searchNetworks(this.searchText, this.pageSize, offset, 'name', 'asc')
@@ -171,39 +169,39 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     deleteMultipleItems() {
         this.dialogsService
-        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' networks' : ' network'))
-        .afterClosed()
-        .subscribe((deleteNetworks: boolean) => {
-            if (deleteNetworks) {
-                const deletionJobs: Observable<any>[] = [];
-                var allDeviceIds: string[] = []
-        
-                this.selection.selected.forEach((network: NetworksModel) => {
-                    this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, 'name', 'asc', network.id, null).subscribe((devices) => {
-                        const deviceIds = devices.map((p) => p.id);
-                        allDeviceIds = allDeviceIds.concat(deviceIds)
+            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' networks' : ' network'))
+            .afterClosed()
+            .subscribe((deleteNetworks: boolean) => {
+                if (deleteNetworks) {
+                    const deletionJobs: Observable<any>[] = [];
+                    let allDeviceIds: string[] = [];
 
-                        if (deviceIds.length > 0) {
-                            deletionJobs.push(this.deviceInstancesService.deleteDeviceInstances(deviceIds));
-                        }
-                        deletionJobs.push(this.networksService.delete(network.id));
-                    })
-                })
-                
-                forkJoin(deletionJobs).subscribe((resps) => {
-                    const ok = resps.findIndex((r: any) => r === null || r.status === 500) === -1;
-                    if (ok) {
-                        this.snackBar.open('Hub ' + (allDeviceIds.length > 0 ? 'and devices ' : '') + 'deleted successfully.', undefined, {
-                            duration: 2000,
+                    this.selection.selected.forEach((network: NetworksModel) => {
+                        this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, 'name', 'asc', network.id, null).subscribe((devices) => {
+                            const deviceIds = devices.map((p) => p.id);
+                            allDeviceIds = allDeviceIds.concat(deviceIds);
+
+                            if (deviceIds.length > 0) {
+                                deletionJobs.push(this.deviceInstancesService.deleteDeviceInstances(deviceIds));
+                            }
+                            deletionJobs.push(this.networksService.delete(network.id));
                         });
-                    } else {
-                        this.snackBar.open('Error while deleting the hub' + (allDeviceIds.length > 0 ? ' and devices' : '') + '!', 'close', { panelClass: 'snack-bar-error' });
-                        this.ready = true;
-                    }
+                    });
 
-                    this.reload()
-                });
-            }
-        })
+                    forkJoin(deletionJobs).subscribe((resps) => {
+                        const ok = resps.findIndex((r: any) => r === null || r.status === 500) === -1;
+                        if (ok) {
+                            this.snackBar.open('Hub ' + (allDeviceIds.length > 0 ? 'and devices ' : '') + 'deleted successfully.', undefined, {
+                                duration: 2000,
+                            });
+                        } else {
+                            this.snackBar.open('Error while deleting the hub' + (allDeviceIds.length > 0 ? ' and devices' : '') + '!', 'close', { panelClass: 'snack-bar-error' });
+                            this.ready = true;
+                        }
+
+                        this.reload();
+                    });
+                }
+            });
     }
 }
