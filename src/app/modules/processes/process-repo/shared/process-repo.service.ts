@@ -32,7 +32,7 @@ export class ProcessRepoService {
     constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
 
     list(kind: string, right: string) {
-        return this.http.get<any[]>(environment.permissionSearchUrl + '/jwt/list/' + kind + '/' + right).pipe(
+        return this.http.get<any[]>(environment.permissionSearchUrl + '/v3/resources/' + kind + '?limit=9999&rights=' + right).pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'list', [])),
         );
