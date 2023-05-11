@@ -20,10 +20,11 @@
 */
 
 const completer = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     getCompletions(_: any, session: any, pos: any, ___: any, callback: any) {
-        const line = session.doc.$lines[pos.row].slice(0, pos.column-1);
-        const isNewStatement = line.trim().length == 0 || line.trim().endsWith(';');
-        if(isNewStatement){
+        const line = session.doc.$lines[pos.row].slice(0, pos.column - 1);
+        const isNewStatement = line.trim().length === 0 || line.trim().endsWith(';');
+        if (isNewStatement) {
             callback(null, [
                 {
                     caption: 'deviceRepo.getAspect',
