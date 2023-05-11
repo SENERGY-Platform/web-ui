@@ -22,34 +22,30 @@ table {
     width: 100%;
 }
 
-/*
- TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
- */
-.monitor-container ::ng-deep .mat-tab-body-content {
-    overflow: hidden;
-}
-
-/*
- TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
- */
-.monitor-container ::ng-deep .mat-tab-body-wrapper {
-    height: calc(100vh - 118px);
-}
-
 .monitor-container ::ng-deep .mat-mdc-tab-header {
     min-height: 54px;
 }
 
 .table-container {
     position: relative;
-    max-height: calc(100vh - 300px);
+    max-height: calc(100vh - 270px);
     overflow: auto;
 }
 
 .offset {
     margin-right: 8px;
+    padding-top: 4px;
 }
 
 .hub-selected {
     background: rgba(0,0,0,.06);
+}
+
+.search {
+    padding-top: 8px;
+    padding-left: 8px;
+}
+
+.search .suffix {
+    padding-top: 4px;
 }
