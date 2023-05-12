@@ -40,10 +40,6 @@ export class DiagramEditorComponent implements AfterViewInit {
             name: '',
             image: '',
             operatorId: '',
-            size: {
-                width: 150,
-                height: 100,
-            },
             attrs: {
                 '.': {
                     magnet: false,
@@ -345,7 +341,7 @@ export class DiagramEditorComponent implements AfterViewInit {
         node.attr({
             body: {
                 fill: '#4484ce',
-            },
+            }
         });
         this.graph.addCells([node]);
         this.graph.maxZIndex();
@@ -358,11 +354,27 @@ export class DiagramEditorComponent implements AfterViewInit {
         node.attr({
             body: {
                 fill: '#ddd',
-            },
+            }
         });
         this.graph.addCells([node]);
         this.graph.maxZIndex();
         return node;
+    }
+
+    calculateNodePosition() {
+        var box = (<any>document.getElementsByClassName('joint-layers')[0]).getBBox()
+        var x = box.x + box.width + 100;
+        var y = 200
+        
+        return [x,y]
+    }
+
+    calculateNodeSize(outPorts: any[]) {
+        var outCircleradius = 20
+        var height = outCircleradius * outPorts.length + 30
+        height = height > 100 ? height : 100
+        var size = {'height': height, "width": 150}
+        return size
     }
 
     public newNode(name: string, image: string, inputs: any[], outputs: any[], config: any[], operatorId: string): any {
@@ -383,16 +395,21 @@ export class DiagramEditorComponent implements AfterViewInit {
                 }
             }
         }
+
+        var size = this.calculateNodeSize(outPorts)
+        
         const node = new this.NodeElement({
             type: 'senergy.NodeElement',
             inPorts,
             outPorts,
+            size,
             name,
             image,
             config,
             operatorId,
         });
-        node.position(150, 50);
+        var position = this.calculateNodePosition()
+        node.position(position[0], position[1])
         node.attr({
             label: {
                 visibility: 'visible',

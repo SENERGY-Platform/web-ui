@@ -141,61 +141,11 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
     createSVGFromModel(svg: SVGElement): string {
         let source = '';
         const serializer = new XMLSerializer();
-        const nodes = svg.getElementsByClassName('joint-type-senergy');
-        const viewbox = [null, null, 0, 0];
-        // @ts-ignore
-        for (const node of nodes) {
-            let startOffset = 0;
-            let endOffset = 0;
-            const ports = node.getElementsByClassName('joint-port-label');
-            for (const port of ports) {
-                if (port.getAttribute('text-anchor') === 'end' && endOffset < port.getBBox().width) {
-                    endOffset = port.getBBox().width;
-                }
-                if (port.getAttribute('text-anchor') === 'start' && startOffset < port.getBBox().width) {
-                    startOffset = port.getBBox().width;
-                }
-            }
-            const coords = node.attributes.transform.value.replace('translate(', '').replace(')', '').split(',');
-            // x
-            if (viewbox[0] === null) {
-                viewbox[0] = +coords[0] - startOffset;
-            }
-            // @ts-ignore
-            if (coords[0] < viewbox[0]) {
-                viewbox[0] = +coords[0] - startOffset;
-            }
-            // y
-            if (viewbox[1] === null) {
-                viewbox[1] = +coords[1] - 20;
-            }
-            // @ts-ignore
-            if (coords[1] < viewbox[1]) {
-                viewbox[1] = +coords[1] - 20;
-            }
-            // x width
-            // @ts-ignore
-            if (coords[0] > viewbox[2]) {
-                // @ts-ignore
-                viewbox[2] = +coords[0] + 150 - viewbox[0] + endOffset;
-            }
-            // y height
-            // @ts-ignore
-            if (coords[1] > viewbox[3]) {
-                // @ts-ignore
-                viewbox[3] = +coords[1] + 120 - viewbox[1] + 20;
-            }
-        }
-        let elements: HTMLCollectionOf<Element> = svg.getElementsByTagName('defs');
-        // @ts-ignore
-        for (const element of elements) {
-            element.remove();
-        }
-        elements = svg.getElementsByClassName('joint-tools-layer');
-        // @ts-ignore
-        for (const element of elements) {
-            element.remove();
-        }
+        
+        // Get minimal coordinates to include everything + some space at the sides
+        var box = (<any>document.getElementsByClassName('joint-layers')[0]).getBBox()
+        const viewbox = [box.x -10, box.y, box.width + 20, box.height]
+        
         const tags = ['text', 'g', 'circle', 'rect', 'tspan', 'path'];
         const classes = [
             'link-tools',
@@ -235,6 +185,8 @@ export class FlowDesignerComponent implements OnInit, AfterViewInit {
                     '"',
             );
         }
+
+        source = source.replace("joint-element", "")
         source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
         return source;
     }
