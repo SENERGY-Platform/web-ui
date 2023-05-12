@@ -39,8 +39,7 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./device-types-overview.component.css'],
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
-    readonly pageSize = 20;
-
+    pageSize = 20;
     deviceTypes: DeviceTypePermSearchModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
 
@@ -83,6 +82,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceTypes()
         });

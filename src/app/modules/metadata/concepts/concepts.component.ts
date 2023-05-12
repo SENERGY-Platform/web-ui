@@ -39,7 +39,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./concepts.component.css'],
 })
 export class ConceptsComponent implements OnInit, OnDestroy {
-    readonly pageSize = 20;
+    pageSize = 20;
     concepts: ConceptsPermSearchModel[] = [];
     ready = false;
     dataSource = new MatTableDataSource(this.concepts);
@@ -78,6 +78,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
 
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getConcepts()
         });
@@ -189,6 +190,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     reload() {
         this.ready = false;
+        this.pageSize = 20;
         this.offset = 0;
         this.selectionClear();
         this.getConcepts();

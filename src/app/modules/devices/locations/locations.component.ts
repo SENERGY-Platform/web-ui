@@ -40,7 +40,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./locations.component.css'],
 })
 export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
-    readonly pageSize = 20;
+    pageSize = 20;
     ready = false;
     instances = [];
     totalCount = 200;
@@ -78,6 +78,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dataSource.sort = this.sort
 
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getLocations()
         });
@@ -144,6 +145,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     reload() {
         this.offset = 0;
+        this.pageSize = 20;
         this.ready = false;
         this.selectionClear()
         this.getLocations();

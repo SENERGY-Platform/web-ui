@@ -42,7 +42,7 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./device-classes.component.css'],
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy {
-    readonly pageSize = 20;
+    pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<DeviceClassesPermSearchModel>();
     @ViewChild(MatSort) sort!: MatSort;
@@ -80,6 +80,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceClasses()
         });
@@ -169,6 +170,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
     reload() {
         this.offset = 0;
+        this.pageSize = 20;
         this.ready = false;
         this.selectionClear();
         this.getDeviceClasses()

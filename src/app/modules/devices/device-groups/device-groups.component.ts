@@ -36,7 +36,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./device-groups.component.css'],
 })
 export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
-    readonly pageSize = 20;
+    pageSize = 20;
     selection = new SelectionModel<DeviceGroupsPermSearchModel>(true, []);
     totalCount = 200;
     instances = [];
@@ -74,6 +74,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceGroups()
         });
@@ -156,6 +157,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public reload() {
         this.offset = 0;
+        this.pageSize = 20;
         this.ready = false;
         this.selectionClear();
         this.getDeviceGroups();

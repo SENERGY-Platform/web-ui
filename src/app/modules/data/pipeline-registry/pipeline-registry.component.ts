@@ -34,7 +34,8 @@ import { forkJoin, Observable, pipe, Subscription } from 'rxjs';
     styleUrls: ['./pipeline-registry.component.css'],
 })
 export class PipelineRegistryComponent implements OnInit, AfterViewInit {
-    readonly pageSize = 20;
+    pageSize = 20;
+    offset = 0;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
     ready = false;
     displayedColumns: string[] = ['select', 'id', 'name', 'createdat', 'updatedat', 'info', 'edit', 'delete'];
@@ -61,11 +62,11 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
                 if(searchText != ""){
-                    this.dataSource.data = resp.filter(pipeline => (pipeline.name.search(searchText) != -1))
-                    console.log(this.dataSource.data)
-                } else {
-                    this.dataSource.data = resp
-                }
+                    resp = resp.filter(pipeline => (pipeline.name.search(searchText) != -1))
+                } 
+                this.dataSource.data = resp;
+                this.totalCount = resp.length;
+
 
                 this.ready = true;
             })
@@ -78,6 +79,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         });
 
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize;
             this.loadPipelines();
         });
     }
@@ -92,6 +94,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     }
 
     reload() {
+        this.pageSize = 20;
+        this.offset = 0;
         this.selectionClear();
         this.loadPipelines();
     }

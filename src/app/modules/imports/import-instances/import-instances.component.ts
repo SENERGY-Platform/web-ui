@@ -49,7 +49,7 @@ export class ImportInstancesComponent implements OnInit {
     ) {}
 
     searchText: string = ""
-    readonly pageSize = 20;
+    pageSize = 20;
     totalCount = 200;
     selection = new SelectionModel<ImportInstancesModel>(true, []);
     searchSub: Subscription = new Subscription()    
@@ -71,6 +71,7 @@ export class ImportInstancesComponent implements OnInit {
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load();
         });
@@ -130,6 +131,7 @@ export class ImportInstancesComponent implements OnInit {
 
     reload() {
         this.offset = 0;
+        this.pageSize = 20;
         this.selectionClear();
         this.dataReady = false;
         this.load();

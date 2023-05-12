@@ -40,7 +40,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./functions.component.css'],
 })
 export class FunctionsComponent implements OnInit, OnDestroy {
-    readonly pageSize = 20;
+    pageSize = 20;
     dataSource = new MatTableDataSource<FunctionsPermSearchModel>();
     @ViewChild(MatSort) sort!: MatSort;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -75,7 +75,8 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         };
         this.dataSource.sort = this.sort;
         
-        this.paginator.page.subscribe(()=>{
+        this.paginator.page.subscribe(()=> {
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getFunctions()
         });

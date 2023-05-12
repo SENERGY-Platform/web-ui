@@ -40,7 +40,7 @@ import { SelectionModel } from '@angular/cdk/collections';
     styleUrls: ['./variables.component.css'],
 })
 export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
-    readonly pageSize = 20;
+    pageSize = 20;
     sort = 'unix_timestamp_in_s.desc';
     keyRegex = '';
     ready = false;
@@ -80,6 +80,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
             this.updateSortAndPagination();
         });
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.loadVariables();
         });
@@ -97,7 +98,8 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
 
     reload(){
         this.selectionClear();
-        this.offset = 0
+        this.offset = 0;
+        this.pageSize = 20;
         this.updateTotal();
         this.updateSortAndPagination();
     }

@@ -36,7 +36,7 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./import-types.component.css'],
 })
 export class ImportTypesComponent implements OnInit {
-    readonly pageSize = 20;
+    pageSize = 20;
     dataSource = new MatTableDataSource<ImportTypePermissionSearchModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<ImportTypePermissionSearchModel>(true, []);
@@ -63,6 +63,7 @@ export class ImportTypesComponent implements OnInit {
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load();
         });
@@ -142,6 +143,7 @@ export class ImportTypesComponent implements OnInit {
 
     reload() {
         this.offset = 0;
+        this.pageSize = 20;
         this.dataReady = false;
         this.selectionClear();
         this.load();

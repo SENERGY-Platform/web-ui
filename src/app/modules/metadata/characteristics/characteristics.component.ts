@@ -37,7 +37,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./characteristics.component.css'],
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy {
-    readonly pageSize = 20;
+    pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<CharacteristicsPermSearchModel>();
     @ViewChild(MatSort) sort!: MatSort;
@@ -79,6 +79,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
 
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getCharacteristics()
         });
@@ -225,6 +226,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     reload() {
         this.ready = false;
         this.offset = 0;
+        this.pageSize = 20;
         this.selectionClear();
         this.getCharacteristics();
     }

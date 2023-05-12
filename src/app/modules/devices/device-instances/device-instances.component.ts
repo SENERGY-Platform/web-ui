@@ -88,8 +88,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     ) {
         this.getRouterParams();
     }
-    readonly pageSize = 20;
-
+    pageSize = 20;
     dataSource = new MatTableDataSource<DeviceInstancesModel>();
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<DeviceInstancesModel>(true, []);
@@ -126,6 +125,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         };
         
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load()
         });
@@ -252,6 +252,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     reload() {
         this.offset = 0;
         this.ready = false;
+        this.pageSize = 20;
         this.selectionClear();
         this.load();
     }

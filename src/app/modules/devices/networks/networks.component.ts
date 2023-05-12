@@ -43,7 +43,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
     styleUrls: ['./networks.component.css'],
 })
 export class NetworksComponent implements OnInit, OnDestroy {
-    readonly pageSize = 20;
+    pageSize = 20;
     dataSource = new MatTableDataSource<NetworksModel>();
     @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<NetworksModel>(true, []);
@@ -101,6 +101,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort;
 
         this.paginator.page.subscribe(()=>{
+            this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getNetworks()
         });
@@ -148,6 +149,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
 
     reload() {
         this.offset = 0;
+        this.pageSize = 20;
         this.ready = false;
         this.selectionClear();
         this.getNetworks();
