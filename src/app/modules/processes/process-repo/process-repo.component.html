@@ -23,12 +23,12 @@
         <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Shared']">
             <div fxLayout="row" class="search">
                 <senergy-searchbar fxFlex></senergy-searchbar>
-                <button matTooltip="Delete" mat-icon-button color="accent"
+                <button matTooltip="Delete" mat-icon-button color="accent" class="suffix-del"
                         (click)="deleteMultipleItems()"
                         *ngIf="selectedItems.length > 0 && ready">
                     <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn">delete</mat-icon>
                 </button>
-                <senergy-sort [sortAttributes]="sortAttributes"
+                <senergy-sort  class="suffix" [sortAttributes]="sortAttributes"
                               (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
             </div>
             <div class="main-panel"
