@@ -14,27 +14,12 @@
  * limitations under the License.
  */
 
-
-/*
- TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
- */
-.variables-container ::ng-deep .mat-tab-body-content {
-    overflow: hidden;
-}
-
-/*
- TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
- */
-.variables-container ::ng-deep .mat-tab-body-wrapper {
-    height: calc(100vh - 118px);
-}
-
 .variables-container ::ng-deep .mat-mdc-tab-header {
     min-height: 54px;
 }
 
 .variables-container {
-    height: 100%;
+    height: calc(100% - 16px);
 }
 
 .variables-container > div{
@@ -48,20 +33,6 @@
 
 table {
     width: 100%;
-}
-
-/*
- TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
- */
-.variables-container ::ng-deep .mat-tab-body-content {
-    overflow: hidden;
-}
-
-/*
- TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
- */
-.variables-container ::ng-deep .mat-tab-body-wrapper {
-    height: calc(100vh - 118px);
 }
 
 .variables-container ::ng-deep .mat-mdc-tab-header {
