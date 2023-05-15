@@ -169,20 +169,20 @@
                 <mat-checkbox formControlName="allMessages">Consume all messages</mat-checkbox>
 
                 <div formArrayName="exportValues" *ngFor="let group of getExportValuesControls(); let key = index"
-                     fxLayout="row" class="layout-margin">
+                     fxLayout="row" class="layout-value">
                     <div [formGroupName]="key+offset" fxFlex fxLayoutAlign="center center">
-                        <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                        <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
                             <mat-label>{{exportForm.getRawValue().targetSelector === targetDb ? 'Name' : 'Topic'}}</mat-label>
                             <input #input matInput formControlName="Name" placeholder="Name"/>
                         </mat-form-field>
-                        <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                        <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
                             <mat-label>Path</mat-label>
                             <senergy-select-search formControlName="Path" (ngModelChange)="pathChanged(key+offset)"
                                                    placeholder="Path"
                                                    [options]="getPathsKeyOptions()">
                             </senergy-select-search>
                         </mat-form-field>
-                        <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+                        <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
                             <mat-label>Type</mat-label>
                             <mat-select placeholder="Type" formControlName="Type">
                                 <mat-option *ngFor="let option of dropdown | keyvalue" [value]="option.value">
@@ -191,7 +191,7 @@
                             </mat-select>
                         </mat-form-field>
                         <mat-checkbox formControlName="Tag" (ngModelChange)="pathChanged(key+offset)"
-                                      class="inline layout-margin pad-right"
+                                      class="inline layout-value pad-right"
                                       *ngIf="exportForm.getRawValue().targetSelector === targetDb">Tag
                         </mat-checkbox>
                         <button mat-icon-button>

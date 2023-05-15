@@ -15,9 +15,9 @@
   -->
 
 
-<div fxLayout="row">
+<div fxLayout="row" class="search">
     <senergy-searchbar fxFlex [searchTextIn]="initSearchText"></senergy-searchbar>
-    <mat-form-field color="accent" class="user-input" style="margin-top: 15px;">
+    <mat-form-field color="accent" class="user-input" style="padding-left: 8px;">
         <mat-label>Choose Search Field</mat-label>
         <mat-select [(ngModel)]="searchField" (ngModelChange)="searchFieldChanged()">
             <mat-option *ngFor="let searchField of searchFields" [value]="searchField[1]">
@@ -25,15 +25,12 @@
             </mat-option>
         </mat-select>
     </mat-form-field>
-</div>
-<div fxLayout="row">
-    <div fxFlex></div>
     <button matTooltip="Show generated" mat-icon-button color="accent" (click)="showGeneratedChanged()"
-            *ngIf="!this.showGenerated">
+            *ngIf="!this.showGenerated" class="suffix">
         <mat-icon>visibility</mat-icon>
     </button>
     <button matTooltip="Hide generated" mat-icon-button color="accent" (click)="showGeneratedChanged()"
-            *ngIf="this.showGenerated">
+            *ngIf="this.showGenerated" class="suffix">
         <mat-icon>visibility_off</mat-icon>
     </button>
 </div>
