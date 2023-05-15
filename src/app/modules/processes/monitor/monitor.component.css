@@ -22,8 +22,8 @@ table {
     width: 100%;
 }
 
-.monitor-container ::ng-deep .mat-mdc-tab-header {
-    min-height: 54px;
+:host ::ng-deep .mdc-tab {
+    height: 54px!important;
 }
 
 .table-container {

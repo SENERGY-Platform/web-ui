@@ -20,7 +20,7 @@
 }
 
 .deployments-scroll {
-    height: calc(100% - 106px);
+    height: calc(100% - 85px);
     overflow-y: auto;
 }
 
@@ -115,4 +115,17 @@ mat-grid-list {
 
 .hub-selected {
     background: rgba(0,0,0,.06);
+}
+
+.search {
+    padding-top: 8px;
+    padding-left: 8px;
+}
+
+.search .suffix {
+    padding-top: 15px;
+}
+
+.search .suffix-sort {
+    padding-top: 4px;
 }
