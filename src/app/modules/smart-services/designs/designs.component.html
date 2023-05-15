@@ -14,9 +14,10 @@
   ~ limitations under the License.
   -->
 <div class="designs-container">
-    <div fxLayout="column">
+    <div fxLayout="row" class="search">
         <senergy-searchbar fxFlex></senergy-searchbar>
-        <div class="main-panel"
+    </div>
+    <div class="main-panel"
          infiniteScroll
          [infiniteScrollDistance]="1"
          [infiniteScrollThrottle]="50"
@@ -79,7 +80,6 @@
             <div *ngIf="repoItems.length === 0 && ready">No process models found.</div>
             <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
         </div>
-    </div>
     </div>
 </div>
 <button mat-fab class="fab" matTooltip="Create new Design" routerLink="/smart-services/designer">

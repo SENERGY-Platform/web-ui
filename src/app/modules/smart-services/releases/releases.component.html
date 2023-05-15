@@ -15,13 +15,12 @@
   -->
 <div class="releases-container">
     <div fxLayout="column">
-        <senergy-searchbar fxFlex></senergy-searchbar>
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <button matTooltip="show old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="this.latest">
+        <div fxLayout="row" class="search">
+            <senergy-searchbar fxFlex></senergy-searchbar>
+            <button matTooltip="show old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="this.latest" class="suffix">
                 <mat-icon>visibility</mat-icon>
             </button>
-            <button matTooltip="hide old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="!this.latest">
+            <button matTooltip="hide old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="!this.latest" class="suffix">
                 <mat-icon>visibility_off</mat-icon>
             </button>
         </div>
