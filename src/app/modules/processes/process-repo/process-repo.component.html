@@ -21,9 +21,8 @@
                    (animationDone)="animation()">
         <!-- <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Marketplace', 'Shared']"> -->
         <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Shared']">
-            <senergy-searchbar fxFlex></senergy-searchbar>
-            <div fxLayout="row">
-                <div fxFlex></div>
+            <div fxLayout="row" class="search">
+                <senergy-searchbar fxFlex></senergy-searchbar>
                 <button matTooltip="Delete" mat-icon-button color="accent"
                         (click)="deleteMultipleItems()"
                         *ngIf="selectedItems.length > 0 && ready">
@@ -40,7 +39,8 @@
                  (scrolled)="onScroll()"
                  #mainPanel>
                 <div class="layout-margin" fxLayout="column" *ngIf="animationDone" [formGroup]="formGroup">
-                    <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px" formArrayName="repoItems"
+                    <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
+                                   formArrayName="repoItems"
                                    *ngIf="repoItems.length > 0">
                         <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
                                        [formGroupName]="i">
