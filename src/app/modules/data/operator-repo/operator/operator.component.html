@@ -18,9 +18,10 @@
     <div fxLayout="column" class="layout-margin">
         <div fxLayout="row" fxLayoutAlign="start center" style="margin-bottom:8px;">
             <button mat-raised-button color="accent" routerLink="/data/operator-repo">back</button>
-        </div>
-        <div *ngIf="shareUser" fxLayout="row" fxLayoutAlign="end center">
-            <h3>Shared by {{shareUser}}</h3>
+            <div fxFlex></div>
+            <div *ngIf="shareUser">
+                <h3>Shared by {{shareUser}}</h3>
+            </div>
         </div>
         <mat-form-field fxFill color="accent" appearance="outline">
             <mat-label>Name</mat-label>

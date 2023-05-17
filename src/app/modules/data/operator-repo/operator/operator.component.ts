@@ -123,4 +123,6 @@ export class OperatorComponent implements OnInit {
             duration: 2000,
         });
     }
+
+    protected readonly undefined = undefined;
 }
