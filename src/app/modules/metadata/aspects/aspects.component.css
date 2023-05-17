@@ -51,12 +51,12 @@ ul {
 
 .tree-inline {
     position: relative;
-    top: -0.75em;
+    top: -10px;
 }
 
 .nested-tree-inline {
     position: relative;
-    top: 0.85em;
+    top: 8px;
 }
 
 .aspects-container {
