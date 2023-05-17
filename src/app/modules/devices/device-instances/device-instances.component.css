@@ -29,3 +29,7 @@
 .search-refresh .suffix-button {
     margin-top: -20px;
 }
+
+.height-chips {
+    max-height: calc(100vh - 260px);
+}

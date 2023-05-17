@@ -35,7 +35,7 @@
 }
 
 .device-group-edit-container {
-    height: calc(100% - 64px);
+    height: calc(100% - 72px);
 }
 
 .selectables {
@@ -90,12 +90,6 @@
     text-overflow: ellipsis;
     font-size: smaller;
     width: 100%;
-}
-
-.selected-device-name {
-    font-size: large;
-    font-weight: 500;
-
 }
 
 .pointer {
@@ -158,4 +152,9 @@ table {
     margin-top: 0;
     margin-bottom: 0;
     list-style-group: none;
+}
+
+.mat-mdc-card-title {
+    padding-left: 8px;
+    width: 100%;
 }
