@@ -31,7 +31,6 @@ import {ExportService} from '../../exports/shared/export.service';
 import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesUpdateModel} from './shared/device-instances-update.model';
 import {ExportModel} from '../../exports/shared/export.model';
-import {DeviceInstancesExportDialogComponent} from './dialogs/device-instances-export-dialog.component';
 import {LocationsService} from '../locations/shared/locations.service';
 import {NetworksService} from '../networks/shared/networks.service';
 import {debounceTime} from 'rxjs/operators';
@@ -95,7 +94,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     totalCount = 200;
     offset = 0;
     ready = false;
-    searchText: string = ""
+    searchText = '';
 
     selectedTag = '';
     selectedTagTransformed = '';
@@ -111,23 +110,23 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     private searchSub: Subscription = new Subscription();
 
     ngOnInit(): void {
-        this.deviceInstancesService.getTotalCountOfDevices().subscribe(totalCount => this.totalCount = totalCount)
+        this.deviceInstancesService.getTotalCountOfDevices().subscribe(totalCount => this.totalCount = totalCount);
         this.loadFilterOptions();
         this.initSearch(); // does automatically load data on first page load
     }
 
     ngAfterViewInit(): void {
-        this.dataSource.sort = this.sort
+        this.dataSource.sort = this.sort;
         this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
-            var value = row[sortHeaderId];
+            let value = row[sortHeaderId];
             value = (typeof(value) === 'string') ? value.toUpperCase(): value;
-            return value
+            return value;
         };
-        
+
         this.paginator.page.subscribe(()=>{
-            this.pageSize = this.paginator.pageSize
+            this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.load()
+            this.load();
         });
     }
 
@@ -256,7 +255,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.selectionClear();
         this.load();
     }
-    
+
     showInfoOfDevice(device: DeviceInstancesModel): void {
         this.deviceInstancesDialogService.openDeviceServiceDialog(device.device_type.id, device.id);
     }
@@ -282,7 +281,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                         } else {
                             this.snackBar.open('Error while deleting device!', 'close', { panelClass: 'snack-bar-error' });
                         }
-                        this.reload()
+                        this.reload();
                     });
                 }
             });
@@ -290,34 +289,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     shareDevice(device: DeviceInstancesModel): void {
         this.permissionsDialogService.openPermissionDialog('devices', device.id, device.display_name || device.name);
-    }
-
-    exportDevice(device: DeviceInstancesModel) {
-        this.deviceTypeService.getDeviceType(device.device_type.id).subscribe((deviceType: DeviceTypeModel | null) => {
-            if (deviceType !== null) {
-                const exports: ExportModel[] = [];
-                deviceType.services.forEach((service) => {
-                    const newExports = this.exportService.prepareDeviceServiceExport(device, service);
-                    newExports.forEach((singleExport) => {
-                        singleExport.Description = 'Created at device overview';
-                        singleExport.Generated = false;
-                    });
-                    exports.push(...newExports);
-                });
-                if (exports.length > 0) {
-                    const dialogConfig = new MatDialogConfig();
-                    dialogConfig.minWidth = '375px';
-                    dialogConfig.data = {
-                        exports,
-                    };
-                    this.dialog.open(DeviceInstancesExportDialogComponent, dialogConfig);
-                } else {
-                    this.snackBar.open('Device type has no output services!', 'close', { panelClass: 'snack-bar-error' });
-                }
-            } else {
-                this.snackBar.open('Could not read device type!', 'close', { panelClass: 'snack-bar-error' });
-            }
-        });
     }
 
     private getRouterParams(): void {
@@ -362,25 +333,25 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         const deletionJobs: Observable<any>[] = [];
 
         this.dialogsService
-        .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : ' device'))
-        .afterClosed()
-        .subscribe((deleteConcepts: boolean) => {
-            if (deleteConcepts) {
-                this.ready = false;
-                this.selection.selected.forEach((device: DeviceInstancesModel) => {
-                    deletionJobs.push(this.deviceInstancesService.deleteDeviceInstance(device.id));
-                });
-            }
-            
-            forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                if (ok) {
-                    this.snackBar.open('Devices deleted successfully.', undefined, {duration: 2000});            
-                } else {
-                    this.snackBar.open('Error while deleting devices!', 'close', {panelClass: 'snack-bar-error'});
+            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : ' device'))
+            .afterClosed()
+            .subscribe((deleteConcepts: boolean) => {
+                if (deleteConcepts) {
+                    this.ready = false;
+                    this.selection.selected.forEach((device: DeviceInstancesModel) => {
+                        deletionJobs.push(this.deviceInstancesService.deleteDeviceInstance(device.id));
+                    });
                 }
-                this.reload()
-            })
-        });
+
+                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
+                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
+                    if (ok) {
+                        this.snackBar.open('Devices deleted successfully.', undefined, {duration: 2000});
+                    } else {
+                        this.snackBar.open('Error while deleting devices!', 'close', {panelClass: 'snack-bar-error'});
+                    }
+                    this.reload();
+                });
+            });
     }
 }

@@ -88,19 +88,10 @@
                 </ng-container>
 
                 <ng-container matColumnDef="info">
-                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Info</th>
+                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Data</th>
                     <td mat-cell *matCellDef="let device">
                         <button mat-icon-button color="accent" matTooltip="Info" (click)="showInfoOfDevice(device)">
                             <mat-icon>info</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="export">
-                    <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Export</th>
-                    <td mat-cell *matCellDef="let device">
-                        <button mat-icon-button color="accent" matTooltip="Export" (click)="exportDevice(device)">
-                            <mat-icon>build</mat-icon>
                         </button>
                     </td>
                 </ng-container>
@@ -163,10 +154,10 @@
                 <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
                 </tr>
                 <tr mat-header-row
-                    *matHeaderRowDef="['select', 'log_state', 'shared', 'display_name', 'info', 'export', 'share', 'duplicate', 'edit', 'delete']; sticky: true">
+                    *matHeaderRowDef="['select', 'log_state', 'shared', 'display_name', 'info', 'share', 'duplicate', 'edit', 'delete']; sticky: true">
                 </tr>
                 <tr mat-row
-                    *matRowDef="let m; columns: ['select', 'log_state', 'shared', 'display_name', 'info', 'export', 'share', 'duplicate', 'edit', 'delete'];">
+                    *matRowDef="let m; columns: ['select', 'log_state', 'shared', 'display_name', 'info', 'share', 'duplicate', 'edit', 'delete'];">
                 </tr>
             </table>
         </div>

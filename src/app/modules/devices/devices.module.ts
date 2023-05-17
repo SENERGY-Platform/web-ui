@@ -53,7 +53,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DeviceInstancesExportDialogComponent } from './device-instances/dialogs/device-instances-export-dialog.component';
 import { MatTreeModule } from '@angular/material/tree';
 import { DeviceGroupsComponent } from './device-groups/device-groups.component';
 import { DeviceGroupsEditComponent } from './device-groups/edit/device-groups-edit.component';
@@ -177,7 +176,6 @@ const locationsEdit: Route = {
         DeviceInstancesEditDialogComponent,
         DeviceInstancesSelectDialogComponent,
         NetworksClearDialogComponent,
-        DeviceInstancesExportDialogComponent,
         DeviceGroupsComponent,
         DeviceGroupsEditComponent,
         DeviceGroupsSelectDialogComponent,
