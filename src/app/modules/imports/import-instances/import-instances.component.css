@@ -46,3 +46,15 @@ th.mat-mdc-header-cell {
 .auto-generated-cell {
     padding-top: 1em;
 }
+
+.table-search-container .search-refresh {
+    padding-top: 8px;
+}
+
+.table-search-container .search-refresh > div {
+    margin-top: -20px;
+}
+
+.table-container {
+    max-height: calc(100vh - 160px);
+}

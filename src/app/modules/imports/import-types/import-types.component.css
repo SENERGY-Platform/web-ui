@@ -44,3 +44,10 @@ th.mat-mdc-header-cell {
     z-index: 100;
 }
 
+.table-search-container .search-refresh {
+    padding-top: 8px;
+}
+
+.table-container {
+    max-height: calc(100vh - 250px);
+}

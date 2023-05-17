@@ -16,4 +16,5 @@
 
 .mat-mdc-dialog-content {
     min-height: 270px;
+    padding-top: 8px;
 }
