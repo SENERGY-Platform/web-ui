@@ -20,19 +20,19 @@ import {SelectionModel} from '@angular/cdk/collections';
 import {Component, isDevMode, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
-import {Sort, MatSort} from '@angular/material/sort';
+import {MatSort, Sort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {DomSanitizer} from '@angular/platform-browser';
 import {interval, Observable} from 'rxjs';
 import {debounce, map, startWith} from 'rxjs/operators';
-import { AuthorizationService } from 'src/app/core/services/authorization.service';
-import { KongService } from '../services/kong.service';
-import { LadonService } from '../services/ladom.service';
-import { PermissionModel } from '../permission.model';
-import {PermissionsDialogDeleteComponent} from '../permissions-dialog-delete/permissions-dialog-delete.component';
+import {AuthorizationService} from 'src/app/core/services/authorization.service';
+import {KongService} from '../services/kong.service';
+import {LadonService} from '../services/ladom.service';
+import {PermissionModel} from '../permission.model';
 import {PermissionsDialogImportComponent} from '../permissions-dialog-import/permissions-dialog-import.component';
 import {PermissionImportModel} from '../permissions-dialog-import/permissions-dialog-import.model';
 import {PermissionsEditComponent} from '../permissions-edit/permissions-edit.component';
+import {DialogsService} from '../../../../core/services/dialogs.service';
 
 @Component({
     selector: 'senergy-permissions-list',
@@ -57,14 +57,21 @@ export class PermissionsListComponent implements OnInit {
     public endpointControl = new FormControl();
     public filteredOptions: Observable<string[]> = new Observable();
     public uris: string[] = [];
-    public test: { clientID: string; userId: string; roles: string[]; username: string; target_method: string; target_uri: string } = {
-        clientID: '',
-        userId: '',
-        roles: [],
-        username: '',
-        target_method: '',
-        target_uri: ''
-    };
+    public test: {
+        clientID: string;
+        userId: string;
+        roles: string[];
+        username: string;
+        target_method: string;
+        target_uri: string;
+    } = {
+            clientID: '',
+            userId: '',
+            roles: [],
+            username: '',
+            target_method: '',
+            target_uri: ''
+        };
     public testResult: { GET: boolean; POST: boolean; PUT: boolean; PATCH: boolean; DELETE: boolean; HEAD: boolean } = {
         GET: false,
         POST: false,
@@ -79,9 +86,10 @@ export class PermissionsListComponent implements OnInit {
                 public dialog: MatDialog,
                 private sanitizer: DomSanitizer,
                 private kongService: KongService,
+                private dialogsService: DialogsService,
     ) {
         this.authService.loadAllRoles().subscribe((roles: any | { error: string }) => {
-            if(roles != null) {
+            if (roles != null) {
                 this.roles = roles;
             } else {
                 console.error('Could not load roles from Keycloak. Reason was : ', roles.error);
@@ -89,7 +97,7 @@ export class PermissionsListComponent implements OnInit {
         });
 
         this.authService.loadAllUsers().subscribe((users: any | { error: string }) => {
-            if(users != null) {
+            if (users != null) {
                 this.users = users;
             } else {
                 console.error('Could not load users from Keycloak. Reason was : ', users.error);
@@ -97,7 +105,7 @@ export class PermissionsListComponent implements OnInit {
         });
 
         this.authService.loadAllClients().subscribe((clients: any | { error: string }) => {
-            if(clients != null) {
+            if (clients != null) {
                 this.clients = clients;
             } else {
                 console.error('Could not load clients from Keycloak. Reason was : ', clients.error);
@@ -122,11 +130,11 @@ export class PermissionsListComponent implements OnInit {
 
                 // autocomplete filter
                 this.filteredOptions = this.endpointControl.valueChanges
-                .pipe(
-                    startWith(''),
-                    map((value) => this._filter(value)),
-                );
-            this.filteredOptions.pipe(debounce(() => interval(300))).subscribe(() => this.testAccess());
+                    .pipe(
+                        startWith(''),
+                        map((value) => this._filter(value)),
+                    );
+                this.filteredOptions.pipe(debounce(() => interval(300))).subscribe(() => this.testAccess());
             });
         } catch (e) {
             console.error('Could not load Uris from kong: ' + e);
@@ -246,13 +254,8 @@ export class PermissionsListComponent implements OnInit {
     }
 
     public askfordelete(policy: PermissionModel) {
-        // user does not have developer role but wants to use developer portal -> give him developer role
-        const dialogRef = this.dialog.open(PermissionsDialogDeleteComponent, {
-            width: '450px',
-        });
-
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result === 'yes') {
+        this.dialogsService.openDeleteDialog('policy').afterClosed().subscribe((del: boolean) => {
+            if (del) {
                 this.deletePolicy(policy);
             }
         });
@@ -344,12 +347,8 @@ export class PermissionsListComponent implements OnInit {
     }
 
     deleteMultipleItems() {
-        const dialogRef = this.dialog.open(PermissionsDialogDeleteComponent, {
-            width: '450px',
-        });
-
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result === 'yes') {
+        this.dialogsService.openDeleteDialog('policies').afterClosed().subscribe((del: boolean) => {
+            if (del) {
                 this.ladonService.deletePolicies(this.selection.selected).subscribe(() => {
                     this.loadPolicies();
                 });

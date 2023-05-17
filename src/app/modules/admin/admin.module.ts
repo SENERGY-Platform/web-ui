@@ -18,9 +18,6 @@ import {MatSortModule} from '@angular/material/sort';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {PermissionsEditComponent} from './permissions/permissions-edit/permissions-edit.component';
 import {
-    PermissionsDialogDeleteComponent
-} from './permissions/permissions-dialog-delete/permissions-dialog-delete.component';
-import {
     PermissionsDialogImportComponent
 } from './permissions/permissions-dialog-import/permissions-dialog-import.component';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
@@ -53,7 +50,6 @@ const listRules: Route[] = [
         PermissionsListComponent,
         PermissionsEditComponent,
         PermissionsDialogImportComponent,
-        PermissionsDialogDeleteComponent,
         TimescaleRulesComponent,
         TimescaleRulesCreateEditComponent
     ],

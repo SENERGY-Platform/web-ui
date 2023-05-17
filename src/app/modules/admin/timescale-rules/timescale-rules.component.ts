@@ -48,7 +48,6 @@ export class TimescaleRulesComponent implements OnInit {
     limit = this.limitInit;
     offset = 0;
     dialogWidth = 700;
-    dialogHeight = 900;
     roles: string[] = [];
     users: any[] = [];
 
@@ -107,7 +106,7 @@ export class TimescaleRulesComponent implements OnInit {
                 roles: this.roles,
                 users: this.users,
             },
-            minHeight: '' + this.dialogHeight + 'px',
+            minHeight: '65vh',
             minWidth: '' + this.dialogWidth + 'px',
         };
         this.dialog
@@ -129,7 +128,7 @@ export class TimescaleRulesComponent implements OnInit {
                 roles: this.roles,
                 users: this.users,
             },
-            minHeight: '' + this.dialogHeight + 'px',
+            minHeight: '65vh',
             minWidth: '' + this.dialogWidth + 'px',
         };
         this.dialog.open(TimescaleRulesCreateEditComponent, config);
@@ -143,7 +142,7 @@ export class TimescaleRulesComponent implements OnInit {
                 roles: this.roles,
                 users: this.users,
             },
-            minHeight: '' + this.dialogHeight + 'px',
+            minHeight: '65vh',
             minWidth: '' + this.dialogWidth + 'px',
         };
         this.dialog
