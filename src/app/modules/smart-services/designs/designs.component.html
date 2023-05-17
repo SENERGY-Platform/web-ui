@@ -14,11 +14,9 @@
   ~ limitations under the License.
   -->
 <div class="designs-container layout-margin">
-    <div fxLayout="row" class="search">
         <span class="search-button-container">
             <senergy-searchbar fxFlex></senergy-searchbar>
-    </div>
-    </span>
+        </span>
 
         <div class="main-panel" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
             [scrollWindow]="false" (scrolled)="onScroll()" #mainPanel>

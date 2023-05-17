@@ -25,11 +25,11 @@
 }
 
 .designs-container {
-    height: 100%;
+    height: calc(100% - 32px);
 }
 
 .main-panel {
-    height: calc(100% - 150px);
+    height: calc(100% - 135px);
     overflow-y: auto;
 }
 

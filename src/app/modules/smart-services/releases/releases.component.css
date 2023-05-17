@@ -20,7 +20,7 @@
 }
 
 .releases-container {
-    height: 100%;
+    height: calc(100% - 32px);
 }
 
 .releases-container > div{
@@ -28,7 +28,7 @@
 }
 
 .main-panel {
-    height: calc(100% - 150px);
+    height: calc(100% - 135px);
     overflow-y: auto;
 }
 

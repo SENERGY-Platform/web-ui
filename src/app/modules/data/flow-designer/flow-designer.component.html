@@ -42,10 +42,10 @@
                     <mat-list>
                         <h3 mat-subheader>Operators</h3>
                         <mat-list-item *ngFor="let item of operators">
-                            <mat-icon mat-list-icon> insert_chart_outlined</mat-icon>
-                            <h4 mat-line>{{ item.name }}</h4>
-                            <button disabled="{{!write}}" (click)="addNode(item)" matTooltip="Add operator" mat-button color="accent">
-                                <mat-icon>add</mat-icon>
+                            <mat-icon matListItemIcon>insert_chart_outlined</mat-icon>
+                            <div matListItemTitle>{{ item.name }}</div>
+                            <button matListItemMeta disabled="{{!write}}" (click)="addNode(item)" matTooltip="Add operator" mat-button color="accent">
+                                <mat-icon color="accent">add</mat-icon>
                             </button>
                         </mat-list-item>
                     </mat-list>

@@ -15,7 +15,7 @@
   ~     limitations under the License.
   ~
   -->
-<section *ngIf="userIsAdmin" class="layout-margin">
+<section *ngIf="userIsAdmin" class="layout-margin outer">
     <mat-card appearance="outlined" *ngIf="ready" class="test">
         <mat-card-title>Rule Tester</mat-card-title>
         <mat-card-content>
@@ -86,7 +86,7 @@
 
     <mat-card appearance="outlined" *ngIf="ready" class="table-card">
         <mat-card-content>
-            <div class="table-container-with-button table-container">
+            <div>
                 <mat-table #table (matSortChange)="sortData($event)" [dataSource]="sortedData" [hidden]="!ready"
                            matSort>
                     <ng-container matColumnDef="select">

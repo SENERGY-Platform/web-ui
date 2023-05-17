@@ -24,10 +24,6 @@ senergy-searchbar {
     margin-right: 10px;
 }
 
-mat-form-field {
-    margin-bottom: -1.25em;
-}
-
 .warning-icon {
     color: orangered;
 }

@@ -39,7 +39,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatTreeModule } from '@angular/material/tree';
 import { ImportDeployEditDialogComponent } from './import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import { ImportInstanceExportDialogComponent } from './import-instances/import-instance-export-dialog/import-instance-export-dialog.component';
-import { MatLegacyPaginatorModule as MatPaginatorModule } from '@angular/material/legacy-paginator';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 const types: Route = {
     path: 'imports/types/list',

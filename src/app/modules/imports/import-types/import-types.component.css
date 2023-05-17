@@ -17,7 +17,6 @@
 .container {
     height: calc(100% - 64px);
     overflow-y: auto;
-    padding: 0 8px 8px
 }
 
 .refresh {
@@ -46,8 +45,4 @@ th.mat-mdc-header-cell {
 
 .table-search-container .search-refresh {
     padding-top: 8px;
-}
-
-.table-container {
-    max-height: calc(100vh - 250px);
 }

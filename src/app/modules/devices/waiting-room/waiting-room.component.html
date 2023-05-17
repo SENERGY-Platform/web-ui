@@ -20,11 +20,11 @@
     <span fxLayout="row" class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
         <button matTooltip="Show Hidden" mat-icon-button color="accent" (click)="showHiddenChanged()"
-            *ngIf="!this.showHidden" class="suffix">
+            *ngIf="!this.showHidden">
             <mat-icon>visibility</mat-icon>
         </button>
         <button matTooltip="Hide Hidden" mat-icon-button color="accent" (click)="showHiddenChanged()"
-            *ngIf="this.showHidden" class="suffix">
+            *ngIf="this.showHidden">
             <mat-icon>visibility_off</mat-icon>
         </button>
     </span>

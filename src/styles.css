@@ -47,14 +47,18 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
     width: 100%;
 }
 
+.search-button-container > .mat-mdc-icon-button {
+    margin-top: -20px;
+}
+
 .table-container {
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 216px);
     overflow: auto;
     position: relative;
 }
 
 .table-container-with-button {
-    max-height: calc(100vh - 220px);
+    max-height: calc(100vh - 300px);
 }
 
 .table-container table {
