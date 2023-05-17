@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-.mat-dialog-content {
+.mat-mdc-dialog-content {
     overflow: hidden;
-}
-
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
 }

@@ -18,7 +18,7 @@ import { Component, OnInit } from '@angular/core';
 import { IOModel, OperatorModel } from '../shared/operator.model';
 import { ActivatedRoute } from '@angular/router';
 import { OperatorRepoService } from '../shared/operator-repo.service';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
 import { PermissionsService } from '../../../permissions/shared/permissions.service';
 import { PermissionsUserModel } from '../../../permissions/shared/permissions-user.model';
@@ -123,4 +123,6 @@ export class OperatorComponent implements OnInit {
             duration: 2000,
         });
     }
+
+    protected readonly undefined = undefined;
 }

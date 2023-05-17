@@ -15,19 +15,15 @@
   -->
 <div class="releases-container layout-margin">
     <div fxLayout="column">
-        <span class="search-button-container">
-            <senergy-searchbar></senergy-searchbar>
-            <div fxLayout="row">
-                <div fxFlex></div>
-                <button matTooltip="show old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="this.latest">
-                    <mat-icon>visibility</mat-icon>
-                </button>
-                <button matTooltip="hide old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="!this.latest">
-                    <mat-icon>visibility_off</mat-icon>
-                </button>
-            </div>    
-        </span>
-      
+        <div fxLayout="row" class="search">
+            <senergy-searchbar fxFlex></senergy-searchbar>
+            <button matTooltip="show old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="this.latest" class="suffix">
+                <mat-icon>visibility</mat-icon>
+            </button>
+            <button matTooltip="hide old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="!this.latest" class="suffix">
+                <mat-icon>visibility_off</mat-icon>
+            </button>
+        </div>
         <div class="main-panel"
              infiniteScroll
              [infiniteScrollDistance]="1"

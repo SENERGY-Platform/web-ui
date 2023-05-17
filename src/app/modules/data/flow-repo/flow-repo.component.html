@@ -14,25 +14,20 @@
   ~ limitations under the License.
   -->
 
-<div class="flow-repo-container layout-margin">
-    <div fxLayout="column">
-        <span class="search-button-container">
-            <senergy-searchbar></senergy-searchbar>
-            <div fxLayout="row">
-                <div fxFlex=""></div>
-                <button matTooltip="Show shared" mat-icon-button (click)="showSharedChanged()"
-                        *ngIf="!this.showShared">
-                    <mat-icon>share</mat-icon>
-                </button>
-                <button matTooltip="Hide shared" mat-icon-button color="accent" (click)="showSharedChanged()"
-                        *ngIf="this.showShared">
-                    <mat-icon>share</mat-icon>
-                </button>
-                <senergy-sort [sortAttributes]="sortAttributes"
-                              (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-            </div>
-        </span>
-    </div>
+<div class="flow-repo-container">
+        <div fxLayout="row" class="search">
+            <senergy-searchbar fxFlex></senergy-searchbar>
+            <button matTooltip="Show shared" mat-icon-button (click)="showSharedChanged()" color="accent" class="suffix"
+                    *ngIf="!this.showShared">
+                <mat-icon>share</mat-icon>
+            </button>
+            <button matTooltip="Hide shared" mat-icon-button color="accent" (click)="showSharedChanged()" class="suffix"
+                    *ngIf="this.showShared">
+                <mat-icon>share</mat-icon>
+            </button>
+            <senergy-sort [sortAttributes]="sortAttributes" class="suffix-sort"
+                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        </div>
     <div class="flow-repo-scroll">
         <div infiniteScroll
              [infiniteScrollDistance]="1"

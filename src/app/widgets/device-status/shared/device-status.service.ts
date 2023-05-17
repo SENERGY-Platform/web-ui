@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { DeviceStatusElementModel } from './device-status-properties.model';
 import { ExportModel } from '../../../modules/exports/shared/export.model';

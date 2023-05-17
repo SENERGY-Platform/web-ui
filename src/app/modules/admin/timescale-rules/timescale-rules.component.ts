@@ -17,9 +17,9 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {TimescaleRulesService} from './shared/timescale-rules.service';
 import {TimescaleRuleModel} from './shared/timescale-rule.model';
-import {MatLegacyTable as MatTable} from '@angular/material/legacy-table';
+import {MatTable} from '@angular/material/table';
 import {ImportTypePermissionSearchModel} from '../../imports/import-types/shared/import-types.model';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {TimescaleRulesCreateEditComponent} from './timescale-rules-create-edit/timescale-rules-create-edit.component';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
@@ -48,7 +48,6 @@ export class TimescaleRulesComponent implements OnInit {
     limit = this.limitInit;
     offset = 0;
     dialogWidth = 700;
-    dialogHeight = 900;
     roles: string[] = [];
     users: any[] = [];
 
@@ -107,7 +106,7 @@ export class TimescaleRulesComponent implements OnInit {
                 roles: this.roles,
                 users: this.users,
             },
-            minHeight: '' + this.dialogHeight + 'px',
+            minHeight: '65vh',
             minWidth: '' + this.dialogWidth + 'px',
         };
         this.dialog
@@ -129,7 +128,7 @@ export class TimescaleRulesComponent implements OnInit {
                 roles: this.roles,
                 users: this.users,
             },
-            minHeight: '' + this.dialogHeight + 'px',
+            minHeight: '65vh',
             minWidth: '' + this.dialogWidth + 'px',
         };
         this.dialog.open(TimescaleRulesCreateEditComponent, config);
@@ -143,7 +142,7 @@ export class TimescaleRulesComponent implements OnInit {
                 roles: this.roles,
                 users: this.users,
             },
-            minHeight: '' + this.dialogHeight + 'px',
+            minHeight: '65vh',
             minWidth: '' + this.dialogWidth + 'px',
         };
         this.dialog

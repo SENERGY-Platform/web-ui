@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+.layout-margin {
+    margin: 8px;
+    padding: 12px;
+}
+
+.layout-value {
+    padding-top: 8px;
+}
+
+.layout-value {
+    padding-top: 8px;
+    padding-right: 24px;
+}
+
 .main-panel {
     padding-bottom: 150px;
 }

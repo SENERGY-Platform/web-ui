@@ -18,7 +18,7 @@
 <div class="dashboard-container">
     <mat-tab-group backgroundColor="accent" color="primary" (animationDone)="initAllWidgets()"
                    (selectedIndexChange)="setTabIndex($event)" [(selectedIndex)]="activeTabIndex"
-                   dynamicHeight="true" headerPosition="above">
+                   dynamicHeight="true" headerPosition="above" mat-stretch-tabs="false">
         <mat-tab *ngFor="let dashboard of dashboards; let i=index">
             <ng-template mat-tab-label>
                 <span (mouseenter)="mouseEnterHeader(i)" (mouseleave)="mouseLeaveHeader()"

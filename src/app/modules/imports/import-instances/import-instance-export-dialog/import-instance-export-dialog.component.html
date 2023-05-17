@@ -36,7 +36,7 @@
             <th mat-header-cell *matHeaderCellDef>
                 <mat-checkbox [checked]="valueSelection.selected.length === values.length"
                               [indeterminate]="valueSelection.selected.length !== values.length && valueSelection.selected.length > 0"
-                              (change)="masterCheckboxed($event)" style="padding-left: 16px"></mat-checkbox>
+                              (change)="masterCheckboxed($event)"></mat-checkbox>
             </th>
             <td mat-cell *matCellDef="let m">
                 <mat-checkbox (change)="checkboxed(m, $event)" [checked]="valueSelection.isSelected(m)">

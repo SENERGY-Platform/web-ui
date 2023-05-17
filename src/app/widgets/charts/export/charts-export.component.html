@@ -14,13 +14,13 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget" [zoom]="zoom"
                            [warnText]="(chartExportData?.dataTable?.length || 0) > 0 &&
                             (chartExportData?.dataTable?.length || 0) * ((chartExportData?.dataTable?.[0]?.length || 0)-1) > sizeLimit ?
                             'This widgets displays many data points and impacts performance. Try reducing the displayed' +
                              ' interval or use an aggregation function!' : ''"></senergy-widget-header>
-    <mat-card-content class="content-size">
+    <mat-card-content>
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
             <div *ngIf="ready">

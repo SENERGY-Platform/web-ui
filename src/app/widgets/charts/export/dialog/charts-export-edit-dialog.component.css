@@ -34,16 +34,12 @@ th, td {
     white-space: nowrap;
 }
 
-.mat-cell {
+.mat-mdc-cell {
     padding: 0 8px 0 0;
 }
 
 mat-form-field {
     width: 100%;
-}
-
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
 }
 
 .mat-column-duplicate-delete {

@@ -76,12 +76,6 @@
     width: 100%;
 }
 
-.device-name {
-    font-size: large;
-    font-weight: 500;
-
-}
-
 .pointer {
     cursor: pointer;
 }
@@ -142,4 +136,9 @@ table {
     margin-top: 0;
     margin-bottom: 0;
     list-style-group: none;
+}
+
+.mat-mdc-card-title {
+    padding-left: 8px;
+    width: 100%;
 }

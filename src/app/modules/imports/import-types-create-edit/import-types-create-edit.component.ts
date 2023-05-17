@@ -23,13 +23,13 @@ import {
 } from '../import-types/shared/import-types.model';
 import {ImportTypesService} from '../import-types/shared/import-types.service';
 import {AspectsService} from '../../metadata/aspects/shared/aspects.service';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ContentVariableDialogComponent} from './content-variable-dialog/content-variable-dialog.component';
 import {environment} from '../../../../environments/environment';
 import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {Observable} from 'rxjs';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {convertPunctuation, typeValueValidator} from '../validators/type-value-validator';
 import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
 import {

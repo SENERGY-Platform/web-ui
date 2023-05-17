@@ -28,13 +28,10 @@
     min-height: 200px;
 }
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}
 
-.mat-radio-button {
+.mat-mdc-radio-button {
     margin-top: 8px;
 }
-.mat-radio-button ~ .mat-radio-button {
+.mat-mdc-radio-button ~ .mat-radio-button {
     margin-left: 16px;
 }

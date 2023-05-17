@@ -27,7 +27,7 @@ import {
 } from '../../metadata/device-types-overview/shared/device-type.model';
 import {DatabaseType, ExportDatabaseModel, ExportModel, ExportValueModel} from '../shared/export.model';
 import {ExportService} from '../shared/export.service';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {PipelineModel, PipelineOperatorModel} from '../../data/pipeline-registry/shared/pipeline.model';
 import {PipelineRegistryService} from '../../data/pipeline-registry/shared/pipeline-registry.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -44,7 +44,7 @@ import {map} from 'rxjs/operators';
 import {AbstractControl, FormArray, UntypedFormBuilder, Validators} from '@angular/forms';
 import * as _ from 'lodash';
 import {BrokerExportService} from '../shared/broker-export.service';
-import {LegacyPageEvent as PageEvent} from '@angular/material/legacy-paginator';
+import {PageEvent} from '@angular/material/paginator';
 
 @Component({
     selector: 'senergy-new-export',

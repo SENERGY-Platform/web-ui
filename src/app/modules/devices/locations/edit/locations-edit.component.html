@@ -31,17 +31,22 @@
     <div class="devices-container">
         <h2>Device-Groups</h2>
         <div *ngIf="deviceGroupsForm.value.length > 0">
-            <mat-card  *ngFor="let item of deviceGroupsForm.value" fxLayout="row" fxLayoutAlign="space-between center" class="device-card">
-                <div class="device-info">
-                    <div matTooltip="{{item.name}}" class="device-name">
-                        {{item.name}}
+            <mat-card appearance="outlined" *ngFor="let item of deviceGroupsForm.value" fxLayout="row"
+                      fxLayoutAlign="space-between center" class="device-card">
+                <mat-card-title>
+                    <div class="device-info">
+                        <div matTooltip="{{item.name}}" class="device-name">
+                            {{item.name}}
+                        </div>
                     </div>
-                </div>
-                <div class="device-ctrl">
-                    <button mat-icon-button color="accent" (click)="removeDeviceGroup(item.id)" matTooltip="Remove">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </div>
+                </mat-card-title>
+                <mat-card-actions>
+                    <div class="device-ctrl">
+                        <button mat-icon-button color="accent" (click)="removeDeviceGroup(item.id)" matTooltip="Remove">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </mat-card-actions>
             </mat-card>
         </div>
         <button mat-raised-button color="accent" (click)="selectAndAddGroups()">Add Groups</button>
@@ -50,17 +55,22 @@
     <div class="devices-container">
         <h2>Devices</h2>
         <div *ngIf="devicesForm.value.length > 0">
-            <mat-card  *ngFor="let item of devicesForm.value" fxLayout="row" fxLayoutAlign="space-between center" class="device-card">
-                <div class="device-info">
-                    <div matTooltip="{{item.name}}" class="device-name">
-                        {{item.name}}
+            <mat-card appearance="outlined" *ngFor="let item of devicesForm.value" fxLayout="row"
+                      fxLayoutAlign="space-between center" class="device-card">
+                <mat-card-title>
+                    <div class="device-info">
+                        <div matTooltip="{{item.name}}" class="device-name">
+                            {{item.name}}
+                        </div>
                     </div>
-                </div>
-                <div class="device-ctrl">
-                    <button mat-icon-button color="accent" (click)="removeDevice(item.id)" matTooltip="Remove">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </div>
+                </mat-card-title>
+                <mat-card-actions>
+                    <div class="device-ctrl">
+                        <button mat-icon-button color="accent" (click)="removeDevice(item.id)" matTooltip="Remove">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </mat-card-actions>
             </mat-card>
         </div>
         <button mat-raised-button color="accent" (click)="selectAndAddDevices()">Add Devices</button>

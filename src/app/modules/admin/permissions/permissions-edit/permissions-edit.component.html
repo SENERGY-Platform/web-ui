@@ -74,8 +74,8 @@
         </mat-form-field>
     </div>
 </div>
-<div mat-dialog-actions>
-    <button (click)="yes()" color="accent"  mat-button cdkFocusInitial><strong>Speichern</strong></button>
-    <button (click)="no()" color="accent" mat-button><strong>Abbrechen</strong></button>
+<div mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="primary" (click)="no()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="yes()" [disabled]="form.invalid">Save</button>
 </div>
 

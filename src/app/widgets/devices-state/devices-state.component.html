@@ -14,12 +14,12 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="content-size drag-handler">
+    <mat-card-content class="drag-handler">
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
         <div *ngIf="ready" fxLayout="column" fxFill>
-            <div fxFlex="1 1 calc(33.33% - 5.33px)" (click)="showOnlineDevices()" class="clickable">
+            <div fxFlex="1 1 calc(33.33% - 12px)" (click)="showOnlineDevices()" class="clickable">
                 <div class="widget-icon-green" fxFill fxFlex="30" fxLayoutAlign="center center">
                     <mat-icon class="mat-32 white">cloud</mat-icon>
                 </div>
@@ -32,7 +32,7 @@
                 </div>
             </div>
             <div fxFlex="8px"></div>
-            <div fxFlex="1 1 calc(33.33% - 5.33px)" (click)="showOfflineDevices()" class="clickable">
+            <div fxFlex="1 1 calc(33.33% - 12px)" (click)="showOfflineDevices()" class="clickable">
                 <div class="widget-icon-red" fxFill fxFlex="30" fxLayoutAlign="center center">
                     <mat-icon class="mat-32 white">cloud_off</mat-icon>
                 </div>
@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div fxFlex="8px"></div>
-            <div fxFlex="1 1 calc(33.33% - 5.33px)" (click)="showUnknownDevices()" class="clickable">
+            <div fxFlex="1 1 calc(33.33% - 12px)" (click)="showUnknownDevices()" class="clickable">
                 <div class="widget-icon-orange" fxFill fxFlex="30" fxLayoutAlign="center center">
                     <mat-icon class="white mat-32">help outline</mat-icon>
                 </div>

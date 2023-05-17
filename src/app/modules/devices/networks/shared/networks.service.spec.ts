@@ -18,8 +18,8 @@ import { TestBed, inject } from '@angular/core/testing';
 
 import { NetworksService } from './networks.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
-import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 describe('NetworksService', () => {
     beforeEach(() => {

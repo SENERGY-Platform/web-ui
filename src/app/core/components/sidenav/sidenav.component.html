@@ -15,8 +15,7 @@
   -->
 
 <mat-sidenav-container class="sidenav-container" [ngStyle]="{'z-index': zIndex}" (backdropClick)="closeSidenav()">
-    <mat-sidenav disableClose #sidenav role="navigation" class="sidenav" [fixedInViewport]="true"
-                 class="mat-elevation-z1">
+    <mat-sidenav disableClose #sidenav role="navigation" class="sidenav mat-elevation-z1" [fixedInViewport]="true">
         <ul class="side-menu">
             <li *ngFor="let section of sections">
                     <button mat-button  type=button routerLink="{{section.state}}" routerLinkActive="background-color-sidenav" *ngIf="section.type === 'link'"

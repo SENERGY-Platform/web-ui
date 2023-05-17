@@ -35,7 +35,7 @@
     </mat-select-trigger>
 
     <mat-optgroup class="searchgroup"> <!-- does not show checkbox -->
-        <mat-form-field fxFlex color="accent">
+        <mat-form-field fxFlex color="accent" class="search-field" appearance="outline">
             <input matInput [formControl]="searchControl" placeholder="Search..." #searchInput="matInput" (keydown)="stopPropagation($event)">
             <button mat-button *ngIf="searchControl.value" matSuffix mat-icon-button aria-label="Clear"
                     (click)="resetSearch()">

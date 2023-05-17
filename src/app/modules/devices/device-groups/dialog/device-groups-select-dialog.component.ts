@@ -15,9 +15,9 @@
  */
 
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
+import { MatDialogRef } from '@angular/material/dialog';
 import { DeviceGroupsService } from '../shared/device-groups.service';
-import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
+import { MatTable } from '@angular/material/table';
 import {FormControl, UntypedFormControl} from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { Sort } from '@angular/material/sort';

@@ -26,12 +26,13 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { MonitorProcessTotalModel } from './shared/monitor-process-total.model';
 import { Navigation, Router } from '@angular/router';
 import { DeploymentsModel } from '../deployments/shared/deployments.model';
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
-import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { NetworksModel } from '../../devices/networks/shared/networks.model';
 import { MonitorFogFactory, MonitorFogService } from './shared/monitor-fog.service';
+import { UtilService } from 'src/app/core/services/util.service';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -92,6 +93,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         private router: Router,
         private hubsService: NetworksService,
         private fogMonitorFactory: MonitorFogFactory,
+        public utilsService: UtilService
     ) {
         this.monitorService = plattformMonitorService;
         this.getRouterParams();

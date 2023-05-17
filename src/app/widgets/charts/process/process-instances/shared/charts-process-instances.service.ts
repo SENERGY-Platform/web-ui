@@ -21,7 +21,7 @@ import { MonitorProcessModel } from '../../../../../modules/processes/monitor/sh
 import { ChartsDataTableModel } from '../../../shared/charts-data-table.model';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
 import { ElementSizeService } from '../../../../../core/services/element-size.service';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ChartsProcessInstancesEditDialogComponent } from '../dialogs/charts-process-instances-edit-dialog.component';
 import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
@@ -112,8 +112,10 @@ export class ChartsProcessInstancesService {
             chartArea: { width: element.widthPercentage, height: element.heightPercentage },
             height: element.height,
             width: element.width,
-            pieSliceText: 'value',
-            legend: 'none',
+            pieSliceText: 'none',
+            legend: {
+                'position': 'labeled',
+            }
         });
     }
 }

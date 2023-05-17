@@ -78,7 +78,7 @@ mat-grid-list {
     flex: 1 1 auto;
 }
 
-.mat-cell {
+.mat-mdc-cell {
     padding: 0 8px;
 }
 

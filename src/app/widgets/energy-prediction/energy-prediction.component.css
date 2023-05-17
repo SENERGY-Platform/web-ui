@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-.mat-card {
+.mat-mdc-card {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
@@ -27,23 +27,24 @@
 }
 
 .kpi-1-3 {
-    margin-left: 16px;
-}
-
-.kpi-header-1-3 {
-    margin-top: 6px;
     margin-left: 14px;
 }
 
+.kpi-header-1-3 {
+    margin-top: 0;
+    margin-left: 14px;
+    margin-bottom: -4px;
+}
+
 .kpi-text-1-3 {
-    margin-top: 6px;
+    margin-top: 0;
     margin-left: 4px;
 }
 
-.content-size {
-    min-height: calc(100% - 72px);
+.mat-mdc-card-content {
     height: calc(100% - 72px);
-    margin: 0px;
+    margin: 0;
+    overflow-y: hidden;
 }
 
 .white {
@@ -54,9 +55,11 @@
 }
 
 .values {
-    font: 500 18px/22px Roboto,"Helvetica Neue",sans-serif;
+    font: 400 16px/18px Roboto,"Helvetica Neue",sans-serif;
+    font-weight: 500;
 }
 
-.widget-icon {
-    margin-top: 12px;
+
+.mtop {
+    margin-top: 4px;
 }

@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+
+.layout-margin {
+    margin: 8px 8px 8px;
+}
+
 .truncate {
     white-space: nowrap;
     overflow: hidden;
@@ -39,6 +44,12 @@ table {
     width: 100%;
 }
 
+.table-container {
+    position: relative;
+    max-height: calc(100vh - 215px);
+    overflow: auto;
+}
+
 .offset {
     margin-right: 8px;
 }
@@ -49,4 +60,8 @@ table {
 
 .missing_aes_key_icon {
     vertical-align: bottom;
+}
+
+.search-refresh .suffix {
+    margin-top: -20px;
 }

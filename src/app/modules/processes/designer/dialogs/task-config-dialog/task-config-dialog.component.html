@@ -17,50 +17,58 @@
 
 <h2 mat-dialog-title>Task Configuration</h2>
 
-<mat-radio-group [formControl]="optionsFormControl">
-    <mat-radio-button class="radio-button" value="Controlling">Controlling</mat-radio-button>
-    <mat-radio-button class="radio-button" value="Measuring">Measuring</mat-radio-button>
-</mat-radio-group>
-
 <mat-dialog-content>
+
+    <mat-radio-group [formControl]="optionsFormControl">
+        <mat-radio-button class="radio-button" value="Controlling">Controlling</mat-radio-button>
+        <mat-radio-button class="radio-button" value="Measuring">Measuring</mat-radio-button>
+    </mat-radio-group>
+
     <form class="form">
         <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Controlling'">
             <senergy-select-search placeholder="Device class" [compareWith]="compare"
-                        [formControl]="deviceClassFormControl" [required]="true"
-                        [options]="deviceClasses" useOptionViewProperty="name">
+                                   [formControl]="deviceClassFormControl" [required]="true"
+                                   [options]="deviceClasses" useOptionViewProperty="name">
             </senergy-select-search>
         </mat-form-field>
 
         <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value === 'Measuring'">
             <senergy-select-search placeholder="Aspect" [compareWith]="compare"
-                        [formControl]="aspectFormControl" [required]="true"
-                        [options]="aspects" useOptionViewProperty="name">
+                                   [formControl]="aspectFormControl" [required]="true"
+                                   [options]="aspects" useOptionViewProperty="name">
             </senergy-select-search>
         </mat-form-field>
 
         <mat-form-field class="form-field" color="accent" *ngIf="optionsFormControl.value !== ''">
             <senergy-select-search placeholder="Function" [compareWith]="compare"
-                        [formControl]="functionFormControl" [required]="true"
-                        [options]="functions" useOptionViewProperty="name">
+                                   [formControl]="functionFormControl" [required]="true"
+                                   [options]="functions" useOptionViewProperty="name">
             </senergy-select-search>
         </mat-form-field>
     </form>
+
+    <mat-radio-group [formControl]="completionStrategyFormControl">
+        <mat-radio-button class="radio-button" value="optimistic">Optimistic</mat-radio-button>
+        <mat-radio-button class="radio-button" value="pessimistic">Pessimistic</mat-radio-button>
+    </mat-radio-group>
+
+    <form>
+        <mat-form-field class="form-field" color="accent">
+            <input type="number" matInput placeholder="Retries"
+                   [formControl]="retriesFormControl">
+        </mat-form-field>
+    </form>
+
+    <mat-checkbox class="form-filed-checkbox" [formControl]="preferEventsFormControl"
+                  matTooltip="check if you prefer stored event values before device requests"
+                  matTooltipPosition="right">Prefer Events
+    </mat-checkbox>
 </mat-dialog-content>
 
-<mat-radio-group [formControl]="completionStrategyFormControl">
-    <mat-radio-button class="radio-button" value="optimistic">Optimistic</mat-radio-button>
-    <mat-radio-button class="radio-button" value="pessimistic">Pessimistic</mat-radio-button>
-</mat-radio-group>
-
-<mat-form-field class="full-width" color="accent">
-    <input type="number" matInput placeholder="Retries"
-           [formControl]="retriesFormControl">
-</mat-form-field>
-
-<mat-checkbox class="form-filed-checkbox" [formControl]="preferEventsFormControl" matTooltip="check if you prefer stored event values before device requests" matTooltipPosition="right">Prefer Events</mat-checkbox>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="functionFormControl.value === ''" (click)="save()">Save</button>
+    <button mat-raised-button color="accent" [disabled]="functionFormControl.value === ''" (click)="save()">Save
+    </button>
 </mat-dialog-actions>
 

@@ -47,15 +47,14 @@ gridster-item {
   margin: 0px;
 }
 
-.dashboard-container ::ng-deep .mat-tab-label:last-child {
-  min-width: 20px !important;
-  padding-left: 0px;
-  padding-right: 0px;
+.mat-mdc-tab-labels .mat-mdc-tab {
+  height: 54px;
 }
 
-.dashboard-container ::ng-deep .mat-tab-header {
-  min-height: 54px;
+.mdc-tab {
+  height: 54px!important;
 }
+
 
 .border-radius {
   border-radius: 4px;
@@ -68,11 +67,7 @@ gridster-item {
   z-index: 100;
 }
 
-.dashboard-container ::ng-deep .mat-tab-body-content {
-  overflow: hidden;
-}
-
-.dashboard-container ::ng-deep .mat-tab-body-wrapper {
+.dashboard-container ::ng-deep .mat-mdc-tab-body-wrapper {
   height: calc(100vh - 118px);
 }
 

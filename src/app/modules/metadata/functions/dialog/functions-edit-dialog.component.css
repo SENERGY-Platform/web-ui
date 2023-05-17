@@ -28,6 +28,3 @@
     min-height: 200px;
 }
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}

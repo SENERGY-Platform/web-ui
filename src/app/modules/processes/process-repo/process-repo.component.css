@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
- .process-repo-container ::ng-deep .mat-tab-body-content {
-    overflow: auto;
-}
-
-.process-repo-container ::ng-deep .mat-tab-body-wrapper {
+.process-repo-container ::ng-deep .mat-mdc-tab-body {
+    overflow: hidden;
     height: calc(100vh - 118px);
+
 }
 
-.process-repo-container ::ng-deep .mat-tab-header {
+:host ::ng-deep .mdc-tab {
+    height: 54px!important;
+}
+
+.process-repo-container ::ng-deep .mat-mdc-tab-header {
     min-height: 54px;
 }
 
@@ -84,4 +86,17 @@ mat-grid-list {
 .info-icon {
     padding-left: 5px;
     padding-right: 5px;
+}
+
+.search {
+    padding-top: 8px;
+    padding-left: 8px;
+}
+
+.search .suffix-del {
+    padding-top: 15px;
+}
+
+.search .suffix {
+    padding-top: 4px;
 }

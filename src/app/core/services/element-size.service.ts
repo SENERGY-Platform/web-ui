@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ElementSizeService {
-    constructor() {}
+    constructor() {
+    }
 
     getHeightAndWidthByElementId(
         elementId: string,
@@ -40,47 +41,31 @@ export class ElementSizeService {
             widthPercentage = this.calcWidthPercentage(width);
         }
 
-        return { height, width, heightPercentage, widthPercentage };
+        return {height, width, heightPercentage, widthPercentage};
     }
 
     private calcHeightPercentage(height: number, heightPercentageAdjustment: number): string {
         let percentage = 0;
-        if (height < 200) {
-            percentage = 70;
+        if (height < 500) {
+            percentage = 80;
         } else {
-            if (height < 400) {
-                percentage = 75;
-            } else {
-                if (height < 500) {
-                    percentage = 80;
-                } else {
-                    percentage = 90;
-                }
-            }
+            percentage = 95;
         }
         return percentage - heightPercentageAdjustment + '%';
     }
 
     private calcWidthPercentage(width: number): string {
         let percentage = 0;
-        if (width < 350) {
-            percentage = 65;
+
+        if (width < 800) {
+            percentage = 80;
         } else {
-            if (width < 400) {
-                percentage = 70;
+            if (width < 1100) {
+                percentage = 82;
             } else {
-                if (width < 800) {
-                    percentage = 75;
-                } else {
-                    if (width < 1100) {
-                        percentage = 82;
-                    } else {
-                        percentage = 85;
-                    }
-                }
+                percentage = 85;
             }
         }
-
         return percentage + '%';
     }
 }

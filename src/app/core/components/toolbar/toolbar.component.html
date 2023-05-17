@@ -22,7 +22,7 @@
         <img class="logo"
              src="{{getLogoUrl()}}">
     </a>
-    <div class="mat-h4 color-accent">{{header}}</div>
+    <div fxFlex class="mat-h4 color-accent header-text">{{header}}</div>
     <span class="fill-remaining-space"></span>
     <button mat-icon-button color="accent" (click)="openNotificationsDialog()">
         <mat-icon *ngIf="unreadCounter < 1">notifications_none</mat-icon>

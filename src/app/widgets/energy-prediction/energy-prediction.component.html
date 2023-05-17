@@ -14,9 +14,9 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="content-size drag-handler">
+    <mat-card-content class="drag-handler">
         <div *ngIf="!configured" fxFill fxLayout="row" fxLayoutAlign="center center">
             Please configure widget!
         </div>
@@ -25,11 +25,11 @@
             <div class="center-text">Problem fetching data: Operator might have not received data for selected time frame. Check config otherwise.</div>
         </div>
         <div *ngIf="configured && ready && dataReady" fxLayout="column" fxFill>
-            <div fxFlex="1 1 calc(25% - 6px)">
-                <div class="widget-icon" fxFill fxFlex="40" fxLayoutAlign="center center">
+            <div>
+                <div class="widget-icon" fxFill fxFlex="20" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">trending_up</mat-icon>
                 </div>
-                <div fxFill fxFlex="60" fxLayout="column">
+                <div fxFill fxFlex="80" fxLayout="column">
                     <div class="kpi-header-1-3" fxLayout="row">
                         <div fxFlex="85">CONSUMPTION</div>
                         <mat-icon [matTooltip]="getConsumptionTooltip()">help_outline</mat-icon>
@@ -42,12 +42,11 @@
                     </div>
                 </div>
             </div>
-            <div fxFlex="8px"></div>
-            <div fxFlex="1 1 calc(25% - 6px)">
-                <div class="widget-icon" fxFill fxFlex="40" fxLayoutAlign="center center">
+            <div class="mtop">
+                <div class="widget-icon" fxFill fxFlex="20" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">trending_flat</mat-icon>
                 </div>
-                <div fxFill fxFlex="60" fxLayout="column">
+                <div fxFill fxFlex="80" fxLayout="column">
                     <div class="kpi-header-1-3" fxLayout="row">
                         <div fxFlex="85">METER READING</div>
                         <mat-icon [matTooltip]="getMeterReadingTooltip()">help_outline</mat-icon>
@@ -59,24 +58,22 @@
                     </div>
                 </div>
             </div>
-            <div fxFlex="8px"></div>
-            <div fxFlex="1 1 calc(25% - 6px)">
-                <div class="widget-icon" fxFill fxFlex="40" fxLayoutAlign="center center">
+            <div class="mtop">
+                <div class="widget-icon" fxFill fxFlex="20" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">event</mat-icon>
                 </div>
-                <div fxFill fxFlex="60" fxLayout="column">
+                <div fxFill fxFlex="80" fxLayout="column">
                     <div class="kpi-header-1-3">DATE</div>
                     <div fxLayout="row">
                         <div class="values kpi-1-3">{{predictionModel.timestamp | date: 'shortDate'}}</div>
                     </div>
                 </div>
             </div>
-            <div fxFlex="8px"></div>
-            <div fxFlex="1 1 calc(25% - 6px)">
-                <div class="widget-icon" fxFill fxFlex="40" fxLayoutAlign="center center">
+            <div class="mtop">
+                <div class="widget-icon" fxFill fxFlex="20" fxLayoutAlign="center center">
                     <mat-icon class="mat-32">euro_symbol</mat-icon>
                 </div>
-                <div fxFill fxFlex="60" fxLayout="column">
+                <div fxFill fxFlex="80" fxLayout="column">
                     <div class="kpi-header-1-3" fxLayout="row">
                         <div fxFlex="85">PRICE</div>
                         <mat-icon [matTooltip]="getPriceTooltip()">help_outline</mat-icon>

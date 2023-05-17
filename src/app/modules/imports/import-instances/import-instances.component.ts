@@ -17,9 +17,9 @@ import { Component, OnInit, ViewChild, } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
 import { Sort } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
@@ -28,6 +28,7 @@ import { forkJoin, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
+import { UtilService } from 'src/app/core/services/util.service';
 import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
@@ -45,14 +46,15 @@ export class ImportInstancesComponent implements OnInit {
         private snackBar: MatSnackBar,
         private deleteDialog: DialogsService,
         private router: Router,
-        private searchbarService: SearchbarService
+        private searchbarService: SearchbarService,
+        public utilsService: UtilService
     ) {}
 
     searchText: string = ""
     pageSize = 20;
     totalCount = 200;
     selection = new SelectionModel<ImportInstancesModel>(true, []);
-    searchSub: Subscription = new Subscription()    
+    searchSub: Subscription = new Subscription()
     dataReady = false;
     sort = 'updated_at.desc';
     offset = 0;
@@ -125,6 +127,7 @@ export class ImportInstancesComponent implements OnInit {
             .listImportInstances(this.searchText, this.pageSize, this.offset, this.sort, this.excludeGenerated)
             .subscribe((inst) => {
                 this.dataSource.data = inst;
+                console.log(inst)
                 this.dataReady = true;
             });
     }
@@ -189,14 +192,14 @@ export class ImportInstancesComponent implements OnInit {
             if (deletePipelines) {
                 this.dataReady = false;
                 this.selection.selected.forEach((importInstance: ImportInstancesModel) => {
-                    deletionJobs.push(this.importInstancesService.deleteImportInstance(importInstance.id))    
+                    deletionJobs.push(this.importInstancesService.deleteImportInstance(importInstance.id))
                 });
             }
-            
+
             forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                 const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
                 if (ok) {
-                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});            
+                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
                 } else {
                     this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
                 }

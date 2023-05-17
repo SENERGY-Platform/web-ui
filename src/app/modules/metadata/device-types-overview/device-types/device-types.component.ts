@@ -34,16 +34,16 @@ import {
     functionTypes, senergyConnectorLocalIdConstraint,
 } from '../shared/device-type.model';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeService} from '../shared/device-type.service';
 import {ActivatedRoute, Router} from '@angular/router';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {forkJoin, Observable, of} from 'rxjs';
 import {DeviceTypeHelperService} from './shared/device-type-helper.service';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
 import {DeviceTypesContentVariableDialogComponent} from './dialogs/device-types-content-variable-dialog.component';
-import {MatLegacyOption as MatOption} from '@angular/material/legacy-core';
+import {MatOption} from '@angular/material/core';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
 import {ConceptsCharacteristicsModel} from '../../concepts/shared/concepts-characteristics.model';
 import {environment} from '../../../../../environments/environment';

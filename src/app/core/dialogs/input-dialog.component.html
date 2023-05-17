@@ -16,14 +16,14 @@
 
 <h2 mat-dialog-title>{{title}}</h2>
 
-<div>
+<mat-dialog-content>
     <div *ngFor="let key of Object.keys(fields)">
         <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
             <mat-label>{{key | titlecase}}</mat-label>
             <input matInput placeholder="{{key | titlecase}}" [(ngModel)]="fields[key]" [required]="isRequired(key)">
         </mat-form-field>
     </div>
-</div>
+</mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>

@@ -21,10 +21,6 @@ body {
     margin: 0px;
 }
 
-.mat-tab-label-active {
-    opacity: 1 !important;
-}
-
 svg > g > g:last-child { pointer-events: none } /* google chart anti flickering fix */
 
 .right-aligned-header > .mat-content { /* to align description in expansion panel  headers to the right, has to be here */
@@ -58,7 +54,7 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 }
 
 .table-container-with-button {
-    max-height: calc(100vh - 300px);
+    max-height: calc(100vh - 220px);
 }
 
 .table-container table {

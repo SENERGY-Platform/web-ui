@@ -14,18 +14,10 @@
   ~ limitations under the License.
   -->
 
-<div class="device-instance-container layout-margin">
+<div class="device-instance-container layout-margin" fxLayout="column">
     <span fxLayout="row" class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
-
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <mat-chip-list class="offset" *ngIf="selectedTagTransformed !== ''">
-                <mat-chip [removable]="true" (removed)="tagRemoved()" color="accent" selected>{{selectedTagTransformed}}
-                    <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-            </mat-chip-list>
-            <button mat-icon-button [matMenuTriggerFor]="filterMain" matTooltip="Filter" color="accent">
+            <button mat-icon-button [matMenuTriggerFor]="filterMain" matTooltip="Filter" color="accent" class="suffix-button">
                 <mat-icon>filter_alt</mat-icon>
             </button>
             <mat-menu #filterMain="matMenu">
@@ -35,23 +27,28 @@
             </mat-menu>
             <mat-menu #filterDeviceType="matMenu">
                 <button mat-menu-item *ngFor="let dt of deviceTypeOptions"
-                    (click)="filterByDeviceType(dt)">{{dt.name}}</button>
+                        (click)="filterByDeviceType(dt)">{{dt.name}}</button>
             </mat-menu>
             <mat-menu #filterLocation="matMenu">
                 <button mat-menu-item *ngFor="let location of locationOptions"
-                    (click)="filterByLocation(location)">{{location.name}}</button>
+                        (click)="filterByLocation(location)">{{location.name}}</button>
             </mat-menu>
             <mat-menu #filterNetwork="matMenu">
                 <button mat-menu-item *ngFor="let network of networkOptions"
-                    (click)="filterByNetwork(network)">{{network.name}}</button>
+                        (click)="filterByNetwork(network)">{{network.name}}</button>
             </mat-menu>
-        </div>
     </span>
+    <mat-chip-listbox class="offset" *ngIf="selectedTagTransformed !== ''">
+        <mat-chip-option [removable]="true" (removed)="tagRemoved()" color="accent"
+                         selected>{{selectedTagTransformed}}
+            <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip-option>
+    </mat-chip-listbox>
 
     <div *ngIf="dataSource.data.length === 0 && ready">No devices found.</div>
     <senergy-spinner [show]="!ready"></senergy-spinner>
 
-    <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
+    <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0" [ngClass]="{'height-chips': selectedTagTransformed !== ''}">
         <div class="table-container">
             <table mat-table [dataSource]="dataSource" matSort matSortActive="display_name" matSortDirection="asc">
                 <ng-container matColumnDef="select">

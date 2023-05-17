@@ -19,14 +19,14 @@ import { PipelineModel } from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
 import { MatSort } from '@angular/material/sort';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { forkJoin, Observable, pipe, Subscription } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { UtilService } from 'src/app/core/services/util.service';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -52,6 +52,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         public snackBar: MatSnackBar,
         private searchbarService: SearchbarService,
         private dialogsService: DialogsService,
+        public utilsService: UtilService
     ) {}
 
     ngOnInit() {
@@ -63,7 +64,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
             this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
                 if(searchText != ""){
                     resp = resp.filter(pipeline => (pipeline.name.search(searchText) != -1))
-                } 
+                }
                 this.dataSource.data = resp;
                 this.totalCount = resp.length;
 
@@ -153,14 +154,14 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
             if (deletePipelines) {
                 this.ready = false;
                 this.selection.selected.forEach((pipeline: PipelineModel) => {
-                    deletionJobs.push(this.flowEngineService.deletePipeline(pipeline.id))    
+                    deletionJobs.push(this.flowEngineService.deletePipeline(pipeline.id))
                 });
             }
-            
+
             forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                 const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
                 if (ok) {
-                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});            
+                    this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
                 } else {
                     this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
                 }

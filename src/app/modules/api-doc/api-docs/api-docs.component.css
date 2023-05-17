@@ -16,19 +16,15 @@
  *
  */
 
- .layout-margin {
-     margin: 50px 150px;
- }
+.outer {
+    padding-top: 8px;
+    padding-left: 8px;
+}
 
 .service-container {
     grid-template-columns: repeat(auto-fit, minmax(33%, 1fr));
     grid-gap: 5px;
     display: grid;
-}
-
-mat-card-actions {
-    position: absolute;
-    bottom: 25px;
 }
 
 .search {
@@ -65,7 +61,6 @@ mat-card-actions {
     }
 }
 
-.api-description {
-    margin-left: 15px;
+.card-container {
+    overflow-y: auto;
 }
-

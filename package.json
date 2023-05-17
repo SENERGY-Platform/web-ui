@@ -52,7 +52,7 @@
     "moment": "^2.24.0",
     "ng2-google-charts": "^6.1.0",
     "ngx-clipboard": "^12.3.0",
-    "ngx-infinite-scroll": "^8.0.1",
+    "ngx-infinite-scroll": "^15.0.0",
     "rxjs": "^7.8.0",
     "swagger-ui": "^4.18.3",
     "tslib": "^2.0.0",

@@ -14,9 +14,9 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="content-size">
+    <mat-card-content>
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
         <div *ngIf="ready && widget.properties.acControl === undefined" fxFill fxLayout="column"
              fxLayoutAlign="center center">
@@ -24,7 +24,7 @@
         </div>
         <div *ngIf="ready && widget.properties.acControl !== undefined" fxLayout="column" fxFill class="container"
              fxLayoutAlign="space-evenly">
-            <div fxLayout="row" fxLayoutAlign="center center" style="min-height: 42px">
+            <div fxLayout="row" fxLayoutAlign="center center">
                 <mat-icon *ngIf="widget.properties.acControl?.getCleaningRequired?.value === true" color="warn"
                           matTooltip="Cleaning Required!">warning
                 </mat-icon>
@@ -40,7 +40,8 @@
                     <ng-container *ngIf="widget.properties.acControl?.getBatteryLevel !== undefined">
                         {{widget.properties.acControl?.getTemperatureMeasurements !== undefined ? ', ' : ''}}
                         {{joinMeasurementsString([widget.properties.acControl.getBatteryLevel], true, " %")}}
-                        </ng-container>)
+                    </ng-container>
+                    )
                 </div>
             </div>
             <div fxLayout="row" fxLayoutAlign="space-between">
@@ -83,10 +84,10 @@
             <div *ngIf="widget.properties.acControl?.getFanSpeedLevel !== undefined && widget.properties.acControl?.setFanSpeedLevel !== undefined"
                  fxLayout="row" fxLayoutAlign="space-between center">
                 <mat-icon inline>air</mat-icon>
-                <mat-slider [min]="0" [max]=100 [step]="1"
-                            [value]="widget.properties.acControl?.getFanSpeedLevel?.value || 0"
-                            thumbLabel
-                            (valueChange)="runCommand(widget.properties.acControl?.setFanSpeedLevel, $event)"></mat-slider>
+                <mat-slider [min]="0" [max]=100 [step]="1" color="accent" discrete>
+                    <input matSliderThumb [value]="widget.properties.acControl?.getFanSpeedLevel?.value || 0"
+                           (valueChange)="runCommand(widget.properties.acControl?.setFanSpeedLevel, $event)"/>
+                </mat-slider>
                 %
             </div>
             <div *ngIf="widget.properties.acControl?.getFanSpeedLevelAutomatic !== undefined && widget.properties.acControl?.setFanSpeedLevelAutomatic !== undefined"
@@ -130,9 +131,10 @@
                 <mat-slider [min]="widget.properties.acControl?.minTarget || 15"
                             [max]="widget.properties.acControl?.maxTarget || 30"
                             [step]="widget.properties.acControl?.tempStep || 1"
-                            [value]="(widget.properties.acControl?.getTargetTemperature || [{value:0}])[0]?.value"
-                            (valueChange)="setAllTargets($event)"
-                            thumbLabel></mat-slider>
+                            discrete
+                            color="accent"><input matSliderThumb (valueChange)="setAllTargets($event)"
+                                                  [value]="(widget.properties.acControl?.getTargetTemperature || [{value:0}])[0]?.value"/>
+                </mat-slider>
                 °C
             </div>
         </div>

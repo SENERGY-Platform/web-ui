@@ -23,14 +23,16 @@ tr.second th, tr.second td {
     padding: 0 8px;
 }
 
-.mat-cell {
+.mat-mdc-cell {
     padding: 0 8px;
 }
 
-th.mat-header-cell {
+th.mat-mdc-header-cell {
     padding: 0 8px;
-    position: sticky;
-    top: 0;
+    top: -8px!important;
     background: inherit;
-    z-index: 100;
+}
+
+.mat-mdc-dialog-content {
+    padding-top: 8px;
 }

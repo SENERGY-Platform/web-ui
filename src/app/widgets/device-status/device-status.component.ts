@@ -20,7 +20,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
-import { MatLegacyTable as MatTable } from '@angular/material/legacy-table';
+import { MatTable } from '@angular/material/table';
 import { DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel } from './shared/device-status-properties.model';
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
 import { DeviceStatusDialogService } from './shared/device-status-dialog.service';

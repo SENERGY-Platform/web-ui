@@ -19,4 +19,42 @@
 .container {
     height: calc(100% - 64px);
     overflow-y: auto;
+    padding: 0 8px 8px
+}
+
+.refresh {
+    margin-top: 0.5em;
+    margin-left: 0.5em;
+}
+
+.mat-mdc-cell {
+    padding: 0 8px;
+}
+
+th.mat-mdc-header-cell {
+    padding: 0 8px;
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 100;
+}
+
+.auto-generated {
+    margin-left: 8px;
+}
+
+.auto-generated-cell {
+    padding-top: 1em;
+}
+
+.table-search-container .search-refresh {
+    padding-top: 8px;
+}
+
+.table-search-container .search-refresh > div {
+    margin-top: -20px;
+}
+
+.table-container {
+    max-height: calc(100vh - 160px);
 }

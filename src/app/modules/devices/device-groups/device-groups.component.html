@@ -16,18 +16,14 @@
 <div class="device-groups-container layout-margin">
     <span fxLayout="row" class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
-
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <button matTooltip="hide generated" mat-icon-button color="accent" (click)="setHideGenerated(true)"
+        <button matTooltip="hide generated" mat-icon-button color="accent" (click)="setHideGenerated(true)"
                 *ngIf="!this.hideGenerated">
                 <mat-icon>visibility_off</mat-icon>
             </button>
             <button matTooltip="show generated" mat-icon-button color="accent" (click)="setHideGenerated(false)"
-                *ngIf="this.hideGenerated">
+                    *ngIf="this.hideGenerated">
                 <mat-icon>visibility</mat-icon>
             </button>
-        </div>
     </span>
 
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>

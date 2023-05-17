@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-.designs-container ::ng-deep .mat-tab-body-content {
+.designs-container ::ng-deep .mat-mdc-tab-body {
     overflow: hidden;
-}
-
-.designs-container ::ng-deep .mat-tab-body-wrapper {
     height: calc(100vh - 118px);
 }
 
-.designs-container ::ng-deep .mat-tab-header {
+
+.designs-container ::ng-deep .mat-mdc-tab-header {
     min-height: 54px;
 }
 
@@ -30,8 +28,13 @@
     height: 100%;
 }
 
-.designs-container > div{
-    height: 100%;
+.main-panel {
+    height: calc(100% - 150px);
+    overflow-y: auto;
+}
+
+.layout-margin {
+    margin: 8px;
 }
 
 mat-grid-tile {
@@ -92,4 +95,10 @@ mat-grid-list {
 .info-icon {
     padding-left: 5px;
     padding-right: 5px;
+}
+
+.search {
+    padding-top: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
 }

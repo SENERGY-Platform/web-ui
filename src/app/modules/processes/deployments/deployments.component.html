@@ -13,34 +13,31 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="deployments-container layout-margin">
-    <span class="search-button-container">
-        <senergy-searchbar></senergy-searchbar>
-        <div fxLayout="row">
-            <div fxFlex></div>
+<div class="deployments-container">
+    <div fxLayout="row" class="search">
+        <senergy-searchbar fxFlex></senergy-searchbar>
+
             <button matTooltip="Delete" mat-icon-button color="accent"
                     (click)="deleteMultipleItems()"
                     *ngIf="selectedItems.length > 0 && ready">
-                <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn">delete</mat-icon>
+                <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn" class="suffix-sort">delete</mat-icon>
             </button>
-            <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment" color="accent">
+            <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment" color="accent" class="suffix">
                 <mat-icon>device_hub</mat-icon>
             </button>
             <mat-menu #deploymentEnvironment="matMenu">
                 <button mat-menu-item [ngClass]="{'hub-selected': !hub}" (click)="selectHub(null)">Senergy-Platform</button>
                 <button mat-menu-item *ngFor="let h of hubList" [ngClass]="{'hub-selected': hub?.id === h.id}" (click)="selectHub(h)">{{h.name}}</button>
             </mat-menu>
-            <button matTooltip="show generated" mat-icon-button color="accent" (click)="filterItems(true)" *ngIf="!this.showGenerated">
+            <button matTooltip="show generated" mat-icon-button color="accent" (click)="filterItems(true)" *ngIf="!this.showGenerated" class="suffix">
                 <mat-icon>visibility</mat-icon>
             </button>
-            <button matTooltip="hide generated" mat-icon-button color="accent" (click)="filterItems(false)" *ngIf="this.showGenerated">
+            <button matTooltip="hide generated" mat-icon-button color="accent" (click)="filterItems(false)" *ngIf="this.showGenerated" class="suffix">
                 <mat-icon>visibility_off</mat-icon>
             </button>
-            <senergy-sort [sortAttributes]="sortAttributes"
+            <senergy-sort [sortAttributes]="sortAttributes" class="suffix-sort"
                           (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        </div>
-    </span>
-    
+    </div>
     <div class="deployments-scroll" #mainPanel>
         <div infiniteScroll
              [infiniteScrollDistance]="1"

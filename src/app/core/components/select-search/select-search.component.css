@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-::ng-deep .searchgroup .mat-optgroup-label {
+.searchgroup ::ng-deep .mat-mdc-optgroup-label {
     padding: 10px 16px 0 16px !important;
     min-height: 60px;
+}
+
+.search-field {
+    width: 100%;
+}
+
+.searchgroup ::ng-deep .mdc-list-item__primary-text {
+    width: 100%;
 }

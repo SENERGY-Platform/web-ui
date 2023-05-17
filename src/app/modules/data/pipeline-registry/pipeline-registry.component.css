@@ -52,11 +52,11 @@ mat-grid-list {
     z-index: 100;
 }
 
-.mat-cell {
+.mat-mdc-cell {
     padding: 0 8px;
 }
 
-.mat-header-cell {
+.mat-mdc-header-cell {
     padding: 0 8px;
 }
 

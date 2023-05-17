@@ -14,19 +14,21 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="mat-card-image content-size">
+    <mat-card-content>
         <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
         <div *ngIf="ready && incidents.length !== 0" fxLayout="column" fxFill>
             <mat-list>
                 <mat-list-item *ngFor="let incident of incidents">
-                    <button mat-list-icon mat-icon-button class="mat-warn" matTooltip="show process incidents"
-                            (click)="navigateToMonitorSection(incident)">
-                        <mat-icon class="fix-position">warnings</mat-icon>
-                    </button>
-                    <h4 mat-line class="drag-handler" [matTooltip]="incident.error_message">{{incident.deployment_name}}</h4>
-                    <p mat-line class="drag-handler"> {{incident.time | date:'dd.MM.yyyy, HH:mm'}} </p>
+                    <div matListItemIcon>
+                        <button mat-icon-button class="mat-warn" matTooltip="show process incidents"
+                                (click)="navigateToMonitorSection(incident)">
+                            <mat-icon>warnings</mat-icon>
+                        </button>
+                    </div>
+                    <div matListItemTitle class="drag-handler" [matTooltip]="incident.error_message">{{incident.deployment_name}}</div>
+                    <div matListItemLine class="drag-handler">{{incident.time | date:'dd.MM.yyyy, HH:mm'}}</div>
                 </mat-list-item>
             </mat-list>
         </div>

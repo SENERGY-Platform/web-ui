@@ -14,10 +14,11 @@
   ~ limitations under the License.
   -->
 <div class="designs-container layout-margin">
-    <div fxLayout="column">
+    <div fxLayout="row" class="search">
         <span class="search-button-container">
             <senergy-searchbar fxFlex></senergy-searchbar>
-        </span>
+    </div>
+    </span>
 
         <div class="main-panel" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
             [scrollWindow]="false" (scrolled)="onScroll()" #mainPanel>
@@ -75,7 +76,6 @@
                 <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
             </div>
         </div>
-    </div>
 </div>
 <button mat-fab class="fab" matTooltip="Create new Design" routerLink="/smart-services/designer">
     <mat-icon>add</mat-icon>

@@ -16,7 +16,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import {AuthorizationProfileModel} from '../../../core/components/authorization/authorization-profile.model';
+import {AuthorizationProfileModel} from '../../../core/model/authorization/authorization-profile.model';
 import {
     AbstractControl,
     FormControl,
@@ -26,8 +26,8 @@ import {
     ValidatorFn,
     Validators
 } from '@angular/forms';
-import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {MatDialogRef} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
     templateUrl: './settings-change-dialog.component.html',

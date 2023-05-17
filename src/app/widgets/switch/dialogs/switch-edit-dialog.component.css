@@ -27,7 +27,7 @@ table {
 }
 
 .select-size {
-    max-width: 45px;
+    min-width: 90px;
 }
 
 .user-input {
@@ -38,8 +38,4 @@ table {
 
 .example-first-footer-row td{
     border-bottom: none;
-}
-
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
 }

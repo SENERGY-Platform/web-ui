@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardNewDialogComponent } from '../dialogs/dashboard-new-dialog.component';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';

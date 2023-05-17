@@ -27,6 +27,3 @@ table {
     margin-top: 6px;
 }
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}

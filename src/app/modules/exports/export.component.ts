@@ -17,18 +17,19 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ExportService } from './shared/export.service';
 import { ExportModel, ExportResponseModel } from './shared/export.model';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { ResponsiveService } from '../../core/services/responsive.service';
 import { merge, Subscription } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator';
+import { MatPaginator } from '@angular/material/paginator';
 import { startWith, switchMap } from 'rxjs/operators';
 import { BrokerExportService } from './shared/broker-export.service';
 import { ActivatedRoute } from '@angular/router';
+import { UtilService } from 'src/app/core/services/util.service';
 
 @Component({
     selector: 'senergy-export',
@@ -81,6 +82,7 @@ export class ExportComponent implements OnInit, OnDestroy {
         private responsiveService: ResponsiveService,
         private brokerExportService: BrokerExportService,
         private route: ActivatedRoute,
+        public utilsService: UtilService
     ) {}
 
     ngOnInit() {

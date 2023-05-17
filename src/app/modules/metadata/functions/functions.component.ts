@@ -16,9 +16,9 @@
 
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {forkJoin, Observable, Subscription} from 'rxjs';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
-import {MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import {MatDialog} from '@angular/material/dialog';
+import {MatDialogConfig} from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {FunctionsPermSearchModel} from './shared/functions-perm-search.model';
 import {FunctionsService} from './shared/functions.service';

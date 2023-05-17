@@ -14,31 +14,38 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
-    <mat-card-content class="mat-card-image content-size">
+    <mat-card-content>
         <senergy-widget-spinner [show]="!ready()"></senergy-widget-spinner>
 
         <div *ngIf="ready() && schedules.length !== 0" fxLayout="column" fxFill>
             <mat-list>
-                <mat-list-item *ngFor="let schedule of schedules" [ngClass]="schedule.disabled === true ? 'schedule-disabled' : ''">
-                    <h4 mat-line class="drag-handler">
-                        <mat-icon>schedule</mat-icon>
-                        {{cronReadable(schedule.cron)}}</h4>
-                    <h4 mat-line class="drag-handler">
-                        {{schedule.processAlias || schedule.processName}}</h4>
-                    <button mat-icon-button color="accent" matTooltip="edit schedule"
-                            (click)="add(schedule)" [disabled]="!canEdit(schedule)">
-                        <mat-icon class="fix-position">edit</mat-icon>
-                    </button>
-                    <button mat-icon-button color="accent" matTooltip="delete schedule"
-                            (click)="delete(schedule.scheduleId)">
-                        <mat-icon>delete</mat-icon>
-                    </button>
+                <mat-list-item *ngFor="let schedule of schedules"
+                               [ngClass]="schedule.disabled === true ? 'schedule-disabled' : ''">
+                    <div matListItemTitle class="drag-handler">
+                        <mat-icon inline matListItemIcon>schedule</mat-icon>
+                        {{schedule.processAlias || schedule.processName}}
+                    </div>
+                    <div matListItemLine>
+                    <span class="drag-handler">
+                        {{cronReadable(schedule.cron)}}
+                    </span>
+                    </div>
+                    <div matListItemMeta>
+                        <button mat-icon-button color="accent" matTooltip="edit schedule"
+                                (click)="add(schedule)" [disabled]="!canEdit(schedule)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="accent" matTooltip="delete schedule"
+                                (click)="delete(schedule.scheduleId)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
                 </mat-list-item>
             </mat-list>
         </div>
-        <senergy-no-data [showIf]="ready && schedules.length === 0"></senergy-no-data>
+        <senergy-no-data [showIf]=true *ngIf="ready && schedules.length === 0"></senergy-no-data>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionAdd]="true" (editEvent)="edit()"
                            (addEvent)="add(null)"></senergy-widget-footer>

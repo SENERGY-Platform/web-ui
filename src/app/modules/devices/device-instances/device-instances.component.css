@@ -23,14 +23,13 @@
     margin-top: 4px;
 }
 
-.device-instance-container ::ng-deep .mat-tab-body-content {
-    overflow: hidden;
+.device-instance-container {
 }
 
-.device-instance-container ::ng-deep .mat-tab-body-wrapper {
-    height: calc(100vh - 118px);
+.search-refresh .suffix-button {
+    margin-top: -20px;
 }
 
-.device-instance-container ::ng-deep .mat-tab-header {
-    min-height: 54px;
+.height-chips {
+    max-height: calc(100vh - 260px);
 }

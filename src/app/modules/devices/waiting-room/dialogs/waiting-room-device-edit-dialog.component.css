@@ -43,10 +43,6 @@
     align-items: baseline;
 }
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}
-
 .checkbox-margin {
     margin-bottom: 15px;
 }

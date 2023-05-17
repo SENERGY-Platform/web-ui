@@ -114,10 +114,9 @@
 
     </mat-table>
 </div>
-<div mat-dialog-actions>
-    <button (click)="yes()" [disabled]="!hasValidFileSelected() || overwrite.invalid || !atLeastOnePolicySelected()"
-            [mat-dialog-close]
-            color="primary" mat-button>
-        <strong>Importieren</strong></button>
-    <button (click)="no()" [mat-dialog-close] color="primary" mat-button><strong>Abbrechen</strong></button>
+<div mat-dialog-actions fxLayoutAlign="end center">
+    <button mat-raised-button color="primary" (click)="no()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="yes()"
+            [disabled]="!hasValidFileSelected() || overwrite.invalid || !atLeastOnePolicySelected()">Import
+    </button>
 </div>

@@ -22,7 +22,7 @@ import {SmartServiceReleaseModel, SmartServiceExtendedReleaseModel} from './shar
 import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {saveAs} from 'file-saver';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {UtilService} from '../../../core/services/util.service';

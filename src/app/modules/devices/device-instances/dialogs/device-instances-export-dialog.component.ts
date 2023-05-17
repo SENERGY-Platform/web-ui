@@ -15,12 +15,12 @@
  */
 
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ExportModel} from '../../../exports/shared/export.model';
 import {FormArray, FormBuilder, FormGroup, UntypedFormArray, UntypedFormBuilder} from '@angular/forms';
 import {ExportService} from '../../../exports/shared/export.service';
 import {forkJoin, Observable} from 'rxjs';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 
 @Component({

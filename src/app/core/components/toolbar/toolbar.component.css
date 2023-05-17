@@ -34,6 +34,9 @@
     box-shadow: 0 0 0.2rem rgba(0, 0, 0, .1), 0 0.2rem 0.4rem rgba(0, 0, 0, .1);
 }
 
-.mat-h4 {
-    margin: 0px;
+.header-text {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin: 0 !important;
 }

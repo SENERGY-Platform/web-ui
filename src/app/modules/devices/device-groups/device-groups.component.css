@@ -41,3 +41,7 @@
     right: 15px;
     z-index: 100;
 }
+
+.search-refresh > button {
+    margin-top: -20px;
+}

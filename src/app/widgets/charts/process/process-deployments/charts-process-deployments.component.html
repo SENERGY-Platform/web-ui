@@ -14,9 +14,9 @@
   ~ limitations under the License.
   -->
 
-<mat-card>
+<mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget" [zoom]="zoom"></senergy-widget-header>
-    <mat-card-content class="mat-card-image content-size drag-handler">
+    <mat-card-content class="drag-handler">
         <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
             <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
             <google-chart *ngIf="ready && processDeploymentsHistory.dataTable[0].length !== 0" #processDeploymentsHistoryChart [data]="processDeploymentsHistory"></google-chart>

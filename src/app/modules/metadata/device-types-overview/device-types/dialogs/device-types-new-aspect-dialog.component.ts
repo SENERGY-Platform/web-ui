@@ -15,7 +15,7 @@
  */
 
 import { Component } from '@angular/core';
-import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
+import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     templateUrl: './device-types-new-aspect-dialog.component.html',

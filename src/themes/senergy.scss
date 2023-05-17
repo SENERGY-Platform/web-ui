@@ -15,16 +15,8 @@
  */
 @use '@angular/material' as mat;
 
-// TODO(v15): As of v15 mat.legacy-core no longer includes default typography styles.
-//  The following line adds:
-//    1. Default typography styles for all components
-//    2. Styles for typography hierarchy classes (e.g. .mat-headline-1)
-//  If you specify typography styles for the components you use elsewhere, you should delete this line.
-//  If you don't need the default component typographies but still want the hierarchy styles,
-//  you can delete this line and instead use:
-//    `@include mat.legacy-typography-hierarchy(mat.define-legacy-typography-config());`
-@include mat.all-legacy-component-typographies();
-@include mat.legacy-core();
+@include mat.all-component-typographies();
+@include mat.core();
 
 /* generated: http://mcg.mbitson.com/#!?customcolor=%232e7d32&themename=mcgtheme */
 
@@ -167,16 +159,16 @@ $my-app-sidenav: mat.define-palette($md-custom-color-sidenav);
 
 $my-app-theme: mat.define-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
 
-@include mat.all-legacy-component-themes($my-app-theme);
+@include mat.all-component-themes($my-app-theme);
 
 .background-color-accent {
-  color: white;
-  background-color: mat.get-color-from-palette($my-app-accent);
+  color: white !important;
+  background-color: mat.get-color-from-palette($my-app-accent) !important;
 }
 
 .background-color-sidenav {
-  color: white;
-  background-color: mat.get-color-from-palette($my-app-sidenav);
+  color: white !important;
+  background-color: mat.get-color-from-palette($my-app-sidenav) !important;
 }
 
 .color-accent {
@@ -200,4 +192,8 @@ $my-app-theme: mat.define-light-theme($my-app-primary, $my-app-accent, $my-app-w
     color: white;
     font-family: "Material Icons";
     font-weight: bold;
+}
+
+.mdc-list-item--selected .mdc-list-item__primary-text, .mdc-list-item--activated .mdc-list-item__primary-text {
+  color: mat.get-color-from-palette($my-app-accent) !important;
 }

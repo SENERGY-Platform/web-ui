@@ -24,11 +24,6 @@
     width: 100%;
 }
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}
-
-
 tr.second th, tr.second td {
     position: sticky;
     top: 56px;
@@ -57,11 +52,11 @@ table td {
     border-left: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-.mat-cell {
+.mat-mdc-cell {
     padding: 0 8px;
 }
 
-th.mat-header-cell {
+th.mat-mdc-header-cell {
     border-left: 1px solid rgba(0, 0, 0, 0.12);
     padding: 0 8px;
     position: sticky;

@@ -21,7 +21,7 @@ import {DashboardService} from '../../modules/dashboard/shared/dashboard.service
 import {DeviceCommandModel, DeviceCommandService} from '../../core/services/device-command.service';
 import {AcControlElementModel} from './shared/ac-control.model';
 import {AcControlEditDialogComponent} from './dialog/ac-control-edit-dialog.component';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DashboardManipulationEnum} from '../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {environment} from '../../../environments/environment';
 

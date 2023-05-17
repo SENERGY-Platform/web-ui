@@ -48,10 +48,6 @@
     min-width: 50%;
 }
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}
-
-::ng-deep .mat-select-panel {
-    min-width: fit-content !important;
+senergy-widget-spinner {
+    margin-bottom: 64px;
 }

@@ -15,8 +15,8 @@
  */
 
 
-mat-cell, .mat-cell,
-mat-footer-cell, .mat-footer-cell,
-mat-header-cell, .mat-header-cell {
+mat-cell, .mat-mdc-cell,
+mat-footer-cell, .mat-mdc-footer-cell,
+mat-header-cell, .mat-mdc-header-cell {
     padding: 0.75rem !important;
 }

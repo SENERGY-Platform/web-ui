@@ -1,12 +1,12 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatLegacyCheckboxModule as MatCheckboxModule} from '@angular/material/legacy-checkbox';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatLegacyDialogHarness as MatDialogHarness} from '@angular/material/legacy-dialog/testing';
-import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
-import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
-import {MatLegacyTableModule as MatTableModule} from '@angular/material/legacy-table';
+import {MatInputModule} from '@angular/material/input';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatTableModule} from '@angular/material/table';
 
 import {PermissionsDialogImportComponent} from './permissions-dialog-import.component';
 

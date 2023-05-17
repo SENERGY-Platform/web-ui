@@ -29,7 +29,7 @@ import {
     V2DeploymentsPreparedConfigurableModel,
     V2DeploymentsPreparedModel
 } from './deployments-prepared-v2.model';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root',

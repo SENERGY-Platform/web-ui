@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import { EventEmitter, Injectable, OnDestroy, Output } from '@angular/core';
+import {EventEmitter, Injectable, OnDestroy, Output} from '@angular/core';
 
-import { SidenavSectionModel } from './sidenav-section.model';
-import { SidenavPageModel } from './sidenav-page.model';
-import { HttpClient } from '@angular/common/http';
-import { ErrorHandlerService } from '../../../services/error-handler.service';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
-import { WaitingRoomService } from '../../../../modules/devices/waiting-room/shared/waiting-room.service';
-import { debounceTime } from 'rxjs/operators';
-import { WaitingRoomEventTypeAuthOk, WaitingRoomEventTypeError } from '../../../../modules/devices/waiting-room/shared/waiting-room.model';
+import {SidenavSectionModel} from './sidenav-section.model';
+import {SidenavPageModel} from './sidenav-page.model';
+import {WaitingRoomService} from '../../../../modules/devices/waiting-room/shared/waiting-room.service';
+import {debounceTime} from 'rxjs/operators';
+import {WaitingRoomEventTypeAuthOk} from '../../../../modules/devices/waiting-room/shared/waiting-room.model';
 import {environment} from '../../../../../environments/environment';
-import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import {AuthorizationService} from 'src/app/core/services/authorization.service';
 
 @Injectable({
     providedIn: 'root',
@@ -161,7 +158,7 @@ export class SidenavService implements OnDestroy {
         if(this.authService.userIsAdmin()) {
             sections.push(
                 new SidenavSectionModel('Admin', 'toggle', 'admin_panel_settings', '/admin', [
-                    new SidenavPageModel('User & Client Authorization', 'link', 'security', '/admin/authorization'),
+                    new SidenavPageModel('Authorization', 'link', 'security', '/admin/authorization'),
                     new SidenavPageModel('Timescale Rules', 'link', 'rule', '/admin/timescale-rules'),
                 ])
             );

@@ -18,6 +18,9 @@ table {
     width: 100%;
 }
 
+/*
+ (mdc-migration): The following rule targets internal classes of dialog that may no longer apply for the MDC version. Ignored: deprecated widget
+ */
 mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
@@ -26,6 +29,6 @@ mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
 
-::ng-deep .mat-select-panel {
+::ng-deep .mat-mdc-select-panel {
    min-width: fit-content !important;
 }

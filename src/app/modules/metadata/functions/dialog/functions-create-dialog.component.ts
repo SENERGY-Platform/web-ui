@@ -15,7 +15,7 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialogRef} from '@angular/material/dialog';
 import {FormBuilder, FormGroup, UntypedFormControl, Validators} from '@angular/forms';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
 import {ConceptsPermSearchModel} from '../../concepts/shared/concepts-perm-search.model';

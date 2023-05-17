@@ -16,10 +16,10 @@
 
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Observable} from 'rxjs';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {AspectsService} from './shared/aspects.service';
