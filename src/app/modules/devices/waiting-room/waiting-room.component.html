@@ -19,18 +19,14 @@
 <div class="table-search-container">
     <span fxLayout="row" class="search-refresh">
         <senergy-searchbar></senergy-searchbar>
-
-        <div fxLayout="row">
-            <div fxFlex></div>
-            <button matTooltip="Show Hidden" mat-icon-button color="accent" (click)="showHiddenChanged()"
-                *ngIf="!this.showHidden">
-                <mat-icon>visibility</mat-icon>
-            </button>
-            <button matTooltip="Hide Hidden" mat-icon-button color="accent" (click)="showHiddenChanged()"
-                *ngIf="this.showHidden">
-                <mat-icon>visibility_off</mat-icon>
-            </button>
-        </div>
+        <button matTooltip="Show Hidden" mat-icon-button color="accent" (click)="showHiddenChanged()"
+            *ngIf="!this.showHidden" class="suffix">
+            <mat-icon>visibility</mat-icon>
+        </button>
+        <button matTooltip="Hide Hidden" mat-icon-button color="accent" (click)="showHiddenChanged()"
+            *ngIf="this.showHidden" class="suffix">
+            <mat-icon>visibility_off</mat-icon>
+        </button>
     </span>
 
 

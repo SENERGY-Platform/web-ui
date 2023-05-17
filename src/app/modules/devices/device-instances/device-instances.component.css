@@ -25,3 +25,7 @@
 
 .device-instance-container {
 }
+
+.search-refresh .suffix-button {
+    margin-top: -20px;
+}
