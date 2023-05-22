@@ -17,13 +17,13 @@
  */
 
 import {SelectionModel} from '@angular/cdk/collections';
-import {Component, isDevMode, OnInit} from '@angular/core';
+import {AfterViewInit, Component, isDevMode, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSort, Sort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {DomSanitizer} from '@angular/platform-browser';
-import {interval, Observable} from 'rxjs';
+import {interval, Observable, Subscription} from 'rxjs';
 import {debounce, map, startWith} from 'rxjs/operators';
 import {AuthorizationService} from 'src/app/core/services/authorization.service';
 import {KongService} from '../services/kong.service';
@@ -33,13 +33,14 @@ import {PermissionsDialogImportComponent} from '../permissions-dialog-import/per
 import {PermissionImportModel} from '../permissions-dialog-import/permissions-dialog-import.model';
 import {PermissionsEditComponent} from '../permissions-edit/permissions-edit.component';
 import {DialogsService} from '../../../../core/services/dialogs.service';
+import {MatPaginator, PageEvent} from '@angular/material/paginator';
 
 @Component({
     selector: 'senergy-permissions-list',
     templateUrl: './permissions-list.component.html',
     styleUrls: ['./permissions-list.component.css'],
 })
-export class PermissionsListComponent implements OnInit {
+export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     public displayedColumns = ['select', 'mode', 'subject', 'resource', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'edit', 'delete'];
     public policies: PermissionModel[] = [];
@@ -80,6 +81,9 @@ export class PermissionsListComponent implements OnInit {
         DELETE: false,
         HEAD: false
     };
+    @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
+    private subscriptions: Subscription[] = [];
+    total = 0;
 
     constructor(private authService: AuthorizationService,
                 private ladonService: LadonService,
@@ -121,6 +125,16 @@ export class PermissionsListComponent implements OnInit {
         this.loadPolicies();
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initAutoComplete();
+    }
+
+    ngAfterViewInit() {
+        this.subscriptions.push(this.paginator.page.subscribe((e) => {
+            this.sortData(this.sort, this.filter(), e);
+        }));
+    }
+
+    ngOnDestroy() {
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 
     initAutoComplete() {
@@ -215,15 +229,20 @@ export class PermissionsListComponent implements OnInit {
         });
     }
 
-    public sortData(sort: Sort) {
+    public sortData(sort: Sort, policies: PermissionModel[] | undefined = undefined, pageEvent: PageEvent | undefined = undefined) {
         this.sort = sort;
+        policies = policies || this.policies;
+        const pageSize = pageEvent?.pageSize || 20;
+        const pageIndex = pageEvent?.pageIndex || 0;
         if (sort == null) {
-            return;
+            this.total = policies.length;
+            this.sortedData = policies.slice(pageSize * pageIndex, pageSize * (pageIndex + 1));
         }
-        const data = this.sortedData.slice();
+        const data = policies.slice();
 
         if (!sort.active || sort.direction === '') {
-            this.sortedData = data;
+            this.total = data.length;
+            this.sortedData = data.slice(pageSize * pageIndex, pageSize * (pageIndex + 1));
             return;
         }
         data.sort((a, b) => {
@@ -250,7 +269,8 @@ export class PermissionsListComponent implements OnInit {
                 return 0;
             }
         });
-        this.sortedData = data;
+        this.total = data.length;
+        this.sortedData = data.slice(pageSize * pageIndex, pageSize * (pageIndex + 1));
     }
 
     public askfordelete(policy: PermissionModel) {
@@ -262,8 +282,8 @@ export class PermissionsListComponent implements OnInit {
     }
 
     public export() {
-        if (this.sortedData && this.sortedData.length > 0) {
-            const theJSON = JSON.stringify(this.sortedData.filter((p) => p.id !== 'admin-all'));
+        if (this.policies && this.policies.length > 0) {
+            const theJSON = JSON.stringify(this.policies.filter((p) => p.id !== 'admin-all'));
             return this.sanitizer.bypassSecurityTrustUrl('data:text/json;charset=UTF-8,' + encodeURIComponent(theJSON));
         }
         return;
@@ -296,7 +316,7 @@ export class PermissionsListComponent implements OnInit {
         });
     }
 
-    public search() {
+    filter(): PermissionModel[] {
         const filtered: PermissionModel[] = [];
         const query = new RegExp(this.query, 'i');
         this.policies.forEach((policy) => {
@@ -314,8 +334,11 @@ export class PermissionsListComponent implements OnInit {
                 }
             }
         });
-        this.sortedData = filtered;
-        this.sortData(this.sort);
+        return filtered;
+    }
+
+    public search() {
+        this.sortData(this.sort, this.filter());
     }
 
     public clearSearch() {

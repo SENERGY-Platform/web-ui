@@ -24,12 +24,13 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {Route, RouterModule} from '@angular/router';
 import {CoreModule} from '../../core/core.module';
 import {TimescaleRulesComponent} from './timescale-rules/timescale-rules.component';
-import {FlexModule} from '@angular/flex-layout';
+import {FlexLayoutModule, FlexModule} from '@angular/flex-layout';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {WidgetModule} from '../../widgets/widget.module';
 import {
     TimescaleRulesCreateEditComponent
 } from './timescale-rules/timescale-rules-create-edit/timescale-rules-create-edit.component';
+import {MatPaginatorModule} from '@angular/material/paginator';
 
 const listRules: Route[] = [
     {
@@ -76,7 +77,9 @@ const listRules: Route[] = [
         CoreModule,
         FlexModule,
         InfiniteScrollModule,
-        WidgetModule
+        WidgetModule,
+        MatPaginatorModule,
+        FlexLayoutModule
     ]
 })
 export class AdminModule {
