@@ -16,12 +16,14 @@
  *
  */
 
-import {Component, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl, UntypedFormControl, Validators} from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { PermissionModel } from '../permission.model';
 import {PermissionImportModel} from './permissions-dialog-import.model';
+import {MatPaginator} from "@angular/material/paginator";
+import {Subscription} from "rxjs";
 
 @Component({
     selector: 'senergy-permissions-dialog-import',
@@ -35,6 +37,7 @@ export class PermissionsDialogImportComponent {
     public overwrite = new UntypedFormControl(undefined, Validators.required);
     public policies: PermissionModel[] = [];
     public fileValid = false;
+    public fileChecked = true;
     public selections: boolean[] = [];
     public isAllSelected = false;
 
@@ -63,6 +66,7 @@ export class PermissionsDialogImportComponent {
     public onFileSelected() {
         const reader = new FileReader();
         reader.onload = () => {
+            this.fileChecked = false;
             try {
                 this.policies = JSON.parse(reader.result as string) as PermissionModel[];
                 // Remove admin-all policy if needed, this policy can't be changed in the UI
@@ -79,8 +83,8 @@ export class PermissionsDialogImportComponent {
                     duration: 3 * 1000,
                 });
                 this.fileValid = false;
-                return;
             }
+            this.fileChecked = true;
         };
         try {
             // @ts-ignore

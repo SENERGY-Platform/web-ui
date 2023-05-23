@@ -16,26 +16,28 @@
   ~
   -->
 
-<h1 mat-dialog-title>Permissions Importieren</h1>
+<h1 mat-dialog-title>Import Permissions</h1>
 <div class="medium-text" mat-dialog-content>
-    <div class="radio">
+
+    <div>
+        <button type="button" mat-raised-button (click)="fileInput.click()" color="accent">Choose File</button>
+        <input hidden #fileInput (change)="onFileSelected()" accept=".json" type="file"/>
+        <span *ngIf="fileChecked && (fileInput?.files?.length ?? 0) > 0 && !hasValidFileSelected()" class="warn-text">
+            Please choose valid file
+        </span>
+    </div>
+
+    <div class="radio" *ngIf="fileChecked && (fileInput?.files?.length ?? 0) > 0 && hasValidFileSelected()">
         <mat-radio-group [formControl]="overwrite">
-            <mat-radio-button class="radio-but" matTooltip="Löscht alle bestehenden Einträge"
+            <mat-radio-button class="radio-but" matTooltip="Delete existing permissions and add new ones"
                               value="{{true}}">
-                Überschreiben
+                Overwrite
             </mat-radio-button>
             <mat-radio-button class="radio-but"
-                              matTooltip="Überschreibt Einträge mit gleicher Nutzer/Rolle und Ressource"
-                              value="{{false}}">Hinzufügen
+                              matTooltip="Adds new permissions, but overwrites permissions with same User/Role & Ressource combination"
+                              value="{{false}}">Add
             </mat-radio-button>
         </mat-radio-group>
-    </div>
-    <div>
-        <h4>Datei auswählen</h4>
-        <input #fileInput (change)="onFileSelected()" accept=".json" type="file"/>
-        <span *ngIf="(fileInput?.files?.length ?? 0) > 0 && !hasValidFileSelected()" class="warn-text">
-            Bitte valide Datei auswählen
-        </span>
     </div>
 
     <mat-table #table *ngIf="policies.length > 0" [dataSource]="policies">
