@@ -47,7 +47,7 @@
           <mat-checkbox
                   class="checkbox-margin"
                   [(ngModel)]="processFog"
-                  stringCheckboxValue
+                  appStringCheckboxValue
                   trueValue="true"
                   falseValue="false">
             Prefer Fog Deployment
@@ -57,7 +57,7 @@
           <mat-checkbox
                   class="checkbox-margin"
                   [(ngModel)]="processRestart"
-                  stringCheckboxValue
+                  appStringCheckboxValue
                   trueValue="true"
                   falseValue="false">
             Restart on Incident
@@ -67,7 +67,7 @@
           <mat-checkbox
                   class="checkbox-margin"
                   [(ngModel)]="processNotify"
-                  stringCheckboxValue
+                  appStringCheckboxValue
                   trueValue="true"
                   falseValue="false">
             Notify on Incident
@@ -145,7 +145,7 @@
                             class="checkbox-margin"
                             *ngIf="processTaskMatches(input, taskId, 'event.use_marshaller')"
                             [(ngModel)]="input.value"
-                            stringCheckboxValue
+                            appStringCheckboxValue
                             trueValue="true"
                             falseValue="false">
                       Use Marshaller
@@ -282,7 +282,7 @@
             <mat-checkbox
                     class="consume-all-messages-checkbox"
                     [(ngModel)]="analyticsConsumeAllMessages"
-                    stringCheckboxValue
+                    appStringCheckboxValue
                     trueValue="true"
                     falseValue="false">
               Consume All Messages
@@ -355,7 +355,7 @@
                                 class="checkbox-margin"
                                 *ngIf="analyticsInputMatchesPersistDataField(input, flowInput.id)"
                                 [(ngModel)]="input.value"
-                                stringCheckboxValue
+                                appStringCheckboxValue
                                 trueValue="true"
                                 falseValue="false">
                           Persist Data

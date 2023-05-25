@@ -211,17 +211,19 @@ export class SmartServiceDesignerComponent implements OnInit {
                         this.dialogService.openInputDialog('Design Name and Description', {name: this.name, description: this.description}, ['name'])
                             .afterClosed()
                             .subscribe((result: {name: string; description: string}) => {
-                                this.name = result.name;
-                                this.description = result.description;
-                                const model = { id: this.id, svg_xml: svgXML, bpmn_xml: processXML, name: result.name, description: result.description, user_id: '' };
-                                this.designsService.saveDesign(model).subscribe((result2: SmartServiceDesignModel | null) => {
-                                    if (result2) {
-                                        this.snackBar.open('Model saved.', undefined, { duration: 2000 });
-                                        if(this.id === '') {
-                                            this.router.navigate(['/smart-services/designer/'+result2.id]);
+                                if(result){
+                                    this.name = result.name;
+                                    this.description = result.description;
+                                    const model = { id: this.id, svg_xml: svgXML, bpmn_xml: processXML, name: result.name, description: result.description, user_id: '' };
+                                    this.designsService.saveDesign(model).subscribe((result2: SmartServiceDesignModel | null) => {
+                                        if (result2) {
+                                            this.snackBar.open('Model saved.', undefined, { duration: 2000 });
+                                            if(this.id === '') {
+                                                this.router.navigate(['/smart-services/designer/'+result2.id]);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             });
                     }
                 });
