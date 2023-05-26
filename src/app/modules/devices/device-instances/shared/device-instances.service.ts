@@ -196,7 +196,7 @@ export class DeviceInstancesService {
             value +
             '.' +
             order;
-        if (state !== undefined) {
+        if (!!state) {
             url += '&state=' + state;
         }
         return this.http.get<DeviceInstancesModel[]>(url).pipe(
@@ -225,7 +225,7 @@ export class DeviceInstancesService {
             limit +
             '&offset=' +
             offset;
-        if (state != null) {
+        if (!!state) {
             url += '&state=' + state;
         }
         return this.http.get<DeviceInstancesModel[]>(url).pipe(
