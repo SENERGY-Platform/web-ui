@@ -28,7 +28,7 @@ import { DeviceInstancesRouterState, DeviceInstancesRouterStateTypesEnum } from 
 import { DeviceInstancesDialogService } from '../../devices/device-instances/shared/device-instances-dialog.service';
 import { DeviceTypeDeviceClassModel } from './shared/device-type.model';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UntypedFormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
@@ -42,9 +42,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     pageSize = 20;
     deviceTypes: DeviceTypePermSearchModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
-
     dataSource = new MatTableDataSource<DeviceTypePermSearchModel>();
-    @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<DeviceTypePermSearchModel>(true, []);
     totalCount = 200
     offset = 0;
@@ -53,6 +51,8 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     ready = false;
     private searchSub: Subscription = new Subscription();
     searchText: string = ""
+    sortBy: string = "name"
+    sortDirection: SortDirection = "asc"
 
     constructor(
         private searchbarService: SearchbarService,
@@ -72,6 +72,12 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.searchSub.unsubscribe();
     }
+    
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+        this.sortDirection = $event.direction;
+        this.reload();
+    }
 
     ngAfterViewInit(): void {
         this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
@@ -79,7 +85,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
             value = (typeof(value) === 'string') ? value.toLowerCase(): value;
             return value
         };
-        this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
@@ -163,7 +168,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
     private getDeviceTypes() {
         this.ready = false;
         this.deviceTypeService
-            .getDeviceTypes(this.searchText, this.pageSize, this.offset, "name", "asc")
+            .getDeviceTypes(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .subscribe((deviceTypes: DeviceTypePermSearchModel[]) => {
                 this.dataSource.data = deviceTypes;
                 this.ready = true;

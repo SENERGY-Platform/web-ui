@@ -30,7 +30,7 @@ import { DeviceTypeDeviceClassModel } from '../device-types-overview/shared/devi
 import uuid = util.uuid;
 import { util } from 'jointjs';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { UntypedFormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -45,7 +45,6 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<DeviceClassesPermSearchModel>();
-    @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<DeviceClassesPermSearchModel>(true, []);
     totalCount = 200
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -53,6 +52,8 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
     searchText: string = ""
     offset = 0;
     private searchSub: Subscription = new Subscription();
+    sortBy: string = "name"
+    sortDirection: SortDirection = "asc"
 
     constructor(
         private dialog: MatDialog,
@@ -77,7 +78,6 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
             value = (typeof(value) === 'string') ? value.toUpperCase(): value;
             return value
         };
-        this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
@@ -160,10 +160,9 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
 
     private getDeviceClasses() {
         this.deviceClassesService
-            .getDeviceClasses(this.searchText, this.pageSize, this.offset, "name", "asc")
+            .getDeviceClasses(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .subscribe((deviceClasses: DeviceClassesPermSearchModel[]) => {
                 this.dataSource = new MatTableDataSource(deviceClasses);
-                this.dataSource.sort = this.sort;
                 this.ready = true;
             });
     }
@@ -174,6 +173,12 @@ export class DeviceClassesComponent implements OnInit, OnDestroy {
         this.ready = false;
         this.selectionClear();
         this.getDeviceClasses()
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+        this.sortDirection = $event.direction;
+        this.reload();
     }
 
     private reloadAndShowSnackbar(deviceClass: DeviceTypeDeviceClassModel | null, text: string) {

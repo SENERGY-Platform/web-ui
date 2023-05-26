@@ -28,7 +28,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {NetworksDeleteDialogComponent} from './dialogs/networks-delete-dialog.component';
 import {DeviceInstancesService} from '../device-instances/shared/device-instances.service';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatPaginator} from '@angular/material/paginator';
 import {DialogsService} from 'src/app/core/services/dialogs.service';
@@ -43,7 +43,8 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 export class NetworksComponent implements OnInit, OnDestroy {
     pageSize = 20;
     dataSource = new MatTableDataSource<NetworksModel>();
-    @ViewChild(MatSort) sort!: MatSort;
+    sortBy: string = "name"
+    sortDirection: SortDirection = "asc"    
     selection = new SelectionModel<NetworksModel>(true, []);
     searchText = '';
     totalCount = 200;
@@ -79,6 +80,17 @@ export class NetworksComponent implements OnInit, OnDestroy {
         });
     }
 
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+
+        // TODO Ingo suche connection 
+        if (this.sortBy == "connection") {
+            this.sortBy = "annotations.connected"
+        }
+        this.sortDirection = $event.direction;
+        this.reload();
+    }
+
     ngAfterViewInit(): void {
         this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
             let value;
@@ -96,7 +108,6 @@ export class NetworksComponent implements OnInit, OnDestroy {
             value = (typeof(value) === 'string') ? value.toUpperCase(): value;
             return value;
         };
-        this.dataSource.sort = this.sort;
 
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
@@ -120,7 +131,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
     }
 
     delete(network: NetworksModel) {
-        this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, 'name', 'asc', network.id, null).subscribe((devices) => {
+        this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, this.sortBy, this.sortDirection, network.id, null).subscribe((devices) => {
             this.dialog
                 .open(NetworksDeleteDialogComponent, { data: { networkId: network.id, devices }, minWidth: '300px' })
                 .afterClosed()
@@ -138,7 +149,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
         this.ready = false;
 
         this.networksService
-            .searchNetworks(this.searchText, this.pageSize, this.offset, 'name', 'asc')
+            .searchNetworks(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .subscribe((networks: NetworksModel[]) => {
                 this.dataSource.data = networks;
                 this.ready = true;
@@ -181,7 +192,7 @@ export class NetworksComponent implements OnInit, OnDestroy {
                     let allDeviceIds: string[] = [];
 
                     this.selection.selected.forEach((network: NetworksModel) => {
-                        this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, 'name', 'asc', network.id, null).subscribe((devices) => {
+                        this.deviceInstancesService.getDeviceInstancesByHubId(9999, 0, this.sortBy, this.sortDirection, network.id, null).subscribe((devices) => {
                             const deviceIds = devices.map((p) => p.id);
                             allDeviceIds = allDeviceIds.concat(deviceIds);
 

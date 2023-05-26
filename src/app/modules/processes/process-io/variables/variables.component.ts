@@ -19,7 +19,7 @@ import {ProcessIoService} from '../shared/process-io.service';
 import {ProcessIoVariable} from '../shared/process-io.model';
 import {MatTableDataSource} from '@angular/material/table';
 import {MonitorProcessModel} from '../../monitor/shared/monitor-process.model';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeviceInstancesUpdateModel} from '../../../devices/device-instances/shared/device-instances-update.model';
 import {DialogsService} from '../../../../core/services/dialogs.service';
@@ -48,13 +48,14 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
     offset = 0;
     totalCount = 0;
 
-    @ViewChild('matSort', { static: false }) matSort!: MatSort;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<ProcessIoVariable>(true, []);
 
     dataSource = new MatTableDataSource<ProcessIoVariable>();
     displayedColumns: string[] = ['select', 'unix_timestamp_in_s', 'key', 'process_instance_id', 'process_definition_id', 'value', 'edit', 'delete'];
-
+    sortBy: string = "unix_timestamp_in_s"
+    sortDirection: SortDirection = "desc"
+    
     private searchSub: Subscription = new Subscription();
 
     constructor(
@@ -77,15 +78,17 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
     }
 
     ngAfterViewInit(): void {
-        this.dataSource.sort = this.matSort;
-        this.dataSource.sort.sortChange.subscribe(() => {
-            this.updateSortAndPagination();
-        });
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.loadVariables();
         });
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+        this.sortDirection = $event.direction;
+        this.reload();
     }
 
     initSearch() {
@@ -103,7 +106,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         this.offset = 0;
         this.pageSize = 20;
         this.updateTotal();
-        this.updateSortAndPagination();
+        this.loadVariables();
     }
 
     updateTotal(){
@@ -114,16 +117,10 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
         });
     }
 
-    updateSortAndPagination(){
-        if(this.matSort && this.matSort.active){
-            this.sort = this.matSort.active+'.'+this.matSort.direction;
-        }
-        this.loadVariables();
-    }
-
     loadVariables(){
         this.ready = false;
-        this.processIoService.listVariables(this.pageSize, this.offset, this.sort, this.keyRegex).subscribe(value => {
+        var sort = this.sortBy + '.' + this.sortDirection 
+        this.processIoService.listVariables(this.pageSize, this.offset, sort, this.keyRegex).subscribe(value => {
             if(value){
                 this.dataSource.data = value || [];
             }
@@ -149,7 +146,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
                     if(value.status >= 300){
                         this.snackBar.open('Error while updating process-io variable!', 'close', { panelClass: 'snack-bar-error' });
                     }else {
-                        this.updateSortAndPagination();
+                        this.loadVariables();
                     }
                 });
             }
@@ -185,7 +182,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy{
                                 if(value.status >= 300){
                                     this.snackBar.open('Error while setting process-io variable!', 'close', { panelClass: 'snack-bar-error' });
                                 }else {
-                                    this.updateSortAndPagination();
+                                    this.loadVariables();
                                 }
                             });
                         }

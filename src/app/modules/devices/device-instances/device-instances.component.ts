@@ -34,7 +34,7 @@ import {ExportModel} from '../../exports/shared/export.model';
 import {LocationsService} from '../locations/shared/locations.service';
 import {NetworksService} from '../networks/shared/networks.service';
 import {debounceTime} from 'rxjs/operators';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {MatDialogConfig} from '@angular/material/dialog';
@@ -89,7 +89,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
     pageSize = 20;
     dataSource = new MatTableDataSource<DeviceInstancesModel>();
-    @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<DeviceInstancesModel>(true, []);
     totalCount = 200;
     offset = 0;
@@ -108,6 +107,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     routerDeviceType: DeviceTypeBaseModel | null = null;
     routerLocation: LocationModel | null = null;
     private searchSub: Subscription = new Subscription();
+    sortBy: string = "display_name"
+    sortDirection: SortDirection = "asc"    
 
     ngOnInit(): void {
         this.deviceInstancesService.getTotalCountOfDevices().subscribe(totalCount => this.totalCount = totalCount);
@@ -116,13 +117,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.dataSource.sort = this.sort;
-        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
-            let value = row[sortHeaderId];
-            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
-            return value;
-        };
-
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -135,6 +129,16 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             this.searchText = searchText;
             this.reload();
         });
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+
+        if(this.sortBy == 'log_state') {
+            this.sortBy = "annotations.connected"
+        }
+        this.sortDirection = $event.direction;
+        this.reload();
     }
 
     private load() {
@@ -153,8 +157,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                 .getDeviceInstancesByHubId(
                     this.pageSize,
                     this.offset,
-                    'display_name',
-                    'asc',
+                    this.sortBy, 
+                    this.sortDirection,
                     this.routerNetwork.id,
                     null,
                 )
@@ -164,8 +168,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         } else if (this.routerDeviceType !== null) {
             this.selectedTag = this.routerDeviceType.name;
             this.selectedTagTransformed = this.routerDeviceType.name;
+            var sortDirection: "asc" | "desc" = this.sortDirection == "" ? "asc" : "desc"
             this.deviceInstancesService
-                .getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.pageSize, this.offset, 'display_name', 'asc', null)
+                .getDeviceInstancesByDeviceType(this.routerDeviceType.id, this.pageSize, this.offset, this.sortBy, sortDirection, null)
                 .subscribe((deviceInstances) => {
                     this.setDevices(deviceInstances);
                 });
@@ -175,8 +180,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                 .getDeviceInstances(
                     this.pageSize,
                     this.offset,
-                    'display_name',
-                    'asc',
+                    this.sortBy,
+                    this.sortDirection,
                     this.searchText,
                     this.selectedTagType,
                     this.selectedTag,
@@ -208,10 +213,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     private loadFilterOptions() {
-        this.locationsService.listLocations(100, 0, 'name', 'asc').subscribe((value) => {
+        this.locationsService.listLocations(100, 0, "name", this.sortDirection).subscribe((value) => {
             this.locationOptions = value;
         });
-        this.networksService.listNetworks(100, 0, 'name', 'asc').subscribe((value) => {
+        this.networksService.listNetworks(100, 0, "name", this.sortDirection).subscribe((value) => {
             this.networkOptions = value;
         });
         this.deviceInstancesService.listUsedDeviceTypeIds().subscribe((deviceTypeIds) => {

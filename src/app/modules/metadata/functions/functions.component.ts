@@ -27,7 +27,7 @@ import {FunctionsEditDialogComponent} from './dialog/functions-edit-dialog.compo
 import {FunctionsCreateDialogComponent} from './dialog/functions-create-dialog.component';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -42,7 +42,6 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 export class FunctionsComponent implements OnInit, OnDestroy {
     pageSize = 20;
     dataSource = new MatTableDataSource<FunctionsPermSearchModel>();
-    @ViewChild(MatSort) sort!: MatSort;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<FunctionsPermSearchModel>(true, []);
     totalCount = 200;
@@ -51,6 +50,8 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     userIsAdmin = false;
     private searchSub: Subscription = new Subscription();
     searchText: string = ""
+    sortBy: string = "name"
+    sortDirection: SortDirection = "asc"
 
     constructor(
         private dialog: MatDialog,
@@ -73,7 +74,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
             value = (typeof(value) === 'string') ? value.toUpperCase(): value;
             return value
         };
-        this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=> {
             this.pageSize = this.paginator.pageSize
@@ -168,10 +168,9 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     private getFunctions() {
         this.ready = false;
         this.functionsService
-                .getFunctions(this.searchText, this.pageSize, this.offset, 'name', 'asc')
+                .getFunctions(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
                 .subscribe((functions: FunctionsPermSearchModel[]) => {
                     this.dataSource = new MatTableDataSource(functions);
-                    this.dataSource.sort = this.sort;
                     this.ready = true;
         });
     }
@@ -181,6 +180,12 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.selectionClear();
         this.getFunctions();
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+        this.sortDirection = $event.direction;
+        this.reload();
     }
 
     private reloadAndShowSnackbar(func: DeviceTypeFunctionModel | null, text: string) {

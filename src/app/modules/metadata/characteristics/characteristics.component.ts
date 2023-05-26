@@ -25,7 +25,7 @@ import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-sear
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ConceptsPermSearchModel} from '../concepts/shared/concepts-perm-search.model';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
@@ -40,7 +40,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     pageSize = 20;
     ready = false;
     dataSource = new MatTableDataSource<CharacteristicsPermSearchModel>();
-    @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<CharacteristicsPermSearchModel>(true, []);
     totalCount = 200;
     offset = 0;
@@ -49,6 +48,8 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
     selectedTag = '';
     private searchSub: Subscription = new Subscription();
     searchText: string = ""
+    sortBy: string = "name"
+    sortDirection: SortDirection = "asc"
 
     constructor(
         private dialog: MatDialog,
@@ -70,13 +71,18 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
         this.searchSub.unsubscribe();
     }
 
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+        this.sortDirection = $event.direction;
+        this.reload();
+    }
+
     ngAfterViewInit(): void {
         this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
             var value = row[sortHeaderId];
             value = (typeof(value) === 'string') ? value.toUpperCase(): value;
             return value
         };
-        this.dataSource.sort = this.sort;
 
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
@@ -202,7 +208,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy {
             this.selectedTag = this.routerConcept.name;
         }
         this.characteristicsService
-            .getCharacteristics(this.searchText, this.pageSize, this.offset, 'name', 'asc', this.routerConcept?.characteristic_ids || [])
+            .getCharacteristics(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection, this.routerConcept?.characteristic_ids || [])
             .subscribe((characteristics: CharacteristicsPermSearchModel[]) => {
                 this.setCharacteristics(characteristics);
             });

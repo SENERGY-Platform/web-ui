@@ -22,7 +22,7 @@ import {DialogsService} from '../../../core/services/dialogs.service';
 import {DeviceGroupsPermSearchModel} from './shared/device-groups-perm-search.model';
 import {DeviceGroupsService} from './shared/device-groups.service';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -41,11 +41,12 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     totalCount = 200;
     instances = [];
     dataSource = new MatTableDataSource<DeviceGroupsPermSearchModel>();
-    @ViewChild(MatSort) sort!: MatSort;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
     offset = 0;
     searchText: string = ""
+    sortBy: string = "name"
+    sortDirection: SortDirection = "asc"   
 
     private searchSub: Subscription = new Subscription();
 
@@ -71,13 +72,18 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
             value = (typeof(value) === 'string') ? value.toUpperCase(): value;
             return value
         };
-        this.dataSource.sort = this.sort;
         
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceGroups()
         });
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+        this.sortDirection = $event.direction;
+        this.reload();
     }
 
     ngOnDestroy() {
@@ -144,9 +150,9 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private getDeviceGroups() {
-        let query =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.pageSize, this.offset, 'name', 'asc');
+        let query =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
         if(this.hideGenerated) {
-            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.pageSize, this.offset, 'name', 'asc');
+            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
         }
 
         query.subscribe((deviceGroups: DeviceGroupsPermSearchModel[]) => {

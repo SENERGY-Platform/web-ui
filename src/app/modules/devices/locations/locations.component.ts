@@ -26,7 +26,7 @@ import {
     DeviceInstancesRouterStateTypesEnum
 } from '../device-instances/device-instances.component';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -46,11 +46,12 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     totalCount = 200;
     offset = 0;
     dataSource = new MatTableDataSource<LocationModel>();
-    @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<LocationModel>(true, []);
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     private searchSub: Subscription = new Subscription();
     searchText: string = ""
+    sortBy: string = "name"
+    sortDirection: SortDirection = "asc"    
 
     constructor(
         private locationsService: LocationsService,
@@ -75,13 +76,18 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
             value = (typeof(value) === 'string') ? value.toUpperCase(): value;
             return value
         };
-        this.dataSource.sort = this.sort
 
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getLocations()
         });
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+        this.sortDirection = $event.direction;
+        this.reload();
     }
 
     showDevices(location: LocationModel) {

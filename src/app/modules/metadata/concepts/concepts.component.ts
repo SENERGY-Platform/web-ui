@@ -26,7 +26,7 @@ import {ConceptsPermSearchModel} from './shared/concepts-perm-search.model';
 import {DeviceTypeConceptModel} from '../device-types-overview/shared/device-type.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {UntypedFormControl} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -43,13 +43,14 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     concepts: ConceptsPermSearchModel[] = [];
     ready = false;
     dataSource = new MatTableDataSource(this.concepts);
-    @ViewChild(MatSort) sort!: MatSort;
     selection = new SelectionModel<ConceptsPermSearchModel>(true, []);
     totalCount = 200;
     offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     private searchSub: Subscription = new Subscription();
     searchText: string = ""
+    sortBy: string = "name"
+    sortDirection: SortDirection = "asc"
 
     constructor(
         private dialog: MatDialog,
@@ -75,7 +76,6 @@ export class ConceptsComponent implements OnInit, OnDestroy {
             value = (typeof(value) === 'string') ? value.toUpperCase(): value;
             return value
         };
-        this.dataSource.sort = this.sort;
 
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
@@ -181,7 +181,7 @@ export class ConceptsComponent implements OnInit, OnDestroy {
 
     private getConcepts() {
         this.conceptsService
-            .getConcepts(this.searchText, this.pageSize, this.offset, 'name', 'asc')
+            .getConcepts(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .subscribe((concepts: ConceptsPermSearchModel[]) => {
                 this.dataSource.data = concepts;
                 this.ready = true;
@@ -194,6 +194,12 @@ export class ConceptsComponent implements OnInit, OnDestroy {
         this.offset = 0;
         this.selectionClear();
         this.getConcepts();
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+        this.sortDirection = $event.direction;
+        this.reload();
     }
 
     isAllSelected() {
