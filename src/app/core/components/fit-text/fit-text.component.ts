@@ -40,7 +40,7 @@ export class FitTextComponent implements AfterViewInit, OnChanges, OnDestroy, Af
     @Input() maxFontSize = 128;
     @Input() minFontSize = 8;
 
-    private resizeTimeout: number | undefined;
+    private resizeTimeout: any;
     private subscription: Subscription | undefined;
     private scrollWidth = 0;
     private clientWidth = 0;
