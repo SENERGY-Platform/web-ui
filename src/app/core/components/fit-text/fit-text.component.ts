@@ -21,41 +21,69 @@ import {
     ElementRef,
     Input,
     OnChanges,
+    OnDestroy,
     SimpleChanges,
     ViewChild
 } from '@angular/core';
 import {ResponsiveService} from '../../services/responsive.service';
+import {Subscription} from 'rxjs';
 
 @Component({
     selector: 'senergy-fit-text',
     templateUrl: './fit-text.component.html',
     styleUrls: ['./fit-text.component.css']
 })
-export class FitTextComponent implements AfterViewInit, OnChanges, AfterViewChecked {
+export class FitTextComponent implements AfterViewInit, OnChanges, OnDestroy, AfterViewChecked {
     @ViewChild('element', {static: false}) element!: ElementRef;
 
     @Input() txt = '';
     @Input() maxFontSize = 128;
     @Input() minFontSize = 8;
 
-    private timeout: any;
-
+    private resizeTimeout: number | undefined;
+    private subscription: Subscription | undefined;
+    private scrollWidth = 0;
+    private clientWidth = 0;
+    private scrollHeight = 0;
+    private clientHeight = 0;
 
     constructor(private responsiveService: ResponsiveService) {
     }
 
     ngAfterViewInit() {
-        this.responsiveService.observeMqAlias().subscribe(() => {
-            this.resizeText();
+        this.subscription = this.responsiveService.observeMqAlias().subscribe(() => {
+            if (this.resizeTimeout === undefined) {
+                this.resizeTimeout = setTimeout(() => this.resizeText(), 0);
+            }
         });
+        if (this.resizeTimeout === undefined) {
+            this.resizeTimeout = setTimeout(() => this.resizeText(), 0);
+        }
     }
 
-    ngAfterViewChecked(): void {
-        this.resizeText();
-    }
 
     ngOnChanges(_: SimpleChanges): void {
-        this.resizeText();
+        if (this.resizeTimeout === undefined) {
+            this.resizeTimeout = setTimeout(() => this.resizeText(), 0);
+        }
+    }
+
+    ngAfterViewChecked() {
+        if (this.scrollWidth !== this.element.nativeElement.scrollWidth ||
+            this.clientWidth !== this.element.nativeElement.clientWidth ||
+            this.scrollHeight !== this.element.nativeElement.scrollHeight ||
+            this.clientHeight !== this.element.nativeElement.clientHeight) {
+            if (this.resizeTimeout === undefined) {
+                this.resizeTimeout = setTimeout(() => this.resizeText(), 0);
+            }
+        }
+    }
+
+    ngOnDestroy(): void {
+        if (this.resizeTimeout !== undefined) {
+            clearTimeout(this.resizeTimeout);
+        }
+        this.subscription?.unsubscribe();
     }
 
     private isOverflown(element: any) {
@@ -63,27 +91,22 @@ export class FitTextComponent implements AfterViewInit, OnChanges, AfterViewChec
     }
 
     private resizeText() {
-        if (this.timeout !== undefined) {
-            // already queued
-            return;
-        }
-        if (this.element === undefined || this.element.nativeElement.scrollWidth === 0) {
-            this.timeout = setTimeout(() => {
-                this.timeout = undefined;
-                this.resizeText();
-            }, 10);
-        } else {
-            let i = this.minFontSize;
-            let overflow = false;
+        let i = this.minFontSize;
+        let overflow = false;
 
-            while (!overflow && i < this.maxFontSize) {
-                this.element.nativeElement.style.fontSize = `${i}px`;
-                overflow = this.isOverflown(this.element.nativeElement);
-                if (!overflow) {
-                    i++;
-                }
+        while (!overflow && i < this.maxFontSize) {
+            this.element.nativeElement.style.fontSize = `${i}px`;
+            overflow = this.isOverflown(this.element.nativeElement);
+            if (!overflow) {
+                i++;
             }
-            this.element.nativeElement.style.fontSize = `${i - 1}px`;
         }
+        this.element.nativeElement.style.fontSize = `${i - 1}px`;
+        this.scrollWidth = this.element.nativeElement.scrollWidth;
+        this.clientWidth = this.element.nativeElement.clientWidth;
+        this.scrollHeight = this.element.nativeElement.scrollHeight;
+        this.clientHeight = this.element.nativeElement.clientHeight;
+
+        this.resizeTimeout = undefined;
     }
 }
