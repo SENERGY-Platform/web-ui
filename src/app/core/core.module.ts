@@ -59,6 +59,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {InputDialogComponent} from './dialogs/input-dialog.component';
 import {IsJsonValidatorDirective} from './validators/is-json-validator.directive';
 import {GenericValidator} from './validators/generc-validator.directive';
+import { FitTextComponent } from './components/fit-text/fit-text.component';
 
 @NgModule({
     imports: [
@@ -108,6 +109,7 @@ import {GenericValidator} from './validators/generc-validator.directive';
         ClosableSnackBarComponent,
         IsJsonValidatorDirective,
         GenericValidator,
+        FitTextComponent,
     ],
     exports: [
         SidenavComponent,
@@ -125,7 +127,8 @@ import {GenericValidator} from './validators/generc-validator.directive';
         SelectSearchComponent,
         ClosableSnackBarComponent,
         IsJsonValidatorDirective,
-        GenericValidator
+        GenericValidator,
+        FitTextComponent
     ],
 })
 export class CoreModule {

@@ -59,7 +59,6 @@ import {EnergyPredictionComponent} from './energy-prediction/energy-prediction.c
 import {EnergyPredictionEditDialogComponent} from './energy-prediction/dialog/energy-prediction-edit-dialog.component';
 import {AirQualityComponent} from './air-quality/air-quality.component';
 import {AirQualityEditDialogComponent} from './air-quality/dialog/air-quality-edit-dialog.component';
-import {AngularFittextModule} from 'angular-fittext';
 import {MultiValueComponent} from './multi-value/multi-value.component';
 import {MultiValueEditDialogComponent} from './multi-value/dialog/multi-value-edit-dialog.component';
 import {ProcessIncidentListComponent} from './process-incident-list/process-incident-list.component';
@@ -131,7 +130,6 @@ registerLocaleData(localeDe, 'de');
         MatStepperModule,
         MatGridListModule,
         MatExpansionModule,
-        AngularFittextModule,
         MatRadioModule,
         MatSortModule,
         MatSliderModule,

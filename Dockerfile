@@ -5,7 +5,7 @@ WORKDIR /tmp/workspace
 # install dependencies
 ADD package.json .
 ADD package-lock.json .
-RUN npm ci --unsafe-perm --force
+RUN npm ci
 
 
 # copy sourcecode and build

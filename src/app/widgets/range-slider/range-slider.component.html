@@ -17,13 +17,9 @@
 <mat-card appearance="outlined" class="switch-container">
     <senergy-widget-header [widget]="widget"></senergy-widget-header>
     <div class="content-box">
-        <div fxFill fxLayout="row" fxLayoutAlign="center center">
-            <div [fittext] [maxFontSize]="64">
-                    <span>
-                       {{this.widget.properties.rangeSliderValue2}} {{this.widget.properties.selectedUnit}}
-                    </span>
-            </div>
-        </div>
+        <senergy-fit-text [txt]="this.widget.properties.rangeSliderValue2 + ' ' + this.widget.properties.selectedUnit"
+                          [maxFontSize]="64">
+        </senergy-fit-text>
     </div>
     <div>
         <mat-slider [(ngModel)]="widget.properties.active" [min]="widget.properties.selectedMinValue || 0"
