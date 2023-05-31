@@ -32,10 +32,7 @@ import {ExportModel, ExportResponseModel, ExportValueModel} from '../../../../mo
 import {ChartsExportMeasurementModel, ChartsExportVAxesModel} from '../shared/charts-export-properties.model';
 import {ChartsExportRangeTimeTypeEnum} from '../shared/charts-export-range-time-type.enum';
 import {MatTableDataSource} from '@angular/material/table';
-import {
-    MAT_DIALOG_DATA,
-    MatDialogRef
-} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {forkJoin, Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {DeviceInstancesModel} from '../../../../modules/devices/device-instances/shared/device-instances.model';
@@ -65,25 +62,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     widgetId: string;
     chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart', 'PieChart', 'Timeline'];
     timeRangeEnum = ChartsExportRangeTimeTypeEnum;
-    timeRangeTypes = [this.timeRangeEnum.Relative,  this.timeRangeEnum.RelativeAhead, this.timeRangeEnum.Absolute];
-    groupTypes = [
-        'mean',
-        'sum',
-        'count',
-        'median',
-        'min',
-        'max',
-        'first',
-        'last',
-        'difference-first',
-        'difference-last',
-        'difference-min',
-        'difference-max',
-        'difference-count',
-        'difference-mean',
-        'difference-sum',
-        'difference-median',
-    ];
+    timeRangeTypes = [this.timeRangeEnum.Relative, this.timeRangeEnum.RelativeAhead, this.timeRangeEnum.Absolute];
     groupTypeIsDifference = false;
 
     displayedColumns: string[] = [
@@ -566,13 +545,42 @@ export class ChartsExportEditDialogComponent implements OnInit {
             return null;
         }
         if (control.value === undefined || control.value === null || control.value.length === 0) {
-            return  { validateInterval: { value: control.value } };
+            return {validateInterval: {value: control.value}};
         }
         const re = new RegExp('\\d+(ns|u|µ|ms|s|months|y|m|h|d|w)');
         const matches = re.exec(control.value);
         if (matches == null || matches.length === 0 || matches[0].length !== control.value.length) {
-            return  { validateInterval: { value: control.value } };
+            return {validateInterval: {value: control.value}};
         }
         return null;
     };
+
+    groupTypes(): string[] {
+        const res = [
+            'mean',
+            'sum',
+            'count',
+            'median',
+            'min',
+            'max',
+            'first',
+            'last',
+            'difference-first',
+            'difference-last',
+            'difference-min',
+            'difference-max',
+            'difference-count',
+            'difference-mean',
+            'difference-sum',
+            'difference-median',
+
+        ];
+        const influxExp = (this.exports.value as (ChartsExportMeasurementModel | DeviceInstancesModel)[])
+            .find(exp => (exp as DeviceInstancesModel).device_type === undefined &&
+                ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb));
+        if (influxExp === undefined) {
+            res.push('time-weighted-mean-linear', 'time-weighted-mean-locf');
+        }
+        return res;
+    }
 }
