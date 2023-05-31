@@ -86,29 +86,14 @@ export class NetworksComponent implements OnInit, OnDestroy {
         // TODO Ingo suche connection 
         if (this.sortBy == "connection") {
             this.sortBy = "annotations.connected"
+        } else if (this.sortBy == "number_devices") {
+            this.sortBy = "device_local_ids"
         }
         this.sortDirection = $event.direction;
         this.reload();
     }
 
     ngAfterViewInit(): void {
-        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
-            let value;
-            if(sortHeaderId == 'connection') {
-                value = row.annotations?.connected;
-            } else if(sortHeaderId == 'number_devices') {
-                if(!row.device_local_ids) {
-                    value = 0;
-                } else {
-                    value = row.device_local_ids?.length;
-                }
-            } else {
-                value = row[sortHeaderId];
-            }
-            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
-            return value;
-        };
-
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;

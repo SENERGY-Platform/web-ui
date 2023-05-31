@@ -71,12 +71,6 @@ export class ConceptsComponent implements OnInit, OnDestroy {
     }
 
     ngAfterViewInit(): void {
-        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
-            var value = row[sortHeaderId];
-            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
-            return value
-        };
-
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;

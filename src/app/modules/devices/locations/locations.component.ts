@@ -71,12 +71,6 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.dataSource.sortingDataAccessor = (row: any, sortHeaderId: string) => {
-            var value = row[sortHeaderId];
-            value = (typeof(value) === 'string') ? value.toUpperCase(): value;
-            return value
-        };
-
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -136,7 +130,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private getLocations() {
         this.locationsService
-            .searchLocations(this.searchText, this.pageSize, this.offset, 'name', 'asc')
+            .searchLocations(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
             .subscribe((locations: LocationModel[]) => {
                 this.dataSource.data = locations;
                 this.ready = true;

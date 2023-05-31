@@ -19,7 +19,7 @@ import { PipelineModel } from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -42,8 +42,9 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     selection = new SelectionModel<PipelineModel>(true, []);
     totalCount = 200;
     searchSub: Subscription = new Subscription();
+    sortBy: string = "createdat"
+    sortDirection: SortDirection = "desc"
 
-    @ViewChild(MatSort, { static: false }) sort!: MatSort;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     constructor(
@@ -74,11 +75,13 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         })
     }
 
-    ngAfterViewInit() {
-        this.sort.sortChange.subscribe(() => {
-            this.loadPipelines();
-        });
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active 
+        this.sortDirection = $event.direction;
+        this.reload();
+    }
 
+    ngAfterViewInit() {
         this.paginator.page.subscribe(()=>{
             this.pageSize = this.paginator.pageSize;
             this.loadPipelines();
@@ -87,7 +90,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
     loadPipelines() {
         this.ready = false;
-        this.pipelineRegistryService.getPipelines('createdat:desc').subscribe((resp: PipelineModel[]) => {
+        var order = this.sortBy + ':' + this.sortDirection
+        this.pipelineRegistryService.getPipelines(order).subscribe((resp: PipelineModel[]) => {
             this.dataSource.data = resp;
             this.totalCount = resp.length;
             this.ready = true;

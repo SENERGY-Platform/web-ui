@@ -24,8 +24,8 @@
 
     <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
         <div class="table-container">
-            <table mat-table [dataSource]="dataSource" matSortActive="createdat" matSort matSortDisableClear
-                matSortDirection="desc">
+            <table mat-table [dataSource]="dataSource" [matSortActive]="sortBy" matSort matSortDisableClear
+                [matSortDirection]="sortDirection" (matSortChange)="matSortChange($event)">
 
                 <ng-container matColumnDef="select">
                     <th mat-header-cell *matHeaderCellDef class="button-column">
