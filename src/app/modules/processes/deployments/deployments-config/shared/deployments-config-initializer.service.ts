@@ -24,7 +24,7 @@ import {
     ValidationErrors,
     ValidatorFn
 } from '@angular/forms';
-import * as moment from 'moment';
+import {duration} from 'moment';
 import {
     ConditionalEventModel,
     DeploymentsSelectionConfigurableModel,
@@ -188,12 +188,12 @@ export class DeploymentsConfigInitializerService {
 
     private initTimeDurationRawFormGroup(timeEvent: string): UntypedFormGroup {
         return this._formBuilder.group({
-            years: [moment.duration(timeEvent).years()],
-            months: [moment.duration(timeEvent).months()],
-            days: [moment.duration(timeEvent).days()],
-            hours: [moment.duration(timeEvent).hours()],
-            minutes: [moment.duration(timeEvent).minutes()],
-            seconds: [moment.duration(timeEvent).seconds()],
+            years: [duration(timeEvent).years()],
+            months: [duration(timeEvent).months()],
+            days: [duration(timeEvent).days()],
+            hours: [duration(timeEvent).hours()],
+            minutes: [duration(timeEvent).minutes()],
+            seconds: [duration(timeEvent).seconds()],
         });
     }
 
@@ -362,8 +362,8 @@ export class DeploymentsConfigInitializerService {
     private getTimeEventValidator(): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
             if (control.value.type === 'timeDuration'){
-                const duration = moment.duration(control.value.durationUnits);
-                if (duration.asSeconds() < 5) {
+                const dur = duration(control.value.durationUnits);
+                if (dur.asSeconds() < 5) {
                     return {durationLessThan5Seconds: {value: control.value}};
                 }
             }
