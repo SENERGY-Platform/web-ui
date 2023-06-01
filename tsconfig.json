@@ -21,6 +21,7 @@
     "allowJs": true,
     "target": "ES2022",
     "downlevelIteration": true,
+    "allowSyntheticDefaultImports": true,
     "typeRoots": [
       "node_modules/@types"
     ],
