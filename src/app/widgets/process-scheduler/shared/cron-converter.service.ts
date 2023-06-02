@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import cronstrue from 'cronstrue';
+import {toString} from 'cronstrue'
 
 @Injectable({
     providedIn: 'root',
@@ -92,8 +92,7 @@ export class CronConverterService {
     }
 
     getHumanReadableString(cron: string): string {
-        let str = cronstrue
-            .toString(cron, { use24HourTimeFormat: true })
+        let str = toString(cron, { use24HourTimeFormat: true })
             // abbrev. days
             .replace('Monday', 'Mo')
             .replace('Tuesday', 'Tu')

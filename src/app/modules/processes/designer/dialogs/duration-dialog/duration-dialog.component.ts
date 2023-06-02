@@ -17,7 +17,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {DurationIso, DurationResult} from '../../shared/designer.model';
-import * as moment from 'moment';
+import {duration, Duration} from 'moment';
 
 @Component({
     templateUrl: './duration-dialog.component.html',
@@ -33,12 +33,12 @@ export class DurationDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) private dialogParams: { initialDuration: string },
     ) {
         this.initial = dialogParams.initialDuration || '';
-        this.valid = this.isValid(moment.duration(this.initial));
+        this.valid = this.isValid(duration(this.initial));
     }
 
     update(updateEvent: DurationResult) {
         this.result = updateEvent;
-        this.valid = this.isValid(moment.duration(JSON.parse(JSON.stringify(updateEvent.iso))));
+        this.valid = this.isValid(duration(JSON.parse(JSON.stringify(updateEvent.iso))));
     }
 
     ngOnInit() {}
@@ -47,7 +47,7 @@ export class DurationDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    isValid(duration: moment.Duration): boolean {
+    isValid(duration: Duration): boolean {
         return duration.asSeconds() >= 5;
     }
 

@@ -60,7 +60,7 @@ import {DeviceTypeAspectNodeModel} from '../../../../metadata/device-types-overv
 import {FunctionsService} from '../../../../metadata/functions/shared/functions.service';
 import {DeviceTypeService} from '../../../../metadata/device-types-overview/shared/device-type.service';
 import {DeviceClassesService} from '../../../../metadata/device-classes/shared/device-classes.service';
-import * as ace from 'brace';
+import {edit as barceEdit, acequire as braceAcequire} from 'brace';
 import 'brace/mode/javascript';
 import 'brace/mode/json';
 import 'brace/ext/language_tools';
@@ -239,7 +239,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
     ngAfterViewInit(): void {
         const that = this;
-        const langTools = ace.acequire('ace/ext/language_tools');
+        const langTools = braceAcequire('ace/ext/language_tools');
         if(langTools){
             langTools.setCompleters([langTools.snippetCompleter, langTools.keyWordCompleter, {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -295,7 +295,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
     private setAceJsEditor(element: ElementRef<HTMLElement>, inputNamePrefix: string){
         if(element) {
-            const editor = ace.edit(element.nativeElement);
+            const editor = barceEdit(element.nativeElement);
             editor.getSession().setMode('ace/mode/javascript');
             editor.setOptions({
                 enableBasicAutocompletion: true,
@@ -309,7 +309,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
     private setInfoModuleDataAceEditor(element: ElementRef<HTMLElement>){
         if(element) {
-            const editor = ace.edit(element.nativeElement);
+            const editor = barceEdit(element.nativeElement);
             editor.getSession().setMode('ace/mode/json');
             editor.setOptions({
                 enableBasicAutocompletion: true,
@@ -1563,7 +1563,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
         });
 
         temp.push({name: 'info.module_type', type: 'text', value: this.infoModuleType});
-        const infoModuleData = ace.edit(this.infoModuleDataEditor.nativeElement).getValue();
+        const infoModuleData = barceEdit(this.infoModuleDataEditor.nativeElement).getValue();
         if(infoModuleData){
             temp = temp.concat(this.getChunkedInputs('info.module_data', infoModuleData));
         }
@@ -1577,12 +1577,12 @@ export class EditSmartServiceTaskDialogComponent implements OnInit, AfterViewIni
 
         temp = temp.filter(e => e.name.startsWith(result.topic+'.')); //filter unused inputs
 
-        const preScript = ace.edit(this.preScriptEditor.nativeElement).getValue();
+        const preScript = barceEdit(this.preScriptEditor.nativeElement).getValue();
         if(preScript){
             temp = temp.concat(this.getChunkedInputs('prescript', preScript));
         }
 
-        const postScript = ace.edit(this.postScriptEditor.nativeElement).getValue();
+        const postScript = barceEdit(this.postScriptEditor.nativeElement).getValue();
         if(postScript){
             temp = temp.concat(this.getChunkedInputs('postscript', postScript));
         }
