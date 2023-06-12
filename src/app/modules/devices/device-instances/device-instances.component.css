@@ -33,3 +33,8 @@
 .height-chips {
     max-height: calc(100vh - 260px);
 }
+
+a {
+    text-decoration: none;
+    color: #4484ce;
+}
