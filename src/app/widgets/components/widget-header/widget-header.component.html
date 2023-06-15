@@ -25,9 +25,9 @@
               matTooltip="{{warnText}}">
         warning
     </mat-icon>
-    <div *ngIf="optionCustom">
-        <button mat-icon-button color="accent" (click)="custom()" [disabled]="optionCustomDisabled">
-            <mat-icon>{{optionCustomIcon}}</mat-icon>
+    <div *ngFor="let icon of optionCustomIcon; let i = index">
+        <button mat-icon-button color="accent" (click)="custom(i)" [disabled]="optionCustomDisabled[i]">
+            <mat-icon>{{icon}}</mat-icon>
         </button>
     </div>
     <div *ngIf="zoom">

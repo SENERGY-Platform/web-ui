@@ -28,10 +28,9 @@ export class WidgetHeaderComponent implements OnInit {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() warnText = '';
-    @Input() optionCustom = false;
-    @Input() optionCustomDisabled = false;
-    @Input() optionCustomIcon = '';
-    @Output() customEvent = new EventEmitter<boolean>();
+    @Input() optionCustomDisabled: boolean[] = [];
+    @Input() optionCustomIcon: string[] = [];
+    @Output() customEvent = new EventEmitter<{index: number; icon: string}>();
 
     constructor(private dashboardService: DashboardService) {}
 
@@ -45,8 +44,8 @@ export class WidgetHeaderComponent implements OnInit {
         this.dashboardService.zoomWidget(DashboardManipulationEnum.Zoom, this.widget.id, this.widget);
     }
 
-    custom() {
-        this.customEvent.emit(true);
+    custom(i: number) {
+        this.customEvent.emit({index: i, icon: this.optionCustomIcon[i]});
     }
 
 }

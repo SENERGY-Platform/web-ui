@@ -69,52 +69,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        /* TODO
-       const rgxResWidget = this.timeRgx.exec(this.widget.properties.time?.last || '');
-       const rgxResGroupTime = this.timeRgx.exec(this.groupTime || '');
-
-
-       if (this.widget.properties.chartType === 'ColumnChart' && this.widget.properties.group?.type !== undefined
-           && this.widget.properties.group?.type !== '' && rgxResWidget?.length === 3 && Number(rgxResWidget[1]) === 1 && this.widget.properties.time?.last !== null && this.widget.properties.time?.last !== ''
-           && rgxResGroupTime?.length === 3) {
-           this.to = new Date();
-           const offset = Number(rgxResWidget[1]);
-           const timeUnit = rgxResGroupTime[2];
-           switch (timeUnit) {
-           case 'y':
-               this.to = new Date(this.to.setFullYear(this.to.getFullYear() + 1, 0, 0));
-               this.to = new Date(this.to.setHours(0, 0, 0, 0));
-               this.from = new Date(this.to.setFullYear(this.to.getFullYear() - offset));
-               break;
-           case 'months':
-               this.to = new Date(this.to.setFullYear(this.to.getFullYear(), this.to.getMonth() + 1, 0));
-               this.to = new Date(this.to.setHours(0, 0, 0, 0));
-               this.from = new Date(this.to.setMonth(this.to.getMonth() - offset));
-               break;
-           case 'w':
-           case 'd':
-               this.to = new Date(this.to.setFullYear(this.to.getFullYear(), this.to.getMonth(), this.to.getDate() + 1));
-               this.to = new Date(this.to.setHours(0, 0, 0, 0));
-               this.from = new Date(this.to.setDate(this.to.getDate() - offset));
-               break;
-           case 'h':
-               this.to = new Date(this.to.setHours(this.to.getHours() + 1, 0, 0, 0));
-               this.from = new Date(this.to.setHours(this.to.getHours() - offset));
-               break;
-           case 'm':
-               this.to = new Date(this.to.setMinutes(this.to.getMinutes() + 1, 0, 0));
-               this.from = new Date(this.to.setMinutes(this.to.getMinutes() - offset));
-               break;
-           case 's':
-               this.to = new Date(this.to.setSeconds(this.to.getSeconds() + 1, 0));
-               this.from = new Date(this.to.setSeconds(this.to.getSeconds() - offset));
-               break;
-           case 'ms':
-               this.to = new Date(this.to.setMilliseconds(this.to.getMilliseconds() + 1));
-               this.from = new Date(this.to.setMilliseconds(this.to.getMilliseconds() - offset));
-           }
-       }
-        */
         this.scheduleRefresh();
     }
 
@@ -200,43 +154,43 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
 
             let timeUnit = rgxRes[2];
             switch (timeUnit) {
-                case 'y':
-                    timeUnit = 'months';
-                    this.hAxisFormat = 'MMM';
-                    this.to = new Date(this.to.setFullYear(this.to.getFullYear() + 1));
-                    break;
-                case 'months':
-                    timeUnit = 'd';
-                    this.hAxisFormat = 'dd';
-                    this.to = new Date(this.to.setMonth(this.to.getMonth() + 1));
-                    break;
-                case 'w':
-                    timeUnit = 'd';
-                    this.hAxisFormat = 'dd';
-                    this.to = new Date(this.to.valueOf() + 1000 * 60 * 60 * 24 * 7);
-                    break;
-                case 'd':
-                    timeUnit = 'h';
-                    this.hAxisFormat = 'HH';
-                    this.to = new Date(this.to.setDate(this.to.getDate() + 1));
-                    break;
-                case 'h':
-                    timeUnit = 'm';
-                    this.hAxisFormat = 'mm';
-                    this.to = new Date(this.to.setHours(this.to.getHours() + 1));
-                    break;
-                case 'm':
-                    timeUnit = 's';
-                    this.hAxisFormat = 'ss';
-                    this.to = new Date(this.to.setMinutes(this.to.getMinutes() + 1));
-                    break;
-                case 's':
-                    timeUnit = 'ms';
-                    this.hAxisFormat = 'ss.SSS';
-                    this.to = new Date(this.to.setSeconds(this.to.getSeconds() + 1));
-                    break;
-                case 'ms':
-                    return; // cant go smaller
+            case 'y':
+                timeUnit = 'months';
+                this.hAxisFormat = 'MMM';
+                this.to = new Date(this.to.setFullYear(this.to.getFullYear() + 1));
+                break;
+            case 'months':
+                timeUnit = 'd';
+                this.hAxisFormat = 'dd';
+                this.to = new Date(this.to.setMonth(this.to.getMonth() + 1));
+                break;
+            case 'w':
+                timeUnit = 'd';
+                this.hAxisFormat = 'dd';
+                this.to = new Date(this.to.valueOf() + 1000 * 60 * 60 * 24 * 7);
+                break;
+            case 'd':
+                timeUnit = 'h';
+                this.hAxisFormat = 'HH';
+                this.to = new Date(this.to.setDate(this.to.getDate() + 1));
+                break;
+            case 'h':
+                timeUnit = 'm';
+                this.hAxisFormat = 'mm';
+                this.to = new Date(this.to.setHours(this.to.getHours() + 1));
+                break;
+            case 'm':
+                timeUnit = 's';
+                this.hAxisFormat = 'ss';
+                this.to = new Date(this.to.setMinutes(this.to.getMinutes() + 1));
+                break;
+            case 's':
+                timeUnit = 'ms';
+                this.hAxisFormat = 'ss.SSS';
+                this.to = new Date(this.to.setSeconds(this.to.getSeconds() + 1));
+                break;
+            case 'ms':
+                return; // cant go smaller
             }
             this.groupTime = '1' + timeUnit;
 
@@ -246,51 +200,54 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
 
     drillUp() {
         const rgxRes = this.timeRgx.exec(this.groupTime || '');
-        if (rgxRes === null || this.to === null || this.from === null) {
+        if (rgxRes === null) {
             return;
+        }
+        if (this.from === null) {
+            this.from = this.chartExportData.dataTable[1][0] as Date;
         }
         let timeUnit = rgxRes[2];
         switch (timeUnit) {
-            case 'y':
-                return;
-            case 'months':
-                timeUnit = 'y';
-                this.hAxisFormat = 'yyyy';
-                this.from = new Date(0);
-                this.to = new Date('2999-01-01T00:00:00Z');
-                break;
-            case 'w':
-            case 'd':
-                timeUnit = 'months';
-                this.hAxisFormat = 'MMM';
-                this.from = new Date(this.from.setMonth(0, 0));
-                this.from = new Date(this.from.setHours(0, 0, 0, 0));
-                this.to = new Date(this.from.setFullYear(this.from.getFullYear() + 1));
-                break;
-            case 'h':
-                timeUnit = 'd';
-                this.hAxisFormat = 'dd';
-                this.from = new Date(this.from.setDate(0));
-                this.from = new Date(this.from.setHours(0, 0, 0, 0));
-                this.to = new Date(this.from.setMonth(this.from.getMonth() + 1));
-                break;
-            case 'm':
-                timeUnit = 'h';
-                this.hAxisFormat = 'HH';
-                this.from = new Date(this.from.setHours(0, 0, 0, 0));
-                this.to = new Date(this.from.setDate(this.from.getDate() + 1));
-                break;
-            case 's':
-                timeUnit = 'm';
-                this.hAxisFormat = 'mm';
-                this.from = new Date(this.from.setMinutes(0, 0, 0));
-                this.to = new Date(this.from.setHours(this.from.getHours() + 1));
-                break;
-            case 'ms':
-                timeUnit = 's';
-                this.hAxisFormat = 'ss';
-                this.from = new Date(this.from.setSeconds(0, 0));
-                this.to = new Date(this.from.setMinutes(this.from.getMinutes() + 1));
+        case 'y':
+            return;
+        case 'months':
+            timeUnit = 'y';
+            this.hAxisFormat = 'yyyy';
+            this.from = new Date(0);
+            this.to = new Date('2999-01-01T00:00:00Z');
+            break;
+        case 'w':
+        case 'd':
+            timeUnit = 'months';
+            this.hAxisFormat = 'MMM';
+            this.from = new Date(this.from.setMonth(0, 0));
+            this.from = new Date(this.from.setHours(0, 0, 0, 0));
+            this.to = new Date(this.from.setFullYear(this.from.getFullYear() + 1));
+            break;
+        case 'h':
+            timeUnit = 'd';
+            this.hAxisFormat = 'dd';
+            this.from = new Date(this.from.setDate(0));
+            this.from = new Date(this.from.setHours(0, 0, 0, 0));
+            this.to = new Date(this.from.setMonth(this.from.getMonth() + 1));
+            break;
+        case 'm':
+            timeUnit = 'h';
+            this.hAxisFormat = 'HH';
+            this.from = new Date(this.from.setHours(0, 0, 0, 0));
+            this.to = new Date(this.from.setDate(this.from.getDate() + 1));
+            break;
+        case 's':
+            timeUnit = 'm';
+            this.hAxisFormat = 'mm';
+            this.from = new Date(this.from.setMinutes(0, 0, 0));
+            this.to = new Date(this.from.setHours(this.from.getHours() + 1));
+            break;
+        case 'ms':
+            timeUnit = 's';
+            this.hAxisFormat = 'ss';
+            this.from = new Date(this.from.setSeconds(0, 0));
+            this.to = new Date(this.from.setMinutes(this.from.getMinutes() + 1));
         }
 
         this.groupTime = '1' + timeUnit;
@@ -302,7 +259,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         const timeRgx = /(\d+)(ms|s|months|m|h|d|w|y)/;
         const rgxRes = timeRgx.exec(this.groupTime || '');
 
-        return this.to !== null && this.from !== null && this.widget.properties.chartType === 'ColumnChart' && this.widget.properties.group?.type !== undefined
+        return this.widget.properties.chartType === 'ColumnChart' && this.widget.properties.group?.type !== undefined
             && this.widget.properties.group?.type !== '' && rgxRes?.length === 3 && Number(rgxRes[1]) === 1 && rgxRes[2] !== 'y' && this.widget.properties.time?.last !== null && this.widget.properties.time?.last !== '';
     }
 
@@ -330,13 +287,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         }
     }
 
-    /* TODO
-    private fromInternal?: Date;
-    private toInternal?: Date;
-     */
-
     private get from(): Date | null {
-        // TODO return this.fromInternal || null;
         const str = localStorage.getItem(this.widget.id + '_from');
         if (str === null) {
             return null;
@@ -346,16 +297,13 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
 
     private set from(from: Date | null) {
         if (from === null) {
-            // TODO this.fromInternal = undefined;
             localStorage.removeItem(this.widget.id + '_from');
         } else {
-            // TODO this.fromInternal = from;
             localStorage.setItem(this.widget.id + '_from', from.toISOString());
         }
     }
 
     private get to(): Date | null {
-        // TODO return this.toInternal || null;
         const str = localStorage.getItem(this.widget.id + '_to');
         if (str === null) {
             return null;
@@ -365,11 +313,38 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
 
     private set to(to: Date | null) {
         if (to === null) {
-            // TODO this.toInternal = undefined;
             localStorage.removeItem(this.widget.id + '_to');
         } else {
-            // TODO this.toInternal = to;
             localStorage.setItem(this.widget.id + '_to', to.toISOString());
+        }
+    }
+
+    getCustomIcons(header: boolean): {icons: string[]; disabled: boolean[]} {
+        const res = {icons: [] as string[], disabled: [] as boolean[]};
+
+        if (this.zoomOutEnabled() && ((this.zoom && header) || (!this.zoom && !header))) {
+            res.icons.push('zoom_out');
+            res.disabled.push(!this.ready);
+        }
+        if ((this.zoom && header) || (!this.zoom && !header)) {
+            for (let i = 0; i < localStorage.length; i++) {
+                if (localStorage.key(i)?.startsWith(this.widget.id)) {
+                    res.icons.push('undo');
+                    res.disabled.push(!this.ready);
+                    break;
+                }
+            }
+        }
+
+        return res;
+    }
+
+    customEvent($event: {index: number; icon: string}) {
+        if ($event.icon === 'zoom_out') {
+            this.drillUp();
+        } else if ($event.icon === 'undo') {
+            this.chartsService.cleanup(this.widget);
+            this.refresh();
         }
     }
 }

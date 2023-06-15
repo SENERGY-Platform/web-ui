@@ -16,8 +16,8 @@
 
 <mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget" [zoom]="zoom"
-                           [optionCustom]="zoom && zoomOutEnabled()" [optionCustomIcon]="'zoom_out'"
-                           (customEvent)="drillUp()" [optionCustomDisabled]="!ready"
+                           [optionCustomIcon]="getCustomIcons(true).icons"
+                           (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(true).disabled"
                            [warnText]="(chartExportData?.dataTable?.length || 0) > 0 &&
                             (chartExportData?.dataTable?.length || 0) * ((chartExportData?.dataTable?.[0]?.length || 0)-1) > sizeLimit ?
                             'This widgets displays many data points and impacts performance. Try reducing the displayed' +
@@ -42,7 +42,7 @@
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom"
                            (editEvent)="edit()"
-                           [optionCustom]="zoomOutEnabled()" [optionCustomIcon]="'zoom_out'" (customEvent)="drillUp()"
-                           [optionCustomDisabled]="!ready"></senergy-widget-footer>
+                           [optionCustomIcon]="getCustomIcons(false).icons"
+                           (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(false).disabled"></senergy-widget-footer>
 </mat-card>
 

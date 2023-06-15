@@ -30,13 +30,12 @@ export class WidgetFooterComponent implements OnInit {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() optionZoom = false;
     @Input() optionAdd = false;
-    @Input() optionCustom = false;
-    @Input() optionCustomDisabled = false;
-    @Input() optionCustomIcon = '';
+    @Input() optionCustomDisabled: boolean[] = [];
+    @Input() optionCustomIcon: string[] = [];
     @Input() zoom = false;
     @Output() editEvent = new EventEmitter<boolean>();
     @Output() addEvent = new EventEmitter<boolean>();
-    @Output() customEvent = new EventEmitter<boolean>();
+    @Output() customEvent = new EventEmitter<{index: number; icon: string}>();
 
     constructor(private widgetHeaderService: WidgetFooterService, private dashboardService: DashboardService) {}
 
@@ -50,8 +49,8 @@ export class WidgetFooterComponent implements OnInit {
         this.addEvent.emit(true);
     }
 
-    custom() {
-        this.customEvent.emit(true);
+    custom(i: number) {
+        this.customEvent.emit({index: i, icon: this.optionCustomIcon[i]});
     }
 
     delete() {
