@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
+
 import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
-import { DomSanitizer } from '@angular/platform-browser';
-import { SingleValueService } from './shared/single-value.service';
-import { SingleValueModel } from './shared/single-value.model';
-import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
-import { MatIconRegistry } from '@angular/material/icon';
+import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
+import {DomSanitizer} from '@angular/platform-browser';
+import {SingleValueService} from './shared/single-value.service';
+import {SingleValueModel} from './shared/single-value.model';
+import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
+import {Subscription} from 'rxjs';
+import {MatIconRegistry} from '@angular/material/icon';
+import {FormControl} from '@angular/forms';
+import {debounceTime} from 'rxjs/operators';
 
 @Component({
     selector: 'senergy-single-value',
@@ -39,6 +42,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @ViewChild('content', {static: false}) contentBox!: ElementRef;
+    dateControl: FormControl<string | null> = new FormControl<string>('');
 
     constructor(
         private iconRegistry: MatIconRegistry,
@@ -48,9 +52,15 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.update();
+        this.scheduleRefresh();
         this.registerIcons();
         this.setConfigured();
+        this.dateControl.valueChanges.pipe(debounceTime(300)).subscribe((localDateString) => {
+            if (localDateString === null) {
+                return;
+            }
+            this.refresh(localDateString);
+        });
     }
 
     ngOnDestroy() {
@@ -71,24 +81,29 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         return this.contentBox?.nativeElement.scrollHeight || 0;
     }
 
-    private update() {
+    private scheduleRefresh() {
         this.setConfigured();
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
-                this.ready = false;
-                this.dataReady = false;
-                this.singleValueService.getSingleValue(this.widget).subscribe(
-                    (sv: SingleValueModel) => {
-                        this.sv = sv;
-                        this.ready = true;
-                        this.dataReady = true;
-                    },
-                    () => {
-                        this.ready = true;
-                    },
-                );
+                this.refresh();
             }
         });
+    }
+
+    private refresh(localDateString?: string) {
+        this.ready = false;
+        this.dataReady = false;
+        this.singleValueService.getSingleValue(this.widget, localDateString === undefined ? undefined : new Date(localDateString)).subscribe(
+            (sv: SingleValueModel) => {
+                this.sv = sv;
+                this.dateControl.setValue(sv.date.toLocaleString('sv').replace(' ', 'T'), {emitEvent: false});
+                this.ready = true;
+                this.dataReady = true;
+            },
+            () => {
+                this.ready = true;
+            },
+        );
     }
 
     private setConfigured() {

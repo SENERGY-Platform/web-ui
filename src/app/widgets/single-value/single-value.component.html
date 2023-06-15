@@ -15,7 +15,7 @@
   -->
 
 <mat-card appearance="outlined">
-    <senergy-widget-header [widget]="widget"></senergy-widget-header>
+    <senergy-widget-header [widget]="widget" [zoom]="zoom"></senergy-widget-header>
     <mat-card-content class="content-size drag-handler">
         <div *ngIf="!configured" fxFill fxLayout="row" fxLayoutAlign="center center">
             Please configure widget!
@@ -24,28 +24,17 @@
         <senergy-fit-text *ngIf="configured && ready && !dataReady" [txt]="'Problem fetching data! Check config'">
         </senergy-fit-text>
         <div class="content-box" *ngIf="configured && ready && dataReady">
-            <senergy-fit-text *ngIf="sv.type === 'String'" [txt]="sv.value + ' ' + widget.properties.vAxisLabel"
-                              [maxFontSize]="widget.properties.threshold ? widget.properties.threshold : 128">
-            </senergy-fit-text>
-            <senergy-fit-text *ngIf="sv.type === 'Number'"
-                              [txt]="((sv.value | number: widget.properties.format) || '') + ' ' + (widget.properties.vAxisLabel || '')"
-                              [maxFontSize]="widget.properties.threshold ? widget.properties.threshold : 128">
-            </senergy-fit-text>
-            <senergy-fit-text *ngIf="sv.type === 'Date'"
-                              [txt]="((sv.value | date: widget.properties.format) || '') + ' ' + (widget.properties.vAxisLabel || '')"
-                              [maxFontSize]="widget.properties.threshold ? widget.properties.threshold : 128">
-            </senergy-fit-text>
-            <senergy-fit-text *ngIf="sv.type === 'Currency'"
-                              [txt]="((sv.value | currency: widget.properties.format) || '') + ' ' + (widget.properties.vAxisLabel || '')"
-                              [maxFontSize]="widget.properties.threshold ? widget.properties.threshold : 128">
-            </senergy-fit-text>
-            <senergy-fit-text *ngIf="sv.type === 'Percent'"
-                              [txt]="((sv.value | percent: widget.properties.format) || '') + ' ' + (widget.properties.vAxisLabel || '')"
-                              [maxFontSize]="widget.properties.threshold ? widget.properties.threshold : 128">
-            </senergy-fit-text>
+            <senergy-single-value-value [sv]="sv" [widget]="widget"></senergy-single-value-value>
+        </div>
 
+        <div *ngIf="zoom" class="datepick">
+            <mat-form-field appearance="fill" fxFlex color="accent">
+                <mat-label>Select a date</mat-label>
+                <input type="datetime-local" matInput [formControl]="dateControl">
+            </mat-form-field>
         </div>
     </mat-card-content>
-    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionZoom]="true"
+                           [zoom]="zoom"></senergy-widget-footer>
 </mat-card>
 

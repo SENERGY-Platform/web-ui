@@ -97,6 +97,8 @@ import {RangeSliderEditDialogComponent} from './range-slider/dialogs/range-slide
 import {MatSliderModule} from '@angular/material/slider';
 import { AcControlComponent } from './ac-control/ac-control.component';
 import {AcControlEditDialogComponent} from './ac-control/dialog/ac-control-edit-dialog.component';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import { ValueComponent } from './single-value/value/value.component';
 
 registerLocaleData(localeDe, 'de');
 
@@ -133,6 +135,7 @@ registerLocaleData(localeDe, 'de');
         MatRadioModule,
         MatSortModule,
         MatSliderModule,
+        MatDatepickerModule,
     ],
     declarations: [
         RangeSliderComponent,
@@ -186,6 +189,7 @@ registerLocaleData(localeDe, 'de');
         DataTableEditDialogComponent,
         AcControlComponent,
         AcControlEditDialogComponent,
+        ValueComponent,
     ],
     exports: [
         SwitchComponent,

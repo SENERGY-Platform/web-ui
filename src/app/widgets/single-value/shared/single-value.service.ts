@@ -54,7 +54,7 @@ export class SingleValueService {
         });
     }
 
-    getSingleValue(widget: WidgetModel): Observable<SingleValueModel> {
+    getSingleValue(widget: WidgetModel, date?: Date): Observable<SingleValueModel> {
         return new Observable<SingleValueModel>((observer) => {
             const m = widget.properties.measurement;
             const name = widget.properties.vAxis ? widget.properties.vAxis.Name : '';
@@ -67,13 +67,21 @@ export class SingleValueService {
                         },
                     ],
                 };
+                if (date !== undefined) {
+                    requestPayload.time = {
+                        start: new Date(0).toISOString(),
+                        end: date.toISOString(),
+                    };
+                }
                 if (
                     widget.properties.group !== undefined &&
                     widget.properties.group.time !== '' &&
                     widget.properties.group.type !== undefined &&
                     widget.properties.group.type !== ''
                 ) {
-                    requestPayload.time = { last: widget.properties.group.time };
+                    if (date !== undefined) {
+                        requestPayload.time = {last: widget.properties.group.time};
+                    }
                     requestPayload.columns[0].groupType = widget.properties.group.type;
                     requestPayload.groupTime = widget.properties.group.time;
                 } else {
@@ -109,15 +117,18 @@ export class SingleValueService {
                     pairs = pairs[0];
                     let value: any = '';
                     let type = widget.properties.type || '';
+                    let respDate = new Date(0);
                     if (pairs.length === 0) {
                         type = 'String';
                         value = 'N/A';
                     } else {
                         value = pairs[0][1];
+                        respDate = new Date(pairs[0][0]);
                     }
                     const svm: SingleValueModel = {
                         type,
                         value,
+                        date: respDate,
                     };
                     observer.next(svm);
                     observer.complete();

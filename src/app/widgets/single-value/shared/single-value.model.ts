@@ -20,6 +20,7 @@ import {DeviceTypeServiceModel} from '../../../modules/metadata/device-types-ove
 export interface SingleValueModel {
     value: number | string;
     type: string;
+    date: Date;
 }
 
 export interface SingleValuePropertiesModel {
