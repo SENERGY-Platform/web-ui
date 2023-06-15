@@ -30,9 +30,13 @@ export class WidgetFooterComponent implements OnInit {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() optionZoom = false;
     @Input() optionAdd = false;
+    @Input() optionCustom = false;
+    @Input() optionCustomDisabled = false;
+    @Input() optionCustomIcon = '';
     @Input() zoom = false;
     @Output() editEvent = new EventEmitter<boolean>();
     @Output() addEvent = new EventEmitter<boolean>();
+    @Output() customEvent = new EventEmitter<boolean>();
 
     constructor(private widgetHeaderService: WidgetFooterService, private dashboardService: DashboardService) {}
 
@@ -44,6 +48,10 @@ export class WidgetFooterComponent implements OnInit {
 
     add() {
         this.addEvent.emit(true);
+    }
+
+    custom() {
+        this.customEvent.emit(true);
     }
 
     delete() {

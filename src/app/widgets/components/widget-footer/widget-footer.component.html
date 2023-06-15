@@ -15,6 +15,11 @@
   -->
 
 <mat-card-actions *ngIf="!zoom">
+    <div *ngIf="optionCustom">
+        <button mat-icon-button color="accent" (click)="custom()" [disabled]="optionCustomDisabled">
+            <mat-icon>{{optionCustomIcon}}</mat-icon>
+        </button>
+    </div>
     <div *ngIf="optionAdd">
         <button mat-icon-button color="accent" (click)="add()" matTooltip="add element">
             <mat-icon>add</mat-icon>

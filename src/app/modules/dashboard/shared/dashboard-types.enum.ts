@@ -19,6 +19,7 @@ export enum DashboardTypesEnum {
     Switch = 'switch',
     RangeSlider = 'range_slider',
     Chart = 'chart',
+    ChartExport = 'charts_export',
     DevicesState = 'devices_state',
     ProcessState = 'process_state',
     EventList = 'event_list',

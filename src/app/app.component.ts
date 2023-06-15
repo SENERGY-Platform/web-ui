@@ -27,7 +27,6 @@ export class AppComponent implements OnInit {
     constructor(protected keycloak: KeycloakService, private themingService: ThemingService) {}
 
     ngOnInit() {
-        localStorage.clear();
         const sub = this.keycloak.getKeycloakInstance().subject;
         if (sub !== undefined) {
             localStorage.setItem('sub', sub);

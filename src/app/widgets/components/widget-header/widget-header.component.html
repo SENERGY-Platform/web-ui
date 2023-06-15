@@ -25,6 +25,11 @@
               matTooltip="{{warnText}}">
         warning
     </mat-icon>
+    <div *ngIf="optionCustom">
+        <button mat-icon-button color="accent" (click)="custom()" [disabled]="optionCustomDisabled">
+            <mat-icon>{{optionCustomIcon}}</mat-icon>
+        </button>
+    </div>
     <div *ngIf="zoom">
         <button mat-icon-button color="accent" (click)="refresh()" matTooltip="refresh">
             <mat-icon>refresh</mat-icon>

@@ -16,6 +16,8 @@
 
 <mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget" [zoom]="zoom"
+                           [optionCustom]="zoom && zoomOutEnabled()" [optionCustomIcon]="'zoom_out'"
+                           (customEvent)="drillUp()" [optionCustomDisabled]="!ready"
                            [warnText]="(chartExportData?.dataTable?.length || 0) > 0 &&
                             (chartExportData?.dataTable?.length || 0) * ((chartExportData?.dataTable?.[0]?.length || 0)-1) > sizeLimit ?
                             'This widgets displays many data points and impacts performance. Try reducing the displayed' +
@@ -30,15 +32,17 @@
                 <div *ngIf="!errorHasOccured">
                     <div *ngIf="configureWidget === true">Please configure widget!</div>
                     <google-chart *ngIf="configureWidget === false && chartExportData.dataTable[0].length !== 0"
-                                  #chartExport [data]="chartExportData"></google-chart>
+                                  #chartExport [data]="chartExportData"
+                                  (chartSelect)="onChartSelect($event)"></google-chart>
                     <senergy-no-data
                             [showIf]="configureWidget === false && chartExportData.dataTable[0].length === 0"></senergy-no-data>
                 </div>
-
             </div>
         </div>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom"
-                           (editEvent)="edit()"></senergy-widget-footer>
+                           (editEvent)="edit()"
+                           [optionCustom]="zoomOutEnabled()" [optionCustomIcon]="'zoom_out'" (customEvent)="drillUp()"
+                           [optionCustomDisabled]="!ready"></senergy-widget-footer>
 </mat-card>
 

@@ -33,6 +33,7 @@ import { DataTableService } from '../../widgets/data-table/shared/data-table.ser
 import { AirQualityService } from '../../widgets/air-quality/shared/air-quality.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTabGroup } from '@angular/material/tabs';
+import {ChartsService} from "../../widgets/charts/shared/charts.service";
 
 const grids = new Map([
     ['xs', 1],
@@ -71,6 +72,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private dataTableService: DataTableService,
         private airQualityService: AirQualityService,
         private deviceStatusService: DeviceStatusService,
+        private chartsService: ChartsService,
         private route: ActivatedRoute,
         private router: Router,
     ) {}
@@ -405,6 +407,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             break;
         case DashboardTypesEnum.AirQuality:
             this.airQualityService.cleanGeneratedContent(widget.properties);
+            break;
+        case DashboardTypesEnum.ChartExport:
+            this.chartsService.cleanup(widget);
             break;
         }
     }

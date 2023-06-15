@@ -77,28 +77,34 @@ export class ChartsExportService {
         });
     }
 
-    getData(properties: WidgetPropertiesModels): Observable<any[][] | null | ErrorModel> {
+    getData(properties: WidgetPropertiesModels, from: string | undefined = undefined, to: string | undefined = undefined, groupInterval: string | undefined = undefined): Observable<any[][] | null | ErrorModel> {
         const widgetProperties = properties as ChartsExportPropertiesModel;
         const time: QueriesRequestTimeModel = {};
         const limit = properties.chartType === 'PieChart' && properties.calculateIntervals !== true ? 1 : undefined;
         let group: ChartsExportRequestPayloadGroupModel | undefined;
 
-        if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Relative && widgetProperties.time) {
-            time.last = widgetProperties.time.last;
+        if (widgetProperties.group && widgetProperties.group.type !== undefined && widgetProperties.group.type !== '') {
+            group = {
+                time: widgetProperties.group.time,
+                type: widgetProperties.group.type,
+            };
         }
 
-        if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.RelativeAhead && widgetProperties.time) {
+        if (from !== undefined && to !== undefined && groupInterval !== undefined) {
+            time.start = new Date(from).toISOString();
+            time.end = new Date(to).toISOString();
+            if (group !== undefined) {
+                group.time = groupInterval;
+            }
+        } else if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute && widgetProperties.time) {
+            time.start = new Date(widgetProperties.time.start as string).toISOString();
+            time.end = new Date(widgetProperties.time.end as string).toISOString();
+        } else if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Relative && widgetProperties.time) {
+            time.last = widgetProperties.time.last;
+        } else if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.RelativeAhead && widgetProperties.time) {
             time.ahead = widgetProperties.time.ahead;
         }
 
-        if (widgetProperties.timeRangeType === ChartsExportRangeTimeTypeEnum.Absolute && widgetProperties.time) {
-            time.start = new Date(widgetProperties.time.start as string).toISOString();
-            time.end = new Date(widgetProperties.time.end as string).toISOString();
-        }
-
-        if (widgetProperties.group && widgetProperties.group.type !== undefined && widgetProperties.group.type !== '') {
-            group = widgetProperties.group;
-        }
         const influxElements: QueriesRequestElementInfluxModel[] = [];
         const timescaleElements: QueriesRequestElementTimescaleModel[] = [];
         const influxResultMapper: number[] = [];
@@ -202,9 +208,9 @@ export class ChartsExportService {
         }));
     }
 
-    getChartData(widget: WidgetModel): Observable<ChartsModel | ErrorModel> {
+    getChartData(widget: WidgetModel, from?: string, to?: string, groupInterval?: string, hAxisFormat?: string): Observable<ChartsModel | ErrorModel> {
         return new Observable<ChartsModel | ErrorModel>((observer) => {
-            this.getData(widget.properties).subscribe((resp: any[][] | null | ErrorModel) => {
+            this.getData(widget.properties, from, to, groupInterval).subscribe((resp: any[][] | null | ErrorModel) => {
                 if (resp === null) {
                     // no data
                     observer.next(this.setProcessInstancesStatusValues(widget, new ChartDataTableModel([[]])));
@@ -212,7 +218,7 @@ export class ChartsExportService {
                     observer.next(resp);
                 } else {
                     const tableData = this.setData(resp, widget.properties);
-                    observer.next(this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors));
+                    observer.next(this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat));
                 }
                 observer.complete();
             });
@@ -304,7 +310,7 @@ export class ChartsExportService {
         return {table: dataTable};
     }
 
-    private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[]): ChartsModel {
+    private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string): ChartsModel {
         const element = this.elementSizeService.getHeightAndWidthByElementId(widget.id, 5);
 
         // Remove all elements from color array that are missing in the dataTable
@@ -330,7 +336,7 @@ export class ChartsExportService {
                 hAxis: {
                     title: widget.properties.hAxisLabel,
                     gridlines: {count: -1},
-                    format: widget.properties.hAxisFormat,
+                    format: hAxisFormat || widget.properties.hAxisFormat,
                     ticks: widget.properties.chartType === 'ColumnChart' ? dataTable.data.slice(1).map((x) => x[0] as Date) : undefined,
                 },
                 height: element.height,

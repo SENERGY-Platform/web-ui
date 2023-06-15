@@ -576,7 +576,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
         ];
         const influxExp = (this.exports.value as (ChartsExportMeasurementModel | DeviceInstancesModel)[])
-            .find(exp => (exp as DeviceInstancesModel).device_type === undefined &&
+            ?.find(exp => (exp as DeviceInstancesModel).device_type === undefined &&
                 ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb));
         if (influxExp === undefined) {
             res.push('time-weighted-mean-linear', 'time-weighted-mean-locf');

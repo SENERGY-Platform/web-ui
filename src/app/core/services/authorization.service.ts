@@ -69,6 +69,7 @@ export class AuthorizationService {
     }
 
     logout() {
+        localStorage.clear();
         this.keycloakService.logout();
     }
 

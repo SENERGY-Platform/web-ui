@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -28,6 +28,10 @@ export class WidgetHeaderComponent implements OnInit {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() warnText = '';
+    @Input() optionCustom = false;
+    @Input() optionCustomDisabled = false;
+    @Input() optionCustomIcon = '';
+    @Output() customEvent = new EventEmitter<boolean>();
 
     constructor(private dashboardService: DashboardService) {}
 
@@ -40,4 +44,9 @@ export class WidgetHeaderComponent implements OnInit {
     zoomWidget() {
         this.dashboardService.zoomWidget(DashboardManipulationEnum.Zoom, this.widget.id, this.widget);
     }
+
+    custom() {
+        this.customEvent.emit(true);
+    }
+
 }

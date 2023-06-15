@@ -16,6 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { GoogleChartComponent } from 'ng2-google-charts';
+import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 
 @Injectable({
     providedIn: 'root',
@@ -58,6 +59,15 @@ export class ChartsService {
                 } catch (e) {
                     console.log('Error releasing resources: ' + e);
                 }
+            }
+        }
+    }
+
+    cleanup(widget: WidgetModel) {
+        for (let i = localStorage.length; i >= 0; i--) { //reverse order, since deleting messes with index
+            const key = localStorage.key(i);
+            if (key?.startsWith(widget.id)) {
+                localStorage.removeItem(key);
             }
         }
     }
