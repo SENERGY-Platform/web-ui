@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-.layout-margin {
-    margin: 8px;
-}
-
 mat-grid-tile-footer {
     background-color: white !important;
     height: 68px !important;
     color: black !important;
-}
-
-mat-grid-list {
-    margin-bottom: 100px;
 }
 
 .truncate {
@@ -85,5 +77,6 @@ h1 {
 }
 
 #diagram-operators {
-    margin-bottom: 100px;
+    max-height: 600px;
+    overflow-y: scroll;
 }

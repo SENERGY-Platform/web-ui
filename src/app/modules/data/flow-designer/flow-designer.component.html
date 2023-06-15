@@ -34,16 +34,16 @@
             <mat-checkbox disabled="{{!write}}" class="checkbox-margin" [(ngModel)]="flow.share.write">Write</mat-checkbox>
         </section>
         <div fxLayout="row">
-            <div id="senergy-diagram-editor" fxFlex="75">
+            <div id="senergy-diagram-editor" fxFlex="70">
                 <senergy-diagram-editor ></senergy-diagram-editor>
             </div>
-            <div id="diagram-operators" fxFlex="25" class="mat-elevation-z1" >
+            <div id="diagram-operators" fxFlex="30" class="mat-elevation-z1" >
                 <div style="overflow: auto; height: {{listHeight}} px">
                     <mat-list>
-                        <h3 mat-subheader>Operators</h3>
                         <mat-list-item *ngFor="let item of operators">
                             <mat-icon matListItemIcon>insert_chart_outlined</mat-icon>
-                            <div matListItemTitle>{{ item.name }}</div>
+                            <h3 matListItemTitle>{{ item.name }}</h3>
+                            <p [matTooltip]="item.description || 'none'" matListItemLine>{{ item.description }}</p>
                             <button matListItemMeta disabled="{{!write}}" (click)="addNode(item)" matTooltip="Add operator" mat-button color="accent">
                                 <mat-icon color="accent">add</mat-icon>
                             </button>
