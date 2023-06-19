@@ -18,7 +18,7 @@
         <senergy-searchbar></senergy-searchbar>
     </span>
 
-    <div *ngIf="dataSource.data.length === 0 && ready">No processes found.</div>
+    <div *ngIf="dataSource.data.length === 0 && ready">No process IO variables found.</div>
     <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
     <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">

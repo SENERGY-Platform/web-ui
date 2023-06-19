@@ -17,7 +17,7 @@
     <span fxLayout="row" class="search-button-container">
         <senergy-searchbar></senergy-searchbar>
     </span>
-    <senergy-widget-spinner [show]="!dataReady"></senergy-widget-spinner>
+    <senergy-spinner [show]="!dataReady"></senergy-spinner>
     <div *ngIf="dataReady && dataSource.data.length === 0">No import types found.</div>
 
     <div class="mat-elevation-z1" [hidden]="!dataReady || (dataSource.data.length === 0 && dataReady)">

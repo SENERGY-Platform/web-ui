@@ -20,7 +20,7 @@
             <mat-icon>{{excludeGenerated ? 'visibility_off' : 'visibility'}}</mat-icon>
         </button>
     </span>
-    <senergy-widget-spinner [show]="!dataReady"></senergy-widget-spinner>
+    <senergy-spinner [show]="!dataReady"></senergy-spinner>
     <div *ngIf="dataReady && dataSource.data.length === 0">No imports found.</div>
 
     <div class="mat-elevation-z1" [hidden]="!dataReady || (dataSource.data.length === 0 && dataReady)">
