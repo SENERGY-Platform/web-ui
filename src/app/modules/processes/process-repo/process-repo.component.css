@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-.process-repo-container ::ng-deep .mat-mdc-tab-body {
-    overflow: hidden;
-    height: calc(100vh - 118px);
-}
-
-.main-panel {
-    height: calc(100% - 85px);
-    overflow-y: auto;
-}
 
 :host ::ng-deep .mdc-tab {
     height: 54px!important;
@@ -61,7 +52,7 @@ mat-grid-tile-footer {
 }
 
 mat-grid-list {
-    margin-bottom: 100px;
+    margin-bottom: 200px;
 }
 
 .truncate {
