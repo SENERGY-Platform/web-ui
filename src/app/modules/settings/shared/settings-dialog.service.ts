@@ -20,17 +20,26 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { SettingsChangeDialogComponent } from '../dialogs/settings-change-dialog.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { AllowedMethods, PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
+import { Observable } from 'rxjs';
+import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
+import {environment} from '../../../../environments/environment';
 
 @Injectable({
     providedIn: 'root',
 })
 export class SettingsDialogService {
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
+
     constructor(
         private http: HttpClient,
         private errorHandlerService: ErrorHandlerService,
         private dialog: MatDialog,
         public snackBar: MatSnackBar,
-    ) {}
+        private ladonService: LadonService
+    ) {
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.usersServiceUrl, ["GET", "DELETE", "POST", "PUT"])
+    }
 
     openSettingsDialog() {
         const dialogConfig = new MatDialogConfig();
@@ -42,5 +51,18 @@ export class SettingsDialogService {
         const editDialogRef = this.dialog.open(SettingsChangeDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe(() => {});
+    }
+
+    userHasUpdateAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("PUT")      
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

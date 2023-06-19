@@ -34,6 +34,7 @@ export class ToolbarComponent implements OnInit {
     header = '';
     notifications: NotificationModel[] = [];
     unreadCounter = 0;
+    userHasSettingsUpdateAuthorization: boolean = false
 
     constructor(
         private sidenavService: SidenavService,
@@ -53,6 +54,9 @@ export class ToolbarComponent implements OnInit {
             this.notifications = n;
             this.notifications.forEach((no) => (!no.isRead ? this.unreadCounter++ : null));
         });
+        this.settingsDialogService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasSettingsUpdateAuthorization = hasAuth
+        })
     }
 
     toggle(sidenavOpen: boolean): void {
