@@ -39,7 +39,7 @@ import { MatPaginator } from '@angular/material/paginator';
     styleUrls: ['./device-types-overview.component.css'],
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy {
-    displayedColumns = ['select', 'name', 'info', 'edit', 'copy', 'new', 'show']
+    displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show']
     pageSize = 20;
     deviceTypes: DeviceTypePermSearchModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
