@@ -30,6 +30,8 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {NotificationDialogComponent} from '../dialog/notification-dialog.component';
 import {AuthorizationService} from '../../../../services/authorization.service';
 import {webSocket, WebSocketSubject} from 'rxjs/webSocket';
+import { AllowedMethods, PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
 @Injectable({
     providedIn: 'root',
@@ -39,14 +41,17 @@ export class NotificationService implements OnDestroy {
 
     private webSocketSubject: WebSocketSubject<any> | undefined;
     private notifications: NotificationModel[] = [];
+    authorizationObs: Observable<PermissionTestResponse> = new Observable()
 
     constructor(
         private errorHandlerService: ErrorHandlerService,
         private http: HttpClient,
         private authorizationService: AuthorizationService,
         private dialog: MatDialog,
+        private ladonService: LadonService
     ) {
         this.initWs();
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.notificationsUrl, ["GET"])
     }
 
     ngOnDestroy() {
@@ -171,5 +176,18 @@ export class NotificationService implements OnDestroy {
             type: 'authentication',
             payload: token
         }));
+    }
+
+    userHasReadAuthorization(): Observable<boolean> {
+        return this.userHasAuthorization("GET")      
+    }
+
+    userHasAuthorization(method: AllowedMethods): Observable<boolean> {
+        return new Observable(obs => {
+            this.authorizationObs.subscribe(result => {
+                obs.next(result[method])
+                obs.complete()
+            })
+        })    
     }
 }

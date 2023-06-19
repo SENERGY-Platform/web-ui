@@ -35,6 +35,7 @@ export class ToolbarComponent implements OnInit {
     notifications: NotificationModel[] = [];
     unreadCounter = 0;
     userHasSettingsUpdateAuthorization: boolean = false
+    userHasNotificationsReadAuthorization: boolean = false
 
     constructor(
         private sidenavService: SidenavService,
@@ -56,6 +57,10 @@ export class ToolbarComponent implements OnInit {
         });
         this.settingsDialogService.userHasUpdateAuthorization().subscribe(hasAuth => {
             this.userHasSettingsUpdateAuthorization = hasAuth
+        })
+
+        this.notificationService.userHasReadAuthorization().subscribe(hasAuth => {
+            this.userHasNotificationsReadAuthorization = hasAuth
         })
     }
 
