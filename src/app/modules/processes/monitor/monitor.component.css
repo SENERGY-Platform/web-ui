@@ -36,12 +36,3 @@ table {
 .hub-selected {
     background: rgba(0,0,0,.06);
 }
-
-.search {
-    padding-top: 8px;
-    padding-left: 8px;
-}
-
-.search .suffix {
-    padding-top: 4px;
-}

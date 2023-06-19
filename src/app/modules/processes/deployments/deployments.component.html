@@ -13,43 +13,42 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="deployments-container">
-    <div fxLayout="row" class="search">
+<div class="deployments-container layout-margin">
+    <div class="search-button-container">
         <senergy-searchbar fxFlex></senergy-searchbar>
 
-            <button matTooltip="Delete" mat-icon-button color="accent"
-                    (click)="deleteMultipleItems()"
-                    *ngIf="selectedItems.length > 0 && ready">
-                <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn" class="suffix-sort">delete</mat-icon>
-            </button>
-            <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment" color="accent" class="suffix">
-                <mat-icon>device_hub</mat-icon>
-            </button>
-            <mat-menu #deploymentEnvironment="matMenu">
-                <button mat-menu-item [ngClass]="{'hub-selected': !hub}" (click)="selectHub(null)">Senergy-Platform</button>
-                <button mat-menu-item *ngFor="let h of hubList" [ngClass]="{'hub-selected': hub?.id === h.id}" (click)="selectHub(h)">{{h.name}}</button>
-            </mat-menu>
-            <button matTooltip="show generated" mat-icon-button color="accent" (click)="filterItems(true)" *ngIf="!this.showGenerated" class="suffix">
-                <mat-icon>visibility</mat-icon>
-            </button>
-            <button matTooltip="hide generated" mat-icon-button color="accent" (click)="filterItems(false)" *ngIf="this.showGenerated" class="suffix">
-                <mat-icon>visibility_off</mat-icon>
-            </button>
-            <senergy-sort [sortAttributes]="sortAttributes" class="suffix-sort"
-                          (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+        <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()"
+            *ngIf="selectedItems.length > 0 && ready">
+            <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn" class="suffix-sort">delete</mat-icon>
+        </button>
+        <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment"
+            color="accent" class="suffix">
+            <mat-icon>device_hub</mat-icon>
+        </button>
+        <mat-menu #deploymentEnvironment="matMenu">
+            <button mat-menu-item [ngClass]="{'hub-selected': !hub}" (click)="selectHub(null)">Senergy-Platform</button>
+            <button mat-menu-item *ngFor="let h of hubList" [ngClass]="{'hub-selected': hub?.id === h.id}"
+                (click)="selectHub(h)">{{h.name}}</button>
+        </mat-menu>
+        <button matTooltip="show generated" mat-icon-button color="accent" (click)="filterItems(true)"
+            *ngIf="!this.showGenerated" class="suffix">
+            <mat-icon>visibility</mat-icon>
+        </button>
+        <button matTooltip="hide generated" mat-icon-button color="accent" (click)="filterItems(false)"
+            *ngIf="this.showGenerated" class="suffix">
+            <mat-icon>visibility_off</mat-icon>
+        </button>
+        <senergy-sort [sortAttributes]="sortAttributes" class="suffix-sort"
+            (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
     </div>
     <div class="deployments-scroll" #mainPanel>
-        <div infiniteScroll
-             [infiniteScrollDistance]="1"
-             [infiniteScrollThrottle]="50"
-             [infiniteScrollContainer]="'.deployments-scroll'"
-             [fromRoot]="true"
-             (scrolled)="onScroll()">
+        <div infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
+            [infiniteScrollContainer]="'.deployments-scroll'" [fromRoot]="true" (scrolled)="onScroll()">
             <div fxLayout="column" [formGroup]="formGroup">
-                <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px" formArrayName="repoItems"
-                               *ngIf="repoItems.length > 0">
+                <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
+                    formArrayName="repoItems" *ngIf="repoItems.length > 0">
                     <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
-                                   [formGroupName]="i">
+                        [formGroupName]="i">
                         <div fxFill>
                             <img class="widget-image" [src]="item.value.image">
                         </div>
@@ -59,35 +58,33 @@
                                     {{item.value.name}}
                                 </div>
                                 <div class="truncate footer-item-subtitle"
-                                     matTooltip="{{item.value.deploymentTime | date:'medium'}}">
+                                    matTooltip="{{item.value.deploymentTime | date:'medium'}}">
                                     {{item.value.deploymentTime | date:"medium"}}
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                                     <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
                                     </mat-checkbox>
-                                    <button *ngIf="!item.value.online" mat-icon-button
-                                            matTooltip="Missing Dependencies"
-                                            class="mat-warn" (click)="showOfflineReasons(item.value.offline_reasons)">
+                                    <button *ngIf="!item.value.online" mat-icon-button matTooltip="Missing Dependencies"
+                                        class="mat-warn" (click)="showOfflineReasons(item.value.offline_reasons)">
                                         <mat-icon>warning</mat-icon>
                                     </button>
                                     <div fxFlex></div>
-                                    <mat-icon *ngIf="item.value.sync" color="warn" class="icon-spin" matTooltip="waiting for sync with hub">sync</mat-icon>
-                                    <button *ngIf="!item.value.sync"
-                                            mat-icon-button matTooltip="Run" color="accent"
-                                            (click)="run(item.value.id)">
+                                    <mat-icon *ngIf="item.value.sync" color="warn" class="icon-spin"
+                                        matTooltip="waiting for sync with hub">sync</mat-icon>
+                                    <button *ngIf="!item.value.sync" mat-icon-button matTooltip="Run" color="accent"
+                                        (click)="run(item.value.id)">
                                         <mat-icon>play_arrow</mat-icon>
                                     </button>
                                     <button mat-icon-button matTooltip="Copy Deployment" color="accent"
-                                            (click)="copyDeployment(item.value.id)">
+                                        (click)="copyDeployment(item.value.id)">
                                         <mat-icon>content_copy</mat-icon>
                                     </button>
                                     <button mat-icon-button matTooltip="Delete" color="accent"
-                                            (click)="deleteDeployment(item.value)"
-                                            [disabled]="selectedItems.length > 0">
+                                        (click)="deleteDeployment(item.value)" [disabled]="selectedItems.length > 0">
                                         <mat-icon>delete</mat-icon>
                                     </button>
-                                    <button mat-icon-button [matMenuTriggerFor]="deploymentMenu"
-                                            color="accent" matTooltip="More">
+                                    <button mat-icon-button [matMenuTriggerFor]="deploymentMenu" color="accent"
+                                        matTooltip="More">
                                         <mat-icon>more_vert</mat-icon>
                                     </button>
                                     <mat-menu #deploymentMenu="matMenu" [overlapTrigger]="false">

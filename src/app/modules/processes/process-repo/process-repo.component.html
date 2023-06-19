@@ -16,53 +16,47 @@
 
 <div class="process-repo-container">
 
-    <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight
-        (selectedIndexChange)="setIndex($event)" (animationDone)="animation()">
+    <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight (selectedIndexChange)="setIndex($event)"
+        (animationDone)="animation()">
         <!-- <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Marketplace', 'Shared']"> -->
         <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Shared']">
-            <div fxLayout="row" class="search">
-                <senergy-searchbar fxFlex></senergy-searchbar>
-                <button matTooltip="Delete" mat-icon-button color="accent" class="suffix-del"
-                        (click)="deleteMultipleItems()"
-                        *ngIf="selectedItems.length > 0 && ready">
-                    <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn">delete</mat-icon>
-                </button>
-                <senergy-sort  class="suffix" [sortAttributes]="sortAttributes"
-                              (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-            </div>
-            <div class="main-panel"
-                 infiniteScroll
-                 [infiniteScrollDistance]="1"
-                 [infiniteScrollThrottle]="50"
-                 [scrollWindow]="false"
-                 (scrolled)="onScroll()"
-                 #mainPanel>
-                <div class="layout-margin" fxLayout="column" *ngIf="animationDone" [formGroup]="formGroup">
-                    <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
-                                   formArrayName="repoItems"
-                                   *ngIf="repoItems.length > 0">
-                        <mat-grid-tile class="mat-elevation-z1" *ngFor="let item of repoItems.controls, let i = index"
-                                       [formGroupName]="i">
-                            <div fxFill>
-                                <img class="widget-image" [src]="item.value.image">
-                            </div>
-                            <mat-grid-tile-footer>
-                                <div fxLayout="column" fxFill>
-                                    <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
-                                        {{item.value.name}}
-                                    </div>
-                                    <div class="truncate footer-item-subtitle"
-                                         matTooltip="{{item.value.date | date:'medium'}}">
-                                        {{item.value.date | date:"medium"}}
-                                    </div>
-                                    <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
-                                        <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
-                                        </mat-checkbox>
-                                        <mat-icon matTooltip="Process is shared" *ngIf="item.value.shared"
-                                                  class="color-sidenav info-icon">share
-                                        </mat-icon>
-                                        <div fxFlex></div>
-                                        <button mat-icon-button color="accent" matTooltip="Edit"
+            <div class="layout-margin">
+                <div class="search-button-container">
+                    <senergy-searchbar fxFlex></senergy-searchbar>
+                    <button matTooltip="Delete" mat-icon-button color="accent" class="suffix-del"
+                        (click)="deleteMultipleItems()" *ngIf="selectedItems.length > 0 && ready">
+                        <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn">delete</mat-icon>
+                    </button>
+                    <senergy-sort class="suffix" [sortAttributes]="sortAttributes"
+                        (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
+                </div>
+                <div class="main-panel" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
+                    [scrollWindow]="false" (scrolled)="onScroll()" #mainPanel>
+                    <div fxLayout="column" *ngIf="animationDone" [formGroup]="formGroup">
+                        <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
+                            formArrayName="repoItems" *ngIf="repoItems.length > 0">
+                            <mat-grid-tile class="mat-elevation-z1"
+                                *ngFor="let item of repoItems.controls, let i = index" [formGroupName]="i">
+                                <div fxFill>
+                                    <img class="widget-image" [src]="item.value.image">
+                                </div>
+                                <mat-grid-tile-footer>
+                                    <div fxLayout="column" fxFill>
+                                        <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
+                                            {{item.value.name}}
+                                        </div>
+                                        <div class="truncate footer-item-subtitle"
+                                            matTooltip="{{item.value.date | date:'medium'}}">
+                                            {{item.value.date | date:"medium"}}
+                                        </div>
+                                        <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
+                                            <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
+                                            </mat-checkbox>
+                                            <mat-icon matTooltip="Process is shared" *ngIf="item.value.shared"
+                                                class="color-sidenav info-icon">share
+                                            </mat-icon>
+                                            <div fxFlex></div>
+                                            <button mat-icon-button color="accent" matTooltip="Edit"
                                                 routerLink="/processes/designer/{{item.value.id}}">
                                                 <mat-icon>edit</mat-icon>
                                             </button>
@@ -109,6 +103,7 @@
                         <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
                     </div>
                 </div>
+            </div>
         </mat-tab>
     </mat-tab-group>
 </div>

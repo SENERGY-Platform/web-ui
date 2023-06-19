@@ -15,8 +15,8 @@
   -->
 <div class="releases-container layout-margin">
     <div fxLayout="column">
-        <div fxLayout="row" class="search">
-            <senergy-searchbar fxFlex></senergy-searchbar>
+        <div class="search-button-container">
+            <senergy-searchbar></senergy-searchbar>
             <button matTooltip="show old deployments" mat-icon-button color="accent" (click)="toggleLatest()" *ngIf="this.latest" class="suffix">
                 <mat-icon>visibility</mat-icon>
             </button>

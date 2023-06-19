@@ -79,10 +79,6 @@ mat-grid-list {
     background-color: whitesmoke;
 }
 
-.filter-margin {
-    margin-top: 12px
-}
-
 .icon-spin {
     -webkit-animation: icon-spin 2s infinite linear;
     animation: icon-spin 2s infinite linear;
@@ -111,17 +107,4 @@ mat-grid-list {
 
 .hub-selected {
     background: rgba(0,0,0,.06);
-}
-
-.search {
-    padding-top: 8px;
-    padding-left: 8px;
-}
-
-.search .suffix {
-    padding-top: 15px;
-}
-
-.search .suffix-sort {
-    padding-top: 4px;
 }

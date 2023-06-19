@@ -39,7 +39,6 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 
 .search-button-container {
     align-items: center;
-    margin-bottom: 10px;
     display: flex;
 }
 
@@ -47,9 +46,14 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
     width: 100%;
 }
 
+/* Mat-form-field get bottom space around 20px :/ */
 .search-button-container > .mat-mdc-icon-button {
     margin-top: -20px;
 }
+.search-button-container senergy-sort .mat-mdc-icon-button {
+    margin-top: -20px;
+}
+
 
 .table-container {
     max-height: calc(100vh - 216px);
