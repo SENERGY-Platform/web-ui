@@ -16,6 +16,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { KeycloakService } from 'keycloak-angular';
+import { SidenavService } from './core/components/sidenav/shared/sidenav.service';
 import { ThemingService } from './core/services/theming.service';
 
 @Component({
@@ -24,13 +25,19 @@ import { ThemingService } from './core/services/theming.service';
     styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-    constructor(protected keycloak: KeycloakService, private themingService: ThemingService) {}
+    ready: boolean = false
+    constructor(protected keycloak: KeycloakService, private themingService: ThemingService, private sidenavService: SidenavService) {}
 
     ngOnInit() {
+        this.sidenavService.loadSections().then(_ => {
+            this.ready = true
+        })
+
         const sub = this.keycloak.getKeycloakInstance().subject;
         if (sub !== undefined) {
             localStorage.setItem('sub', sub);
         }
         this.themingService.applyTheme();
+
     }
 }

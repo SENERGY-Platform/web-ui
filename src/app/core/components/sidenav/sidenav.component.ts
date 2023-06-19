@@ -36,7 +36,6 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     sections: SidenavSectionModel[] = [];
     openSection: null | string = null;
     zIndex = -1;
-    ready: boolean = false
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -47,7 +46,7 @@ export class SidenavComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
         this.getActiveSection();
-        this.getSections();
+        this.sections = this.sidenavService.getSections();
         this.showOrHideSidenav();
     }
 
@@ -105,13 +104,6 @@ export class SidenavComponent implements OnInit, AfterViewInit {
                 this.sidenav.fixedTopGap = 64;
                 this.zIndex = -1;
             }
-        });
-    }
-
-    private getSections(): void {
-        this.sidenavService.getSections().subscribe(sections => {
-            this.sections = sections;
-            this.ready = true;
         });
     }
 

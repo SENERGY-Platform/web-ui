@@ -40,6 +40,7 @@ import { environment } from '../environments/environment';
 import {SmartServicesModule} from './modules/smart-services/smart-services.module';
 import { AdminModule } from './modules/./admin/admin.module';
 import { ApiDocModule } from './modules/api-doc/api-doc.module';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 registerLocaleData(localeDe);
 
@@ -58,6 +59,7 @@ registerLocaleData(localeDe);
         DataModule,
         ProcessesModule,
         SmartServicesModule,
+        MatProgressSpinnerModule,
         ImportsModule,
         MetadataModule,
         BrowserAnimationsModule,

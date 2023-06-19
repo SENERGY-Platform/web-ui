@@ -60,6 +60,7 @@ export class SidenavService implements OnDestroy {
     private isToggled = false;
     private section = '';
     private waitingRoomEventCloser?: () => void;
+    private sections: SidenavSectionModel[] = []
 
     constructor(
         private waitingRoomService: WaitingRoomService, 
@@ -351,8 +352,12 @@ export class SidenavService implements OnDestroy {
         })
     }
 
-    getSections(): Observable<SidenavSectionModel[]> {
-        return new Observable(obs => {
+    getSections(): SidenavSectionModel[] {
+        return this.sections
+    }
+
+    loadSections(): Promise<SidenavSectionModel[]> {
+        return new Promise((resolve, _) => {
             var allObs: Observable<SidenavSectionModel>[] = []
             var sections: SidenavSectionModel[] = [];
 
@@ -398,9 +403,8 @@ export class SidenavService implements OnDestroy {
                     return sortedSectionTitles.indexOf(section1.name) - sortedSectionTitles.indexOf(section2.name)
                 })
 
-                obs.next(sections)
-                obs.complete()
-
+                this.sections = sections
+                resolve(sections)
             })
         })
     }

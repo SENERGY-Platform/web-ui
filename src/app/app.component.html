@@ -14,5 +14,9 @@
   ~ limitations under the License.
   -->
 
-<senergy-toolbar></senergy-toolbar>
-<senergy-sidenav></senergy-sidenav>
+<mat-spinner *ngIf="!ready" [diameter]="50" [strokeWidth]="5" color="accent"></mat-spinner>
+
+<div *ngIf="ready">
+  <senergy-toolbar></senergy-toolbar>
+  <senergy-sidenav></senergy-sidenav>
+</div>
