@@ -54,21 +54,21 @@ export class SingleValueService {
         });
     }
 
-    getSingleValue(widget: WidgetModel, date?: Date): Observable<SingleValueModel> {
-        return new Observable<SingleValueModel>((observer) => {
+    getValues(widget: WidgetModel, date?: Date): Observable<SingleValueModel[]> {
+        return new Observable<SingleValueModel[]>((observer) => {
             const m = widget.properties.measurement;
             const name = widget.properties.vAxis ? widget.properties.vAxis.Name : '';
             if (m) {
-                const requestPayload: QueriesRequestElementInfluxModel | QueriesRequestElementTimescaleModel = {
+                const requestPayload: QueriesRequestElementInfluxModel[] | QueriesRequestElementTimescaleModel[] = [{
                     columns: [
                         {
                             name,
                             math: widget.properties.math !== '' ? widget.properties.math : undefined,
                         },
                     ],
-                };
-                if (date !== undefined) {
-                    requestPayload.time = {
+                }];
+                if (date !== undefined) { // TODO
+                    requestPayload[0].time = {
                         start: new Date(0).toISOString(),
                         end: date.toISOString(),
                     };
@@ -79,27 +79,46 @@ export class SingleValueService {
                     widget.properties.group.type !== undefined &&
                     widget.properties.group.type !== ''
                 ) {
-                    if (date !== undefined) {
-                        requestPayload.time = {last: widget.properties.group.time};
+                    if (date !== undefined) { // TODO
+                        requestPayload[0].time = {last: widget.properties.group.time};
                     }
-                    requestPayload.columns[0].groupType = widget.properties.group.type;
-                    requestPayload.groupTime = widget.properties.group.time;
+                    requestPayload[0].columns[0].groupType = widget.properties.group.type;
+                    requestPayload[0].groupTime = widget.properties.group.time;
                 } else {
-                    requestPayload.limit = 1;
+                    requestPayload[0].limit = 1;
                 }
+
+                const queryMultiple = function() {
+                    if (date === undefined || requestPayload[0].time === undefined) {
+                        return;
+                    }
+                    requestPayload[0].time.last = undefined;
+                    requestPayload[0].time.start = new Date(0).toISOString();
+                    requestPayload[0].time.end = date.toISOString();
+                    requestPayload[0].limit = 10;
+
+                    requestPayload.push(JSON.parse(JSON.stringify(requestPayload[0])));
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    requestPayload[1].time!.start = date.toISOString();
+                    // eslint-disable-next-line
+                    requestPayload[1].time!.end = '2099-01-01T00:00:00Z';
+                    requestPayload[1].orderDirection = 'asc';
+                };
 
 
                 let o:  Observable<any[][]> | undefined;
                 if (widget.properties.sourceType === 'export' || widget.properties.sourceType === undefined) { // undefined for legacy widgets
-                    (requestPayload as QueriesRequestElementInfluxModel).measurement = m.id;
-                    (requestPayload as QueriesRequestElementTimescaleModel).exportId = m.id;
+                    (requestPayload[0] as QueriesRequestElementInfluxModel).measurement = m.id;
+                    (requestPayload[0] as QueriesRequestElementTimescaleModel).exportId = m.id;
                     switch (m.exportDatabaseId) {
                     case environment.exportDatabaseIdInternalTimescaleDb:
-                        o = this.exportDataService.queryTimescale([requestPayload]);
+                        queryMultiple();
+                        o = this.exportDataService.queryTimescale(requestPayload);
                         break;
                     case undefined:
                     case environment.influxAPIURL:
-                        o = this.exportDataService.queryInflux([requestPayload] as QueriesRequestElementInfluxModel[]);
+                        queryMultiple();
+                        o = this.exportDataService.queryInflux(requestPayload as QueriesRequestElementInfluxModel[]);
                         break;
                     default:
                         console.error('cant load data of this export: not internal');
@@ -108,29 +127,35 @@ export class SingleValueService {
                     }
                 }
                 if (widget.properties.sourceType === 'device') {
-                    (requestPayload as QueriesRequestElementTimescaleModel).deviceId = widget.properties.device?.id;
-                    (requestPayload as QueriesRequestElementTimescaleModel).serviceId = widget.properties.service?.id;
-                    o = this.exportDataService.queryTimescale([requestPayload]);
+                    (requestPayload[0] as QueriesRequestElementTimescaleModel).deviceId = widget.properties.device?.id;
+                    (requestPayload[0] as QueriesRequestElementTimescaleModel).serviceId = widget.properties.service?.id;
+                    queryMultiple();
+                    o = this.exportDataService.queryTimescale(requestPayload);
                 }
 
-                o?.subscribe((pairs) => {
-                    pairs = pairs[0];
-                    let value: any = '';
-                    let type = widget.properties.type || '';
-                    let respDate = new Date(0);
-                    if (pairs.length === 0) {
-                        type = 'String';
-                        value = 'N/A';
-                    } else {
-                        value = pairs[0][1];
-                        respDate = new Date(pairs[0][0]);
+                o?.subscribe((pairList) => {
+                    const res: SingleValueModel[] = [];
+                    for (const pairs of pairList) {
+                        for (const pair of pairs) {
+                            let value: any = '';
+                            let type = widget.properties.type || '';
+                            let respDate = new Date(0);
+                            if (pair.length === 0) {
+                                type = 'String';
+                                value = 'N/A';
+                            } else {
+                                value = pair[1];
+                                respDate = new Date(pair[0]);
+                            }
+                            res.push({
+                                type,
+                                value,
+                                date: respDate,
+                            });
+                        }
                     }
-                    const svm: SingleValueModel = {
-                        type,
-                        value,
-                        date: respDate,
-                    };
-                    observer.next(svm);
+                    res.sort((a,b) => a.date.valueOf() - b.date.valueOf());
+                    observer.next(res);
                     observer.complete();
                 });
             }
