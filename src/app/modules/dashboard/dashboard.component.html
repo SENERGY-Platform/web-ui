@@ -79,7 +79,8 @@
 
                 <div *ngIf="zoomedWidgetIndex !== null">
                     <div class="zoomed-widget">
-                        <senergy-widget [dashboardId]="dashboard.id"
+                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization"
+                                        [dashboardId]="dashboard.id"
                                         [widget]="dashboards[activeTabIndex].widgets[zoomedWidgetIndex]"
                                         [zoom]="true"></senergy-widget>
                     </div>
@@ -90,7 +91,7 @@
                     <gridster-item [item]="widget" *ngFor="let widget of dashboards[activeTabIndex].widgets"
                                    [ngClass]="inDragMode ? 'highlight color-sidenav' : ''"
                                    class="mat-elevation-z1">
-                        <senergy-widget [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false"></senergy-widget>
+                        <senergy-widget [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboard.id" [widget]="widget" [zoom]="false"></senergy-widget>
                     </gridster-item>
                 </gridster>
             </div>
