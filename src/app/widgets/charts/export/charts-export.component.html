@@ -16,7 +16,7 @@
 
 <mat-card appearance="outlined">
     <senergy-widget-header [widget]="widget" [zoom]="zoom"
-                           [optionCustomIcon]="getCustomIcons(true).icons"
+                           [optionCustomIcon]="getCustomIcons(true).icons" [optionCustomTooltip]="getCustomIcons(true).tooltips"
                            (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(true).disabled"
                            [warnText]="(chartExportData?.dataTable?.length || 0) > 0 &&
                             (chartExportData?.dataTable?.length || 0) * ((chartExportData?.dataTable?.[0]?.length || 0)-1) > sizeLimit ?
@@ -42,7 +42,7 @@
     </mat-card-content>
     <senergy-widget-footer [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom"
                            (editEvent)="edit()"
-                           [optionCustomIcon]="getCustomIcons(false).icons"
+                           [optionCustomIcon]="getCustomIcons(false).icons" [optionCustomTooltip]="getCustomIcons(false).tooltips"
                            (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(false).disabled"></senergy-widget-footer>
 </mat-card>
 
