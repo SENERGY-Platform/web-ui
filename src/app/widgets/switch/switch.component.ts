@@ -34,6 +34,8 @@ export class SwitchComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = { properties: {} as WidgetPropertiesModels } as WidgetModel;
     @Input() zoom = false;
+    @Input() userHasDeleteAuthorization = false;
+    @Input() userHasUpdateAuthorization = false;
 
     constructor(private switchService: SwitchService, private dashboardService: DashboardService) {}
 

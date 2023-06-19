@@ -198,11 +198,11 @@ export class DashboardService {
     }
 
     userHasUpdateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("PUT")      
+        return this.userHasAuthorization("POST")      
     }
 
     userHasCreateAuthorization(): Observable<boolean> {
-        return this.userHasAuthorization("POST")   
+        return this.userHasAuthorization("PUT")   
     }
 
     userHasReadAuthorization(): Observable<boolean> {

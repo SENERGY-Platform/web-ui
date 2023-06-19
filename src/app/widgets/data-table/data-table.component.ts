@@ -62,6 +62,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
     items: DataTableComponentItem[] = [];
     matSortActive = '';
     matSortDirection: SortDirection = '';
+    @Input() userHasDeleteAuthorization = false;
+    @Input() userHasUpdateAuthorization = false;
 
     constructor(
         private dashboardService: DashboardService,

@@ -42,8 +42,8 @@ export class ConceptsService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
-    
+        var permSearchURL = environment.permissionSearchUrl + '/v3/resources/concepts'
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(permSearchURL, ["GET", "DELETE", "POST", "PUT"])
     }
     
     tryConverterExtension(extensionTryRequest: ConverterExtensionTryRequest): Observable<ConverterExtensionTryResult | null> {

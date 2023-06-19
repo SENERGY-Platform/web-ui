@@ -56,7 +56,7 @@
                     </td>
                 </ng-container>
 
-                <span *ngIg="userHasDeleteAuthorization">
+                <span *ngIf="userHasDeleteAuthorization">
                     <ng-container matColumnDef="delete">
                         <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
                         <td mat-cell *matCellDef="let deviceClass">

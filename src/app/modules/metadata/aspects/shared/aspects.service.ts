@@ -35,7 +35,8 @@ export class AspectsService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
+        var deviceRepoUrl = environment.deviceRepoUrl + '/aspects'
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(deviceRepoUrl, ["GET", "DELETE", "POST", "PUT"])
     }
 
     updateAspects(aspect: DeviceTypeAspectModel): Observable<DeviceTypeAspectModel | null> {

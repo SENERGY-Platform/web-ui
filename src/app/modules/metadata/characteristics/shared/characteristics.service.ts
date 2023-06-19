@@ -36,7 +36,8 @@ export class CharacteristicsService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
+        var characteristicPermSearchURL = environment.permissionSearchUrl + '/v3/resources/characteristics'
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(characteristicPermSearchURL, ["GET", "DELETE", "POST", "PUT"])
     }
 
     createCharacteristic(

@@ -71,6 +71,8 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @ViewChild('content', {static: false}) contentBox!: ElementRef;
+    @Input() userHasDeleteAuthorization = false;
+    @Input() userHasUpdateAuthorization = false;
     dateControl: FormControl<string | null> = new FormControl<string>('');
 
     constructor(

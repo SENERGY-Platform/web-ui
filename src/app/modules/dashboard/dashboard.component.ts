@@ -63,6 +63,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     dragging = false;
     mouseHoverHeaderIndex = -1;
     @ViewChild(MatTabGroup, { static: false }) matTabGroup!: MatTabGroup;
+    userHasUpdateAuthorization: boolean = false
+    userHasDeleteAuthorization: boolean = false
+    userHasCreateAuthorization: boolean = false
 
     constructor(
         private responsiveService: ResponsiveService,
@@ -81,12 +84,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.initGridCols();
         this.initDashboard();
         this.initWidgets();
+        this.checkAuthorization();
     }
 
     ngOnDestroy(): void {
         this.dashWidgetSubscription.unsubscribe();
         this.dashSubscription.unsubscribe();
         clearInterval(this.interval);
+    }
+
+    checkAuthorization() {
+        this.dashboardService.userHasUpdateAuthorization().subscribe(hasAuth => {
+            this.userHasUpdateAuthorization = hasAuth
+        })
+        this.dashboardService.userHasDeleteAuthorization().subscribe(hasAuth => {
+            this.userHasDeleteAuthorization = hasAuth
+        })
+        this.dashboardService.userHasCreateAuthorization().subscribe(hasAuth => {
+            this.userHasCreateAuthorization = hasAuth
+        })
     }
 
     initAllWidgets() {

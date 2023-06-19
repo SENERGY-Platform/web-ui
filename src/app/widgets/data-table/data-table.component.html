@@ -52,5 +52,5 @@
         </div>
         <senergy-no-data *ngIf="configured && dataReady && items.length === 0" [showIf]=true></senergy-no-data>
     </mat-card-content>
-    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+    <senergy-widget-footer [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
 </mat-card>

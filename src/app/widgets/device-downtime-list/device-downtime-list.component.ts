@@ -34,6 +34,8 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
+    @Input() userHasDeleteAuthorization = false;
+    @Input() userHasUpdateAuthorization = false;
 
     constructor(
         private eventListService: DeviceDowntimeListService,

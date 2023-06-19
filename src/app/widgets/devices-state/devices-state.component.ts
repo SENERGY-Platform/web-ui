@@ -36,6 +36,8 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
+    @Input() userHasDeleteAuthorization = false;
+    @Input() userHasUpdateAuthorization = false;
 
     constructor(private devicesStateService: DevicesStateService, private dashboardService: DashboardService, private router: Router) {}
 

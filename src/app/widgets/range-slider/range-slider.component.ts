@@ -36,6 +36,8 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = { properties: {} as WidgetPropertiesModels } as WidgetModel;
     @Input() zoom = false;
+    @Input() userHasDeleteAuthorization = false;
+    @Input() userHasUpdateAuthorization = false;
 
     constructor(
         private rangeSliderService: RangeSliderService,

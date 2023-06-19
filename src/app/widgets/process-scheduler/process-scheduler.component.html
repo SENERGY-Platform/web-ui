@@ -47,7 +47,7 @@
         </div>
         <senergy-no-data [showIf]=true *ngIf="ready && schedules.length === 0"></senergy-no-data>
     </mat-card-content>
-    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionAdd]="true" (editEvent)="edit()"
+    <senergy-widget-footer [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionAdd]="true" (editEvent)="edit()"
                            (addEvent)="add(null)"></senergy-widget-footer>
 </mat-card>
 

@@ -36,7 +36,8 @@ export class DeviceClassesService {
         private errorHandlerService: ErrorHandlerService,
         private ladonService: LadonService
     ) {
-        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(environment.deviceManagerUrl, ["GET", "DELETE", "POST", "PUT"])
+        var permSearchURL = environment.permissionSearchUrl + '/v3/resources/device-classes'
+        this.authorizationObs = this.ladonService.getUserAuthorizationsForURI(permSearchURL, ["GET", "DELETE", "POST", "PUT"])
     
     }
 

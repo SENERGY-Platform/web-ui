@@ -37,12 +37,12 @@
         </button>
     </div>
     <div>
-        <button mat-icon-button color="accent" (click)="edit()" matTooltip="edit widget">
+        <button *ngIf="userHasUpdateAuthorization" mat-icon-button color="accent" (click)="edit()" matTooltip="edit widget">
             <mat-icon>edit</mat-icon>
         </button>
     </div>
     <div>
-        <button mat-icon-button color="accent" (click)="delete()" matTooltip="delete widget">
+        <button *ngIf="userHasDeleteAuthorization" mat-icon-button color="accent" (click)="delete()" matTooltip="delete widget">
             <mat-icon>delete</mat-icon>
         </button>
     </div>

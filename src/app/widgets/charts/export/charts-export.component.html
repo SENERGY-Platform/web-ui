@@ -40,7 +40,7 @@
             </div>
         </div>
     </mat-card-content>
-    <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom"
+    <senergy-widget-footer [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget" [optionZoom]="true" [zoom]="zoom"
                            (editEvent)="edit()"
                            [optionCustomIcon]="getCustomIcons(false).icons"
                            (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(false).disabled"></senergy-widget-footer>

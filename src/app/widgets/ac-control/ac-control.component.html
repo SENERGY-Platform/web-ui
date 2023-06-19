@@ -140,7 +140,7 @@
         </div>
     </mat-card-content>
     <div>
-        <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget"
+        <senergy-widget-footer [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization" [dashboardId]="dashboardId" [widget]="widget"
                                (editEvent)="edit()"></senergy-widget-footer>
     </div>
 </mat-card>

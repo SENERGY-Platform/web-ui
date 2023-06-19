@@ -55,6 +55,6 @@
         </div>
     </mat-card-content>
     <senergy-widget-footer [dashboardId]="dashboardId" [widget]="widget" (editEvent)="edit()" [optionZoom]="widget.properties.group?.type === undefined"
-                           [zoom]="zoom"></senergy-widget-footer>
+                           [zoom]="zoom" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdateAuthorization]="userHasUpdateAuthorization"></senergy-widget-footer>
 </mat-card>
 

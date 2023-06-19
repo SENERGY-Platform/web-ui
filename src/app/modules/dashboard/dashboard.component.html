@@ -66,11 +66,11 @@
                             matTooltip="reorder widgets">
                         <mat-icon>open_with</mat-icon>
                     </button>
-                    <button (click)="openEditDashboardDialog()" mat-icon-button color="accent"
+                    <button *ngIf="userHasUpdateAuthorization" (click)="openEditDashboardDialog()" mat-icon-button color="accent"
                             matTooltip="edit dashboard">
                         <mat-icon>edit</mat-icon>
                     </button>
-                    <button (click)="openDeleteDashboardDialog()" mat-icon-button color="accent"
+                    <button *ngIf="userHasDeleteAuthorization" (click)="openDeleteDashboardDialog()" mat-icon-button color="accent"
                             [disabled]="dashboards.length <= 1"
                             matTooltip="delete dashboard">
                         <mat-icon>delete</mat-icon>
@@ -108,7 +108,7 @@
     </mat-tab-group>
 </div>
 
-<button *ngIf="zoomedWidgetIndex === null" mat-fab class="fab" matTooltip="Add new widget"
+<button *ngIf="zoomedWidgetIndex === null && userHasCreateAuthorization" mat-fab class="fab" matTooltip="Add new widget"
         (click)="openAddWidgetDialog()">
     <mat-icon>add</mat-icon>
 </button>
