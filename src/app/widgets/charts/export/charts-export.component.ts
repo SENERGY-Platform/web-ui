@@ -319,18 +319,20 @@ export class ChartsExportComponent implements OnInit, OnDestroy {
         }
     }
 
-    getCustomIcons(header: boolean): {icons: string[]; disabled: boolean[]} {
-        const res = {icons: [] as string[], disabled: [] as boolean[]};
+    getCustomIcons(header: boolean): {icons: string[]; disabled: boolean[]; tooltips: string[]} {
+        const res = {icons: [] as string[], disabled: [] as boolean[], tooltips: [] as string[]};
 
         if (this.zoomOutEnabled() && ((this.zoom && header) || (!this.zoom && !header))) {
             res.icons.push('zoom_out');
             res.disabled.push(!this.ready);
+            res.tooltips.push('zoom out');
         }
         if ((this.zoom && header) || (!this.zoom && !header)) {
             for (let i = 0; i < localStorage.length; i++) {
                 if (localStorage.key(i)?.startsWith(this.widget.id)) {
                     res.icons.push('undo');
                     res.disabled.push(!this.ready);
+                    res.tooltips.push('reset zoom');
                     break;
                 }
             }

@@ -26,7 +26,7 @@
         warning
     </mat-icon>
     <div *ngFor="let icon of optionCustomIcon; let i = index">
-        <button mat-icon-button color="accent" (click)="custom(i)" [disabled]="optionCustomDisabled[i]">
+        <button mat-icon-button color="accent" (click)="custom(i)" [disabled]="optionCustomDisabled[i]" [matTooltip]="optionCustomTooltip[i]">
             <mat-icon>{{icon}}</mat-icon>
         </button>
     </div>

@@ -32,6 +32,7 @@ export class WidgetFooterComponent implements OnInit {
     @Input() optionAdd = false;
     @Input() optionCustomDisabled: boolean[] = [];
     @Input() optionCustomIcon: string[] = [];
+    @Input() optionCustomTooltip: string[] = [];
     @Input() zoom = false;
     @Output() editEvent = new EventEmitter<boolean>();
     @Output() addEvent = new EventEmitter<boolean>();

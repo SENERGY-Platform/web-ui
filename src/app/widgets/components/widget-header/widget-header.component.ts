@@ -30,6 +30,7 @@ export class WidgetHeaderComponent implements OnInit {
     @Input() warnText = '';
     @Input() optionCustomDisabled: boolean[] = [];
     @Input() optionCustomIcon: string[] = [];
+    @Input() optionCustomTooltip: string[] = [];
     @Output() customEvent = new EventEmitter<{index: number; icon: string}>();
 
     constructor(private dashboardService: DashboardService) {}
